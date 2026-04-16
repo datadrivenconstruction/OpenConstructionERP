@@ -812,220 +812,87 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
 
 function BIMEmptyAnimation() {
   return (
-    <div className="mx-auto mb-6 relative" style={{ width: 220, height: 160, opacity: 0.6 }}>
+    <div className="relative" style={{ width: 380, height: 280 }}>
       <style>{`
-        /* Building blocks assemble into a silhouette */
-        @keyframes bimBlockSlide1 {
-          0%, 5% { transform: perspective(800px) rotateX(15deg) rotateY(-25deg) translate(-60px, 40px); opacity: 0; }
-          15%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
-          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        @keyframes bim3dRotate {
+          0% { transform: perspective(1200px) rotateX(12deg) rotateY(-18deg); }
+          50% { transform: perspective(1200px) rotateX(8deg) rotateY(8deg); }
+          100% { transform: perspective(1200px) rotateX(12deg) rotateY(-18deg); }
         }
-        @keyframes bimBlockSlide2 {
-          0%, 10% { transform: perspective(800px) rotateX(15deg) rotateY(20deg) translate(50px, -30px); opacity: 0; }
-          22%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
-          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        @keyframes bimSlideUp {
+          0%, 8% { transform: translateY(30px) scale(0.9); opacity: 0; }
+          18%, 72% { transform: translateY(0) scale(1); opacity: 1; }
+          85%, 100% { transform: translateY(0) scale(1); opacity: 0.2; }
         }
-        @keyframes bimBlockSlide3 {
-          0%, 16% { transform: perspective(800px) rotateX(-20deg) rotateY(15deg) translate(40px, 50px); opacity: 0; }
-          28%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
-          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        @keyframes bimGlow {
+          0%, 100% { box-shadow: 0 0 0 rgba(99,102,241,0); }
+          50% { box-shadow: 0 0 20px rgba(99,102,241,0.15); }
         }
-        @keyframes bimBlockSlide4 {
-          0%, 20% { transform: perspective(800px) rotateX(10deg) rotateY(-30deg) translate(-50px, -40px); opacity: 0; }
-          33%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
-          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        @keyframes bimScan {
+          0%, 100% { top: 10%; opacity: 0; }
+          20% { opacity: 0.6; }
+          80% { opacity: 0.6; }
+          50% { top: 80%; }
         }
-        @keyframes bimBlockSlide5 {
-          0%, 25% { transform: perspective(800px) rotateX(-15deg) rotateY(-20deg) translate(30px, 60px); opacity: 0; }
-          38%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
-          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        @keyframes bimDataFlow {
+          0%, 15% { transform: translateX(-10px); opacity: 0; width: 0; }
+          30%, 68% { transform: translateX(0); opacity: 0.6; width: 100%; }
+          82%, 100% { transform: translateX(0); opacity: 0; width: 100%; }
         }
-        @keyframes bimBlockSlide6 {
-          0%, 28% { transform: perspective(800px) rotateX(20deg) rotateY(25deg) translate(-40px, -50px); opacity: 0; }
-          42%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
-          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        @keyframes bimRowIn {
+          0%, 40% { transform: translateX(8px); opacity: 0; }
+          55%, 72% { transform: translateX(0); opacity: 0.8; }
+          85%, 100% { opacity: 0; }
         }
-        @keyframes bimBlockSlide7 {
-          0%, 32% { transform: perspective(800px) rotateX(-10deg) rotateY(30deg) translate(55px, 35px); opacity: 0; }
-          46%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
-          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
-        }
-        /* Connection lines draw from building to table */
-        @keyframes bimLineDrawH {
-          0%, 50% { transform: scaleX(0); opacity: 0; }
-          55% { opacity: 0.7; }
-          65%, 78% { transform: scaleX(1); opacity: 0.7; }
-          88%, 100% { transform: scaleX(1); opacity: 0; }
-        }
-        @keyframes bimLineDrawV {
-          0%, 53% { transform: scaleY(0); opacity: 0; }
-          58% { opacity: 0.5; }
-          68%, 78% { transform: scaleY(1); opacity: 0.5; }
-          88%, 100% { transform: scaleY(1); opacity: 0; }
-        }
-        /* Table/grid rows slide in */
-        @keyframes bimTableRow {
-          0%, 58% { transform: translateX(12px); opacity: 0; }
-          68%, 78% { transform: translateX(0); opacity: 0.8; }
-          88%, 100% { transform: translateX(0); opacity: 0; }
-        }
-        /* Table header */
-        @keyframes bimTableHead {
-          0%, 55% { transform: translateY(-4px); opacity: 0; }
-          65%, 78% { transform: translateY(0); opacity: 0.9; }
-          88%, 100% { transform: translateY(0); opacity: 0; }
-        }
-        /* Gentle float for the building group */
-        @keyframes bimFloat {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-3px); }
-        }
-        /* Dot pulse on connection endpoints */
-        @keyframes bimDotPulse {
-          0%, 52%, 88%, 100% { transform: scale(0); opacity: 0; }
-          60%, 78% { transform: scale(1); opacity: 0.8; }
+        @keyframes bimPulseRing {
+          0%, 100% { transform: scale(0.8); opacity: 0; }
+          50% { transform: scale(1.3); opacity: 0.3; }
         }
       `}</style>
 
-      <div style={{ animation: 'bimFloat 6s ease-in-out infinite' }}>
-        {/* Building silhouette — 7 blocks assembling with 3D perspective */}
-        <div style={{ position: 'absolute', left: 16, top: 8, width: 100, height: 130 }}>
-          {/* Block 1 — tall left tower */}
-          <div style={{
-            position: 'absolute', left: 0, top: 0, width: 28, height: 85,
-            borderRadius: 4,
-            background: 'linear-gradient(135deg, var(--oe-blue), #6366f1)',
-            animation: 'bimBlockSlide1 9s ease-out infinite',
-            transformOrigin: 'center center',
-            boxShadow: '0 2px 8px rgba(99,102,241,0.15)',
-          }} />
-          {/* Block 2 — wide base */}
-          <div style={{
-            position: 'absolute', left: 0, bottom: 0, width: 95, height: 22,
-            borderRadius: 4,
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            animation: 'bimBlockSlide2 9s ease-out infinite',
-            transformOrigin: 'center center',
-            boxShadow: '0 2px 8px rgba(139,92,246,0.12)',
-          }} />
-          {/* Block 3 — center column */}
-          <div style={{
-            position: 'absolute', left: 32, top: 20, width: 24, height: 65,
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, #10b981, #059669)',
-            animation: 'bimBlockSlide3 9s ease-out infinite',
-            transformOrigin: 'center center',
-            boxShadow: '0 2px 8px rgba(16,185,129,0.12)',
-          }} />
-          {/* Block 4 — right short block */}
-          <div style={{
-            position: 'absolute', left: 60, top: 42, width: 32, height: 44,
-            borderRadius: 4,
-            background: 'linear-gradient(135deg, var(--oe-blue), #3b82f6)',
-            animation: 'bimBlockSlide4 9s ease-out infinite',
-            transformOrigin: 'center center',
-            boxShadow: '0 2px 8px rgba(59,130,246,0.12)',
-          }} />
-          {/* Block 5 — small accent block on top of tower */}
-          <div style={{
-            position: 'absolute', left: 6, top: -4, width: 16, height: 12,
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-            animation: 'bimBlockSlide5 9s ease-out infinite',
-            transformOrigin: 'center center',
-          }} />
-          {/* Block 6 — mid-height bridge between columns */}
-          <div style={{
-            position: 'absolute', left: 26, top: 38, width: 36, height: 10,
-            borderRadius: 2,
-            background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
-            animation: 'bimBlockSlide6 9s ease-out infinite',
-            transformOrigin: 'center center',
-          }} />
-          {/* Block 7 — right tower extension */}
-          <div style={{
-            position: 'absolute', left: 68, top: 24, width: 20, height: 22,
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, #10b981, #34d399)',
-            animation: 'bimBlockSlide7 9s ease-out infinite',
-            transformOrigin: 'center center',
-          }} />
-          {/* Window accents — small dots on blocks for detail */}
-          {[
-            { l: 5, t: 14, d: 250 }, { l: 14, t: 14, d: 300 },
-            { l: 5, t: 28, d: 350 }, { l: 14, t: 28, d: 400 },
-            { l: 5, t: 42, d: 450 }, { l: 14, t: 42, d: 500 },
-            { l: 36, t: 32, d: 380 }, { l: 46, t: 32, d: 430 },
-            { l: 66, t: 55, d: 500 }, { l: 78, t: 55, d: 550 },
-          ].map((w, i) => (
-            <div key={i} style={{
-              position: 'absolute', left: w.l, top: w.t, width: 4, height: 5,
-              borderRadius: 1, background: 'rgba(255,255,255,0.6)',
-              animation: `bimBlockSlide${(i % 7) + 1} 9s ease-out infinite`,
-            }} />
-          ))}
+      {/* 3D isometric building */}
+      <div style={{ position: 'absolute', left: 24, top: 10, width: 170, height: 240, animation: 'bim3dRotate 12s ease-in-out infinite' }}>
+        {/* Ground plane */}
+        <div style={{ position: 'absolute', bottom: 0, left: -12, right: -12, height: 6, borderRadius: 3, background: 'linear-gradient(90deg, rgba(99,102,241,0.08), rgba(99,102,241,0.15), rgba(99,102,241,0.08))' }} />
+        {/* Tower 1 */}
+        <div style={{ position: 'absolute', left: 0, bottom: 6, width: 44, height: 160, borderRadius: '6px 6px 2px 2px', background: 'linear-gradient(180deg, #818cf8 0%, var(--oe-blue) 60%, #4338ca 100%)', animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0s', boxShadow: '4px 4px 0 rgba(67,56,202,0.3)' }}>
+          {[24, 44, 64, 84, 104, 124, 144].map((t, i) => <div key={i} style={{ position: 'absolute', left: 6, top: t, width: 12, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.35)' }} />)}
+          {[24, 44, 64, 84, 104, 124, 144].map((t, i) => <div key={`r${i}`} style={{ position: 'absolute', left: 24, top: t, width: 12, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.25)' }} />)}
         </div>
-
-        {/* Connection lines — horizontal line from building to table area */}
-        <div style={{
-          position: 'absolute', left: 120, top: 70, width: 30, height: 2,
-          background: 'linear-gradient(90deg, #6366f1, var(--oe-blue))',
-          borderRadius: 1,
-          transformOrigin: 'left center',
-          animation: 'bimLineDrawH 9s ease-out infinite',
-        }} />
-        {/* Diagonal connecting line */}
-        <div style={{
-          position: 'absolute', left: 148, top: 55, width: 2, height: 32,
-          background: 'linear-gradient(180deg, var(--oe-blue), #10b981)',
-          borderRadius: 1,
-          transformOrigin: 'top center',
-          animation: 'bimLineDrawV 9s ease-out infinite',
-        }} />
-        {/* Connection dot at junction */}
-        <div style={{
-          position: 'absolute', left: 145, top: 67, width: 8, height: 8,
-          borderRadius: '50%',
-          background: 'var(--oe-blue)',
-          animation: 'bimDotPulse 9s ease-out infinite',
-        }} />
-
-        {/* Table / BOQ grid representation */}
-        <div style={{ position: 'absolute', right: 8, top: 32, width: 56, height: 80 }}>
-          {/* Table header */}
-          <div style={{
-            width: '100%', height: 10, borderRadius: '4px 4px 0 0',
-            background: 'linear-gradient(135deg, var(--oe-blue), #6366f1)',
-            animation: 'bimTableHead 9s ease-out infinite',
-          }} />
-          {/* Table rows */}
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} style={{
-              display: 'flex', gap: 2, marginTop: 3,
-              animation: `bimTableRow 9s ease-out infinite`,
-              animationDelay: `${i * 0.12}s`,
-            }}>
-              <div style={{
-                flex: 1, height: 8, borderRadius: 2,
-                background: i % 2 === 0
-                  ? 'linear-gradient(90deg, rgba(99,102,241,0.25), rgba(99,102,241,0.1))'
-                  : 'linear-gradient(90deg, rgba(16,185,129,0.25), rgba(16,185,129,0.1))',
-              }} />
-              <div style={{
-                width: 14, height: 8, borderRadius: 2,
-                background: 'rgba(99,102,241,0.15)',
-              }} />
-            </div>
-          ))}
-          {/* Table border outline */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            border: '1px solid rgba(99,102,241,0.15)',
-            borderRadius: 4,
-            pointerEvents: 'none',
-            animation: 'bimTableHead 9s ease-out infinite',
-          }} />
+        {/* Tower 2 */}
+        <div style={{ position: 'absolute', left: 52, bottom: 6, width: 38, height: 115, borderRadius: '5px 5px 2px 2px', background: 'linear-gradient(180deg, #34d399 0%, #10b981 60%, #059669 100%)', animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.3s', boxShadow: '4px 4px 0 rgba(5,150,105,0.3)' }}>
+          {[18, 36, 54, 72, 90].map((t, i) => <div key={i} style={{ position: 'absolute', left: 6, top: t, width: 10, height: 6, borderRadius: 1, background: 'rgba(255,255,255,0.35)' }} />)}
         </div>
+        {/* Tower 3 */}
+        <div style={{ position: 'absolute', left: 98, bottom: 6, width: 54, height: 135, borderRadius: '6px 6px 2px 2px', background: 'linear-gradient(180deg, #a78bfa 0%, #8b5cf6 60%, #6d28d9 100%)', animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.6s', boxShadow: '4px 4px 0 rgba(109,40,217,0.3)' }}>
+          {[20, 40, 60, 80, 100, 120].map((t, i) => <div key={i} style={{ position: 'absolute', left: 7, top: t, width: 14, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.3)' }} />)}
+          {[20, 40, 60, 80, 100, 120].map((t, i) => <div key={`r${i}`} style={{ position: 'absolute', left: 30, top: t, width: 14, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.2)' }} />)}
+        </div>
+        {/* Bridge between towers */}
+        <div style={{ position: 'absolute', left: 42, bottom: 72, width: 60, height: 9, borderRadius: 2, background: 'linear-gradient(90deg, var(--oe-blue), #8b5cf6)', animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.9s' }} />
+        {/* Scanning line */}
+        <div style={{ position: 'absolute', left: -5, width: 'calc(100% + 10px)', height: 2, background: 'linear-gradient(90deg, transparent, var(--oe-blue), transparent)', animation: 'bimScan 4s ease-in-out infinite', borderRadius: 1 }} />
+        {/* Glow ring around building */}
+        <div style={{ position: 'absolute', inset: -8, borderRadius: 12, border: '1px solid rgba(99,102,241,0.1)', animation: 'bimGlow 3s ease-in-out infinite' }} />
+      </div>
+
+      {/* Data flow arrows */}
+      <div style={{ position: 'absolute', left: 200, top: 100, width: 50, height: 2, background: 'linear-gradient(90deg, var(--oe-blue), #10b981)', borderRadius: 1, transformOrigin: 'left', animation: 'bimDataFlow 10s ease-out infinite', animationDelay: '1.5s' }} />
+      <div style={{ position: 'absolute', left: 200, top: 135, width: 50, height: 2, background: 'linear-gradient(90deg, #8b5cf6, var(--oe-blue))', borderRadius: 1, transformOrigin: 'left', animation: 'bimDataFlow 10s ease-out infinite', animationDelay: '1.8s' }} />
+      {/* Pulse dots at connection */}
+      <div style={{ position: 'absolute', left: 197, top: 96, width: 10, height: 10, borderRadius: '50%', border: '1.5px solid var(--oe-blue)', animation: 'bimPulseRing 3s ease-out infinite' }} />
+      <div style={{ position: 'absolute', left: 197, top: 131, width: 10, height: 10, borderRadius: '50%', border: '1.5px solid #8b5cf6', animation: 'bimPulseRing 3s ease-out infinite', animationDelay: '0.5s' }} />
+
+      {/* BOQ Table */}
+      <div style={{ position: 'absolute', right: 10, top: 60, width: 120, height: 150 }}>
+        <div style={{ width: '100%', height: 14, borderRadius: '6px 6px 0 0', background: 'linear-gradient(135deg, var(--oe-blue), #6366f1)', animation: 'bimRowIn 10s ease-out infinite', animationDelay: '2s' }} />
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div key={i} style={{ display: 'flex', gap: 2, marginTop: 3, animation: 'bimRowIn 10s ease-out infinite', animationDelay: `${2.2 + i * 0.15}s` }}>
+            <div style={{ flex: 2, height: 10, borderRadius: 3, background: i % 2 === 0 ? 'linear-gradient(90deg, rgba(99,102,241,0.2), rgba(99,102,241,0.08))' : 'linear-gradient(90deg, rgba(16,185,129,0.2), rgba(16,185,129,0.08))' }} />
+            <div style={{ flex: 1, height: 10, borderRadius: 3, background: 'rgba(139,92,246,0.12)' }} />
+          </div>
+        ))}
+        <div style={{ position: 'absolute', inset: 0, border: '1px solid rgba(99,102,241,0.1)', borderRadius: 6, pointerEvents: 'none' }} />
       </div>
     </div>
   );
@@ -1109,22 +976,15 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
   return (
     <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
       <div className="px-6 pt-4 pb-3 border-b border-border-light"><Breadcrumb items={breadcrumbItems} /></div>
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20 overflow-y-auto">
-        <div className="w-full max-w-6xl px-6 py-10">
-          {/* Hero title — centered above the 3-column layout */}
-          <div className="text-center mb-10">
-            <h1 className="text-2xl font-bold text-content-primary tracking-tight">{t('bim.landing_hero_title')}</h1>
-            <p className="text-sm text-content-secondary mt-2 max-w-lg mx-auto">
-              {t('bim.landing_hero_subtitle')}
-            </p>
-          </div>
+      <div className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-blue-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20">
+        <div className="max-w-6xl mx-auto px-6 py-5">
 
-          {/* 2-column layout: Upload | Features */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch mb-8">
+          {/* Row 1: Upload card (left) + Hero text (right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start mb-6">
 
-            {/* LEFT -- Upload card (stretches to match features height) */}
+            {/* LEFT — Upload card */}
             <div className="flex flex-col">
-              <div className="rounded-2xl bg-surface-primary border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6 flex-1 flex flex-col">
+              <div className="rounded-2xl bg-white dark:bg-gray-800/60 border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-5">
                 <label
                   aria-label={t('bim.landing_dropzone_aria', { defaultValue: 'Drop a BIM model file here or click to browse. Supported formats: .rvt, .ifc, .csv, .xlsx' })}
                   onDrop={(e) => {
@@ -1133,19 +993,12 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     if (f) {
                       const ext = getFileExtension(f.name);
                       if (DWG_EXTENSIONS.has(ext)) {
-                        addToast({
-                          type: 'info',
-                          title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Takeoff module' }),
-                          message: t('bim.dwg_redirect_msg', { defaultValue: 'Redirecting to DWG Takeoff...' }),
-                        });
+                        addToast({ type: 'info', title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Takeoff module' }), message: t('bim.dwg_redirect_msg', { defaultValue: 'Redirecting to DWG Takeoff...' }) });
                         navigate('/dwg-takeoff');
                         return;
                       }
                       if (!CAD_EXTENSIONS.has(ext) && !DATA_EXTENSIONS.has(ext)) {
-                        addToast({
-                          type: 'error',
-                          title: t('bim.upload_unsupported_format', { defaultValue: 'Unsupported file format. Please upload .rvt or .ifc files.' }),
-                        });
+                        addToast({ type: 'error', title: t('bim.upload_unsupported_format', { defaultValue: 'Unsupported file format. Please upload .rvt or .ifc files.' }) });
                         return;
                       }
                       setFile(f);
@@ -1153,26 +1006,26 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     }
                   }}
                   onDragOver={(e) => e.preventDefault()}
-                  className={`flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all flex-1 min-h-[200px] ${
+                  className={`flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
                     file ? 'border-oe-blue bg-oe-blue/5' : 'border-border-medium hover:border-oe-blue hover:bg-blue-50/50 dark:hover:bg-blue-950/20'
                   }`}
                 >
                   {file ? (
                     <>
-                      <div className="w-14 h-14 rounded-xl bg-oe-blue/10 flex items-center justify-center"><CheckCircle2 size={26} className="text-oe-blue" /></div>
+                      <div className="w-12 h-12 rounded-xl bg-oe-blue/10 flex items-center justify-center"><CheckCircle2 size={22} className="text-oe-blue" /></div>
                       <p className="text-sm font-semibold text-content-primary">{file.name}</p>
                       <p className="text-[11px] text-content-quaternary">{formatFileSize(file.size)}</p>
                     </>
                   ) : (
                     <>
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border border-blue-200/50 dark:border-blue-800/30 flex items-center justify-center">
-                        <FileUp size={26} className="text-oe-blue" />
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border border-blue-200/50 dark:border-blue-800/30 flex items-center justify-center">
+                        <FileUp size={22} className="text-oe-blue" />
                       </div>
                       <p className="text-sm font-semibold text-content-primary">{t('bim.landing_drop_here')}</p>
                       <p className="text-[11px] text-content-quaternary">{t('bim.landing_size_hint')}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30">.rvt</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30">.ifc</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30" title="Revit 2015–2026">.rvt</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30" title="IFC 2x3, 4.0, 4.1, 4.3">.ifc</span>
                         <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-secondary text-content-quaternary border border-border-light">.csv</span>
                         <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-secondary text-content-quaternary border border-border-light">.xlsx</span>
                       </div>
@@ -1191,72 +1044,65 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     </button>
                   </div>
                 )}
-                {/* Supported formats hint below the drop zone */}
-                <p className="text-[11px] text-content-tertiary mt-3">
-                  {t('bim.landing_formats', { defaultValue: 'Supports Revit (.rvt), IFC (.ifc), CSV, Excel. DWG files \u2192 DWG Takeoff module.' })}
-                </p>
               </div>
 
-              {/* Active upload progress — below the upload card */}
+              {/* Active upload progress */}
               {activeUploads.length > 0 && (
-                <div className="mt-4 space-y-2">
+                <div className="mt-3 space-y-2">
                   {activeUploads.map((job) => (
-                    <div key={job.id} className={`rounded-xl border p-4 ${job.status === 'ready' ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20' : 'border-oe-blue/30 bg-white dark:bg-gray-900 shadow-md shadow-oe-blue/10'}`}>
-                      <div className="flex items-center gap-2 mb-2">
-                        {job.status === 'ready' ? (
-                          <CheckCircle2 size={16} className="text-green-500 shrink-0" />
-                        ) : (
-                          <Loader2 size={16} className="text-oe-blue animate-spin shrink-0" />
-                        )}
-                        <span className="text-sm font-medium text-content-primary truncate">{job.fileName}</span>
+                    <div key={job.id} className={`rounded-xl border p-3.5 ${job.status === 'ready' ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20' : 'border-oe-blue/30 bg-white dark:bg-gray-900 shadow-sm'}`}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        {job.status === 'ready' ? <CheckCircle2 size={14} className="text-green-500 shrink-0" /> : <Loader2 size={14} className="text-oe-blue animate-spin shrink-0" />}
+                        <span className="text-xs font-medium text-content-primary truncate">{job.fileName}</span>
                       </div>
                       {job.status !== 'ready' ? (
                         <>
-                          <div className="h-2 w-full rounded-full bg-surface-tertiary overflow-hidden">
-                            <div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500 ease-out" style={{ width: `${job.progress}%` }} />
-                          </div>
-                          <p className="text-xs text-content-tertiary mt-1.5">{job.stage || t('bim.processing', { defaultValue: 'Processing...' })}</p>
+                          <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500" style={{ width: `${job.progress}%` }} /></div>
+                          <p className="text-[11px] text-content-tertiary mt-1">{job.stage || t('bim.processing', { defaultValue: 'Processing...' })}</p>
                         </>
                       ) : (
-                        <p className="text-xs text-green-600 dark:text-green-400">
-                          {t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount })}
-                        </p>
+                        <p className="text-[11px] text-green-600 dark:text-green-400">{t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount })}</p>
                       )}
                     </div>
                   ))}
-                  {activeUploads.some((j) => j.status !== 'ready') && (
-                    <p className="text-[11px] text-content-tertiary text-center py-1">
-                      {t('bim.upload_continue_working', {
-                        defaultValue: 'Processing in background — you can continue working or upload another file.',
-                      })}
-                    </p>
-                  )}
                 </div>
               )}
             </div>
 
-            {/* CENTER — Feature explanation cards */}
-            <div className="space-y-3">
-              <h2 className="text-xs font-bold text-content-secondary uppercase tracking-widest mb-2">
-                {t('bim.landing_what_you_get', { defaultValue: 'What you get' })}
-              </h2>
+            {/* RIGHT — Hero text + animation */}
+            <div className="flex flex-col justify-center lg:pt-4">
+              <h1 className="text-2xl font-bold text-content-primary tracking-tight leading-tight">{t('bim.landing_hero_title')}</h1>
+              <p className="text-sm text-content-secondary mt-2.5 leading-relaxed">
+                {t('bim.landing_hero_subtitle')}
+              </p>
+              <p className="text-[11px] text-content-tertiary mt-3">
+                {t('bim.landing_formats_detailed', { defaultValue: 'Revit 2015\u20132026 (.rvt) \u00B7 IFC 2x3, 4.0, 4.1, 4.3 (.ifc) \u00B7 CSV \u00B7 Excel. DWG \u2192 DWG Takeoff.' })}
+              </p>
+              {/* Animation — constrained to text width */}
+              <div className="hidden lg:block mt-6 opacity-25 max-w-full overflow-hidden">
+                <BIMEmptyAnimation />
+              </div>
+            </div>
+          </div>
+
+          {/* Row 2: Feature cards — 3x2 grid */}
+          <div>
+            <h2 className="text-[10px] font-bold text-content-tertiary uppercase tracking-widest mb-2">
+              {t('bim.landing_what_you_get', { defaultValue: 'What you get' })}
+            </h2>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
               {features.map((f, i) => (
-                <div key={i} className="flex items-start gap-3 rounded-xl p-3.5 bg-surface-primary/60 dark:bg-surface-primary/40 border border-border-light/50 hover:border-border-light transition-colors">
-                  <div className={`w-9 h-9 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={16} className={f.ic} /></div>
+                <div key={i} className="flex items-start gap-2.5 rounded-lg p-3 bg-white dark:bg-gray-800/40 border border-border-light/60 hover:border-border-light hover:shadow-sm transition-all">
+                  <div className={`w-7 h-7 rounded-md ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={14} className={f.ic} /></div>
                   <div className="min-w-0">
-                    <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
-                    <p className="text-[11px] text-content-quaternary leading-snug mt-0.5">{f.desc}</p>
+                    <h3 className="text-[11px] font-semibold text-content-primary leading-tight">{f.title}</h3>
+                    <p className="text-[10px] text-content-quaternary leading-snug mt-0.5">{f.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
-
           </div>
 
-          {/* Animation preview — full width below grid, subtle */}
-          <div className="hidden lg:flex items-center justify-center opacity-30 mb-8">
-            <BIMEmptyAnimation />
-          </div>
         </div>
       </div>
     </div>

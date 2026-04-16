@@ -795,7 +795,7 @@ function ConnectModal({
           <div
             className={`mb-3 rounded-lg px-3 py-2 text-xs ${
               testResult.success
-                ? 'bg-semantic-success-bg text-[#15803d]'
+                ? 'bg-semantic-success-bg text-semantic-success'
                 : 'bg-semantic-error-bg text-semantic-error'
             }`}
           >

@@ -665,14 +665,16 @@ export function CostsPage() {
       <div className="mb-5 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-content-primary">{t('costs.title')}</h1>
-          <p className="mt-1 text-sm text-content-secondary">
-            {regionInfo
-              ? `${regionInfo.name} — ${total.toLocaleString()} ${t('costs.items', 'items')}`
-              : total > 0
-                ? `${total.toLocaleString()} ${t('costs.results_found', 'results found')}`
-                : t('costs.search_hint', 'Search cost items by description or code')}
-          </p>
-          <InfoHint inline className="ml-1" text={t('costs.what_is_cost_db', { defaultValue: 'Unit rates and composite prices for materials, labor, and equipment. Import regional databases (CWICR, BKI, RSMeans) from Modules or add custom rates. Toggle AI Semantic Search for natural-language queries.' })} />
+          <span className="mt-1 text-sm text-content-secondary inline-flex items-center gap-0.5 flex-wrap">
+            <span>
+              {regionInfo
+                ? `${regionInfo.name} — ${total.toLocaleString()} ${t('costs.items', 'items')}`
+                : total > 0
+                  ? `${total.toLocaleString()} ${t('costs.results_found', 'results found')}`
+                  : t('costs.search_hint', 'Search cost items by description or code')}
+            </span>
+            <InfoHint inline text={t('costs.what_is_cost_db', { defaultValue: 'Unit rates and composite prices for materials, labor, and equipment. Import regional databases (CWICR, BKI, RSMeans) from Modules or add custom rates. Toggle AI Semantic Search for natural-language queries.' })} />
+          </span>
         </div>
         <div className="flex items-center gap-2">
           {total > 0 && (

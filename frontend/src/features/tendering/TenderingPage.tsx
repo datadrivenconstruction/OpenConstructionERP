@@ -167,7 +167,7 @@ function DeviationBadge({ pct }: { pct: number }) {
   }
   if (pct < 0) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-[#15803d]">
+      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-semantic-success">
         <ArrowDownRight size={12} /> {pct.toFixed(1)}%
       </span>
     );
@@ -284,13 +284,14 @@ function CreatePackageDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in">
-      <Card className="w-full max-w-md animate-scale-in">
+      <Card className="w-full max-w-md animate-scale-in" role="dialog" aria-label={t('tendering.new_package', 'New Tender Package')}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-content-primary">
             {t('tendering.new_package', 'New Tender Package')}
           </h2>
           <button
             onClick={onClose}
+            aria-label={t('common.close', 'Close')}
             className="rounded-md p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
             <X size={18} />
@@ -418,13 +419,14 @@ function AddBidDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in">
-      <Card className="w-full max-w-md animate-scale-in">
+      <Card className="w-full max-w-md animate-scale-in" role="dialog" aria-label={t('tendering.add_bid', 'Add Bid')}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-content-primary">
             {t('tendering.add_bid', 'Add Bid')}
           </h2>
           <button
             onClick={onClose}
+            aria-label={t('common.close', 'Close')}
             className="rounded-md p-1 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
             <X size={18} />
@@ -938,9 +940,9 @@ function PackageDetail({
       {lowestBid && comparison && comparison.bid_count >= 2 && (
         <Card className="border-semantic-success/20 bg-semantic-success-bg/30">
           <div className="flex items-center gap-3">
-            <Award size={20} className="text-[#15803d]" />
+            <Award size={20} className="text-semantic-success" />
             <div>
-              <p className="text-sm font-semibold text-[#15803d]">
+              <p className="text-sm font-semibold text-semantic-success">
                 {t('tendering.recommendation', 'Recommendation')}
               </p>
               <p className="text-xs text-content-secondary">

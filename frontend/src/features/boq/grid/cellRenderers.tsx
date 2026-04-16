@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo, useEffect, forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ICellRendererParams } from 'ag-grid-community';
 import {
   ChevronDown,
@@ -24,6 +25,7 @@ import { countComments } from '../CommentDrawer';
 import { BIMQuantityPicker } from './BIMQuantityPicker';
 import { MiniGeometryPreview } from '@/shared/ui/MiniGeometryPreview';
 import { fetchBIMElementsByIds } from '@/features/bim/api';
+import { getIntlLocale } from '@/shared/lib/formatters';
 
 /* ── Validation Status Dot ────────────────────────────────────────── */
 
@@ -34,12 +36,27 @@ const VALIDATION_DOT_STYLES: Record<string, string> = {
   pending: 'bg-gray-300 dark:bg-gray-600',
 };
 
-const VALIDATION_DOT_TOOLTIP: Record<string, string> = {
-  passed: 'Validation passed — position is complete',
-  warnings: 'Validation warnings — review recommended',
-  errors: 'Validation errors — action required',
-  pending: 'Validation pending — not yet checked',
-};
+/**
+ * Validation tooltip lookup — requires `t()` from context, so we return
+ * a factory that the renderer calls.
+ */
+function getValidationTooltip(
+  status: string,
+  t: (key: string, opts?: Record<string, string>) => string,
+): string {
+  switch (status) {
+    case 'passed':
+      return t('boq.validation_passed', { defaultValue: 'Validation passed — position is complete' });
+    case 'warnings':
+      return t('boq.validation_warnings', { defaultValue: 'Validation warnings — review recommended' });
+    case 'errors':
+      return t('boq.validation_errors', { defaultValue: 'Validation errors — action required' });
+    case 'pending':
+      return t('boq.validation_pending', { defaultValue: 'Validation pending — not yet checked' });
+    default:
+      return status;
+  }
+}
 
 /* ── Section Full-Width Group Row Renderer ────────────────────────── */
 
@@ -193,6 +210,7 @@ export function ActionsCellRenderer(params: ICellRendererParams) {
 
   if (!data || data._isSection || data._isFooter) return null;
 
+  const t = ctx?.t ?? ((key: string, opts?: Record<string, string | number>) => (opts?.defaultValue as string) ?? key);
   const commentCount = countComments(data.metadata as Record<string, unknown> | undefined);
   const anomaly = ctx?.anomalyMap?.get(data.id as string);
 
@@ -224,7 +242,8 @@ export function ActionsCellRenderer(params: ICellRendererParams) {
           className="flex h-4 items-center gap-0.5 px-1 rounded bg-amber-100 text-amber-600
                      dark:bg-amber-900/30 dark:text-amber-400
                      hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors shrink-0"
-          title={`${commentCount} comment${commentCount > 1 ? 's' : ''}`}
+          title={t('boq.comment_count', { defaultValue: '{{count}} comment(s)', count: commentCount })}
+          aria-label={t('boq.comment_count', { defaultValue: '{{count}} comment(s)', count: commentCount })}
         >
           <span className="text-[9px] font-bold tabular-nums">{commentCount}</span>
         </button>
@@ -238,7 +257,8 @@ export function ActionsCellRenderer(params: ICellRendererParams) {
         className="flex h-6 w-6 items-center justify-center rounded
                    text-content-tertiary/50 hover:text-content-primary
                    hover:bg-surface-tertiary transition-all"
-        title="Actions"
+        title={t('common.actions', { defaultValue: 'Actions' })}
+        aria-label={t('common.actions', { defaultValue: 'Actions' })}
       >
         <MoreHorizontal size={14} />
       </button>
@@ -254,10 +274,14 @@ export function ExpandCellRenderer(params: ICellRendererParams) {
 
   if (!data || data._isSection || data._isFooter || data._isResource || data._isAddResource) return null;
 
+  const t = ctx?.t ?? ((key: string, opts?: Record<string, string>) => (opts?.defaultValue as string) ?? key);
   const hasResources = Array.isArray(data.metadata?.resources) && data.metadata.resources.length > 0;
   if (!hasResources) return null;
 
   const isExpanded = ctx?.expandedPositions?.has(data.id) ?? false;
+  const expandTitle = isExpanded
+    ? t('boq.collapse_resources', { defaultValue: 'Collapse resources' })
+    : t('boq.expand_resources', { defaultValue: 'Expand resources' });
 
   return (
     <div className="flex items-center justify-center h-full w-full">
@@ -266,7 +290,8 @@ export function ExpandCellRenderer(params: ICellRendererParams) {
         className="h-6 w-6 flex items-center justify-center rounded
                    text-content-tertiary hover:text-oe-blue hover:bg-oe-blue/10
                    transition-colors cursor-pointer"
-        title={isExpanded ? 'Collapse resources' : 'Expand resources'}
+        title={expandTitle}
+        aria-label={expandTitle}
       >
         {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
       </button>
@@ -277,9 +302,11 @@ export function ExpandCellRenderer(params: ICellRendererParams) {
 /* ── Ordinal + Validation Dot ─────────────────────────────────────── */
 
 export function OrdinalCellRenderer(params: ICellRendererParams) {
-  const { data, value } = params;
+  const { data, value, context } = params;
   if (!data || data._isSection || data._isFooter) return <span>{value}</span>;
 
+  const ctx = context as FullGridContext | undefined;
+  const t = ctx?.t ?? ((key: string, opts?: Record<string, string>) => (opts?.defaultValue as string) ?? key);
   const status = data.validation_status ?? 'pending';
   const dotColor = VALIDATION_DOT_STYLES[status] ?? VALIDATION_DOT_STYLES.pending;
 
@@ -288,7 +315,8 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
       <span className="text-xs font-mono truncate min-w-0">{value}</span>
       <span
         className={`inline-block h-2 w-2 shrink-0 rounded-full ${dotColor} cursor-help`}
-        title={VALIDATION_DOT_TOOLTIP[status] ?? status}
+        title={getValidationTooltip(status, t)}
+        aria-label={getValidationTooltip(status, t)}
       />
     </div>
   );
@@ -299,6 +327,7 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
 export function BimLinkCellRenderer(params: ICellRendererParams) {
   const { data, context } = params;
   const ctx = context as FullGridContext | undefined;
+  const t = ctx?.t ?? ((key: string, opts?: Record<string, string | number>) => (opts?.defaultValue as string) ?? key);
 
   if (!data || data._isFooter || data._isResource || data._isAddResource || data._isSection) {
     return null;
@@ -347,7 +376,8 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
         className="h-6 px-1.5 inline-flex items-center gap-0.5 rounded
                    bg-oe-blue/10 text-oe-blue text-[10px] font-semibold
                    hover:bg-oe-blue/25 transition-colors cursor-pointer"
-        title={`${bimLinkCount} BIM element${bimLinkCount > 1 ? 's' : ''} linked — click to preview`}
+        title={t('boq.bim_link_tooltip', { defaultValue: '{{count}} BIM element(s) linked — click to preview', count: bimLinkCount })}
+        aria-label={t('boq.bim_link_tooltip', { defaultValue: '{{count}} BIM element(s) linked — click to preview', count: bimLinkCount })}
       >
         <Cuboid size={11} />
         {bimLinkCount}
@@ -389,6 +419,7 @@ const BimLinkPopover = forwardRef<
     onUpdatePosition?: (id: string, data: Record<string, unknown>, oldData: Record<string, unknown>) => void;
   }
 >(function BimLinkPopover({ modelId, elementIds, style, onClose, positionData, onUpdatePosition }, ref) {
+  const { t } = useTranslation();
   const innerRef = useRef<HTMLDivElement>(null);
   const combinedRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -486,10 +517,10 @@ const BimLinkPopover = forwardRef<
         <div className="flex items-center gap-2">
           <Cuboid size={14} className="text-oe-blue" />
           <span className="text-xs font-semibold text-content-primary">
-            Linked Geometry
+            {t('boq.linked_geometry', { defaultValue: 'Linked Geometry' })}
           </span>
           <span className="text-[10px] text-content-tertiary tabular-nums">
-            ({elementIds.length} element{elementIds.length !== 1 ? 's' : ''})
+            ({t('boq.element_count', { defaultValue: '{{count}} element(s)', count: elementIds.length })})
           </span>
         </div>
         <button
@@ -520,7 +551,7 @@ const BimLinkPopover = forwardRef<
           <div className="max-h-[180px] overflow-y-auto">
             {isLoading && (
               <div className="flex items-center justify-center py-6 text-content-tertiary text-xs">
-                Loading element data...
+                {t('boq.loading_element_data', { defaultValue: 'Loading element data...' })}
               </div>
             )}
             {!isLoading && elements.map((el) => (
@@ -549,7 +580,7 @@ const BimLinkPopover = forwardRef<
             >
               <Info size={11} className="text-blue-600 shrink-0" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex-1 text-left">
-                Properties
+                {t('boq.bim_properties', { defaultValue: 'Properties' })}
               </span>
               <ChevronDown size={12} className={`text-blue-500 transition-transform ${showAllProps ? 'rotate-180' : ''}`} />
             </button>
@@ -588,7 +619,7 @@ const BimLinkPopover = forwardRef<
                           {key.replace(/_/g, ' ')}
                         </span>
                         <span className="text-[10px] font-mono text-content-primary tabular-nums shrink-0 font-medium">
-                          {value.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+                          {value.toLocaleString(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
                         </span>
                       </div>
                     ))}
@@ -596,7 +627,7 @@ const BimLinkPopover = forwardRef<
                 );
               })}
               {!isLoading && elements.every((el) => !el.quantities || Object.keys(el.quantities).length === 0) && !showAllProps && (
-                <div className="py-3 text-center text-[10px] text-content-tertiary">No quantities — click to show all properties</div>
+                <div className="py-3 text-center text-[10px] text-content-tertiary">{t('boq.no_quantities_hint', { defaultValue: 'No quantities — click to show all properties' })}</div>
               )}
             </div>
 
@@ -604,7 +635,7 @@ const BimLinkPopover = forwardRef<
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/50 dark:bg-emerald-950/20 border-b border-border-light/50 dark:border-border-dark/50">
               <Ruler size={11} className="text-emerald-600 shrink-0" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                Apply to BOQ
+                {t('boq.apply_to_boq', { defaultValue: 'Apply to BOQ' })}
               </span>
             </div>
             <div className="flex-1 overflow-y-auto">
@@ -615,7 +646,7 @@ const BimLinkPopover = forwardRef<
               )}
               {!isLoading && quantitySums.length === 0 && (
                 <div className="py-3 text-center text-[10px] text-content-tertiary">
-                  No numeric quantities
+                  {t('boq.no_numeric_quantities', { defaultValue: 'No numeric quantities' })}
                 </div>
               )}
               {!isLoading && quantitySums.map((s) => {
@@ -635,7 +666,7 @@ const BimLinkPopover = forwardRef<
                       </span>
                       <div className="flex items-baseline gap-1">
                         <span className="text-[12px] tabular-nums text-content-primary font-semibold">
-                          {Number.isInteger(s.sum) ? s.sum.toLocaleString('en') : s.sum.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+                          {Number.isInteger(s.sum) ? s.sum.toLocaleString(getIntlLocale()) : s.sum.toLocaleString(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
                         </span>
                         {s.unit && (
                           <span className="text-[9px] text-content-quaternary font-mono">{s.unit}</span>
@@ -647,7 +678,7 @@ const BimLinkPopover = forwardRef<
                     </div>
                     {isCurrent ? (
                       <span className="text-[9px] text-emerald-600 font-semibold shrink-0 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">
-                        current
+                        {t('boq.bim_qty_current', { defaultValue: 'current' })}
                       </span>
                     ) : (
                       <button
@@ -659,7 +690,7 @@ const BimLinkPopover = forwardRef<
                                    text-white bg-emerald-500 hover:bg-emerald-600
                                    shadow-sm transition-all"
                       >
-                        Use <ArrowRight size={9} />
+                        {t('boq.bim_qty_use', { defaultValue: 'Use' })} <ArrowRight size={9} />
                       </button>
                     )}
                   </div>
@@ -684,7 +715,7 @@ const BimLinkPopover = forwardRef<
           }}
         >
           <Boxes size={14} />
-          Open in BIM Viewer
+          {t('boq.open_in_bim_viewer', { defaultValue: 'Open in BIM Viewer' })}
         </a>
       </div>
     </div>
@@ -704,6 +735,7 @@ function InlineNumberInput({
   className?: string;
   fmt: Intl.NumberFormat;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -735,6 +767,7 @@ function InlineNumberInput({
           if (e.key === 'Escape') setEditing(false);
         }}
         className={`bg-white dark:bg-surface-primary border border-oe-blue rounded px-1 py-0 text-right tabular-nums outline-none ${className ?? ''}`}
+        aria-label={t('boq.inline_edit_number', { defaultValue: 'Edit value' })}
         autoFocus
       />
     );
@@ -744,7 +777,7 @@ function InlineNumberInput({
     <span
       onDoubleClick={startEdit}
       className={`cursor-text hover:bg-oe-blue-subtle/50 rounded px-1 transition-colors ${className ?? ''}`}
-      title="Double-click to edit"
+      title={t('boq.double_click_to_edit', { defaultValue: 'Double-click to edit' })}
     >
       {fmt.format(value)}
     </span>
@@ -760,6 +793,7 @@ function InlineTextInput({
   onCommit: (v: string) => void;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -791,6 +825,7 @@ function InlineTextInput({
           if (e.key === 'Escape') setEditing(false);
         }}
         className={`bg-white dark:bg-surface-primary border border-oe-blue rounded px-1 py-0 outline-none ${className ?? ''}`}
+        aria-label={t('boq.inline_edit_text', { defaultValue: 'Edit text' })}
         autoFocus
       />
     );
@@ -800,7 +835,7 @@ function InlineTextInput({
     <span
       onDoubleClick={startEdit}
       className={`cursor-text hover:bg-oe-blue-subtle/50 rounded px-1 transition-colors truncate ${className ?? ''}`}
-      title="Double-click to edit"
+      title={t('boq.double_click_to_edit', { defaultValue: 'Double-click to edit' })}
     >
       {value}
     </span>
@@ -1119,6 +1154,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
 export function BimQtyPickerCellRenderer(params: ICellRendererParams) {
   const { data, context } = params;
   const ctx = context as FullGridContext | undefined;
+  const t = ctx?.t ?? ((key: string, opts?: Record<string, string>) => (opts?.defaultValue as string) ?? key);
 
   if (!data || data._isFooter || data._isResource || data._isAddResource || data._isSection) {
     return null;
@@ -1150,7 +1186,8 @@ export function BimQtyPickerCellRenderer(params: ICellRendererParams) {
         className="h-6 w-6 flex items-center justify-center rounded
                    text-emerald-600/60 hover:text-emerald-600 hover:bg-emerald-50
                    dark:hover:bg-emerald-950/30 transition-colors cursor-pointer"
-        title="Pick quantity from BIM"
+        title={t('boq.pick_qty_from_bim', { defaultValue: 'Pick quantity from BIM' })}
+        aria-label={t('boq.pick_qty_from_bim', { defaultValue: 'Pick quantity from BIM' })}
       >
         <Ruler size={13} />
       </button>

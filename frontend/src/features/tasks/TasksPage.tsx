@@ -24,17 +24,16 @@ import {
   AlertTriangle,
   Pencil,
   Trash2,
+  GripVertical,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, ViewInBIMButton } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { triggerDownload } from '@/shared/lib/api';
-// Auth store used for "My Tasks" filter
 import {
   fetchTasks,
   createTask,
@@ -470,7 +469,9 @@ const TaskCard = React.memo(function TaskCard({
   onDelete,
   onStatusChange,
   customCategories,
+  customStatuses,
   onDragStart,
+  isDragging,
 }: {
   task: Task;
   onComplete: (id: string) => void;
@@ -478,7 +479,9 @@ const TaskCard = React.memo(function TaskCard({
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: TaskStatus) => void;
   customCategories: CustomCategory[];
+  customStatuses: CustomStatus[];
   onDragStart?: (e: React.DragEvent, taskId: string) => void;
+  isDragging?: boolean;
 }) {
   const { t } = useTranslation();
 
@@ -498,8 +501,13 @@ const TaskCard = React.memo(function TaskCard({
       data-task-id={task.id}
       draggable
       onDragStart={(e: React.DragEvent) => onDragStart?.(e, task.id)}
+      role="listitem"
+      aria-grabbed={isDragging ?? false}
+      aria-label={task.title}
       className={clsx(
-        'px-2.5 py-2 mb-1.5 hover:shadow-md transition-shadow group cursor-grab active:cursor-grabbing',
+        'px-2.5 py-2 mb-1.5 hover:shadow-md transition-all group cursor-grab active:cursor-grabbing',
+        'hover:border-border hover:-translate-y-px',
+        isDragging && 'opacity-40 scale-[0.97] shadow-none',
         isOverdue && 'bg-red-50/40 dark:bg-red-950/15',
       )}
     >
@@ -601,12 +609,16 @@ const TaskCard = React.memo(function TaskCard({
                 value={task.status}
                 onChange={(e) => onStatusChange(task.id, e.target.value as TaskStatus)}
                 onClick={(e) => e.stopPropagation()}
+                aria-label={t('tasks.change_status', { defaultValue: 'Change status' })}
                 className="text-[9px] py-0 px-0.5 rounded border border-border-light bg-surface-secondary text-content-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue h-4"
               >
                 <option value="draft">{t('tasks.status_draft', { defaultValue: 'Draft' })}</option>
                 <option value="open">{t('tasks.status_open', { defaultValue: 'Open' })}</option>
                 <option value="in_progress">{t('tasks.status_in_progress', { defaultValue: 'In Progress' })}</option>
                 <option value="completed">{t('tasks.status_completed', { defaultValue: 'Completed' })}</option>
+                {customStatuses.map((cs) => (
+                  <option key={cs.name} value={cs.name}>{cs.label}</option>
+                ))}
               </select>
             </>
           ) : (
@@ -704,6 +716,64 @@ export function TasksPage() {
     setCustomStatuses(updated);
     saveCustomStatuses(updated);
   }, [customStatuses]);
+
+  // Column reordering via drag
+  const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
+  const [columnDropTarget, setColumnDropTarget] = useState<string | null>(null);
+
+  const handleColumnReorderDragStart = useCallback(
+    (e: React.DragEvent, status: string) => {
+      // Only allow reordering custom columns
+      if (BUILTIN_STATUSES.includes(status as TaskStatus)) return;
+      setDraggedColumn(status);
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('application/x-column', status);
+    },
+    [],
+  );
+
+  const handleColumnReorderDragOver = useCallback(
+    (e: React.DragEvent, targetStatus: string) => {
+      if (!draggedColumn || draggedColumn === targetStatus) return;
+      // Only allow dropping on custom columns (reorder within custom set)
+      if (BUILTIN_STATUSES.includes(targetStatus as TaskStatus)) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      setColumnDropTarget(targetStatus);
+    },
+    [draggedColumn],
+  );
+
+  const handleColumnReorderDrop = useCallback(
+    (e: React.DragEvent, targetStatus: string) => {
+      e.preventDefault();
+      if (!draggedColumn || draggedColumn === targetStatus) {
+        setDraggedColumn(null);
+        setColumnDropTarget(null);
+        return;
+      }
+      const fromIdx = customStatuses.findIndex((s) => s.name === draggedColumn);
+      const toIdx = customStatuses.findIndex((s) => s.name === targetStatus);
+      if (fromIdx === -1 || toIdx === -1) {
+        setDraggedColumn(null);
+        setColumnDropTarget(null);
+        return;
+      }
+      const updated = [...customStatuses];
+      const [moved] = updated.splice(fromIdx, 1);
+      updated.splice(toIdx, 0, moved!);
+      setCustomStatuses(updated);
+      saveCustomStatuses(updated);
+      setDraggedColumn(null);
+      setColumnDropTarget(null);
+    },
+    [draggedColumn, customStatuses],
+  );
+
+  const handleColumnReorderEnd = useCallback(() => {
+    setDraggedColumn(null);
+    setColumnDropTarget(null);
+  }, []);
 
   const handleAddCategory = useCallback(() => {
     const label = newCategoryName.trim();
@@ -1009,11 +1079,6 @@ export function TasksPage() {
       setDraggedTaskId(taskId);
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', taskId);
-      if (e.currentTarget instanceof HTMLElement) {
-        requestAnimationFrame(() => {
-          (e.currentTarget as HTMLElement).style.opacity = '0.4';
-        });
-      }
     },
     [],
   );
@@ -1048,9 +1113,6 @@ export function TasksPage() {
   const handleDragEnd = useCallback(() => {
     setDraggedTaskId(null);
     setDropTargetStatus(null);
-    document.querySelectorAll('[draggable="true"]').forEach((el) => {
-      (el as HTMLElement).style.opacity = '';
-    });
   }, []);
 
   const handleImportFile = async () => {
@@ -1368,7 +1430,7 @@ export function TasksPage() {
       </div>
 
       {/* Board / Columns */}
-      <div>
+      <div onDragEnd={() => { handleDragEnd(); handleColumnReorderEnd(); }}>
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3" aria-hidden="true">
             {Array.from({ length: 4 }).map((_, colIdx) => (
@@ -1422,7 +1484,7 @@ export function TasksPage() {
             }
           />
         ) : (
-          <div className="flex gap-3 overflow-x-auto pb-2">
+          <div className="flex gap-3 overflow-x-auto pb-2" role="list" aria-label={t('tasks.kanban_board', { defaultValue: 'Task board' })}>
             {allStatuses.map((status) => {
               const colItems = grouped.get(status) ?? [];
               const isDropTarget = draggedTaskId != null && dropTargetStatus === status;
@@ -1433,33 +1495,72 @@ export function TasksPage() {
               const displayLabel = isBuiltin
                 ? t(`tasks.status_${status}`, { defaultValue: status.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') })
                 : customStatus?.label ?? status;
+              const isColumnDragging = draggedColumn === status;
+              const isColumnDropTarget = draggedColumn != null && columnDropTarget === status;
 
               return (
                 <div
                   key={status}
-                  className="flex flex-col min-w-[240px] flex-1"
-                  onDragOver={(e) => handleColumnDragOver(e, status as TaskStatus)}
-                  onDragLeave={handleColumnDragLeave}
-                  onDrop={(e) => handleColumnDrop(e, status as TaskStatus)}
-                  onDragEnd={handleDragEnd}
+                  className={clsx(
+                    'flex flex-col min-w-[240px] flex-1 transition-all duration-150',
+                    isColumnDragging && 'opacity-50',
+                    isColumnDropTarget && 'border-l-2 border-oe-blue',
+                  )}
+                  onDragOver={(e) => {
+                    // Distinguish card drags from column reorder drags
+                    if (draggedColumn) {
+                      handleColumnReorderDragOver(e, status);
+                    } else {
+                      handleColumnDragOver(e, status as TaskStatus);
+                    }
+                  }}
+                  onDragLeave={() => {
+                    handleColumnDragLeave();
+                    setColumnDropTarget(null);
+                  }}
+                  onDrop={(e) => {
+                    if (e.dataTransfer.types.includes('application/x-column')) {
+                      handleColumnReorderDrop(e, status);
+                    } else {
+                      handleColumnDrop(e, status as TaskStatus);
+                    }
+                  }}
+                  onDragEnd={() => {
+                    handleDragEnd();
+                    handleColumnReorderEnd();
+                  }}
+                  role="group"
+                  aria-label={t('tasks.column_label', { defaultValue: '{{name}} column, {{count}} tasks', name: displayLabel, count: colItems.length })}
                 >
                   {/* Column header */}
                   <div
+                    draggable={!isBuiltin}
+                    onDragStart={(e) => handleColumnReorderDragStart(e, status)}
                     className={clsx(
-                      'rounded-md px-2.5 py-1.5 mb-2 flex items-center justify-between',
+                      'rounded-md px-2.5 py-1.5 mb-2 flex items-center justify-between select-none',
+                      !isBuiltin && 'cursor-grab active:cursor-grabbing',
                       headerCls,
                     )}
                   >
-                    <span className="text-xs font-semibold">{displayLabel}</span>
+                    <div className="flex items-center gap-1.5">
+                      {!isBuiltin && (
+                        <GripVertical size={12} className="opacity-40 shrink-0" />
+                      )}
+                      <span className="text-xs font-semibold">{displayLabel}</span>
+                    </div>
                     <div className="flex items-center gap-1">
-                      <span className="text-[10px] font-bold rounded-full px-1.5 py-0.5 bg-white/30 tabular-nums">
+                      <span
+                        className="text-[10px] font-bold rounded-full px-1.5 py-0.5 bg-white/30 tabular-nums"
+                        aria-label={t('tasks.task_count', { defaultValue: '{{count}} tasks', count: colItems.length })}
+                      >
                         {colItems.length}
                       </span>
                       {!isBuiltin && (
                         <button
                           onClick={() => handleRemoveStatus(status)}
                           className="h-4 w-4 flex items-center justify-center rounded text-current opacity-50 hover:opacity-100 hover:bg-white/30 transition-opacity"
-                          title={t('common.delete', { defaultValue: 'Delete' })}
+                          title={t('tasks.remove_column', { defaultValue: 'Remove column' })}
+                          aria-label={t('tasks.remove_column_named', { defaultValue: 'Remove {{name}} column', name: displayLabel })}
                         >
                           <X size={10} />
                         </button>
@@ -1467,12 +1568,14 @@ export function TasksPage() {
                     </div>
                   </div>
 
-                  {/* Column items — drop zone */}
+                  {/* Column items -- drop zone */}
                   <div
                     className={clsx(
                       'flex-1 min-h-[60px] rounded-lg transition-all duration-150',
-                      isDropTarget && 'bg-oe-blue/5 ring-2 ring-oe-blue/30 ring-dashed',
+                      isDropTarget && 'bg-oe-blue/5 border-2 border-dashed border-oe-blue/30',
                     )}
+                    aria-dropeffect={draggedTaskId ? 'move' : 'none'}
+                    role="list"
                   >
                     {colItems.length === 0 ? (
                       <div className={clsx(
@@ -1493,7 +1596,9 @@ export function TasksPage() {
                           onDelete={handleDeleteTask}
                           onStatusChange={handleStatusChange}
                           customCategories={customCategories}
+                          customStatuses={customStatuses}
                           onDragStart={handleCardDragStart}
+                          isDragging={draggedTaskId === task.id}
                         />
                       ))
                     )}
@@ -1512,6 +1617,7 @@ export function TasksPage() {
                     onChange={(e) => setNewStatusName(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') handleAddStatus(); if (e.key === 'Escape') setShowAddStatus(false); }}
                     placeholder={t('tasks.new_column_name', { defaultValue: 'Column name...' })}
+                    aria-label={t('tasks.new_column_name', { defaultValue: 'Column name...' })}
                     className="w-full text-xs px-2.5 py-1.5 rounded-md border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
                     autoFocus
                   />
@@ -1659,7 +1765,13 @@ export function TasksPage() {
                       </summary>
                       <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
                         {importResult.errors.slice(0, 20).map((err) => (
-                          <li key={`row-${err.row}`}>Row {err.row}: {err.error}</li>
+                          <li key={`row-${err.row}`}>
+                            {t('tasks.import_row_error', {
+                              defaultValue: 'Row {{row}}: {{error}}',
+                              row: err.row,
+                              error: err.error,
+                            })}
+                          </li>
                         ))}
                       </ul>
                     </details>

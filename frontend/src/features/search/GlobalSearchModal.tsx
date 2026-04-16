@@ -170,7 +170,7 @@ export default function GlobalSearchModal() {
           <button
             onClick={closeModal}
             className="p-1 rounded text-content-tertiary hover:text-content-primary hover:bg-surface-secondary"
-            aria-label="Close"
+            aria-label={t('common.close', { defaultValue: 'Close' })}
           >
             <X size={14} />
           </button>

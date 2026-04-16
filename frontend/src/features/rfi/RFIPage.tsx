@@ -136,7 +136,7 @@ function CreateRFIModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[85vh] flex flex-col" role="dialog" aria-label={t('rfi.new_rfi', { defaultValue: 'New RFI' })}>
+      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[85vh] flex flex-col" role="dialog" aria-modal="true" aria-label={t('rfi.new_rfi', { defaultValue: 'New RFI' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light sticky top-0 z-10 bg-surface-elevated rounded-t-xl">
           <div>
@@ -174,11 +174,12 @@ function CreateRFIModal({
 
           {/* Subject */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="rfi-subject" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('rfi.field_subject', { defaultValue: 'Subject' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
             <input
+              id="rfi-subject"
               value={form.subject}
               onChange={(e) => set('subject', e.target.value)}
               placeholder={t('rfi.subject_placeholder', {
@@ -200,11 +201,12 @@ function CreateRFIModal({
 
           {/* Question */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="rfi-question" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('rfi.field_question', { defaultValue: 'Question' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
             <textarea
+              id="rfi-question"
               value={form.question}
               onChange={(e) => set('question', e.target.value)}
               rows={5}
@@ -236,10 +238,11 @@ function CreateRFIModal({
           {/* Two-column: Ball in Court + Due Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="rfi-ball-in-court" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('rfi.field_ball_in_court', { defaultValue: 'Assigned To' })}
               </label>
               <input
+                id="rfi-ball-in-court"
                 value={form.ball_in_court}
                 onChange={(e) => set('ball_in_court', e.target.value)}
                 className={inputCls}
@@ -249,10 +252,11 @@ function CreateRFIModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="rfi-due-date" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('rfi.field_due_date', { defaultValue: 'Response Due Date' })}
               </label>
               <input
+                id="rfi-due-date"
                 type="date"
                 value={form.due_date}
                 onChange={(e) => set('due_date', e.target.value)}
@@ -401,7 +405,7 @@ function RespondModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4" role="dialog" aria-label={t('rfi.respond_title', { defaultValue: 'Respond to RFI #{{number}}', number: rfi.rfi_number })}>
+      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4" role="dialog" aria-modal="true" aria-label={t('rfi.respond_title', { defaultValue: 'Respond to RFI #{{number}}', number: rfi.rfi_number })}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="text-lg font-semibold text-content-primary">
             {t('rfi.respond_title', { defaultValue: 'Respond to RFI #{{number}}', number: rfi.rfi_number })}
@@ -420,10 +424,11 @@ function RespondModal({
             <p className="text-sm text-content-primary">{rfi.question}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="rfi-response" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('rfi.field_response', { defaultValue: 'Response' })}
             </label>
             <textarea
+              id="rfi-response"
               value={response}
               onChange={(e) => setResponse(e.target.value)}
               rows={4}
@@ -939,6 +944,7 @@ export function RFIPage() {
                   useProjectContextStore.getState().setActiveProject(p.id, p.name);
                 }
               }}
+              aria-label={t('rfi.select_project', { defaultValue: 'Project...' })}
               className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
             >
               <option value="" disabled>
@@ -1053,6 +1059,7 @@ export function RFIPage() {
             placeholder={t('rfi.search_placeholder', {
               defaultValue: 'Search RFIs...',
             })}
+            aria-label={t('rfi.search_placeholder', { defaultValue: 'Search RFIs...' })}
             className={inputCls + ' pl-9'}
           />
         </div>
@@ -1062,6 +1069,7 @@ export function RFIPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as RFIStatus | '')}
+            aria-label={t('rfi.filter_all', { defaultValue: 'All Statuses' })}
             className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
           >
             <option value="">

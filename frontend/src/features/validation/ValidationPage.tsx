@@ -270,6 +270,8 @@ function ResultRow({
         onClick={onToggle}
         className="flex w-full items-center gap-3 px-4 py-3 text-left"
         title={tooltip}
+        aria-expanded={expanded}
+        aria-label={`${result.rule_name}: ${statusLabel}`}
       >
         {statusIcon}
         <div className="min-w-0 flex-1">
@@ -308,6 +310,7 @@ function ResultRow({
               {boqId && onNavigateToPosition ? (
                 <button
                   onClick={(e) => { e.stopPropagation(); onNavigateToPosition(boqId, result.element_ref!); }}
+                  aria-label={t('validation.go_to_element', { defaultValue: 'Go to element' })}
                   className="inline-flex items-center gap-1 text-oe-blue hover:underline font-mono"
                 >
                   {result.element_ref.substring(0, 8)}...
@@ -375,12 +378,14 @@ function FilterBar({
 }
 
 function SelectDropdown({
+  id,
   label,
   value,
   onChange,
   options,
   placeholder,
 }: {
+  id: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -389,8 +394,9 @@ function SelectDropdown({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-content-primary">{label}</label>
+      <label htmlFor={id} className="text-sm font-medium text-content-primary">{label}</label>
       <select
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={`h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm transition-all duration-normal ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue hover:border-content-tertiary ${
@@ -582,6 +588,7 @@ export function ValidationPage() {
               <Skeleton height={40} className="w-full" rounded="md" />
             ) : (
               <SelectDropdown
+                id="validation-project-select"
                 label={t('validation.select_project', 'Project')}
                 value={selectedProjectId}
                 onChange={handleProjectChange}
@@ -595,6 +602,7 @@ export function ValidationPage() {
               <Skeleton height={40} className="w-full" rounded="md" />
             ) : (
               <SelectDropdown
+                id="validation-boq-select"
                 label={t('validation.select_boq', 'Bill of Quantities')}
                 value={selectedBoqId}
                 onChange={handleBoqChange}
@@ -696,6 +704,7 @@ export function ValidationPage() {
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setExpandedResults(new Set(filteredResults.map((_, i) => i)))}
+                    aria-label={t('validation.expand_all', { defaultValue: 'Expand All' })}
                     className="text-xs font-medium text-content-secondary hover:text-content-primary transition-colors"
                   >
                     {t('validation.expand_all', { defaultValue: 'Expand All' })}
@@ -703,6 +712,7 @@ export function ValidationPage() {
                   <span className="text-content-quaternary">|</span>
                   <button
                     onClick={() => setExpandedResults(new Set())}
+                    aria-label={t('validation.collapse_all', { defaultValue: 'Collapse All' })}
                     className="text-xs font-medium text-content-secondary hover:text-content-primary transition-colors"
                   >
                     {t('validation.collapse_all', { defaultValue: 'Collapse All' })}

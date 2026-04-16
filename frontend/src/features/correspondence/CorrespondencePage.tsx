@@ -150,8 +150,8 @@ function CreateCorrespondenceModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('correspondence.new_entry', { defaultValue: 'New Entry' })}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" role="dialog" aria-modal="true" aria-label={t('correspondence.new_entry', { defaultValue: 'New Entry' })}>
+      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="text-lg font-semibold text-content-primary">
@@ -170,10 +170,10 @@ function CreateCorrespondenceModal({
         <div className="px-6 py-4 space-y-5">
           {/* ── Direction Cards ── */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-2">
+            <label id="corr-direction-label" className="block text-sm font-medium text-content-primary mb-2">
               {t('correspondence.field_direction', { defaultValue: 'Direction' })}
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-labelledby="corr-direction-label">
               {(['incoming', 'outgoing'] as CorrespondenceDirection[]).map((dir) => {
                 const cfg = DIRECTION_CARD_CONFIG[dir];
                 const DirIcon = cfg.icon;
@@ -182,6 +182,8 @@ function CreateCorrespondenceModal({
                   <button
                     key={dir}
                     type="button"
+                    role="radio"
+                    aria-checked={selected}
                     onClick={() => set('direction', dir)}
                     className={clsx(
                       'flex items-center gap-3 rounded-lg border-2 px-4 py-3 transition-all text-left',
@@ -211,16 +213,18 @@ function CreateCorrespondenceModal({
 
           {/* ── Type as visual badges ── */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-2">
+            <label id="corr-type-label" className="block text-sm font-medium text-content-primary mb-2">
               {t('correspondence.field_type', { defaultValue: 'Type' })}
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="corr-type-label">
               {CORR_TYPES_LIST.map((tp) => {
                 const selected = form.type === tp;
                 return (
                   <button
                     key={tp}
                     type="button"
+                    role="radio"
+                    aria-checked={selected}
                     onClick={() => set('type', tp)}
                     className={clsx(
                       'inline-flex items-center rounded-full border-2 px-3.5 py-1.5 text-xs font-semibold transition-all',
@@ -247,11 +251,12 @@ function CreateCorrespondenceModal({
 
           {/* Subject */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="corr-subject" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('correspondence.field_subject', { defaultValue: 'Subject' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
             <input
+              id="corr-subject"
               value={form.subject}
               onChange={(e) => {
                 set('subject', e.target.value);
@@ -286,7 +291,7 @@ function CreateCorrespondenceModal({
           {/* From + To */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="corr-from" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_from', { defaultValue: 'From' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -312,7 +317,7 @@ function CreateCorrespondenceModal({
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="corr-to" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_to', { defaultValue: 'To' })}
               </label>
               <ContactSearchInput
@@ -344,10 +349,11 @@ function CreateCorrespondenceModal({
           {/* Two-column: Date Sent + Date Received */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="corr-date-sent" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_date_sent', { defaultValue: 'Date Sent' })}
               </label>
               <input
+                id="corr-date-sent"
                 type="date"
                 value={form.date_sent}
                 onChange={(e) => set('date_sent', e.target.value)}
@@ -355,10 +361,11 @@ function CreateCorrespondenceModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="corr-date-received" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_date_received', { defaultValue: 'Date Received' })}
               </label>
               <input
+                id="corr-date-received"
                 type="date"
                 value={form.date_received}
                 onChange={(e) => set('date_received', e.target.value)}
@@ -369,10 +376,11 @@ function CreateCorrespondenceModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="corr-notes" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('correspondence.field_notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
+              id="corr-notes"
               value={form.notes}
               onChange={(e) => set('notes', e.target.value)}
               rows={3}
@@ -419,7 +427,12 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({ item }: { item
           'flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-surface-secondary/50 transition-colors',
           expanded && 'bg-surface-secondary/30',
         )}
+        role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
+        aria-label={t('correspondence.toggle_row', { defaultValue: 'Toggle details for {{ref}}', ref: item.reference_number })}
         onClick={() => setExpanded((prev) => !prev)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded((prev) => !prev); } }}
       >
         <ChevronRight
           size={14}
@@ -708,6 +721,7 @@ export function CorrespondencePage() {
                   useProjectContextStore.getState().setActiveProject(p.id, p.name);
                 }
               }}
+              aria-label={t('correspondence.select_project', { defaultValue: 'Project...' })}
               className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
             >
               <option value="" disabled>
@@ -793,6 +807,7 @@ export function CorrespondencePage() {
             placeholder={t('correspondence.search_placeholder', {
               defaultValue: 'Search correspondence...',
             })}
+            aria-label={t('correspondence.search_placeholder', { defaultValue: 'Search correspondence...' })}
             className={inputCls + ' pl-9'}
           />
         </div>
@@ -804,6 +819,7 @@ export function CorrespondencePage() {
             onChange={(e) =>
               setDirectionFilter(e.target.value as CorrespondenceDirection | '')
             }
+            aria-label={t('correspondence.filter_all_dir', { defaultValue: 'All Directions' })}
             className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-36"
           >
             <option value="">
@@ -826,6 +842,7 @@ export function CorrespondencePage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as CorrespondenceType | '')}
+            aria-label={t('correspondence.filter_all_type', { defaultValue: 'All Types' })}
             className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-36"
           >
             <option value="">

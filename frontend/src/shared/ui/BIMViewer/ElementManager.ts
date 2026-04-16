@@ -499,12 +499,6 @@ export class ElementManager {
     // trimesh does NOT convert Z_UP→Y_UP when generating GLB.
     // Always apply -90° X rotation to bring the model upright in
     // Three.js Y_UP coordinate system.
-    const box = new THREE.Box3().setFromObject(scene);
-    const size = box.getSize(new THREE.Vector3());
-    // eslint-disable-next-line no-console
-    console.log(
-      `[BIM orientation] bbox: X=${size.x.toFixed(1)} Y=${size.y.toFixed(1)} Z=${size.z.toFixed(1)} → rotating Z_UP→Y_UP`,
-    );
     scene.rotation.x = -Math.PI / 2;
     scene.updateMatrixWorld(true);
 
@@ -550,22 +544,11 @@ export class ElementManager {
     //   5. parent.name         via nameToElement
     //   6. Extract numeric ID from parent.name pattern "Type-N-suffix" (Light-1-235371-point)
     //      — this catches DDC light/node IDs embedded in composite names.
-    let _debugLogCount = 0;
     scene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         const nodeName = child.name || '';
         const parentName = child.parent?.name || '';
         const grandparentName = child.parent?.parent?.name || '';
-
-        // Debug: log first 5 mesh names for diagnostics
-        if (_debugLogCount < 5) {
-          // eslint-disable-next-line no-console
-          console.log(
-            `[BIM match debug] mesh.name="${nodeName}" parent="${parentName}" grandparent="${grandparentName}" ` +
-            `inMap=${stableIdToElement.has(nodeName) || stableIdToElement.has(parentName)}`,
-          );
-          _debugLogCount++;
-        }
 
         let element =
           stableIdToElement.get(nodeName) ||

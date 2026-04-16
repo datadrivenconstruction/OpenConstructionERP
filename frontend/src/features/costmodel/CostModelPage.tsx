@@ -88,7 +88,7 @@ function formatCompact(amount: number, currency: string): string {
  * Negative variance means over budget (BAD = red).
  */
 function varianceColor(variance: number): string {
-  if (variance > 0) return 'text-[#15803d]';
+  if (variance > 0) return 'text-semantic-success';
   if (variance < 0) return 'text-semantic-error';
   return 'text-content-secondary';
 }
@@ -175,7 +175,7 @@ const PerformanceIndicator = memo(function PerformanceIndicator({
       <div
         className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-bold tabular-nums ${
           isHealthy
-            ? 'bg-semantic-success-bg text-[#15803d]'
+            ? 'bg-semantic-success-bg text-semantic-success'
             : 'bg-semantic-error-bg text-semantic-error'
         }`}
       >
@@ -613,7 +613,7 @@ const EVMKPIBox = memo(function EVMKPIBox({
 
   if (thresholdMode === 'index') {
     if (value >= 1.0) {
-      colorClass = 'text-[#15803d]';
+      colorClass = 'text-semantic-success';
       bgClass = 'bg-semantic-success-bg';
     } else if (value >= 0.85) {
       colorClass = 'text-amber-600';
@@ -624,7 +624,7 @@ const EVMKPIBox = memo(function EVMKPIBox({
     }
   } else if (thresholdMode === 'variance') {
     if (value > 0) {
-      colorClass = 'text-[#15803d]';
+      colorClass = 'text-semantic-success';
       bgClass = 'bg-semantic-success-bg';
     } else if (value < 0) {
       colorClass = 'text-semantic-error';
@@ -825,7 +825,7 @@ const EVMDashboard = memo(function EVMDashboard({
                 {t('costmodel.evm_sv_label', { defaultValue: 'SV' })}
               </span>
               <span
-                className={`font-medium tabular-nums ${evm.sv >= 0 ? 'text-[#15803d]' : 'text-semantic-error'}`}
+                className={`font-medium tabular-nums ${evm.sv >= 0 ? 'text-semantic-success' : 'text-semantic-error'}`}
               >
                 {evm.sv >= 0 ? '+' : ''}
                 {formatCompact(evm.sv, currency)}
@@ -836,7 +836,7 @@ const EVMDashboard = memo(function EVMDashboard({
                 {t('costmodel.evm_cv_label', { defaultValue: 'CV' })}
               </span>
               <span
-                className={`font-medium tabular-nums ${evm.cv >= 0 ? 'text-[#15803d]' : 'text-semantic-error'}`}
+                className={`font-medium tabular-nums ${evm.cv >= 0 ? 'text-semantic-success' : 'text-semantic-error'}`}
               >
                 {evm.cv >= 0 ? '+' : ''}
                 {formatCompact(evm.cv, currency)}
@@ -1260,16 +1260,16 @@ function SnapshotsList({ projectId, currency }: { projectId: string; currency: s
                   {t('costmodel.planned', 'Planned')}
                 </th>
                 <th className="py-2 px-3 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
-                  EV
+                  {t('costmodel.snapshot_ev', { defaultValue: 'EV' })}
                 </th>
                 <th className="py-2 px-3 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
-                  AC
+                  {t('costmodel.snapshot_ac', { defaultValue: 'AC' })}
                 </th>
                 <th className="py-2 px-3 text-center text-xs font-semibold uppercase tracking-wider text-content-secondary">
-                  SPI
+                  {t('costmodel.snapshot_spi', { defaultValue: 'SPI' })}
                 </th>
                 <th className="py-2 px-3 text-center text-xs font-semibold uppercase tracking-wider text-content-secondary">
-                  CPI
+                  {t('costmodel.snapshot_cpi', { defaultValue: 'CPI' })}
                 </th>
                 <th className="py-2 pl-3 text-left text-xs font-semibold uppercase tracking-wider text-content-secondary">
                   {t('costmodel.notes', { defaultValue: 'Notes' })}
@@ -1291,10 +1291,10 @@ function SnapshotsList({ projectId, currency }: { projectId: string; currency: s
                   <td className="py-2.5 px-3 text-right tabular-nums text-content-secondary">
                     {formatCompact(snap.actual_cost, currency)}
                   </td>
-                  <td className={`py-2.5 px-3 text-center tabular-nums font-medium ${snap.spi >= 1 ? 'text-[#15803d]' : 'text-semantic-error'}`}>
+                  <td className={`py-2.5 px-3 text-center tabular-nums font-medium ${snap.spi >= 1 ? 'text-semantic-success' : 'text-semantic-error'}`}>
                     {snap.spi.toFixed(2)}
                   </td>
-                  <td className={`py-2.5 px-3 text-center tabular-nums font-medium ${snap.cpi >= 1 ? 'text-[#15803d]' : 'text-semantic-error'}`}>
+                  <td className={`py-2.5 px-3 text-center tabular-nums font-medium ${snap.cpi >= 1 ? 'text-semantic-success' : 'text-semantic-error'}`}>
                     {snap.cpi.toFixed(2)}
                   </td>
                   <td className="py-2.5 pl-3 min-w-[160px]">
@@ -1384,7 +1384,7 @@ const SliderControl = memo(function SliderControl({
             value > 0
               ? 'text-semantic-error'
               : value < 0
-                ? 'text-[#15803d]'
+                ? 'text-semantic-success'
                 : 'text-content-primary'
           }`}
         >
@@ -1619,7 +1619,7 @@ function WhatIfPanel({
                         result.delta > 0
                           ? 'text-semantic-error'
                           : result.delta < 0
-                            ? 'text-[#15803d]'
+                            ? 'text-semantic-success'
                             : 'text-content-primary'
                       }`}
                     >

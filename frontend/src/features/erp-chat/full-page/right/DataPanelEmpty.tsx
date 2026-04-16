@@ -106,9 +106,9 @@ export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
     >
       <div
         style={{
-          maxWidth: 720,
+          maxWidth: 800,
           margin: '0 auto',
-          padding: '32px 24px 48px',
+          padding: '24px 14px 32px',
         }}
       >
         {/* Hero icon + headline */}
@@ -246,9 +246,9 @@ export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 12,
-            marginBottom: 24,
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 10,
+            marginBottom: 20,
           }}
         >
           {TOOL_CATEGORIES.map((cat) => (

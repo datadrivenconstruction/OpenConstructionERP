@@ -432,6 +432,8 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
                     displayValue={poForm.vendor_display}
                     onChange={(id, name) => setPoForm((f) => ({ ...f, vendor_contact_id: id, vendor_display: name }))}
                     placeholder={t('procurement.search_vendor', { defaultValue: 'Search vendor...' })}
+                    showBrowse
+                    browseContactTypes={['supplier', 'subcontractor']}
                   />
                 </div>
                 {/* PO Type — visual toggle */}
@@ -895,7 +897,7 @@ function GoodsReceiptsTab({ projectId }: { projectId: string }) {
                   <span
                     className={
                       gr.received_qty >= gr.ordered_qty
-                        ? 'text-[#15803d]'
+                        ? 'text-semantic-success'
                         : 'text-content-primary'
                     }
                   >

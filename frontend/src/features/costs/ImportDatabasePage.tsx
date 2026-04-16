@@ -510,10 +510,10 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
               {result && (
                 <div className="mt-3 grid grid-cols-3 gap-2">
                   <div className="rounded-lg bg-semantic-success-bg/50 px-3 py-2 text-center">
-                    <div className="text-lg font-bold text-[#15803d] tabular-nums">
+                    <div className="text-lg font-bold text-semantic-success tabular-nums">
                       {result.imported.toLocaleString()}
                     </div>
-                    <div className="text-2xs text-[#15803d]/70">{t('costs.items_installed', { defaultValue: 'items installed' })}</div>
+                    <div className="text-2xs text-semantic-success/70">{t('costs.items_installed', { defaultValue: 'items installed' })}</div>
                   </div>
                   <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
                     <div className="text-lg font-bold text-content-secondary tabular-nums">
@@ -1158,7 +1158,7 @@ function VectorDatabaseSection() {
               <div className="rounded-lg bg-semantic-success-bg/40 border border-semantic-success/20 px-4 py-3 mb-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-semantic-success" />
-                  <span className="text-xs font-medium text-[#15803d]">
+                  <span className="text-xs font-medium text-semantic-success">
                     {lastResult.indexed.toLocaleString()} vectors indexed in {lastResult.duration}s
                     {lastResult.region !== 'all' && ` (${CWICR_DATABASES.find((d) => d.id === lastResult.region)?.name ?? lastResult.region})`}
                   </span>
@@ -1432,7 +1432,7 @@ export function ImportDatabasePage() {
 
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-xl bg-semantic-success-bg/50 px-4 py-3 text-center">
-                <div className="text-2xl font-bold text-[#15803d]">{result.imported}</div>
+                <div className="text-2xl font-bold text-semantic-success">{result.imported}</div>
                 <div className="text-xs text-content-secondary mt-0.5">
                   {t('costs.import_imported', { defaultValue: 'Imported' })}
                 </div>
@@ -1508,7 +1508,7 @@ export function ImportDatabasePage() {
                 </h3>
                 <ul className="mt-2 space-y-1.5 text-sm text-content-secondary">
                   <li className="flex items-center gap-2">
-                    <FileSpreadsheet size={14} className="text-[#15803d] shrink-0" />
+                    <FileSpreadsheet size={14} className="text-semantic-success shrink-0" />
                     {t('costs.import_format_excel', {
                       defaultValue:
                         'Excel (.xlsx) with columns: Code, Description, Unit, Rate',

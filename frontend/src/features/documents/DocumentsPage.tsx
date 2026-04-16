@@ -569,11 +569,10 @@ export function DocumentsPage() {
   /* ── Card click handler ─────────────────────────────────────────────── */
 
   const handleCardClick = useCallback((doc: DocItem) => {
-    // DWG/DXF files -> navigate to DWG Takeoff page
+    // DWG/DXF files -> navigate to DWG Takeoff page with document name for matching
     const lowerName = doc.name.toLowerCase();
     if (lowerName.endsWith('.dwg') || lowerName.endsWith('.dxf')) {
-      // Navigate to DWG takeoff — the DWG module will match by name via deep-link
-      navigate(`/dwg-takeoff`);
+      navigate(`/dwg-takeoff?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`);
       return;
     }
 
@@ -1044,6 +1043,16 @@ export function DocumentsPage() {
                               >
                                 <Ruler size={14} className="text-oe-blue" />
                                 {t('documents.open_in_takeoff', { defaultValue: 'Measure & Takeoff' })}
+                              </button>
+                            )}
+                            {(doc.name.toLowerCase().endsWith('.dwg') || doc.name.toLowerCase().endsWith('.dxf')) && (
+                              <button
+                                role="menuitem"
+                                onClick={() => { setOpenMenuId(null); navigate(`/dwg-takeoff?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`); }}
+                                className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                              >
+                                <Ruler size={14} className="text-oe-blue" />
+                                {t('documents.open_in_dwg_takeoff', { defaultValue: 'Open in DWG Takeoff' })}
                               </button>
                             )}
                             <a

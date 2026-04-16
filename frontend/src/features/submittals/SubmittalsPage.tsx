@@ -135,7 +135,7 @@ function CreateSubmittalModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('submittals.new_submittal', { defaultValue: 'New Submittal' })}>
+      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('submittals.new_submittal', { defaultValue: 'New Submittal' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="text-lg font-semibold text-content-primary">
@@ -154,11 +154,12 @@ function CreateSubmittalModal({
         <div className="px-6 py-4 space-y-4">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="submittal-title" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('submittals.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
             <input
+              id="submittal-title"
               value={form.title}
               onChange={(e) => {
                 set('title', e.target.value);
@@ -184,11 +185,12 @@ function CreateSubmittalModal({
           {/* Two-column: Spec Section + Type */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="submittal-spec-section" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('submittals.field_spec_section', { defaultValue: 'Spec Section' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
               <input
+                id="submittal-spec-section"
                 value={form.spec_section}
                 onChange={(e) => {
                   set('spec_section', e.target.value);
@@ -210,11 +212,12 @@ function CreateSubmittalModal({
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="submittal-type" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('submittals.field_type', { defaultValue: 'Type' })}
               </label>
               <div className="relative">
                 <select
+                  id="submittal-type"
                   value={form.type}
                   onChange={(e) => set('type', e.target.value as SubmittalType)}
                   className={inputCls + ' appearance-none pr-9'}
@@ -234,10 +237,11 @@ function CreateSubmittalModal({
 
           {/* Date Required */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="submittal-date-required" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('submittals.field_date_required', { defaultValue: 'Date Required' })}
             </label>
             <input
+              id="submittal-date-required"
               type="date"
               value={form.date_required}
               onChange={(e) => set('date_required', e.target.value)}
@@ -247,10 +251,11 @@ function CreateSubmittalModal({
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="submittal-description" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('submittals.field_description', { defaultValue: 'Description' })}
             </label>
             <textarea
+              id="submittal-description"
               value={form.description}
               onChange={(e) => set('description', e.target.value)}
               rows={3}
@@ -312,7 +317,7 @@ function ApproveModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4" role="dialog" aria-label={t('submittals.review_title', { defaultValue: 'Review {{number}}', number: submittal.submittal_number })}>
+      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4" role="dialog" aria-modal="true" aria-label={t('submittals.review_title', { defaultValue: 'Review {{number}}', number: submittal.submittal_number })}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="text-lg font-semibold text-content-primary">
             {t('submittals.review_title', {
@@ -338,10 +343,10 @@ function ApproveModal({
 
           {/* Decision */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-2">
+            <label id="submittal-decision-label" className="block text-sm font-medium text-content-secondary mb-2">
               {t('submittals.field_decision', { defaultValue: 'Decision' })}
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-labelledby="submittal-decision-label">
               {(
                 [
                   'approved',
@@ -352,6 +357,8 @@ function ApproveModal({
               ).map((s) => (
                 <button
                   key={s}
+                  role="radio"
+                  aria-checked={decision === s}
                   onClick={() => setDecision(s)}
                   className={clsx(
                     'rounded-lg border px-3 py-2 text-xs font-medium transition-colors text-left',
@@ -368,10 +375,11 @@ function ApproveModal({
 
           {/* Comments */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="submittal-review-comments" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('submittals.field_comments', { defaultValue: 'Comments' })}
             </label>
             <textarea
+              id="submittal-review-comments"
               value={comments}
               onChange={(e) => setComments(e.target.value)}
               rows={3}
@@ -750,6 +758,7 @@ export function SubmittalsPage() {
                   useProjectContextStore.getState().setActiveProject(p.id, p.name);
                 }
               }}
+              aria-label={t('submittals.select_project', { defaultValue: 'Project...' })}
               className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
             >
               <option value="" disabled>
@@ -874,6 +883,7 @@ export function SubmittalsPage() {
             placeholder={t('submittals.search_placeholder', {
               defaultValue: 'Search submittals...',
             })}
+            aria-label={t('submittals.search_placeholder', { defaultValue: 'Search submittals...' })}
             className={inputCls + ' pl-9'}
           />
         </div>
@@ -883,6 +893,7 @@ export function SubmittalsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as SubmittalStatus | '')}
+            aria-label={t('submittals.filter_all', { defaultValue: 'All Statuses' })}
             className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-48"
           >
             <option value="">

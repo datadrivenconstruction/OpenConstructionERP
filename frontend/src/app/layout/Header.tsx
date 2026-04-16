@@ -233,8 +233,6 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           <span className="hidden lg:inline">{t('nav.docs', { defaultValue: 'Docs' })}</span>
         </a>
 
-        {/* GitHub — intentionally empty, moved before Search */}
-
         {/* Feedback — Variant A (optional file) + B (URL params) */}
         <button
           type="button"

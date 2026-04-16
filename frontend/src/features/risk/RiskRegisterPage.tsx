@@ -96,7 +96,7 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
           <thead>
             <tr>
               <th className="p-1 text-left text-content-tertiary w-20">{t('risk.probability', { defaultValue: 'Probability' })}</th>
-              {IMPACT_LEVELS.map((i) => <th key={i} className="p-1 text-center text-content-tertiary capitalize">{i}</th>)}
+              {IMPACT_LEVELS.map((i) => <th key={i} className="p-1 text-center text-content-tertiary capitalize">{t(`risk.impact_${i}`, { defaultValue: i })}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -183,7 +183,7 @@ function RiskMatrixHeatmap({ risks }: { risks: RiskItem[] }) {
                         className={`flex items-center justify-center h-10 w-12 rounded-md text-sm font-bold ${
                           count > 0 ? heatmapColor(score) : 'bg-surface-secondary text-content-quaternary'
                         }`}
-                        title={`P=${p} x I=${i} = ${score}${count > 0 ? `, ${count} risk(s)` : ''}`}
+                        title={`P=${p} x I=${i} = ${score}${count > 0 ? `, ${count} ${t('risk.risks_count', { defaultValue: 'risk(s)' })}` : ''}`}
                       >
                         {count > 0 ? count : '-'}
                       </div>
@@ -235,52 +235,52 @@ function CreateDialog({ projectId, currency, onClose, onCreated }: { projectId: 
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" role="dialog" aria-modal="true" aria-labelledby="risk-create-title" onClick={onClose}>
       <div className="w-full max-w-lg rounded-xl bg-surface-primary p-6 shadow-xl border border-border max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-semibold text-content-primary">{t('risk.new', { defaultValue: 'New Risk' })}</h2>
-          <button onClick={onClose} className="text-content-tertiary hover:text-content-primary"><X size={18} /></button>
+          <h2 id="risk-create-title" className="text-lg font-semibold text-content-primary">{t('risk.new', { defaultValue: 'New Risk' })}</h2>
+          <button onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="text-content-tertiary hover:text-content-primary"><X size={18} /></button>
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('common.title', { defaultValue: 'Title' })} *</label>
-            <input value={f.title} onChange={(e) => set('title', e.target.value)} placeholder={t('risk.title_placeholder', { defaultValue: 'e.g. Foundation soil instability' })} className={inputCls} />
+            <label htmlFor="risk-title" className="block text-sm font-medium text-content-primary mb-1.5">{t('common.title', { defaultValue: 'Title' })} *</label>
+            <input id="risk-title" value={f.title} onChange={(e) => set('title', e.target.value)} placeholder={t('risk.title_placeholder', { defaultValue: 'e.g. Foundation soil instability' })} className={inputCls} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('common.description', { defaultValue: 'Description' })}</label>
-            <textarea value={f.description} onChange={(e) => set('description', e.target.value)} rows={2} className={textareaCls} />
+            <label htmlFor="risk-description" className="block text-sm font-medium text-content-primary mb-1.5">{t('common.description', { defaultValue: 'Description' })}</label>
+            <textarea id="risk-description" value={f.description} onChange={(e) => set('description', e.target.value)} rows={2} className={textareaCls} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.category', { defaultValue: 'Category' })}</label>
-              <select value={f.category} onChange={(e) => set('category', e.target.value)} className={inputCls}>
+              <label htmlFor="risk-category" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.category', { defaultValue: 'Category' })}</label>
+              <select id="risk-category" value={f.category} onChange={(e) => set('category', e.target.value)} className={inputCls}>
                 {CATEGORIES.map((c) => <option key={c} value={c}>{t(`risk.cat_${c}`, { defaultValue: c })}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.severity', { defaultValue: 'Impact Severity' })}</label>
-              <select value={f.impactSeverity} onChange={(e) => set('impactSeverity', e.target.value)} className={inputCls}>
+              <label htmlFor="risk-severity" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.severity', { defaultValue: 'Impact Severity' })}</label>
+              <select id="risk-severity" value={f.impactSeverity} onChange={(e) => set('impactSeverity', e.target.value)} className={inputCls}>
                 {SEVERITIES.map((s) => <option key={s} value={s}>{t(`risk.severity_${s}`, { defaultValue: s })}</option>)}
               </select>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.probability', { defaultValue: 'Probability' })}</label>
-              <input type="number" min={0} max={1} step={0.1} value={f.probability} onChange={(e) => set('probability', parseFloat(e.target.value) || 0)} className={inputCls} />
+              <label htmlFor="risk-probability" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.probability', { defaultValue: 'Probability' })}</label>
+              <input id="risk-probability" type="number" min={0} max={1} step={0.1} value={f.probability} onChange={(e) => set('probability', parseFloat(e.target.value) || 0)} className={inputCls} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.impact_cost', { defaultValue: 'Cost Impact' })}</label>
-              <input type="number" min={0} step="any" value={f.impactCost} onChange={(e) => set('impactCost', parseFloat(e.target.value) || 0)} className={inputCls} />
+              <label htmlFor="risk-impact-cost" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.impact_cost', { defaultValue: 'Cost Impact' })}</label>
+              <input id="risk-impact-cost" type="number" min={0} step="any" value={f.impactCost} onChange={(e) => set('impactCost', parseFloat(e.target.value) || 0)} className={inputCls} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.schedule_days', { defaultValue: 'Days' })}</label>
-              <input type="number" min={0} value={f.scheduleDays} onChange={(e) => set('scheduleDays', parseInt(e.target.value) || 0)} className={inputCls} />
+              <label htmlFor="risk-schedule-days" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.schedule_days', { defaultValue: 'Days' })}</label>
+              <input id="risk-schedule-days" type="number" min={0} value={f.scheduleDays} onChange={(e) => set('scheduleDays', parseInt(e.target.value) || 0)} className={inputCls} />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.owner', { defaultValue: 'Risk Owner' })}</label>
-            <input value={f.ownerName} onChange={(e) => set('ownerName', e.target.value)} className={inputCls} />
+            <label htmlFor="risk-owner" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.owner', { defaultValue: 'Risk Owner' })}</label>
+            <input id="risk-owner" value={f.ownerName} onChange={(e) => set('ownerName', e.target.value)} className={inputCls} />
           </div>
         </div>
         <div className="mt-6 flex justify-end gap-3">
@@ -322,7 +322,7 @@ function DetailView({ riskId, onBack }: { riskId: string; onBack: () => void }) 
   return (
     <div>
       <div className="mb-6">
-        <button onClick={onBack} className="inline-flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary mb-3"><ArrowLeft size={14} />{t('common.back', { defaultValue: 'Back' })}</button>
+        <button onClick={onBack} aria-label={t('common.back', { defaultValue: 'Back' })} className="inline-flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary mb-3"><ArrowLeft size={14} />{t('common.back', { defaultValue: 'Back' })}</button>
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3">
@@ -355,18 +355,18 @@ function DetailView({ riskId, onBack }: { riskId: string; onBack: () => void }) 
       {editing ? (
         <Card className="p-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.status', { defaultValue: 'Status' })}</label>
-            <select value={ef.status} onChange={(e) => setEf((p) => ({ ...p, status: e.target.value }))} className={inputCls + ' max-w-xs'}>
+            <label htmlFor="risk-edit-status" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.status', { defaultValue: 'Status' })}</label>
+            <select id="risk-edit-status" value={ef.status} onChange={(e) => setEf((p) => ({ ...p, status: e.target.value }))} className={inputCls + ' max-w-xs'}>
               {STATUSES.map((s) => <option key={s} value={s}>{t(`risk.status_${s}`, { defaultValue: s })}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.mitigation', { defaultValue: 'Mitigation Strategy' })}</label>
-            <textarea value={ef.mitigation} onChange={(e) => setEf((p) => ({ ...p, mitigation: e.target.value }))} rows={3} className={textareaCls} />
+            <label htmlFor="risk-edit-mitigation" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.mitigation', { defaultValue: 'Mitigation Strategy' })}</label>
+            <textarea id="risk-edit-mitigation" value={ef.mitigation} onChange={(e) => setEf((p) => ({ ...p, mitigation: e.target.value }))} rows={3} className={textareaCls} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.contingency', { defaultValue: 'Contingency Plan' })}</label>
-            <textarea value={ef.contingency} onChange={(e) => setEf((p) => ({ ...p, contingency: e.target.value }))} rows={3} className={textareaCls} />
+            <label htmlFor="risk-edit-contingency" className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.contingency', { defaultValue: 'Contingency Plan' })}</label>
+            <textarea id="risk-edit-contingency" value={ef.contingency} onChange={(e) => setEf((p) => ({ ...p, contingency: e.target.value }))} rows={3} className={textareaCls} />
           </div>
           <div className="flex gap-3">
             <Button variant="primary" size="sm" disabled={upd.isPending} onClick={() => upd.mutate({ status: ef.status, mitigation_strategy: ef.mitigation, contingency_plan: ef.contingency })}>
@@ -478,6 +478,7 @@ export function RiskRegisterPage() {
                 const p = projects.find((pr) => pr.id === e.target.value);
                 if (p) useProjectContextStore.getState().setActiveProject(p.id, p.name);
               }}
+              aria-label={t('risk.select_project', { defaultValue: 'Project...' })}
               className={selectCls + ' max-w-[180px]'}
             >
               <option value="" disabled>{t('risk.select_project', { defaultValue: 'Project...' })}</option>
@@ -509,7 +510,7 @@ export function RiskRegisterPage() {
             { icon: ShieldAlert, label: t('risk.total', { defaultValue: 'Total Risks' }), value: summary.total_risks, cls: 'text-content-primary', bg: 'bg-surface-secondary' },
             { icon: AlertTriangle, label: t('risk.high_critical', { defaultValue: 'High / Critical' }), value: summary.high_critical_count, cls: 'text-semantic-error', bg: 'bg-red-50 dark:bg-red-950/30' },
             { icon: DollarSign, label: t('risk.exposure', { defaultValue: 'Total Exposure' }), value: fmtCur(summary.total_exposure, currency), cls: 'text-semantic-error', bg: 'bg-surface-secondary' },
-            { icon: Shield, label: t('risk.mitigated', { defaultValue: 'Mitigated' }), value: summary.mitigated_count, cls: 'text-[#15803d]', bg: 'bg-green-50 dark:bg-green-950/30' },
+            { icon: Shield, label: t('risk.mitigated', { defaultValue: 'Mitigated' }), value: summary.mitigated_count, cls: 'text-semantic-success', bg: 'bg-green-50 dark:bg-green-950/30' },
           ].map(({ icon: Icon, label, value, cls, bg }) => (
             <Card key={label} className="p-4">
               <div className="flex items-center gap-2">
@@ -541,6 +542,7 @@ export function RiskRegisterPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('risk.search', { defaultValue: 'Search risks...' })}
+              aria-label={t('risk.search', { defaultValue: 'Search risks...' })}
               className="h-8 w-full rounded-lg border border-border bg-surface-primary pl-8 pr-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
             />
           </div>
@@ -552,11 +554,11 @@ export function RiskRegisterPage() {
 
       {showFilters && (
         <div className="mt-2 flex items-center gap-2 flex-wrap animate-fade-in">
-          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className={selectCls + ' max-w-[150px]'}>
+          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} aria-label={t('risk.filter_category', { defaultValue: 'Filter by category' })} className={selectCls + ' max-w-[150px]'}>
             <option value="">{t('risk.all_categories', { defaultValue: 'All Categories' })}</option>
             {CATEGORIES.map((c) => <option key={c} value={c}>{t(`risk.cat_${c}`, { defaultValue: c })}</option>)}
           </select>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={selectCls + ' max-w-[150px]'}>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} aria-label={t('risk.filter_status', { defaultValue: 'Filter by status' })} className={selectCls + ' max-w-[150px]'}>
             <option value="">{t('risk.all_statuses', { defaultValue: 'All Statuses' })}</option>
             {STATUSES.map((s) => <option key={s} value={s}>{t(`risk.status_${s}`, { defaultValue: s })}</option>)}
           </select>
@@ -613,7 +615,7 @@ export function RiskRegisterPage() {
                       <td className="px-4 py-3 text-content-secondary text-xs truncate max-w-[100px]">{r.owner_name || '-'}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
-                          <button onClick={(e) => { e.stopPropagation(); setDeleteTarget(r.id); }} className="text-content-tertiary hover:text-semantic-error transition-colors p-1" title={t('common.delete', { defaultValue: 'Delete' })}><Trash2 size={14} /></button>
+                          <button onClick={(e) => { e.stopPropagation(); setDeleteTarget(r.id); }} className="text-content-tertiary hover:text-semantic-error transition-colors p-1" title={t('common.delete', { defaultValue: 'Delete' })} aria-label={t('common.delete', { defaultValue: 'Delete' })}><Trash2 size={14} /></button>
                           <ChevronRight size={14} className="text-content-tertiary" />
                         </div>
                       </td>
