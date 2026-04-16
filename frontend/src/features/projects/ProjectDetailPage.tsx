@@ -474,7 +474,7 @@ function SummaryCard({
 }) {
   const bgMap = {
     default: 'bg-surface-secondary text-content-tertiary',
-    success: 'bg-semantic-success-bg text-[#15803d]',
+    success: 'bg-semantic-success-bg text-semantic-success',
     blue: 'bg-oe-blue-subtle text-oe-blue',
   };
 
@@ -734,10 +734,10 @@ function ImportDialog({
             <div className="space-y-4">
               {/* Success summary */}
               <div className="flex items-center gap-3 rounded-lg bg-semantic-success-bg px-4 py-3">
-                <CheckCircle2 size={20} className="shrink-0 text-[#15803d]" />
+                <CheckCircle2 size={20} className="shrink-0 text-semantic-success" />
                 <div>
-                  <p className="text-sm font-medium text-[#15803d]">{t('import.complete', { defaultValue: 'Import complete' })}</p>
-                  <p className="text-xs text-[#15803d]/80">
+                  <p className="text-sm font-medium text-semantic-success">{t('import.complete', { defaultValue: 'Import complete' })}</p>
+                  <p className="text-xs text-semantic-success/80">
                     {t('import.positions_imported', { defaultValue: '{{count}} positions imported', count: result.imported })}
                     {(result.skipped ?? 0) > 0 && `, ${t('import.rows_skipped', { defaultValue: '{{count}} rows skipped', count: result.skipped })}`}
                   </p>
@@ -1392,7 +1392,7 @@ export function ProjectDetailPage() {
                     </div>
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                       parseFloat(dashboardData.quality.validation_score) >= 0.8
-                        ? 'bg-semantic-success-bg text-[#15803d]'
+                        ? 'bg-semantic-success-bg text-semantic-success'
                         : parseFloat(dashboardData.quality.validation_score) >= 0.5
                         ? 'bg-amber-100 text-amber-600'
                         : 'bg-surface-secondary text-content-tertiary'
@@ -1674,7 +1674,7 @@ export function ProjectDetailPage() {
                           change_order: 'bg-amber-100 text-amber-600',
                           document_uploaded: 'bg-[#7c3aed]/10 text-[#7c3aed]',
                           punch_item: 'bg-semantic-error-bg text-semantic-error',
-                          field_report: 'bg-semantic-success-bg text-[#15803d]',
+                          field_report: 'bg-semantic-success-bg text-semantic-success',
                         };
                         return (
                           <div key={`${item.type}-${item.title.slice(0, 30)}-${idx}`} className="flex items-center gap-3 px-5 py-3">

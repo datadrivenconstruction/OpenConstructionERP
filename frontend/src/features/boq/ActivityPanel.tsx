@@ -30,7 +30,7 @@ import { formatRelativeTime } from './boqHelpers';
 const ACTIVITY_ICON_MAP: Record<ActivityAction, { icon: React.ReactNode; color: string }> = {
   position_added: {
     icon: <Circle size={12} strokeWidth={3} />,
-    color: 'text-[#34c759]',
+    color: 'text-semantic-success',
   },
   position_updated: {
     icon: <Pencil size={12} strokeWidth={2} />,
@@ -50,7 +50,7 @@ const ACTIVITY_ICON_MAP: Record<ActivityAction, { icon: React.ReactNode; color: 
   },
   section_added: {
     icon: <Plus size={12} strokeWidth={2.5} />,
-    color: 'text-[#34c759]',
+    color: 'text-semantic-success',
   },
   section_deleted: {
     icon: <Trash2 size={12} strokeWidth={2} />,
@@ -58,15 +58,15 @@ const ACTIVITY_ICON_MAP: Record<ActivityAction, { icon: React.ReactNode; color: 
   },
   validation_run: {
     icon: <BarChart3 size={12} strokeWidth={2} />,
-    color: 'text-[#5856d6]',
+    color: 'text-violet-500',
   },
   excel_imported: {
     icon: <FileDown size={12} strokeWidth={2} />,
-    color: 'text-[#34c759]',
+    color: 'text-semantic-success',
   },
   csv_imported: {
     icon: <FileDown size={12} strokeWidth={2} />,
-    color: 'text-[#34c759]',
+    color: 'text-semantic-success',
   },
   boq_created: {
     icon: <Plus size={12} strokeWidth={2.5} />,
@@ -74,11 +74,11 @@ const ACTIVITY_ICON_MAP: Record<ActivityAction, { icon: React.ReactNode; color: 
   },
   template_applied: {
     icon: <LayoutTemplate size={12} strokeWidth={2} />,
-    color: 'text-[#5856d6]',
+    color: 'text-violet-500',
   },
   markup_added: {
     icon: <Plus size={12} strokeWidth={2.5} />,
-    color: 'text-[#34c759]',
+    color: 'text-semantic-success',
   },
   markup_updated: {
     icon: <Pencil size={12} strokeWidth={2} />,
@@ -86,7 +86,7 @@ const ACTIVITY_ICON_MAP: Record<ActivityAction, { icon: React.ReactNode; color: 
   },
   status_changed: {
     icon: <Activity size={12} strokeWidth={2} />,
-    color: 'text-[#ff9f0a]',
+    color: 'text-amber-500',
   },
 };
 

@@ -530,14 +530,14 @@ function OnboardingSteps({
                   <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                       step.done
-                        ? 'bg-semantic-success-bg text-[#15803d]'
+                        ? 'bg-semantic-success-bg text-semantic-success'
                         : 'bg-oe-blue-subtle text-oe-blue'
                     }`}
                   >
                     {step.id}
                   </div>
                   <div
-                    className={`${step.done ? 'text-[#15803d]' : 'text-content-tertiary'}`}
+                    className={`${step.done ? 'text-semantic-success' : 'text-content-tertiary'}`}
                   >
                     {step.icon}
                   </div>
@@ -1658,10 +1658,7 @@ export function DashboardPage() {
   return (
     <div className="space-y-6 animate-fade-in pt-4">
       {/* Hero — logo + gradient animated heading */}
-      <div
-        className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between animate-card-in"
-        style={{ animationDelay: '0ms' }}
-      >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between animate-card-in">
         <div>
           <h1 className="text-3xl font-bold tracking-tight gradient-text">
             {t('dashboard.welcome')}
@@ -1729,8 +1726,7 @@ export function DashboardPage() {
         <ExternalLink size={12} className="text-oe-blue opacity-50 shrink-0" />
       </a>
 
-      {/* Welcome banner — shown once on first launch, dismissable */}
-      {/* Welcome modal — first launch only */}
+      {/* Welcome modal — shown once on first launch, dismissable */}
       {showWelcome && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={dismissWelcome} />
@@ -1877,7 +1873,6 @@ export function DashboardPage() {
           deepest cross-module integration signals — answers the question
           "how complete is the model integration on this project?" */}
       <BIMCoverageCard />
-
 
       {/* Workflow Guide — step-by-step for new users */}
       <WorkflowGuide projects={projects} boqs={allBoqs} schedules={allSchedules} />

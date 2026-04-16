@@ -81,7 +81,7 @@ export interface UpdateTaskPayload {
 export async function fetchTasks(filters?: TaskFilters): Promise<Task[]> {
   const params = new URLSearchParams();
   if (filters?.project_id) params.set('project_id', filters.project_id);
-  if (filters?.task_type) params.set('task_type', filters.task_type);
+  if (filters?.task_type) params.set('type', filters.task_type);
   if (filters?.status) params.set('status', filters.status);
   if (filters?.assigned_to) params.set('assigned_to', filters.assigned_to);
   const qs = params.toString();

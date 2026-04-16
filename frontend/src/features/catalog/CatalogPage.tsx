@@ -344,6 +344,7 @@ function RegionTabBar({
       {canScrollLeft && (
         <button
           onClick={() => scroll('left')}
+          aria-label={t('common.scroll_left', { defaultValue: 'Scroll left' })}
           className="absolute left-0 top-0 bottom-0 z-10 flex items-center pl-0.5 pr-3 bg-gradient-to-r from-surface-elevated/80 via-surface-elevated/60 to-transparent rounded-l-xl"
         >
           <ChevronLeft size={16} className="text-content-tertiary" />
@@ -352,6 +353,7 @@ function RegionTabBar({
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}
+          aria-label={t('common.scroll_right', { defaultValue: 'Scroll right' })}
           className="absolute right-0 top-0 bottom-0 z-10 flex items-center pr-0.5 pl-3 bg-gradient-to-l from-surface-elevated/80 via-surface-elevated/60 to-transparent rounded-r-xl"
         >
           <ChevronRight size={16} className="text-content-tertiary" />
@@ -506,7 +508,7 @@ function PriceBar({
         <div
           className="absolute top-0 h-full w-0.5 bg-content-primary rounded-full"
           style={{ left: `${Math.min(Math.max(avgPos, 2), 98)}%` }}
-          title={`Avg: ${fmt(avg)} ${currency}`}
+          title={`${fmt(avg)} ${currency}`}
         />
       </div>
       <span className="text-2xs text-content-quaternary tabular-nums whitespace-nowrap">
@@ -563,6 +565,7 @@ function ResourceRow({
               e.stopPropagation();
               onSelect();
             }}
+            aria-label={translate('catalog.toggle_select', { defaultValue: 'Toggle selection' })}
             className="flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:text-oe-blue transition-colors"
           >
             {isSelected ? (
@@ -601,7 +604,7 @@ function ResourceRow({
         <td className="px-3 py-3 max-w-[120px]">
           <span
             className={`inline-block truncate max-w-full rounded px-1.5 py-0.5 text-2xs font-medium ${
-              typeColors[resource.resource_type] || 'bg-gray-100 text-gray-700'
+              typeColors[resource.resource_type] || 'bg-surface-secondary text-content-secondary'
             }`}
             title={resource.category}
           >
@@ -651,16 +654,18 @@ function ResourceRow({
                 e.stopPropagation();
                 onCopy();
               }}
+              aria-label={translate('catalog.copy_rate', { defaultValue: 'Copy rate' })}
               title={translate('catalog.copy_rate', { defaultValue: 'Copy rate' })}
             >
               {copiedId === resource.id ? (
-                <Check size={14} className="text-green-500" />
+                <Check size={14} className="text-semantic-success" />
               ) : (
                 <Copy size={14} />
               )}
             </button>
             <button
               className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+              aria-label={translate('catalog.toggle_details', { defaultValue: 'Toggle details' })}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggle();
@@ -730,15 +735,15 @@ function ResourceDetailPanel({
           {/* Price cards */}
           <div className="flex gap-2 shrink-0">
             <div className="rounded-lg bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 px-3 py-2 text-center min-w-[80px]">
-              <div className="text-2xs text-green-600 dark:text-green-400 font-medium mb-0.5">Min</div>
+              <div className="text-2xs text-green-600 dark:text-green-400 font-medium mb-0.5">{t('common.min', { defaultValue: 'Min' })}</div>
               <div className="text-sm font-bold text-green-700 dark:text-green-300 tabular-nums">{fmt(resource.min_price)}</div>
             </div>
             <div className="rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20 px-3 py-2 text-center min-w-[80px]">
-              <div className="text-2xs text-amber-600 dark:text-amber-400 font-medium mb-0.5">Avg</div>
+              <div className="text-2xs text-amber-600 dark:text-amber-400 font-medium mb-0.5">{t('common.avg', { defaultValue: 'Avg' })}</div>
               <div className="text-sm font-bold text-amber-700 dark:text-amber-300 tabular-nums">{fmt(resource.base_price)}</div>
             </div>
             <div className="rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200/50 dark:border-red-500/20 px-3 py-2 text-center min-w-[80px]">
-              <div className="text-2xs text-red-600 dark:text-red-400 font-medium mb-0.5">Max</div>
+              <div className="text-2xs text-red-600 dark:text-red-400 font-medium mb-0.5">{t('common.max', { defaultValue: 'Max' })}</div>
               <div className="text-sm font-bold text-red-700 dark:text-red-300 tabular-nums">{fmt(resource.max_price)}</div>
             </div>
           </div>
@@ -971,6 +976,7 @@ function BuildAssemblyModal({
           </div>
           <button
             onClick={onClose}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
             <X size={16} />
@@ -990,6 +996,7 @@ function BuildAssemblyModal({
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                aria-label={t('catalog.assembly_name', { defaultValue: 'Assembly Name' })}
                 placeholder={t('catalog.assembly_name_placeholder', {
                   defaultValue: 'e.g. Reinforced Concrete Wall C30/37',
                 })}
@@ -1003,6 +1010,7 @@ function BuildAssemblyModal({
               <select
                 value={assemblyUnit}
                 onChange={(e) => setAssemblyUnit(e.target.value)}
+                aria-label={t('boq.unit', { defaultValue: 'Unit' })}
                 className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
               >
                 {['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'].map((u) => (
@@ -1021,12 +1029,13 @@ function BuildAssemblyModal({
             <select
               value={assemblyCategory}
               onChange={(e) => setAssemblyCategory(e.target.value)}
+              aria-label={t('catalog.category', { defaultValue: 'Category' })}
               className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent sm:w-48"
             >
               {['general', 'concrete', 'masonry', 'steel', 'mep', 'earthwork', 'custom'].map(
                 (c) => (
                   <option key={c} value={c}>
-                    {c.charAt(0).toUpperCase() + c.slice(1)}
+                    {t(`catalog.assembly_cat_${c}`, { defaultValue: c.charAt(0).toUpperCase() + c.slice(1) })}
                   </option>
                 ),
               )}
@@ -1322,6 +1331,7 @@ export function CatalogPage() {
               <select
                 value={region}
                 onChange={(e) => handleRegionChange(e.target.value)}
+                aria-label={t('catalog.filter_region', { defaultValue: 'Filter by region' })}
                 className="h-9 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-8 text-sm text-content-primary transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
               >
                 <option value="">
@@ -1469,6 +1479,7 @@ export function CatalogPage() {
               type="text"
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
+              aria-label={t('catalog.search_resources', { defaultValue: 'Search resources' })}
               placeholder={
                 regionInfo
                   ? `${t('catalog.search_in', { defaultValue: 'Search in' })} ${regionInfo.name}...`
@@ -1499,6 +1510,7 @@ export function CatalogPage() {
               <select
                 value={category}
                 onChange={(e) => handleCategoryChange(e.target.value)}
+                aria-label={t('catalog.filter_category', { defaultValue: 'Filter by category' })}
                 className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary sm:w-48"
               >
                 <option value="">
@@ -1520,6 +1532,7 @@ export function CatalogPage() {
           <div className="relative">
             <select
               value={unit}
+              aria-label={t('catalog.filter_unit', { defaultValue: 'Filter by unit' })}
               onChange={(e) => {
                 setUnit(e.target.value);
                 setOffset(0);
@@ -1634,6 +1647,7 @@ export function CatalogPage() {
                     <th className="px-3 py-3 w-10">
                       <button
                         onClick={toggleSelectAll}
+                        aria-label={t('catalog.select_all', { defaultValue: 'Select all' })}
                         className="flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:text-oe-blue transition-colors"
                       >
                         {selectedIds.size > 0 && selectedIds.size === items.length ? (
@@ -1709,9 +1723,10 @@ export function CatalogPage() {
                   })}
                 </p>
                 {totalPages > 1 && (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1" role="navigation" aria-label={t('catalog.pagination', { defaultValue: 'Pagination' })}>
                     <button
                       onClick={() => goToPage(currentPage - 1)}
+                      aria-label={t('common.previous_page', { defaultValue: 'Previous page' })}
                       disabled={currentPage === 1 || isFetching}
                       className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
@@ -1760,6 +1775,7 @@ export function CatalogPage() {
                     <button
                       onClick={() => goToPage(currentPage + 1)}
                       disabled={currentPage === totalPages || isFetching}
+                      aria-label={t('common.next_page', { defaultValue: 'Next page' })}
                       className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
                       <ChevronRight size={16} />
@@ -1812,6 +1828,7 @@ export function CatalogPage() {
             </Button>
             <button
               onClick={() => setSelectedIds(new Set())}
+              aria-label={t('catalog.clear_selection', { defaultValue: 'Clear selection' })}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
             >
               <X size={14} />
@@ -1994,6 +2011,7 @@ function PriceAdjustModal({
           </div>
           <button
             onClick={onClose}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
             <X size={16} />
@@ -2110,7 +2128,7 @@ function PriceAdjustModal({
                     ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
                     : isDecrease
                       ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                      : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                      : 'bg-surface-secondary text-content-secondary'
                 }`}
               >
                 {isIncrease ? '+' : ''}{percentage}%
@@ -2361,7 +2379,7 @@ function CreateResourceModal({
               {t('catalog.create_resource_desc', { defaultValue: 'Create a new resource for your catalog' })}
             </p>
           </div>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary">
+          <button onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary">
             <X size={16} />
           </button>
         </div>

@@ -84,7 +84,7 @@ const STATUS_CONFIG: Record<
   completed: { variant: 'success', cls: '' },
   cancelled: {
     variant: 'neutral',
-    cls: 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+    cls: 'bg-surface-secondary text-content-secondary',
   },
 };
 
@@ -535,7 +535,7 @@ function ImportSummaryModal({
       setProcessingStage(t('meetings.stage_done', { defaultValue: 'Done' }));
       setStep('preview');
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Preview extraction failed';
+      const msg = err instanceof Error ? err.message : t('meetings.preview_extraction_failed', { defaultValue: 'Preview extraction failed' });
       setPreviewError(msg);
       setStep('upload');
       addToast({ type: 'error', title: t('meetings.preview_failed', { defaultValue: 'Failed to preview meeting transcript' }), message: msg });
@@ -1020,10 +1020,10 @@ async function downloadMeetingPdf(meetingId: string): Promise<void> {
     headers,
   });
   if (!response.ok) {
-    let detail = 'Export failed';
+    let detail = 'PDF export failed';
     try {
       const body = await response.json();
-      detail = body.detail || detail;
+      detail = body.detail || 'PDF export failed';
     } catch {
       // ignore parse error
     }
@@ -1517,6 +1517,7 @@ export function MeetingsPage() {
                   useProjectContextStore.getState().setActiveProject(p.id, p.name);
                 }
               }}
+              aria-label={t('meetings.select_project_label', { defaultValue: 'Select project' })}
               className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
             >
               <option value="" disabled>
@@ -1607,6 +1608,7 @@ export function MeetingsPage() {
             placeholder={t('meetings.search_placeholder', {
               defaultValue: 'Search meetings...',
             })}
+            aria-label={t('meetings.search_placeholder', { defaultValue: 'Search meetings' })}
             className={inputCls + ' pl-9'}
           />
         </div>
@@ -1616,6 +1618,7 @@ export function MeetingsPage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as MeetingType | '')}
+            aria-label={t('meetings.filter_type', { defaultValue: 'Filter by type' })}
             className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-44"
           >
             <option value="">
@@ -1639,6 +1642,7 @@ export function MeetingsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as MeetingStatus | '')}
+            aria-label={t('meetings.filter_status', { defaultValue: 'Filter by status' })}
             className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
           >
             <option value="">

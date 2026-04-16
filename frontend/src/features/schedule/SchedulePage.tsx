@@ -104,7 +104,7 @@ function statusColor(status: string): {
       return {
         bg: 'bg-semantic-success/20',
         fill: 'bg-semantic-success',
-        text: 'text-[#15803d]',
+        text: 'text-semantic-success',
         variant: 'success',
       };
     case 'in_progress':
@@ -133,19 +133,19 @@ function statusColor(status: string): {
 
 /* ── Work Calendar Info ────────────────────────────────────────────────── */
 
-const WORK_CALENDAR_INFO: Record<string, { hours: number; days: number; label: string }> = {
-  DACH: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
-  UK: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
-  US: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
-  GULF: { hours: 10, days: 6, label: 'Mon-Sat, 10h' },
-  RU: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
-  NORDIC: { hours: 7.5, days: 5, label: 'Mon-Fri, 7.5h' },
-  FRANCE: { hours: 7, days: 5, label: 'Mon-Fri, 7h' },
-  BRAZIL: { hours: 8, days: 6, label: 'Mon-Sat, 8h' },
-  CHINA: { hours: 8, days: 6, label: 'Mon-Sat, 8h' },
-  INDIA: { hours: 8, days: 6, label: 'Mon-Sat, 8h' },
-  CANADA: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
-  SPAIN: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
+const WORK_CALENDAR_INFO: Record<string, { hours: number; days: number }> = {
+  DACH: { hours: 8, days: 5 },
+  UK: { hours: 8, days: 5 },
+  US: { hours: 8, days: 5 },
+  GULF: { hours: 10, days: 6 },
+  RU: { hours: 8, days: 5 },
+  NORDIC: { hours: 7.5, days: 5 },
+  FRANCE: { hours: 7, days: 5 },
+  BRAZIL: { hours: 8, days: 6 },
+  CHINA: { hours: 8, days: 6 },
+  INDIA: { hours: 8, days: 6 },
+  CANADA: { hours: 8, days: 5 },
+  SPAIN: { hours: 8, days: 5 },
 };
 
 /* ── Modal Overlay ─────────────────────────────────────────────────────── */
@@ -161,6 +161,7 @@ function Modal({
   title: string;
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -180,7 +181,7 @@ function Modal({
           <h2 id="schedule-modal-title" className="text-lg font-semibold text-content-primary">{title}</h2>
           <button
             onClick={onClose}
-            aria-label={title}
+            aria-label={t('common.close', 'Close')}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary"
           >
             <X size={16} />
@@ -213,7 +214,7 @@ function SummaryStats({
       label: t('schedule.completed', 'Completed'),
       value: summary.completed,
       icon: CheckCircle2,
-      color: 'text-[#15803d]',
+      color: 'text-semantic-success',
       bg: 'bg-semantic-success-bg',
     },
     {
@@ -537,7 +538,17 @@ function GanttChart({
       }
     }
 
-    return markers;
+    // Filter out markers that are too close to prevent label overlap.
+    // Minimum gap: 6% of timeline width (≈ label width in characters).
+    const MIN_GAP_PCT = 6;
+    const filtered: typeof markers = [];
+    for (const m of markers) {
+      const lastPct = filtered[filtered.length - 1]?.offsetPct ?? -Infinity;
+      if (filtered.length === 0 || m.offsetPct - lastPct >= MIN_GAP_PCT) {
+        filtered.push(m);
+      }
+    }
+    return filtered;
   }, [timelineStart, timelineEnd, totalDays, zoomLevel]);
 
   // Compute bar positions
@@ -630,19 +641,19 @@ function GanttChart({
             </div>
             <div className="space-y-2 opacity-40">
               <div className="flex items-center gap-3">
-                <span className="w-24 text-right text-2xs text-content-tertiary truncate">Foundation</span>
+                <span className="w-24 text-right text-2xs text-content-tertiary truncate">{t('schedule.preview_foundation', { defaultValue: 'Foundation' })}</span>
                 <div className="flex-1 h-6 rounded-md bg-oe-blue/15 relative">
                   <div className="h-full w-3/5 rounded-md bg-oe-blue/30" />
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="w-24 text-right text-2xs text-content-tertiary truncate">Structural</span>
+                <span className="w-24 text-right text-2xs text-content-tertiary truncate">{t('schedule.preview_structural', { defaultValue: 'Structural' })}</span>
                 <div className="flex-1 h-6 rounded-md bg-semantic-success/15 relative ml-[15%]">
                   <div className="h-full w-2/5 rounded-md bg-semantic-success/30" />
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="w-24 text-right text-2xs text-content-tertiary truncate">MEP Install</span>
+                <span className="w-24 text-right text-2xs text-content-tertiary truncate">{t('schedule.preview_mep', { defaultValue: 'MEP Install' })}</span>
                 <div className="flex-1 h-6 rounded-md bg-semantic-warning/15 relative ml-[30%]">
                   <div className="h-full w-1/4 rounded-md bg-semantic-warning/30" />
                 </div>
@@ -728,6 +739,7 @@ function GanttChart({
                     max={100}
                     step={5}
                     value={displayProgress}
+                    aria-label={t('schedule.progress_slider', { defaultValue: 'Progress for {{name}}', name: activity.name })}
                     onChange={(e) => {
                       const val = Number(e.target.value);
                       setPendingProgress((prev) => ({ ...prev, [activity.id]: val }));
@@ -1284,7 +1296,16 @@ function ScheduleDetail({
                 onClick={() => {
                   const activities = ganttData?.activities ?? [];
                   const rows = [
-                    ['WBS', 'Name', 'Type', 'Start', 'End', 'Duration (days)', 'Progress %', 'Status'].join('\t'),
+                    [
+                      t('schedule.export_wbs', { defaultValue: 'WBS' }),
+                      t('schedule.export_name', { defaultValue: 'Name' }),
+                      t('schedule.export_type', { defaultValue: 'Type' }),
+                      t('schedule.export_start', { defaultValue: 'Start' }),
+                      t('schedule.export_end', { defaultValue: 'End' }),
+                      t('schedule.export_duration', { defaultValue: 'Duration (days)' }),
+                      t('schedule.export_progress', { defaultValue: 'Progress %' }),
+                      t('schedule.export_status', { defaultValue: 'Status' }),
+                    ].join('\t'),
                     ...activities.map((a) => [
                       a.wbs_code, a.name, a.activity_type, a.start_date, a.end_date,
                       a.duration_days, a.progress_pct, a.status,

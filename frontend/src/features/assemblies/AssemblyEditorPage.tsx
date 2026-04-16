@@ -319,8 +319,11 @@ export function AssemblyEditorPage() {
             <thead>
               <tr className="border-b border-border-light bg-surface-tertiary text-left">
                 <th className="w-8 px-1 py-3" />
-                <th className="px-4 py-3 font-medium text-content-secondary min-w-[280px]">
+                <th className="px-4 py-3 font-medium text-content-secondary min-w-[240px]">
                   {t('boq.description')}
+                </th>
+                <th className="px-4 py-3 font-medium text-content-secondary w-20 text-center">
+                  {t('assemblies.type', { defaultValue: 'Type' })}
                 </th>
                 <th className="px-4 py-3 font-medium text-content-secondary w-24 text-right">
                   {t('assemblies.factor', { defaultValue: 'Factor' })}
@@ -368,8 +371,8 @@ export function AssemblyEditorPage() {
               ))}
               {components.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-content-tertiary">
-                    {t('assemblies.no_components_hint', { defaultValue: 'No components yet. Click "Add Component" to start building this assembly.' })}
+                  <td colSpan={9} className="px-4 py-10 text-center text-content-tertiary">
+                    {t('assemblies.no_components_hint', { defaultValue: 'No components yet. Click "Add Component" or "From Database" to start building this assembly.' })}
                   </td>
                 </tr>
               )}
@@ -378,7 +381,7 @@ export function AssemblyEditorPage() {
               <tfoot>
                 {assembly.bid_factor !== 1.0 && (
                   <tr className="border-t border-border-light bg-surface-tertiary/50">
-                    <td colSpan={6} className="px-4 py-2.5 text-right text-sm text-content-secondary">
+                    <td colSpan={7} className="px-4 py-2.5 text-right text-sm text-content-secondary">
                       {t('assemblies.subtotal', { defaultValue: 'Subtotal' })}
                     </td>
                     <td className="px-4 py-2.5 text-right text-sm text-content-secondary tabular-nums">
@@ -389,7 +392,7 @@ export function AssemblyEditorPage() {
                 )}
                 {assembly.bid_factor !== 1.0 && (
                   <tr className="border-t border-border-light bg-surface-tertiary/50">
-                    <td colSpan={6} className="px-4 py-2.5 text-right text-sm text-content-secondary">
+                    <td colSpan={7} className="px-4 py-2.5 text-right text-sm text-content-secondary">
                       {t('assemblies.bid_factor', { defaultValue: 'Bid Factor' })} ({assembly.bid_factor})
                     </td>
                     <td className="px-4 py-2.5 text-right text-sm text-content-secondary tabular-nums">
@@ -399,7 +402,7 @@ export function AssemblyEditorPage() {
                   </tr>
                 )}
                 <tr className="border-t-2 border-border bg-surface-tertiary font-semibold">
-                  <td colSpan={6} className="px-4 py-3 text-right text-content-primary">
+                  <td colSpan={7} className="px-4 py-3 text-right text-content-primary">
                     {assembly.bid_factor !== 1.0
                       ? t('assemblies.total_rate_adjusted', {
                           defaultValue: 'Total Rate (\u00d7{{factor}} bid factor)',
@@ -467,6 +470,7 @@ function CostDbSearchForAssembly({
   onAdded: () => void;
 }) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [adding, setAdding] = useState<Set<string>>(new Set());
   const [added, setAdded] = useState<Set<string>>(new Set());
@@ -481,6 +485,14 @@ function CostDbSearchForAssembly({
     retry: false,
   });
 
+  // Close handler that always refreshes the assembly data when components were added
+  const handleClose = useCallback(() => {
+    if (added.size > 0) {
+      queryClient.invalidateQueries({ queryKey: ['assembly', assemblyId] });
+    }
+    onClose();
+  }, [added.size, assemblyId, onClose, queryClient]);
+
   const handleAdd = useCallback(
     async (item: CostSearchItem) => {
       setAdding((prev) => new Set(prev).add(item.id));
@@ -494,6 +506,8 @@ function CostDbSearchForAssembly({
           factor: 1.0,
         });
         setAdded((prev) => new Set(prev).add(item.id));
+        // Refresh the assembly data so components table updates in real time
+        queryClient.invalidateQueries({ queryKey: ['assembly', assemblyId] });
         addToast({ type: 'success', title: t('common.added', { defaultValue: 'Added' }), message: (item.description || item.code).slice(0, 60) });
       } catch {
         addToast({ type: 'error', title: t('assemblies.add_failed', { defaultValue: 'Failed to add' }) });
@@ -505,14 +519,14 @@ function CostDbSearchForAssembly({
         });
       }
     },
-    [assemblyId, addToast, t],
+    [assemblyId, addToast, t, queryClient],
   );
 
   const fmt = (n: number) =>
     new Intl.NumberFormat(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={handleClose}>
       <div
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -532,7 +546,7 @@ function CostDbSearchForAssembly({
             <Button variant="primary" size="sm" onClick={onAdded}>
               {t('common.done', { defaultValue: 'Done' })}
             </Button>
-            <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
+            <button onClick={handleClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
               <X size={16} />
             </button>
           </div>
@@ -604,6 +618,39 @@ function CostDbSearchForAssembly({
 }
 
 
+/* -- Resource type inference ----------------------------------------------- */
+
+const LABOR_KEYWORDS = [
+  'labor', 'labour', 'worker', 'crew', 'mason', 'carpenter', 'plumber',
+  'electrician', 'fitter', 'welder', 'helper', 'operator', 'plasterer',
+  'roofer', 'driver', 'arbeit', 'lohn', 'monteur', 'arbeiter',
+];
+const EQUIPMENT_KEYWORDS = [
+  'equip', 'machine', 'crane', 'excavator', 'pump', 'mixer', 'truck',
+  'scaffold', 'vibrator', 'compressor', 'generator', 'maschine', 'bagger',
+  'kran', 'gerät',
+];
+
+function inferResourceType(component: AssemblyComponent): 'material' | 'labor' | 'equipment' {
+  // Check explicit metadata first
+  const meta = component.metadata;
+  if (meta && typeof meta === 'object') {
+    const rt = (meta as Record<string, unknown>).resource_type;
+    if (rt === 'labor' || rt === 'equipment' || rt === 'material') return rt;
+  }
+  // Infer from description
+  const desc = (component.description || '').toLowerCase();
+  if (LABOR_KEYWORDS.some((kw) => desc.includes(kw))) return 'labor';
+  if (EQUIPMENT_KEYWORDS.some((kw) => desc.includes(kw))) return 'equipment';
+  return 'material';
+}
+
+const RESOURCE_TYPE_STYLES: Record<string, string> = {
+  material: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400',
+  labor: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400',
+  equipment: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400',
+};
+
 /* -- Component Row (inline editable) -------------------------------------- */
 
 function ComponentRow({
@@ -673,6 +720,23 @@ function ComponentRow({
           className={inputClass}
           placeholder={t('assemblies.enter_description', { defaultValue: 'Enter description...' })}
         />
+      </td>
+
+      {/* Resource Type */}
+      <td className="px-4 py-2.5 text-center">
+        {(() => {
+          const resType = inferResourceType(component);
+          const label = resType === 'labor'
+            ? t('assemblies.type_labor', { defaultValue: 'Labor' })
+            : resType === 'equipment'
+              ? t('assemblies.type_equipment', { defaultValue: 'Equip' })
+              : t('assemblies.type_material', { defaultValue: 'Mat' });
+          return (
+            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${RESOURCE_TYPE_STYLES[resType]}`}>
+              {label}
+            </span>
+          );
+        })()}
       </td>
 
       {/* Factor */}

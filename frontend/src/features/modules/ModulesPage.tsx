@@ -197,7 +197,7 @@ export function ModulesPage() {
       </div>
 
       {/* Tab bar */}
-      <div className="mb-6 flex gap-1 rounded-lg bg-surface-secondary p-1 animate-card-in" style={{ animationDelay: '30ms' }}>
+      <div className="mb-6 flex gap-1 rounded-lg bg-surface-secondary p-1 animate-card-in" role="tablist" aria-label={t('modules.tabs', { defaultValue: 'Module sections' })} style={{ animationDelay: '30ms' }}>
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -205,6 +205,8 @@ export function ModulesPage() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
+              role="tab"
+              aria-selected={isActive}
               className={clsx(
                 'flex-1 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-fast',
                 isActive
@@ -361,6 +363,16 @@ function CompanyProfilesTab() {
             </Card>
           ))}
         </div>
+      ) : !presets || presets.length === 0 ? (
+        <div className="py-12 text-center">
+          <Users size={36} className="mx-auto mb-3 text-content-tertiary" />
+          <p className="text-sm font-medium text-content-secondary">
+            {t('modules.no_profiles', { defaultValue: 'No company profiles available' })}
+          </p>
+          <p className="mt-1 text-xs text-content-tertiary">
+            {t('modules.no_profiles_hint', { defaultValue: 'Profiles help pre-configure which modules are active for your company type.' })}
+          </p>
+        </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {presets?.map((preset) => {
@@ -370,6 +382,8 @@ function CompanyProfilesTab() {
               <button
                 key={preset.key}
                 onClick={() => handleProfileClick(preset)}
+                aria-label={`${preset.label} — ${preset.module_count} ${t('modules.modules_label', { defaultValue: 'modules' })}`}
+                aria-pressed={isActive}
                 className={clsx(
                   'text-left rounded-xl border p-4 transition-all',
                   isActive
@@ -683,18 +697,20 @@ function DataPackagesTab() {
         setInstallingId(mod.id);
         try {
           const status = await apiGet<{ backend: string; connected: boolean; can_restore_snapshots: boolean; can_generate_locally: boolean }>('/v1/costs/vector/status/');
-          let result;
           if (status.can_restore_snapshots) {
-            result = await apiPost<{ restored?: boolean; indexed?: number; database?: string; duration_seconds?: number }>(`/v1/costs/vector/restore-snapshot/${dbId}`);
+            await apiPost<{ restored?: boolean; indexed?: number; database?: string; duration_seconds?: number }>(`/v1/costs/vector/restore-snapshot/${dbId}`);
           } else if (status.connected) {
-            result = await apiPost<{ restored?: boolean; indexed?: number; database?: string; duration_seconds?: number }>(`/v1/costs/vector/load-github/${dbId}`);
+            await apiPost<{ restored?: boolean; indexed?: number; database?: string; duration_seconds?: number }>(`/v1/costs/vector/load-github/${dbId}`);
           } else {
-            throw new Error('No vector database available. Install LanceDB (pip install lancedb) or start Qdrant (docker run -p 6333:6333 qdrant/qdrant)');
+            throw new Error(t('marketplace.no_vector_backend', { defaultValue: 'No vector database available. Install LanceDB (pip install lancedb) or start Qdrant (docker run -p 6333:6333 qdrant/qdrant)' }));
           }
           addToast({
             type: 'success',
             title: t('marketplace.vector_imported', { defaultValue: 'Vector index loaded' }),
-            message: `${result.indexed || result.restored ? 'Vectors ready' : 'Restored'} for ${dbId}`,
+            message: t('marketplace.vector_ready_message', {
+              defaultValue: 'Vector index ready for {{region}}',
+              region: dbId,
+            }),
           });
           queryClient.invalidateQueries({ queryKey: ['marketplace'] });
           queryClient.invalidateQueries({ queryKey: ['vector-status'] });
@@ -854,7 +870,7 @@ function DataPackagesTab() {
                   key={mod.id}
                   className="flex items-center gap-3 rounded-lg border border-border-light bg-surface-elevated px-3 py-2.5 transition-all hover:border-border"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-success-bg text-[#15803d] dark:text-emerald-400">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-success-bg text-semantic-success dark:text-emerald-400">
                     <Icon size={15} />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -883,6 +899,7 @@ function DataPackagesTab() {
       {/* Search */}
       <div className="mb-6 max-w-md">
         <Input
+          aria-label={t('marketplace.search_packages', { defaultValue: 'Search packages' })}
           placeholder={t('marketplace.search_placeholder', { defaultValue: 'Search packages...' })}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -1132,7 +1149,7 @@ function SystemModulesTab() {
                 className={clsx(
                   'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors',
                   mod.enabled
-                    ? 'bg-semantic-success-bg text-[#15803d] dark:text-emerald-400'
+                    ? 'bg-semantic-success-bg text-semantic-success dark:text-emerald-400'
                     : 'bg-surface-tertiary text-content-quaternary',
                 )}
               >
@@ -1176,7 +1193,11 @@ function SystemModulesTab() {
                   disabled={togglingModule === mod.name}
                   role="switch"
                   aria-checked={mod.enabled}
-                  aria-label={`${mod.enabled ? 'Disable' : 'Enable'} ${mod.display_name}`}
+                  aria-label={t('modules.toggle_module', {
+                    defaultValue: '{{action}} {{name}}',
+                    action: mod.enabled ? t('common.disable', { defaultValue: 'Disable' }) : t('common.enable', { defaultValue: 'Enable' }),
+                    name: mod.display_name,
+                  })}
                   className="shrink-0"
                 >
                   {togglingModule === mod.name ? (
@@ -1281,7 +1302,11 @@ function ModuleToggleCard({
         onClick={onToggle}
         role="switch"
         aria-checked={enabled}
-        aria-label={`${enabled ? 'Disable' : 'Enable'} ${name}`}
+        aria-label={t('modules.toggle_module', {
+          defaultValue: '{{action}} {{name}}',
+          action: enabled ? t('common.disable', { defaultValue: 'Disable' }) : t('common.enable', { defaultValue: 'Enable' }),
+          name,
+        })}
         className="shrink-0"
       >
         <div
@@ -1328,17 +1353,17 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoIn
           className={clsx(
             'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors duration-fast ease-oe',
             mod.category === 'resource_catalog'
-              ? 'bg-[#fef3c7] text-[#92400e] dark:bg-amber-900/30 dark:text-amber-300'
+              ? 'bg-semantic-warning-bg text-semantic-warning'
               : mod.category === 'cost_database'
                 ? 'bg-oe-blue-subtle text-oe-blue'
                 : mod.category === 'vector_index'
-                  ? 'bg-[#f0e6ff] text-[#7c3aed] dark:bg-purple-900/30 dark:text-purple-400'
+                  ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400'
                   : mod.category === 'language'
-                    ? 'bg-semantic-success-bg text-[#15803d] dark:text-emerald-400'
+                    ? 'bg-semantic-success-bg text-semantic-success dark:text-emerald-400'
                     : mod.category === 'converter'
-                      ? 'bg-semantic-warning-bg text-[#b45309] dark:text-amber-400'
+                      ? 'bg-semantic-warning-bg text-semantic-warning'
                       : mod.category === 'analytics'
-                        ? 'bg-[#e0f2fe] text-[#0369a1] dark:bg-sky-900/30 dark:text-sky-400'
+                        ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
                         : 'bg-surface-secondary text-content-secondary',
           )}
         >
@@ -1361,9 +1386,9 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoIn
             <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200/50 dark:border-purple-800/30 px-2.5 py-1.5">
               <Info size={12} className="text-purple-500 shrink-0 mt-0.5" />
               <div className="text-2xs text-purple-700 dark:text-purple-300 leading-relaxed">
-                <strong>Option A:</strong> Qdrant + Snapshot (best quality, 3072d):<br />
+                <strong>{t('marketplace.vector_option_a', { defaultValue: 'Option A' })}:</strong> Qdrant + Snapshot (3072d):<br />
                 <code className="font-mono bg-purple-100 dark:bg-purple-800/40 px-1 rounded text-[10px]">docker run -p 6333:6333 qdrant/qdrant</code><br />
-                <strong>Option B:</strong> LanceDB (lightweight, 384d):<br />
+                <strong>{t('marketplace.vector_option_b', { defaultValue: 'Option B' })}:</strong> LanceDB (384d):<br />
                 <code className="font-mono bg-purple-100 dark:bg-purple-800/40 px-1 rounded text-[10px]">pip install lancedb sentence-transformers</code>
               </div>
             </div>

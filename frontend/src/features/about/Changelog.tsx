@@ -14,6 +14,23 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.7.1',
+    date: '2026-04-16',
+    changes: [
+      'BIM: redesigned landing layout, version badges',
+      'Tasks: type filter fix, Kanban column reorder',
+      'BOQ: FAB shifts when AI panel open, template removed',
+      'DWG: light-theme filmstrip and right panel',
+      'Takeoff: BIM-style upload card redesign',
+      'Procurement: contact picker from contacts module',
+      'Assemblies: resource display + type badges',
+      'Schedule: month label overlap prevention',
+      'Design: 56 hardcoded colors → semantic tokens',
+      'i18n: 20+ hardcoded strings wrapped in t()',
+      'a11y: aria-labels across all modules',
+    ],
+  },
+  {
     version: '1.7.0',
     date: '2026-04-15',
     changes: [

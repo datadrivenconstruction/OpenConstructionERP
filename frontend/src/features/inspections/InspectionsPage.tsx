@@ -85,7 +85,7 @@ const STATUS_CONFIG: Record<
   completed: { variant: 'success', cls: '' },
   cancelled: {
     variant: 'neutral',
-    cls: 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+    cls: '',
   },
 };
 
@@ -180,7 +180,7 @@ function CreateInspectionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('inspections.new_inspection', { defaultValue: 'New Inspection' })}>
+      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('inspections.new_inspection', { defaultValue: 'New Inspection' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
@@ -252,11 +252,12 @@ function CreateInspectionModal({
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="inspection-title" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('inspections.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
             <input
+              id="inspection-title"
               value={form.title}
               onChange={(e) => {
                 set('title', e.target.value);
@@ -291,11 +292,12 @@ function CreateInspectionModal({
           {/* Two-column: Date + Inspector */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="inspection-date" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('inspections.field_date', { defaultValue: 'Planned Date' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
               <input
+                id="inspection-date"
                 type="date"
                 value={form.date}
                 onChange={(e) => {
@@ -315,10 +317,11 @@ function CreateInspectionModal({
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="inspection-inspector" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('inspections.field_inspector', { defaultValue: 'Inspector' })}
               </label>
               <input
+                id="inspection-inspector"
                 value={form.inspector}
                 onChange={(e) => set('inspector', e.target.value)}
                 className={inputCls}
@@ -339,10 +342,11 @@ function CreateInspectionModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="inspection-location" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('inspections.field_location', { defaultValue: 'Location' })}
             </label>
             <input
+              id="inspection-location"
               value={form.location}
               onChange={(e) => set('location', e.target.value)}
               className={inputCls}
@@ -396,11 +400,16 @@ const InspectionRow = React.memo(function InspectionRow({
     <div className="border-b border-border-light last:border-b-0">
       {/* Main row */}
       <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
+        aria-label={t('inspections.toggle_details', { defaultValue: 'Toggle inspection details' })}
         className={clsx(
           'flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-surface-secondary/50 transition-colors',
           expanded && 'bg-surface-secondary/30',
         )}
         onClick={() => setExpanded((prev) => !prev)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded((prev) => !prev); } }}
       >
         <ChevronRight
           size={14}
@@ -578,12 +587,12 @@ async function downloadExcelExport(url: string, fallbackFilename: string): Promi
 
   const response = await fetch(`/api${url}`, { method: 'GET', headers });
   if (!response.ok) {
-    let detail = 'Export failed';
+    let detail = fallbackFilename;
     try {
       const body = await response.json();
-      detail = body.detail || detail;
+      detail = body.detail || 'export_failed';
     } catch {
-      // ignore parse error
+      detail = 'export_failed';
     }
     throw new Error(detail);
   }
@@ -811,6 +820,7 @@ export function InspectionsPage() {
                   useProjectContextStore.getState().setActiveProject(p.id, p.name);
                 }
               }}
+              aria-label={t('inspections.select_project', { defaultValue: 'Project...' })}
               className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
             >
               <option value="" disabled>
@@ -915,6 +925,7 @@ export function InspectionsPage() {
             placeholder={t('inspections.search_placeholder', {
               defaultValue: 'Search inspections...',
             })}
+            aria-label={t('inspections.search_placeholder', { defaultValue: 'Search inspections...' })}
             className={inputCls + ' pl-9'}
           />
         </div>
@@ -924,6 +935,7 @@ export function InspectionsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as InspectionStatus | '')}
+            aria-label={t('inspections.filter_all_statuses', { defaultValue: 'All Statuses' })}
             className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
           >
             <option value="">

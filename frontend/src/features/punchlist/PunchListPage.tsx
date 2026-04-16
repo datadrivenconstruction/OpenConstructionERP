@@ -149,7 +149,7 @@ function StatsCards({ summary }: { summary: PunchSummary | undefined }) {
     {
       label: t('punch.stat_in_progress', { defaultValue: 'In Progress' }),
       value: byStatus['in_progress'] ?? 0,
-      cls: 'text-[#b45309]',
+      cls: 'text-amber-700 dark:text-amber-400',
     },
     {
       label: t('punch.stat_resolved', { defaultValue: 'Resolved' }),
@@ -251,7 +251,7 @@ function AddPunchModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-primary rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('punch.add_item', { defaultValue: 'Add Punch Item' })}>
+      <div className="w-full max-w-2xl bg-surface-primary rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('punch.add_item', { defaultValue: 'Add Punch Item' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="text-lg font-semibold text-content-primary">
@@ -270,10 +270,11 @@ function AddPunchModal({
         <div className="px-6 py-4 space-y-4">
           {/* Title — full width */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="punch-title" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('punch.field_title', { defaultValue: 'Title' })} <span className="text-semantic-error">*</span>
             </label>
             <input
+              id="punch-title"
               value={form.title}
               onChange={(e) => { set('title', e.target.value); setTouched(true); }}
               placeholder={t('punch.title_placeholder', {
@@ -291,10 +292,11 @@ function AddPunchModal({
 
           {/* Description — full width */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="punch-description" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('punch.field_description', { defaultValue: 'Description' })}
             </label>
             <textarea
+              id="punch-description"
               value={form.description}
               onChange={(e) => set('description', e.target.value)}
               rows={2}
@@ -340,10 +342,11 @@ function AddPunchModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="punch-category" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('punch.field_category', { defaultValue: 'Category' })}
               </label>
               <select
+                id="punch-category"
                 value={form.category}
                 onChange={(e) => set('category', e.target.value as PunchCategory)}
                 className={inputCls}
@@ -363,10 +366,11 @@ function AddPunchModal({
 
             {/* Assigned To */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="punch-assigned-to" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('punch.field_assigned_to', { defaultValue: 'Assigned To' })}
               </label>
               <select
+                id="punch-assigned-to"
                 value={form.assigned_to}
                 onChange={(e) => set('assigned_to', e.target.value)}
                 className={inputCls}
@@ -387,10 +391,11 @@ function AddPunchModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Due Date */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="punch-due-date" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('punch.field_due_date', { defaultValue: 'Due Date' })}
               </label>
               <input
+                id="punch-due-date"
                 type="date"
                 value={form.due_date}
                 onChange={(e) => set('due_date', e.target.value)}
@@ -400,10 +405,11 @@ function AddPunchModal({
 
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="punch-location" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('punch.field_location', { defaultValue: 'Location' })}
               </label>
               <input
+                id="punch-location"
                 value={form.location}
                 onChange={(e) => set('location', e.target.value)}
                 placeholder={t('punch.location_placeholder', {
@@ -834,6 +840,7 @@ export function PunchListPage() {
                   useProjectContextStore.getState().setActiveProject(p.id, p.name);
                 }
               }}
+              aria-label={t('punch.select_project', { defaultValue: 'Project...' })}
               className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
             >
               <option value="" disabled>
@@ -871,6 +878,7 @@ export function PunchListPage() {
             placeholder={t('punch.search', {
               defaultValue: 'Search title, description, location...',
             })}
+            aria-label={t('punch.search', { defaultValue: 'Search title, description, location...' })}
             className={inputCls + ' pl-9'}
           />
         </div>
@@ -890,6 +898,7 @@ export function PunchListPage() {
           <div className="flex items-center rounded-lg border border-border overflow-hidden">
             <button
               onClick={() => setViewMode('list')}
+              aria-label={t('punch.view_list', { defaultValue: 'List view' })}
               className={clsx(
                 'flex items-center gap-1 px-3 py-2 text-sm transition-colors',
                 viewMode === 'list'
@@ -911,6 +920,7 @@ export function PunchListPage() {
                   ? 'bg-oe-blue text-white'
                   : 'bg-surface-primary text-content-secondary hover:bg-surface-secondary',
               )}
+              aria-label={t('punch.view_kanban', { defaultValue: 'Kanban view' })}
               title={t('punch.view_kanban', { defaultValue: 'Kanban view' })}
             >
               <Columns3 size={14} />
@@ -928,6 +938,7 @@ export function PunchListPage() {
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value as PunchPriority | '')}
+            aria-label={t('punch.all_priorities', { defaultValue: 'All Priorities' })}
             className={inputCls + ' max-w-[160px]'}
           >
             <option value="">
@@ -945,6 +956,7 @@ export function PunchListPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as PunchStatus | '')}
+            aria-label={t('punch.all_statuses', { defaultValue: 'All Statuses' })}
             className={inputCls + ' max-w-[160px]'}
           >
             <option value="">
@@ -965,6 +977,7 @@ export function PunchListPage() {
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value as PunchCategory | '')}
+            aria-label={t('punch.all_categories', { defaultValue: 'All Categories' })}
             className={inputCls + ' max-w-[160px]'}
           >
             <option value="">
@@ -985,6 +998,7 @@ export function PunchListPage() {
           <select
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
+            aria-label={t('punch.all_assignees', { defaultValue: 'All Assignees' })}
             className={inputCls + ' max-w-[180px]'}
           >
             <option value="">
@@ -1252,6 +1266,7 @@ const PunchTableRow = React.memo(function PunchTableRow({
               <button
                 key={tr.next}
                 onClick={() => onTransition(item.id, tr.next)}
+                aria-label={t(tr.labelKey, { defaultValue: tr.defaultLabel })}
                 title={t(tr.labelKey, { defaultValue: tr.defaultLabel })}
                 className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-1 text-xs text-content-secondary hover:text-content-primary hover:bg-surface-secondary transition-colors"
               >
@@ -1264,7 +1279,8 @@ const PunchTableRow = React.memo(function PunchTableRow({
           })}
           <button
             onClick={() => onDelete(item.id)}
-            className="inline-flex items-center rounded-md p-1 text-content-quaternary hover:text-semantic-error hover:bg-red-50 transition-colors"
+            className="inline-flex items-center rounded-md p-1 text-content-quaternary hover:text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+            aria-label={t('common.delete', { defaultValue: 'Delete' })}
             title={t('common.delete', { defaultValue: 'Delete' })}
           >
             <Trash2 size={13} />

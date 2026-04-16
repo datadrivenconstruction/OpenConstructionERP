@@ -4,6 +4,7 @@ export interface AssemblyComponent {
   id: string;
   assembly_id: string;
   cost_item_id: string | null;
+  catalog_resource_id: string | null;
   description: string;
   factor: number;
   quantity: number;
@@ -11,6 +12,7 @@ export interface AssemblyComponent {
   unit_cost: number;
   total: number;
   sort_order: number;
+  metadata: Record<string, unknown>;
 }
 
 export interface Assembly {

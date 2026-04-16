@@ -636,7 +636,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
             </label>
             <div className="relative">
               <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-xs text-content-tertiary font-medium">
-                EUR
+                {budgets?.[0]?.currency ?? 'EUR'}
               </span>
               <input
                 type="number"
@@ -806,6 +806,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label={t('finance.search_budgets', { defaultValue: 'Search by WBS or category...' })}
             placeholder={t('finance.search_budgets', {
               defaultValue: 'Search by WBS or category...',
             })}
@@ -918,7 +919,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                   <span
                     className={
                       b.variance >= 0
-                        ? 'text-[#15803d] font-medium'
+                        ? 'text-semantic-success font-medium'
                         : 'text-semantic-error font-medium'
                     }
                   >
@@ -988,7 +989,10 @@ function BudgetsTab({ projectId }: { projectId: string }) {
           </div>
           <div className="px-6 py-4 space-y-4">
             <div
-              className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors cursor-pointer border-border hover:border-oe-blue/50"
+              role="button"
+              tabIndex={0}
+              aria-label={t('finance.drop_budget_file', { defaultValue: 'Drop Excel or CSV file here, or click to browse' })}
+              className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors cursor-pointer border-border hover:border-oe-blue/50 focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
               onClick={() => {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -998,6 +1002,12 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                   if (f) setImportFile(f);
                 };
                 input.click();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  (e.currentTarget as HTMLElement).click();
+                }
               }}
             >
               <Upload size={24} className="text-content-tertiary mb-2" />
@@ -1319,6 +1329,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              aria-label={t('finance.search_invoices', { defaultValue: 'Search invoices...' })}
               placeholder={t('finance.search_invoices', {
                 defaultValue: 'Search invoices...',
               })}
@@ -1329,6 +1340,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
+              aria-label={t('finance.filter_status', { defaultValue: 'Filter by status' })}
               className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-36"
             >
               <option value="">{t('finance.filter_all_statuses', { defaultValue: 'All Statuses' })}</option>
@@ -2144,10 +2156,10 @@ function EVMTab({ projectId }: { projectId: string }) {
           let indicatorColor = '';
           if (kpi.isIndex) {
             indicatorColor =
-              kpi.value >= 1.0 ? 'text-[#15803d]' : 'text-semantic-error';
+              kpi.value >= 1.0 ? 'text-semantic-success' : 'text-semantic-error';
           } else if (kpi.isCurrency && kpi.label.includes('Variance')) {
             indicatorColor =
-              kpi.value >= 0 ? 'text-[#15803d]' : 'text-semantic-error';
+              kpi.value >= 0 ? 'text-semantic-success' : 'text-semantic-error';
           }
 
           return (
@@ -2172,13 +2184,13 @@ function EVMTab({ projectId }: { projectId: string }) {
               {kpi.isIndex && (
                 <div className="mt-1 flex items-center gap-1 text-xs">
                   {kpi.value >= 1.0 ? (
-                    <ArrowUpRight size={12} className="text-[#15803d]" />
+                    <ArrowUpRight size={12} className="text-semantic-success" />
                   ) : (
                     <ArrowDownRight size={12} className="text-semantic-error" />
                   )}
                   <span
                     className={
-                      kpi.value >= 1.0 ? 'text-[#15803d]' : 'text-semantic-error'
+                      kpi.value >= 1.0 ? 'text-semantic-success' : 'text-semantic-error'
                     }
                   >
                     {kpi.value >= 1.0

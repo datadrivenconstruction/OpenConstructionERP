@@ -201,9 +201,9 @@ function downloadBlob(content: string, filename: string, mimeType: string): void
   triggerDownload(blob, filename);
 }
 
-/** Format a date string for display, falling back to "N/A" for nulls. */
+/** Format a date string for display, falling back to "-" for nulls. */
 function fmtDate(d: string | null | undefined): string {
-  if (!d) return 'N/A';
+  if (!d) return '-';
   try {
     return new Date(d).toLocaleDateString(getIntlLocale());
   } catch {
@@ -812,8 +812,7 @@ export function ReportsPage() {
           const first = data[0]!;
           setActiveProject(first.id, first.name);
         }
-      } catch (err) {
-        if (import.meta.env.DEV) console.warn('Failed to load projects for reports:', err);
+      } catch {
         if (!cancelled) setProjects([]);
       } finally {
         if (!cancelled) setLoadingProjects(false);
@@ -934,6 +933,23 @@ export function ReportsPage() {
     },
     [selectedProjectId, selectedProject, selectedBoqId, selectedBoq, addToast, t],
   );
+
+  if (loadingProjects) {
+    return (
+      <div className="w-full space-y-6 animate-fade-in">
+        <Breadcrumb
+          items={[
+            { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
+            { label: t('reports.title', { defaultValue: 'Reports' }) },
+          ]}
+          className="mb-4"
+        />
+        <div className="flex items-center justify-center py-20">
+          <Loader2 size={24} className="animate-spin text-oe-blue" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-6 animate-fade-in">
@@ -1065,6 +1081,9 @@ export function ReportsPage() {
           <div className="mt-4">
             <button
               onClick={() => setShowBuilder((p) => !p)}
+              aria-label={showBuilder
+                ? t('reports.hide_builder', { defaultValue: 'Hide Builder' })
+                : t('reports.configure', { defaultValue: 'Configure Sections' })}
               className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-xs font-medium text-white hover:bg-oe-blue-hover transition-colors"
             >
               <Settings2 size={14} />
@@ -1460,6 +1479,7 @@ function CustomReportBuilder({
         <button
           onClick={onGenerate}
           disabled={disabled || generating || sections.size === 0}
+          aria-label={t('reports.generate_report', { defaultValue: 'Generate Report' })}
           className="flex items-center gap-1.5 rounded-lg bg-oe-blue px-4 py-2 text-sm font-medium text-white hover:bg-oe-blue-hover disabled:opacity-50 transition-colors"
         >
           {generating ? (
@@ -1483,6 +1503,10 @@ function CustomReportBuilder({
           <button
             key={preset.id}
             onClick={() => onSetSections(preset.sections)}
+            aria-label={t('reports.apply_preset_aria', {
+              defaultValue: 'Apply preset: {{preset}}',
+              preset: t(preset.labelKey, { defaultValue: preset.labelDefault }),
+            })}
             className="rounded-full border border-border-light bg-surface-secondary/50 px-3 py-1 text-2xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
             {t(preset.labelKey, { defaultValue: preset.labelDefault })}

@@ -534,7 +534,7 @@ function ImportContactsModal({
       setResult(res);
       onSuccess(res);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Import failed');
+      setError(err instanceof Error ? err.message : t('contacts.import_failed', { defaultValue: 'Import failed' }));
     } finally {
       setIsPending(false);
     }

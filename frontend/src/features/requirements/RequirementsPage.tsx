@@ -151,7 +151,7 @@ function GatePipeline({
 
         const statusIcon =
           status === 'pass' ? (
-            <CheckCircle2 size={20} className="text-[#15803d]" />
+            <CheckCircle2 size={20} className="text-semantic-success" />
           ) : status === 'fail' ? (
             <XCircle size={20} className="text-semantic-error" />
           ) : status === 'warning' ? (
@@ -162,7 +162,7 @@ function GatePipeline({
 
         const borderColor =
           status === 'pass'
-            ? 'border-[#15803d]/30'
+            ? 'border-semantic-success/30'
             : status === 'fail'
               ? 'border-semantic-error/30'
               : status === 'warning'
@@ -223,7 +223,7 @@ function GatePipeline({
                       className={clsx(
                         'text-xs font-bold tabular-nums',
                         status === 'pass'
-                          ? 'text-[#15803d]'
+                          ? 'text-semantic-success'
                           : status === 'fail'
                             ? 'text-semantic-error'
                             : status === 'warning'
@@ -239,7 +239,7 @@ function GatePipeline({
                       className={clsx(
                         'h-full rounded-full transition-all duration-500',
                         status === 'pass'
-                          ? 'bg-[#15803d]'
+                          ? 'bg-semantic-success'
                           : status === 'fail'
                             ? 'bg-semantic-error'
                             : status === 'warning'
@@ -317,7 +317,7 @@ function StatsCards({ stats }: { stats: RequirementStats | undefined }) {
       value: `${coveragePercent}%`,
       cls:
         coveragePercent >= 80
-          ? 'text-[#15803d]'
+          ? 'text-semantic-success'
           : coveragePercent >= 50
             ? 'text-[#b45309]'
             : 'text-semantic-error',
@@ -541,7 +541,7 @@ function RequirementModal({
                     try {
                       new RegExp(f.constraint_value);
                       return (
-                        <span className="ml-2 text-[#15803d]">
+                        <span className="ml-2 text-semantic-success">
                           {t('requirements.regex_valid', { defaultValue: 'Valid pattern' })}
                         </span>
                       );
@@ -2217,7 +2217,7 @@ function RequirementRow({
               className={clsx(
                 'text-xs font-medium tabular-nums',
                 req.confidence >= 0.8
-                  ? 'text-[#15803d]'
+                  ? 'text-semantic-success'
                   : req.confidence >= 0.5
                     ? 'text-[#b45309]'
                     : 'text-semantic-error',

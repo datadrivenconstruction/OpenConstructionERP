@@ -175,7 +175,7 @@ export function BOQEditorPage() {
       addRecent({
         type: 'boq',
         id: boqId,
-        title: boq.name || 'Untitled BOQ',
+        title: boq.name || t('boq.untitled', { defaultValue: 'Untitled BOQ' }),
         url: `/boq/${boqId}`,
       });
     }
@@ -523,7 +523,7 @@ export function BOQEditorPage() {
         // Fire the API call so the delete isn't silently lost.
         // Log failures — component is unmounting so toasts may not render.
         boqApi.deletePosition(pending.positionSnapshot.id).catch((err) => {
-          console.error('Failed to flush pending delete on unmount:', err);
+          if (import.meta.env.DEV) console.error('Failed to flush pending delete on unmount:', err);
         });
         pendingDeleteRef.current = null;
       }
@@ -2577,13 +2577,7 @@ export function BOQEditorPage() {
         onAddPosition={() => handleAddPosition()}
         onAddSection={handleAddSection}
         onImportFromCosts={() => setCostDbModalOpen(true)}
-        onUseTemplate={() => {
-          addToast({
-            type: 'info',
-            title: t('boq.templates_coming_soon', { defaultValue: 'Templates coming soon' }),
-            message: t('boq.templates_coming_soon_desc', { defaultValue: 'The template selector will be available in a future update.' }),
-          });
-        }}
+        sidePanelOpen={aiChatOpen || costFinderOpen || smartPanelOpen}
         t={t}
       />
 

@@ -181,7 +181,7 @@ function CreateNCRModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('ncr.new_ncr', { defaultValue: 'New NCR' })}>
+      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('ncr.new_ncr', { defaultValue: 'New NCR' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
@@ -287,11 +287,12 @@ function CreateNCRModal({
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="ncr-title" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('ncr.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
             <input
+              id="ncr-title"
               value={form.title}
               onChange={(e) => {
                 set('title', e.target.value);
@@ -316,11 +317,12 @@ function CreateNCRModal({
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="ncr-description" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('ncr.field_description', { defaultValue: 'Description' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
             <textarea
+              id="ncr-description"
               value={form.description}
               onChange={(e) => {
                 set('description', e.target.value);
@@ -353,10 +355,11 @@ function CreateNCRModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="ncr-location" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('ncr.field_location', { defaultValue: 'Location' })}
             </label>
             <input
+              id="ncr-location"
               value={form.location}
               onChange={(e) => set('location', e.target.value)}
               className={inputCls}
@@ -368,10 +371,11 @@ function CreateNCRModal({
 
           {/* Root Cause */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="ncr-root-cause" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('ncr.field_root_cause', { defaultValue: 'Root Cause (if known)' })}
             </label>
             <textarea
+              id="ncr-root-cause"
               value={form.root_cause}
               onChange={(e) => set('root_cause', e.target.value)}
               rows={3}
@@ -854,6 +858,7 @@ export function NCRPage() {
                   useProjectContextStore.getState().setActiveProject(p.id, p.name);
                 }
               }}
+              aria-label={t('ncr.select_project', { defaultValue: 'Project...' })}
               className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
             >
               <option value="" disabled>
@@ -943,6 +948,7 @@ export function NCRPage() {
             placeholder={t('ncr.search_placeholder', {
               defaultValue: 'Search NCRs...',
             })}
+            aria-label={t('ncr.search_placeholder', { defaultValue: 'Search NCRs...' })}
             className={inputCls + ' pl-9'}
           />
         </div>
@@ -952,6 +958,7 @@ export function NCRPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as NCRStatus | '')}
+            aria-label={t('ncr.filter_all_statuses', { defaultValue: 'All Statuses' })}
             className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
           >
             <option value="">

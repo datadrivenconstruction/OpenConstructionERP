@@ -15,7 +15,7 @@ interface BadgeProps {
 const variantStyles: Record<BadgeVariant, string> = {
   neutral: 'bg-surface-secondary text-content-secondary',
   blue: 'bg-oe-blue-subtle text-oe-blue',
-  success: 'bg-semantic-success-bg text-[#15803d]',
+  success: 'bg-semantic-success-bg text-semantic-success',
   warning: 'bg-semantic-warning-bg text-[#b45309]',
   error: 'bg-semantic-error-bg text-semantic-error',
 };
