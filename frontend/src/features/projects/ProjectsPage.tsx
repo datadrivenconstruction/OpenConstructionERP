@@ -106,7 +106,7 @@ export function ProjectsPage() {
             const boqs = await apiGet<BOQBasic[]>(`/v1/boq/boqs/?project_id=${p.id}`);
             return { projectId: p.id, boqs, failed: false };
           } catch (err) {
-            console.warn(`Failed to fetch BOQs for project ${p.id}:`, err);
+            if (import.meta.env.DEV) console.warn(`Failed to fetch BOQs for project ${p.id}:`, err);
             return { projectId: p.id, boqs: [] as BOQBasic[], failed: true };
           }
         }),
@@ -130,7 +130,7 @@ export function ProjectsPage() {
           const full = await apiGet<BOQWithPositions>(`/v1/boq/boqs/${b.id}`);
           return { boqId: b.id, projectId: b.project_id, grandTotal: full.grand_total, failed: false };
         } catch (err) {
-          console.warn(`Failed to fetch BOQ ${b.id} detail:`, err);
+          if (import.meta.env.DEV) console.warn(`Failed to fetch BOQ ${b.id} detail:`, err);
           return { boqId: b.id, projectId: b.project_id, grandTotal: 0, failed: true };
         }
       });
@@ -156,7 +156,7 @@ export function ProjectsPage() {
   // Show a persistent warning if BOQ stats failed to load at the top level
   useEffect(() => {
     if (boqStatsError) {
-      console.error('BOQ stats query failed:', boqStatsError);
+      if (import.meta.env.DEV) console.error('BOQ stats query failed:', boqStatsError);
     }
   }, [boqStatsError]);
 

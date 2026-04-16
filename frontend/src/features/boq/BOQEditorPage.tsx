@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 // lucide-react icons used by sub-components (BOQToolbar, BOQGrid, etc.) — none needed directly here
-import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet } from 'lucide-react';
+import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet, Keyboard } from 'lucide-react';
 import { Button, Badge, Breadcrumb } from '@/shared/ui';
 import { useProgressStore } from '@/shared/ui/GlobalProgress';
 import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
@@ -206,6 +206,10 @@ export function BOQEditorPage() {
   const isUndoRedoInProgressRef = useRef(false);
   /** Stable ref for handleAddPosition — allows keyboard shortcut access before declaration. */
   const addPositionRef = useRef<(() => void) | null>(null);
+  /** Stable ref for handleDuplicatePosition — allows keyboard shortcut access before declaration. */
+  const duplicatePositionRef = useRef<((id: string) => void) | null>(null);
+  /** Stable ref for handleExport — allows keyboard shortcut access before declaration. */
+  const handleExportRef = useRef<((format: 'excel' | 'csv' | 'pdf' | 'gaeb') => void) | null>(null);
 
   // Derived booleans that re-evaluate when undoRedoVersion changes
   const canUndo = undoRedoVersion >= 0 && undoStackRef.current.length > 0;
@@ -556,6 +560,7 @@ export function BOQEditorPage() {
   const [excelPasteOpen, setExcelPasteOpen] = useState(false);
   const [customColumnsOpen, setCustomColumnsOpen] = useState(false);
   const [isExcelPasteImporting, setIsExcelPasteImporting] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   /** When set, the cost DB modal adds a resource to this position instead of creating a new position. */
   const [costDbForPositionId, setCostDbForPositionId] = useState<string | null>(null);
 
@@ -794,6 +799,26 @@ export function BOQEditorPage() {
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
+      // Skip shortcuts when user is editing a cell / input / textarea
+      const tag = (document.activeElement?.tagName ?? '').toLowerCase();
+      const isEditing =
+        tag === 'input' || tag === 'textarea' || tag === 'select' ||
+        (document.activeElement as HTMLElement)?.isContentEditable === true;
+
+      // F1 — show shortcuts overlay (always works, even during editing)
+      if (e.key === 'F1') {
+        e.preventDefault();
+        setShowShortcuts((v) => !v);
+        return;
+      }
+
+      // Ctrl+Shift+? — show shortcuts overlay (always works)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '?') {
+        e.preventDefault();
+        setShowShortcuts((v) => !v);
+        return;
+      }
+
       // Ctrl+Z / Cmd+Z = Undo
       if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
         e.preventDefault();
@@ -822,11 +847,54 @@ export function BOQEditorPage() {
         addPositionRef.current?.();
         return;
       }
+
+      // Guard remaining shortcuts — don't fire when editing cells
+      if (isEditing) return;
+
+      // Ctrl+D = Duplicate selected position
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'd') {
+        e.preventDefault();
+        if (selectedPositionIds.length === 1) {
+          duplicatePositionRef.current?.(selectedPositionIds[0]!);
+        }
+        return;
+      }
+      // Ctrl+E = Open export menu
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'e') {
+        e.preventDefault();
+        handleExportRef.current?.('excel');
+        return;
+      }
+      // Ctrl+I = Open import dialog
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'i') {
+        e.preventDefault();
+        importInputRef.current?.click();
+        return;
+      }
+      // Ctrl+L = Toggle lock/unlock
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'l') {
+        e.preventDefault();
+        if (boq?.is_locked) {
+          handleUnlock();
+        } else {
+          handleLock();
+        }
+        return;
+      }
+      // Ctrl+/ = Toggle AI chat panel
+      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        setAiChatOpen((prev) => {
+          if (!prev) { setCostFinderOpen(false); setSmartPanelOpen(false); }
+          return !prev;
+        });
+        return;
+      }
     }
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleUndo, handleRedo]);
+  }, [handleUndo, handleRedo, selectedPositionIds, handleLock, handleUnlock, boq?.is_locked]);
 
   /* ── Activity panel ───────────────────────────────────────────────── */
 
@@ -859,29 +927,6 @@ export function BOQEditorPage() {
     return groupPositionsIntoSections(boq.positions);
   }, [boq]);
 
-  /* ── Section drag-and-drop reordering (future feature) ───────────── */
-
-  /* Section drag state and handlers — wired to section header UI
-  const handleSectionDragStart = (sectionId: string) => setDragSectionId(sectionId);
-  const handleSectionDrop = (targetSectionId: string) => {
-    if (!dragSectionId || dragSectionId === targetSectionId || !grouped.sections.length) {
-      setDragSectionId(null); return;
-    }
-    const sectionIds = grouped.sections.map((g) => g.section.id);
-    const fromIdx = sectionIds.indexOf(dragSectionId);
-    const toIdx = sectionIds.indexOf(targetSectionId);
-    if (fromIdx === -1 || toIdx === -1) { setDragSectionId(null); return; }
-    const reordered = [...sectionIds];
-    reordered.splice(fromIdx, 1);
-    reordered.splice(toIdx, 0, dragSectionId);
-    reordered.forEach((secId, idx) => {
-      const newOrdinal = String(idx + 1).padStart(2, '0');
-      updateMutation.mutate({ id: secId, data: { ordinal: newOrdinal, sort_order: idx * 10 } });
-    });
-    setDragSectionId(null);
-    setDragOverSectionId(null);
-  }; */
-
   /* ── Position drag-and-drop reordering ─────────────────────────── */
 
   const reorderMutation = useMutation({
@@ -908,6 +953,58 @@ export function BOQEditorPage() {
       reorderMutation.mutate(reorderedIds);
     },
     [boq, reorderMutation],
+  );
+
+  /* ── Section reorder (drag section onto another section) ─────── */
+  const handleReorderSections = useCallback(
+    (fromId: string, toId: string) => {
+      if (!boq) return;
+      const sectionIds = grouped.sections.map((g) => g.section.id);
+      const fromIdx = sectionIds.indexOf(fromId);
+      const toIdx = sectionIds.indexOf(toId);
+      if (fromIdx === -1 || toIdx === -1) return;
+      const reordered = [...sectionIds];
+      reordered.splice(fromIdx, 1);
+      reordered.splice(toIdx, 0, fromId);
+      // Build full position order: sections interleaved with their children
+      const fullOrder: string[] = [];
+      for (const secId of reordered) {
+        fullOrder.push(secId);
+        const group = grouped.sections.find((g) => g.section.id === secId);
+        if (group) {
+          for (const child of group.children) fullOrder.push(child.id);
+        }
+      }
+      // Include ungrouped at the end
+      for (const pos of grouped.ungrouped) fullOrder.push(pos.id);
+      reorderMutation.mutate(fullOrder);
+    },
+    [boq, grouped, reorderMutation],
+  );
+
+  /* ── Delete section with all its positions ──────────────────── */
+  const handleDeleteSection = useCallback(
+    async (sectionId: string) => {
+      if (!boq) return;
+      const group = grouped.sections.find((g) => g.section.id === sectionId);
+      if (!group) return;
+      // Delete all children first, then the section itself
+      const idsToDelete = [...group.children.map((c) => c.id), sectionId];
+      for (const id of idsToDelete) {
+        try {
+          await boqApi.deletePosition(id);
+        } catch { /* continue with remaining */ }
+      }
+      invalidateAll();
+      addToast({
+        type: 'success',
+        title: t('boq.section_deleted', {
+          defaultValue: 'Section deleted with {{count}} positions',
+          count: group.children.length,
+        }),
+      });
+    },
+    [boq, boqId, grouped, invalidateAll, addToast, t],
   );
 
   /* Build flat position list for keyboard navigation — reserved for future use
@@ -960,6 +1057,21 @@ export function BOQEditorPage() {
     () => computeQualityScore(boq?.positions ?? [], markups),
     [boq?.positions, markups],
   );
+
+  /* ── Mini summary bar stats ─────────────────────────────────────── */
+
+  const miniSummaryStats = useMemo(() => {
+    const allPositions = boq?.positions ?? [];
+    const sectionCount = grouped.sections.length;
+    const positionCount = allPositions.filter((p) => !isSection(p)).length;
+    const errorCount = allPositions.filter(
+      (p) => !isSection(p) && p.validation_status === 'errors',
+    ).length;
+    const warningCount = allPositions.filter(
+      (p) => !isSection(p) && p.validation_status === 'warnings',
+    ).length;
+    return { sectionCount, positionCount, errorCount, warningCount };
+  }, [boq?.positions, grouped.sections.length]);
 
   /* ── Tips (contextual) ───────────────────────────────────────────── */
 
@@ -1107,15 +1219,6 @@ export function BOQEditorPage() {
   // Keep ref in sync for keyboard shortcut access
   addPositionRef.current = handleAddPosition;
 
-  /* handleDeleteSection — wired via section context menu (future)
-  const handleDeleteSection = useCallback(
-    (sectionGroup: SectionGroup) => {
-      for (const child of sectionGroup.children) trackedDelete(child.id);
-      trackedDelete(sectionGroup.section.id);
-    },
-    [trackedDelete],
-  ); */
-
   /** Actually perform the export (download file). */
   const doExport = useCallback(
     async (format: 'excel' | 'csv' | 'pdf' | 'gaeb') => {
@@ -1223,6 +1326,8 @@ export function BOQEditorPage() {
     },
     [qualityBreakdown.score, doExport],
   );
+  // Keep ref in sync for keyboard shortcut access
+  handleExportRef.current = handleExport;
 
   /** Confirm GAEB export after preview dialog. */
   const confirmGaebExport = useCallback(() => {
@@ -1669,6 +1774,8 @@ export function BOQEditorPage() {
     },
     [boqId, boq?.positions, addMutation, addToast, t],
   );
+  // Keep ref in sync for keyboard shortcut access
+  duplicatePositionRef.current = handleDuplicatePosition;
 
   /* ── AI features: Suggest Rate, Classify, Anomaly Detection ─────── */
 
@@ -2359,6 +2466,7 @@ export function BOQEditorPage() {
           isRenumbering={renumberMutation.isPending}
           hasPositions={hasPositions}
           qualityScoreRing={<QualityScoreRing score={qualityBreakdown.score} breakdown={qualityBreakdown} t={t} />}
+          onShowShortcuts={() => setShowShortcuts(true)}
         />
       </div>
 
@@ -2371,7 +2479,30 @@ export function BOQEditorPage() {
 
       {/* ── BOQ Table (AG Grid) ───────────────────────────────────────── */}
       {hasPositions ? (
-        <div className="mb-2"><BOQGrid
+        <div className="mb-2">
+        {/* ── Mini Summary Bar ─────────────────────────────────────────── */}
+        <div className="flex items-center gap-4 px-3 py-1.5 border-b border-border-light bg-surface-secondary/30 text-xs text-content-tertiary rounded-t-xl">
+          <span>{miniSummaryStats.sectionCount} {t('boq.sections', { defaultValue: 'sections' })}</span>
+          <span className="text-border-light">|</span>
+          <span>{miniSummaryStats.positionCount} {t('boq.positions_label', { defaultValue: 'positions' })}</span>
+          <span className="text-border-light">|</span>
+          {miniSummaryStats.errorCount > 0 && (
+            <>
+              <span className="text-red-500 font-medium">{miniSummaryStats.errorCount} {t('boq.errors', { defaultValue: 'errors' })}</span>
+              <span className="text-border-light">|</span>
+            </>
+          )}
+          {miniSummaryStats.warningCount > 0 && (
+            <>
+              <span className="text-amber-500 font-medium">{miniSummaryStats.warningCount} {t('boq.warnings', { defaultValue: 'warnings' })}</span>
+              <span className="text-border-light">|</span>
+            </>
+          )}
+          <span className="ml-auto font-medium text-content-primary tabular-nums">
+            {t('boq.grand_total', { defaultValue: 'Grand Total' })}: {currencySymbol} {grossTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+        </div>
+        <BOQGrid
           ref={boqGridRef}
           positions={boq.positions}
           onUpdatePosition={trackedUpdate}
@@ -2382,6 +2513,8 @@ export function BOQEditorPage() {
           onAddComment={handleAddComment}
           onFormulaApplied={handleGridFormulaApplied}
           onReorderPositions={handleReorderPositions}
+          onReorderSections={handleReorderSections}
+          onDeleteSection={handleDeleteSection}
           collapsedSections={collapsedSections}
           onToggleSection={toggleSection}
           highlightPositionId={newPositionId ?? bimScrollTargetId ?? undefined}
@@ -2794,6 +2927,64 @@ export function BOQEditorPage() {
           />
         );
       })()}
+
+      {/* ── Keyboard Shortcuts Overlay ──────────────────────────────── */}
+      {showShortcuts && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-label={t('boq.keyboard_shortcuts', { defaultValue: 'Keyboard Shortcuts' })}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowShortcuts(false)} />
+          <div className="relative z-10 rounded-xl bg-surface-primary shadow-2xl border border-border-light p-6 max-w-md w-full animate-scale-in">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Keyboard size={18} className="text-content-tertiary" />
+                <h3 className="text-base font-semibold text-content-primary">
+                  {t('boq.keyboard_shortcuts', { defaultValue: 'Keyboard Shortcuts' })}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowShortcuts(false)}
+                className="p-1.5 rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
+                aria-label={t('common.close', { defaultValue: 'Close' })}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="grid grid-cols-[auto_1fr] gap-y-2.5 gap-x-4 text-sm">
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_enter', { defaultValue: 'Ctrl+Enter' })}</kbd>
+              <span className="text-content-secondary">{t('boq.shortcut_new_position', { defaultValue: 'New Position' })}</span>
+
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_d', { defaultValue: 'Ctrl+D' })}</kbd>
+              <span className="text-content-secondary">{t('boq.shortcut_duplicate', { defaultValue: 'Duplicate Position' })}</span>
+
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_e', { defaultValue: 'Ctrl+E' })}</kbd>
+              <span className="text-content-secondary">{t('boq.shortcut_export', { defaultValue: 'Export' })}</span>
+
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_i', { defaultValue: 'Ctrl+I' })}</kbd>
+              <span className="text-content-secondary">{t('boq.shortcut_import', { defaultValue: 'Import' })}</span>
+
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_l', { defaultValue: 'Ctrl+L' })}</kbd>
+              <span className="text-content-secondary">{t('boq.shortcut_lock', { defaultValue: 'Lock / Unlock Estimate' })}</span>
+
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_z', { defaultValue: 'Ctrl+Z' })}</kbd>
+              <span className="text-content-secondary">{t('boq.shortcut_undo', { defaultValue: 'Undo' })}</span>
+
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_y', { defaultValue: 'Ctrl+Y' })}</kbd>
+              <span className="text-content-secondary">{t('boq.shortcut_redo', { defaultValue: 'Redo' })}</span>
+
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_slash', { defaultValue: 'Ctrl+/' })}</kbd>
+              <span className="text-content-secondary">{t('boq.shortcut_ai_chat', { defaultValue: 'Toggle AI Chat' })}</span>
+
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_ctrl_shift_v', { defaultValue: 'Ctrl+Shift+V' })}</kbd>
+              <span className="text-content-secondary">{t('boq.shortcut_paste_excel', { defaultValue: 'Paste from Excel' })}</span>
+
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_del', { defaultValue: 'Del' })}</kbd>
+              <span className="text-content-secondary">{t('boq.shortcut_delete', { defaultValue: 'Delete Selected' })}</span>
+
+              <kbd className="inline-flex items-center rounded border border-border-light bg-surface-secondary px-1.5 py-0.5 text-xs font-mono">{t('boq.shortcut_f1', { defaultValue: 'F1' })}</kbd>
+              <span className="text-content-secondary">{t('boq.shortcut_show_shortcuts', { defaultValue: 'Show Shortcuts' })}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Vector DB Setup Dialog ───────────────────────────────────── */}
       {showVectorSetup && (

@@ -371,28 +371,31 @@ export class ElementManager {
     geometryUrl: string,
     onProgress?: (fraction: number) => void,
   ): Promise<void> {
-    // Probe the Content-Type to decide which loader to use.
-    // We make a HEAD request first -- cheap, avoids downloading the
-    // full blob twice if we guess wrong.
-    // Auto-detect format via Content-Type header. GLB preferred (2x smaller,
-    // faster parsing). Node names are patched into the GLB by the backend
-    // so mesh-to-element matching works with both formats.
+    // Auto-detect format via Content-Type header. GLB preferred (smaller +
+    // faster parsing). Node names are patched into the GLB by the backend so
+    // mesh-to-element matching works with both formats. The positional
+    // fallback inside processLoadedScene handles low-match cases, so the
+    // previous GLB→DAE retry path (which double-loaded geometry and doubled
+    // upload wait) is gone.
+    let format: 'glb' | 'dae' | 'unknown' = 'unknown';
     try {
       const resp = await fetch(geometryUrl, { method: 'HEAD' });
       if (resp.ok) {
         const ct = resp.headers.get('content-type') || '';
         if (ct.includes('gltf-binary') || ct.includes('gltf+json')) {
-          return this.loadGLBGeometry(geometryUrl, onProgress);
-        }
-        if (ct.includes('collada') || ct.includes('xml') || ct.includes('dae')) {
-          return this.loadDAEGeometry(geometryUrl, onProgress);
+          format = 'glb';
+        } else if (ct.includes('collada') || ct.includes('xml') || ct.includes('dae')) {
+          format = 'dae';
         }
       }
     } catch {
-      // HEAD failed — fall through to GLB-first path
+      // HEAD failed — default to GLB loader (it falls back to DAE on error)
     }
-    // Default: try GLB first (smaller + faster), DAE fallback in error handler
-    return this.loadGLBGeometry(geometryUrl, onProgress);
+
+    if (format === 'dae') {
+      return this.loadDAEGeometry(geometryUrl, onProgress);
+    }
+    await this.loadGLBGeometry(geometryUrl, onProgress);
   }
 
   /**
@@ -428,8 +431,7 @@ export class ElementManager {
           }
         },
         (error) => {
-          // eslint-disable-next-line no-console
-          console.warn('GLB load failed, falling back to DAE:', error);
+          if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) console.warn('GLB load failed, falling back to DAE:', error);
           // Fallback: try the DAE loader in case the file is actually COLLADA
           this.loadDAEGeometry(geometryUrl, onProgress).then(resolve, reject);
         },
@@ -492,6 +494,36 @@ export class ElementManager {
     // Remove any existing placeholder meshes for elements that have geometry
     this.clearPlaceholders();
 
+    // Purge any previous geometry load (e.g. GLB from the first pass when
+    // loadGeometry() falls back to DAE after a low match ratio). Without this,
+    // stale GLB meshes remain in the scene graph and in meshMap with temporary
+    // _unmatched_N ids that no longer resolve to element data, so clicking
+    // such a mesh picks an id that getElementData can't find and the
+    // properties panel never opens.
+    if (this.daeGroup) {
+      this.daeGroup.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          obj.geometry?.dispose();
+        }
+      });
+      this.elementGroup.remove(this.daeGroup);
+    }
+    for (const batched of this.batchedMeshes) {
+      this.sceneManager.scene.remove(batched);
+      batched.dispose();
+    }
+    this.batchedMeshes = [];
+    // Drop meshMap entries that pointed at the purged meshes — any mesh we
+    // still reference was from the previous load. elementDataMap is kept
+    // so that the new matching pass can rebind element ids to new meshes.
+    for (const mesh of this.allDaeMeshes) {
+      const ud = mesh.userData as { elementId?: string | null };
+      if (ud.elementId) this.meshMap.delete(ud.elementId);
+    }
+    this.allDaeMeshes = [];
+    this.meshMatchRatio = 0;
+    this.geometryLoaded = false;
+
     this.daeGroup = new THREE.Group();
     this.daeGroup.name = 'bim_dae_geometry';
 
@@ -530,45 +562,92 @@ export class ElementManager {
       strippedLights++;
     }
 
-    // Traverse the loaded scene and match mesh nodes.
+    // Walk ALL ancestors up to the scene root and collect every Object3D.name.
+    // The DDC RvtExporter DAE sometimes nests nodes:
+    //   <node id="140056" name="140056">        ← Revit ElementId (outer)
+    //     <node id="135248" name="135248">      ← internal sub-node
+    //       <instance_geometry />
+    //     </node>
+    //   </node>
+    // ColladaLoader turns each <node> into a Group, so `mesh.parent.name`
+    // is "135248" (inner) and `mesh.parent.parent.name` is "140056" (outer).
+    // We prefer the OUTERMOST numeric ancestor — that's the element id a
+    // user expects to see — over any inner id, regardless of which one
+    // happens to live in stableIdToElement.
+    //
+    // Matching strategy per mesh:
+    //   1. collect every ancestor name (+ mesh.name itself)
+    //   2. prefer the outermost ancestor whose name matches stableIdToElement
+    //   3. if none match, prefer the outermost ancestor whose name matches nameToElement
+    //   4. extract any "Type-N-ElementId-suffix" numeric segments as a last resort
+    //   5. remember the outermost numeric ancestor as `outerNodeId` — used
+    //      later as the stub `mesh_ref` for unmatched meshes, so the
+    //      properties panel shows the user-facing Revit ElementId, not the
+    //      inner geometry container.
+    //
     // IMPORTANT: do NOT replace `child.material` -- the geometry file
     // ships with real per-element materials. We only touch the material
     // when an explicit colour-by mode is on, and we cache the original
     // on `userData.originalMaterial` so `resetColors()` can restore it.
-    //
-    // Matching strategy (tried in order for each mesh):
-    //   1. child.name          via stableIdToElement (mesh_ref / db id)
-    //   2. parent.name         via stableIdToElement (DDC patched node name = ElementId)
-    //   3. grandparent.name    via stableIdToElement (GLB loader may nest differently)
-    //   4. child.name          via nameToElement (element display name)
-    //   5. parent.name         via nameToElement
-    //   6. Extract numeric ID from parent.name pattern "Type-N-suffix" (Light-1-235371-point)
-    //      — this catches DDC light/node IDs embedded in composite names.
     scene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        const nodeName = child.name || '';
-        const parentName = child.parent?.name || '';
-        const grandparentName = child.parent?.parent?.name || '';
+        // Collect the ancestor chain: [mesh.name, parent.name, grandparent.name, …]
+        // from innermost (mesh) to outermost (scene root). We stop at the
+        // loaded scene root so patched `scene.name` (the DAE filename or
+        // empty) doesn't pollute matching.
+        const chain: string[] = [];
+        let cursor: THREE.Object3D | null = child;
+        while (cursor && cursor !== scene) {
+          chain.push(cursor.name || '');
+          cursor = cursor.parent;
+        }
+        // Drop the empty strings so lookups don't accidentally hit
+        // `stableIdToElement.get('')`.
+        const namedChain = chain.filter((n) => n !== '');
 
-        let element =
-          stableIdToElement.get(nodeName) ||
-          stableIdToElement.get(parentName) ||
-          stableIdToElement.get(grandparentName) ||
-          nameToElement.get(nodeName) ||
-          nameToElement.get(parentName);
+        // Outermost numeric ancestor — used as mesh_ref on stubs and as the
+        // user-facing ID for ancestor-matched elements.
+        let outerNumericName = '';
+        for (let i = namedChain.length - 1; i >= 0; i--) {
+          if (/^\d+$/.test(namedChain[i]!)) {
+            outerNumericName = namedChain[i]!;
+            break;
+          }
+        }
 
-        // Fallback: try to extract a numeric ID from the parent name.
-        // DDC COLLADA sometimes names nodes as "Type-N-ElementId-suffix"
-        // (e.g. "Light-1-235371-point"). If the parent name contains a
-        // numeric segment that matches a mesh_ref, use it.
-        if (!element && parentName) {
-          const segments = parentName.split('-');
-          for (const seg of segments) {
-            if (/^\d+$/.test(seg)) {
-              const candidate = stableIdToElement.get(seg);
-              if (candidate) {
-                element = candidate;
-                break;
+        let element: BIMElementData | undefined;
+        // Prefer the outermost ancestor that resolves in stableIdToElement,
+        // falling back through increasingly inner nodes.
+        for (let i = namedChain.length - 1; i >= 0; i--) {
+          const hit = stableIdToElement.get(namedChain[i]!);
+          if (hit) {
+            element = hit;
+            break;
+          }
+        }
+        if (!element) {
+          for (let i = namedChain.length - 1; i >= 0; i--) {
+            const hit = nameToElement.get(namedChain[i]!);
+            if (hit) {
+              element = hit;
+              break;
+            }
+          }
+        }
+        // Last-resort: some DDC COLLADA nodes encode the ElementId as a
+        // "Type-N-ElementId-suffix" segment (e.g. "Light-1-235371-point").
+        // Scan every ancestor name for such segments, outer → inner.
+        if (!element) {
+          outer: for (let i = namedChain.length - 1; i >= 0; i--) {
+            const segments = namedChain[i]!.split('-');
+            for (const seg of segments) {
+              if (/^\d+$/.test(seg)) {
+                const candidate = stableIdToElement.get(seg);
+                if (candidate) {
+                  element = candidate;
+                  if (!outerNumericName) outerNumericName = seg;
+                  break outer;
+                }
               }
             }
           }
@@ -590,11 +669,22 @@ export class ElementManager {
             elementId: element.id,
             elementData: element,
             originalMaterial,
+            // Remember which ancestor-name the viewer used to pick this
+            // element so the panel can show it verbatim when the element
+            // row has no mesh_ref (e.g. some legacy imports).
+            outerNodeId: outerNumericName || undefined,
           };
           this.meshMap.set(element.id, child);
           matchedCount++;
         } else {
-          child.userData = { elementId: null, originalMaterial };
+          child.userData = {
+            elementId: null,
+            originalMaterial,
+            outerNodeId: outerNumericName || undefined,
+            // Keep the raw chain so the stub pass below can build
+            // `mesh_ref` without repeating the traversal.
+            ancestorNames: namedChain,
+          };
         }
 
         if (!child.material) {
@@ -605,17 +695,31 @@ export class ElementManager {
       }
     });
 
-    if (strippedLights > 0) {
-      // eslint-disable-next-line no-console
+    if (strippedLights > 0 && typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
       console.info(`[BIM] stripped ${strippedLights} lights/cameras from loaded scene`);
     }
 
-    // eslint-disable-next-line no-console
-    console.info(
-      `[BIM] mesh matching: ${matchedCount}/${this.allDaeMeshes.length} meshes matched ` +
-      `to ${this.elementDataMap.size} elements ` +
-      `(${this.elementDataMap.size > 0 ? Math.round((matchedCount / this.elementDataMap.size) * 100) : 0}% element coverage)`,
-    );
+    if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
+      console.info(
+        `[BIM] mesh matching: ${matchedCount}/${this.allDaeMeshes.length} meshes matched ` +
+        `to ${this.elementDataMap.size} elements ` +
+        `(${this.elementDataMap.size > 0 ? Math.round((matchedCount / this.elementDataMap.size) * 100) : 0}% element coverage)`,
+      );
+      // Log first 5 unmatched mesh names + first 5 element mesh_refs for debugging
+      const unmatchedNames = this.allDaeMeshes
+        .filter((m) => !(m.userData as { elementId?: string | null }).elementId)
+        .slice(0, 5)
+        .map((m) => {
+          const ud = m.userData as { ancestorNames?: string[]; outerNodeId?: string };
+          const chain = ud.ancestorNames?.join(' ← ') || m.name;
+          return `outer="${ud.outerNodeId || ''}" chain=[${chain}]`;
+        });
+      const sampleRefs = Array.from(this.elementDataMap.values()).slice(0, 5).map((e) => `id="${e.id}" mesh_ref="${e.mesh_ref}" name="${e.name}"`);
+      if (unmatchedNames.length > 0) {
+        console.info('[BIM] sample unmatched meshes:', unmatchedNames);
+        console.info('[BIM] sample element refs:', sampleRefs);
+      }
+    }
 
     // FALLBACK: assign elementIds to unmatched meshes so every visible
     // mesh is selectable.  When explicit matching covers < 50% of meshes,
@@ -633,68 +737,139 @@ export class ElementManager {
     );
 
     if (unmatchedMeshes.length > 0 && unmatchedElements.length > 0) {
-      // Sort meshes by vertical position (Y in Three.js Y_UP = height)
-      // so that meshes near the ground pair with ground-floor elements.
-      const meshWithY = unmatchedMeshes.map((m) => {
-        const pos = new THREE.Vector3();
-        m.getWorldPosition(pos);
-        return { mesh: m, y: pos.y };
-      });
-      meshWithY.sort((a, b) => a.y - b.y);
+      // Greedy nearest-neighbor fallback: for each unmatched mesh, find the
+      // closest unmatched element by 3D distance between bounding box centers.
+      // This replaces the old Y-sort + storey-sort index pairing which
+      // produced wrong associations (e.g. roof mesh → furniture element).
 
-      // Sort elements: those WITH storey FIRST (grouped by storey name,
-      // alphabetical approximates floor order for typical naming:
-      // "00 - Ground", "01 - Entry Level", "02 - Floor"), then elements
-      // WITHOUT storey LAST. This ensures storey-bearing elements get
-      // the most spatially relevant meshes, while unassigned elements
-      // consume whatever remains.
-      const sortedElements = [...unmatchedElements].sort((a, b) => {
-        const sa = a.storey || '';
-        const sb = b.storey || '';
-        // Elements with storey come before those without
-        if (sa && !sb) return -1;
-        if (!sa && sb) return 1;
-        if (sa !== sb) return sa.localeCompare(sb);
-        return (a.element_type || '').localeCompare(b.element_type || '');
+      // Threshold: matches with distance > 5m are marked unreliable.
+      const UNRELIABLE_DISTANCE_M = 5;
+
+      // Pre-compute mesh world-space bounding box centers.
+      const meshCenters = unmatchedMeshes.map((m) => {
+        const center = new THREE.Vector3();
+        m.getWorldPosition(center);
+        // If the mesh has geometry with a bounding box, use its center
+        // for a more accurate position (getWorldPosition gives the origin).
+        if (m.geometry.boundingBox) {
+          const geomCenter = new THREE.Vector3();
+          m.geometry.boundingBox.getCenter(geomCenter);
+          geomCenter.applyMatrix4(m.matrixWorld);
+          center.copy(geomCenter);
+        }
+        return { mesh: m, center };
       });
 
-      const pairs = Math.min(meshWithY.length, sortedElements.length);
-      for (let i = 0; i < pairs; i++) {
-        const mesh = meshWithY[i]!.mesh;
-        const el = sortedElements[i]!;
-        mesh.userData = {
-          ...(mesh.userData as object),
-          elementId: el.id,
-          elementData: el,
-          positionalFallback: true,
-        };
-        this.meshMap.set(el.id, mesh);
+      // Pre-compute element bounding box centers (only elements that have bbox).
+      // Elements without bounding_box cannot be spatially matched and are skipped.
+      const elementCenters: { el: BIMElementData; center: THREE.Vector3 }[] = [];
+      for (const el of unmatchedElements) {
+        if (el.bounding_box) {
+          const bb = el.bounding_box;
+          // Element bbox is in Z_UP coordinates (same as the loaded scene
+          // before the -90deg X rotation). Convert to Y_UP to match mesh
+          // world positions: swap Y ↔ Z, negate new-Z (the rotation is
+          // -90° around X which maps Z→Y, Y→-Z).
+          const cx = (bb.min_x + bb.max_x) / 2;
+          const cy = (bb.min_z + bb.max_z) / 2;  // Z_UP height → Y_UP height
+          const cz = -(bb.min_y + bb.max_y) / 2; // Y_UP depth (negated by rotation)
+          elementCenters.push({ el, center: new THREE.Vector3(cx, cy, cz) });
+        }
       }
-      matchedCount += pairs;
-      // eslint-disable-next-line no-console
-      console.info(
-        `[BIM] positional fallback: paired ${pairs} meshes with element data ` +
-        `(sorted by Y-position ↔ storey for better filter accuracy)`,
+
+      let pairedCount = 0;
+      let unreliableCount = 0;
+      const pairedElementIds = new Set<string>();
+
+      if (elementCenters.length > 0) {
+        // Greedy: for each mesh, find the nearest unpaired element.
+        for (const { mesh, center: meshCenter } of meshCenters) {
+          let bestDist = Infinity;
+          let bestIdx = -1;
+          for (let j = 0; j < elementCenters.length; j++) {
+            if (pairedElementIds.has(elementCenters[j]!.el.id)) continue;
+            const dist = meshCenter.distanceTo(elementCenters[j]!.center);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestIdx = j;
+            }
+          }
+          if (bestIdx >= 0) {
+            const el = elementCenters[bestIdx]!.el;
+            const unreliable = bestDist > UNRELIABLE_DISTANCE_M;
+            mesh.userData = {
+              ...(mesh.userData as object),
+              elementId: el.id,
+              elementData: el,
+              positionalFallback: true,
+              unreliableMatch: unreliable,
+              matchDistance: Math.round(bestDist * 100) / 100,
+            };
+            this.meshMap.set(el.id, mesh);
+            pairedElementIds.add(el.id);
+            pairedCount++;
+            if (unreliable) unreliableCount++;
+          }
+        }
+      }
+      matchedCount += pairedCount;
+      if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) console.info(
+        `[BIM] positional fallback: paired ${pairedCount} meshes with element data ` +
+        `by nearest bounding-box center (${unreliableCount} unreliable, distance > ${UNRELIABLE_DISTANCE_M}m)`,
       );
     }
 
-    // Assign temporary IDs to any remaining meshes that still have no
-    // elementId — this ensures every visible mesh is selectable.
+    // Assign temporary IDs AND stub BIMElementData entries to any remaining
+    // meshes that still have no elementId. Without the elementDataMap stub,
+    // clicking such a mesh would call getElementData(tempId) → undefined →
+    // setSelectedElement(null) → properties panel never opens. The DAE node
+    // name (patched by the backend to equal the Revit ElementId) is used as
+    // mesh_ref — so the Parquet-fetch path can still pull the full row for
+    // elements the backend filtered out of BIMElement (planting, sketch
+    // lines, detail components, …).
     let tempIdCounter = 0;
     for (const mesh of this.allDaeMeshes) {
-      if (!(mesh.userData as { elementId?: string | null }).elementId) {
+      const ud = mesh.userData as {
+        elementId?: string | null;
+        outerNodeId?: string;
+        ancestorNames?: string[];
+      };
+      if (!ud.elementId) {
         const tempId = `_unmatched_${tempIdCounter++}`;
+        // Prefer the OUTERMOST numeric ancestor name as mesh_ref — that
+        // matches the Revit ElementId a user would expect to see (same
+        // value the Excel parquet row uses as its `id`). Falling through
+        // to inner node names would display a sub-component id that is
+        // not what the user reads from their CAD tool.
+        const outerNodeId = ud.outerNodeId || '';
+        const chain = ud.ancestorNames || [];
+        const innerNodeName = chain[0] || '';
+        const meshRef = outerNodeId || innerNodeName || undefined;
+        const stubName = meshRef || `Unmatched element ${tempIdCounter}`;
+        const stub: BIMElementData = {
+          id: tempId,
+          mesh_ref: meshRef,
+          name: stubName,
+          element_type: 'Unmatched',
+          discipline: 'other',
+          properties: {
+            node_name: outerNodeId || innerNodeName,
+            inner_node: innerNodeName && innerNodeName !== outerNodeId ? innerNodeName : '',
+            ancestor_chain: chain.join(' › '),
+          },
+        };
         mesh.userData = {
           ...(mesh.userData as object),
           elementId: tempId,
+          elementData: stub,
         };
         this.meshMap.set(tempId, mesh);
+        this.elementDataMap.set(tempId, stub);
       }
     }
     if (tempIdCounter > 0) {
       matchedCount += tempIdCounter;
-      // eslint-disable-next-line no-console
-      console.info(`[BIM] assigned temporary IDs to ${tempIdCounter} unmatched meshes`);
+      if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) console.info(`[BIM] assigned ${tempIdCounter} temporary IDs+stubs to unmatched meshes (clickable)`);
     }
 
     const totalElements = this.elementDataMap.size;
@@ -715,8 +890,7 @@ export class ElementManager {
       try {
         this.batchMeshesByMaterial();
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.warn('[BIM] BatchedMesh path failed, falling back to individual meshes', err);
+        if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) console.warn('[BIM] BatchedMesh path failed, falling back to individual meshes', err);
       }
     }
 
@@ -794,8 +968,7 @@ export class ElementManager {
           group.material,
         );
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.warn('[BIM] BatchedMesh ctor failed for material group, falling back', err);
+        if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) console.warn('[BIM] BatchedMesh ctor failed for material group, falling back', err);
         drawCallsAfter += group.meshes.length;
         continue;
       }
@@ -822,8 +995,7 @@ export class ElementManager {
         } catch (err) {
           // Geometry didn't fit (e.g. because of mismatched attribute formats
           // between source meshes); leave this one as an individual mesh.
-          // eslint-disable-next-line no-console
-          console.warn('[BIM] addInstance failed, leaving mesh standalone', err);
+          if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) console.warn('[BIM] addInstance failed, leaving mesh standalone', err);
         }
       }
 
@@ -843,8 +1015,7 @@ export class ElementManager {
       }
     }
 
-    // eslint-disable-next-line no-console
-    console.info(
+    if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) console.info(
       `[BIM] BatchedMesh: ${batchedMeshes} batches holding ${batchedInstances} instances; ` +
         `draw calls ${drawCallsBefore} → ${drawCallsAfter} ` +
         `(${Math.round((1 - drawCallsAfter / Math.max(1, drawCallsBefore)) * 100)}% reduction)`,
@@ -1104,8 +1275,7 @@ export class ElementManager {
         visibleCount++;
       }
     }
-    // eslint-disable-next-line no-console
-    console.info(
+    if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) console.info(
       `[BIM filter] meshMap=${this.meshMap.size} visible=${visibleCount} hidden=${this.meshMap.size - visibleCount - noDataCount} noData=${noDataCount}`,
     );
 

@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Upload,
@@ -60,11 +60,30 @@ function timeSince(ts: number, t: (key: string, opts?: Record<string, unknown>) 
 export function GlobalUploadIndicator() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const jobs = useBIMUploadStore((s) => s.jobs);
   const cancelUpload = useBIMUploadStore((s) => s.cancelUpload);
   const dismissJob = useBIMUploadStore((s) => s.dismissJob);
   const retryJob = useBIMUploadStore((s) => s.retryJob);
-  const hasActiveUploads = useBIMUploadStore((s) => s.hasActiveUploads);
+
+  /** Model id the user is currently viewing, if any. Captured from the
+   *  two routes that can embed a model id:
+   *    /bim/{modelId}
+   *    /projects/{projectId}/bim?model={modelId}
+   *  When the current URL already shows the just-completed upload there's
+   *  nothing new to tell the user — the viewport IS the confirmation —
+   *  so we skip the pill entirely. Active ('uploading'/'converting') jobs
+   *  still render because the user wants progress feedback. */
+  const viewingModelId = useMemo(() => {
+    const pathMatch = location.pathname.match(/\/bim\/([0-9a-f-]{36})/i);
+    if (pathMatch) return pathMatch[1];
+    const searchParams = new URLSearchParams(location.search);
+    return searchParams.get('model');
+  }, [location.pathname, location.search]);
+  // Note: `hasActiveUploads` from the store also returns true while a job is
+  // in 'converting' state — but with the async backend that just means the
+  // server is processing an already-uploaded file, so leaving the page is
+  // safe.  We only want to warn while a file is genuinely being transferred.
 
   const [expanded, setExpanded] = useState(false);
   /** Tick counter to refresh elapsed-time labels. */
@@ -87,35 +106,49 @@ export function GlobalUploadIndicator() {
     return () => clearInterval(iv);
   }, [active.length]);
 
-  // Auto-dismiss completed jobs after 5 minutes
+  // Auto-dismiss completed jobs. Lifetime rules:
+  //   * 'ready' + user viewing this same model → 0 ms (immediate) —
+  //     the 3D viewer already is the confirmation.
+  //   * 'ready' otherwise → 8 s; the model list on other pages needs a
+  //     brief "done" signal.
+  //   * 'error' / 'converter_required' → 5 min; the user needs time to
+  //     read what failed and click Retry.
   useEffect(() => {
     if (finished.length === 0) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
     for (const job of finished) {
-      if (job.completedAt) {
-        const remaining = 5 * 60 * 1000 - (Date.now() - job.completedAt);
-        if (remaining <= 0) {
-          dismissJob(job.id);
-        } else {
-          timers.push(setTimeout(() => dismissJob(job.id), remaining));
-        }
+      if (!job.completedAt) continue;
+      const viewingThisModel = job.modelId && job.modelId === viewingModelId;
+      const lifetime = job.status === 'ready'
+        ? (viewingThisModel ? 0 : 8 * 1000)
+        : 5 * 60 * 1000;
+      const remaining = lifetime - (Date.now() - job.completedAt);
+      if (remaining <= 0) {
+        dismissJob(job.id);
+      } else {
+        timers.push(setTimeout(() => dismissJob(job.id), remaining));
       }
     }
     return () => timers.forEach(clearTimeout);
-  }, [finished, dismissJob]);
+  }, [finished, dismissJob, viewingModelId]);
 
-  // beforeunload handler: warn user when active uploads exist
+  // beforeunload handler: only warn while a file is genuinely being
+  // transferred ('uploading' status).  Once the backend has accepted the
+  // file ('converting' / 'ready' / etc.) the work continues server-side and
+  // closing the tab does not lose anything.  This used to also fire during
+  // 'converting', which made the browser nag the user every time they
+  // navigated after starting an upload — the warning interrupted the normal
+  // "kick off and check back later" workflow.
   useEffect(() => {
+    const isTransferring = active.some((j) => j.status === 'uploading');
+    if (!isTransferring) return;
     const handler = (e: BeforeUnloadEvent) => {
-      if (hasActiveUploads()) {
-        e.preventDefault();
-        // Legacy browsers need returnValue
-        e.returnValue = '';
-      }
+      e.preventDefault();
+      e.returnValue = '';
     };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
-  }, [hasActiveUploads]);
+  }, [active]);
 
   const handleOpen = useCallback(
     (job: BIMUploadJob) => {
@@ -278,7 +311,7 @@ function JobRow({
               </span>
             </div>
             <p className="text-[10px] text-content-quaternary mt-0.5">
-              {job.stage} — {elapsed(job.startedAt)}
+              {t(job.stage, { defaultValue: 'Processing...' })} — {elapsed(job.startedAt)}
             </p>
           </div>
         )}

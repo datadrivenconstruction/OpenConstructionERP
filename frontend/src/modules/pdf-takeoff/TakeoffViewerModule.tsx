@@ -38,6 +38,14 @@ import {
   Highlighter,
   Loader2,
   Link2,
+  FileUp,
+  ShieldCheck,
+  Crosshair,
+  Scan,
+  FileText,
+  Image as ImageIcon,
+  Sparkles,
+  Layers,
   X,
 } from 'lucide-react';
 import { useToastStore } from '../../stores/useToastStore';
@@ -1602,49 +1610,230 @@ export default function TakeoffViewerModule() {
 
   /* ── Render ──────────────────────────────────────────────────────── */
 
+  /* ── Landing features (BIM-style) ──────────────────────────── */
+
+  const landingFeatures = [
+    {
+      icon: Crosshair,
+      color: 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-800',
+      ic: 'text-blue-500',
+      title: t('takeoff.landing_feat_click_title', { defaultValue: 'Click-to-measure' }),
+      desc: t('takeoff.landing_feat_click_desc', { defaultValue: 'Distance, area, polyline and count tools — click directly on the PDF to capture quantities.' }),
+    },
+    {
+      icon: Scan,
+      color: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-800',
+      ic: 'text-emerald-500',
+      title: t('takeoff.landing_feat_symbol_title', { defaultValue: 'Auto symbol detection' }),
+      desc: t('takeoff.landing_feat_symbol_desc', { defaultValue: 'AI spots doors, windows and MEP symbols and proposes counts with confidence scores.' }),
+    },
+    {
+      icon: Ruler,
+      color: 'bg-violet-50 dark:bg-violet-950/20 border-violet-100 dark:border-violet-800',
+      ic: 'text-violet-500',
+      title: t('takeoff.landing_feat_scale_title', { defaultValue: 'Scale calibration' }),
+      desc: t('takeoff.landing_feat_scale_desc', { defaultValue: 'Two-point calibration or preset scales (1:50, 1:100) — every measurement stays accurate.' }),
+    },
+    {
+      icon: Layers,
+      color: 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-800',
+      ic: 'text-orange-500',
+      title: t('takeoff.landing_feat_units_title', { defaultValue: 'Area · length · count' }),
+      desc: t('takeoff.landing_feat_units_desc', { defaultValue: 'Switch freely between m, m², m³, pcs — grouped by trade with hide/show per layer.' }),
+    },
+    {
+      icon: Sparkles,
+      color: 'bg-pink-50 dark:bg-pink-950/20 border-pink-100 dark:border-pink-800',
+      ic: 'text-pink-500',
+      title: t('takeoff.landing_feat_ai_title', { defaultValue: 'AI-assisted quantities' }),
+      desc: t('takeoff.landing_feat_ai_desc', { defaultValue: 'Let the AI extract walls, slabs and rooms from a drawing — you review and confirm before committing.' }),
+    },
+    {
+      icon: Link2,
+      color: 'bg-cyan-50 dark:bg-cyan-950/20 border-cyan-100 dark:border-cyan-800',
+      ic: 'text-cyan-500',
+      title: t('takeoff.landing_feat_export_title', { defaultValue: 'Export to BOQ' }),
+      desc: t('takeoff.landing_feat_export_desc', { defaultValue: 'Send measurements straight into your Bill of Quantities — with links back to the source drawing.' }),
+    },
+  ];
+
+  const landingFormats = [
+    { ext: 'PDF', label: t('takeoff.landing_fmt_pdf', { defaultValue: 'Vector drawings, floor plans, sections' }), icon: FileText, size: 'up to 50MB', primary: true },
+    { ext: 'PNG', label: t('takeoff.landing_fmt_png', { defaultValue: 'Raster plan images' }), icon: ImageIcon, size: 'up to 50MB' },
+    { ext: 'JPG', label: t('takeoff.landing_fmt_jpg', { defaultValue: 'Scanned or photographed plans' }), icon: ImageIcon, size: 'up to 50MB' },
+    { ext: 'TIFF', label: t('takeoff.landing_fmt_tiff', { defaultValue: 'High-resolution scans' }), icon: ImageIcon, size: 'up to 50MB' },
+    { ext: 'DWG', label: t('takeoff.landing_fmt_dwg', { defaultValue: 'Use DWG Takeoff module instead' }), icon: Box, size: 'via DWG module', muted: true },
+  ];
+
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
-          <Ruler className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+      {/* Header — only shown when a PDF is loaded */}
+      {pdfDoc && (
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
+            <Ruler className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-content-primary">
+              {t('takeoff_viewer.title', { defaultValue: 'PDF Takeoff Viewer' })}
+            </h1>
+            <p className="text-sm text-content-tertiary">
+              {t('takeoff_viewer.subtitle', { defaultValue: 'View drawings and take measurements' })}
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-xl font-bold text-content-primary">
-            {t('takeoff_viewer.title', { defaultValue: 'PDF Takeoff Viewer' })}
-          </h1>
-          <p className="text-sm text-content-tertiary">
-            {t('takeoff_viewer.subtitle', { defaultValue: 'View drawings and take measurements' })}
-          </p>
-        </div>
-      </div>
+      )}
 
-      {/* Upload area (when no PDF loaded) */}
+      {/* Landing (BIM-style) — when no PDF loaded */}
       {!pdfDoc && (
-        <label
-          className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border p-12 cursor-pointer hover:border-oe-blue hover:bg-oe-blue-subtle/10 transition-all"
-          onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.add('border-oe-blue', 'bg-oe-blue-subtle/10'); }}
-          onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.remove('border-oe-blue', 'bg-oe-blue-subtle/10'); }}
-          onDrop={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            e.currentTarget.classList.remove('border-oe-blue', 'bg-oe-blue-subtle/10');
-            const file = Array.from(e.dataTransfer.files).find(f => f.type === 'application/pdf');
-            if (file) {
-              const fakeEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
-              handleFileUpload(fakeEvent);
-            }
-          }}
-        >
-          <Upload className="h-10 w-10 text-content-tertiary mb-3" />
-          <p className="text-sm font-medium text-content-primary">
-            {t('takeoff_viewer.upload', { defaultValue: 'Drop a PDF here or click to upload' })}
-          </p>
-          <p className="text-xs text-content-tertiary mt-1">
-            {t('takeoff_viewer.upload_hint', { defaultValue: 'Supports architectural drawings, floor plans, sections' })}
-          </p>
-          <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
-        </label>
+        <div className="-mx-4 sm:-mx-7 -mt-6 -mb-6 bg-gradient-to-br from-slate-50 via-white to-blue-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20">
+          <div className="max-w-7xl mx-auto px-6 pt-16 pb-10">
+
+            {/* Row 1: Upload card (left) + Hero text (right) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch mb-8">
+
+              {/* LEFT — Upload card */}
+              <div className="flex flex-col">
+                <div className="rounded-2xl bg-white dark:bg-gray-800/60 border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6 flex flex-col h-full">
+                  <label
+                    aria-label={t('takeoff.landing_dropzone_aria', { defaultValue: 'Drop a PDF, PNG, JPG or TIFF here or click to browse.' })}
+                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.add('ring-2', 'ring-oe-blue/40'); }}
+                    onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.remove('ring-2', 'ring-oe-blue/40'); }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      e.currentTarget.classList.remove('ring-2', 'ring-oe-blue/40');
+                      const file = Array.from(e.dataTransfer.files).find((f) => f.type === 'application/pdf');
+                      if (file) {
+                        const fakeEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
+                        handleFileUpload(fakeEvent);
+                      }
+                    }}
+                    className="group/drop flex flex-col items-center justify-center gap-4 rounded-xl p-10 text-center cursor-pointer transition-all flex-1 border-2 border-dashed border-border-medium bg-gradient-to-br from-blue-50/60 via-white to-violet-50/40 dark:from-blue-950/20 dark:via-gray-800/40 dark:to-violet-950/20 hover:border-oe-blue/50 hover:shadow-md"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-oe-blue/10 to-violet-500/10 flex items-center justify-center group-hover/drop:scale-110 transition-transform">
+                      <FileUp size={26} className="text-oe-blue" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-content-primary">
+                        {t('takeoff.landing_drop_here', { defaultValue: 'Drop a PDF here or click to browse' })}
+                      </p>
+                      <p className="text-xs text-content-tertiary mt-1">
+                        {t('takeoff.landing_size_hint', { defaultValue: 'PDF, PNG, JPG, TIFF — up to 50MB' })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap justify-center">
+                      <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-oe-blue/8 text-oe-blue border border-oe-blue/15 font-semibold">.pdf</span>
+                      <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-oe-blue/8 text-oe-blue border border-oe-blue/15 font-semibold">.png</span>
+                      <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-oe-blue/8 text-oe-blue border border-oe-blue/15 font-semibold">.jpg</span>
+                      <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-oe-blue/8 text-oe-blue border border-oe-blue/15 font-semibold">.tiff</span>
+                    </div>
+                    <p className="text-[10px] text-content-quaternary leading-relaxed mt-1 text-center">
+                      {t('takeoff.landing_dropzone_hint', { defaultValue: 'Architectural drawings \u00B7 floor plans \u00B7 sections \u00B7 scans' })}
+                    </p>
+                    <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
+                  </label>
+                </div>
+              </div>
+
+              {/* RIGHT — Hero text */}
+              <div className="flex flex-col justify-center gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-content-primary tracking-tight leading-tight">
+                    {t('takeoff.landing_hero_title', { defaultValue: 'PDF Takeoff' })}
+                  </h1>
+                  <p className="text-base text-content-secondary mt-3 leading-relaxed">
+                    {t('takeoff.landing_hero_subtitle', {
+                      defaultValue: 'Click-to-measure on any drawing \u2014 lengths, areas, counts \u2014 with AI that suggests quantities and sends them straight into your BOQ.',
+                    })}
+                  </p>
+                  <p className="text-xs text-content-tertiary mt-3 leading-relaxed">
+                    {t('takeoff.landing_formats_detailed', {
+                      defaultValue: 'PDF (vector & raster) \u00B7 PNG \u00B7 JPG \u00B7 TIFF \u00B7 scales 1:50, 1:100, custom. DWG \u2192 DWG Takeoff module.',
+                    })}
+                  </p>
+                  <p className="mt-2 flex items-center gap-1.5 text-[11px] text-content-tertiary">
+                    <ShieldCheck size={12} className="shrink-0" />
+                    <span>
+                      {t('common.local_processing', { defaultValue: '100% Local Processing \u2014 Your files never leave your computer' })}
+                      {' \u00B7 '}
+                      {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC cad2data' })}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Row 2: Feature cards */}
+            <div className="mb-8">
+              <h2 className="text-xs font-bold text-content-tertiary uppercase tracking-widest mb-3">
+                {t('takeoff.landing_what_you_get', { defaultValue: 'What you get' })}
+              </h2>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                {landingFeatures.map((f, i) => (
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 rounded-xl p-4 bg-white dark:bg-gray-800/40 border border-border-light/60 hover:border-border-light hover:shadow-sm transition-all"
+                  >
+                    <div className={`w-8 h-8 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}>
+                      <f.icon size={15} className={f.ic} />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
+                      <p className="text-[11px] text-content-tertiary leading-snug mt-1">{f.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Row 3: Supported formats */}
+            <div>
+              <h2 className="text-xs font-bold text-content-tertiary uppercase tracking-widest mb-3">
+                {t('takeoff.landing_supported_formats', { defaultValue: 'Supported formats' })}
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                {landingFormats.map((f, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-start gap-3 rounded-xl p-3.5 bg-white dark:bg-gray-800/40 border transition-all ${
+                      f.primary
+                        ? 'border-oe-blue/30 shadow-sm ring-1 ring-oe-blue/10'
+                        : f.muted
+                          ? 'border-border-light/60 opacity-70'
+                          : 'border-border-light/60 hover:border-border-light hover:shadow-sm'
+                    }`}
+                  >
+                    <div
+                      className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${
+                        f.primary
+                          ? 'bg-oe-blue/10 border-oe-blue/20 text-oe-blue'
+                          : 'bg-surface-secondary border-border-light text-content-tertiary'
+                      }`}
+                    >
+                      <f.icon size={15} />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[11px] font-mono font-bold ${f.primary ? 'text-oe-blue' : 'text-content-primary'}`}>
+                          .{f.ext.toLowerCase()}
+                        </span>
+                        {f.primary && (
+                          <span className="text-[9px] font-semibold uppercase tracking-wider text-oe-blue">
+                            {t('takeoff.landing_fmt_primary', { defaultValue: 'Primary' })}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-content-tertiary leading-snug mt-0.5">{f.label}</p>
+                      <p className="text-[10px] text-content-quaternary mt-0.5">{f.size}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
       )}
 
       {isLoading && (

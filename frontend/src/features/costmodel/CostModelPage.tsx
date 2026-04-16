@@ -196,6 +196,13 @@ const PerformanceIndicator = memo(function PerformanceIndicator({
 
 /* ── S-Curve Chart (SVG) ───────────────────────────────────────────────── */
 
+/** EVM S-curve chart colors — semantic names for planned/earned/actual series */
+const CHART_COLORS = {
+  planned: 'var(--chart-planned, #2563eb)',
+  earned: 'var(--chart-earned, #16a34a)',
+  actual: 'var(--chart-actual, #dc2626)',
+} as const;
+
 const SCurveChart = memo(function SCurveChart({ data }: { data: SCurvePoint[] }) {
   const { t } = useTranslation();
 
@@ -330,7 +337,7 @@ const SCurveChart = memo(function SCurveChart({ data }: { data: SCurvePoint[] })
         <path
           d={plannedPath}
           fill="none"
-          stroke="#2563eb"
+          stroke={CHART_COLORS.planned}
           strokeWidth={2.5}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -338,7 +345,7 @@ const SCurveChart = memo(function SCurveChart({ data }: { data: SCurvePoint[] })
         <path
           d={earnedPath}
           fill="none"
-          stroke="#16a34a"
+          stroke={CHART_COLORS.earned}
           strokeWidth={2.5}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -346,7 +353,7 @@ const SCurveChart = memo(function SCurveChart({ data }: { data: SCurvePoint[] })
         <path
           d={actualPath}
           fill="none"
-          stroke="#dc2626"
+          stroke={CHART_COLORS.actual}
           strokeWidth={2.5}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -355,9 +362,9 @@ const SCurveChart = memo(function SCurveChart({ data }: { data: SCurvePoint[] })
         {/* Data points */}
         {data.map((d, i) => (
           <g key={`dots-${d.period}`}>
-            <circle cx={scales.x(i)} cy={scales.y(d.planned)} r={3} fill="#2563eb" />
-            <circle cx={scales.x(i)} cy={scales.y(d.earned)} r={3} fill="#16a34a" />
-            <circle cx={scales.x(i)} cy={scales.y(d.actual)} r={3} fill="#dc2626" />
+            <circle cx={scales.x(i)} cy={scales.y(d.planned)} r={3} fill={CHART_COLORS.planned} />
+            <circle cx={scales.x(i)} cy={scales.y(d.earned)} r={3} fill={CHART_COLORS.earned} />
+            <circle cx={scales.x(i)} cy={scales.y(d.actual)} r={3} fill={CHART_COLORS.actual} />
           </g>
         ))}
 
@@ -375,8 +382,8 @@ const SCurveChart = memo(function SCurveChart({ data }: { data: SCurvePoint[] })
             strokeWidth={0.5}
             strokeOpacity={0.1}
           />
-          <line x1={0} y1={6} x2={16} y2={6} stroke="#2563eb" strokeWidth={2.5} strokeLinecap="round" />
-          <circle cx={8} cy={6} r={3} fill="#2563eb" />
+          <line x1={0} y1={6} x2={16} y2={6} stroke={CHART_COLORS.planned} strokeWidth={2.5} strokeLinecap="round" />
+          <circle cx={8} cy={6} r={3} fill={CHART_COLORS.planned} />
           <text
             x={22}
             y={10}
@@ -387,8 +394,8 @@ const SCurveChart = memo(function SCurveChart({ data }: { data: SCurvePoint[] })
           >
             {t('costmodel.planned', 'Planned (PV)')}
           </text>
-          <line x1={100} y1={6} x2={116} y2={6} stroke="#16a34a" strokeWidth={2.5} strokeLinecap="round" />
-          <circle cx={108} cy={6} r={3} fill="#16a34a" />
+          <line x1={100} y1={6} x2={116} y2={6} stroke={CHART_COLORS.earned} strokeWidth={2.5} strokeLinecap="round" />
+          <circle cx={108} cy={6} r={3} fill={CHART_COLORS.earned} />
           <text
             x={122}
             y={10}
@@ -399,8 +406,8 @@ const SCurveChart = memo(function SCurveChart({ data }: { data: SCurvePoint[] })
           >
             {t('costmodel.earned', 'Earned (EV)')}
           </text>
-          <line x1={196} y1={6} x2={212} y2={6} stroke="#dc2626" strokeWidth={2.5} strokeLinecap="round" />
-          <circle cx={204} cy={6} r={3} fill="#dc2626" />
+          <line x1={196} y1={6} x2={212} y2={6} stroke={CHART_COLORS.actual} strokeWidth={2.5} strokeLinecap="round" />
+          <circle cx={204} cy={6} r={3} fill={CHART_COLORS.actual} />
           <text
             x={218}
             y={10}

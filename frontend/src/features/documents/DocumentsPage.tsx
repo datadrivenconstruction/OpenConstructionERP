@@ -6,7 +6,7 @@ import {
   Search, X, Loader2, FolderOpen, ChevronDown, HardDrive, Eye,
   MoreHorizontal, Pencil, Tag, Ruler, Send,
 } from 'lucide-react';
-import { Card, Button, Badge, EmptyState, Breadcrumb, ViewInBIMButton } from '@/shared/ui';
+import { Button, Badge, EmptyState, Breadcrumb, ViewInBIMButton } from '@/shared/ui';
 import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet, apiDelete, apiPatch } from '@/shared/lib/api';
@@ -55,11 +55,40 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
-function fileIcon(mime: string) {
-  if (mime.includes('pdf')) return <FileText size={20} className="text-red-500" />;
-  if (mime.includes('image')) return <Image size={20} className="text-green-500" />;
-  if (mime.includes('sheet') || mime.includes('excel') || mime.includes('csv')) return <FileSpreadsheet size={20} className="text-blue-500" />;
-  return <File size={20} className="text-content-tertiary" />;
+/**
+ * Returns an icon + background wrapper class tuned per file type so cards
+ * have visually consistent, color-coded file-type chips (matches the
+ * pattern used on the BIM landing + Data Explorer pages).
+ */
+function fileIcon(mime: string, name?: string) {
+  const lower = (name ?? '').toLowerCase();
+  if (mime.includes('pdf') || lower.endsWith('.pdf')) {
+    return <FileText size={16} className="text-red-500" />;
+  }
+  if (mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|tiff?)$/.test(lower)) {
+    return <Image size={16} className="text-emerald-500" />;
+  }
+  if (mime.includes('sheet') || mime.includes('excel') || mime.includes('csv') || /\.(xlsx?|csv)$/.test(lower)) {
+    return <FileSpreadsheet size={16} className="text-green-600" />;
+  }
+  if (/\.(dwg|dxf)$/.test(lower)) {
+    return <File size={16} className="text-orange-500" />;
+  }
+  if (/\.(rvt|ifc|nwd|nwc)$/.test(lower)) {
+    return <File size={16} className="text-blue-500" />;
+  }
+  return <File size={16} className="text-content-tertiary" />;
+}
+
+/** Tailwind background class for a file-type badge/avatar, paired with the icon. */
+function fileIconBg(mime: string, name?: string): string {
+  const lower = (name ?? '').toLowerCase();
+  if (mime.includes('pdf') || lower.endsWith('.pdf')) return 'bg-red-50 dark:bg-red-950/20';
+  if (mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|tiff?)$/.test(lower)) return 'bg-emerald-50 dark:bg-emerald-950/20';
+  if (mime.includes('sheet') || mime.includes('excel') || mime.includes('csv') || /\.(xlsx?|csv)$/.test(lower)) return 'bg-green-50 dark:bg-green-950/20';
+  if (/\.(dwg|dxf)$/.test(lower)) return 'bg-orange-50 dark:bg-orange-950/20';
+  if (/\.(rvt|ifc|nwd|nwc)$/.test(lower)) return 'bg-blue-50 dark:bg-blue-950/20';
+  return 'bg-surface-secondary';
 }
 
 function isPreviewable(mime: string): 'pdf' | 'image' | null {
@@ -656,8 +685,8 @@ export function DocumentsPage() {
 
   if (!projectId) {
     return (
-      <div className="w-full animate-fade-in">
-        <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.documents', 'Documents') }]} className="mb-4" />
+      <div className="w-full px-5 py-4 space-y-4 animate-fade-in">
+        <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.documents', 'Documents') }]} />
         <EmptyState
           icon={<FolderOpen size={28} strokeWidth={1.5} />}
           title={t('documents.select_project', { defaultValue: 'Select a project' })}
@@ -669,7 +698,7 @@ export function DocumentsPage() {
 
   return (
     <div
-      className="w-full animate-fade-in"
+      className="w-full px-5 py-4 space-y-4 animate-fade-in"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -678,19 +707,31 @@ export function DocumentsPage() {
         { label: t('nav.dashboard', 'Dashboard'), to: '/' },
         { label: t('nav.documents', 'Documents') },
         ...(activeProjectName ? [{ label: activeProjectName }] : []),
-      ]} className="mb-4" />
+      ]} />
 
       {/* No-project warning removed: the early return above already handles !projectId */}
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-content-primary">{t('documents.title', { defaultValue: 'Documents' })}</h1>
           <p className="mt-1 text-sm text-content-secondary">
             {t('documents.subtitle', { defaultValue: 'Upload and manage project files — drawings, contracts, specifications' })}
           </p>
         </div>
-        <div className="shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
+          {!isLoading && documents && documents.length > 0 && (
+            <div className="hidden sm:flex items-center gap-3 text-xs text-content-tertiary">
+              <span className="flex items-center gap-1.5">
+                <FileText size={13} />
+                {t('documents.total_count', { defaultValue: '{{count}} documents', count: stats.count })}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <HardDrive size={13} />
+                {t('documents.total_size', { defaultValue: '{{size}} total', size: formatSize(stats.totalSize) })}
+              </span>
+            </div>
+          )}
           <input
             ref={fileInputRef}
             type="file"
@@ -715,7 +756,7 @@ export function DocumentsPage() {
       </div>
 
       {/* ── Document flow ──────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 text-2xs text-content-quaternary mb-4">
+      <div className="flex items-center gap-2 text-2xs text-content-quaternary">
         <span className="text-content-tertiary">
           {t('documents.flow_label', { defaultValue: 'Document flow:' })}
         </span>
@@ -732,47 +773,50 @@ export function DocumentsPage() {
         </button>
       </div>
 
-      {/* ── Stats bar ───────────────────────────────────────────────────── */}
-      {!isLoading && documents && documents.length > 0 && (
-        <div className="flex items-center gap-4 mb-4 text-xs text-content-tertiary">
-          <span className="flex items-center gap-1.5">
-            <FileText size={13} />
-            {t('documents.total_count', { defaultValue: '{{count}} documents', count: stats.count })}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <HardDrive size={13} />
-            {t('documents.total_size', { defaultValue: '{{size}} total', size: formatSize(stats.totalSize) })}
-          </span>
-        </div>
-      )}
-
-      {/* ── Drop zone ───────────────────────────────────────────────────── */}
+      {/* ── Drop zone — matches BIM landing pattern ────────────────────── */}
       <div
-        className={`mb-5 rounded-xl border-2 border-dashed p-6 text-center transition-all duration-200 ${
+        className={`group/drop rounded-2xl border-2 border-dashed p-6 sm:p-8 text-center transition-all duration-200 cursor-pointer ${
           dragOver
-            ? 'border-oe-blue bg-oe-blue-subtle/30 scale-[1.01] shadow-lg'
-            : 'border-border-light hover:border-border'
+            ? 'border-oe-blue bg-oe-blue/5 scale-[1.005] shadow-md'
+            : 'border-border-medium bg-gradient-to-br from-blue-50/60 via-white to-violet-50/40 dark:from-blue-950/20 dark:via-gray-800/40 dark:to-violet-950/20 hover:border-oe-blue/50 hover:shadow-sm'
         }`}
         role="region"
         aria-label={t('documents.drop_zone', { defaultValue: 'File drop zone' })}
+        onClick={() => { if (projectId) fileInputRef.current?.click(); }}
       >
-        <Upload size={28} className={`mx-auto mb-3 transition-colors ${dragOver ? 'text-oe-blue' : 'text-content-tertiary'}`} />
-        <p className="text-sm text-content-secondary mb-1">
+        <div className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl transition-all ${
+          dragOver
+            ? 'bg-oe-blue/15'
+            : 'bg-gradient-to-br from-oe-blue/10 to-violet-500/10 group-hover/drop:scale-110'
+        }`}>
+          <Upload size={22} className={dragOver ? 'text-oe-blue' : 'text-oe-blue'} />
+        </div>
+        <p className="text-sm font-semibold text-content-primary">
           {dragOver
             ? t('documents.drop_now', { defaultValue: 'Drop files to upload' })
             : t('documents.drop_hint', { defaultValue: 'Drag & drop files here' })}
         </p>
-        <p className="text-xs text-content-tertiary mb-3">
+        <p className="text-xs text-content-tertiary mt-1">
           {t('documents.supported_types', { defaultValue: 'PDF, images, Excel, DWG, IFC — any file type (max 100 MB)' })}
         </p>
+        <div className="flex items-center justify-center gap-2 mt-3">
+          <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-red-500/8 text-red-500 border border-red-500/15 font-semibold">.pdf</span>
+          <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-emerald-500/8 text-emerald-600 border border-emerald-500/15 font-semibold">.img</span>
+          <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-green-500/8 text-green-600 border border-green-500/15 font-semibold">.xlsx</span>
+          <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-orange-500/8 text-orange-500 border border-orange-500/15 font-semibold">.dwg</span>
+          <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-blue-500/8 text-blue-500 border border-blue-500/15 font-semibold">.ifc</span>
+        </div>
         <button
           type="button"
           disabled={!projectId}
-          onClick={() => fileInputRef.current?.click()}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+          onClick={(e) => {
+            e.stopPropagation();
+            if (projectId) fileInputRef.current?.click();
+          }}
+          className={`mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
             projectId
-              ? 'border-oe-blue text-oe-blue hover:bg-oe-blue hover:text-white'
-              : 'border-border text-content-quaternary cursor-not-allowed'
+              ? 'bg-oe-blue text-white hover:bg-oe-blue-dark shadow-sm hover:shadow active:scale-[0.98]'
+              : 'bg-surface-secondary text-content-quaternary cursor-not-allowed'
           }`}
         >
           <Upload size={14} />
@@ -783,7 +827,7 @@ export function DocumentsPage() {
       </div>
 
       {/* ── Filters + Sort ──────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-5">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary pointer-events-none" />
           <input
@@ -827,7 +871,7 @@ export function DocumentsPage() {
 
       {/* ── CAD/BIM Models ──────────────────────────────────────────────── */}
       {cadSessions.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
               <HardDrive size={13} className="text-oe-blue" />
@@ -838,42 +882,44 @@ export function DocumentsPage() {
               {t('documents.open_explorer', { defaultValue: 'Open Explorer' })}
             </button>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {cadSessions.map((s) => {
               const fmt = (s.file_format || '').toUpperCase();
               const fmtColor: Record<string, string> = {
-                RVT: 'bg-blue-100 text-blue-700', IFC: 'bg-green-100 text-green-700',
-                DWG: 'bg-orange-100 text-orange-700', DGN: 'bg-purple-100 text-purple-700',
+                RVT: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
+                IFC: 'bg-green-50 text-green-600 dark:bg-green-950/30 dark:text-green-400',
+                DWG: 'bg-orange-50 text-orange-500 dark:bg-orange-950/30 dark:text-orange-400',
+                DGN: 'bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400',
               };
               return (
-                <Card
+                <button
                   key={s.session_id}
-                  padding="none"
-                  hoverable
-                  className="cursor-pointer"
+                  type="button"
                   onClick={() => navigate(`/data-explorer?session=${s.session_id}`)}
+                  className="group text-left rounded-xl border border-border-light shadow-sm hover:shadow-md hover:border-oe-blue/30 transition-all bg-surface-primary p-4 flex flex-col"
                 >
-                  <div className="flex items-center gap-3 p-3">
+                  <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue-subtle shrink-0">
-                      <HardDrive size={18} className="text-oe-blue" />
+                      <HardDrive size={16} className="text-oe-blue" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-content-primary truncate">{s.display_name}</p>
-                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                        <span className={`px-1.5 py-0.5 rounded text-2xs font-bold ${fmtColor[fmt] || 'bg-gray-100 text-gray-600'}`}>{fmt}</span>
-                        <span className="text-2xs text-content-tertiary">{s.element_count.toLocaleString()} elements</span>
-                        <span className="text-2xs text-content-quaternary">{s.extraction_time.toFixed(1)}s</span>
-                        {s.created_at && <span className="text-2xs text-content-quaternary"><DateDisplay value={s.created_at} /></span>}
-                        {s.is_permanent ? (
-                          <Badge variant="success" size="sm">{t('documents.saved', { defaultValue: 'Saved' })}</Badge>
-                        ) : (
-                          <Badge variant="neutral" size="sm">{t('documents.temporary', { defaultValue: '24h' })}</Badge>
-                        )}
-                      </div>
+                      <p className="text-sm font-medium text-content-primary truncate" title={s.display_name}>{s.display_name}</p>
+                      <p className="text-[11px] text-content-tertiary mt-1 flex items-center gap-1.5">
+                        <span className={`px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold ${fmtColor[fmt] || 'bg-surface-secondary text-content-tertiary'}`}>{fmt || '—'}</span>
+                        <span>{s.element_count.toLocaleString()} elements</span>
+                      </p>
                     </div>
-                    <ChevronDown size={14} className="text-content-tertiary -rotate-90 shrink-0" />
                   </div>
-                </Card>
+                  <div className="mt-3 pt-2.5 border-t border-border-light/60 flex items-center justify-between text-[10px] text-content-quaternary">
+                    <span>{s.extraction_time.toFixed(1)}s</span>
+                    {s.created_at && <span><DateDisplay value={s.created_at} /></span>}
+                    {s.is_permanent ? (
+                      <Badge variant="success" size="sm">{t('documents.saved', { defaultValue: 'Saved' })}</Badge>
+                    ) : (
+                      <Badge variant="neutral" size="sm">{t('documents.temporary', { defaultValue: '24h' })}</Badge>
+                    )}
+                  </div>
+                </button>
               );
             })}
           </div>
@@ -882,9 +928,11 @@ export function DocumentsPage() {
 
       {/* ── Documents grid ──────────────────────────────────────────────── */}
       {isLoading ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} padding="md"><div className="h-16 animate-pulse bg-surface-secondary rounded" /></Card>
+        <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-xl border border-border-light bg-surface-primary p-4 shadow-sm">
+              <div className="h-16 animate-pulse bg-surface-secondary rounded" />
+            </div>
           ))}
         </div>
       ) : sortedDocuments.length === 0 ? (
@@ -909,7 +957,7 @@ export function DocumentsPage() {
           />
         )
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {sortedDocuments.map((doc) => {
             const isDeleting = deleteMutation.isPending && deleteMutation.variables === doc.id;
             const isConfirming = confirmDeleteId === doc.id;
@@ -917,14 +965,12 @@ export function DocumentsPage() {
             const clickable = isCardClickable(doc);
 
             return (
-              <Card
+              <div
                 key={doc.id}
-                padding="none"
-                hoverable
-                className={`group ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
+                className={`group rounded-xl border border-border-light shadow-sm hover:shadow-md hover:border-oe-blue/30 transition-all bg-surface-primary flex flex-col ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 <div
-                  className={`flex items-start gap-3 px-4 py-3 ${clickable ? 'cursor-pointer' : 'cursor-default'}`}
+                  className={`flex items-start gap-3 p-4 flex-1 ${clickable ? 'cursor-pointer' : 'cursor-default'}`}
                   onClick={() => handleCardClick(doc)}
                   role={clickable ? 'button' : undefined}
                   tabIndex={clickable ? 0 : undefined}
@@ -940,12 +986,17 @@ export function DocumentsPage() {
                       : undefined
                   }
                 >
-                  <div className="mt-0.5 shrink-0">{fileIcon(doc.mime_type)}</div>
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 ${fileIconBg(doc.mime_type, doc.name)}`}>
+                    {fileIcon(doc.mime_type, doc.name)}
+                  </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-semibold text-content-primary truncate">{doc.name}</h3>
-                    <div className="flex items-center gap-2 mt-1 text-2xs text-content-tertiary">
-                      <span>{formatSize(doc.file_size)}</span>
-                      <span>&middot;</span>
+                    <h3 className="text-sm font-medium text-content-primary truncate" title={doc.name}>{doc.name}</h3>
+                    <p className="text-[11px] text-content-tertiary mt-1">
+                      {formatSize(doc.file_size)}
+                      {' \u00B7 '}
+                      <DateDisplay value={doc.created_at} />
+                    </p>
+                    <div className="flex items-center gap-1.5 flex-wrap mt-2">
                       <Badge variant="neutral" size="sm">{doc.category}</Badge>
                       {doc.version > 1 && <Badge variant="blue" size="sm">v{doc.version}</Badge>}
                       {doc.cde_state && (
@@ -953,13 +1004,8 @@ export function DocumentsPage() {
                           {doc.cde_state.toUpperCase()}
                         </Badge>
                       )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <p className="text-2xs text-content-quaternary">
-                        <DateDisplay value={doc.created_at} />
-                      </p>
                       {previewKind && (
-                        <span className="flex items-center gap-0.5 text-2xs text-oe-blue opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="flex items-center gap-0.5 text-[10px] text-oe-blue opacity-0 group-hover:opacity-100 transition-opacity">
                           <Eye size={10} />
                           {t('documents.preview', { defaultValue: 'Preview' })}
                         </span>
@@ -967,14 +1013,14 @@ export function DocumentsPage() {
                       <DocBIMIcon docId={doc.id} />
                     </div>
                     {doc.tags && doc.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1.5">
+                      <div className="flex flex-wrap gap-1 mt-2">
                         {doc.tags.slice(0, 3).map((tag) => (
-                          <span key={tag} className="rounded-full bg-content-primary/[0.04] px-2 py-[1px] text-[9px] font-medium text-content-tertiary">
+                          <span key={tag} className="rounded-full bg-content-primary/[0.04] px-2 py-[1px] text-[10px] font-medium text-content-tertiary">
                             {tag}
                           </span>
                         ))}
                         {doc.tags.length > 3 && (
-                          <span className="text-[9px] text-content-quaternary">+{doc.tags.length - 3}</span>
+                          <span className="text-[10px] text-content-quaternary">+{doc.tags.length - 3}</span>
                         )}
                       </div>
                     )}
@@ -1113,7 +1159,7 @@ export function DocumentsPage() {
                     )}
                   </div>
                 </div>
-              </Card>
+              </div>
             );
           })}
         </div>

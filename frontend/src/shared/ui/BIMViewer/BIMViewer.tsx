@@ -41,6 +41,7 @@ import {
   Tag,
   Settings,
 } from 'lucide-react';
+import { fetchBIMElementProperties } from '@/features/bim/api';
 import { SceneManager } from './SceneManager';
 import { ElementManager } from './ElementManager';
 import type { BIMElementData } from './ElementManager';
@@ -154,32 +155,174 @@ export interface BIMViewerProps {
   onSmartFilter?: (
     filterId: 'errors' | 'warnings' | 'unlinked_boq' | 'has_tasks' | 'has_docs',
   ) => void;
+  /** When true, the parent's filter sidebar is open — the viewer shifts
+   *  its top-left toolbar to the right so it doesn't sit behind the panel. */
+  leftPanelOpen?: boolean;
+  /** Width (in px) of the left filter panel — used to offset the toolbar
+   *  when `leftPanelOpen` is true. Defaults to 320 to match BIMFilterPanel. */
+  leftPanelWidth?: number;
 }
 
 /* ── Properties Table ──────────────────────────────────────────────────── */
 
+/** Recognise values that should be hidden as "empty". Excel exports from
+ *  DDC often emit the literal strings "None" or "0" for unset attributes;
+ *  showing them in the panel is noise. */
+function isEmptyValue(v: unknown): boolean {
+  if (v == null) return true;
+  if (typeof v === 'number' && v === 0) return true;
+  if (typeof v === 'string') {
+    const s = v.trim();
+    if (s === '' || s === '0' || s === 'None' || s === 'null' || s === 'N/A' || s === 'n/a') return true;
+  }
+  return false;
+}
+
+/** Parse German booleans (`WAHR`/`FALSCH`) and their English equivalents. */
+function parseBool(v: unknown): boolean | null {
+  if (typeof v === 'boolean') return v;
+  if (typeof v !== 'string') return null;
+  const s = v.trim().toLowerCase();
+  if (s === 'wahr' || s === 'true' || s === 'yes' || s === 'y') return true;
+  if (s === 'falsch' || s === 'false' || s === 'no' || s === 'n') return false;
+  return null;
+}
+
+/** Parse a DDC-style property bag encoded as `Key=Value; Key=Value` into
+ *  a {key: value} dict. Returns null if the string doesn't look like one
+ *  (needs at least two `;`-separated `Key=Value` pairs). */
+function parseMaterialString(v: unknown): Record<string, string> | null {
+  if (typeof v !== 'string') return null;
+  if (!v.includes('=') || !v.includes(';')) return null;
+  const parts = v.split(';').map((p) => p.trim()).filter(Boolean);
+  if (parts.length < 2) return null;
+  const out: Record<string, string> = {};
+  for (const part of parts) {
+    const eq = part.indexOf('=');
+    if (eq <= 0) return null; // not well-formed
+    const k = part.slice(0, eq).trim();
+    const raw = part.slice(eq + 1).trim();
+    const val = raw.replace(/^"(.*)"$/, '$1');
+    if (!k || isEmptyValue(val)) continue;
+    out[k] = val;
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
+/** Render `key=value; key=value` as a compact sub-table. */
+function SubTable({ data }: { data: Record<string, string> }) {
+  return (
+    <div className="mt-1 rounded-md border border-border-light/60 bg-surface-secondary/40 divide-y divide-border-light/40">
+      {Object.entries(data).map(([k, v]) => (
+        <div key={k} className="flex justify-between items-start gap-2 py-1 px-2">
+          <span className="text-[10px] text-content-tertiary shrink-0 max-w-[45%] truncate" title={k}>
+            {k}
+          </span>
+          <span className="text-[10px] text-content-primary text-end break-words min-w-0" title={v}>
+            {v}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Render a boolean as a coloured tag. */
+function BoolTag({ value }: { value: boolean }) {
+  return value ? (
+    <span className="inline-flex items-center rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 px-2 py-[1px] text-[10px] font-semibold">
+      true
+    </span>
+  ) : (
+    <span className="inline-flex items-center rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 px-2 py-[1px] text-[10px] font-semibold">
+      false
+    </span>
+  );
+}
+
+/** Normalise a DDC Parquet column name for display.
+ *  `[Type] Category` → `Type: Category`; `category` → `Category`. */
+function prettyKey(raw: string): string {
+  let k = raw.trim();
+  const typePrefix = k.match(/^\[Type\]\s*(.+)$/i);
+  if (typePrefix) {
+    k = `Type: ${typePrefix[1]!}`;
+  }
+  // Title-case single-word lowercase keys only; leave already-cased keys alone.
+  if (/^[a-z][a-z0-9_ ]*$/.test(k)) {
+    k = k.replace(/[_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  return k;
+}
+
+/** Sort keys so the most-useful identity fields surface at the top. */
+const KEY_PRIORITY: Record<string, number> = {
+  id: -100,
+  type_name: -90,
+  'type name': -90,
+  name: -85,
+  category: -80,
+  'family name': -75,
+  family: -75,
+  type: -70,
+  uniqueid: -65,
+  ifcguid: -60,
+  workset: -55,
+  'design option': -50,
+};
+
+function sortedEntries(props: Record<string, unknown>): Array<[string, unknown]> {
+  return Object.entries(props)
+    .filter(([, v]) => !isEmptyValue(v))
+    .sort(([a], [b]) => {
+      const pa = KEY_PRIORITY[a.toLowerCase()] ?? 0;
+      const pb = KEY_PRIORITY[b.toLowerCase()] ?? 0;
+      if (pa !== pb) return pa - pb;
+      return a.localeCompare(b);
+    });
+}
+
 function PropertiesTable({ properties }: { properties: Record<string, unknown> }) {
-  const entries = Object.entries(properties).filter(([, v]) => v != null && v !== '');
+  const entries = sortedEntries(properties);
   if (entries.length === 0) return null;
 
   return (
     <div className="space-y-0.5">
-      {entries.map(([key, value]) => (
-        <div
-          key={key}
-          className="flex justify-between items-start gap-3 py-1.5 px-2 rounded hover:bg-surface-secondary/50 group"
-        >
-          <span className="text-[11px] text-content-tertiary shrink-0 max-w-[40%] truncate" title={key}>
-            {key}
-          </span>
-          <span
-            className="text-[11px] text-content-primary font-medium text-end break-words min-w-0"
-            title={String(value)}
+      {entries.map(([key, value]) => {
+        const label = prettyKey(key);
+        const bool = parseBool(value);
+        const mat = bool === null ? parseMaterialString(value) : null;
+        return (
+          <div
+            key={key}
+            className="flex flex-col gap-0.5 py-1.5 px-2 rounded hover:bg-surface-secondary/50 group"
           >
-            {String(value)}
-          </span>
-        </div>
-      ))}
+            <div className="flex justify-between items-start gap-3">
+              <span
+                className="text-[11px] text-content-tertiary shrink-0 max-w-[45%] truncate"
+                title={key}
+              >
+                {label}
+              </span>
+              {bool !== null ? (
+                <BoolTag value={bool} />
+              ) : mat ? (
+                <span className="text-[10px] text-content-tertiary italic">
+                  {Object.keys(mat).length} fields
+                </span>
+              ) : (
+                <span
+                  className="text-[11px] text-content-primary font-medium text-end break-words min-w-0"
+                  title={String(value)}
+                >
+                  {String(value)}
+                </span>
+              )}
+            </div>
+            {mat && <SubTable data={mat} />}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -241,6 +384,8 @@ export function BIMViewer({
   onLinkActivity,
   onLinkRequirement,
   onSmartFilter,
+  leftPanelOpen = false,
+  leftPanelWidth = 320,
 }: BIMViewerProps) {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -703,38 +848,123 @@ export function BIMViewer({
     onElementSelect?.(null);
   }, [onElementSelect]);
 
-  /** Fetch all Parquet columns for the selected element via the DuckDB
-   *  dataframe query endpoint. This surfaces 1000+ columns from "complete"
-   *  mode uploads that the JSONB `properties` column only has a subset of. */
-  const handleFetchAllProperties = useCallback(async () => {
-    if (!selectedElement || !modelId) return;
-    setParquetLoading(true);
-    try {
-      const resp = await fetch(`/api/v1/bim_hub/models/${modelId}/dataframe/query/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filters: [{ column: 'id', op: '=', value: selectedElement.id }],
-          limit: 1,
-        }),
-      });
-      if (resp.ok) {
-        const rows: Record<string, unknown>[] = await resp.json();
-        if (rows.length > 0) {
-          setParquetProps(rows[0]!);
-        } else {
-          setParquetProps({});
-        }
-      } else {
-        setParquetProps(null);
-      }
-    } catch {
+  /** Per-element Parquet row cache. Keyed by revitId (mesh_ref / DAE node
+   *  id) so re-clicking an element is instant — no refetch, no skeleton
+   *  flash. Cleared when the model changes (below). */
+  const parquetCacheRef = useRef<Map<string, Record<string, unknown> | null>>(new Map());
+  // Abort in-flight fetch when the user picks a different element mid-request,
+  // so a slow query for element A never overwrites fresh data for element B.
+  const parquetAbortRef = useRef<AbortController | null>(null);
+
+  /** Resolve the Revit ElementId of the currently-selected element. The
+   *  Parquet's primary key column is `id` and contains this value — it is
+   *  exposed on the BIMElement row as `mesh_ref`. Unmatched stubs use the
+   *  DAE node name (backend-patched to equal the Revit id). */
+  const revitIdOf = useCallback((el: BIMElementData | null): string | null => {
+    if (!el) return null;
+    const props = el.properties as Record<string, unknown> | undefined;
+    const nodeName = props?.node_name as string | undefined;
+    const propId = props?.id as string | undefined;
+    return el.mesh_ref || propId || nodeName || el.stable_id || null;
+  }, []);
+
+  // Clear the cache when the model itself changes — a new model has a
+  // different Parquet and potentially colliding ids.
+  useEffect(() => {
+    parquetCacheRef.current.clear();
+    parquetAbortRef.current?.abort();
+    parquetAbortRef.current = null;
+    setParquetProps(null);
+    setParquetLoading(false);
+  }, [modelId]);
+
+  // Auto-fetch the full Parquet row as soon as an element is selected so
+  // the user sees all properties without switching tabs. Results are cached
+  // per revitId in `parquetCacheRef` — re-clicking the same element is
+  // instant and shows no skeleton flash.
+  useEffect(() => {
+    if (!selectedElement || !modelId) {
       setParquetProps(null);
-    } finally {
+      setParquetLoading(false);
+      return;
+    }
+    const revitId = revitIdOf(selectedElement);
+    if (!revitId) {
+      setParquetProps(null);
+      setParquetLoading(false);
+      return;
+    }
+
+    // Cache hit → render immediately, no loading state, no flash.
+    const cached = parquetCacheRef.current.get(revitId);
+    if (cached !== undefined) {
+      setParquetProps(cached);
       setParquetLoading(false);
       setParquetExpanded(true);
+      return;
     }
-  }, [selectedElement, modelId]);
+
+    // Cancel any in-flight fetch for the previous selection.
+    parquetAbortRef.current?.abort();
+    const ac = new AbortController();
+    parquetAbortRef.current = ac;
+
+    setParquetLoading(true);
+    setParquetProps(null);
+
+    void (async () => {
+      try {
+        const row = await fetchBIMElementProperties(modelId, revitId, ac.signal);
+        if (ac.signal.aborted) return;
+        parquetCacheRef.current.set(revitId, row);
+        setParquetProps(row);
+      } catch (err) {
+        // Abort is expected when the user clicks a new element mid-fetch —
+        // we don't want to null out state, the next effect run will handle it.
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        if (!ac.signal.aborted) setParquetProps(null);
+      } finally {
+        if (!ac.signal.aborted) {
+          setParquetLoading(false);
+          setParquetExpanded(true);
+        }
+      }
+    })();
+
+    return () => {
+      ac.abort();
+    };
+  }, [selectedElement, modelId, revitIdOf]);
+
+  /** Kept for the legacy "All properties" refresh button so it still
+   *  force-refetches on demand, bypassing the cache. */
+  const handleFetchAllProperties = useCallback(async () => {
+    if (!selectedElement || !modelId) return;
+    const revitId = revitIdOf(selectedElement);
+    if (!revitId) {
+      setParquetProps({});
+      return;
+    }
+    parquetCacheRef.current.delete(revitId);
+    parquetAbortRef.current?.abort();
+    const ac = new AbortController();
+    parquetAbortRef.current = ac;
+
+    setParquetLoading(true);
+    try {
+      const row = await fetchBIMElementProperties(modelId, revitId, ac.signal);
+      parquetCacheRef.current.set(revitId, row);
+      if (!ac.signal.aborted) setParquetProps(row);
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      if (!ac.signal.aborted) setParquetProps(null);
+    } finally {
+      if (!ac.signal.aborted) {
+        setParquetLoading(false);
+        setParquetExpanded(true);
+      }
+    }
+  }, [selectedElement, modelId, revitIdOf]);
 
   const handleToggleGrid = useCallback(() => {
     sceneRef.current?.toggleGrid();
@@ -983,18 +1213,48 @@ export function BIMViewer({
     return selectedElement.properties;
   }, [selectedElement]);
 
-  /** Model summary breakdown — computed once per element set change.
-   *  Shows category and storey breakdowns in the properties panel when
-   *  no element is individually selected. */
+  /** Model summary breakdown — reactive to the active view.
+   *
+   *  Scope precedence (highest wins):
+   *    1. **selection** — user has 2+ elements selected. The summary
+   *       aggregates just those elements (useful for "what did I just
+   *       isolate?" and "how much of X is in my picks?").
+   *    2. **filtered** — a filterPredicate is applied (category chip /
+   *       storey chip / discipline toggle). The summary reflects what
+   *       the user actually SEES in the viewport.
+   *    3. **all** — no filter, no multi-selection: full model stats.
+   *
+   *  The backing `elements` array can itself already be a group subset
+   *  (BIMPage restricts the query when `?group=<id>` is in the URL), so
+   *  when a saved group is active the "all" scope is really "whole group".
+   *  The `total` / `shown` counts describe what's in `elements` vs what
+   *  passes the active scope filter. */
   const modelSummary = useMemo(() => {
-    const els = elements ?? [];
-    if (els.length === 0) return null;
+    const all = elements ?? [];
+    if (all.length === 0) return null;
+
+    const selectedIds = selectedElementIds ?? [];
+    let subset: BIMElementData[];
+    let scope: 'all' | 'filtered' | 'selection';
+    if (selectedIds.length > 1) {
+      const set = new Set(selectedIds);
+      subset = all.filter((el) => set.has(el.id));
+      scope = 'selection';
+    } else if (filterPredicate) {
+      subset = all.filter(filterPredicate);
+      scope = 'filtered';
+    } else {
+      subset = all;
+      scope = 'all';
+    }
+    if (subset.length === 0) return null;
+
     const byCat = new Map<string, number>();
     const byStorey = new Map<string, number>();
     let totalVolume = 0;
     let totalArea = 0;
     let totalLength = 0;
-    for (const el of els) {
+    for (const el of subset) {
       const cat = el.element_type || 'Unknown';
       byCat.set(cat, (byCat.get(cat) ?? 0) + 1);
       const st = el.storey || 'Unassigned';
@@ -1005,11 +1265,19 @@ export function BIMViewer({
         totalLength += el.quantities['length'] ?? el.quantities['Length'] ?? 0;
       }
     }
-    // Sort by count descending
     const categories = [...byCat.entries()].sort((a, b) => b[1] - a[1]);
     const storeys = [...byStorey.entries()].sort((a, b) => b[1] - a[1]);
-    return { categories, storeys, totalVolume, totalArea, totalLength };
-  }, [elements]);
+    return {
+      categories,
+      storeys,
+      totalVolume,
+      totalArea,
+      totalLength,
+      scope,
+      total: all.length,
+      shown: subset.length,
+    };
+  }, [elements, filterPredicate, selectedElementIds]);
 
   const elementQuantities = useMemo(() => {
     if (!selectedElement?.quantities) return {};
@@ -1045,7 +1313,7 @@ export function BIMViewer({
                     })
                   : t('bim.loading_model', { defaultValue: 'Loading model…' })}
               </span>
-              {geometryProgress !== null && (
+              {geometryProgress !== null ? (
                 <>
                   <div className="h-2 w-full rounded-full bg-surface-tertiary overflow-hidden ring-1 ring-border-light">
                     <div
@@ -1067,6 +1335,23 @@ export function BIMViewer({
                   <span className="text-[10px] text-content-quaternary text-center mt-1">
                     {t('bim.loading_navigate_hint', {
                       defaultValue: 'You can navigate to other pages — loading will continue in the background',
+                    })}
+                  </span>
+                </>
+              ) : (
+                <>
+                  {/* Indeterminate bar while the element list / model meta is
+                      fetching — users need motion feedback so the UI doesn't
+                      feel frozen during the pre-geometry phase. */}
+                  <div className="h-2 w-full rounded-full bg-surface-tertiary overflow-hidden ring-1 ring-border-light relative">
+                    <div
+                      className="absolute top-0 h-full w-1/3 rounded-full bg-gradient-to-r from-transparent via-oe-blue to-transparent"
+                      style={{ animation: 'oeBimIndeterminate 1.4s ease-in-out infinite' }}
+                    />
+                  </div>
+                  <span className="text-[11px] text-content-tertiary text-center">
+                    {t('bim.loading_elements', {
+                      defaultValue: 'Fetching element list…',
                     })}
                   </span>
                 </>
@@ -1098,11 +1383,13 @@ export function BIMViewer({
         </div>
       )}
 
-      {/* Toolbar overlay — organised by function group with dividers.
-          Grouping follows the professional 6-group taxonomy from the research
-          brief: Camera | Selection | Visibility | (contextual tools follow). */}
-      <div className="absolute top-3 start-3 flex items-center gap-1 z-20 rounded-lg bg-surface-primary border border-border-light shadow-sm p-1">
-        {/* Camera views — each has a unique icon */}
+      {/* Top-left toolbar — one row: camera presets on the left,
+          a soft divider, then visibility toggles. Shifts right when the
+          parent's filter sidebar is open so it never sits behind it. */}
+      <div
+        className="absolute top-3 z-20 flex items-center gap-1 rounded-lg bg-surface-primary border border-border-light shadow-sm p-1 transition-[inset-inline-start] duration-200"
+        style={{ insetInlineStart: leftPanelOpen ? leftPanelWidth + 12 : 12 }}
+      >
         <ToolbarButton
           icon={Home}
           label={t('bim.zoom_fit', { defaultValue: 'Fit all (F)' })}
@@ -1139,8 +1426,7 @@ export function BIMViewer({
           onClick={handleZoomToSelection}
           variant="group"
         />
-        <div className="w-px h-5 bg-border-light mx-0.5" />
-        {/* Visibility toggles — distinct icons for each */}
+        <div className="w-px h-5 bg-border-light mx-1.5" />
         <ToolbarButton
           icon={LayoutGrid}
           label={t('bim.wireframe', { defaultValue: 'Wireframe (W)' })}
@@ -1428,69 +1714,111 @@ export function BIMViewer({
         </div>
       )}
 
-      {/* Model summary panel — shown when elements are loaded but no
-          individual element is selected.  Gives the user a quick overview
-          of the model breakdown by category and storey. */}
-      {!selectedElement && modelSummary && elementCount > 0 && (
+      {/* Summary panel — reactive to active scope:
+            * no selection + no filter → full model
+            * filter active            → filtered subset
+            * 2+ elements selected     → selection summary
+          A single selected element still shows the Properties panel
+          (handled above). */}
+      {(!selectedElement || (selectedElementIds && selectedElementIds.length > 1)) && modelSummary && elementCount > 0 && (
         <div className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur-sm border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] overflow-y-auto">
           <div className="px-4 py-3 border-b border-border-light">
             <div className="flex items-center gap-2">
-              <LayoutGrid size={16} className="text-oe-blue shrink-0" />
+              {modelSummary.scope === 'selection' ? (
+                <CheckSquare size={16} className="text-oe-blue shrink-0" />
+              ) : modelSummary.scope === 'filtered' ? (
+                <Tag size={16} className="text-oe-blue shrink-0" />
+              ) : (
+                <LayoutGrid size={16} className="text-oe-blue shrink-0" />
+              )}
               <h3 className="text-sm font-bold text-content-primary">
-                {t('bim.model_summary', { defaultValue: 'Model summary' })}
+                {modelSummary.scope === 'selection'
+                  ? t('bim.selection_summary', { defaultValue: 'Selection summary' })
+                  : modelSummary.scope === 'filtered'
+                    ? t('bim.filtered_summary', { defaultValue: 'Filtered summary' })
+                    : t('bim.model_summary', { defaultValue: 'Model summary' })}
               </h3>
             </div>
-            <div className="mt-1.5 flex items-center gap-2">
+            <div className="mt-1.5 flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center rounded-md bg-oe-blue/10 px-2 py-0.5 text-xs font-semibold text-oe-blue tabular-nums">
-                {elementCount.toLocaleString()}
+                {modelSummary.shown.toLocaleString()}
               </span>
               <span className="text-xs text-content-tertiary">
                 {t('bim.model_total_elements_label', { defaultValue: 'elements' })}
               </span>
+              {modelSummary.scope !== 'all' && modelSummary.total !== modelSummary.shown && (
+                <span className="text-[10px] text-content-quaternary tabular-nums">
+                  {t('bim.of_total', { defaultValue: 'of {{total}}', total: modelSummary.total.toLocaleString() })}
+                </span>
+              )}
             </div>
           </div>
           <div className="px-4 py-3 space-y-4">
-            {/* Category breakdown */}
+            {/* Category breakdown — inline bar acts as the row background,
+                no stripy half-filled progress track. Each row shows the
+                share visually via a tinted fill that stretches from the
+                left, with category name and count overlaid. */}
             <div>
-              <h4 className="text-xs font-bold text-content-primary mb-2">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-content-tertiary mb-2">
                 {t('bim.by_category', { defaultValue: 'By category' })}
               </h4>
-              <div className="space-y-1.5 max-h-44 overflow-y-auto">
+              <div className="space-y-0.5 max-h-48 overflow-y-auto -mx-1 px-1">
                 {modelSummary.categories.slice(0, 15).map(([cat, count]) => {
                   const maxCount = modelSummary.categories[0]?.[1] ?? 1;
                   const pct = Math.max(4, (count / maxCount) * 100);
                   return (
-                    <div key={cat}>
-                      <div className="flex items-center justify-between text-xs mb-0.5">
-                        <span className="text-content-secondary truncate mr-2 font-medium">{cat}</span>
-                        <span className="inline-flex items-center rounded bg-surface-tertiary px-1.5 py-px text-[11px] font-semibold text-content-primary tabular-nums shrink-0">{count}</span>
-                      </div>
-                      <div className="h-1 w-full rounded-full bg-surface-tertiary overflow-hidden">
-                        <div className="h-full rounded-full bg-oe-blue/40" style={{ width: `${pct}%` }} />
-                      </div>
+                    <div
+                      key={cat}
+                      className="relative flex items-center justify-between rounded-md px-2 py-1 overflow-hidden"
+                    >
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-y-0 left-0 bg-oe-blue/10 rounded-md pointer-events-none"
+                        style={{ width: `${pct}%` }}
+                      />
+                      <span className="relative text-xs text-content-secondary truncate mr-2 font-medium">{cat}</span>
+                      <span className="relative text-[11px] font-semibold text-content-primary tabular-nums shrink-0">
+                        {count.toLocaleString()}
+                      </span>
                     </div>
                   );
                 })}
                 {modelSummary.categories.length > 15 && (
-                  <div className="text-[11px] text-content-quaternary italic pt-0.5">
-                    + {modelSummary.categories.length - 15} more
+                  <div className="text-[11px] text-content-quaternary italic pt-0.5 pl-2">
+                    + {modelSummary.categories.length - 15} {t('common.more', { defaultValue: 'more' })}
                   </div>
                 )}
               </div>
             </div>
-            {/* Storey breakdown */}
+            {/* Storey breakdown — same row-bg style for visual rhythm */}
             {modelSummary.storeys.length > 1 && (
               <div>
-                <h4 className="text-xs font-bold text-content-primary mb-2">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-content-tertiary mb-2">
                   {t('bim.by_storey', { defaultValue: 'By storey' })}
                 </h4>
-                <div className="space-y-1 max-h-32 overflow-y-auto">
-                  {modelSummary.storeys.map(([st, count]) => (
-                    <div key={st} className="flex items-center justify-between text-xs">
-                      <span className="text-content-secondary truncate mr-2">{st}</span>
-                      <span className="inline-flex items-center rounded bg-surface-tertiary px-1.5 py-px text-[11px] font-semibold text-content-primary tabular-nums shrink-0">{count}</span>
-                    </div>
-                  ))}
+                <div className="space-y-0.5 max-h-36 overflow-y-auto -mx-1 px-1">
+                  {(() => {
+                    const maxS = modelSummary.storeys[0]?.[1] ?? 1;
+                    return modelSummary.storeys.map(([st, count]) => {
+                      const pct = Math.max(4, (count / maxS) * 100);
+                      return (
+                        <div
+                          key={st}
+                          className="relative flex items-center justify-between rounded-md px-2 py-1 overflow-hidden"
+                        >
+                          <div
+                            aria-hidden="true"
+                            className="absolute inset-y-0 left-0 bg-emerald-500/10 rounded-md pointer-events-none"
+                            style={{ width: `${pct}%` }}
+                          />
+                          <span className="relative text-xs text-content-secondary truncate mr-2">{st}</span>
+                          <span className="relative text-[11px] font-semibold text-content-primary tabular-nums shrink-0">
+                            {count.toLocaleString()}
+                          </span>
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             )}
@@ -1553,27 +1881,61 @@ export function BIMViewer({
 
       {/* Properties panel (when element selected) — tabbed layout */}
       {selectedElement && (
-        <div className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur-sm border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] flex flex-col">
+        <div data-testid="bim-properties-panel" className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur-sm border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] flex flex-col">
           <div className="p-3 border-b border-border-light shrink-0">
-            <div className="flex items-center justify-between mb-0.5">
-              <h3 className="text-sm font-semibold text-content-primary truncate">
-                {(selectedElement.properties as Record<string, unknown>)?.type_name as string
-                  || selectedElement.name
-                  || selectedElement.element_type
-                  || selectedElement.id}
-              </h3>
-              <button
-                onClick={handleCloseProperties}
-                className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary transition-colors"
-                aria-label={t('common.close', { defaultValue: 'Close' })}
-              >
-                <span className="text-xs font-bold">&times;</span>
-              </button>
-            </div>
-            {/* Category subtitle */}
-            {selectedElement.element_type && (
-              <p className="text-[10px] text-content-tertiary mb-0.5">{selectedElement.element_type}</p>
-            )}
+            {(() => {
+              // Is the element an "Unmatched" stub (mesh has no BIMElement
+              // row yet — Parquet round-trip will fill in the real values)?
+              // While loading, we show neutral skeleton bars instead of the
+              // literal "Unmatched" placeholder — otherwise clicking any
+              // stub flashes "Unmatched" for a frame before the real name
+              // arrives, which looks like a bug.
+              const isStub = selectedElement.element_type === 'Unmatched';
+              const stubLoading = isStub && !parquetProps && parquetLoading;
+
+              const rawTitle = isStub && parquetProps
+                ? ((parquetProps['type name'] ?? parquetProps.type_name ?? parquetProps.name ?? selectedElement.name) as string)
+                : ((selectedElement.properties as Record<string, unknown>)?.type_name as string
+                    || selectedElement.name
+                    || (isStub ? '' : selectedElement.element_type)
+                    || selectedElement.id);
+
+              const rawCategory = isStub && parquetProps
+                ? String(parquetProps.category ?? '')
+                : (isStub ? '' : selectedElement.element_type);
+              const prettyCategory = rawCategory
+                ? rawCategory.replace(/^OST_/, '').replace(/([a-z])([A-Z])/g, '$1 $2')
+                : '';
+
+              // Key the real-content block on the resolved title so a new
+              // element or a stub resolving from skeleton to full data
+              // re-triggers the 200ms fade-in — no pop-in flicker.
+              const fadeKey = stubLoading ? '__skeleton__' : `${rawTitle}|${prettyCategory}`;
+
+              return (
+                <div key={fadeKey} className="animate-fade-in">
+                  <div className="flex items-center justify-between mb-0.5">
+                    {stubLoading ? (
+                      <div className="h-4 flex-1 mr-2 rounded bg-surface-secondary animate-pulse" />
+                    ) : (
+                      <h3 className="text-sm font-semibold text-content-primary truncate">{rawTitle}</h3>
+                    )}
+                    <button
+                      onClick={handleCloseProperties}
+                      className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary transition-colors"
+                      aria-label={t('common.close', { defaultValue: 'Close' })}
+                    >
+                      <span className="text-xs font-bold">&times;</span>
+                    </button>
+                  </div>
+                  {stubLoading ? (
+                    <div className="h-2.5 w-20 rounded bg-surface-secondary animate-pulse mb-0.5" />
+                  ) : prettyCategory ? (
+                    <p className="text-[10px] text-content-tertiary mb-0.5">{prettyCategory}</p>
+                  ) : null}
+                </div>
+              );
+            })()}
             {/* Element ID(s) — clickable to copy */}
             <button
               type="button"
@@ -1602,6 +1964,62 @@ export function BIMViewer({
               </svg>
             </button>
           </div>
+
+          {/* Quick-action bar — always visible, not buried in a tab */}
+          {(onAddToBOQ || onCreateTask || onLinkDocument || onLinkActivity || onLinkRequirement) && (
+            <div className="px-3 py-1.5 border-b border-border-light shrink-0 flex flex-wrap gap-1">
+              {onAddToBOQ && (
+                <button
+                  type="button"
+                  onClick={() => onAddToBOQ([selectedElement])}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-oe-blue/10 text-oe-blue hover:bg-oe-blue/20 border border-oe-blue/20 transition-colors"
+                >
+                  <Plus size={10} />
+                  {t('bim.quick_boq', { defaultValue: 'BOQ' })}
+                </button>
+              )}
+              {onCreateTask && (
+                <button
+                  type="button"
+                  onClick={() => onCreateTask(selectedElement)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-colors"
+                >
+                  <Plus size={10} />
+                  {t('bim.quick_task', { defaultValue: 'Task' })}
+                </button>
+              )}
+              {onLinkDocument && (
+                <button
+                  type="button"
+                  onClick={() => onLinkDocument(selectedElement)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-violet-500/10 text-violet-700 dark:text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-colors"
+                >
+                  <Plus size={10} />
+                  {t('bim.quick_doc', { defaultValue: 'Document' })}
+                </button>
+              )}
+              {onLinkActivity && (
+                <button
+                  type="button"
+                  onClick={() => onLinkActivity(selectedElement)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors"
+                >
+                  <Plus size={10} />
+                  {t('bim.quick_schedule', { defaultValue: 'Schedule' })}
+                </button>
+              )}
+              {onLinkRequirement && (
+                <button
+                  type="button"
+                  onClick={() => onLinkRequirement(selectedElement)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium bg-violet-500/10 text-violet-700 dark:text-violet-400 hover:bg-violet-500/20 border border-violet-500/20 transition-colors"
+                >
+                  <Plus size={10} />
+                  {t('bim.quick_req', { defaultValue: 'Requirement' })}
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Tab bar */}
           <div className="flex border-b border-border-light shrink-0">

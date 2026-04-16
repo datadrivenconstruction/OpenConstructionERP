@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import {
@@ -800,7 +800,10 @@ export function ReportsPage() {
   const [builderGenerating, setBuilderGenerating] = useState(false);
 
   // Load projects on mount
+  const hasLoadedProjects = useRef(false);
   useEffect(() => {
+    if (hasLoadedProjects.current) return;
+    hasLoadedProjects.current = true;
     let cancelled = false;
     (async () => {
       try {
@@ -821,7 +824,7 @@ export function ReportsPage() {
     return () => {
       cancelled = true;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeProjectId, setActiveProject]);
 
   // Load BOQs when project changes
   useEffect(() => {

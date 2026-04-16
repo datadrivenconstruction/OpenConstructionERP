@@ -13,6 +13,8 @@ import { create } from 'zustand';
 import {
   uploadCADFile,
   uploadBIMData,
+  generateBIMPDFSheets,
+  fetchBIMModel,
   type BIMCadUploadResponse,
 } from '@/features/bim/api';
 
@@ -47,6 +49,22 @@ export interface BIMUploadJob {
   /** Converter id when status is 'converter_required'. */
   converterId: string | null;
 
+  /** When true, the store will fire a background PDF-sheet generation
+   *  request once the model record reaches status="ready" on the
+   *  backend.  The request is deliberately delayed: triggering it
+   *  immediately makes the PDF DDC subprocess compete with the model
+   *  conversion DDC, which can stall the upload entirely. */
+  generatePdfSheets: boolean;
+
+  /** Lifecycle of the optional PDF-sheet generation:
+   *    - 'idle'        — no PDF requested, or model not ready yet
+   *    - 'generating'  — backend has accepted the PDF job and is exporting
+   *    - 'done'        — PDF generation finished successfully
+   *    - 'failed'      — backend rejected or DDC failed; ``pdfError`` is set
+   */
+  pdfStatus: 'idle' | 'generating' | 'done' | 'failed';
+  pdfError: string | null;
+
   startedAt: number;
   completedAt: number | null;
 }
@@ -62,6 +80,9 @@ export interface StartUploadParams {
   geometryFile?: File | null;
   /** DDC conversion depth: 'standard' (fast, key props), 'medium' (~900 cols), 'complete' (~1000+ cols). */
   conversionDepth?: 'standard' | 'medium' | 'complete';
+  /** When true, also fire a background request to extract all sheets
+   *  from the uploaded CAD file as a single PDF (CAD uploads only). */
+  generatePdfSheets?: boolean;
 }
 
 interface BIMUploadState {
@@ -129,11 +150,11 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
       /** pct added per tick (capped at targetPct) */
       step: number;
     }> = [
-      { status: 'uploading',  stage: 'Uploading...',           targetPct: 30, interval: 200, step: 1.8 },
-      { status: 'converting', stage: 'Converting...',          targetPct: 50, interval: 400, step: 0.8 },
-      { status: 'converting', stage: 'Extracting elements...', targetPct: 75, interval: 300, step: 1.0 },
-      { status: 'converting', stage: 'Indexing...',            targetPct: 88, interval: 250, step: 1.2 },
-      { status: 'converting', stage: 'Finalizing...',          targetPct: 95, interval: 200, step: 1.5 },
+      { status: 'uploading',  stage: 'bim_upload.stage_uploading',    targetPct: 30, interval: 200, step: 1.8 },
+      { status: 'converting', stage: 'bim_upload.stage_converting',   targetPct: 50, interval: 400, step: 0.8 },
+      { status: 'converting', stage: 'bim_upload.stage_extracting',   targetPct: 75, interval: 300, step: 1.0 },
+      { status: 'converting', stage: 'bim_upload.stage_indexing',     targetPct: 88, interval: 250, step: 1.2 },
+      { status: 'converting', stage: 'bim_upload.stage_finalizing',   targetPct: 95, interval: 200, step: 1.5 },
     ];
 
     let phaseIdx = 0;
@@ -194,6 +215,61 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
     }
   }
 
+  /** Poll the model record until it's ready, then trigger background PDF
+   *  export.  Used by ``executeUpload`` when ``params.generatePdfSheets``
+   *  is true; lives at module scope so the polling loop survives page
+   *  navigation (the upload store itself is global).  Bail out silently if
+   *  the job is removed or the model fails — the heavy lifting is on the
+   *  backend, this side is only orchestration. */
+  async function waitForReadyThenGeneratePdf(jobId: string, modelId: string) {
+    const POLL_INTERVAL_MS = 4000;
+    const POLL_MAX_ATTEMPTS = 600; // ~40 minutes upper bound
+
+    for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
+      // Bail if the user dismissed/cancelled the job
+      if (!get().jobs.has(jobId)) return;
+
+      await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+
+      let model: Awaited<ReturnType<typeof fetchBIMModel>>;
+      try {
+        model = await fetchBIMModel(modelId);
+      } catch {
+        // Transient network blip — keep polling
+        continue;
+      }
+
+      if (model.status === 'ready') {
+        patchJob(jobId, { pdfStatus: 'generating', pdfError: null });
+        try {
+          await generateBIMPDFSheets(modelId);
+        } catch (e) {
+          patchJob(jobId, {
+            pdfStatus: 'failed',
+            pdfError: e instanceof Error ? e.message : String(e),
+          });
+          return;
+        }
+        // The PDF endpoint just schedules a backend BackgroundTask; there
+        // is no completion signal we can poll without scraping Documents.
+        // Mark the indicator as done after a heuristic delay long enough
+        // for typical sheet exports — the resulting PDF will appear in
+        // the project's Documents list when DDC finishes.
+        setTimeout(() => {
+          if (get().jobs.has(jobId)) {
+            patchJob(jobId, { pdfStatus: 'done' });
+          }
+        }, 90 * 1000);
+        return;
+      }
+
+      if (model.status === 'error' || model.status === 'needs_converter') {
+        // Don't try to generate PDF for a model that itself failed.
+        return;
+      }
+    }
+  }
+
   /** Run the actual upload. This is a plain async function, not a hook. */
   async function executeUpload(jobId: string, params: StartUploadParams) {
     startStageTimer(jobId);
@@ -215,20 +291,38 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
         const st = res.status || 'processing';
         const cnt = res.element_count || 0;
 
-        if (st === 'ready' || (st !== 'converter_required' && st !== 'needs_converter' && st !== 'error')) {
+        const isSuccessStatus =
+          st === 'ready' ||
+          (st !== 'converter_required' &&
+            st !== 'needs_converter' &&
+            st !== 'error');
+
+        if (isSuccessStatus) {
           patchJob(jobId, {
             status: 'ready',
             progress: 100,
-            stage: 'Done',
+            stage: 'bim_upload.stage_done',
             modelId: res.model_id,
             elementCount: cnt,
             completedAt: Date.now(),
           });
+
+          // PDF generation is intentionally deferred until the model record
+          // reaches status="ready" on the backend.  Triggering it earlier
+          // makes the PDF DDC subprocess race the model conversion DDC, and
+          // both crawl — the user reported the upload "freezing forever".
+          // We poll model status here in the store so the call survives
+          // page navigation; once the model is ready we fire-and-forget the
+          // PDF endpoint and surface its lifecycle via job.pdfStatus.
+          if (params.generatePdfSheets && res.model_id) {
+            const modelIdForPdf = res.model_id;
+            void waitForReadyThenGeneratePdf(jobId, modelIdForPdf);
+          }
         } else if (st === 'converter_required' || st === 'needs_converter') {
           patchJob(jobId, {
             status: 'converter_required',
             progress: 0,
-            stage: 'Converter required',
+            stage: 'bim_upload.stage_converter_required',
             modelId: res.model_id,
             errorMessage:
               res.error_message || res.message || `${(res.format || '').toUpperCase()} converter not installed`,
@@ -239,7 +333,7 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
           patchJob(jobId, {
             status: 'error',
             progress: 0,
-            stage: 'Failed',
+            stage: 'bim_upload.stage_failed',
             modelId: res.model_id,
             errorMessage: res.error_message || 'Could not extract elements from this CAD file.',
             completedAt: Date.now(),
@@ -260,7 +354,7 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
         patchJob(jobId, {
           status: 'ready',
           progress: 100,
-          stage: 'Done',
+          stage: 'bim_upload.stage_done',
           modelId: res.model_id,
           elementCount: res.element_count,
           completedAt: Date.now(),
@@ -276,7 +370,7 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
       patchJob(jobId, {
         status: 'error',
         progress: 0,
-        stage: 'Failed',
+        stage: 'bim_upload.stage_failed',
         errorMessage: msg,
         completedAt: Date.now(),
       });
@@ -300,11 +394,14 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
         discipline: params.discipline,
         status: 'uploading',
         progress: 5,
-        stage: 'Sending file...',
+        stage: 'bim_upload.stage_sending',
         modelId: null,
         elementCount: 0,
         errorMessage: null,
         converterId: null,
+        generatePdfSheets: params.generatePdfSheets ?? false,
+        pdfStatus: 'idle',
+        pdfError: null,
         startedAt: Date.now(),
         completedAt: null,
       };
@@ -373,9 +470,11 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
       patchJob(jobId, {
         status: 'uploading',
         progress: 5,
-        stage: 'Sending file...',
+        stage: 'bim_upload.stage_sending',
         errorMessage: null,
         converterId: null,
+        pdfStatus: 'idle',
+        pdfError: null,
         completedAt: null,
         startedAt: Date.now(),
       });
@@ -390,6 +489,7 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
         discipline: existing.discipline,
         uploadType: existing.fileName.match(/\.(csv|xlsx|xls)$/i) ? 'data' : 'cad',
         geometryFile: files.geometryFile,
+        generatePdfSheets: existing.generatePdfSheets,
       });
     },
 

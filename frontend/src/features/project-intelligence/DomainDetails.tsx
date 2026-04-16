@@ -44,8 +44,26 @@ interface ActionDef {
   has_backend_action: boolean;
 }
 
+/** Domain state map from backend API — each domain sub-object contains
+ *  heterogeneous fields (numbers, strings, booleans, arrays). */
+type DomainStateValue = string | number | boolean | string[] | null | undefined;
+type DomainStateMap = Record<string, Record<string, DomainStateValue>> & { project_name?: string };
+
+/** Safely extract a number from a domain state field, defaulting to 0. */
+function n(val: DomainStateValue): number {
+  return typeof val === 'number' ? val : 0;
+}
+/** Safely extract a string from a domain state field. */
+function s(val: DomainStateValue): string {
+  return typeof val === 'string' ? val : '';
+}
+/** Safely extract a string array from a domain state field. */
+function arr(val: DomainStateValue): string[] {
+  return Array.isArray(val) ? val : [];
+}
+
 interface DomainDetailsProps {
-  state: any;
+  state: DomainStateMap;
   scores: Record<string, number>;
   selectedDomain: string | null;
   onSelectDomain: (domain: string | null) => void;
@@ -121,7 +139,7 @@ function DomainContent({
   actions,
 }: {
   domain: string;
-  state: any;
+  state: DomainStateMap;
   score: number;
   onAction: (actionId: string) => void;
   actions: ActionDef[];
@@ -134,24 +152,24 @@ function DomainContent({
     case 'boq': {
       const b = state.boq || {};
       rows.push(
-        { label: 'Total items', value: b.total_items ?? 0 },
-        { label: 'Sections', value: b.sections_count ?? 0 },
+        { label: 'Total items', value: n(b.total_items) },
+        { label: 'Sections', value: n(b.sections_count) },
         {
           label: 'With prices',
-          value: (b.total_items ?? 0) - (b.items_with_zero_price ?? 0),
-          status: (b.items_with_zero_price ?? 0) === 0 ? 'ok' : 'warn',
+          value: n(b.total_items) - n(b.items_with_zero_price),
+          status: n(b.items_with_zero_price) === 0 ? 'ok' : 'warn',
         },
         {
           label: 'Zero price',
-          value: b.items_with_zero_price ?? 0,
-          status: (b.items_with_zero_price ?? 0) === 0 ? 'ok' : 'warn',
+          value: n(b.items_with_zero_price),
+          status: n(b.items_with_zero_price) === 0 ? 'ok' : 'warn',
         },
         {
           label: 'Zero quantity',
-          value: b.items_with_zero_quantity ?? 0,
-          status: (b.items_with_zero_quantity ?? 0) === 0 ? 'ok' : 'warn',
+          value: n(b.items_with_zero_quantity),
+          status: n(b.items_with_zero_quantity) === 0 ? 'ok' : 'warn',
         },
-        { label: 'Last modified', value: b.last_modified ? _formatDate(b.last_modified) : 'Never' },
+        { label: 'Last modified', value: s(b.last_modified) ? _formatDate(s(b.last_modified)) : 'Never' },
         {
           label: 'Export ready',
           value: b.export_ready ? 'Yes' : 'No',
@@ -161,21 +179,21 @@ function DomainContent({
       break;
     }
     case 'schedule': {
-      const s = state.schedule || {};
+      const sc = state.schedule || {};
       rows.push(
-        { label: 'Activities', value: s.activities_count ?? 0 },
-        { label: 'Start date', value: s.start_date || 'Not set' },
-        { label: 'End date', value: s.end_date || 'Not set' },
-        { label: 'Duration', value: s.duration_days != null ? `${s.duration_days} days` : 'Unknown' },
+        { label: 'Activities', value: n(sc.activities_count) },
+        { label: 'Start date', value: s(sc.start_date) || 'Not set' },
+        { label: 'End date', value: s(sc.end_date) || 'Not set' },
+        { label: 'Duration', value: sc.duration_days != null ? `${sc.duration_days} days` : 'Unknown' },
         {
           label: 'Baseline set',
-          value: s.baseline_set ? 'Yes' : 'No',
-          status: s.baseline_set ? 'ok' : 'warn',
+          value: sc.baseline_set ? 'Yes' : 'No',
+          status: sc.baseline_set ? 'ok' : 'warn',
         },
         {
           label: 'Critical path',
-          value: s.has_critical_path ? 'Yes' : 'No',
-          status: s.has_critical_path ? 'ok' : undefined,
+          value: sc.has_critical_path ? 'Yes' : 'No',
+          status: sc.has_critical_path ? 'ok' : undefined,
         }
       );
       break;
@@ -183,30 +201,30 @@ function DomainContent({
     case 'validation': {
       const v = state.validation || {};
       rows.push(
-        { label: 'Last run', value: v.last_run ? _formatDate(v.last_run) : 'Never' },
+        { label: 'Last run', value: s(v.last_run) ? _formatDate(s(v.last_run)) : 'Never' },
         {
           label: 'Errors',
-          value: v.total_errors ?? 0,
-          status: (v.total_errors ?? 0) === 0 ? 'ok' : 'error',
+          value: n(v.total_errors),
+          status: n(v.total_errors) === 0 ? 'ok' : 'error',
         },
         {
           label: 'Warnings',
-          value: v.warnings ?? 0,
-          status: (v.warnings ?? 0) === 0 ? 'ok' : 'warn',
+          value: n(v.warnings),
+          status: n(v.warnings) === 0 ? 'ok' : 'warn',
         },
-        { label: 'Passed rules', value: v.passed_rules ?? 0, status: 'ok' },
-        { label: 'Total rules', value: v.total_rules ?? 0 }
+        { label: 'Passed rules', value: n(v.passed_rules), status: 'ok' },
+        { label: 'Total rules', value: n(v.total_rules) }
       );
       break;
     }
     case 'risk': {
       const r = state.risk || {};
       rows.push(
-        { label: 'Total risks', value: r.total_risks ?? 0 },
+        { label: 'Total risks', value: n(r.total_risks) },
         {
           label: 'High unmitigated',
-          value: r.high_severity_unmitigated ?? 0,
-          status: (r.high_severity_unmitigated ?? 0) === 0 ? 'ok' : 'error',
+          value: n(r.high_severity_unmitigated),
+          status: n(r.high_severity_unmitigated) === 0 ? 'ok' : 'error',
         },
         {
           label: 'Contingency set',
@@ -219,10 +237,10 @@ function DomainContent({
     case 'takeoff': {
       const tk = state.takeoff || {};
       rows.push(
-        { label: 'Files uploaded', value: tk.files_uploaded ?? 0 },
-        { label: 'Files processed', value: tk.files_processed ?? 0 },
-        { label: 'Formats', value: (tk.formats || []).join(', ') || 'None' },
-        { label: 'Quantities extracted', value: tk.quantities_extracted ?? 0 }
+        { label: 'Files uploaded', value: n(tk.files_uploaded) },
+        { label: 'Files processed', value: n(tk.files_processed) },
+        { label: 'Formats', value: arr(tk.formats).join(', ') || 'None' },
+        { label: 'Quantities extracted', value: n(tk.quantities_extracted) }
       );
       break;
     }
@@ -255,8 +273,8 @@ function DomainContent({
     case 'tendering': {
       const td = state.tendering || {};
       rows.push(
-        { label: 'Bid packages', value: td.bid_packages ?? 0 },
-        { label: 'Bids received', value: td.bids_received ?? 0 },
+        { label: 'Bid packages', value: n(td.bid_packages) },
+        { label: 'Bids received', value: n(td.bids_received) },
         {
           label: 'Bids compared',
           value: td.bids_compared ? 'Yes' : 'No',
@@ -268,10 +286,10 @@ function DomainContent({
     case 'documents': {
       const doc = state.documents || {};
       rows.push(
-        { label: 'Total files', value: doc.total_files ?? 0 },
+        { label: 'Total files', value: n(doc.total_files) },
         {
           label: 'Categories',
-          value: (doc.categories_covered || []).join(', ') || 'None',
+          value: arr(doc.categories_covered).join(', ') || 'None',
         }
       );
       break;
@@ -279,8 +297,8 @@ function DomainContent({
     case 'reports': {
       const rep = state.reports || {};
       rows.push(
-        { label: 'Reports generated', value: rep.reports_generated ?? 0 },
-        { label: 'Last report', value: rep.last_report ? _formatDate(rep.last_report) : 'Never' }
+        { label: 'Reports generated', value: n(rep.reports_generated) },
+        { label: 'Last report', value: s(rep.last_report) ? _formatDate(s(rep.last_report)) : 'Never' }
       );
       break;
     }
