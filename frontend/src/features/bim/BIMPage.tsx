@@ -1119,12 +1119,12 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
             </p>
           </div>
 
-          {/* 3-column layout: Upload | Features | Animation */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.2fr_1fr_0.8fr] gap-8 items-start mb-10">
+          {/* 2-column layout: Upload | Features */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch mb-8">
 
-            {/* LEFT -- Upload card (prominent, bigger) */}
-            <div>
-              <div className="rounded-2xl bg-surface-primary border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6">
+            {/* LEFT -- Upload card (stretches to match features height) */}
+            <div className="flex flex-col">
+              <div className="rounded-2xl bg-surface-primary border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6 flex-1 flex flex-col">
                 <label
                   aria-label={t('bim.landing_dropzone_aria', { defaultValue: 'Drop a BIM model file here or click to browse. Supported formats: .rvt, .ifc, .csv, .xlsx' })}
                   onDrop={(e) => {
@@ -1153,7 +1153,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     }
                   }}
                   onDragOver={(e) => e.preventDefault()}
-                  className={`flex flex-col items-center gap-3 border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${
+                  className={`flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all flex-1 min-h-[200px] ${
                     file ? 'border-oe-blue bg-oe-blue/5' : 'border-border-medium hover:border-oe-blue hover:bg-blue-50/50 dark:hover:bg-blue-950/20'
                   }`}
                 >
@@ -1251,10 +1251,11 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
               ))}
             </div>
 
-            {/* RIGHT -- CSS animation preview (hidden on small and medium screens) */}
-            <div className="hidden lg:flex items-center justify-center">
-              <BIMEmptyAnimation />
-            </div>
+          </div>
+
+          {/* Animation preview — full width below grid, subtle */}
+          <div className="hidden lg:flex items-center justify-center opacity-30 mb-8">
+            <BIMEmptyAnimation />
           </div>
         </div>
       </div>

@@ -1967,11 +1967,11 @@ export function CadDataExplorerPage() {
               </p>
             </div>
 
-            {/* 3-column layout: Upload | Features | Animation */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr_0.8fr] gap-8 items-start mb-10">
+            {/* 2-column layout: Upload + Features | Animation */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-8 items-start mb-10">
 
-              {/* LEFT -- Upload card */}
-              <div>
+              {/* LEFT -- Upload + Features */}
+              <div className="space-y-6">
                 <div className="rounded-2xl bg-surface-primary border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6">
                   <UploadConvertZone onSessionReady={handleSessionReady} />
                   <p className="text-[10px] text-content-quaternary mt-3 text-center">
@@ -1981,26 +1981,21 @@ export function CadDataExplorerPage() {
                     {t('explorer.upload_hint_size', { defaultValue: 'Max file size: 100 MB' })}
                   </p>
                 </div>
-              </div>
-
-              {/* CENTER -- Feature explanation cards */}
-              <div className="space-y-3">
-                <h2 className="text-xs font-bold text-content-secondary uppercase tracking-widest mb-2">
-                  {t('explorer.what_you_get', { defaultValue: 'What you get' })}
-                </h2>
-                {FEATURE_CARDS.map((f, i) => (
-                  <div key={i} className={`flex items-start gap-3 rounded-xl p-3.5 bg-surface-primary/60 dark:bg-surface-primary/40 border ${f.border} hover:border-border-light transition-colors`}>
-                    <div className={`w-9 h-9 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={16} className={f.ic} /></div>
-                    <div className="min-w-0">
-                      <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
-                      <p className="text-[11px] text-content-quaternary leading-snug mt-0.5">{f.desc}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {FEATURE_CARDS.map((f, i) => (
+                    <div key={i} className={`flex items-start gap-3 rounded-xl p-3.5 bg-surface-primary/60 dark:bg-surface-primary/40 border ${f.border} hover:border-border-light transition-colors`}>
+                      <div className={`w-9 h-9 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={16} className={f.ic} /></div>
+                      <div className="min-w-0">
+                        <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
+                        <p className="text-[11px] text-content-quaternary leading-snug mt-0.5">{f.desc}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
-              {/* RIGHT -- CSS animation preview */}
-              <div className="flex items-center justify-center">
+              {/* RIGHT -- CSS animation preview (bigger, less opacity) */}
+              <div className="flex items-center justify-center opacity-40 lg:min-h-[400px]">
                 <DataExplorerEmptyAnimation />
               </div>
             </div>
@@ -2106,7 +2101,9 @@ export function CadDataExplorerPage() {
         )}
 
             {/* Converter status */}
-            <ConverterStatus />
+            <div className="mt-6 mb-4">
+              <ConverterStatus />
+            </div>
           </div>
         </div>
       </div>
