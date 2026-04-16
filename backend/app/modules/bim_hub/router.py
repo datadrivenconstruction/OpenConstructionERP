@@ -51,7 +51,7 @@ import pathlib
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Header, HTTPException, Query, UploadFile, status
 from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -909,16 +909,313 @@ _CAD_MAX_SIZE = 500 * 1024 * 1024  # 500 MB
 _NEEDS_CONVERTER_EXTS = {".rvt", ".dwg", ".dgn"}
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Background workers — invoked via FastAPI BackgroundTasks so the upload
+# request returns in milliseconds even when DDC conversion takes minutes.
+# Each worker uses a fresh AsyncSession (the request session is closed by
+# the time the task runs) and the same storage abstraction as the router.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+async def _process_cad_in_background(
+    *,
+    project_id: str,
+    model_id: str,
+    cad_storage_key: str,
+    ext: str,
+    conversion_depth: str,
+) -> None:
+    """Run DDC conversion + element extraction for an uploaded CAD file.
+
+    Scheduled after the upload endpoint returns so the HTTP request finishes
+    in milliseconds while the (potentially minutes-long) conversion happens
+    off the request path.  Updates the model row's ``status`` to
+    ``ready`` / ``error`` / ``needs_converter`` when finished — the frontend
+    already polls ``GET /{model_id}`` and transitions the UI automatically.
+    """
+    import asyncio
+    import tempfile
+    import uuid as _uuid
+    from pathlib import Path as _Path
+
+    from sqlalchemy import select
+
+    from app.core.storage import get_storage_backend
+    from app.database import async_session_factory
+    from app.modules.bim_hub.ifc_processor import process_ifc_file
+    from app.modules.bim_hub.models import BIMElement, BIMModel
+
+    model_uuid = _uuid.UUID(model_id)
+
+    try:
+        content = await get_storage_backend().get(cad_storage_key)
+
+        with tempfile.TemporaryDirectory(prefix="oe-bim-bg-") as _tmp_str:
+            _tmp_dir = _Path(_tmp_str)
+            _tmp_cad_path = _tmp_dir / f"original{ext}"
+            await asyncio.to_thread(_tmp_cad_path.write_bytes, content)
+
+            result = await asyncio.to_thread(
+                process_ifc_file, _tmp_cad_path, _tmp_dir, conversion_depth
+            )
+            element_count = result["element_count"]
+
+            geo_key: str | None = None
+            geo_local = result.get("geometry_path")
+            if geo_local:
+                _geo_path = _Path(geo_local)
+                if _geo_path.is_file():
+                    _geo_bytes = await asyncio.to_thread(_geo_path.read_bytes)
+                    _geo_ext = _geo_path.suffix or ".dae"
+                    geo_key = await bim_file_storage.save_geometry(
+                        project_id=project_id,
+                        model_id=model_id,
+                        ext=_geo_ext,
+                        content=_geo_bytes,
+                    )
+
+            glb_key: str | None = None
+            glb_local = result.get("glb_path")
+            if glb_local:
+                _glb_path = _Path(glb_local)
+                if _glb_path.is_file():
+                    _glb_bytes = await asyncio.to_thread(_glb_path.read_bytes)
+                    glb_key = await bim_file_storage.save_geometry(
+                        project_id=project_id,
+                        model_id=model_id,
+                        ext=".glb",
+                        content=_glb_bytes,
+                    )
+                    logger.info(
+                        "GLB geometry saved: %s (%d bytes)", glb_key, len(_glb_bytes)
+                    )
+
+            raw_elements = result.get("raw_elements", [])
+            if raw_elements:
+                try:
+                    from app.modules.bim_hub.dataframe_store import write_dataframe
+
+                    await asyncio.to_thread(
+                        write_dataframe,
+                        project_id=project_id,
+                        model_id=model_id,
+                        rows=raw_elements,
+                    )
+                except Exception as exc:
+                    logger.warning("Parquet write failed (non-fatal): %s", exc)
+
+        async with async_session_factory() as session:
+            # Defensive: the upload endpoint commits before scheduling us, but
+            # retry a few times anyway in case of slow disk flushes / connection
+            # pool churn during a heavy upload burst.
+            model = None
+            for _attempt in range(5):
+                model = (
+                    await session.execute(
+                        select(BIMModel).where(BIMModel.id == model_uuid)
+                    )
+                ).scalar_one_or_none()
+                if model is not None:
+                    break
+                await asyncio.sleep(0.2)
+            if model is None:
+                logger.error(
+                    "Background processor: model %s vanished mid-conversion", model_id
+                )
+                return
+
+            if element_count > 0:
+                for elem_data in result["elements"]:
+                    el = BIMElement(
+                        model_id=model_uuid,
+                        stable_id=elem_data["stable_id"],
+                        element_type=elem_data.get("element_type"),
+                        name=elem_data.get("name"),
+                        storey=elem_data.get("storey"),
+                        discipline=elem_data.get("discipline"),
+                        properties=elem_data.get("properties", {}),
+                        quantities=elem_data.get("quantities", {}),
+                        geometry_hash=elem_data.get("geometry_hash"),
+                        bounding_box=elem_data.get("bounding_box"),
+                        mesh_ref=elem_data.get("mesh_ref"),
+                    )
+                    session.add(el)
+
+                model.status = "ready"
+                model.element_count = element_count
+                model.storey_count = len(result["storeys"])
+                model.bounding_box = result.get("bounding_box")
+                if glb_key:
+                    model.canonical_file_path = glb_key
+                elif geo_key:
+                    model.canonical_file_path = geo_key
+                model.metadata_ = {
+                    **(model.metadata_ or {}),
+                    "geometry_type": result.get("geometry_type", "unknown"),
+                }
+                logger.info(
+                    "Background CAD processed: %d elements, %d storeys → model %s ready",
+                    element_count, len(result["storeys"]), model_id,
+                )
+            else:
+                if ext == ".rvt":
+                    model.status = "needs_converter"
+                    model.error_message = (
+                        "RVT files require the DDC cad2data converter. "
+                        "Install cad2data or convert to IFC first, then re-upload."
+                    )
+                else:
+                    model.status = "error"
+                    model.error_message = (
+                        "No elements could be extracted from this IFC file."
+                    )
+                logger.warning(
+                    "Background CAD processed but no elements found for model %s",
+                    model_id,
+                )
+
+            await session.commit()
+
+    except Exception as exc:
+        logger.exception("Background CAD processing failed for model %s: %s", model_id, exc)
+        try:
+            async with async_session_factory() as session:
+                model = (
+                    await session.execute(
+                        select(BIMModel).where(BIMModel.id == model_uuid)
+                    )
+                ).scalar_one_or_none()
+                if model is not None:
+                    model.status = "error"
+                    model.error_message = f"Processing failed: {exc}"
+                    await session.commit()
+        except Exception as exc2:
+            logger.exception("Failed to mark model %s as error: %s", model_id, exc2)
+
+
+async def _generate_pdf_in_background(
+    *,
+    project_id: str,
+    model_id: str,
+    cad_storage_key: str,
+    ext: str,
+    model_name: str,
+    user_id: str,
+) -> None:
+    """Run DDC PDF-only export for an existing model and link as a Document.
+
+    Invoked from POST /{model_id}/generate-pdf-sheets/ via BackgroundTasks.
+    Calls the DDC converter exactly once with a ``.pdf`` output target — no
+    re-export of XLSX/DAE.  Silently skips when no converter is installed
+    on the host (the upload itself stays usable; PDF export is opt-in).
+    """
+    import asyncio
+    import subprocess
+    import tempfile
+    import uuid as _uuid
+    from pathlib import Path as _Path
+
+    from app.core.storage import get_storage_backend
+    from app.database import async_session_factory
+
+    converter_ext = ext.lstrip(".").lower()
+    try:
+        from app.modules.boq.cad_import import find_converter
+    except ImportError:
+        logger.warning("PDF generation skipped — cad_import not available")
+        return
+
+    converter = find_converter(converter_ext)
+    if not converter:
+        logger.info(
+            "PDF generation skipped — %s converter not installed",
+            converter_ext.upper(),
+        )
+        return
+
+    try:
+        content = await get_storage_backend().get(cad_storage_key)
+
+        with tempfile.TemporaryDirectory(prefix="oe-bim-pdf-") as _tmp_str:
+            _tmp_dir = _Path(_tmp_str)
+            _tmp_cad_path = _tmp_dir / f"original{ext}"
+            await asyncio.to_thread(_tmp_cad_path.write_bytes, content)
+
+            pdf_target = (_tmp_dir / "sheets.pdf").resolve()
+
+            def _run_pdf() -> tuple[int, bytes]:
+                proc = subprocess.run(
+                    [str(converter), str(_tmp_cad_path.resolve()), str(pdf_target)],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=str(converter.parent),
+                    input=b"\n",
+                    timeout=900,
+                )
+                return proc.returncode, proc.stderr
+
+            try:
+                rc, stderr = await asyncio.to_thread(_run_pdf)
+            except subprocess.TimeoutExpired:
+                logger.warning("DDC PDF generation timed out for model %s", model_id)
+                return
+
+            if rc != 0 or not pdf_target.is_file() or pdf_target.stat().st_size < 1000:
+                logger.warning(
+                    "DDC PDF generation failed for model %s (rc=%d, stderr=%s)",
+                    model_id,
+                    rc,
+                    stderr.decode(errors="replace")[:200] if stderr else "",
+                )
+                return
+
+            pdf_bytes = await asyncio.to_thread(pdf_target.read_bytes)
+            pdf_storage_key = await bim_file_storage.save_geometry(
+                project_id=project_id,
+                model_id=model_id,
+                ext=".pdf",
+                content=pdf_bytes,
+            )
+
+            try:
+                from app.modules.documents.models import Document as DocModel
+
+                async with async_session_factory() as session:
+                    pdf_doc = DocModel(
+                        project_id=_uuid.UUID(project_id),
+                        name=f"{model_name or 'BIM Model'} — Sheets (PDF)",
+                        category="drawing",
+                        file_path=pdf_storage_key,
+                        file_size=len(pdf_bytes),
+                        mime_type="application/pdf",
+                        tags=["bim", "sheets", "auto-generated", converter_ext],
+                        created_by=_uuid.UUID(user_id) if user_id else None,
+                    )
+                    session.add(pdf_doc)
+                    await session.commit()
+                    logger.info(
+                        "PDF sheets saved as Document for model %s: %s (%d bytes)",
+                        model_id, pdf_storage_key, len(pdf_bytes),
+                    )
+            except Exception as exc:
+                logger.warning("PDF sheets → Document linkage failed: %s", exc)
+
+    except Exception as exc:
+        logger.exception("PDF generation failed for model %s: %s", model_id, exc)
+
+
 @router.post("/upload-cad/", status_code=201)
 async def upload_cad_file(
+    background_tasks: BackgroundTasks,
     project_id: str = Query(..., description="Project UUID"),
     name: str = Query(default="", max_length=255),
     discipline: str = Query(default="architecture", max_length=50),
     conversion_depth: str = Query(
-        default="complete",
+        default="standard",
         description=(
-            "DDC conversion depth: 'complete' (all Revit parameters,"
-            " ~1000+ columns) or 'standard' (~15 basic columns, faster)"
+            "DDC conversion depth: 'standard' (~15 basic columns, fastest),"
+            " 'medium' (DDC standard + full property promotion, ~900 columns),"
+            " or 'complete' (all Revit parameters, ~1000+ columns, slowest)"
         ),
     ),
     file: UploadFile = File(..., description="CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS)"),
@@ -1079,204 +1376,38 @@ async def upload_cad_file(
     except Exception as exc:
         logger.warning("Failed to cross-link BIM to documents hub: %s", exc)
 
-    # Process the CAD file — extract elements + generate COLLADA geometry.
-    # IFC: text-based parser (instant). RVT: requires DDC cad2data binary.
-    #
-    # ``process_ifc_file`` is a sync function that needs real on-disk
-    # paths for both the input CAD and the output geometry directory,
-    # so we materialise the upload into a short-lived temp workspace,
-    # run the processor there, then upload any generated geometry back
-    # through the storage abstraction BEFORE the tempdir is cleaned up.
-    # This keeps the router storage-backend-agnostic — the same code
-    # path works for the local filesystem backend and future S3.
+    # Schedule processing OUT of the request path: the upload endpoint now
+    # returns 201 + status="processing" in milliseconds, and the actual DDC
+    # conversion + element/geometry persistence happens in a background task.
+    # This eliminates the multi-minute synchronous block that used to drop
+    # the connection on slow conversions ("Cannot connect to server" in the
+    # frontend).  The frontend already polls GET /{model_id}/ — model.status
+    # transitions from "processing" → "ready" / "error" / "needs_converter"
+    # automatically once the worker finishes.
     final_status = "processing"
     element_count = 0
 
+    # Commit BEFORE scheduling the background task: the worker opens its own
+    # async session and looks the model up by id, so the row must already be
+    # durably visible to other connections.  Without this explicit commit the
+    # worker raced the request-scope dependency teardown and saw "model
+    # vanished mid-conversion" intermittently.
+    await service.session.commit()
+
     processable = ext in (".ifc", ".rvt")
     if processable:
-        try:
-            import asyncio
-            import tempfile
-            from pathlib import Path as _Path
-
-            from app.modules.bim_hub.ifc_processor import process_ifc_file
-
-            with tempfile.TemporaryDirectory(prefix="oe-bim-") as _tmp_str:
-                _tmp_dir = _Path(_tmp_str)
-                _tmp_cad_path = _tmp_dir / f"original{ext}"
-                # Materialise the upload so the sync processor can open it.
-                await asyncio.to_thread(_tmp_cad_path.write_bytes, content)
-
-                # Run sync processor in thread to avoid blocking the event loop
-                result = await asyncio.to_thread(
-                    process_ifc_file, _tmp_cad_path, _tmp_dir, conversion_depth
-                )
-                element_count = result["element_count"]
-
-                # Persist any generated geometry through the storage
-                # abstraction BEFORE the tempdir vanishes.  We set
-                # ``canonical_file_path`` to the real storage key so later
-                # introspection tools don't dereference a stale temp path.
-                geo_local = result.get("geometry_path")
-                if geo_local:
-                    _geo_path = _Path(geo_local)
-                    if _geo_path.is_file():
-                        _geo_bytes = await asyncio.to_thread(_geo_path.read_bytes)
-                        _geo_ext = _geo_path.suffix or ".dae"
-                        _geo_key = await bim_file_storage.save_geometry(
-                            project_id=project_id,
-                            model_id=str(model_id),
-                            ext=_geo_ext,
-                            content=_geo_bytes,
-                        )
-                        model.canonical_file_path = _geo_key
-                    else:
-                        logger.warning(
-                            "Processor reported geometry_path=%s but file is missing",
-                            geo_local,
-                        )
-
-                # Store GLB (DAE→GLB with node names patched back in)
-                glb_local = result.get("glb_path")
-                if glb_local:
-                    _glb_path = _Path(glb_local)
-                    if _glb_path.is_file():
-                        _glb_bytes = await asyncio.to_thread(_glb_path.read_bytes)
-                        _glb_key = await bim_file_storage.save_geometry(
-                            project_id=project_id,
-                            model_id=str(model_id),
-                            ext=".glb",
-                            content=_glb_bytes,
-                        )
-                        model.canonical_file_path = _glb_key
-                        logger.info(
-                            "GLB geometry saved: %s (%d bytes)",
-                            _glb_key, len(_glb_bytes),
-                        )
-
-            if element_count > 0:
-                # Insert elements into DB
-                from app.modules.bim_hub.models import BIMElement
-
-                for elem_data in result["elements"]:
-                    el = BIMElement(
-                        model_id=model_id,
-                        stable_id=elem_data["stable_id"],
-                        element_type=elem_data.get("element_type"),
-                        name=elem_data.get("name"),
-                        storey=elem_data.get("storey"),
-                        discipline=elem_data.get("discipline"),
-                        properties=elem_data.get("properties", {}),
-                        quantities=elem_data.get("quantities", {}),
-                        geometry_hash=elem_data.get("geometry_hash"),
-                        bounding_box=elem_data.get("bounding_box"),
-                        mesh_ref=elem_data.get("mesh_ref"),
-                    )
-                    service.session.add(el)
-
-                # Update model record.  ``canonical_file_path`` was already
-                # assigned inside the tempdir block above (pointing at the
-                # real storage key for the uploaded geometry blob), so we
-                # don't touch it again here — overwriting with
-                # ``result["geometry_path"]`` would leak a stale temp path.
-                model.status = "ready"
-                model.element_count = element_count
-                model.storey_count = len(result["storeys"])
-                model.bounding_box = result.get("bounding_box")
-                model.metadata_ = {
-                    **(model.metadata_ or {}),
-                    "geometry_type": result.get("geometry_type", "unknown"),
-                }
-                await service.session.flush()
-                final_status = "ready"
-
-                logger.info(
-                    "CAD processed: %d elements, %d storeys → model %s is ready",
-                    element_count, len(result["storeys"]), model_id,
-                )
-
-                # ── Save PDF sheets as a Document ─────────────────────────
-                # DDC converters export all Revit/IFC sheets as a single PDF
-                # when invoked with a .pdf output target.  If available, we
-                # store it via the Documents module so it appears in the
-                # project's document list alongside the BIM model.
-                _pdf_local = result.get("pdf_sheets_path")
-                if _pdf_local:
-                    _pdf_p = _Path(_pdf_local)
-                    if _pdf_p.is_file() and _pdf_p.stat().st_size > 1000:
-                        try:
-                            from app.modules.documents.models import Document as DocModel
-
-                            _pdf_bytes = await asyncio.to_thread(_pdf_p.read_bytes)
-                            _pdf_storage_key = f"bim/{project_id}/{model_id}/sheets.pdf"
-                            await bim_file_storage.save_geometry(
-                                project_id=project_id,
-                                model_id=str(model_id),
-                                ext=".pdf",
-                                content=_pdf_bytes,
-                            )
-
-                            _pdf_doc = DocModel(
-                                project_id=uuid.UUID(project_id),
-                                name=f"{name or 'BIM Model'} — Sheets (PDF)",
-                                category="drawing",
-                                file_path=_pdf_storage_key,
-                                file_size=len(_pdf_bytes),
-                                mime_type="application/pdf",
-                                tags=["bim", "sheets", "auto-generated", model_format],
-                                created_by=user_id,
-                            )
-                            service.session.add(_pdf_doc)
-                            await service.session.flush()
-                            logger.info(
-                                "PDF sheets saved as Document: %s (%d bytes)",
-                                _pdf_storage_key, len(_pdf_bytes),
-                            )
-                        except Exception as exc:
-                            logger.warning("PDF sheets → Document failed: %s", exc)
-
-                # Write full DDC dataframe as Parquet for analytical queries.
-                # The hot table keeps ~12 indexed fields; the Parquet preserves
-                # ALL 1000+ DDC columns in columnar, ZSTD-compressed form.
-                # Failure is non-fatal -- the 3D viewer and BOQ linking work
-                # without it; only the dataframe query endpoints degrade.
-                raw_elements = result.get("raw_elements", [])
-                if raw_elements:
-                    try:
-                        from app.modules.bim_hub.dataframe_store import write_dataframe
-
-                        await asyncio.to_thread(
-                            write_dataframe,
-                            project_id=project_id,
-                            model_id=str(model_id),
-                            rows=raw_elements,
-                        )
-                    except Exception as exc:
-                        logger.warning("Parquet write failed (non-fatal): %s", exc)
-
-            else:
-                # No elements extracted — set informative status
-                if ext == ".rvt":
-                    model.status = "needs_converter"
-                    model.error_message = (
-                        "RVT files require the DDC cad2data converter. "
-                        "Install cad2data or convert to IFC first, then re-upload."
-                    )
-                else:
-                    model.status = "error"
-                    model.error_message = "No elements could be extracted from this IFC file."
-                await service.session.flush()
-                final_status = model.status
-                logger.warning("CAD processed but no elements found: %s", filename)
-        except Exception as exc:
-            logger.warning("CAD processing failed for %s: %s", filename, exc)
-            model.status = "error"
-            model.error_message = f"Processing failed: {exc}"
-            try:
-                await service.session.flush()
-            except Exception:
-                pass
-            final_status = "error"
+        background_tasks.add_task(
+            _process_cad_in_background,
+            project_id=project_id,
+            model_id=str(model_id),
+            cad_storage_key=saved_cad_key,
+            ext=ext,
+            conversion_depth=conversion_depth,
+        )
+        logger.info(
+            "CAD upload accepted, processing scheduled in background: %s → model %s",
+            filename, model_id,
+        )
     else:
         # Non-processable format (DWG, DGN, FBX, etc.) — needs converter
         model.status = "needs_converter"
@@ -1305,6 +1436,68 @@ async def upload_cad_file(
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Optional post-upload: generate PDF sheets for an existing model
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+@router.post("/{model_id}/generate-pdf-sheets/", status_code=202)
+async def generate_pdf_sheets(
+    model_id: uuid.UUID,
+    background_tasks: BackgroundTasks,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
+    service: BIMHubService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Schedule PDF-sheets export for an existing BIM model.
+
+    Runs the DDC converter once with a ``.pdf`` output target — no XLSX/DAE
+    re-export, only the sheets PDF.  The PDF is saved as a Document linked
+    to the project once the worker finishes.
+
+    Returns immediately; the caller does not wait for the export to finish.
+    Frontend can detect completion by polling the project's documents list.
+    """
+    from app.modules.bim_hub import file_storage as _bim_storage
+
+    model = await _verify_model_access(service, model_id, user_id or "")
+
+    model_format = (model.model_format or "").lower()
+    if not model_format:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Model has no format recorded — cannot regenerate sheets.",
+        )
+
+    ext = "." + model_format.lstrip(".")
+    cad_storage_key = _bim_storage.original_cad_key(
+        project_id=model.project_id,
+        model_id=model_id,
+        ext=ext,
+    )
+    backend_store = _bim_storage._backend()
+    if not await backend_store.exists(cad_storage_key):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Original CAD file is no longer available — re-upload the model.",
+        )
+
+    background_tasks.add_task(
+        _generate_pdf_in_background,
+        project_id=str(model.project_id),
+        model_id=str(model_id),
+        cad_storage_key=cad_storage_key,
+        ext=ext,
+        model_name=model.name or "BIM Model",
+        user_id=user_id or "",
+    )
+
+    return {
+        "status": "scheduled",
+        "model_id": str(model_id),
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Geometry file serving
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1316,6 +1509,11 @@ async def get_model_geometry(
     token: str | None = Query(
         default=None,
         description="JWT access token (alternative to Authorization header for static loaders)",
+    ),
+    fmt: str | None = Query(
+        default=None,
+        description="Force a specific geometry format: 'dae' or 'glb'. "
+        "When omitted, the server returns GLB (preferred) with DAE fallback.",
     ),
     authorization: str | None = Header(default=None),
     service: BIMHubService = Depends(_get_service),
@@ -1379,7 +1577,14 @@ async def get_model_geometry(
     project_id = str(model.project_id)
 
     # Resolve the geometry blob through the storage backend.
-    found = await bim_file_storage.find_geometry_key(project_id, model_id)
+    # When ?fmt=dae is passed, force DAE format (useful when GLB has
+    # scrambled node names from an older trimesh conversion).
+    if fmt and fmt.lower() == "dae":
+        found = await bim_file_storage.find_geometry_key(
+            project_id, model_id, prefer_ext=".dae"
+        )
+    else:
+        found = await bim_file_storage.find_geometry_key(project_id, model_id)
     if found is not None:
         key, ext = found
         media_type = bim_file_storage.GEOMETRY_MEDIA_TYPES.get(
@@ -1404,15 +1609,27 @@ async def get_model_geometry(
         compressed = _gzip.compress(_geo_bytes, compresslevel=6)
         from fastapi.responses import Response
 
+        # RFC 5987 encoding so non-ASCII model names (Cyrillic / Arabic / …)
+        # don't blow up the latin-1 HTTP header encoder. Without this the
+        # whole geometry response 500's and the frontend spins on "loading"
+        # forever. We send both a plain-ASCII `filename=` fallback and a
+        # UTF-8-encoded `filename*=` for browsers that support it.
+        from urllib.parse import quote as _qs
+
+        display_name = f"{model.name}{ext}"
+        ascii_fallback = display_name.encode("ascii", "replace").decode("ascii")
+        cd_header = (
+            f'inline; filename="{ascii_fallback}"; '
+            f"filename*=UTF-8''{_qs(display_name)}"
+        )
+
         return Response(
             content=compressed,
             media_type=media_type,
             headers={
                 **cache_headers,
                 "Content-Encoding": "gzip",
-                "Content-Disposition": (
-                    f'inline; filename="{model.name}{ext}"'
-                ),
+                "Content-Disposition": cd_header,
             },
         )
 
@@ -1543,9 +1760,20 @@ async def list_elements(
         description="Filter to elements belonging to this saved element group",
     ),
     offset: int = Query(default=0, ge=0),
-    # Capped at 2000 to prevent excessive memory usage. The frontend should
-    # paginate through larger element sets.
-    limit: int = Query(default=2000, ge=1, le=2000),
+    # Cap depends on ``skeleton``: the enriched path is paginated at 2000/page
+    # because each row fans out to six relation joins (boq_links, docs,
+    # tasks, activities, requirements, validation). Skeleton mode returns
+    # plain BIMElement rows with no joins and is safe at 50000/page.
+    limit: int = Query(default=500, ge=1, le=50000),
+    skeleton: bool = Query(
+        default=False,
+        description=(
+            "Skip eager-loading of boq_links / linked_documents / linked_tasks "
+            "/ linked_activities / linked_requirements / validation_results. "
+            "~10× faster and used by the 3D viewer for mesh-to-element "
+            "matching, where those relations are not needed."
+        ),
+    ),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
@@ -1567,6 +1795,44 @@ async def list_elements(
     )
 
     await _verify_model_access(service, model_id, user_id or "")
+
+    # Skeleton path: plain BIMElement rows, no relation joins, no enrichment.
+    # Ten times faster than the enriched path — used by the 3D viewer, where
+    # mesh matching only needs id/mesh_ref/name/element_type/bbox.
+    if skeleton:
+        if limit > 50000:
+            limit = 50000
+        plain_items, plain_total = await service.list_elements(
+            model_id,
+            element_type=element_type,
+            storey=storey,
+            discipline=discipline,
+            offset=offset,
+            limit=limit,
+        )
+        # Skinny rows: drop the per-element `properties` / `quantities` /
+        # `classification` / `metadata` payloads. These can weigh ~1.5 kB per
+        # row on a typical Revit export (45+ Revit parameters × short value),
+        # which adds up to a 16 MB JSON body for 7 000 elements. The viewer
+        # pulls the full property set straight from Parquet on click, so
+        # carrying it in the skeleton is pure overhead.
+        skeleton_items: list[BIMElementResponse] = []
+        for e in plain_items:
+            resp = BIMElementResponse.model_validate(e)
+            resp.properties = {}
+            resp.quantities = {}
+            resp.metadata = {}
+            skeleton_items.append(resp)
+        return BIMElementListResponse(
+            items=skeleton_items,
+            total=plain_total,
+            offset=offset,
+            limit=limit,
+        )
+
+    # Enriched path is capped at 2000 — each extra row spawns six join lookups.
+    if limit > 2000:
+        limit = 2000
     (
         items,
         total,
@@ -1713,6 +1979,35 @@ async def get_elements_by_ids(
         offset=0,
         limit=len(elements),
     )
+
+
+@router.post(
+    "/models/{model_id}/ensure-element/",
+    response_model=BIMElementResponse,
+)
+async def ensure_element(
+    model_id: uuid.UUID,
+    body: dict,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.create")),
+    service: BIMHubService = Depends(_get_service),
+) -> BIMElementResponse:
+    """Resolve (or lazy-create) a BIMElement row from a mesh_ref / stable_id.
+
+    Needed when linking a BOQ position to a BIM mesh that was visible in the
+    3D viewer but had no oe_bim_element row (e.g. DDC standard extract skips
+    certain Revit categories). Body: ``{"mesh_ref": "140056"}`` or
+    ``{"stable_id": "140056"}``.
+    """
+    await _verify_model_access(service, model_id, user_id or "")
+    stable_id = body.get("stable_id")
+    mesh_ref = body.get("mesh_ref")
+    element = await service.ensure_element(
+        model_id,
+        stable_id=str(stable_id) if stable_id else None,
+        mesh_ref=str(mesh_ref) if mesh_ref else None,
+    )
+    return BIMElementResponse.model_validate(element)
 
 
 @router.get("/elements/{element_id}", response_model=BIMElementResponse)

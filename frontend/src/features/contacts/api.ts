@@ -168,6 +168,6 @@ export function downloadContactsTemplate(): void {
       triggerDownload(blob, 'contacts_import_template.xlsx');
     })
     .catch((err) => {
-      console.error('Template download error:', err);
+      if (import.meta.env.DEV) console.error('Template download error:', err);
     });
 }

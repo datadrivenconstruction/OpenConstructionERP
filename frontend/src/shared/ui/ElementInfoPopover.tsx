@@ -152,14 +152,17 @@ function sourceIcon(source: ElementPayload['source']) {
   }
 }
 
-function sourceLabel(source: ElementPayload['source']): string {
+function sourceLabel(
+  source: ElementPayload['source'],
+  t: (key: string, opts?: Record<string, string>) => string,
+): string {
   switch (source) {
     case 'bim':
-      return 'BIM Element';
+      return t('element_info.source_bim', { defaultValue: 'BIM Element' });
     case 'dwg':
-      return 'DWG Entity';
+      return t('element_info.source_dwg', { defaultValue: 'DWG Entity' });
     case 'pdf':
-      return 'PDF Measurement';
+      return t('element_info.source_pdf', { defaultValue: 'PDF Measurement' });
   }
 }
 
@@ -249,7 +252,7 @@ export function ElementInfoPopover({
         </div>
         <div className="flex items-center gap-1 shrink-0 ml-2">
           <span className="text-[9px] text-content-quaternary uppercase tracking-wider font-medium">
-            {sourceLabel(element.source)}
+            {sourceLabel(element.source, t)}
           </span>
           <button
             type="button"

@@ -299,7 +299,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
 
         // Auto-index vectors in background — don't await (it takes 30-60s and blocks UI)
         apiPost('/v1/costs/vector/index/').catch((err) => {
-          console.error('Vector indexing failed (non-critical):', err);
+          if (import.meta.env.DEV) console.error('Vector indexing failed (non-critical):', err);
         });
       } catch (err: unknown) {
         const detail =
@@ -923,7 +923,7 @@ function VectorDatabaseSection() {
               message: `${indexed.toLocaleString()} vectors indexed in ${duration}s`,
             });
           } catch (err) {
-            console.error('GitHub vector load failed, falling back to local generation:', err);
+            if (import.meta.env.DEV) console.error('GitHub vector load failed, falling back to local generation:', err);
             // GitHub vectors not available — generate locally for this region
             const token = useAuthStore.getState().accessToken;
             const res = await fetch(`/api/v1/costs/vector/index/?region=${encodeURIComponent(db.id)}`, {

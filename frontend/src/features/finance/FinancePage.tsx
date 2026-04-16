@@ -336,6 +336,105 @@ function FinanceModuleLinks({ projectId: _projectId }: { projectId: string }) {
   );
 }
 
+/* ── Workflow Guide ───────────────────────────────────────────────────── */
+
+function FinanceWorkflowGuide() {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(() => {
+    try { return localStorage.getItem('oe_finance_guide_closed') !== '1'; } catch { return true; }
+  });
+
+  const dismiss = () => {
+    setOpen(false);
+    try { localStorage.setItem('oe_finance_guide_closed', '1'); } catch { /* */ }
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="mb-2 inline-flex items-center gap-1.5 text-xs text-content-tertiary hover:text-oe-blue transition-colors"
+      >
+        <Lightbulb size={12} />
+        {t('finance.show_guide', { defaultValue: 'Show: How it works' })}
+      </button>
+    );
+  }
+
+  const steps = [
+    {
+      num: '1',
+      icon: <Wallet size={16} />,
+      title: t('finance.guide_step1_title', { defaultValue: 'Create budget lines' }),
+      desc: t('finance.guide_step1_desc', {
+        defaultValue: 'Lock your BOQ estimate → budget lines are created automatically from sections. Or add them manually per WBS category.',
+      }),
+    },
+    {
+      num: '2',
+      icon: <FileText size={16} />,
+      title: t('finance.guide_step2_title', { defaultValue: 'Track invoices' }),
+      desc: t('finance.guide_step2_desc', {
+        defaultValue: 'Create payable invoices (from subcontractors) or receivable invoices (to clients). Attach line items and link to WBS.',
+      }),
+    },
+    {
+      num: '3',
+      icon: <CreditCard size={16} />,
+      title: t('finance.guide_step3_title', { defaultValue: 'Record payments' }),
+      desc: t('finance.guide_step3_desc', {
+        defaultValue: 'Mark invoices as paid — payment records are created automatically. Track amounts, methods, and references.',
+      }),
+    },
+    {
+      num: '4',
+      icon: <BarChart3 size={16} />,
+      title: t('finance.guide_step4_title', { defaultValue: 'Monitor with EVM' }),
+      desc: t('finance.guide_step4_desc', {
+        defaultValue: 'Create periodic snapshots to track Earned Value metrics: SPI, CPI, EAC, VAC. See if you\'re on time and within budget.',
+      }),
+    },
+  ];
+
+  return (
+    <div className="mb-4 rounded-xl border border-oe-blue/15 bg-gradient-to-r from-oe-blue/[0.03] to-violet-500/[0.03] p-4 animate-card-in">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Lightbulb size={14} className="text-oe-blue" />
+          <span className="text-xs font-semibold text-content-primary">
+            {t('finance.how_it_works', { defaultValue: 'How it works' })}
+          </span>
+        </div>
+        <button
+          onClick={dismiss}
+          className="rounded p-0.5 text-content-quaternary hover:text-content-secondary transition-colors"
+          aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
+        >
+          <X size={14} />
+        </button>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {steps.map((s) => (
+          <div key={s.num} className="flex items-start gap-2.5">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold">
+              {s.num}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-content-primary">
+                <span className="text-oe-blue">{s.icon}</span>
+                {s.title}
+              </div>
+              <p className="mt-0.5 text-2xs leading-relaxed text-content-tertiary">
+                {s.desc}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Page ────────────────────────────────────────────────────────── */
 
 export function FinancePage() {
@@ -398,6 +497,9 @@ export function FinancePage() {
         </div>
         {projectId && <FinanceModuleLinks projectId={projectId} />}
       </div>
+
+      {/* How it works — collapsible workflow guide */}
+      <FinanceWorkflowGuide />
 
       {/* No-project warning */}
       {!projectId && (
@@ -1263,6 +1365,13 @@ function InvoicesTab({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-4">
+      {/* Explanation */}
+      <p className="text-sm text-content-secondary">
+        {t('finance.invoices_explanation', {
+          defaultValue: 'Track all project invoices in one place. Payable = invoices from subcontractors/vendors. Receivable = invoices you send to clients. Mark invoices as paid to auto-generate payment records.',
+        })}
+      </p>
+
       {/* Sub-tabs: Payable / Receivable + Export */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2" title={t('finance.payable_receivable_tooltip', { defaultValue: 'Payable = invoices you owe to vendors. Receivable = invoices clients owe to you.' })}>
@@ -2127,6 +2236,20 @@ function EVMTab({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-6">
+      {/* Explanation */}
+      <div className="rounded-lg border border-oe-blue/15 bg-oe-blue/[0.03] p-3">
+        <p className="text-sm text-content-secondary">
+          {t('finance.evm_explanation', {
+            defaultValue: 'Earned Value Management (EVM) compares planned progress with actual performance. SPI > 1.0 = ahead of schedule. CPI > 1.0 = under budget. Create snapshots periodically to track trends over time.',
+          })}
+        </p>
+        <div className="mt-2 flex flex-wrap gap-3 text-2xs text-content-tertiary">
+          <span><strong className="text-content-secondary">SPI</strong> = EV / PV ({t('finance.evm_hint_schedule', { defaultValue: 'schedule efficiency' })})</span>
+          <span><strong className="text-content-secondary">CPI</strong> = EV / AC ({t('finance.evm_hint_cost', { defaultValue: 'cost efficiency' })})</span>
+          <span><strong className="text-content-secondary">EAC</strong> = BAC / CPI ({t('finance.evm_hint_forecast', { defaultValue: 'forecast total cost' })})</span>
+        </div>
+      </div>
+
       {/* Header: Data date + Create Snapshot */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-content-tertiary">

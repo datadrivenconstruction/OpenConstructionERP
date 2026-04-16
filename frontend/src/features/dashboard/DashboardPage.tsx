@@ -22,7 +22,6 @@ import {
   Download,
   X,
   Building2,
-  Star,
   Loader2,
   DollarSign,
   FileText,
@@ -37,7 +36,6 @@ import {
   MessageSquare,
   HardHat,
   Percent,
-  Rocket,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint, ActivityFeed as CrossModuleActivityFeed } from '@/shared/ui';
 import BIMCoverageCard from './BIMCoverageCard';
@@ -1259,191 +1257,7 @@ function ProjectMetricCards({
   );
 }
 
-/* ── Workflow Guide (step-by-step for new users) ─────────────────────── */
-
-interface WorkflowStep {
-  step: number;
-  icon: React.ReactNode;
-  titleKey: string;
-  titleDefault: string;
-  descKey: string;
-  descDefault: string;
-  route: string;
-  done: boolean;
-}
-
-function WorkflowGuide({
-  projects,
-  boqs,
-  schedules,
-}: {
-  projects?: ProjectSummary[];
-  boqs?: BOQWithTotal[];
-  schedules?: ScheduleSummary[];
-}) {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-
-  const hasProjects = Boolean(projects && projects.length > 0);
-  const hasBoqs = Boolean(boqs && boqs.length > 0);
-  const hasValidatedBoqs = Boolean(
-    boqs && boqs.some((b) => b.positions && b.positions.some((p) => p.total > 0)),
-  );
-  const hasSchedules = Boolean(schedules && schedules.length > 0);
-  // Reports are considered "done" if the user has at least one BOQ with priced positions
-  const hasReports = hasValidatedBoqs;
-
-  const steps: WorkflowStep[] = [
-    {
-      step: 1,
-      icon: <FolderPlus size={20} strokeWidth={1.75} />,
-      titleKey: 'dashboard.wf_create_project',
-      titleDefault: 'Create Your First Project',
-      descKey: 'dashboard.wf_create_project_desc',
-      descDefault: 'Set up a project with region, currency, and classification standard.',
-      route: '/projects/new',
-      done: hasProjects,
-    },
-    {
-      step: 2,
-      icon: <FileSpreadsheet size={20} strokeWidth={1.75} />,
-      titleKey: 'dashboard.wf_add_boq',
-      titleDefault: 'Add a Bill of Quantities',
-      descKey: 'dashboard.wf_add_boq_desc',
-      descDefault: 'Build your cost breakdown with sections, positions, and unit rates.',
-      route: '/boq',
-      done: hasBoqs,
-    },
-    {
-      step: 3,
-      icon: <ShieldCheck size={20} strokeWidth={1.75} />,
-      titleKey: 'dashboard.wf_run_validation',
-      titleDefault: 'Run Validation',
-      descKey: 'dashboard.wf_run_validation_desc',
-      descDefault: 'Check for missing quantities, zero prices, duplicates, and compliance.',
-      route: '/validation',
-      done: hasValidatedBoqs,
-    },
-    {
-      step: 4,
-      icon: <Calendar size={20} strokeWidth={1.75} />,
-      titleKey: 'dashboard.wf_generate_schedule',
-      titleDefault: 'Generate Schedule from BOQ',
-      descKey: 'dashboard.wf_generate_schedule_desc',
-      descDefault: 'Create a project timeline with activities, dependencies, and milestones.',
-      route: '/schedule',
-      done: hasSchedules,
-    },
-    {
-      step: 5,
-      icon: <BarChart3 size={20} strokeWidth={1.75} />,
-      titleKey: 'dashboard.wf_export_reports',
-      titleDefault: 'Export Reports',
-      descKey: 'dashboard.wf_export_reports_desc',
-      descDefault: 'Generate PDF summaries, GAEB XML, Excel exports, and cost breakdowns.',
-      route: '/reports',
-      done: hasReports,
-    },
-  ];
-
-  const completedCount = steps.filter((s) => s.done).length;
-  const allDone = completedCount === steps.length;
-
-  // Hide if all steps done — the user already knows the workflow
-  if (allDone) return null;
-
-  return (
-    <div
-      className="animate-card-in"
-      style={{ animationDelay: '90ms' }}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">
-            <Rocket size={14} className="text-emerald-600" strokeWidth={2} />
-          </div>
-          <h3 className="text-sm font-semibold text-content-primary">
-            {t('dashboard.workflow_guide', { defaultValue: 'Your Workflow' })}
-          </h3>
-          <Badge variant="blue" size="sm">
-            {completedCount}/{steps.length}
-          </Badge>
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div className="mb-4">
-        <div className="h-1 w-full rounded-full bg-surface-secondary overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-slow ease-oe"
-            style={{
-              width: `${(completedCount / steps.length) * 100}%`,
-              background: 'linear-gradient(90deg, #16a34a, #0891b2)',
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
-        {steps.map((s, i) => {
-          const isNext = !s.done && steps.slice(0, i).every((prev) => prev.done);
-          return (
-            <button
-              key={s.step}
-              onClick={() => navigate(s.route)}
-              className={`group relative flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-all duration-normal ease-oe animate-stagger-in ${
-                s.done
-                  ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-800/30 dark:bg-emerald-900/10 opacity-80'
-                  : isNext
-                    ? 'border-oe-blue/40 bg-oe-blue-subtle/20 hover:border-oe-blue/60 hover:shadow-sm'
-                    : 'border-border-light bg-surface-primary hover:border-border-light/80 hover:bg-surface-secondary/50'
-              }`}
-              style={{ animationDelay: `${100 + i * 50}ms` }}
-            >
-              {/* Step number + done indicator */}
-              <div className="flex items-center gap-2 w-full">
-                <div
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-2xs font-bold ${
-                    s.done
-                      ? 'bg-emerald-500 text-white'
-                      : isNext
-                        ? 'bg-oe-blue text-white'
-                        : 'bg-surface-secondary text-content-tertiary'
-                  }`}
-                >
-                  {s.done ? (
-                    <CheckCircle2 size={12} strokeWidth={2.5} />
-                  ) : (
-                    s.step
-                  )}
-                </div>
-                <div className={`${s.done ? 'text-emerald-600' : isNext ? 'text-oe-blue' : 'text-content-quaternary'}`}>
-                  {s.icon}
-                </div>
-              </div>
-
-              <div className="min-w-0">
-                <h4 className={`text-xs font-semibold leading-snug ${s.done ? 'text-emerald-700 dark:text-emerald-400' : 'text-content-primary'}`}>
-                  {t(s.titleKey, { defaultValue: s.titleDefault })}
-                </h4>
-                <p className="mt-0.5 text-2xs leading-relaxed text-content-tertiary line-clamp-2">
-                  {t(s.descKey, { defaultValue: s.descDefault })}
-                </p>
-              </div>
-
-              {/* Arrow connector on non-last items (visible on sm+) */}
-              {i < steps.length - 1 && (
-                <div className="hidden sm:block absolute -right-2 top-1/2 -translate-y-1/2 z-10 text-content-quaternary">
-                  <ArrowRight size={12} strokeWidth={1.5} />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+/* ── System Status Summary (compact badges) ──────────────────────────── */
 
 /* ── System Status Summary (compact badges) ──────────────────────────── */
 
@@ -1541,13 +1355,7 @@ export function DashboardPage() {
     } catch { /* storage unavailable */ }
   }, [navigate]);
 
-  // Show welcome/support modal (after onboarding is done, first dashboard visit)
-  const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem('oe_welcome_dismissed'));
   const [showAllActivity, setShowAllActivity] = useState(false);
-  const dismissWelcome = useCallback(() => {
-    setShowWelcome(false);
-    localStorage.setItem('oe_welcome_dismissed', '1');
-  }, []);
 
   const { data: projects } = useQuery({
     queryKey: ['projects'],
@@ -1653,11 +1461,10 @@ export function DashboardPage() {
       updatedAt: (picked as unknown as { updated_at?: string }).updated_at,
     };
   }, [allBoqs, projects]);
-  const lastBoqId = lastBoq?.id ?? null;
 
   return (
-    <div className="space-y-6 animate-fade-in pt-4">
-      {/* Hero — logo + gradient animated heading */}
+    <div className="space-y-5 animate-fade-in pt-4">
+      {/* ─── 1. Hero row ─────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between animate-card-in">
         <div>
           <h1 className="text-3xl font-bold tracking-tight gradient-text">
@@ -1686,17 +1493,6 @@ export function DashboardPage() {
           </a>
         </div>
         <div className="flex items-center gap-2 animate-stagger-in" style={{ animationDelay: '150ms' }}>
-          {lastBoqId && (
-            <Button
-              variant="secondary"
-              size="lg"
-              icon={<ArrowRight size={16} />}
-              iconPosition="right"
-              onClick={() => navigate(`/boq/${lastBoqId}`)}
-            >
-              {t('dashboard.continue_estimate', { defaultValue: 'Continue last estimate' })}
-            </Button>
-          )}
           <Button
             variant="primary"
             size="lg"
@@ -1706,118 +1502,55 @@ export function DashboardPage() {
           >
             {t('projects.new_project')}
           </Button>
+          <Button
+            variant="secondary"
+            size="lg"
+            icon={<Sparkles size={14} />}
+            onClick={async () => {
+              try {
+                const proj = await apiPost<{id:string}>('/v1/projects/', {
+                  name: `Estimate ${new Date().toLocaleDateString()}`,
+                  region: 'DACH', currency: 'EUR', classification_standard: 'din276',
+                });
+                const boq = await apiPost<{id:string}>('/v1/boq/boqs/', {
+                  project_id: proj.id, name: 'Bill of Quantities',
+                });
+                navigate(`/boq/${boq.id}`);
+              } catch {
+                addToast({ type: 'error', title: t('dashboard.quick_start_failed', { defaultValue: 'Failed to create quick start estimate' }) });
+              }
+            }}
+          >
+            {t('dashboard.quick_start', { defaultValue: 'Quick Start' })}
+          </Button>
         </div>
       </div>
-      {/* Open-source badge */}
-      <a
-        href="https://github.com/datadrivenconstruction/OpenConstructionERP"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-oe-blue/8 via-violet-500/8 to-emerald-500/8 border border-oe-blue/15 py-1.5 px-3 hover:shadow-md hover:border-oe-blue/30 transition-all animate-stagger-in"
-        style={{ animationDelay: '200ms' }}
-      >
-        <span className="relative flex h-2.5 w-2.5 shrink-0">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-        </span>
-        <span className="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
-          {t('dashboard.open_source_erp', { defaultValue: 'Erste Open-Source Bau-ERP' })}
-        </span>
-        <ExternalLink size={12} className="text-oe-blue opacity-50 shrink-0" />
-      </a>
 
-      {/* Welcome modal — shown once on first launch, dismissable */}
-      {showWelcome && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={dismissWelcome} />
-          <div className="relative w-full max-w-lg rounded-2xl border border-border-light bg-surface-elevated shadow-2xl overflow-hidden">
-            {/* Header gradient */}
-            <div className="bg-gradient-to-r from-oe-blue to-violet-600 px-6 py-5 text-white text-center">
-              <h2 className="text-lg font-bold">{t('dashboard.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}</h2>
-              <p className="mt-1 text-sm text-white/80">{t('dashboard.welcome_sub', { defaultValue: 'Free & open-source construction cost estimation' })}</p>
-            </div>
-
-            {/* Content */}
-            <div className="px-6 py-5">
-              <p className="text-sm text-content-secondary text-center mb-5 leading-relaxed">
-                {t('dashboard.welcome_body', { defaultValue: 'This project is built and maintained by the community. Your support helps us add new features, regional databases, and keep it free for everyone.' })}
-              </p>
-
-              {/* 3 CTA cards */}
-              <div className="space-y-2.5">
-                <a
-                  href="https://github.com/datadrivenconstruction/OpenConstructionERP"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10 px-4 py-3 hover:shadow-md transition-all group"
-                >
-                  <Star size={22} className="text-amber-500 shrink-0 group-hover:scale-110 transition-transform" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-content-primary">{t('dashboard.welcome_star', { defaultValue: 'Star on GitHub' })}</div>
-                    <div className="text-2xs text-content-tertiary">{t('dashboard.welcome_star_desc', { defaultValue: 'Help others discover the project — takes 2 seconds' })}</div>
-                  </div>
-                  <ExternalLink size={14} className="text-content-quaternary shrink-0" />
-                </a>
-
-                <a
-                  href="https://github.com/sponsors/datadrivenconstruction"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-xl border border-rose-200 dark:border-rose-800/40 bg-rose-50/50 dark:bg-rose-900/10 px-4 py-3 hover:shadow-md transition-all group"
-                >
-                  <Sparkles size={22} className="text-rose-500 shrink-0 group-hover:scale-110 transition-transform" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-content-primary">{t('dashboard.welcome_sponsor', { defaultValue: 'Become a Sponsor' })}</div>
-                    <div className="text-2xs text-content-tertiary">{t('dashboard.welcome_sponsor_desc', { defaultValue: 'Fund new features and keep the project free for everyone' })}</div>
-                  </div>
-                  <ExternalLink size={14} className="text-content-quaternary shrink-0" />
-                </a>
-
-                <a
-                  href="https://datadrivenconstruction.io/contact-support/?utm_source=erp"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-xl border border-oe-blue/20 dark:border-blue-800/40 bg-oe-blue/[0.03] dark:bg-blue-900/10 px-4 py-3 hover:shadow-md transition-all group"
-                >
-                  <Building2 size={22} className="text-oe-blue shrink-0 group-hover:scale-110 transition-transform" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-content-primary">{t('dashboard.welcome_consult', { defaultValue: 'Professional Consulting' })}</div>
-                    <div className="text-2xs text-content-tertiary">{t('dashboard.welcome_consult_desc', { defaultValue: 'Custom deployment, training, and enterprise solutions worldwide' })}</div>
-                  </div>
-                  <ExternalLink size={14} className="text-content-quaternary shrink-0" />
-                </a>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-3 border-t border-border-light bg-surface-secondary/30 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-2xs text-content-quaternary">datadrivenconstruction.io</span>
-                <button
-                  onClick={() => { dismissWelcome(); navigate('/onboarding'); }}
-                  className="text-2xs text-oe-blue hover:text-oe-blue/80 transition-colors underline"
-                >
-                  {t('dashboard.run_setup', { defaultValue: 'Run Setup Wizard' })}
-                </button>
-              </div>
-              <button
-                onClick={dismissWelcome}
-                className="rounded-lg bg-oe-blue px-4 py-1.5 text-sm font-medium text-white hover:bg-oe-blue/90 transition-colors"
-              >
-                {t('dashboard.welcome_start', { defaultValue: 'Get Started' })}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* System Status Summary — compact badges */}
-      <SystemStatusSummary projects={projects} boqs={allBoqs} />
-
-      {/* KPI hint */}
+      {/* ─── 2. Stats row ────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        {/* Open-source badge */}
+        <a
+          href="https://github.com/datadrivenconstruction/OpenConstructionERP"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-oe-blue/8 via-violet-500/8 to-emerald-500/8 border border-oe-blue/15 py-1.5 px-3 hover:shadow-md hover:border-oe-blue/30 transition-all animate-stagger-in shrink-0"
+          style={{ animationDelay: '200ms' }}
+        >
+          <span className="relative flex h-2.5 w-2.5 shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+          </span>
+          <span className="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
+            {t('dashboard.open_source_erp', { defaultValue: 'Erste Open-Source Bau-ERP' })}
+          </span>
+          <ExternalLink size={12} className="text-oe-blue opacity-50 shrink-0" />
+        </a>
+        {/* Stat pills */}
+        <SystemStatusSummary projects={projects} boqs={allBoqs} />
+      </div>
       <InfoHint text={t('dashboard.kpi_hint', { defaultValue: 'Summary across all projects. Values update as you add estimates and schedule activities.' })} />
 
-      {/* Continue Your Work — prominent card for returning users */}
+      {/* ─── 3. Continue Your Work — full-width banner ────────────────── */}
       {lastBoq && (
         <div
           className="group relative overflow-hidden rounded-xl border-2 border-oe-blue/30 bg-gradient-to-br from-oe-blue-subtle/40 via-surface-elevated to-violet-500/5 p-5 cursor-pointer hover:border-oe-blue/60 hover:shadow-lg transition-all animate-card-in"
@@ -1833,16 +1566,14 @@ export function DashboardPage() {
                 <span className="text-2xs font-semibold text-oe-blue uppercase tracking-wider">
                   {t('dashboard.continue_work', { defaultValue: 'Continue your work' })}
                 </span>
-                <span className="text-2xs text-content-quaternary">·</span>
+                <span className="text-2xs text-content-quaternary">&middot;</span>
                 <span className="text-2xs text-content-tertiary">
                   {lastBoq.status === 'draft' ? t('boq.status_draft', { defaultValue: 'Draft' }) : lastBoq.status}
                 </span>
               </div>
               <h2 className="text-lg font-bold text-content-primary truncate">{lastBoq.name}</h2>
               {lastBoq.projectName && (
-                <p className="text-xs text-content-tertiary truncate mt-0.5">
-                  {lastBoq.projectName}
-                </p>
+                <p className="text-xs text-content-tertiary truncate mt-0.5">{lastBoq.projectName}</p>
               )}
               <div className="mt-3 flex items-center gap-4 text-xs text-content-secondary">
                 {lastBoq.positionCount > 0 && (
@@ -1864,20 +1595,45 @@ export function DashboardPage() {
         </div>
       )}
 
-      {/* KPI Ribbon */}
+      {/* ─── 4. KPI Ribbon ───────────────────────────────────────────── */}
       <KpiRibbon boqs={allBoqs} schedules={allSchedules} projects={projects} />
 
-      {/* BIM coverage card — only renders when the active project has at
-          least one BIM model.  Shows what fraction of elements is linked
-          to BOQ, costed, validated, has tasks / docs.  One of the
-          deepest cross-module integration signals — answers the question
-          "how complete is the model integration on this project?" */}
+      {/* ─── 4. Project Cards (primary content) ──────────────────────── */}
+      <ProjectMetricCards cards={projectCards} loading={cardsLoading} />
+
+      {/* Fallback project list when no metric cards available */}
+      {(!projectCards || projectCards.length === 0) && (
+        <div className="animate-card-in" style={{ animationDelay: '150ms' }}>
+          <Card padding="none">
+            <div className="p-6 pb-0">
+              <CardHeader
+                title={t('dashboard.recent_projects')}
+                action={
+                  <Button variant="ghost" size="sm" icon={<ArrowRight size={14} />} iconPosition="right" onClick={() => navigate('/projects')}>
+                    {t('projects.title')}
+                  </Button>
+                }
+              />
+            </div>
+            <CardContent className="!mt-0">
+              <ProjectsList projects={projects} />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* ─── 5. Portfolio Overview (multi-project users) ─────────────── */}
+      {projects && projects.length > 1 && (
+        <PortfolioOverview projects={projects} />
+      )}
+
+      {/* ─── 6. BIM Coverage ─────────────────────────────────────────── */}
       <BIMCoverageCard />
 
-      {/* Workflow Guide — step-by-step for new users */}
-      <WorkflowGuide projects={projects} boqs={allBoqs} schedules={allSchedules} />
+      {/* ─── 7. Getting Started (onboarding — hidden once all done) ─── */}
+      <OnboardingSteps projects={projects} regionStats={regionStats} boqs={allBoqs} vectorCount={vectorCount} />
 
-      {/* Context-aware Next Steps */}
+      {/* ─── 8. Context-aware suggestions ────────────────────────────── */}
       <NextSteps
         projects={projects}
         boqs={allBoqs}
@@ -1885,124 +1641,9 @@ export function DashboardPage() {
         allContacts={contactsCount}
       />
 
-      {/* Portfolio Overview Stats */}
-      {projects && projects.length > 1 && (
-        <PortfolioOverview projects={projects} />
-      )}
-
-      {/* Quick Actions */}
-      <div className="flex flex-wrap sm:flex-nowrap sm:overflow-x-auto sm:scrollbar-none items-center gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2 animate-card-in" style={{ animationDelay: '80ms' }}>
-          <span className="text-xs font-medium text-content-tertiary mr-1">
-            {t('dashboard.quick_actions', { defaultValue: 'Quick Actions' })}:
-          </span>
-          {/* Quick Start — primary action for new users */}
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<Sparkles size={14} />}
-            onClick={async () => {
-              try {
-                const proj = await apiPost<{id:string}>('/v1/projects/', {
-                  name: `Estimate ${new Date().toLocaleDateString()}`,
-                  region: 'DACH', currency: 'EUR', classification_standard: 'din276',
-                });
-                const boq = await apiPost<{id:string}>('/v1/boq/boqs/', {
-                  project_id: proj.id, name: 'Bill of Quantities',
-                });
-                navigate(`/boq/${boq.id}`);
-              } catch {
-                addToast({ type: 'error', title: t('dashboard.quick_start_failed', { defaultValue: 'Failed to create quick start estimate' }) });
-              }
-            }}
-          >
-            {t('dashboard.quick_start', { defaultValue: 'Quick Start Estimate' })}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<FolderPlus size={14} />}
-            onClick={() => navigate('/projects/new')}
-          >
-            {t('dashboard.new_project', { defaultValue: 'New Project' })}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<FileText size={14} />}
-            onClick={() => navigate('/boq')}
-          >
-            {t('dashboard.create_boq', { defaultValue: 'New BOQ' })}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<ShieldCheck size={14} />}
-            onClick={() => navigate('/validation')}
-          >
-            {t('nav.validation', { defaultValue: 'Validate' })}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Database size={14} />}
-            onClick={() => navigate('/setup/databases')}
-          >
-            {t('dashboard.qa_import_cost_db', { defaultValue: 'Import Cost DB' })}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Sparkles size={14} />}
-            onClick={() => navigate('/ai-estimate')}
-          >
-            {t('dashboard.qa_ai_estimate', { defaultValue: 'AI Estimate' })}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Download size={14} />}
-            onClick={() => navigate('/costs/import')}
-          >
-            {t('costs.import_title', { defaultValue: 'Import Database' })}
-          </Button>
-      </div>
-
-      {/* Onboarding Steps */}
-      <OnboardingSteps projects={projects} regionStats={regionStats} boqs={allBoqs} vectorCount={vectorCount} />
-
-      {/* Project Summary Cards with KPI metrics */}
-      <ProjectMetricCards cards={projectCards} loading={cardsLoading} />
-
-      {/* Recent Projects — fallback list shown when no project cards data */}
-      {(!projectCards || projectCards.length === 0) && (
-      <div className="animate-card-in" style={{ animationDelay: '150ms' }}>
-        <Card padding="none">
-          <div className="p-6 pb-0">
-            <CardHeader
-              title={t('dashboard.recent_projects')}
-              action={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  icon={<ArrowRight size={14} />}
-                  iconPosition="right"
-                  onClick={() => navigate('/projects')}
-                >
-                  {t('projects.title')}
-                </Button>
-              }
-            />
-          </div>
-          <CardContent className="!mt-0">
-            <ProjectsList projects={projects} />
-          </CardContent>
-        </Card>
-      </div>
-      )}
-
-      {/* Analytics Section */}
+      {/* ─── 9. Analytics + Activity + System Status ─────────────────── */}
       {projects && projects.length > 0 && (
-        <div className="animate-card-in" style={{ animationDelay: '450ms' }}>
+        <div className="animate-card-in" style={{ animationDelay: '350ms' }}>
           <div className="mb-4 flex items-center gap-2">
             <BarChart3 size={18} className="text-content-tertiary" strokeWidth={1.75} />
             <h2 className="text-lg font-semibold text-content-primary">
@@ -2013,25 +1654,15 @@ export function DashboardPage() {
         </div>
       )}
 
-      {/* Activity Feed (left) + System Status (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Activity Feed — left column */}
         {projects && projects.length > 0 && (
-          <div className="lg:col-span-2 animate-card-in" style={{ animationDelay: '500ms' }}>
+          <div className="lg:col-span-2 animate-card-in" style={{ animationDelay: '400ms' }}>
             <Card className="h-full">
               <CardHeader
                 title={t('dashboard.activity', { defaultValue: 'Recent Activity' })}
                 action={
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    icon={<ArrowRight size={14} />}
-                    iconPosition="right"
-                    onClick={() => setShowAllActivity((prev) => !prev)}
-                  >
-                    {showAllActivity
-                      ? t('common.show_less', { defaultValue: 'Show less' })
-                      : t('common.show_more', { defaultValue: 'Show more' })}
+                  <Button variant="ghost" size="sm" icon={<ArrowRight size={14} />} iconPosition="right" onClick={() => setShowAllActivity((prev) => !prev)}>
+                    {showAllActivity ? t('common.show_less', { defaultValue: 'Show less' }) : t('common.show_more', { defaultValue: 'Show more' })}
                   </Button>
                 }
               />
@@ -2041,9 +1672,7 @@ export function DashboardPage() {
             </Card>
           </div>
         )}
-
-        {/* System Status — right column */}
-        <div className={`${projects && projects.length > 0 ? 'lg:col-start-3' : ''} animate-card-in`} style={{ animationDelay: '550ms' }}>
+        <div className={`${projects && projects.length > 0 ? 'lg:col-start-3' : ''} animate-card-in`} style={{ animationDelay: '450ms' }}>
           <Card className="h-full">
             <CardHeader title={t('dashboard.system_status')} />
             <CardContent>

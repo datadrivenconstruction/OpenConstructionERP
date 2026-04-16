@@ -64,7 +64,7 @@ describe('getColumnDefs', () => {
 
   it('should have checkbox selection column', () => {
     const defs = getColumnDefs(context);
-    const checkboxCol = defs.find((d: any) => d.colId === '_checkbox');
+    const checkboxCol = defs.find((d: { colId?: string }) => d.colId === '_checkbox');
     expect(checkboxCol).toBeDefined();
     if (!checkboxCol) return;
     expect(checkboxCol.colId).toBe('_checkbox');
@@ -116,7 +116,7 @@ describe('getColumnDefs', () => {
 
   it('should have a cell editor for unit', () => {
     const defs = getColumnDefs(context);
-    const unitCol = defs.find((d: any) => d.field === 'unit');
+    const unitCol = defs.find((d: { field?: string }) => d.field === 'unit');
     expect(unitCol).toBeDefined();
     expect(unitCol?.cellEditor).toBeDefined();
   });

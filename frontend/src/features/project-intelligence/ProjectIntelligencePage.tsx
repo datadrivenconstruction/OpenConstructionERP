@@ -49,8 +49,13 @@ const GRADE_COLORS: Record<string, string> = {
   F: '#da3633',
 };
 
+/** Dynamic state object from backend — each domain key (boq, validation, etc.)
+ *  maps to an object with heterogeneous metric fields. */
+type DomainStateValue = string | number | boolean | string[] | null | undefined;
+type DomainStateMap = Record<string, Record<string, DomainStateValue>>;
 interface SummaryState {
   project_name?: string;
+  [key: string]: Record<string, DomainStateValue> | string | undefined;
 }
 
 interface Summary {
@@ -132,8 +137,8 @@ export function ProjectIntelligencePage() {
           );
           setActions(actData);
         } catch { /* actions are optional */ }
-      } catch (err: any) {
-        setError(err.message || 'Failed to load project intelligence');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to load project intelligence');
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -582,7 +587,7 @@ export function ProjectIntelligencePage() {
                 </p>
               </div>
               <DomainDetails
-                state={state}
+                state={state as DomainStateMap}
                 scores={score.domain_scores}
                 selectedDomain={selectedDomain}
                 onSelectDomain={setSelectedDomain}

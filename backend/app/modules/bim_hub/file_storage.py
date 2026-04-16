@@ -120,14 +120,23 @@ async def save_original_cad(
 async def find_geometry_key(
     project_id: uuid.UUID | str,
     model_id: uuid.UUID | str,
+    prefer_ext: str | None = None,
 ) -> tuple[str, str] | None:
     """Return ``(key, ext)`` for the first geometry blob found, or ``None``.
 
     Geometry may have been uploaded as DAE / GLB / glTF.  We probe each
     candidate in priority order.
+
+    When *prefer_ext* is set (e.g. ``".dae"``), that extension is tried
+    first before falling back to the default priority order.  This lets
+    the frontend force DAE when the GLB has scrambled node names.
     """
     backend = _backend()
-    for ext in GEOMETRY_EXTENSIONS:
+    exts = list(GEOMETRY_EXTENSIONS)
+    if prefer_ext and prefer_ext in exts:
+        exts.remove(prefer_ext)
+        exts.insert(0, prefer_ext)
+    for ext in exts:
         key = geometry_key(project_id, model_id, ext)
         if await backend.exists(key):
             return key, ext

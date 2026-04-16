@@ -486,7 +486,7 @@ export function CostsPage() {
             offset: 0,
           } as CostSearchResponse;
         } catch (err) {
-          console.error('Semantic search failed, falling back to regular search:', err);
+          if (import.meta.env.DEV) console.error('Semantic search failed, falling back to regular search:', err);
           // Fall back to regular search
         }
       }
