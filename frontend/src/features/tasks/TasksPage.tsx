@@ -57,7 +57,7 @@ interface Project {
 }
 
 const BUILTIN_TASK_TYPES: BuiltinTaskType[] = ['task', 'topic', 'information', 'decision', 'personal'];
-const STATUSES: TaskStatus[] = ['draft', 'open', 'in_progress', 'completed'];
+// STATUSES is now computed dynamically (BUILTIN_STATUSES + custom) inside the component
 
 const TYPE_CARD_ICON: Record<string, React.ElementType> = {
   task: ListTodo,
@@ -112,6 +112,33 @@ function saveCustomCategories(categories: CustomCategory[]): void {
     // Ignore storage errors
   }
 }
+
+/* ── Custom Status Columns (Kanban) ──────────────────────────────────── */
+
+interface CustomStatus {
+  name: string;     // lowercase slug used as task status value
+  label: string;    // display name
+  colorIdx: number; // index into CUSTOM_CATEGORY_COLORS
+}
+
+const CUSTOM_STATUSES_KEY = 'oe-task-custom-statuses';
+
+function loadCustomStatuses(): CustomStatus[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_STATUSES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomStatuses(statuses: CustomStatus[]): void {
+  try {
+    localStorage.setItem(CUSTOM_STATUSES_KEY, JSON.stringify(statuses));
+  } catch { /* Ignore */ }
+}
+
+const BUILTIN_STATUSES: TaskStatus[] = ['draft', 'open', 'in_progress', 'completed'];
 
 /** Get the color class for any task type, including custom categories. */
 function getTypeColor(taskType: string, customCategories: CustomCategory[]): string {
@@ -637,12 +664,46 @@ export function TasksPage() {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dropTargetStatus, setDropTargetStatus] = useState<TaskStatus | null>(null);
 
-  // Custom categories
+  // Custom categories (task types)
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>(loadCustomCategories);
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryColorIdx, setNewCategoryColorIdx] = useState(0);
   const addCategoryInputRef = useRef<HTMLInputElement>(null);
+
+  // Custom status columns (Kanban)
+  const [customStatuses, setCustomStatuses] = useState<CustomStatus[]>(loadCustomStatuses);
+  const [showAddStatus, setShowAddStatus] = useState(false);
+  const [newStatusName, setNewStatusName] = useState('');
+  const [newStatusColorIdx, setNewStatusColorIdx] = useState(2);
+
+  const allStatuses = useMemo<string[]>(
+    () => [...BUILTIN_STATUSES, ...customStatuses.map((s) => s.name)],
+    [customStatuses],
+  );
+
+  const handleAddStatus = useCallback(() => {
+    const label = newStatusName.trim();
+    if (!label) return;
+    const slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    if (!slug || BUILTIN_STATUSES.includes(slug as TaskStatus) || customStatuses.some((s) => s.name === slug)) {
+      addToast({ type: 'warning', title: t('tasks.status_exists', { defaultValue: 'This status already exists' }) });
+      return;
+    }
+    const updated = [...customStatuses, { name: slug, label, colorIdx: newStatusColorIdx }];
+    setCustomStatuses(updated);
+    saveCustomStatuses(updated);
+    setNewStatusName('');
+    setNewStatusColorIdx((prev) => (prev + 1) % CUSTOM_CATEGORY_COLORS.length);
+    setShowAddStatus(false);
+    addToast({ type: 'success', title: t('tasks.status_created', { defaultValue: 'Column "{{name}}" created', name: label }) });
+  }, [newStatusName, newStatusColorIdx, customStatuses, addToast, t]);
+
+  const handleRemoveStatus = useCallback((slug: string) => {
+    const updated = customStatuses.filter((s) => s.name !== slug);
+    setCustomStatuses(updated);
+    saveCustomStatuses(updated);
+  }, [customStatuses]);
 
   const handleAddCategory = useCallback(() => {
     const label = newCategoryName.trim();
@@ -756,16 +817,21 @@ export function TasksPage() {
     return list;
   }, [tasks, searchQuery, myTasksOnly]);
 
-  // Group by status
+  // Group by status (built-in + custom)
   const grouped = useMemo(() => {
-    const map = new Map<TaskStatus, Task[]>();
-    for (const s of STATUSES) map.set(s, []);
+    const map = new Map<string, Task[]>();
+    for (const s of allStatuses) map.set(s, []);
     for (const item of filtered) {
       const col = map.get(item.status);
       if (col) col.push(item);
+      else {
+        // Task has a status not in our columns — put in first column
+        const first = map.get(allStatuses[0]!);
+        if (first) first.push(item);
+      }
     }
     return map;
-  }, [filtered]);
+  }, [filtered, allStatuses]);
 
   // Invalidation
   const invalidateAll = useCallback(() => {
@@ -1356,37 +1422,49 @@ export function TasksPage() {
             }
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-            {STATUSES.map((status) => {
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {allStatuses.map((status) => {
               const colItems = grouped.get(status) ?? [];
               const isDropTarget = draggedTaskId != null && dropTargetStatus === status;
+              const isBuiltin = BUILTIN_STATUSES.includes(status as TaskStatus);
+              const customStatus = customStatuses.find((s) => s.name === status);
+              const headerCls = STATUS_HEADER_CLS[status as TaskStatus]
+                ?? (customStatus ? CUSTOM_CATEGORY_COLORS[customStatus.colorIdx % CUSTOM_CATEGORY_COLORS.length]?.bg ?? 'bg-gray-100 text-gray-700' : 'bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400');
+              const displayLabel = isBuiltin
+                ? t(`tasks.status_${status}`, { defaultValue: status.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') })
+                : customStatus?.label ?? status;
+
               return (
                 <div
                   key={status}
-                  className="flex flex-col"
-                  onDragOver={(e) => handleColumnDragOver(e, status)}
+                  className="flex flex-col min-w-[240px] flex-1"
+                  onDragOver={(e) => handleColumnDragOver(e, status as TaskStatus)}
                   onDragLeave={handleColumnDragLeave}
-                  onDrop={(e) => handleColumnDrop(e, status)}
+                  onDrop={(e) => handleColumnDrop(e, status as TaskStatus)}
                   onDragEnd={handleDragEnd}
                 >
                   {/* Column header */}
                   <div
                     className={clsx(
                       'rounded-md px-2.5 py-1.5 mb-2 flex items-center justify-between',
-                      STATUS_HEADER_CLS[status],
+                      headerCls,
                     )}
                   >
-                    <span className="text-xs font-semibold">
-                      {t(`tasks.status_${status}`, {
-                        defaultValue: status
-                          .split('_')
-                          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                          .join(' '),
-                      })}
-                    </span>
-                    <span className="text-[10px] font-bold rounded-full px-1.5 py-0.5 bg-white/30 tabular-nums">
-                      {colItems.length}
-                    </span>
+                    <span className="text-xs font-semibold">{displayLabel}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] font-bold rounded-full px-1.5 py-0.5 bg-white/30 tabular-nums">
+                        {colItems.length}
+                      </span>
+                      {!isBuiltin && (
+                        <button
+                          onClick={() => handleRemoveStatus(status)}
+                          className="h-4 w-4 flex items-center justify-center rounded text-current opacity-50 hover:opacity-100 hover:bg-white/30 transition-opacity"
+                          title={t('common.delete', { defaultValue: 'Delete' })}
+                        >
+                          <X size={10} />
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Column items — drop zone */}
@@ -1423,6 +1501,52 @@ export function TasksPage() {
                 </div>
               );
             })}
+
+            {/* Add new status column */}
+            <div className="min-w-[200px] flex flex-col">
+              {showAddStatus ? (
+                <div className="rounded-lg border-2 border-dashed border-oe-blue/30 bg-oe-blue/5 p-3 space-y-2">
+                  <input
+                    type="text"
+                    value={newStatusName}
+                    onChange={(e) => setNewStatusName(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleAddStatus(); if (e.key === 'Escape') setShowAddStatus(false); }}
+                    placeholder={t('tasks.new_column_name', { defaultValue: 'Column name...' })}
+                    className="w-full text-xs px-2.5 py-1.5 rounded-md border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                    autoFocus
+                  />
+                  <div className="flex gap-1">
+                    {CUSTOM_CATEGORY_COLORS.map((c, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setNewStatusColorIdx(i)}
+                        className={clsx(
+                          'w-5 h-5 rounded-full border-2 transition-transform',
+                          newStatusColorIdx === i ? 'scale-125 border-content-primary' : 'border-transparent',
+                        )}
+                        style={{ backgroundColor: c.hex }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={handleAddStatus} className="flex-1 text-[10px] font-semibold py-1.5 rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors">
+                      {t('common.add', { defaultValue: 'Add' })}
+                    </button>
+                    <button onClick={() => setShowAddStatus(false)} className="flex-1 text-[10px] font-semibold py-1.5 rounded-md bg-surface-secondary text-content-secondary hover:bg-surface-tertiary transition-colors">
+                      {t('common.cancel', { defaultValue: 'Cancel' })}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowAddStatus(true)}
+                  className="rounded-md border-2 border-dashed border-border-medium px-4 py-3 flex items-center justify-center gap-2 text-xs text-content-tertiary hover:text-oe-blue hover:border-oe-blue/30 hover:bg-oe-blue/5 transition-all"
+                >
+                  <Plus size={14} />
+                  {t('tasks.add_column', { defaultValue: 'Add column' })}
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
