@@ -287,6 +287,6 @@ export function downloadFieldReportsTemplate(): void {
       triggerDownload(blob, 'field_reports_import_template.xlsx');
     })
     .catch((err) => {
-      console.error('Template download error:', err);
+      if (import.meta.env.DEV) console.error('Template download error:', err);
     });
 }

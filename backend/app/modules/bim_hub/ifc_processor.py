@@ -118,53 +118,68 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                 )
                 return proc.returncode, proc.stdout, proc.stderr
 
-            # ── Pass 1: Excel ──────────────────────────────────────────
-            # `-no-collada` here just disables placeholder COLLADA we don't need
-            # for the Excel pass — the actual COLLADA comes from pass 2.
+            # ── Passes 1 + 2 in parallel: Excel + native COLLADA ──────
+            # DDC RvtExporter has to load the entire RVT file from scratch
+            # for each invocation (no shared state between processes), so
+            # running the Excel and COLLADA passes sequentially used to
+            # double the effective conversion time.  The two output files
+            # are independent — both passes only read the input and write
+            # to a different target — so we run them in parallel threads.
+            # Wall-time drops to roughly max(Excel, COLLADA) instead of sum.
+            #
+            # The previously-present third synchronous pass for PDF sheet
+            # export was removed: it triples upload latency, frequently
+            # times out, and the PDF can be regenerated on demand from the
+            # original RVT/IFC blob (which is already saved by the router
+            # before this processor runs).
+            import concurrent.futures
+
             output_xlsx = (output_dir / (ifc_path.stem + ".xlsx")).resolve()
-            try:
-                rc, _stdout, stderr = _run_ddc(output_xlsx, "-no-collada")
-            except subprocess.TimeoutExpired:
-                logger.error("DDC Excel pass timed out for %s", ifc_path.name)
-                return None
-            if rc != 0:
-                logger.warning(
-                    "DDC Excel pass exit %d: %s",
-                    rc, stderr.decode(errors="replace")[:300],
-                )
-                return None
-
-            excel_path: Path | None = None
-            if output_xlsx.exists() and output_xlsx.stat().st_size > 0:
-                excel_path = output_xlsx
-            else:
-                for f in output_dir.iterdir():
-                    if f.suffix in (".xlsx", ".xls") and f.stat().st_size > 0:
-                        excel_path = f
-                        break
-            if not excel_path:
-                logger.warning("DDC Excel pass produced no output file in %s", output_dir)
-                return None
-
-            raw_elements = parse_cad_excel(excel_path)
-            if not raw_elements:
-                logger.warning("DDC Excel pass produced empty file")
-                return None
-            logger.info(
-                "DDC converter extracted %d raw rows from %s",
-                len(raw_elements), ifc_path.name,
-            )
-
-            # ── Pass 2: native COLLADA geometry ────────────────────────
-            # Output filename MUST be `geometry.dae` so the existing
-            # BIM Hub geometry endpoint can locate it.
             real_dae = (output_dir / "geometry.dae").resolve()
-            try:
-                rc2, _stdout2, stderr2 = _run_ddc(real_dae)
-            except subprocess.TimeoutExpired:
-                logger.warning("DDC COLLADA pass timed out — will fall back to box geometry")
-                rc2 = -1
-                stderr2 = b""
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as _pool:
+                fut_xlsx = _pool.submit(_run_ddc, output_xlsx, "-no-collada")
+                fut_dae = _pool.submit(_run_ddc, real_dae)
+
+                try:
+                    rc, _stdout, stderr = fut_xlsx.result()
+                except subprocess.TimeoutExpired:
+                    logger.error("DDC Excel pass timed out for %s", ifc_path.name)
+                    return None
+                if rc != 0:
+                    logger.warning(
+                        "DDC Excel pass exit %d: %s",
+                        rc, stderr.decode(errors="replace")[:300],
+                    )
+                    return None
+
+                excel_path: Path | None = None
+                if output_xlsx.exists() and output_xlsx.stat().st_size > 0:
+                    excel_path = output_xlsx
+                else:
+                    for f in output_dir.iterdir():
+                        if f.suffix in (".xlsx", ".xls") and f.stat().st_size > 0:
+                            excel_path = f
+                            break
+                if not excel_path:
+                    logger.warning("DDC Excel pass produced no output file in %s", output_dir)
+                    return None
+
+                raw_elements = parse_cad_excel(excel_path)
+                if not raw_elements:
+                    logger.warning("DDC Excel pass produced empty file")
+                    return None
+                logger.info(
+                    "DDC converter extracted %d raw rows from %s",
+                    len(raw_elements), ifc_path.name,
+                )
+
+                try:
+                    rc2, _stdout2, stderr2 = fut_dae.result()
+                except subprocess.TimeoutExpired:
+                    logger.warning("DDC COLLADA pass timed out — will fall back to box geometry")
+                    rc2 = -1
+                    stderr2 = b""
 
             real_dae_path: Path | None = None
             if rc2 == 0 and real_dae.exists() and real_dae.stat().st_size > 0:
@@ -179,41 +194,11 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                     rc2, stderr2.decode(errors="replace")[:200] if stderr2 else "",
                 )
 
-            # ── Pass 3: PDF sheets (drawings) ─────────────────────────
-            # DDC converters export PDF when the output file has .pdf extension.
-            # We generate one PDF containing all sheets from the Revit/IFC model
-            # and store it alongside the model for the Documents module.
-            pdf_path: Path | None = None
-            try:
-                real_pdf = (output_dir / "sheets.pdf").resolve()
-                rc3, _stdout3, stderr3 = _run_ddc(real_pdf)
-                if rc3 == 0 and real_pdf.exists() and real_pdf.stat().st_size > 1000:
-                    pdf_path = real_pdf
-                    logger.info(
-                        "DDC PDF sheets exported: %d bytes",
-                        real_pdf.stat().st_size,
-                    )
-                else:
-                    logger.debug(
-                        "DDC PDF pass skipped (rc=%s, size=%s)",
-                        rc3,
-                        real_pdf.stat().st_size if real_pdf.exists() else 0,
-                    )
-            except subprocess.TimeoutExpired:
-                logger.debug("DDC PDF pass timed out — skipping")
-            except Exception as exc:
-                logger.debug("DDC PDF pass error: %s", exc)
-
-            result = _excel_elements_to_bim_result(
+            return _excel_elements_to_bim_result(
                 raw_elements,
                 output_dir,
                 real_dae_path=real_dae_path,
             )
-            # Attach PDF path so the caller (BIM Hub router) can create
-            # a Document record linking the sheets to the project.
-            if pdf_path:
-                result["pdf_sheets_path"] = str(pdf_path)
-            return result
     except ImportError:
         logger.debug("cad_import module not available")
     except Exception as e:
@@ -535,21 +520,41 @@ def _excel_elements_to_bim_result(
         if mesh_ref_int is not None:
             bbox = dae_bboxes.get(mesh_ref_int)
 
-        # Properties: keep human-meaningful BuiltIn params, drop noisy / structural keys
-        SKIP_PROP_KEYS = {
-            "id", "uniqueid", "versionguid", "design option", "workset",
-            "category", "name", "type name", "family name", "level", "storey",
+        # Properties: preserve EVERY DDC column from the dataframe so the
+        # viewer never loses information.  Only skip keys that are
+        # genuinely duplicated as top-level fields (id → stable_id,
+        # category → element_type, name → name) or in the dedicated
+        # ``quantities`` map (length, area, volume, …).  Keys like
+        # "design option", "workset", "versionguid" are intentionally kept
+        # because designers do query them and dropping them silently
+        # destroys data the user explicitly asked to preserve.
+        DUPLICATE_PROP_KEYS = {
+            # Already in stable_id
+            "id", "uniqueid", "globalid", "type ifcguid",
+            # Already in element_type
+            "category",
+            # Already in top-level name
+            "name",
+            # Already in quantities map (BuiltIn measurement params)
             "length", "area", "volume", "width", "height", "thickness",
-            "perimeter", "count", "globalid", "type ifcguid", "export type to ifc",
+            "perimeter", "count",
+            "gross area", "gross volume", "floor area", "floor volume",
+            "surface area", "cut length", "unconnected height",
+            # IFC BaseQuantities mirrors of the above
+            "[basequantities] length", "[basequantities] width",
+            "[basequantities] height", "[basequantities] area",
+            "[basequantities] volume",
         }
         properties: dict[str, str] = {}
         for k, v in row.items():
-            if k.lower() in SKIP_PROP_KEYS:
+            if k.lower() in DUPLICATE_PROP_KEYS:
                 continue
             if v is None:
                 continue
             sval = str(v).strip()
-            if not sval or sval in ("None", "0"):
+            # Drop only truly empty values; keep "0" because for some Revit
+            # parameters (e.g. counts, structural flags) zero is meaningful.
+            if not sval or sval.lower() in ("none", "null", "n/a"):
                 continue
             # Cap value length to keep payloads reasonable
             properties[k] = sval[:500]
@@ -649,6 +654,79 @@ def _excel_elements_to_bim_result(
     }
 
 
+def _dae_element_bboxes(
+    dae_path: Path,
+) -> tuple[dict[str, tuple[float, float, float, float, float, float]], dict[str, str]]:
+    """Parse a DDC COLLADA file and return per-element bounding boxes.
+
+    Returns:
+        element_bboxes: ``{element_id: (min_x, min_y, min_z, max_x, max_y, max_z)}``
+        element_to_shape: ``{element_id: shape_id}`` (for diagnostics).
+
+    The DDC ``RvtExporter`` writes one top-level
+    ``<visual_scene>/<node id="{RevitElementId}">`` per element, each with a
+    single ``<instance_geometry url="#shapeN-lib">`` pointing at the shape
+    definition in ``<library_geometries>``.  We read every shape's
+    ``<float_array>`` of positions to compute its axis-aligned bbox.  Under
+    ``trimesh`` vertex-deduplication the count changes, but bbox is invariant
+    (it's derived from coordinate extrema), which makes it a stable
+    fingerprint for matching DAE shapes back to GLB meshes.
+    """
+    element_bboxes: dict[str, tuple[float, float, float, float, float, float]] = {}
+    element_to_shape: dict[str, str] = {}
+    try:
+        tree = ET.parse(str(dae_path))
+    except ET.ParseError as exc:
+        logger.debug("DAE bbox extraction: XML parse error: %s", exc)
+        return element_bboxes, element_to_shape
+
+    ns = {"c": _COLLADA_NS}
+    geoms = {
+        g.get("id", ""): g
+        for g in tree.findall(".//c:library_geometries/c:geometry", ns)
+    }
+
+    def _shape_bbox(
+        shape_id: str,
+    ) -> tuple[float, float, float, float, float, float] | None:
+        g = geoms.get(shape_id)
+        if g is None:
+            return None
+        # DDC writes positions as the first <source>/<float_array> inside <mesh>.
+        fa = g.find("c:mesh/c:source/c:float_array", ns)
+        if fa is None or not fa.text:
+            return None
+        try:
+            vals = [float(x) for x in fa.text.split()]
+        except ValueError:
+            return None
+        if len(vals) < 3:
+            return None
+        xs = vals[0::3]
+        ys = vals[1::3]
+        zs = vals[2::3]
+        return (min(xs), min(ys), min(zs), max(xs), max(ys), max(zs))
+
+    for node in tree.findall(".//c:visual_scene/c:node", ns):
+        nid = node.get("id", "") or ""
+        # Only numeric ids — Revit ElementId. Lights/cameras/named nodes skipped.
+        if not nid.isdigit():
+            continue
+        ig = node.find("c:instance_geometry", ns)
+        if ig is None:
+            continue
+        shape_id = (ig.get("url", "") or "").lstrip("#")
+        if not shape_id:
+            continue
+        bb = _shape_bbox(shape_id)
+        if bb is None:
+            continue
+        element_bboxes[nid] = bb
+        element_to_shape[nid] = shape_id
+
+    return element_bboxes, element_to_shape
+
+
 def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
     """Convert a COLLADA .dae file to binary glTF (.glb) using trimesh.
 
@@ -659,9 +737,17 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
     Typical conversion: 32 MB DAE -> 9.5 MB GLB (3.4x smaller).
     With server-side gzip the transfer shrinks to ~1.7 MB (19x smaller).
 
-    **Important**: trimesh.load() on DAE files loses the original COLLADA
-    node IDs (replaces them with ``shapeN-lib``).  We post-process the GLB
-    JSON chunk to restore node names from the DAE ``<node id="...">`` tags.
+    **Important**: trimesh.load() on DAE files does NOT guarantee that GLB
+    ``node.name`` still corresponds to the mesh at ``node.mesh``.  Trimesh
+    internally reorders/regroups meshes by material, so the node-name and
+    mesh-geometry pairing is unreliable (observed in the wild: node named
+    "135248" pointing at the roof geometry of element 140056, and vice-versa).
+
+    We therefore rebuild the name↔geometry pairing post-export by matching
+    each GLB mesh's POSITION bbox against the per-element bboxes parsed
+    directly from the DAE ``<visual_scene>/<node>/<instance_geometry>``
+    chain.  Bounding boxes survive trimesh's vertex-deduplication /
+    primitive-splitting unchanged, making them a robust fingerprint.
     """
     glb_target = (output_dir / "geometry.glb").resolve()
     try:
@@ -670,39 +756,130 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
         scene = trimesh.load(str(dae_path))
         glb_data: bytes = scene.export(file_type="glb")  # type: ignore[union-attr]
 
-        # Post-process: restore node names from the original DAE.
-        # Parse COLLADA <node id="..."> to get the original IDs in order.
+        # Post-process: reassign GLB node/mesh names using bbox matching
+        # against DAE shapes.  This replaces the previous approach which
+        # blindly trusted trimesh's scene-graph names.
         try:
-            import xml.etree.ElementTree as _ET
             import struct as _struct
             import json as _json
 
-            dae_tree = _ET.parse(str(dae_path))
-            ns = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
-            dae_nodes = dae_tree.findall(".//c:visual_scene/c:node", ns)
-            dae_node_ids = [n.get("id", "") for n in dae_nodes]
-
-            if dae_node_ids:
+            element_bboxes, _element_to_shape = _dae_element_bboxes(dae_path)
+            if element_bboxes:
                 # Parse GLB: header(12) + json_chunk_header(8) + json
                 json_len = _struct.unpack("<I", glb_data[12:16])[0]
                 gltf = _json.loads(glb_data[20 : 20 + json_len])
                 glb_nodes = gltf.get("nodes", [])
-
-                # Map: skip the root "world" node, patch geometry nodes
                 glb_meshes = gltf.get("meshes", [])
-                geom_idx = 0
-                for node in glb_nodes:
-                    if "mesh" in node and geom_idx < len(dae_node_ids):
-                        eid = dae_node_ids[geom_idx]
-                        node["name"] = eid
-                        # ALSO patch mesh.name — Three.js GLTFLoader
-                        # sets Mesh.name from meshes[].name (not node.name).
-                        mesh_idx = node["mesh"]
-                        if mesh_idx < len(glb_meshes):
-                            glb_meshes[mesh_idx]["name"] = eid
-                        geom_idx += 1
+                accessors = gltf.get("accessors", [])
 
-                if geom_idx > 0:
+                def _mesh_bbox(
+                    mesh_idx: int,
+                ) -> tuple[float, float, float, float, float, float] | None:
+                    """Union bbox over every primitive's POSITION accessor."""
+                    if mesh_idx >= len(glb_meshes):
+                        return None
+                    primitives = glb_meshes[mesh_idx].get("primitives", [])
+                    lo = [float("inf")] * 3
+                    hi = [float("-inf")] * 3
+                    any_found = False
+                    for prim in primitives:
+                        pos_idx = prim.get("attributes", {}).get("POSITION")
+                        if pos_idx is None or pos_idx >= len(accessors):
+                            continue
+                        acc = accessors[pos_idx]
+                        mn = acc.get("min")
+                        mx = acc.get("max")
+                        if not mn or not mx or len(mn) < 3 or len(mx) < 3:
+                            continue
+                        for i in range(3):
+                            if mn[i] < lo[i]:
+                                lo[i] = mn[i]
+                            if mx[i] > hi[i]:
+                                hi[i] = mx[i]
+                        any_found = True
+                    if not any_found:
+                        return None
+                    return (lo[0], lo[1], lo[2], hi[0], hi[1], hi[2])
+
+                # Build a spatial bucket over DAE element bboxes keyed by
+                # rounded bbox-center.  This turns O(N*M) into O(N+M) for
+                # typical models (5k+ elements).  Collisions are resolved by
+                # scoring all candidates in the bucket.
+                def _key(
+                    bb: tuple[float, float, float, float, float, float],
+                ) -> tuple[int, int, int]:
+                    # 0.5-unit bucket — trimesh preserves coords exactly, so
+                    # the match is effectively exact; the bucket is only a
+                    # prefilter for speed.
+                    cx = (bb[0] + bb[3]) * 0.5
+                    cy = (bb[1] + bb[4]) * 0.5
+                    cz = (bb[2] + bb[5]) * 0.5
+                    return (int(cx * 2), int(cy * 2), int(cz * 2))
+
+                buckets: dict[tuple[int, int, int], list[str]] = {}
+                for eid, bb in element_bboxes.items():
+                    buckets.setdefault(_key(bb), []).append(eid)
+
+                def _score(
+                    a: tuple[float, float, float, float, float, float],
+                    b: tuple[float, float, float, float, float, float],
+                ) -> float:
+                    return sum(abs(a[i] - b[i]) for i in range(6))
+
+                # Size of a typical model is ~5k elements; searching all
+                # buckets in a 1-unit radius is cheap and handles float
+                # rounding at bucket boundaries.
+                def _find_element(
+                    bb: tuple[float, float, float, float, float, float],
+                ) -> tuple[str | None, float]:
+                    k = _key(bb)
+                    best_eid: str | None = None
+                    best_score = float("inf")
+                    for dx in (-1, 0, 1):
+                        for dy in (-1, 0, 1):
+                            for dz in (-1, 0, 1):
+                                neighbors = buckets.get((k[0] + dx, k[1] + dy, k[2] + dz))
+                                if not neighbors:
+                                    continue
+                                for eid in neighbors:
+                                    s = _score(bb, element_bboxes[eid])
+                                    if s < best_score:
+                                        best_score = s
+                                        best_eid = eid
+                    return best_eid, best_score
+
+                # Tolerance: trimesh preserves coordinates exactly, so a
+                # perfect match is ~0.  We accept up to 0.01 (1 cm summed
+                # over 6 floats) to tolerate float round-trips.
+                match_tol = 0.01
+                matched = 0
+                total_mesh_nodes = 0
+                assigned_mesh: set[int] = set()
+                for node in glb_nodes:
+                    if "mesh" not in node:
+                        continue
+                    total_mesh_nodes += 1
+                    mi = node["mesh"]
+                    mb = _mesh_bbox(mi)
+                    if mb is None:
+                        continue
+                    eid, s = _find_element(mb)
+                    if eid is not None and s <= match_tol:
+                        node["name"] = eid
+                        if mi not in assigned_mesh and mi < len(glb_meshes):
+                            glb_meshes[mi]["name"] = eid
+                            assigned_mesh.add(mi)
+                        matched += 1
+
+                logger.info(
+                    "GLB post-process: bbox-matched %d/%d mesh nodes to "
+                    "DAE element ids (of %d DAE elements)",
+                    matched,
+                    total_mesh_nodes,
+                    len(element_bboxes),
+                )
+
+                if matched > 0:
                     # Rebuild GLB with patched JSON
                     new_json = _json.dumps(gltf, separators=(",", ":")).encode("utf-8")
                     # Pad to 4-byte alignment
@@ -718,12 +895,8 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
                         + new_json
                         + bin_chunk
                     )
-                    logger.info(
-                        "GLB post-process: restored %d node names from DAE",
-                        geom_idx,
-                    )
-        except Exception as patch_err:
-            logger.debug("GLB node-name patching skipped: %s", patch_err)
+        except Exception as patch_err:  # noqa: BLE001 — non-fatal post-process
+            logger.debug("GLB node-name patching skipped: %s", patch_err, exc_info=True)
 
         glb_target.write_bytes(glb_data)
 

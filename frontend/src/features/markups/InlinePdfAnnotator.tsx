@@ -272,8 +272,7 @@ export function InlinePdfAnnotator({
         // RenderingCancelledException is expected on zoom / page flip —
         // swallow it, but surface anything else to the console.
         if (err && (err as { name?: string }).name !== 'RenderingCancelledException') {
-          // eslint-disable-next-line no-console
-          console.warn('PDF page render failed', err);
+          if (import.meta.env.DEV) console.warn('PDF page render failed', err);
         }
         return;
       }

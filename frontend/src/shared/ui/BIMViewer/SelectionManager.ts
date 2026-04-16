@@ -154,8 +154,8 @@ export class SelectionManager {
         const batchedObj = hit.object;
         const instId = (hit as { instanceId?: number }).instanceId;
         for (const mesh of this.elementManager.getAllMeshes()) {
-          const handle = (mesh.userData as { batchHandle?: { batchedMesh: unknown; instanceId: number } }).batchHandle;
-          if (handle && handle.batchedMesh === batchedObj && handle.instanceId === instId) {
+          const handle = (mesh.userData as { batchHandle?: { batched: unknown; instanceId: number } }).batchHandle;
+          if (handle && handle.batched === batchedObj && handle.instanceId === instId) {
             const eid = (mesh.userData as { elementId?: string }).elementId;
             if (eid) {
               (hit.object.userData as Record<string, unknown>).elementId = eid;

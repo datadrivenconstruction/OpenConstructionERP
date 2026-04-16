@@ -1116,9 +1116,6 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
         result = buildFullView(manifest);
         break;
     }
-    if (import.meta.env.DEV) {
-      console.log('[ArchitectureMap]', viewLevel, '- Nodes:', result.nodes.length, 'Edges:', result.edges.length);
-    }
     return result;
   }, [manifest, viewLevel]);
 

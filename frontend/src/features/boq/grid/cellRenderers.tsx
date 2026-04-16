@@ -17,14 +17,16 @@ import {
   ArrowRight,
   Loader2,
   Info,
+  Trash2,
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import { RESOURCE_TYPE_BADGE, fmtWithCurrency } from '../boqHelpers';
 import { countComments } from '../CommentDrawer';
 import { BIMQuantityPicker } from './BIMQuantityPicker';
 import { MiniGeometryPreview } from '@/shared/ui/MiniGeometryPreview';
-import { fetchBIMElementsByIds } from '@/features/bim/api';
+import { fetchBIMElementsByIds, fetchBIMElementProperties } from '@/features/bim/api';
+import type { BIMElementData } from '@/shared/ui/BIMViewer/ElementManager';
 import { getIntlLocale } from '@/shared/lib/formatters';
 
 /* ── Validation Status Dot ────────────────────────────────────────── */
@@ -73,7 +75,7 @@ export interface SectionGroupContext {
 
 export function SectionFullWidthRenderer(params: ICellRendererParams) {
   const { data, context } = params;
-  const ctx = context as SectionGroupContext | undefined;
+  const ctx = context as FullGridContext | undefined;
 
   if (!data?._isSection || !ctx) return null;
 
@@ -89,8 +91,35 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
   const t = ctx.t ?? ((key: string, opts?: Record<string, string | number>) =>
     (opts?.defaultValue as string) ?? key);
 
+  const [dragOver, setDragOver] = useState(false);
+
   return (
-    <div className="flex items-center w-full h-full px-2 gap-2 select-none group/section">
+    <div
+      className={`flex items-center w-full h-full px-2 gap-2 select-none group/section transition-colors ${
+        dragOver ? 'bg-oe-blue-subtle/40 border-t-2 border-oe-blue' : ''
+      }`}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('text/x-section-id', data.id);
+        e.dataTransfer.effectAllowed = 'move';
+      }}
+      onDragOver={(e) => {
+        if (e.dataTransfer.types.includes('text/x-section-id')) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          setDragOver(true);
+        }
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        const fromId = e.dataTransfer.getData('text/x-section-id');
+        if (fromId && fromId !== data.id) {
+          ctx.onReorderSections?.(fromId, data.id);
+        }
+      }}
+    >
       <span className="cursor-grab opacity-40 group-hover/section:opacity-80 shrink-0 transition-opacity">
         <GripVertical size={14} className="text-content-tertiary" />
       </span>
@@ -151,6 +180,32 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
         {t('boq.add_item', { defaultValue: 'Add' })}
       </button>
 
+      {(ctx as FullGridContext | undefined)?.onDeleteSection && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (window.confirm(
+              t('boq.confirm_delete_section', {
+                defaultValue: 'Delete this section and all {{count}} positions inside it?',
+                count: childCount,
+              })
+            )) {
+              (ctx as FullGridContext).onDeleteSection!(data.id);
+            }
+          }}
+          className="shrink-0 h-5 flex items-center gap-0.5 px-1.5 rounded
+                     text-[10px] font-medium
+                     text-content-tertiary hover:text-red-600
+                     bg-transparent hover:bg-red-50 dark:hover:bg-red-950/30
+                     opacity-0 group-hover/section:opacity-100
+                     transition-all"
+          title={t('boq.delete_section', { defaultValue: 'Delete section with all positions' })}
+          aria-label={t('boq.delete_section', { defaultValue: 'Delete section with all positions' })}
+        >
+          <Trash2 size={10} />
+        </button>
+      )}
+
       <span className="shrink-0 text-xs font-bold text-content-primary tabular-nums pl-2">
         {formattedSubtotal}
       </span>
@@ -188,8 +243,7 @@ export interface ResourceGridContext {
   currencyCode: string;
   locale: string;
   fmt: Intl.NumberFormat;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: (...args: any[]) => string;
+  t: (key: string, options?: Record<string, string | number>) => string;
 }
 
 export type FullGridContext = ActionsContext & ResourceGridContext & SectionGroupContext & {
@@ -200,6 +254,10 @@ export type FullGridContext = ActionsContext & ResourceGridContext & SectionGrou
   onUpdatePosition?: (id: string, data: Record<string, unknown>, oldData: Record<string, unknown>) => void;
   /** Highlight linked BIM elements in the 3D viewer (triggered from ordinal badge). */
   onHighlightBIMElements?: (elementIds: string[]) => void;
+  /** Delete a section with all its child positions. */
+  onDeleteSection?: (sectionId: string) => void;
+  /** Reorder sections via drag-and-drop. */
+  onReorderSections?: (fromId: string, toId: string) => void;
 };
 
 /* ── Actions Cell Renderer ────────────────────────────────────────── */
@@ -314,7 +372,7 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
     <div className="flex items-center gap-1 overflow-hidden">
       <span className="text-xs font-mono truncate min-w-0">{value}</span>
       <span
-        className={`inline-block h-2 w-2 shrink-0 rounded-full ${dotColor} cursor-help`}
+        className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${dotColor} cursor-help`}
         title={getValidationTooltip(status, t)}
         aria-label={getValidationTooltip(status, t)}
       />
@@ -458,6 +516,81 @@ const BimLinkPopover = forwardRef<
   });
   const elements = data?.items ?? [];
 
+  // Parquet fallback: some BIM elements have empty `quantities` in the DB
+  // because DDC's "standard" Excel extract skips Area/Volume for certain
+  // Revit categories (e.g. tapered roofs, planting). The full DDC
+  // dataframe stored in Parquet often still has useful numerics
+  // (thickness, level offset, rafter cut, …). We fetch the Parquet row
+  // for each linked element keyed by its Revit ElementId (`mesh_ref`)
+  // and merge those numeric values into the view so the user always
+  // has something actionable to apply.
+  const parquetFetches = useQueries({
+    queries: elements.map((el) => ({
+      queryKey: ['bim-parquet-row', modelId, el.mesh_ref || el.id],
+      queryFn: () => fetchBIMElementProperties(modelId, el.mesh_ref || el.stable_id || el.id),
+      enabled: !!modelId && !!el.mesh_ref,
+      staleTime: 5 * 60_000,
+    })),
+  });
+  const parquetByElementId = useMemo(() => {
+    const out: Record<string, Record<string, unknown>> = {};
+    elements.forEach((el, i) => {
+      const row = parquetFetches[i]?.data;
+      if (row) out[el.id] = row;
+    });
+    return out;
+  }, [elements, parquetFetches]);
+
+  /** Extract numeric entries from an element, with Parquet fallback
+   *  when DB quantities are empty. Keys already present in `quantities`
+   *  are preferred (they're the canonical Area/Volume/Length fields);
+   *  Parquet fills the rest. */
+  const extractNumerics = useCallback(
+    (el: BIMElementData, includeAllProperties: boolean) => {
+      const entries: { key: string; value: number; source: 'qty' | 'prop' | 'parquet' }[] = [];
+      const seen = new Set<string>();
+      if (el.quantities) {
+        for (const [k, v] of Object.entries(el.quantities)) {
+          const num = typeof v === 'number' ? v : parseFloat(String(v));
+          if (!isNaN(num) && num !== 0) {
+            entries.push({ key: k, value: num, source: 'qty' });
+            seen.add(k);
+          }
+        }
+      }
+      if (includeAllProperties && el.properties) {
+        for (const [k, v] of Object.entries(el.properties)) {
+          if (seen.has(k)) continue;
+          const num = typeof v === 'number' ? v : parseFloat(String(v));
+          if (!isNaN(num) && num !== 0) {
+            entries.push({ key: k, value: num, source: 'prop' });
+            seen.add(k);
+          }
+        }
+      }
+      // Parquet-sourced numerics — surface them when the DB has no
+      // direct quantities (so the panel always has SOMETHING), and
+      // when the user explicitly asks for all properties.
+      const parquet = parquetByElementId[el.id];
+      if (parquet && (entries.length === 0 || includeAllProperties)) {
+        for (const [k, v] of Object.entries(parquet)) {
+          if (seen.has(k)) continue;
+          // Skip the `id` column (that's the Revit ElementId, not a quantity)
+          if (k === 'id') continue;
+          const num = typeof v === 'number' ? v : parseFloat(String(v));
+          if (!isNaN(num) && num !== 0) {
+            entries.push({ key: k, value: num, source: 'parquet' });
+            seen.add(k);
+          }
+        }
+      }
+      return entries;
+    },
+    [parquetByElementId],
+  );
+
+  const isEnriching = parquetFetches.some((q) => q.isLoading);
+
   const currentQuantity = typeof positionData?.quantity === 'number' ? positionData.quantity : 0;
   const canApply = !!positionData?.id && !!onUpdatePosition;
 
@@ -475,40 +608,143 @@ const BimLinkPopover = forwardRef<
     [positionData, onUpdatePosition, currentQuantity],
   );
 
-  // Compute sums across all elements for each quantity key
+  // Aggregation across linked elements — two semantics:
+  //
+  //   SUM — additive totals: area, volume, length, perimeter, weight, count.
+  //         Σ across all elements is what the BOQ position quantity should be.
+  //
+  //   DISTINCT — per-element constants: thickness, width, height, material
+  //         type, fire rating. Summing them is meaningless (five 240 mm walls
+  //         aren't "1200 mm thick"). We keep the list of unique values so the
+  //         user can pick one to apply, or just see the distribution.
+  //
+  // We classify each key with a keyword heuristic. Unknown → DISTINCT (safer
+  // default: showing "N unique values" never lies; an unwarranted sum might).
   const quantitySums = useMemo(() => {
-    if (elements.length === 0) return [] as { key: string; label: string; sum: number; unit: string; count: number }[];
-    const map = new Map<string, { key: string; label: string; sum: number; unit: string; count: number }>();
+    if (elements.length === 0) {
+      return [] as {
+        key: string;
+        label: string;
+        agg: 'sum' | 'distinct';
+        sum: number;
+        unit: string;
+        count: number;
+        uniqueValues: number[];
+      }[];
+    }
+    type Entry = {
+      key: string;
+      label: string;
+      agg: 'sum' | 'distinct';
+      sum: number;
+      unit: string;
+      count: number;
+      uniqueValues: number[];
+    };
+    const classify = (k: string): 'sum' | 'distinct' => {
+      const low = k.toLowerCase();
+      // Additive — quantities that roll up
+      if (
+        low.includes('area') ||
+        low.endsWith('_m2') ||
+        low.includes('volume') ||
+        low.endsWith('_m3') ||
+        low === 'length' ||
+        low.endsWith('_length') ||
+        low.endsWith('_m') ||
+        low.includes('perimeter') ||
+        low.includes('weight') ||
+        low.endsWith('_kg') ||
+        low.includes('count') ||
+        low === 'qty' ||
+        low === 'quantity'
+      ) {
+        return 'sum';
+      }
+      // Per-element constants — thickness, width, height, span, rating…
+      return 'distinct';
+    };
+    const unitOf = (k: string): string => {
+      const low = k.toLowerCase();
+      if (low.includes('area') || low.endsWith('_m2')) return 'm\u00B2';
+      if (low.includes('volume') || low.endsWith('_m3')) return 'm\u00B3';
+      if (
+        low.includes('length') ||
+        low.endsWith('_m') ||
+        low.includes('height') ||
+        low.includes('width') ||
+        low.includes('perimeter')
+      )
+        return 'm';
+      if (low.includes('thickness')) return 'mm';
+      if (low.includes('weight') || low.endsWith('_kg')) return 'kg';
+      if (low.includes('count')) return 'pcs';
+      return '';
+    };
+    const map = new Map<string, Entry>();
+    const bump = (k: string, num: number) => {
+      const existing = map.get(k);
+      const label = k
+        .replace(/_m2$|_m3$|_m$|_kg$/, '')
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+      if (existing) {
+        existing.sum += num;
+        existing.count += 1;
+        if (!existing.uniqueValues.includes(num)) existing.uniqueValues.push(num);
+      } else {
+        map.set(k, {
+          key: k,
+          label,
+          agg: classify(k),
+          sum: num,
+          unit: unitOf(k),
+          count: 1,
+          uniqueValues: [num],
+        });
+      }
+    };
     for (const el of elements) {
-      if (!el.quantities) continue;
-      for (const [k, v] of Object.entries(el.quantities)) {
-        const num = typeof v === 'number' ? v : parseFloat(String(v));
-        if (isNaN(num) || num === 0) continue;
-        const existing = map.get(k);
-        const label = k.replace(/_m2$|_m3$|_m$|_kg$/, '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-        if (existing) {
-          existing.sum += num;
-          existing.count += 1;
-        } else {
-          let unit = '';
-          if (k.includes('area') || k.endsWith('_m2')) unit = 'm\u00B2';
-          else if (k.includes('volume') || k.endsWith('_m3')) unit = 'm\u00B3';
-          else if (k.includes('length') || k.endsWith('_m') || k.includes('height') || k.includes('width') || k.includes('perimeter')) unit = 'm';
-          else if (k.includes('weight') || k.endsWith('_kg')) unit = 'kg';
-          else if (k.includes('count')) unit = 'pcs';
-          map.set(k, { key: k, label, sum: num, unit, count: 1 });
+      const dbKeys = new Set<string>();
+      if (el.quantities) {
+        for (const [k, v] of Object.entries(el.quantities)) {
+          const num = typeof v === 'number' ? v : parseFloat(String(v));
+          if (isNaN(num) || num === 0) continue;
+          bump(k, num);
+          dbKeys.add(k);
+        }
+      }
+      // Parquet fallback — only if the DB had no numeric quantities at
+      // all for this element, to avoid polluting sums with cosmetic
+      // numerics (material id, color code, …) when real area/volume
+      // already came through.
+      if (dbKeys.size === 0) {
+        const parquet = parquetByElementId[el.id];
+        if (parquet) {
+          for (const [k, v] of Object.entries(parquet)) {
+            if (k === 'id') continue;
+            const num = typeof v === 'number' ? v : parseFloat(String(v));
+            if (isNaN(num) || num === 0) continue;
+            bump(k, num);
+          }
         }
       }
     }
-    return Array.from(map.values()).sort((a, b) => b.sum - a.sum);
-  }, [elements]);
+    // Sort: SUM entries first (they're the headline numbers), then DISTINCT
+    // in descending order of "informativeness" (variety of values).
+    return Array.from(map.values()).sort((a, b) => {
+      if (a.agg !== b.agg) return a.agg === 'sum' ? -1 : 1;
+      if (a.agg === 'sum') return b.sum - a.sum;
+      return b.uniqueValues.length - a.uniqueValues.length;
+    });
+  }, [elements, parquetByElementId]);
 
   return (
     <div
       ref={combinedRef}
       className="rounded-xl shadow-2xl border border-border-light dark:border-border-dark
-                 bg-white dark:bg-surface-elevated overflow-hidden"
-      style={{ ...style, width: canApply ? 640 : 380 }}
+                 bg-white dark:bg-surface-elevated overflow-hidden flex flex-col"
+      style={{ ...style, width: canApply ? 900 : 380, maxHeight: 'calc(100vh - 48px)' }}
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -532,9 +768,9 @@ const BimLinkPopover = forwardRef<
         </button>
       </div>
 
-      <div className={canApply ? 'flex' : ''}>
+      <div className={canApply ? 'flex flex-1 min-h-0 overflow-hidden' : ''}>
         {/* Left column: 3D preview + element cards */}
-        <div className={canApply ? 'w-[380px] shrink-0 border-r border-border-light dark:border-border-dark' : 'w-full'}>
+        <div className={canApply ? 'w-[380px] shrink-0 border-r border-border-light dark:border-border-dark flex flex-col' : 'w-full'}>
           {/* 3D Preview */}
           {glbOk && (
             <MiniGeometryPreview
@@ -570,13 +806,13 @@ const BimLinkPopover = forwardRef<
           </div>
         </div>
 
-        {/* Right column: properties + quantity picker */}
+        {/* Middle column: properties */}
         {canApply && (
-          <div className="w-[260px] flex flex-col">
+          <div className="w-[260px] shrink-0 flex flex-col border-r border-border-light dark:border-border-dark">
             {/* Properties header + toggle */}
             <button
               onClick={() => setShowAllProps((v) => !v)}
-              className="flex items-center gap-1.5 px-3 py-1.5 w-full bg-blue-50/50 dark:bg-blue-950/20 border-b border-border-light/50 dark:border-border-dark/50 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 w-full bg-blue-50/50 dark:bg-blue-950/20 border-b border-border-light/50 dark:border-border-dark/50 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors shrink-0"
             >
               <Info size={11} className="text-blue-600 shrink-0" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex-1 text-left">
@@ -584,29 +820,14 @@ const BimLinkPopover = forwardRef<
               </span>
               <ChevronDown size={12} className={`text-blue-500 transition-transform ${showAllProps ? 'rotate-180' : ''}`} />
             </button>
-            <div className={`overflow-y-auto border-b border-border-light dark:border-border-dark ${showAllProps ? 'max-h-[280px]' : 'max-h-[140px]'}`}>
+            <div className="flex-1 min-h-0 overflow-y-auto">
               {isLoading && (
                 <div className="flex items-center justify-center gap-2 py-4">
                   <Loader2 size={12} className="animate-spin text-content-tertiary" />
                 </div>
               )}
               {!isLoading && elements.map((el) => {
-                // Collect numeric entries from quantities + properties
-                const numericEntries: { key: string; value: number; source: 'qty' | 'prop' }[] = [];
-                if (el.quantities) {
-                  for (const [k, v] of Object.entries(el.quantities)) {
-                    const num = typeof v === 'number' ? v : parseFloat(String(v));
-                    if (!isNaN(num)) numericEntries.push({ key: k, value: num, source: 'qty' });
-                  }
-                }
-                if (showAllProps && el.properties) {
-                  for (const [k, v] of Object.entries(el.properties)) {
-                    const num = typeof v === 'number' ? v : parseFloat(String(v));
-                    if (!isNaN(num) && !numericEntries.some((e) => e.key === k)) {
-                      numericEntries.push({ key: k, value: num, source: 'prop' });
-                    }
-                  }
-                }
+                const numericEntries = extractNumerics(el, showAllProps);
                 if (numericEntries.length === 0) return null;
                 return (
                   <div key={el.id} className="px-3 py-1.5 border-b border-border-light/30 dark:border-border-dark/30 last:border-b-0">
@@ -615,7 +836,16 @@ const BimLinkPopover = forwardRef<
                     )}
                     {numericEntries.map(({ key, value, source }) => (
                       <div key={key} className="flex items-baseline justify-between gap-2 py-0.5">
-                        <span className={`text-[10px] truncate ${source === 'prop' ? 'text-content-tertiary italic' : 'text-content-secondary'}`}>
+                        <span
+                          className={`text-[10px] truncate ${
+                            source === 'qty'
+                              ? 'text-content-secondary'
+                              : source === 'parquet'
+                                ? 'text-emerald-700 dark:text-emerald-400'
+                                : 'text-content-tertiary italic'
+                          }`}
+                          title={source === 'parquet' ? 'From Parquet row (DDC export)' : source === 'prop' ? 'From element properties' : 'From element quantities'}
+                        >
                           {key.replace(/_/g, ' ')}
                         </span>
                         <span className="text-[10px] font-mono text-content-primary tabular-nums shrink-0 font-medium">
@@ -626,19 +856,36 @@ const BimLinkPopover = forwardRef<
                   </div>
                 );
               })}
-              {!isLoading && elements.every((el) => !el.quantities || Object.keys(el.quantities).length === 0) && !showAllProps && (
-                <div className="py-3 text-center text-[10px] text-content-tertiary">{t('boq.no_quantities_hint', { defaultValue: 'No quantities — click to show all properties' })}</div>
+              {!isLoading && !isEnriching && elements.every((el) => extractNumerics(el, showAllProps).length === 0) && (
+                <div className="py-3 text-center text-[10px] text-content-tertiary">
+                  {!showAllProps
+                    ? t('boq.no_quantities_hint', { defaultValue: 'No quantities — click to show all properties' })
+                    : t('boq.no_numeric_found', { defaultValue: 'No numeric values in this element' })}
+                </div>
+              )}
+              {isEnriching && !isLoading && (
+                <div className="flex items-center justify-center gap-2 py-2 text-[10px] text-content-tertiary">
+                  <Loader2 size={10} className="animate-spin" />
+                  {t('boq.loading_full_properties', { defaultValue: 'Loading full properties…' })}
+                </div>
               )}
             </div>
+          </div>
+        )}
 
-            {/* Apply Quantity section — aggregated sums */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/50 dark:bg-emerald-950/20 border-b border-border-light/50 dark:border-border-dark/50">
+        {/* Right column: Apply to BOQ — quantity sums that drop values
+            into the position quantity on click. Own scroll container so
+            the "Use" buttons are always reachable even when the
+            properties column has many rows. */}
+        {canApply && (
+          <div className="w-[260px] shrink-0 flex flex-col">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/50 dark:bg-emerald-950/20 border-b border-border-light/50 dark:border-border-dark/50 shrink-0">
               <Ruler size={11} className="text-emerald-600 shrink-0" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                 {t('boq.apply_to_boq', { defaultValue: 'Apply to BOQ' })}
               </span>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 min-h-0 overflow-y-auto">
               {isLoading && (
                 <div className="flex items-center justify-center gap-2 py-4">
                   <Loader2 size={12} className="animate-spin text-content-tertiary" />
@@ -650,49 +897,116 @@ const BimLinkPopover = forwardRef<
                 </div>
               )}
               {!isLoading && quantitySums.map((s) => {
-                const isCurrent = Math.abs(s.sum - currentQuantity) < 0.001;
-                return (
-                  <div
-                    key={s.key}
-                    className={`flex items-center gap-1 px-3 py-1.5 group/qrow transition-colors ${
-                      isCurrent
-                        ? 'bg-emerald-50/60 dark:bg-emerald-950/20'
-                        : 'hover:bg-emerald-50/80 dark:hover:bg-emerald-950/30'
-                    }`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[11px] text-content-secondary truncate block">
-                        {s.label}
-                      </span>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-[12px] tabular-nums text-content-primary font-semibold">
-                          {Number.isInteger(s.sum) ? s.sum.toLocaleString(getIntlLocale()) : s.sum.toLocaleString(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
-                        </span>
-                        {s.unit && (
-                          <span className="text-[9px] text-content-quaternary font-mono">{s.unit}</span>
-                        )}
-                        {elements.length > 1 && s.count > 1 && (
-                          <span className="text-[8px] text-content-quaternary">({s.count} el.)</span>
-                        )}
+                // SUM entries get the traditional "Use this number" row.
+                if (s.agg === 'sum') {
+                  const isCurrent = Math.abs(s.sum - currentQuantity) < 0.001;
+                  const fmt = Number.isInteger(s.sum)
+                    ? s.sum.toLocaleString(getIntlLocale())
+                    : s.sum.toLocaleString(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+                  return (
+                    <div
+                      key={s.key}
+                      className={`flex items-center gap-1 px-3 py-1.5 group/qrow transition-colors ${
+                        isCurrent
+                          ? 'bg-emerald-50/60 dark:bg-emerald-950/20'
+                          : 'hover:bg-emerald-50/80 dark:hover:bg-emerald-950/30'
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1">
+                          <span className="text-[11px] text-content-secondary truncate">{s.label}</span>
+                          <span
+                            className="text-[8px] font-bold uppercase text-emerald-600/80 tracking-wider shrink-0"
+                            title={t('boq.bim_agg_sum_title', { defaultValue: 'Summed across all linked elements' })}
+                          >
+                            Σ
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-[12px] tabular-nums text-content-primary font-semibold">{fmt}</span>
+                          {s.unit && <span className="text-[9px] text-content-quaternary font-mono">{s.unit}</span>}
+                          {elements.length > 1 && s.count > 1 && (
+                            <span className="text-[8px] text-content-quaternary">({s.count} el.)</span>
+                          )}
+                        </div>
                       </div>
+                      {isCurrent ? (
+                        <span className="text-[9px] text-emerald-600 font-semibold shrink-0 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">
+                          {t('boq.bim_qty_current', { defaultValue: 'current' })}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUseQuantity(s.sum, `BIM: ${s.label} (Σ)`);
+                          }}
+                          className="shrink-0 h-6 flex items-center gap-0.5 px-2.5 rounded text-[10px] font-semibold
+                                     text-white bg-emerald-500 hover:bg-emerald-600
+                                     shadow-sm transition-all"
+                        >
+                          {t('boq.bim_qty_use', { defaultValue: 'Use' })} <ArrowRight size={9} />
+                        </button>
+                      )}
                     </div>
-                    {isCurrent ? (
-                      <span className="text-[9px] text-emerald-600 font-semibold shrink-0 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">
-                        {t('boq.bim_qty_current', { defaultValue: 'current' })}
-                      </span>
-                    ) : (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUseQuantity(s.sum, `BIM: ${s.label}`);
-                        }}
-                        className="shrink-0 h-6 flex items-center gap-0.5 px-2.5 rounded text-[10px] font-semibold
-                                   text-white bg-emerald-500 hover:bg-emerald-600
-                                   shadow-sm transition-all"
+                  );
+                }
+                // DISTINCT entries: list unique values (e.g. wall thicknesses
+                // across a multi-wall selection). Single value → one chip.
+                // Many values → scrollable chip strip, each individually
+                // clickable to apply that specific number.
+                const unique = s.uniqueValues;
+                const sortedUnique = [...unique].sort((a, b) => a - b);
+                const fmtVal = (n: number) =>
+                  Number.isInteger(n)
+                    ? n.toLocaleString(getIntlLocale())
+                    : n.toLocaleString(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+                return (
+                  <div key={s.key} className="px-3 py-1.5 border-b border-border-light/30 dark:border-border-dark/30 last:border-b-0 hover:bg-sky-50/40 dark:hover:bg-sky-950/20 transition-colors">
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <span className="text-[11px] text-content-secondary truncate">{s.label}</span>
+                      <span
+                        className="text-[8px] font-bold uppercase text-sky-600/80 tracking-wider shrink-0"
+                        title={t('boq.bim_agg_distinct_title', {
+                          defaultValue:
+                            'Per-element value — summing is meaningless, so each unique value is listed. Click one to apply it.',
+                        })}
                       >
-                        {t('boq.bim_qty_use', { defaultValue: 'Use' })} <ArrowRight size={9} />
-                      </button>
-                    )}
+                        {sortedUnique.length === 1
+                          ? '='
+                          : t('boq.bim_agg_distinct_label', {
+                              defaultValue: '{{n}} values',
+                              n: sortedUnique.length,
+                            })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {sortedUnique.map((v) => {
+                        const isCurrent = Math.abs(v - currentQuantity) < 0.001;
+                        return (
+                          <button
+                            key={v}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isCurrent) handleUseQuantity(v, `BIM: ${s.label} = ${fmtVal(v)}`);
+                            }}
+                            disabled={isCurrent}
+                            className={`inline-flex items-baseline gap-0.5 px-1.5 py-0.5 rounded border text-[10px] tabular-nums font-mono transition-colors ${
+                              isCurrent
+                                ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border-emerald-300 cursor-default'
+                                : 'bg-surface-secondary text-content-primary border-border-light hover:bg-sky-100 hover:border-sky-400 dark:hover:bg-sky-900/40'
+                            }`}
+                            title={
+                              isCurrent
+                                ? t('boq.bim_qty_current', { defaultValue: 'current' })
+                                : t('boq.bim_qty_use_this', { defaultValue: 'Use this value' })
+                            }
+                          >
+                            {fmtVal(v)}
+                            {s.unit && <span className="text-[8px] text-content-quaternary">{s.unit}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               })}

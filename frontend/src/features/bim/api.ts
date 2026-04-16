@@ -140,18 +140,34 @@ export async function fetchBIMModel(modelId: string): Promise<BIMModelData> {
 
 /** Fetch elements for a specific BIM model.
  *
- * Default limit is 2000 (API max).  The 3D viewer paginates if needed.
+ * Two modes:
+ *   * `skeleton: true` — plain BIMElement rows, no enrichment joins. ~10×
+ *     faster; used by the 3D viewer (it only needs id / mesh_ref / name /
+ *     element_type / bbox for mesh matching). Server cap 50 000.
+ *   * `skeleton: false` (default) — enriched with boq_links, linked
+ *     documents / tasks / activities / requirements and validation
+ *     results. Paginated (server cap 2000). Used by BOQ linking and the
+ *     element list.
+ *
+ * A click in the viewer still resolves full Revit properties via
+ * /dataframe/query/ against the Parquet, so selection cost is O(1) in
+ * element count regardless of which mode fetched the list.
  */
 export async function fetchBIMElements(
   modelId: string,
-  opts?: { limit?: number; offset?: number; groupId?: string | null },
+  opts?: {
+    limit?: number;
+    offset?: number;
+    groupId?: string | null;
+    skeleton?: boolean;
+  },
 ): Promise<BIMElementsResponse> {
-  const limit = opts?.limit ?? 2000;
+  const skeleton = opts?.skeleton ?? false;
+  const limit = opts?.limit ?? (skeleton ? 50000 : 500);
   const offset = opts?.offset ?? 0;
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
-  if (opts?.groupId) {
-    params.set('group_id', opts.groupId);
-  }
+  if (opts?.groupId) params.set('group_id', opts.groupId);
+  if (skeleton) params.set('skeleton', 'true');
   return apiGet<BIMElementsResponse>(
     `/v1/bim_hub/models/${encodeURIComponent(modelId)}/elements/?${params.toString()}`,
   );
@@ -189,6 +205,51 @@ export async function fetchGeometryBlobUrl(modelId: string): Promise<string> {
   }
   const blob = await resp.blob();
   return URL.createObjectURL(blob);
+}
+
+/** Fetch the full Parquet row for a single element, keyed by its Revit
+ *  ElementId (the Parquet `id` column).
+ *
+ *  The 3D viewer uses the lightweight "skeleton" element list
+ *  (`fetchBIMElements(..., { skeleton: true })`) — five fields per row, no
+ *  properties. When the user clicks a mesh the viewer calls this to pull
+ *  the full ~45-1000 column row (all DDC-extracted Revit parameters) on
+ *  demand. That keeps the initial load fast and lazy-loads detail only
+ *  when needed.
+ *
+ *  `revitId` is typically `BIMElementData.mesh_ref`. For DDC-exported
+ *  RVT / IFC this equals the DAE `<node id="...">` attribute and the
+ *  Parquet row's `id`. Returns `null` when the Parquet has no row with
+ *  that id (the element was filtered out of BIMElement by the category
+ *  skip-list but still survives in Parquet).
+ */
+export async function fetchBIMElementProperties(
+  modelId: string,
+  revitId: string,
+  signal?: AbortSignal,
+): Promise<Record<string, unknown> | null> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const resp = await fetch(
+    `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/dataframe/query/`,
+    {
+      method: 'POST',
+      headers,
+      signal,
+      body: JSON.stringify({
+        filters: [{ column: 'id', op: '=', value: String(revitId) }],
+        limit: 1,
+      }),
+    },
+  );
+
+  if (!resp.ok) {
+    throw new Error(`Element properties fetch failed (HTTP ${resp.status})`);
+  }
+  const rows = (await resp.json()) as Record<string, unknown>[];
+  return rows[0] ?? null;
 }
 
 /** @deprecated Use fetchGeometryBlobUrl() instead — this exposes the JWT in the URL. */
@@ -313,6 +374,28 @@ export async function listLinks(
 ): Promise<BOQElementLinkListResponse> {
   return apiGet<BOQElementLinkListResponse>(
     `/v1/bim_hub/links/?boq_position_id=${encodeURIComponent(boqPositionId)}`,
+  );
+}
+
+/** Resolve (or lazy-create) a BIMElement DB row from a mesh_ref / stable_id.
+ *
+ *  When the user clicks a mesh in the 3D viewer that was NOT returned by
+ *  the standard BIMElement listing (e.g. DDC's Excel extract skipped the
+ *  category — tapered roofs, planting, detail lines…), the frontend holds
+ *  only a client-side stub id like `_unmatched_12`.  That id will fail UUID
+ *  validation on POST /links/.  Call this first to swap the stub for a
+ *  real BIMElement UUID; the backend pulls the row from Parquet and persists
+ *  it so future operations treat it like any other element. */
+export async function ensureBIMElement(
+  modelId: string,
+  ref: { meshRef?: string | null; stableId?: string | null },
+): Promise<{ id: string }> {
+  const payload: Record<string, string> = {};
+  if (ref.meshRef) payload.mesh_ref = ref.meshRef;
+  if (ref.stableId) payload.stable_id = ref.stableId;
+  return apiPost<{ id: string }, Record<string, string>>(
+    `/v1/bim_hub/models/${encodeURIComponent(modelId)}/ensure-element/`,
+    payload,
   );
 }
 
@@ -716,6 +799,20 @@ export async function uploadCADFile(
   }
 
   return response.json();
+}
+
+/** Trigger background generation of a single PDF that combines every
+ *  sheet/view extracted from the uploaded CAD file.  The request itself
+ *  is non-blocking — the backend schedules the job and returns
+ *  immediately.  The resulting PDF is saved to the project's Documents
+ *  module once ready. */
+export async function generateBIMPDFSheets(
+  modelId: string,
+): Promise<{ status: string; model_id: string }> {
+  return apiPost<{ status: string; model_id: string }>(
+    `/v1/bim_hub/${encodeURIComponent(modelId)}/generate-pdf-sheets/`,
+    {},
+  );
 }
 
 /* ── BIM Requirements Import/Export ─────────────────────────────────── */

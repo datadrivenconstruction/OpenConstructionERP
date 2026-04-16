@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { ChatMessage } from '../../types';
 import ToolCallCard from './ToolCallCard';
 import StreamingCursor from './StreamingCursor';
@@ -16,25 +17,21 @@ function formatTime(d: Date): string {
  * markdown library.
  */
 function renderMarkdown(text: string): string {
-  let html = text;
+  // Escape ALL HTML entities first to prevent XSS injection
+  let html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 
   // Fenced code blocks: ```...```
   html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_m, _lang, code) => {
-    const escaped = code
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .trimEnd();
-    return `<pre style="background:var(--chat-surface-3,rgba(0,0,0,.06));padding:10px 12px;border-radius:8px;overflow-x:auto;font-size:13px;line-height:1.5;font-family:var(--chat-font-mono,monospace);margin:6px 0"><code>${escaped}</code></pre>`;
+    return `<pre style="background:var(--chat-surface-3,rgba(0,0,0,.06));padding:10px 12px;border-radius:8px;overflow-x:auto;font-size:13px;line-height:1.5;font-family:var(--chat-font-mono,monospace);margin:6px 0"><code>${code.trimEnd()}</code></pre>`;
   });
 
   // Inline code: `code`
   html = html.replace(/`([^`\n]+)`/g, (_m, code) => {
-    const escaped = code
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-    return `<code style="background:var(--chat-surface-3,rgba(0,0,0,.06));padding:1px 5px;border-radius:4px;font-size:0.9em;font-family:var(--chat-font-mono,monospace)">${escaped}</code>`;
+    return `<code style="background:var(--chat-surface-3,rgba(0,0,0,.06));padding:1px 5px;border-radius:4px;font-size:0.9em;font-family:var(--chat-font-mono,monospace)">${code}</code>`;
   });
 
   // Bold: **text**
@@ -102,6 +99,7 @@ interface MessageBubbleProps {
 
 export default function MessageBubble({ message, isStreaming }: MessageBubbleProps) {
   const { role, content, toolCalls, ts } = message;
+  const renderedHtml = useMemo(() => (content ? renderMarkdown(content) : ''), [content]);
 
   if (role === 'system') {
     return (
@@ -201,7 +199,7 @@ export default function MessageBubble({ message, isStreaming }: MessageBubblePro
             }}
           >
             {content ? (
-              <span dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />
+              <span dangerouslySetInnerHTML={{ __html: renderedHtml }} />
             ) : null}
             {isStreaming && <StreamingCursor />}
           </div>

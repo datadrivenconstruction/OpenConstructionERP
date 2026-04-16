@@ -748,8 +748,7 @@ function RuleEditorModal({
                         } catch (err) {
                           // Soft-fail — the cost endpoint is optional and
                           // shouldn't block rule editing if it errors.
-                          // eslint-disable-next-line no-console
-                          console.warn('Cost suggestion failed', err);
+                          if (import.meta.env.DEV) console.warn('Cost suggestion failed', err);
                         }
                       }}
                       className="inline-flex items-center gap-1 rounded-lg border border-oe-blue/40 bg-oe-blue/5 px-2 py-1.5 text-[11px] font-medium text-oe-blue hover:bg-oe-blue/10"

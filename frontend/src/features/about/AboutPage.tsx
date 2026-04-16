@@ -70,7 +70,7 @@ export function AboutPage() {
               { value: '55K+', label: t('about.stat_costs', { defaultValue: 'Cost Items (CWICR)' }) },
               { value: '20+', label: t('about.stat_langs', { defaultValue: 'Languages' }) },
               { value: '11', label: t('about.stat_regions', { defaultValue: 'Regional Databases' }) },
-              { value: '42', label: t('about.stat_rules', { defaultValue: 'Validation Rules' }) },
+              { value: '4', label: t('about.stat_cad_formats', { defaultValue: 'CAD/BIM Reverse Engineering' }) },
             ].map((s, i) => (
               <div key={i} className="text-center rounded-xl bg-surface-secondary/50 p-4">
                 <div className="text-2xl font-bold text-content-primary">{s.value}</div>

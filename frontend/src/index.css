@@ -506,6 +506,26 @@ h4 {
   background: rgba(245, 158, 11, 0.18);
 }
 
+/* ── Validation status row accents ───────────────────────────────────
+   Left-border accent so estimators can scan validation state at a glance
+   across hundreds of BOQ rows. Pairs with the dot in OrdinalCellRenderer. */
+
+.ag-theme-quartz .ag-row.boq-row-error {
+  box-shadow: inset 2.5px 0 0 var(--color-red-400, #f87171);
+}
+
+.ag-theme-quartz .ag-row.boq-row-warning {
+  box-shadow: inset 2.5px 0 0 var(--color-amber-400, #fbbf24);
+}
+
+.dark .ag-theme-quartz .ag-row.boq-row-error {
+  box-shadow: inset 2.5px 0 0 var(--color-red-400, #f87171);
+}
+
+.dark .ag-theme-quartz .ag-row.boq-row-warning {
+  box-shadow: inset 2.5px 0 0 var(--color-amber-400, #fbbf24);
+}
+
 /* ── Premium Visual Polish ──────────────────────────────────────────── */
 
 /* Smooth scroll behavior */
@@ -1248,4 +1268,20 @@ tbody tr:nth-child(20) { animation-delay: 570ms; }
 @keyframes oeTypingDot {
   0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
   30% { opacity: 1; transform: translateY(-4px); }
+}
+
+/* ── DWG Takeoff: AutoCAD-style drafting grid ─────────────────────────────
+   Scoped to .oe-dwg-canvas — do NOT promote these tokens to :root.
+   Light mode = faint black lines on a pale canvas.
+   Dark mode = faint white lines on a deep drafting-board canvas.
+   1:5 minor:major ratio mirrors AutoCAD's default grid snap. */
+.oe-dwg-canvas {
+  --oe-dwg-grid-minor: rgba(255, 255, 255, 0.04);
+  --oe-dwg-grid-major: rgba(255, 255, 255, 0.08);
+  --oe-dwg-vignette: rgba(0, 0, 0, 0.45);
+}
+:root:not(.dark) .oe-dwg-canvas {
+  --oe-dwg-grid-minor: rgba(0, 0, 0, 0.04);
+  --oe-dwg-grid-major: rgba(0, 0, 0, 0.08);
+  --oe-dwg-vignette: rgba(0, 0, 0, 0.10);
 }

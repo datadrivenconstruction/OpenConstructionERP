@@ -13,8 +13,8 @@ import {
   Table2, BarChart3, PieChart, FileSpreadsheet, Database, Filter,
   ArrowUpDown, ChevronDown, ChevronRight, ChevronLeft, Layers, X, Save,
   Download as DownloadIcon, Columns3, Search as SearchIcon,
-  Upload, FileUp, Loader2, CheckCircle2, Settings, AlertCircle, FolderOpen,
-  TrendingUp, Hash, Clock,
+  Upload, FileUp, Loader2, CheckCircle2, AlertCircle, FolderOpen,
+  TrendingUp, Hash, Clock, ShieldCheck,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
@@ -458,7 +458,12 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
   }, [sessionId, groupBy, aggCols, aggFn, addToast, t]);
 
   // Auto-run on mount
-  useEffect(() => { runPivot(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const hasRunInitialPivot = useRef(false);
+  useEffect(() => {
+    if (hasRunInitialPivot.current) return;
+    hasRunInitialPivot.current = true;
+    runPivot();
+  }, [runPivot]);
 
   const toggleGroupBy = useCallback((col: string) => {
     setGroupBy((prev) => prev.includes(col) ? prev.filter((c) => c !== col) : [...prev, col]);
@@ -759,6 +764,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
   const maxVal = sortedGroups.length > 0 ? Math.max(...sortedGroups.map((g) => g.results[chartValue] ?? 0)) : 1;
   const totalVal = sortedGroups.reduce((s, g) => s + (g.results[chartValue] ?? 0), 0);
 
+  /** Category bar chart palette — deliberately hardcoded for consistent data viz */
   const BAR_COLORS = ['#3B82F6', '#22C55E', '#F97316', '#A855F7', '#EF4444', '#06B6D4', '#EC4899', '#84CC16', '#F59E0B', '#6366F1'];
 
   return (
@@ -1204,6 +1210,23 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
 
 /* ── Data Explorer Empty State Animation ────────────────────────────── */
 
+/** Decorative animation palette for the empty-state data explorer illustration */
+const EXPLORER_ANIM = {
+  indigo: '#6366f1',
+  violet: '#8b5cf6',
+  emerald: '#10b981',
+  emeraldLight: '#34d399',
+  emeraldDark: '#059669',
+  blue: '#3b82f6',
+  /* rgba building blocks for gradient stops & translucent fills */
+  indigoRgb: '99,102,241',
+  emeraldRgb: '16,185,129',
+  blueRgb: '59,130,246',
+  violetRgb: '139,92,246',
+  emeraldDarkRgb: '5,150,105',
+  surface: 'var(--surface-primary, #ffffff)',
+} as const;
+
 function DataExplorerEmptyAnimation() {
   return (
     <div className="mx-auto mb-6 relative" style={{ width: 260, height: 150, opacity: 0.6 }}>
@@ -1286,7 +1309,7 @@ function DataExplorerEmptyAnimation() {
           {/* Y axis */}
           <div style={{
             position: 'absolute', left: 0, top: 0, width: 2, height: 100,
-            background: 'linear-gradient(180deg, rgba(99,102,241,0.3), rgba(16,185,129,0.3))',
+            background: `linear-gradient(180deg, rgba(${EXPLORER_ANIM.indigoRgb},0.3), rgba(${EXPLORER_ANIM.emeraldRgb},0.3))`,
             borderRadius: 1,
             transformOrigin: 'top center',
             animation: 'explorerAxisYIn 9s ease-out infinite',
@@ -1294,18 +1317,18 @@ function DataExplorerEmptyAnimation() {
           {/* X axis */}
           <div style={{
             position: 'absolute', left: 0, top: 100, width: 95, height: 2,
-            background: 'linear-gradient(90deg, rgba(99,102,241,0.3), rgba(16,185,129,0.3))',
+            background: `linear-gradient(90deg, rgba(${EXPLORER_ANIM.indigoRgb},0.3), rgba(${EXPLORER_ANIM.emeraldRgb},0.3))`,
             borderRadius: 1,
             transformOrigin: 'left center',
             animation: 'explorerAxisIn 9s ease-out infinite',
           }} />
           {/* Bar columns */}
           {[
-            { h: 60, color: 'linear-gradient(180deg, var(--oe-blue), #6366f1)', idx: 0 },
-            { h: 82, color: 'linear-gradient(180deg, #6366f1, #8b5cf6)', idx: 1 },
-            { h: 45, color: 'linear-gradient(180deg, #10b981, #059669)', idx: 2 },
-            { h: 72, color: 'linear-gradient(180deg, var(--oe-blue), #3b82f6)', idx: 3 },
-            { h: 55, color: 'linear-gradient(180deg, #10b981, #34d399)', idx: 4 },
+            { h: 60, color: `linear-gradient(180deg, var(--oe-blue), ${EXPLORER_ANIM.indigo})`, idx: 0 },
+            { h: 82, color: `linear-gradient(180deg, ${EXPLORER_ANIM.indigo}, ${EXPLORER_ANIM.violet})`, idx: 1 },
+            { h: 45, color: `linear-gradient(180deg, ${EXPLORER_ANIM.emerald}, ${EXPLORER_ANIM.emeraldDark})`, idx: 2 },
+            { h: 72, color: `linear-gradient(180deg, var(--oe-blue), ${EXPLORER_ANIM.blue})`, idx: 3 },
+            { h: 55, color: `linear-gradient(180deg, ${EXPLORER_ANIM.emerald}, ${EXPLORER_ANIM.emeraldLight})`, idx: 4 },
           ].map((bar, i) => (
             <div key={i} style={{
               position: 'absolute',
@@ -1317,14 +1340,14 @@ function DataExplorerEmptyAnimation() {
               background: bar.color,
               transformOrigin: 'bottom center',
               animation: `explorerBarGrow${bar.idx} 9s ease-out infinite`,
-              boxShadow: '0 -2px 6px rgba(99,102,241,0.08)',
+              boxShadow: `0 -2px 6px rgba(${EXPLORER_ANIM.indigoRgb},0.08)`,
             }} />
           ))}
           {/* Bar chart label placeholder */}
           <div style={{
             position: 'absolute', left: 8, top: 106, width: 82, height: 4,
             borderRadius: 2,
-            background: 'rgba(99,102,241,0.1)',
+            background: `rgba(${EXPLORER_ANIM.indigoRgb},0.1)`,
             animation: 'explorerAxisIn 9s ease-out infinite',
           }} />
         </div>
@@ -1348,7 +1371,7 @@ function DataExplorerEmptyAnimation() {
             borderRadius: '50%',
             background: `conic-gradient(
               transparent 0deg 140deg,
-              #10b981 140deg 250deg,
+              ${EXPLORER_ANIM.emerald} 140deg 250deg,
               transparent 250deg 360deg
             )`,
             transformOrigin: 'center center',
@@ -1360,7 +1383,7 @@ function DataExplorerEmptyAnimation() {
             borderRadius: '50%',
             background: `conic-gradient(
               transparent 0deg 250deg,
-              #8b5cf6 250deg 330deg,
+              ${EXPLORER_ANIM.violet} 250deg 330deg,
               transparent 330deg 360deg
             )`,
             transformOrigin: 'center center',
@@ -1372,7 +1395,7 @@ function DataExplorerEmptyAnimation() {
             borderRadius: '50%',
             background: `conic-gradient(
               transparent 0deg 330deg,
-              rgba(99,102,241,0.25) 330deg 360deg
+              rgba(${EXPLORER_ANIM.indigoRgb},0.25) 330deg 360deg
             )`,
             transformOrigin: 'center center',
             animation: 'explorerPieSegC 9s ease-out infinite',
@@ -1382,7 +1405,7 @@ function DataExplorerEmptyAnimation() {
           <div style={{
             position: 'absolute', left: 14, top: 14, width: 24, height: 24,
             borderRadius: '50%',
-            background: 'var(--surface-primary, #ffffff)',
+            background: EXPLORER_ANIM.surface,
             boxShadow: 'inset 0 0 8px rgba(0,0,0,0.03)',
           }} />
         </div>
@@ -1394,8 +1417,8 @@ function DataExplorerEmptyAnimation() {
             display: 'flex', gap: 2, marginBottom: 4,
             animation: 'explorerRowSlide 9s ease-out infinite',
           }}>
-            <div style={{ flex: 2, height: 9, borderRadius: '4px 0 0 0', background: 'linear-gradient(90deg, var(--oe-blue), #6366f1)' }} />
-            <div style={{ flex: 1, height: 9, borderRadius: '0 4px 0 0', background: 'linear-gradient(90deg, #6366f1, #8b5cf6)' }} />
+            <div style={{ flex: 2, height: 9, borderRadius: '4px 0 0 0', background: `linear-gradient(90deg, var(--oe-blue), ${EXPLORER_ANIM.indigo})` }} />
+            <div style={{ flex: 1, height: 9, borderRadius: '0 4px 0 0', background: `linear-gradient(90deg, ${EXPLORER_ANIM.indigo}, ${EXPLORER_ANIM.violet})` }} />
           </div>
           {/* Table data rows */}
           {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -1407,12 +1430,12 @@ function DataExplorerEmptyAnimation() {
               <div style={{
                 flex: 2, height: 7, borderRadius: 2,
                 background: i % 2 === 0
-                  ? 'rgba(99,102,241,0.12)'
-                  : 'rgba(16,185,129,0.12)',
+                  ? `rgba(${EXPLORER_ANIM.indigoRgb},0.12)`
+                  : `rgba(${EXPLORER_ANIM.emeraldRgb},0.12)`,
               }} />
               <div style={{
                 flex: 1, height: 7, borderRadius: 2,
-                background: 'rgba(139,92,246,0.1)',
+                background: `rgba(${EXPLORER_ANIM.violetRgb},0.1)`,
               }} />
             </div>
           ))}
@@ -1421,9 +1444,9 @@ function DataExplorerEmptyAnimation() {
         {/* ── Dashboard Mini Cards (bottom center) ── */}
         <div style={{ position: 'absolute', left: 106, bottom: 2, display: 'flex', gap: 6 }}>
           {[
-            { w: 46, bg: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(99,102,241,0.05))', border: 'rgba(59,130,246,0.15)' },
-            { w: 46, bg: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05))', border: 'rgba(16,185,129,0.15)' },
-            { w: 46, bg: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(99,102,241,0.05))', border: 'rgba(139,92,246,0.15)' },
+            { w: 46, bg: `linear-gradient(135deg, rgba(${EXPLORER_ANIM.blueRgb},0.1), rgba(${EXPLORER_ANIM.indigoRgb},0.05))`, border: `rgba(${EXPLORER_ANIM.blueRgb},0.15)` },
+            { w: 46, bg: `linear-gradient(135deg, rgba(${EXPLORER_ANIM.emeraldRgb},0.1), rgba(${EXPLORER_ANIM.emeraldDarkRgb},0.05))`, border: `rgba(${EXPLORER_ANIM.emeraldRgb},0.15)` },
+            { w: 46, bg: `linear-gradient(135deg, rgba(${EXPLORER_ANIM.violetRgb},0.1), rgba(${EXPLORER_ANIM.indigoRgb},0.05))`, border: `rgba(${EXPLORER_ANIM.violetRgb},0.15)` },
           ].map((card, i) => (
             <div key={i} style={{
               width: card.w, height: 36, borderRadius: 6,
@@ -1435,79 +1458,13 @@ function DataExplorerEmptyAnimation() {
               justifyContent: 'center', padding: '0 6px', gap: 3,
             }}>
               {/* Mini stat line */}
-              <div style={{ width: '60%', height: 4, borderRadius: 2, background: i === 0 ? 'rgba(59,130,246,0.25)' : i === 1 ? 'rgba(16,185,129,0.25)' : 'rgba(139,92,246,0.25)' }} />
-              <div style={{ width: '40%', height: 3, borderRadius: 2, background: 'rgba(99,102,241,0.1)' }} />
+              <div style={{ width: '60%', height: 4, borderRadius: 2, background: i === 0 ? `rgba(${EXPLORER_ANIM.blueRgb},0.25)` : i === 1 ? `rgba(${EXPLORER_ANIM.emeraldRgb},0.25)` : `rgba(${EXPLORER_ANIM.violetRgb},0.25)` }} />
+              <div style={{ width: '40%', height: 3, borderRadius: 2, background: `rgba(${EXPLORER_ANIM.indigoRgb},0.1)` }} />
             </div>
           ))}
         </div>
       </div>
     </div>
-  );
-}
-
-function ConverterStatus() {
-  const { t } = useTranslation();
-  const { data } = useQuery({
-    queryKey: ['cad-converters-status'],
-    queryFn: () => apiGet<{ converters: { id: string; name: string; extensions: string[]; installed: boolean }[] }>('/v1/takeoff/converters/'),
-    staleTime: 60000,
-  });
-
-  if (!data?.converters) return null;
-
-  const installed = data.converters.filter((c) => c.installed);
-  const notInstalled = data.converters.filter((c) => !c.installed);
-
-  return (
-    <Card className="p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
-          <Settings size={13} className="text-content-tertiary" />
-          {t('explorer.converters', { defaultValue: 'CAD Converters' })}
-          <span className="text-2xs text-content-quaternary font-normal ml-1">
-            — {t('explorer.converters_desc', { defaultValue: 'DDC Community converters for extracting BIM element data' })}
-          </span>
-        </h3>
-        <Badge variant={installed.length === data.converters.length ? 'success' : 'warning'} size="sm">
-          {installed.length}/{data.converters.length} {t('explorer.installed', { defaultValue: 'installed' })}
-        </Badge>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {data.converters.map((c) => (
-          <div
-            key={c.id}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-2xs font-medium border transition-colors ${
-              c.installed
-                ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
-                : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800 cursor-pointer hover:bg-amber-100'
-            }`}
-            onClick={!c.installed ? () => window.open('https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto', '_blank') : undefined}
-            title={!c.installed ? t('explorer.requires_external', { defaultValue: 'External tool — click for setup instructions' }) : undefined}
-          >
-            {c.installed ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-            <span className="font-semibold">{c.name}</span>
-            <span className="opacity-60">{c.extensions.join(', ')}</span>
-            {!c.installed && (
-              <span className="ml-1 underline text-2xs">{t('explorer.setup_guide', { defaultValue: 'Setup Guide' })}</span>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="mt-3 flex items-center gap-3 text-2xs text-content-quaternary">
-        {notInstalled.length > 0 && (
-          <span className="flex items-center gap-1">
-            <AlertCircle size={10} />
-            {t('explorer.converters_external_hint', { defaultValue: 'CAD converters require DDC cad2data tools installed on your server' })}
-          </span>
-        )}
-        <span className="flex items-center gap-1 ml-auto">
-          {t('explorer.powered_by', { defaultValue: 'Powered by' })}{' '}
-          <a href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN" target="_blank" rel="noopener noreferrer" className="text-oe-blue hover:underline">
-            DDC cad2data Converters
-          </a>
-        </span>
-      </div>
-    </Card>
   );
 }
 
@@ -1927,18 +1884,12 @@ export function CadDataExplorerPage() {
       queryClient.invalidateQueries({ queryKey: ['cad-all-sessions'] });
     },
     onError: (err: Error) => {
-      console.error('Failed to delete CAD session:', err.message);
+      if (import.meta.env.DEV) console.error('Failed to delete CAD session:', err.message);
     },
   });
 
   if (!sessionId) {
     const recentSessions = allSessions.slice(0, 12);
-    const LANDING_FORMAT_COLORS: Record<string, string> = {
-      RVT: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-      IFC: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-      DWG: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-      DGN: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-    };
 
     const FEATURE_CARDS: { icon: React.ElementType; title: string; desc: string; color: string; border: string; ic: string }[] = [
       { icon: Table2, title: t('explorer.feat_table', { defaultValue: 'Data Table' }), desc: t('explorer.feat_table_desc', { defaultValue: 'Browse all elements with sorting, filtering, and column selection. Export to CSV or Excel.' }), color: 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-800', border: 'border-border-light/50', ic: 'text-blue-500' },
@@ -1955,158 +1906,145 @@ export function CadDataExplorerPage() {
             { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
           ]} />
         </div>
-        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20 overflow-y-auto">
-          <div className="w-full max-w-6xl px-6 py-10">
-            {/* Hero title */}
-            <div className="text-center mb-10">
-              <h1 className="text-2xl font-bold text-content-primary tracking-tight">
-                {t('explorer.hero_title', { defaultValue: 'CAD/BIM Data Explorer' })}
-              </h1>
-              <p className="text-sm text-content-secondary mt-2 max-w-lg mx-auto">
-                {t('explorer.hero_subtitle', { defaultValue: 'Analyze building element data in a powerful spreadsheet interface. Filter, pivot, chart, and export quantities from your IFC and Revit models.' })}
-              </p>
-            </div>
 
-            {/* 2-column layout: Upload + Features | Animation */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-8 items-start mb-10">
+        <div className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-blue-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20">
+          <div className="max-w-7xl mx-auto pt-20 pb-4">
 
-              {/* LEFT -- Upload + Features */}
-              <div className="space-y-6">
-                <div className="rounded-2xl bg-surface-primary border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6">
+            {/* 2-column layout: Upload card (left) + Hero text (right) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch mb-8">
+
+              {/* LEFT — Upload card */}
+              <div className="flex flex-col">
+                <div className="rounded-2xl bg-white dark:bg-gray-800/60 border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6 flex flex-col h-full">
                   <UploadConvertZone onSessionReady={handleSessionReady} />
-                  <p className="text-[10px] text-content-quaternary mt-3 text-center">
-                    {t('explorer.upload_hint_formats', { defaultValue: 'Supported formats:' })}{' '}
-                    <span className="font-semibold text-content-tertiary">IFC, RVT, DWG, DGN, DXF, RFA</span>
-                    {' | '}
-                    {t('explorer.upload_hint_size', { defaultValue: 'Max file size: 100 MB' })}
+                </div>
+              </div>
+
+              {/* RIGHT — Hero text + animation */}
+              <div className="flex flex-col justify-center gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-content-primary tracking-tight leading-tight">
+                    {t('explorer.hero_title', { defaultValue: 'CAD/BIM Data Explorer' })}
+                  </h1>
+                  <p className="text-base text-content-secondary mt-3 leading-relaxed">
+                    {t('explorer.hero_subtitle', { defaultValue: 'Analyze building element data in a powerful spreadsheet interface. Filter, pivot, chart, and export quantities from your IFC and Revit models.' })}
+                  </p>
+                  <p className="text-xs text-content-tertiary mt-3 leading-relaxed">
+                    IFC 2x3, 4.0, 4.1, 4.3 &middot; Revit 2015–2026 &middot; DWG &middot; DGN &middot; DXF &middot; RFA
+                  </p>
+                  <p className="mt-2 flex items-center gap-1.5 text-[11px] text-content-tertiary">
+                    <ShieldCheck size={12} className="shrink-0" />
+                    <span>
+                      {t('common.local_processing', { defaultValue: '100% Local Processing — Your files never leave your computer' })}
+                      {' \u00B7 '}
+                      {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC cad2data' })}
+                    </span>
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {FEATURE_CARDS.map((f, i) => (
-                    <div key={i} className={`flex items-start gap-3 rounded-xl p-3.5 bg-surface-primary/60 dark:bg-surface-primary/40 border ${f.border} hover:border-border-light transition-colors`}>
-                      <div className={`w-9 h-9 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={16} className={f.ic} /></div>
-                      <div className="min-w-0">
-                        <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
-                        <p className="text-[11px] text-content-quaternary leading-snug mt-0.5">{f.desc}</p>
-                      </div>
-                    </div>
-                  ))}
+                {/* Animation */}
+                <div className="hidden lg:block mt-auto opacity-60 overflow-hidden">
+                  <DataExplorerEmptyAnimation />
                 </div>
               </div>
+            </div>
 
-              {/* RIGHT -- CSS animation preview (bigger, less opacity) */}
-              <div className="flex items-center justify-center opacity-40 lg:min-h-[400px]">
-                <DataExplorerEmptyAnimation />
+            {/* Feature cards */}
+            <div className="mb-8">
+              <h2 className="text-xs font-bold text-content-tertiary uppercase tracking-widest mb-3">
+                {t('explorer.what_you_get', { defaultValue: 'What you get' })}
+              </h2>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {FEATURE_CARDS.map((f, i) => (
+                  <div key={i} className="flex items-start gap-3 rounded-xl p-4 bg-white dark:bg-gray-800/40 border border-border-light/60 hover:border-border-light hover:shadow-sm transition-all">
+                    <div className={`w-8 h-8 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={15} className={f.ic} /></div>
+                    <div className="min-w-0">
+                      <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
+                      <p className="text-[11px] text-content-tertiary leading-snug mt-1">{f.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Recent sessions -- card grid */}
-            {recentSessions.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-content-primary flex items-center gap-2">
-                <Clock size={15} className="text-content-tertiary" />
-                {t('explorer.recent_models', { defaultValue: 'Recent Models' })}
-                <Badge variant="neutral" size="sm">{allSessions.length}</Badge>
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {recentSessions.map((s) => {
-                const fmt = (s.file_format || '').toUpperCase();
-                const timeAgo = s.created_at ? (() => {
-                  const diff = Date.now() - new Date(s.created_at).getTime();
-                  const mins = Math.floor(diff / 60000);
-                  if (mins < 60) return `${mins}m ago`;
-                  const hrs = Math.floor(mins / 60);
-                  if (hrs < 24) return `${hrs}h ago`;
-                  return `${Math.floor(hrs / 24)}d ago`;
-                })() : '';
 
-                // Estimate column count from element_count (heuristic for display)
-                const colCount = describe ? describe.total_columns : null;
-
-                return (
-                  <button
-                    key={s.session_id}
-                    className="relative w-full text-left rounded-xl border border-border-light bg-surface-elevated p-4 hover:shadow-lg hover:border-oe-blue/30 hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer"
-                    onClick={() => setSearchParams({ session: s.session_id })}
-                  >
-                    {/* Delete button */}
-                    <span
-                      role="button"
-                      tabIndex={0}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm(t('explorer.delete_session_confirm', { defaultValue: 'Delete this analysis? This cannot be undone.' }))) {
-                          deleteSessionMutation.mutate(s.session_id);
-                        }
-                      }}
-                      onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.click(); }}
-                      className="absolute top-2.5 right-2.5 h-6 w-6 flex items-center justify-center rounded-md text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg opacity-0 group-hover:opacity-100 transition-all cursor-pointer z-10"
-                      title={t('common.delete', { defaultValue: 'Delete' })}
-                    >
-                      <X size={14} />
-                    </span>
-
-                    {/* Header: name + format badge */}
-                    <div className="flex items-start gap-2.5 mb-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface-secondary shrink-0">
-                        <Database size={16} className="text-content-tertiary" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-sm font-semibold text-content-primary truncate">{s.display_name}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`px-1.5 py-0.5 rounded text-2xs font-bold shrink-0 ${LANDING_FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
-                            {fmt || '?'}
-                          </span>
-                          {s.is_permanent && (
-                            <span className="inline-flex items-center gap-0.5 text-2xs text-green-600 dark:text-green-400 font-medium">
-                              <Save size={10} />
-                              {t('explorer.saved_label', { defaultValue: 'Saved' })}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Stats row */}
-                    <div className="flex items-center gap-3 text-2xs text-content-tertiary">
-                      <span className="inline-flex items-center gap-1 tabular-nums">
-                        <Hash size={10} className="text-content-quaternary" />
-                        {s.element_count.toLocaleString()} {t('explorer.elements_short', { defaultValue: 'elements' })}
-                      </span>
-                      {colCount != null && (
-                        <span className="inline-flex items-center gap-1 tabular-nums">
-                          <Columns3 size={10} className="text-content-quaternary" />
-                          {colCount} {t('explorer.cols_short', { defaultValue: 'cols' })}
-                        </span>
-                      )}
-                      <span className="ml-auto inline-flex items-center gap-1 tabular-nums text-content-quaternary">
-                        <Clock size={10} />
-                        {timeAgo}
-                      </span>
-                    </div>
-
-                    {/* Hover arrow indicator */}
-                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ChevronRight size={16} className="text-oe-blue" />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+            {/* Privacy + converter bar moved to top fixed header */}
+          </div>{/* end max-w-7xl */}
+        </div>{/* end scroll area */}
+      {/* ── Bottom Filmstrip: Recent Sessions (fixed, inside outer flex-col) ── */}
+      {recentSessions.length > 0 && (
+        <div className="shrink-0 border-t border-border-light bg-surface-primary">
+          <div className="flex items-center px-4 py-1.5">
+            <Clock size={14} className="text-content-tertiary mr-2 shrink-0" />
+            <span className="text-xs font-semibold text-content-primary">
+              {t('explorer.recent_models', { defaultValue: 'Recent Models' })}
+            </span>
+            <span className="text-[11px] text-content-quaternary ml-1.5">({allSessions.length})</span>
           </div>
-        )}
+          <div className="flex items-center gap-2.5 px-4 pb-2.5 overflow-x-auto">
+            {recentSessions.map((s) => {
+              const fmt = (s.file_format || '').toUpperCase();
+              const timeAgo = s.created_at ? (() => {
+                const diff = Date.now() - new Date(s.created_at).getTime();
+                const mins = Math.floor(diff / 60000);
+                if (mins < 60) return `${mins}m ago`;
+                const hrs = Math.floor(mins / 60);
+                if (hrs < 24) return `${hrs}h ago`;
+                return `${Math.floor(hrs / 24)}d ago`;
+              })() : '';
 
-            {/* Converter status */}
-            <div className="mt-6 mb-4">
-              <ConverterStatus />
-            </div>
+              return (
+                <button
+                  key={s.session_id}
+                  onClick={() => setSearchParams({ session: s.session_id })}
+                  className="group relative shrink-0 w-64 text-start rounded-xl border border-border-light bg-surface-secondary hover:bg-surface-tertiary hover:border-oe-blue/30 hover:shadow-lg transition-all duration-200 overflow-hidden"
+                >
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm(t('explorer.delete_session_confirm', { defaultValue: 'Delete this analysis?' }))) {
+                        deleteSessionMutation.mutate(s.session_id);
+                      }
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.click(); }}
+                    className="absolute top-2 right-2 p-1 rounded text-content-quaternary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100 transition-all z-10"
+                  >
+                    <X size={12} />
+                  </span>
+                  {/* Format accent stripe */}
+                  <div className={`h-1 w-full ${
+                    fmt === 'RVT' ? 'bg-blue-500' :
+                    fmt === 'IFC' ? 'bg-green-500' :
+                    fmt === 'DWG' ? 'bg-orange-500' :
+                    fmt === 'DGN' ? 'bg-purple-500' :
+                    fmt === 'DXF' ? 'bg-amber-500' :
+                    'bg-gray-400'
+                  }`} />
+                  <div className="px-3.5 py-3">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[9px] font-black tracking-tighter leading-none ${
+                        fmt === 'RVT' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+                        fmt === 'IFC' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' :
+                        fmt === 'DWG' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' :
+                        fmt === 'DGN' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' :
+                        'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                      }`}>{fmt || '?'}</div>
+                      <span className="text-xs font-semibold text-content-primary truncate">{s.display_name}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-[11px] text-content-tertiary">
+                      <span className="font-medium tabular-nums">{s.element_count.toLocaleString()} {t('explorer.elements_short', { defaultValue: 'elements' })}</span>
+                      {s.is_permanent && <span className="text-emerald-500 font-medium">saved</span>}
+                      {timeAgo && <span className="ml-auto text-content-quaternary">{timeAgo}</span>}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
-      </div>
+      )}
+    </div>
     );
   }
 

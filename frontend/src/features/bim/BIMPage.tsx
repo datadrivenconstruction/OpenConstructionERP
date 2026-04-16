@@ -12,6 +12,7 @@
  */
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -44,6 +45,7 @@ import {
   Cuboid,
   SlidersHorizontal,
   ClipboardList,
+  ShieldCheck,
 } from 'lucide-react';
 import { Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -52,7 +54,6 @@ import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import BIMFilterPanel from './BIMFilterPanel';
 import BIMLinkedBOQPanel from './BIMLinkedBOQPanel';
 import BIMGroupsPanel from './BIMGroupsPanel';
-import { BIMProcessingProgress, type BIMProcessingStage } from './BIMProcessingProgress';
 import { BIMConverterStatusBanner } from './BIMConverterStatusBanner';
 import { InstallConverterPrompt } from './InstallConverterPrompt';
 import AddToBOQModal from './AddToBOQModal';
@@ -67,7 +68,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
-import { useBIMUploadStore } from '@/stores/useBIMUploadStore';
+import { useBIMUploadStore, type BIMUploadJob } from '@/stores/useBIMUploadStore';
 import {
   fetchBIMModels,
   fetchBIMModel,
@@ -308,14 +309,6 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
 
 /* ── Upload Panel ────────────────────────────────────────────────────── */
 
-interface ProcessingUpdate {
-  stage: BIMProcessingStage;
-  fileName?: string;
-  fileSize?: string;
-  elementCount?: number;
-  errorMessage?: string;
-}
-
 /** State used by UploadPanel to remember an upload that was deferred
  *  because the matching DDC converter was missing.  Once the user
  *  confirms install via `InstallConverterPrompt`, the saved fields
@@ -337,16 +330,12 @@ function UploadPanel({
   onClose,
   initialAdvancedMode,
   initialModelName,
-  onProcessingUpdate,
 }: {
   projectId: string;
   onUploadComplete: (modelId: string) => void;
   onClose: () => void;
   initialAdvancedMode?: boolean;
   initialModelName?: string;
-  /** Reports stage transitions to the parent so it can render a global
-   *  progress card over the viewport. */
-  onProcessingUpdate?: (update: ProcessingUpdate | null) => void;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -355,6 +344,7 @@ function UploadPanel({
   const [modelName, setModelName] = useState(initialModelName || '');
   const [discipline, setDiscipline] = useState('architecture');
   const [conversionDepth, setConversionDepth] = useState<'standard' | 'medium' | 'complete'>('standard');
+  const [generatePdfSheets, setGeneratePdfSheets] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStage, setUploadStage] = useState('');
@@ -416,15 +406,10 @@ function UploadPanel({
     setUploadError(null);
     setUploadProgress(0);
 
-    const activeFile = advancedMode ? dataFile : file;
-    const sizeLabel = activeFile ? formatFileSize(activeFile.size) : undefined;
-    const fileName = activeFile?.name;
-
     try {
       if (advancedMode && dataFile) {
         // Advanced (data) upload — delegate to global store
         const name = modelName || 'Imported';
-        onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
         startGlobalUpload({
           file: dataFile,
           projectId,
@@ -467,7 +452,6 @@ function UploadPanel({
                 setUploading(false);
                 setUploadProgress(0);
                 setUploadStage('');
-                onProcessingUpdate?.(null);
                 setInstallPromptState({
                   open: true,
                   converterId: needsConverterMatch,
@@ -484,12 +468,11 @@ function UploadPanel({
             } catch (err) {
               // If the converters endpoint fails, fall through to upload —
               // the backend will preflight-reject and we'll catch it below.
-              console.warn('Converter preflight check failed:', err);
+              if (import.meta.env.DEV) console.warn('Converter preflight check failed:', err);
             }
           }
 
           // Delegate to global store — upload survives navigation.
-          onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
           startGlobalUpload({
             file,
             projectId,
@@ -497,6 +480,7 @@ function UploadPanel({
             discipline,
             uploadType: 'cad',
             conversionDepth,
+            generatePdfSheets,
           });
           addToast({
             type: 'info',
@@ -515,7 +499,6 @@ function UploadPanel({
             discipline,
             uploadType: 'data',
           });
-          onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
           addToast({
             type: 'info',
             title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
@@ -530,12 +513,6 @@ function UploadPanel({
       const msg = err instanceof Error ? err.message : String(err);
       setUploadError(msg);
       setUploadProgress(0);
-      onProcessingUpdate?.({
-        stage: 'error',
-        fileName,
-        fileSize: sizeLabel,
-        errorMessage: msg,
-      });
       addToast({ type: 'error', title: t('bim.upload_failed'), message: msg });
     } finally {
       setUploading(false);
@@ -549,8 +526,9 @@ function UploadPanel({
     geometryFile,
     modelName,
     discipline,
+    conversionDepth,
+    generatePdfSheets,
     onUploadComplete,
-    onProcessingUpdate,
     addToast,
     resetForm,
     queryClient,
@@ -564,15 +542,8 @@ function UploadPanel({
    *  store so the retry also survives navigation. */
   const retryUploadAfterInstall = useCallback(
     (pending: InstallPromptState) => {
-      const pendingFile = pending.pendingFile;
-      const sizeLabel = formatFileSize(pendingFile.size);
-      onProcessingUpdate?.({
-        stage: 'uploading',
-        fileName: pendingFile.name,
-        fileSize: sizeLabel,
-      });
       startGlobalUpload({
-        file: pendingFile,
+        file: pending.pendingFile,
         projectId: pending.pendingProjectId,
         modelName: pending.pendingName,
         discipline: pending.pendingDiscipline,
@@ -586,7 +557,7 @@ function UploadPanel({
         }),
       });
     },
-    [addToast, onProcessingUpdate, startGlobalUpload, t],
+    [addToast, startGlobalUpload, t],
   );
 
   const canUpload = advancedMode ? !!dataFile && !uploading : !!file && !uploading;
@@ -636,7 +607,7 @@ function UploadPanel({
                     <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden">
                       <div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500 ease-out" style={{ width: `${job.progress}%` }} />
                     </div>
-                    <p className="text-[10px] text-content-tertiary mt-1">{job.stage || t('bim.processing', { defaultValue: 'Processing...' })}</p>
+                    <p className="text-[10px] text-content-tertiary mt-1">{t(job.stage, { defaultValue: 'Processing...' })}</p>
                   </>
                 ) : (
                   <p className="text-[10px] text-green-600 dark:text-green-400">
@@ -719,10 +690,29 @@ function UploadPanel({
         <div>
           <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}</label>
           <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={conversionDepth} onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'medium' | 'complete')}>
-            <option value="standard">{t('bim.depth_standard', { defaultValue: 'Fast — key properties (Category, Level, Volume, Area, ~20s)' })}</option>
-            <option value="medium">{t('bim.depth_medium', { defaultValue: 'Standard — all type parameters (~900 columns, ~25s)' })}</option>
-            <option value="complete">{t('bim.depth_complete', { defaultValue: 'Full — every Revit parameter including views (~1000+ columns, ~30s)' })}</option>
+            <option value="standard">{t('bim.upload_depth_standard', { defaultValue: 'Standard · main categories (fast)' })}</option>
+            <option value="medium">{t('bim.upload_depth_medium', { defaultValue: 'Medium · extended categories (balanced)' })}</option>
+            <option value="complete">{t('bim.upload_depth_complete', { defaultValue: 'Complete · all categories (slow)' })}</option>
           </select>
+          <p className="mt-1 text-[10px] text-content-quaternary leading-relaxed">{t('bim.upload_depth_help', { defaultValue: 'Controls how many Revit categories are extracted. Element IDs and full properties are always preserved.' })}</p>
+        </div>
+        <div>
+          <label className="flex items-start gap-2 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={generatePdfSheets}
+              onChange={(e) => setGeneratePdfSheets(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border-medium text-oe-blue focus:ring-1 focus:ring-oe-blue cursor-pointer"
+            />
+            <div className="flex-1 min-w-0">
+              <span className="block text-[11px] font-medium text-content-primary group-hover:text-oe-blue transition-colors">
+                {t('bim.upload_generate_pdf_label', { defaultValue: 'Also export existing project sheets as PDF (background)' })}
+              </span>
+              <span className="block text-[10px] text-content-quaternary leading-relaxed mt-0.5">
+                {t('bim.upload_generate_pdf_help', { defaultValue: 'Exports the sheets the designer prepared inside the model as a single PDF into Documents. Runs after the model is ready — upload is not delayed.' })}
+              </span>
+            </div>
+          </label>
         </div>
 
         {uploading && (
@@ -777,10 +767,34 @@ function UploadPanel({
 /* ── Non-Ready Model Overlay ─────────────────────────────────────────── */
 
 function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
-  model: BIMModelData; onUploadConverted: () => void; onDelete: () => void;
+  model: BIMModelData | null; onUploadConverted: () => void; onDelete: () => void;
 }) {
   const { t } = useTranslation();
+
+  // model is null while the models query is still hydrating after a fresh
+  // upload / deep link — render a lightweight "loading" overlay so we don't
+  // flash the empty viewer or trip the elements query into an error state.
+  if (!model) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-surface-secondary" role="status">
+        <div className="text-center max-w-sm px-6">
+          <div className="mx-auto w-20 h-20 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 flex items-center justify-center mb-5">
+            <Loader2 size={32} className="text-blue-500 animate-spin" />
+          </div>
+          <h2 className="text-lg font-bold text-content-primary mb-2">
+            {t('bim.overlay_loading_model_title', { defaultValue: 'Loading model…' })}
+          </h2>
+          <p className="text-sm text-content-secondary">
+            {t('bim.overlay_loading_model_desc', { defaultValue: 'Fetching the model record. This usually takes only a moment.' })}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const fmt = (model.model_format || model.format || '').toUpperCase();
+  const isProcessing = model.status === 'processing';
+
   const configs = {
     processing: { icon: <Loader2 size={32} className="text-blue-500 animate-spin" />, bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800', title: t('bim.overlay_processing_title'), desc: t('bim.overlay_processing_desc', { format: fmt }) },
     needs_converter: { icon: <AlertTriangle size={32} className="text-amber-500" />, bg: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800', title: t('bim.overlay_needs_converter_title'), desc: t('bim.overlay_needs_converter_desc', { format: fmt }) },
@@ -789,20 +803,45 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
   const c = configs[model.status as keyof typeof configs] ?? configs.error;
 
   return (
-    <div className="flex flex-col items-center justify-center h-full bg-surface-secondary" role="alert">
-      <div className="text-center max-w-sm px-6">
+    <div className="flex flex-col items-center justify-center h-full bg-surface-secondary" role={isProcessing ? 'status' : 'alert'}>
+      <div className="text-center max-w-md px-6 w-full">
         <div className={`mx-auto w-20 h-20 rounded-2xl ${c.bg} border flex items-center justify-center mb-5`}>{c.icon}</div>
         <h2 className="text-lg font-bold text-content-primary mb-2">{c.title}</h2>
         <p className="text-sm text-content-secondary mb-2">{c.desc}</p>
         <p className="text-[11px] text-content-quaternary mb-6">{model.name}{model.file_size ? ` · ${formatFileSize(model.file_size)}` : ''}</p>
-        <div className="flex items-center justify-center gap-3 flex-wrap">
-          <button onClick={onUploadConverted} aria-label={t('bim.overlay_upload_converted_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-oe-blue text-white text-sm font-semibold hover:bg-oe-blue-dark transition-colors shadow-sm">
-            <UploadCloud size={15} /> {t('bim.overlay_upload_converted_btn')}
-          </button>
-          <button onClick={onDelete} aria-label={t('bim.overlay_delete_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
-            <Trash2 size={15} /> {t('bim.overlay_delete_btn')}
-          </button>
-        </div>
+
+        {isProcessing && (
+          <div className="mx-auto max-w-xs mb-6">
+            <style>{`
+              @keyframes oeBimIndeterminate {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(400%); }
+              }
+            `}</style>
+            <div className="h-1.5 w-full rounded-full bg-blue-100 dark:bg-blue-900/30 overflow-hidden relative">
+              <div
+                className="absolute top-0 left-0 h-full w-1/4 rounded-full bg-gradient-to-r from-blue-400 to-blue-600"
+                style={{ animation: 'oeBimIndeterminate 1.6s ease-in-out infinite' }}
+              />
+            </div>
+            <p className="text-[11px] text-content-tertiary mt-2.5">
+              {t('bim.overlay_processing_hint', {
+                defaultValue: 'Backend is converting the file. This page will update automatically when ready — feel free to navigate away.',
+              })}
+            </p>
+          </div>
+        )}
+
+        {!isProcessing && (
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <button onClick={onUploadConverted} aria-label={t('bim.overlay_upload_converted_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-oe-blue text-white text-sm font-semibold hover:bg-oe-blue-dark transition-colors shadow-sm">
+              <UploadCloud size={15} /> {t('bim.overlay_upload_converted_btn')}
+            </button>
+            <button onClick={onDelete} aria-label={t('bim.overlay_delete_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
+              <Trash2 size={15} /> {t('bim.overlay_delete_btn')}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -810,9 +849,32 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
 
 /* ── BIM Empty State Animation ──────────────────────────────────────── */
 
+/** Decorative animation palette for the BIM empty-state 3D building illustration */
+const BIM_ANIM = {
+  /* Tower 1 (indigo) */
+  indigoLight: '#818cf8',
+  indigo: '#6366f1',
+  indigoDark: '#4338ca',
+  /* Tower 2 (emerald) */
+  emeraldLight: '#34d399',
+  emerald: '#10b981',
+  emeraldDark: '#059669',
+  /* Tower 3 (violet) */
+  violetLight: '#a78bfa',
+  violet: '#8b5cf6',
+  violetDark: '#6d28d9',
+  /* rgba building blocks for translucent fills */
+  indigoRgb: '99,102,241',
+  emeraldRgb: '16,185,129',
+  violetRgb: '139,92,246',
+  indigoDarkRgb: '67,56,202',
+  emeraldDarkRgb: '5,150,105',
+  violetDarkRgb: '109,40,217',
+} as const;
+
 function BIMEmptyAnimation() {
   return (
-    <div className="relative" style={{ width: 380, height: 280 }}>
+    <div className="relative w-full" style={{ maxWidth: 440, height: 260, margin: '0 auto' }}>
       <style>{`
         @keyframes bim3dRotate {
           0% { transform: perspective(1200px) rotateX(12deg) rotateY(-18deg); }
@@ -825,8 +887,8 @@ function BIMEmptyAnimation() {
           85%, 100% { transform: translateY(0) scale(1); opacity: 0.2; }
         }
         @keyframes bimGlow {
-          0%, 100% { box-shadow: 0 0 0 rgba(99,102,241,0); }
-          50% { box-shadow: 0 0 20px rgba(99,102,241,0.15); }
+          0%, 100% { box-shadow: 0 0 0 rgba(${BIM_ANIM.indigoRgb},0); }
+          50% { box-shadow: 0 0 20px rgba(${BIM_ANIM.indigoRgb},0.15); }
         }
         @keyframes bimScan {
           0%, 100% { top: 10%; opacity: 0; }
@@ -853,46 +915,46 @@ function BIMEmptyAnimation() {
       {/* 3D isometric building */}
       <div style={{ position: 'absolute', left: 24, top: 10, width: 170, height: 240, animation: 'bim3dRotate 12s ease-in-out infinite' }}>
         {/* Ground plane */}
-        <div style={{ position: 'absolute', bottom: 0, left: -12, right: -12, height: 6, borderRadius: 3, background: 'linear-gradient(90deg, rgba(99,102,241,0.08), rgba(99,102,241,0.15), rgba(99,102,241,0.08))' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: -12, right: -12, height: 6, borderRadius: 3, background: `linear-gradient(90deg, rgba(${BIM_ANIM.indigoRgb},0.08), rgba(${BIM_ANIM.indigoRgb},0.15), rgba(${BIM_ANIM.indigoRgb},0.08))` }} />
         {/* Tower 1 */}
-        <div style={{ position: 'absolute', left: 0, bottom: 6, width: 44, height: 160, borderRadius: '6px 6px 2px 2px', background: 'linear-gradient(180deg, #818cf8 0%, var(--oe-blue) 60%, #4338ca 100%)', animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0s', boxShadow: '4px 4px 0 rgba(67,56,202,0.3)' }}>
+        <div style={{ position: 'absolute', left: 0, bottom: 6, width: 44, height: 160, borderRadius: '6px 6px 2px 2px', background: `linear-gradient(180deg, ${BIM_ANIM.indigoLight} 0%, var(--oe-blue) 60%, ${BIM_ANIM.indigoDark} 100%)`, animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0s', boxShadow: `4px 4px 0 rgba(${BIM_ANIM.indigoDarkRgb},0.3)` }}>
           {[24, 44, 64, 84, 104, 124, 144].map((t, i) => <div key={i} style={{ position: 'absolute', left: 6, top: t, width: 12, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.35)' }} />)}
           {[24, 44, 64, 84, 104, 124, 144].map((t, i) => <div key={`r${i}`} style={{ position: 'absolute', left: 24, top: t, width: 12, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.25)' }} />)}
         </div>
         {/* Tower 2 */}
-        <div style={{ position: 'absolute', left: 52, bottom: 6, width: 38, height: 115, borderRadius: '5px 5px 2px 2px', background: 'linear-gradient(180deg, #34d399 0%, #10b981 60%, #059669 100%)', animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.3s', boxShadow: '4px 4px 0 rgba(5,150,105,0.3)' }}>
+        <div style={{ position: 'absolute', left: 52, bottom: 6, width: 38, height: 115, borderRadius: '5px 5px 2px 2px', background: `linear-gradient(180deg, ${BIM_ANIM.emeraldLight} 0%, ${BIM_ANIM.emerald} 60%, ${BIM_ANIM.emeraldDark} 100%)`, animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.3s', boxShadow: `4px 4px 0 rgba(${BIM_ANIM.emeraldDarkRgb},0.3)` }}>
           {[18, 36, 54, 72, 90].map((t, i) => <div key={i} style={{ position: 'absolute', left: 6, top: t, width: 10, height: 6, borderRadius: 1, background: 'rgba(255,255,255,0.35)' }} />)}
         </div>
         {/* Tower 3 */}
-        <div style={{ position: 'absolute', left: 98, bottom: 6, width: 54, height: 135, borderRadius: '6px 6px 2px 2px', background: 'linear-gradient(180deg, #a78bfa 0%, #8b5cf6 60%, #6d28d9 100%)', animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.6s', boxShadow: '4px 4px 0 rgba(109,40,217,0.3)' }}>
+        <div style={{ position: 'absolute', left: 98, bottom: 6, width: 54, height: 135, borderRadius: '6px 6px 2px 2px', background: `linear-gradient(180deg, ${BIM_ANIM.violetLight} 0%, ${BIM_ANIM.violet} 60%, ${BIM_ANIM.violetDark} 100%)`, animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.6s', boxShadow: `4px 4px 0 rgba(${BIM_ANIM.violetDarkRgb},0.3)` }}>
           {[20, 40, 60, 80, 100, 120].map((t, i) => <div key={i} style={{ position: 'absolute', left: 7, top: t, width: 14, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.3)' }} />)}
           {[20, 40, 60, 80, 100, 120].map((t, i) => <div key={`r${i}`} style={{ position: 'absolute', left: 30, top: t, width: 14, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.2)' }} />)}
         </div>
         {/* Bridge between towers */}
-        <div style={{ position: 'absolute', left: 42, bottom: 72, width: 60, height: 9, borderRadius: 2, background: 'linear-gradient(90deg, var(--oe-blue), #8b5cf6)', animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.9s' }} />
+        <div style={{ position: 'absolute', left: 42, bottom: 72, width: 60, height: 9, borderRadius: 2, background: `linear-gradient(90deg, var(--oe-blue), ${BIM_ANIM.violet})`, animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.9s' }} />
         {/* Scanning line */}
         <div style={{ position: 'absolute', left: -5, width: 'calc(100% + 10px)', height: 2, background: 'linear-gradient(90deg, transparent, var(--oe-blue), transparent)', animation: 'bimScan 4s ease-in-out infinite', borderRadius: 1 }} />
         {/* Glow ring around building */}
-        <div style={{ position: 'absolute', inset: -8, borderRadius: 12, border: '1px solid rgba(99,102,241,0.1)', animation: 'bimGlow 3s ease-in-out infinite' }} />
+        <div style={{ position: 'absolute', inset: -8, borderRadius: 12, border: `1px solid rgba(${BIM_ANIM.indigoRgb},0.1)`, animation: 'bimGlow 3s ease-in-out infinite' }} />
       </div>
 
       {/* Data flow arrows */}
-      <div style={{ position: 'absolute', left: 200, top: 100, width: 50, height: 2, background: 'linear-gradient(90deg, var(--oe-blue), #10b981)', borderRadius: 1, transformOrigin: 'left', animation: 'bimDataFlow 10s ease-out infinite', animationDelay: '1.5s' }} />
-      <div style={{ position: 'absolute', left: 200, top: 135, width: 50, height: 2, background: 'linear-gradient(90deg, #8b5cf6, var(--oe-blue))', borderRadius: 1, transformOrigin: 'left', animation: 'bimDataFlow 10s ease-out infinite', animationDelay: '1.8s' }} />
+      <div style={{ position: 'absolute', left: 200, top: 100, width: 50, height: 2, background: `linear-gradient(90deg, var(--oe-blue), ${BIM_ANIM.emerald})`, borderRadius: 1, transformOrigin: 'left', animation: 'bimDataFlow 10s ease-out infinite', animationDelay: '1.5s' }} />
+      <div style={{ position: 'absolute', left: 200, top: 135, width: 50, height: 2, background: `linear-gradient(90deg, ${BIM_ANIM.violet}, var(--oe-blue))`, borderRadius: 1, transformOrigin: 'left', animation: 'bimDataFlow 10s ease-out infinite', animationDelay: '1.8s' }} />
       {/* Pulse dots at connection */}
       <div style={{ position: 'absolute', left: 197, top: 96, width: 10, height: 10, borderRadius: '50%', border: '1.5px solid var(--oe-blue)', animation: 'bimPulseRing 3s ease-out infinite' }} />
-      <div style={{ position: 'absolute', left: 197, top: 131, width: 10, height: 10, borderRadius: '50%', border: '1.5px solid #8b5cf6', animation: 'bimPulseRing 3s ease-out infinite', animationDelay: '0.5s' }} />
+      <div style={{ position: 'absolute', left: 197, top: 131, width: 10, height: 10, borderRadius: '50%', border: `1.5px solid ${BIM_ANIM.violet}`, animation: 'bimPulseRing 3s ease-out infinite', animationDelay: '0.5s' }} />
 
       {/* BOQ Table */}
       <div style={{ position: 'absolute', right: 10, top: 60, width: 120, height: 150 }}>
-        <div style={{ width: '100%', height: 14, borderRadius: '6px 6px 0 0', background: 'linear-gradient(135deg, var(--oe-blue), #6366f1)', animation: 'bimRowIn 10s ease-out infinite', animationDelay: '2s' }} />
+        <div style={{ width: '100%', height: 14, borderRadius: '6px 6px 0 0', background: `linear-gradient(135deg, var(--oe-blue), ${BIM_ANIM.indigo})`, animation: 'bimRowIn 10s ease-out infinite', animationDelay: '2s' }} />
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <div key={i} style={{ display: 'flex', gap: 2, marginTop: 3, animation: 'bimRowIn 10s ease-out infinite', animationDelay: `${2.2 + i * 0.15}s` }}>
-            <div style={{ flex: 2, height: 10, borderRadius: 3, background: i % 2 === 0 ? 'linear-gradient(90deg, rgba(99,102,241,0.2), rgba(99,102,241,0.08))' : 'linear-gradient(90deg, rgba(16,185,129,0.2), rgba(16,185,129,0.08))' }} />
-            <div style={{ flex: 1, height: 10, borderRadius: 3, background: 'rgba(139,92,246,0.12)' }} />
+            <div style={{ flex: 2, height: 10, borderRadius: 3, background: i % 2 === 0 ? `linear-gradient(90deg, rgba(${BIM_ANIM.indigoRgb},0.2), rgba(${BIM_ANIM.indigoRgb},0.08))` : `linear-gradient(90deg, rgba(${BIM_ANIM.emeraldRgb},0.2), rgba(${BIM_ANIM.emeraldRgb},0.08))` }} />
+            <div style={{ flex: 1, height: 10, borderRadius: 3, background: `rgba(${BIM_ANIM.violetRgb},0.12)` }} />
           </div>
         ))}
-        <div style={{ position: 'absolute', inset: 0, border: '1px solid rgba(99,102,241,0.1)', borderRadius: 6, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, border: `1px solid rgba(${BIM_ANIM.indigoRgb},0.1)`, borderRadius: 6, pointerEvents: 'none' }} />
       </div>
     </div>
   );
@@ -900,14 +962,18 @@ function BIMEmptyAnimation() {
 
 /* ── Landing Page ────────────────────────────────────────────────────── */
 
-function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrumbItems, onProcessingUpdate }: {
+function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrumbItems, models: landingModels, onSelectModel, onDeleteModel }: {
   projectId: string; onUploadComplete: (modelId: string) => void; breadcrumbItems: { label: string; to?: string }[];
-  onProcessingUpdate?: (update: ProcessingUpdate | null) => void;
+  models?: BIMModelData[];
+  onSelectModel?: (id: string) => void;
+  onDeleteModel?: (id: string, name: string) => void;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState('');
+  const [conversionDepth, setConversionDepth] = useState<'standard' | 'medium' | 'complete'>('standard');
+  const [generatePdfSheets, setGeneratePdfSheets] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -942,15 +1008,16 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
     try {
       const name = modelName || file.name.replace(/\.[^.]+$/, '');
       const uploadType = isCADFile(file.name) ? 'cad' as const : 'data' as const;
-      // Show centered progress overlay immediately
-      const sizeLabel = (file.size / 1024 / 1024).toFixed(1) + ' MB';
-      onProcessingUpdate?.({ stage: 'uploading', fileName: file.name, fileSize: sizeLabel });
       startGlobalUpload({
         file,
         projectId,
         modelName: name,
         discipline: 'architecture',
         uploadType,
+        // Both options only have an effect for native CAD uploads; the
+        // store ignores them for the CSV/XLSX path.
+        conversionDepth: uploadType === 'cad' ? conversionDepth : undefined,
+        generatePdfSheets: uploadType === 'cad' ? generatePdfSheets : false,
       });
       addToast({
         type: 'info',
@@ -962,7 +1029,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
       resetForm();
     } catch (err) { setUploadError(err instanceof Error ? err.message : String(err)); }
     finally { setUploading(false); }
-  }, [file, projectId, modelName, startGlobalUpload, addToast, t, onProcessingUpdate, resetForm]);
+  }, [file, projectId, modelName, conversionDepth, generatePdfSheets, startGlobalUpload, addToast, t, resetForm]);
 
   const features = [
     { icon: Eye, color: 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-800', ic: 'text-blue-500', title: t('bim.landing_feat_3d_title'), desc: t('bim.landing_feat_3d_desc') },
@@ -977,14 +1044,14 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
     <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
       <div className="px-6 pt-4 pb-3 border-b border-border-light"><Breadcrumb items={breadcrumbItems} /></div>
       <div className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-blue-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20">
-        <div className="max-w-6xl mx-auto px-6 py-5">
+        <div className="max-w-7xl mx-auto pt-20 pb-4">
 
           {/* Row 1: Upload card (left) + Hero text (right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch mb-8">
 
             {/* LEFT — Upload card */}
             <div className="flex flex-col">
-              <div className="rounded-2xl bg-white dark:bg-gray-800/60 border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-5">
+              <div className="rounded-2xl bg-white dark:bg-gray-800/60 border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6 flex flex-col h-full">
                 <label
                   aria-label={t('bim.landing_dropzone_aria', { defaultValue: 'Drop a BIM model file here or click to browse. Supported formats: .rvt, .ifc, .csv, .xlsx' })}
                   onDrop={(e) => {
@@ -1006,36 +1073,78 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     }
                   }}
                   onDragOver={(e) => e.preventDefault()}
-                  className={`flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                    file ? 'border-oe-blue bg-oe-blue/5' : 'border-border-medium hover:border-oe-blue hover:bg-blue-50/50 dark:hover:bg-blue-950/20'
+                  className={`group/drop flex flex-col items-center justify-center gap-4 rounded-xl p-10 text-center cursor-pointer transition-all flex-1 ${
+                    file
+                      ? 'border-2 border-oe-blue bg-oe-blue/5'
+                      : 'border-2 border-dashed border-border-medium bg-gradient-to-br from-blue-50/60 via-white to-violet-50/40 dark:from-blue-950/20 dark:via-gray-800/40 dark:to-violet-950/20 hover:border-oe-blue/50 hover:shadow-md'
                   }`}
                 >
                   {file ? (
                     <>
-                      <div className="w-12 h-12 rounded-xl bg-oe-blue/10 flex items-center justify-center"><CheckCircle2 size={22} className="text-oe-blue" /></div>
+                      <div className="w-14 h-14 rounded-2xl bg-oe-blue/10 flex items-center justify-center"><CheckCircle2 size={26} className="text-oe-blue" /></div>
                       <p className="text-sm font-semibold text-content-primary">{file.name}</p>
-                      <p className="text-[11px] text-content-quaternary">{formatFileSize(file.size)}</p>
+                      <p className="text-xs text-content-quaternary">{formatFileSize(file.size)}</p>
                     </>
                   ) : (
                     <>
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border border-blue-200/50 dark:border-blue-800/30 flex items-center justify-center">
-                        <FileUp size={22} className="text-oe-blue" />
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-oe-blue/10 to-violet-500/10 flex items-center justify-center group-hover/drop:scale-110 transition-transform">
+                        <FileUp size={26} className="text-oe-blue" />
                       </div>
-                      <p className="text-sm font-semibold text-content-primary">{t('bim.landing_drop_here')}</p>
-                      <p className="text-[11px] text-content-quaternary">{t('bim.landing_size_hint')}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30" title="Revit 2015–2026">.rvt</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30" title="IFC 2x3, 4.0, 4.1, 4.3">.ifc</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-secondary text-content-quaternary border border-border-light">.csv</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-secondary text-content-quaternary border border-border-light">.xlsx</span>
+                      <div>
+                        <p className="text-sm font-semibold text-content-primary">{t('bim.landing_drop_here')}</p>
+                        <p className="text-xs text-content-tertiary mt-1">{t('bim.landing_size_hint')}</p>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-oe-blue/8 text-oe-blue border border-oe-blue/15 font-semibold">.rvt</span>
+                        <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-oe-blue/8 text-oe-blue border border-oe-blue/15 font-semibold">.ifc</span>
+                      </div>
+                      <p className="text-[10px] text-content-quaternary leading-relaxed mt-1 text-center">
+                        Revit 2015–2026 &middot; IFC 2x3, 4.0, 4.1, 4.3
+                      </p>
                     </>
                   )}
-                  <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }} />
+                  <input ref={fileInputRef} type="file" accept=".rvt,.ifc" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }} />
                 </label>
                 {file && (
                   <div className="mt-4 space-y-3">
                     <input type="text" className="w-full text-sm py-2.5 px-4 rounded-xl border border-border-light bg-surface-secondary text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/30" placeholder={t('bim.model_name')} value={modelName} onChange={(e) => setModelName(e.target.value)} />
+                    {isCADFile(file.name) && (
+                      <>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">
+                            {t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}
+                          </label>
+                          <select
+                            className="w-full text-sm py-2.5 px-4 rounded-xl border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                            value={conversionDepth}
+                            onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'medium' | 'complete')}
+                          >
+                            <option value="standard">{t('bim.upload_depth_standard', { defaultValue: 'Standard · main categories (fast)' })}</option>
+                            <option value="medium">{t('bim.upload_depth_medium', { defaultValue: 'Medium · extended categories (balanced)' })}</option>
+                            <option value="complete">{t('bim.upload_depth_complete', { defaultValue: 'Complete · all categories (slow)' })}</option>
+                          </select>
+                          <p className="mt-1 text-[10px] text-content-quaternary leading-relaxed">
+                            {t('bim.upload_depth_help', { defaultValue: 'Controls how many Revit categories are extracted. Element IDs and full properties are always preserved.' })}
+                          </p>
+                        </div>
+                        <label className="flex items-start gap-2 cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            checked={generatePdfSheets}
+                            onChange={(e) => setGeneratePdfSheets(e.target.checked)}
+                            className="mt-0.5 h-4 w-4 rounded border-border-medium text-oe-blue focus:ring-1 focus:ring-oe-blue cursor-pointer"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <span className="block text-[11px] font-medium text-content-primary group-hover:text-oe-blue transition-colors">
+                              {t('bim.upload_generate_pdf_label', { defaultValue: 'Also export existing project sheets as PDF (background)' })}
+                            </span>
+                            <span className="block text-[10px] text-content-quaternary leading-relaxed mt-0.5">
+                              {t('bim.upload_generate_pdf_help', { defaultValue: 'Exports the sheets the designer prepared inside the model as a single PDF into Documents. Runs after the model is ready — upload is not delayed.' })}
+                            </span>
+                          </div>
+                        </label>
+                      </>
+                    )}
                     {uploading && <div className="h-1.5 rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div>}
                     {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
                     <button onClick={handleUpload} disabled={uploading} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-md hover:shadow-lg">
@@ -1058,7 +1167,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                       {job.status !== 'ready' ? (
                         <>
                           <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500" style={{ width: `${job.progress}%` }} /></div>
-                          <p className="text-[11px] text-content-tertiary mt-1">{job.stage || t('bim.processing', { defaultValue: 'Processing...' })}</p>
+                          <p className="text-[11px] text-content-tertiary mt-1">{t(job.stage, { defaultValue: 'Processing...' })}</p>
                         </>
                       ) : (
                         <p className="text-[11px] text-green-600 dark:text-green-400">{t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount })}</p>
@@ -1070,16 +1179,26 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
             </div>
 
             {/* RIGHT — Hero text + animation */}
-            <div className="flex flex-col justify-center lg:pt-4">
-              <h1 className="text-2xl font-bold text-content-primary tracking-tight leading-tight">{t('bim.landing_hero_title')}</h1>
-              <p className="text-sm text-content-secondary mt-2.5 leading-relaxed">
-                {t('bim.landing_hero_subtitle')}
-              </p>
-              <p className="text-[11px] text-content-tertiary mt-3">
-                {t('bim.landing_formats_detailed', { defaultValue: 'Revit 2015\u20132026 (.rvt) \u00B7 IFC 2x3, 4.0, 4.1, 4.3 (.ifc) \u00B7 CSV \u00B7 Excel. DWG \u2192 DWG Takeoff.' })}
-              </p>
-              {/* Animation — constrained to text width */}
-              <div className="hidden lg:block mt-6 opacity-25 max-w-full overflow-hidden">
+            <div className="flex flex-col justify-center gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-content-primary tracking-tight leading-tight">{t('bim.landing_hero_title')}</h1>
+                <p className="text-base text-content-secondary mt-3 leading-relaxed">
+                  {t('bim.landing_hero_subtitle')}
+                </p>
+                <p className="text-xs text-content-tertiary mt-3 leading-relaxed">
+                  {t('bim.landing_formats_detailed', { defaultValue: 'Revit 2015\u20132026 (.rvt) \u00B7 IFC 2x3, 4.0, 4.1, 4.3 (.ifc) \u00B7 CSV \u00B7 Excel. DWG \u2192 DWG Takeoff.' })}
+                </p>
+                <p className="mt-2 flex items-center gap-1.5 text-[11px] text-content-tertiary">
+                  <ShieldCheck size={12} className="shrink-0" />
+                  <span>
+                    {t('common.local_processing', { defaultValue: '100% Local Processing — Your files never leave your computer' })}
+                    {' \u00B7 '}
+                    {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC cad2data' })}
+                  </span>
+                </p>
+              </div>
+              {/* Animation — fills remaining space */}
+              <div className="hidden lg:block mt-auto opacity-60 overflow-hidden">
                 <BIMEmptyAnimation />
               </div>
             </div>
@@ -1087,24 +1206,216 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
 
           {/* Row 2: Feature cards — 3x2 grid */}
           <div>
-            <h2 className="text-[10px] font-bold text-content-tertiary uppercase tracking-widest mb-2">
+            <h2 className="text-xs font-bold text-content-tertiary uppercase tracking-widest mb-3">
               {t('bim.landing_what_you_get', { defaultValue: 'What you get' })}
             </h2>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               {features.map((f, i) => (
-                <div key={i} className="flex items-start gap-2.5 rounded-lg p-3 bg-white dark:bg-gray-800/40 border border-border-light/60 hover:border-border-light hover:shadow-sm transition-all">
-                  <div className={`w-7 h-7 rounded-md ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={14} className={f.ic} /></div>
+                <div key={i} className="flex items-start gap-3 rounded-xl p-4 bg-white dark:bg-gray-800/40 border border-border-light/60 hover:border-border-light hover:shadow-sm transition-all">
+                  <div className={`w-8 h-8 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={15} className={f.ic} /></div>
                   <div className="min-w-0">
-                    <h3 className="text-[11px] font-semibold text-content-primary leading-tight">{f.title}</h3>
-                    <p className="text-[10px] text-content-quaternary leading-snug mt-0.5">{f.desc}</p>
+                    <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
+                    <p className="text-[11px] text-content-tertiary leading-snug mt-1">{f.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* Row 3 removed — models now in fixed bottom filmstrip only */}
+          {false as boolean && (
+            <div className="hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {(landingModels ?? []).map((m) => {
+                  const fmt = (m.model_format || m.format || '').toUpperCase();
+                  const isError = m.status === 'error' || m.status === 'needs_converter';
+                  const isProcessing = m.status === 'processing';
+                  const isReady = m.status === 'ready';
+
+                  const statusColor = isReady
+                    ? 'bg-emerald-500'
+                    : isProcessing
+                      ? 'bg-amber-400 animate-pulse'
+                      : isError
+                        ? 'bg-red-400'
+                        : 'bg-gray-400';
+
+                  const statusLabel = isReady
+                    ? t('bim.status_ready', { defaultValue: 'Ready' })
+                    : m.status === 'needs_converter'
+                      ? t('bim.status_needs_converter', { defaultValue: 'Needs Converter' })
+                      : isProcessing
+                        ? t('bim.status_processing', { defaultValue: 'Processing' })
+                        : isError
+                          ? t('bim.status_error', { defaultValue: 'Error' })
+                          : m.status;
+
+                  const statusTextColor = isReady
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : isProcessing
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : isError
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-content-tertiary';
+
+                  const borderAccent = isReady
+                    ? 'border-l-emerald-400'
+                    : isProcessing
+                      ? 'border-l-amber-400'
+                      : isError
+                        ? 'border-l-red-400'
+                        : 'border-l-gray-300 dark:border-l-gray-600';
+
+                  const timeAgo = m.created_at ? (() => {
+                    const diff = Date.now() - new Date(m.created_at!).getTime();
+                    const mins = Math.floor(diff / 60000);
+                    if (mins < 1) return t('bim.just_now', { defaultValue: 'just now' });
+                    if (mins < 60) return t('bim.time_mins_ago', { defaultValue: '{{count}}m ago', count: mins });
+                    const hrs = Math.floor(mins / 60);
+                    if (hrs < 24) return t('bim.time_hours_ago', { defaultValue: '{{count}}h ago', count: hrs });
+                    const days = Math.floor(hrs / 24);
+                    return t('bim.time_days_ago', { defaultValue: '{{count}}d ago', count: days });
+                  })() : '';
+
+                  return (
+                    <button
+                      key={m.id}
+                      onClick={() => onSelectModel?.(m.id)}
+                      className={`group relative w-full text-left rounded-xl border border-border-light border-l-[3px] ${borderAccent} bg-white dark:bg-gray-800/50 p-4 hover:shadow-lg hover:border-oe-blue/30 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer`}
+                    >
+                      {/* Delete button — visible on hover */}
+                      {onDeleteModel && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); onDeleteModel(m.id, m.name); }}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onDeleteModel(m.id, m.name); } }}
+                          aria-label={t('bim.delete_model', { defaultValue: 'Delete model' })}
+                          className="absolute top-3 end-3 p-1.5 rounded-lg text-content-quaternary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all z-10"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+
+                      {/* Card content */}
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-oe-blue/10 to-blue-50 dark:to-blue-950/20 border border-oe-blue/15 flex items-center justify-center shrink-0">
+                          <Cuboid size={18} className="text-oe-blue" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-content-primary truncate pe-6" title={m.name}>{m.name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            {fmt && (
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-oe-blue/8 text-oe-blue border border-oe-blue/15 font-semibold leading-none">
+                                .{fmt.toLowerCase()}
+                              </span>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <span className={`w-1.5 h-1.5 rounded-full ${statusColor}`} />
+                              <span className={`text-[10px] font-medium ${statusTextColor}`}>{statusLabel}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Footer stats */}
+                      <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-border-light/60">
+                        <div className="flex items-center gap-3 text-[11px] text-content-quaternary tabular-nums">
+                          {isProcessing && (m.element_count ?? 0) === 0 ? (
+                            <span className="inline-block w-20 h-3 rounded bg-surface-tertiary animate-pulse" />
+                          ) : (
+                            <>
+                              <span className="flex items-center gap-1">
+                                <Layers size={11} className="text-content-quaternary" />
+                                {t('bim.element_count', { defaultValue: '{{count}} elements', count: m.element_count ?? 0 })}
+                              </span>
+                              {(m.storey_count ?? 0) > 0 && (
+                                <span className="flex items-center gap-1">
+                                  <Building2 size={11} className="text-content-quaternary" />
+                                  {t('bim.storey_count', { defaultValue: '{{count}} levels', count: m.storey_count })}
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        {timeAgo && (
+                          <span className="flex items-center gap-1 text-[10px] text-content-quaternary">
+                            <CalendarDays size={10} />
+                            {timeAgo}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
+
+      {/* ── Bottom Filmstrip: Your Models (fixed, like DWG Takeoff) ── */}
+      {landingModels && landingModels.length > 0 && (
+        <div className="shrink-0 border-t border-border-light bg-surface-primary">
+          <div className="flex items-center px-4 py-1.5">
+            <Database size={14} className="text-content-tertiary mr-2 shrink-0" />
+            <span className="text-xs font-semibold text-content-primary">
+              {t('bim.your_models', { defaultValue: 'Your Models' })}
+            </span>
+            <span className="text-[11px] text-content-quaternary ml-1.5">({landingModels.length})</span>
+          </div>
+          <div className="flex items-center gap-2.5 px-4 pb-2.5 overflow-x-auto">
+            {landingModels.map((m) => {
+              const fmt = (m.model_format || m.format || '').toUpperCase();
+              const isReady = m.status === 'ready';
+              const isProcessing = m.status === 'processing';
+              const isError = m.status === 'error' || m.status === 'needs_converter';
+              const statusDot = isReady ? 'bg-emerald-500' : isProcessing ? 'bg-amber-400 animate-pulse' : isError ? 'bg-red-400' : 'bg-gray-400';
+
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => onSelectModel?.(m.id)}
+                  className="group relative shrink-0 w-52 text-start rounded-lg border border-border-light bg-surface-secondary hover:bg-surface-tertiary hover:border-oe-blue/30 hover:shadow-md transition-all duration-200 overflow-hidden"
+                >
+                  {onDeleteModel && (
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => { e.stopPropagation(); onDeleteModel(m.id, m.name); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onDeleteModel(m.id, m.name); } }}
+                      className="absolute top-1.5 right-1.5 p-1 rounded text-content-quaternary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100 transition-all z-10"
+                    >
+                      <Trash2 size={11} />
+                    </span>
+                  )}
+                  <div className="px-3 py-2.5">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Cuboid size={12} className="shrink-0 text-content-tertiary" />
+                      <span className="text-[11px] font-semibold text-content-primary truncate">{m.name}</span>
+                      {fmt && (
+                        <span className="text-[9px] font-mono font-bold px-1 py-0.5 rounded bg-oe-blue/8 text-oe-blue border border-oe-blue/15 shrink-0">.{fmt.toLowerCase()}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-content-quaternary">
+                      <span className="flex items-center gap-1">
+                        <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`} />
+                        {isReady ? t('bim.status_ready', { defaultValue: 'Ready' }) : isProcessing ? t('bim.status_processing', { defaultValue: 'Processing' }) : m.status}
+                      </span>
+                      {(m.element_count ?? 0) > 0 && (
+                        <>
+                          <span>&middot;</span>
+                          <span>{m.element_count} {t('bim.elements', { defaultValue: 'elements' })}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1149,7 +1460,6 @@ export function BIMPage() {
   >('default');
   const showBoundingBoxes = false;
   const [isolatedIds, setIsolatedIds] = useState<string[] | null>(null);
-  const [processing, setProcessing] = useState<ProcessingUpdate | null>(null);
   const [meshMatchRatio, setMeshMatchRatio] = useState<number | null>(null);
   /** Elements queued for linking via the AddToBOQ modal. Single element
    *  when the user clicks an element; multiple elements when "quick
@@ -1198,27 +1508,37 @@ export function BIMPage() {
   }, [statusPollQuery.data, activeModel, queryClient, projectId, activeModelId]);
 
   // Auto-detect project when navigating to /bim/:modelId without correct project context.
-  // This handles deep-links and bookmarked model URLs.
+  // Runs at most once per urlModelId — never overrides an explicit project switch
+  // from the top selector (which would otherwise snap the user back to this model's project).
   const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
+  const autoDetectedRef = useRef<string | null>(null);
   useEffect(() => {
     if (!urlModelId) return;
-    // If no project is selected OR model not in current project's list → fetch model to get project_id
+    if (autoDetectedRef.current === urlModelId) return;
+    if (modelsQuery.isLoading) return;
     const modelInList = models.find((m) => m.id === urlModelId);
-    if (!modelInList) {
-      fetchBIMModel(urlModelId).then((model) => {
-        if (model?.project_id && model.project_id !== projectId) {
-          setActiveProject(model.project_id, '');
-        }
-      }).catch(() => {});
+    if (modelInList) {
+      autoDetectedRef.current = urlModelId;
+      return;
     }
-  }, [urlModelId, models, projectId, setActiveProject]);
+    fetchBIMModel(urlModelId).then((model) => {
+      autoDetectedRef.current = urlModelId;
+      if (model?.project_id && model.project_id !== projectId) {
+        setActiveProject(model.project_id, '');
+      }
+    }).catch(() => { autoDetectedRef.current = urlModelId; });
+  }, [urlModelId, models, projectId, setActiveProject, modelsQuery.isLoading]);
 
+  // Pick a valid active model: handles initial mount, deep links (after auto-detect),
+  // and project switches (when current activeModelId no longer belongs to the project).
   useEffect(() => {
-    if (models.length && !activeModelId) {
-      // URL model ID takes priority, then first model in list
-      const target = urlModelId && models.find((m) => m.id === urlModelId) ? urlModelId : models[0]!.id;
-      setActiveModelId(target);
-    }
+    if (!models.length) return;
+    // For deep links, wait until auto-detect has had a chance to run.
+    if (urlModelId && autoDetectedRef.current !== urlModelId) return;
+    const currentInList = activeModelId && models.some((m) => m.id === activeModelId);
+    if (currentInList) return;
+    const target = urlModelId && models.find((m) => m.id === urlModelId) ? urlModelId : models[0]!.id;
+    setActiveModelId(target);
   }, [models, activeModelId, urlModelId]);
 
   // Sync URL when active model changes
@@ -1242,14 +1562,6 @@ export function BIMPage() {
     setActiveGroupId(null);
   }, [activeModelId]);
 
-  // Auto-dismiss the processing progress card 4 seconds after the model is
-  // ready (errors stay until the user clicks close).
-  useEffect(() => {
-    if (processing?.stage !== 'ready') return;
-    const timer = setTimeout(() => setProcessing(null), 4000);
-    return () => clearTimeout(timer);
-  }, [processing?.stage]);
-
   // When ?group= is present, load only that group's elements from the
   // backend (lazy loading).  This makes cross-module navigation instant
   // for large models (7k+ elements).
@@ -1267,14 +1579,22 @@ export function BIMPage() {
   const effectiveGroupId = fullModelRequested ? null : activeGroupId;
 
   const elementsQuery = useQuery({
-    queryKey: ['bim-elements', activeModelId, effectiveGroupId ?? 'all'],
+    // Skeleton mode: ~10× faster list (no boq_links / tasks / docs / activities
+    // / requirements / validation joins). The 3D viewer only needs identity
+    // + bbox for mesh matching; relations are fetched on demand when the user
+    // opens the BOQ-link panel or a validation drawer.
+    queryKey: ['bim-elements', activeModelId, effectiveGroupId ?? 'all', 'skeleton'],
     queryFn: () =>
       fetchBIMElements(activeModelId!, {
         groupId: effectiveGroupId,
+        skeleton: true,
       }),
-    // Load elements when model is ready OR when navigating via URL
-    // (activeModel may be null during project auto-detect race)
-    enabled: !!activeModelId && (activeModel?.status === 'ready' || (!activeModel && !!urlModelId)),
+    // Only load elements once we know the model is actually ready.  Firing
+    // earlier (e.g. while the model is still in 'processing' state right after
+    // an upload) used to surface a misleading "Failed to load model elements"
+    // toast — the inline NonReadyOverlay now drives the UI for non-ready
+    // states and the elements query waits its turn.
+    enabled: !!activeModelId && activeModel?.status === 'ready',
   });
   const elements: BIMElementData[] = elementsQuery.data?.items ?? [];
   const elementsTotal: number = elementsQuery.data?.total ?? 0;
@@ -1642,33 +1962,29 @@ export function BIMPage() {
   const handleUploadComplete = useCallback((modelId: string) => {
     setActiveModelId(modelId); setShowUploadOverride(false); setSelectedElementId(null);
     setUploadOpen(false); setUploadConvertedName(null);
+    // Invalidate both model list and elements — the model is ready on the
+    // backend but the list cache may still show 'processing' for a moment.
     queryClient.invalidateQueries({ queryKey: ['bim-models', projectId] });
+    queryClient.invalidateQueries({ queryKey: ['bim-elements', modelId] });
+    // Retry after a short delay to catch race conditions where the first
+    // refetch arrives before the backend has fully committed the status.
+    setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: ['bim-models', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['bim-elements', modelId] });
+    }, 2000);
   }, [queryClient, projectId]);
 
   // Watch global BIM upload store — when a job for this project finishes
   // successfully, auto-select the new model and refresh the model list.
-  // Also drive the processing overlay so BIMProcessingProgress still works
-  // when BIMPage is mounted.
+  // Completion / error toasts are user-facing here (not the pill in
+  // GlobalUploadIndicator — that's only a progress indicator).
   const globalUploadJobs = useBIMUploadStore((s) => s.jobs);
   const completedJobRef = useRef(new Set<string>());
   useEffect(() => {
     for (const [jobId, job] of globalUploadJobs) {
       if (job.projectId !== projectId) continue;
-      // Drive inline processing overlay from store state
-      if (job.status === 'uploading' || job.status === 'converting') {
-        setProcessing({
-          stage: job.status as BIMProcessingStage,
-          fileName: job.fileName,
-          fileSize: formatFileSize(job.fileSize),
-        });
-      } else if (job.status === 'ready' && !completedJobRef.current.has(jobId)) {
+      if (job.status === 'ready' && !completedJobRef.current.has(jobId)) {
         completedJobRef.current.add(jobId);
-        setProcessing({
-          stage: 'ready',
-          fileName: job.fileName,
-          fileSize: formatFileSize(job.fileSize),
-          elementCount: job.elementCount,
-        });
         if (job.modelId) handleUploadComplete(job.modelId);
         addToast({
           type: 'success',
@@ -1676,23 +1992,20 @@ export function BIMPage() {
           message: t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount }),
         });
       } else if (
-        (job.status === 'error' || job.status === 'converter_required') &&
+        job.status === 'error' &&
         !completedJobRef.current.has(jobId)
       ) {
         completedJobRef.current.add(jobId);
-        setProcessing({
-          stage: job.status === 'converter_required' ? 'needs_converter' : 'error',
-          fileName: job.fileName,
-          fileSize: formatFileSize(job.fileSize),
-          errorMessage: job.errorMessage || undefined,
+        addToast({
+          type: 'error',
+          title: t('bim.toast_processing_failed_title', { defaultValue: 'Processing failed' }),
+          message: job.errorMessage || undefined,
         });
-        if (job.status === 'error') {
-          addToast({
-            type: 'error',
-            title: t('bim.toast_processing_failed_title', { defaultValue: 'Processing failed' }),
-            message: job.errorMessage || undefined,
-          });
-        }
+      } else if (
+        job.status === 'converter_required' &&
+        !completedJobRef.current.has(jobId)
+      ) {
+        completedJobRef.current.add(jobId);
       }
     }
   }, [globalUploadJobs, projectId, handleUploadComplete, addToast, t]);
@@ -1734,12 +2047,25 @@ export function BIMPage() {
   }
 
   if (showFullPageUpload && !modelsQuery.isLoading) {
-    return <LandingPage projectId={projectId} onUploadComplete={handleUploadComplete} breadcrumbItems={breadcrumbItems} onProcessingUpdate={setProcessing} />;
+    return (
+      <>
+        <LandingPage projectId={projectId} onUploadComplete={handleUploadComplete} breadcrumbItems={breadcrumbItems} models={models} onSelectModel={(id) => { setActiveModelId(id); setShowUploadOverride(false); setSelectedElementId(null); }} onDeleteModel={handleDeleteModel} />
+        <ConfirmDialog {...confirmProps} />
+      </>
+    );
   }
 
   const storeys = new Set(elements.map((e) => e.storey).filter(Boolean));
   const discips = new Set(elements.map((e) => e.discipline).filter(Boolean));
-  const isModelNonReady = activeModel && ['processing', 'needs_converter', 'error'].includes(activeModel.status);
+  // "Loading by URL": user just uploaded or deep-linked, models query is still
+  // refetching, so activeModel hasn't materialised yet.  We treat this as a
+  // non-ready state so the inline overlay renders instead of the BIMViewer
+  // (which would otherwise fire the elements query and surface an error).
+  const isModelLoadingByUrl =
+    !!urlModelId && !activeModel && (modelsQuery.isLoading || modelsQuery.isFetching);
+  const isModelNonReady =
+    !!isModelLoadingByUrl ||
+    !!(activeModel && ['processing', 'needs_converter', 'error'].includes(activeModel.status));
 
   return (
     <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
@@ -1919,11 +2245,60 @@ export function BIMPage() {
         )}
 
         <div className="flex-1 min-w-0 relative">
+        {/* PDF generation indicator — shown when the upload job for the
+            active model has a deferred PDF export running on the backend.
+            Pure status bar, never blocks interaction with the viewer. */}
+        {(() => {
+          if (!activeModelId) return null;
+          let pdfJob: BIMUploadJob | null = null;
+          for (const j of globalUploadJobs.values()) {
+            if (j.modelId === activeModelId && (j.pdfStatus === 'generating' || j.pdfStatus === 'failed')) {
+              pdfJob = j;
+              break;
+            }
+          }
+          if (!pdfJob) return null;
+          const failed = pdfJob.pdfStatus === 'failed';
+          return (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+              <div className={clsx(
+                'flex items-center gap-2.5 px-3.5 py-2 rounded-full border shadow-md backdrop-blur-sm',
+                failed
+                  ? 'bg-red-50/95 dark:bg-red-950/40 border-red-200 dark:border-red-800 text-red-700 dark:text-red-200'
+                  : 'bg-blue-50/95 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-200',
+              )}>
+                {failed ? (
+                  <AlertCircle size={14} className="shrink-0" />
+                ) : (
+                  <Loader2 size={14} className="shrink-0 animate-spin" />
+                )}
+                <span className="text-xs font-medium whitespace-nowrap">
+                  {failed
+                    ? t('bim.pdf_status_failed', { defaultValue: 'PDF sheet export failed' })
+                    : t('bim.pdf_status_generating', { defaultValue: 'Generating PDF sheets in background…' })}
+                </span>
+                {failed && pdfJob.pdfError && (
+                  <span className="text-[10px] text-red-500/80 max-w-xs truncate">
+                    {pdfJob.pdfError}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
         {isModelNonReady ? (
           <NonReadyOverlay
-            model={activeModel!}
-            onUploadConverted={() => { setUploadConvertedName(activeModel!.name); setUploadOpen(true); }}
-            onDelete={() => handleDeleteModel(activeModel!.id, activeModel!.name)}
+            model={activeModel ?? null}
+            onUploadConverted={() => {
+              if (activeModel) {
+                setUploadConvertedName(activeModel.name);
+                setUploadOpen(true);
+              }
+            }}
+            onDelete={() => {
+              if (activeModel) handleDeleteModel(activeModel.id, activeModel.name);
+            }}
           />
         ) : activeModelId ? (
           <>
@@ -1953,6 +2328,7 @@ export function BIMPage() {
             onLinkActivity={handleLinkActivity}
             onLinkRequirement={handleLinkRequirement}
             onSmartFilter={handleSmartFilter}
+            leftPanelOpen={filterPanelOpen && elements.length > 0}
             className="h-full"
           />
 
@@ -2003,68 +2379,14 @@ export function BIMPage() {
             onClose={() => { setUploadOpen(false); setUploadConvertedName(null); }}
             initialAdvancedMode={!!uploadConvertedName}
             initialModelName={uploadConvertedName || undefined}
-            onProcessingUpdate={setProcessing}
           />
         )}
 
-        {/* Compact bottom-right progress notification — non-blocking so user
-            can continue interacting (select models, upload more files). */}
-        {processing && (processing.stage === 'uploading' || processing.stage === 'converting' || processing.stage === 'parsing' || processing.stage === 'indexing') && (
-          <div className="absolute bottom-4 end-4 z-40 w-80">
-            <div className="bg-surface-primary border border-border-light rounded-xl shadow-md p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <Loader2 size={18} className="text-oe-blue animate-spin shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-xs font-semibold text-content-primary truncate">
-                    {processing.stage === 'uploading'
-                      ? t('bim.progress_uploading', { defaultValue: 'Uploading file...' })
-                      : processing.stage === 'converting'
-                        ? t('bim.progress_converting', { defaultValue: 'Converting CAD model...' })
-                        : processing.stage === 'parsing'
-                          ? t('bim.progress_parsing', { defaultValue: 'Extracting elements...' })
-                          : t('bim.progress_indexing', { defaultValue: 'Indexing properties...' })}
-                  </h4>
-                  {processing.fileName && (
-                    <p className="text-[10px] text-content-tertiary truncate">
-                      {processing.fileName}
-                      {processing.fileSize ? ` (${processing.fileSize})` : ''}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-[width] duration-700 ease-out"
-                  style={{
-                    width: processing.stage === 'uploading' ? '25%'
-                      : processing.stage === 'converting' ? '55%'
-                        : processing.stage === 'parsing' ? '75%'
-                          : '92%',
-                  }}
-                />
-              </div>
-              <p className="text-[10px] text-content-quaternary mt-1.5">
-                {t('bim.progress_navigate_away_short', {
-                  defaultValue: 'Processing in background -- you can continue working.',
-                })}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Completion / error progress card (bottom-right of viewport) */}
-        {processing && (processing.stage === 'ready' || processing.stage === 'error' || processing.stage === 'needs_converter') && (
-          <div className="absolute bottom-6 end-6 z-40 pointer-events-none">
-            <BIMProcessingProgress
-              stage={processing.stage}
-              fileName={processing.fileName}
-              fileSize={processing.fileSize}
-              elementCount={processing.elementCount}
-              errorMessage={processing.errorMessage}
-              onClose={() => setProcessing(null)}
-            />
-          </div>
-        )}
+        {/* In-page progress/completion toasts removed: GlobalUploadIndicator
+            (mounted in AppLayout) is the single source of truth for upload
+            state and survives navigation. Having a second local tracker here
+            caused a zombie "Converting CAD model…" toast when UploadPanel set
+            stage='converting' and no code path later flipped it to 'ready'. */}
 
         {/* Low mesh-match warning — shown when the loaded DAE has no per-element
             mapping (e.g. DDC RVT exports with numeric node names), which means
@@ -2112,6 +2434,7 @@ export function BIMPage() {
       {linkCandidates && linkCandidates.length > 0 && projectId && (
         <AddToBOQModal
           projectId={projectId}
+          modelId={activeModelId ?? ''}
           elements={linkCandidates}
           onClose={() => setLinkCandidates(null)}
           onLinked={() => {
