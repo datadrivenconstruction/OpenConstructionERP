@@ -48,6 +48,11 @@ export { ConfirmDialog } from './ConfirmDialog';
 export type { ConfirmDialogProps } from './ConfirmDialog';
 
 export { Breadcrumb } from './Breadcrumb';
+
+export { ProjectMap, buildGeocodeQuery } from './ProjectMap';
+export type { LatLng } from './ProjectMap';
+
+export { ProjectWeather } from './ProjectWeather';
 export type { BreadcrumbItem } from './Breadcrumb';
 
 export { ErrorBoundary } from './ErrorBoundary';

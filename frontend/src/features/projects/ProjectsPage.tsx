@@ -4,9 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   FolderPlus, FolderOpen, ArrowRight, MoreHorizontal, Copy, Trash2, Archive, ExternalLink,
-  Search, ChevronDown, ArrowUpDown, Star,
+  Search, ChevronDown, ArrowUpDown, Star, Map as MapIcon, CloudSun,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, SkeletonGrid, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, SkeletonGrid, Breadcrumb, ProjectMap, ProjectWeather, type LatLng } from '@/shared/ui';
+import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { projectsApi, type Project } from './api';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
@@ -193,11 +194,22 @@ export function ProjectsPage() {
       list = list.filter((p) => p.region === regionFilter);
     }
 
-    // Sort — pinned first, then by selected sort option
+    // Sort — pinned first, then locale priority (en → de → others)
+    // so the US and German demo projects anchor the top of the list,
+    // then fall through to the user-selected sort option.
+    const localePriority = (p: Project): number => {
+      if (p.locale === 'en') return 0;
+      if (p.locale === 'de') return 1;
+      return 2;
+    };
     list.sort((a, b) => {
       const aPinned = pinnedIds.includes(a.id) ? 0 : 1;
       const bPinned = pinnedIds.includes(b.id) ? 0 : 1;
       if (aPinned !== bPinned) return aPinned - bPinned;
+
+      const aLoc = localePriority(a);
+      const bLoc = localePriority(b);
+      if (aLoc !== bLoc) return aLoc - bLoc;
 
       switch (sortOption) {
         case 'name_asc':
@@ -415,6 +427,9 @@ export function ProjectsPage() {
                 </button>
               ))}
             </div>
+
+            {/* Widget toggles — map + weather */}
+            <WidgetToggles />
           </div>
         </Card>
       )}
@@ -642,14 +657,39 @@ function ProjectCard({
     masterformat: 'MasterFormat',
   };
 
+  const mapEnabled = useWidgetSettingsStore((s) => s.projectMapEnabled);
+  const weatherEnabled = useWidgetSettingsStore((s) => s.projectWeatherEnabled);
+  const [cardCoords, setCardCoords] = useState<LatLng | null>(
+    project.address?.lat && project.address?.lng
+      ? { lat: project.address.lat, lng: project.address.lng }
+      : null,
+  );
+
   return (
     <Card
       hoverable
       padding="none"
-      className="cursor-pointer relative animate-card-in"
+      className="cursor-pointer relative animate-card-in overflow-hidden"
       style={style}
       onClick={() => navigate(`/projects/${project.id}`)}
     >
+      {mapEnabled && project.address && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <ProjectMap
+            variant="card"
+            lat={project.address?.lat ?? null}
+            lng={project.address?.lng ?? null}
+            address={project.address?.street}
+            city={project.address?.city}
+            country={project.address?.country}
+            label={[project.address?.city, project.address?.country]
+              .filter(Boolean)
+              .join(', ')}
+            className="rounded-none border-none"
+            onResolved={setCardCoords}
+          />
+        </div>
+      )}
       <div className="p-5">
         <div className="flex items-start justify-between">
           <div className={`flex h-10 w-10 items-center justify-center rounded-xl font-bold ${getRegionAvatarClass(project.region)}`}>
@@ -782,6 +822,15 @@ function ProjectCard({
             </span>
           </div>
         )}
+        {weatherEnabled && cardCoords && (
+          <div className="mb-1.5" onClick={(e) => e.stopPropagation()}>
+            <ProjectWeather
+              variant="summary"
+              lat={cardCoords.lat}
+              lng={cardCoords.lng}
+            />
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-2xs text-content-tertiary">
             <span>{new Date(project.created_at).toLocaleDateString(getIntlLocale())}</span>
@@ -798,6 +847,51 @@ function ProjectCard({
         </div>
       </div>
     </Card>
+  );
+}
+
+/**
+ * WidgetToggles — inline on/off switches for the map + weather widgets.
+ *
+ * Lives in the filters toolbar next to sort.  State is persisted via
+ * `useWidgetSettingsStore`, so the choice sticks across reloads without
+ * a server round-trip.
+ */
+function WidgetToggles() {
+  const { t } = useTranslation();
+  const mapEnabled = useWidgetSettingsStore((s) => s.projectMapEnabled);
+  const weatherEnabled = useWidgetSettingsStore((s) => s.projectWeatherEnabled);
+  const toggleMap = useWidgetSettingsStore((s) => s.toggleProjectMap);
+  const toggleWeather = useWidgetSettingsStore((s) => s.toggleProjectWeather);
+
+  const btn = (active: boolean) =>
+    `flex items-center gap-1 rounded-md px-2 py-1.5 text-2xs font-medium transition-colors ${
+      active
+        ? 'bg-oe-blue-subtle text-oe-blue'
+        : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary'
+    }`;
+
+  return (
+    <div className="flex items-center gap-1 shrink-0 border-l border-border-light pl-2 ml-1">
+      <button
+        type="button"
+        onClick={toggleMap}
+        className={btn(mapEnabled)}
+        title={t('widget_settings.toggle_map', { defaultValue: 'Toggle project map' })}
+      >
+        <MapIcon size={12} />
+        {t('widget_settings.map', { defaultValue: 'Map' })}
+      </button>
+      <button
+        type="button"
+        onClick={toggleWeather}
+        className={btn(weatherEnabled)}
+        title={t('widget_settings.toggle_weather', { defaultValue: 'Toggle weather forecast' })}
+      >
+        <CloudSun size={12} />
+        {t('widget_settings.weather', { defaultValue: 'Weather' })}
+      </button>
+    </div>
   );
 }
 

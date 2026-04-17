@@ -30,6 +30,7 @@ import { apiGet, apiPost } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { takeoffApi, type TakeoffDocumentResponse } from './api';
 
 const TakeoffViewerModule = lazy(() => import('@/modules/pdf-takeoff/TakeoffViewerModule'));
 
@@ -702,16 +703,18 @@ function QuickMeasurementForm({
 
 /* ── Document Filmstrip ─────────────────────────────────────────────── */
 
-/** Bottom panel showing uploaded takeoff PDFs — styled like BIM model filmstrip. */
+/** Bottom panel showing uploaded takeoff PDFs — light-themed, styled like BIM model filmstrip. */
 function TakeoffDocFilmstrip({
   documents,
   activeDocId,
+  isLoading,
   onSelectDoc,
   onDeleteDoc,
   onUploadNew,
 }: {
   documents: UploadedDocument[];
   activeDocId: string | null;
+  isLoading?: boolean;
   onSelectDoc: (id: string) => void;
   onDeleteDoc: (id: string) => void;
   onUploadNew: () => void;
@@ -719,39 +722,28 @@ function TakeoffDocFilmstrip({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
 
-  // Auto-collapse after 5 seconds (like BIM filmstrip)
-  useEffect(() => {
-    const timer = setTimeout(() => setExpanded(false), 5000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (documents.length === 0) return null;
-
   return (
-    <div className="shrink-0 bg-surface-primary border-t border-border-light mt-6">
+    <div className="shrink-0 bg-surface-primary border border-border-light rounded-xl mt-6 overflow-hidden">
       {/* Header — always visible */}
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="flex items-center w-full px-4 py-2 cursor-pointer group hover:bg-surface-secondary/30 transition-colors"
+        className="flex items-center w-full px-4 py-2 cursor-pointer group hover:bg-surface-secondary/40 transition-colors"
       >
-        {/* Drag handle */}
-        <div className="flex flex-col items-center gap-[3px] mr-3 opacity-50 group-hover:opacity-80 transition-opacity">
-          <div className="w-5 h-[2px] rounded-full bg-content-tertiary" />
-          <div className="w-5 h-[2px] rounded-full bg-content-tertiary" />
-          <div className="w-5 h-[2px] rounded-full bg-content-tertiary" />
-        </div>
-        <Layers size={16} className="text-content-secondary mr-2 shrink-0" />
+        <Layers size={14} className="text-content-tertiary mr-2 shrink-0" />
         <span className="text-xs font-semibold text-content-primary">
-          {t('takeoff.documents_panel', 'Documents')}
+          {t('takeoff.documents_panel', { defaultValue: 'Documents' })}
         </span>
-        <span className="text-[11px] text-content-tertiary ml-1.5">({documents.length})</span>
-        <svg
-          className={`ml-auto w-4 h-4 text-content-tertiary transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-        </svg>
+        <span className="text-[11px] text-content-quaternary ml-1.5">
+          ({documents.length})
+        </span>
+        <ChevronDown
+          size={14}
+          className={clsx(
+            'ml-auto text-content-tertiary transition-transform duration-200',
+            expanded ? '' : '-rotate-90',
+          )}
+        />
       </button>
 
       {/* Collapsible document cards */}
@@ -759,50 +751,110 @@ function TakeoffDocFilmstrip({
         className="overflow-hidden transition-all duration-300 ease-in-out"
         style={{ maxHeight: expanded ? '120px' : '0px', opacity: expanded ? 1 : 0 }}
       >
-        <div className="flex items-center gap-3 px-4 pb-2 overflow-x-auto">
-          {documents.map((doc) => (
-            <button
-              key={doc.id}
-              type="button"
-              onClick={() => onSelectDoc(doc.id)}
-              className={clsx(
-                'relative flex flex-col items-center justify-center shrink-0 w-28 h-16 rounded-xl border-2 transition-all group/card',
-                doc.id === activeDocId
-                  ? 'border-oe-blue bg-oe-blue-subtle/30 shadow-sm'
-                  : 'border-border-light hover:border-oe-blue/40 hover:bg-surface-secondary/50',
-              )}
-            >
-              <FileText
-                size={18}
-                className={clsx(
-                  doc.id === activeDocId ? 'text-oe-blue' : 'text-content-tertiary',
-                )}
-              />
-              <span className="text-[9px] font-medium text-content-primary truncate max-w-[96px] mt-1">
-                {doc.filename}
-              </span>
-              <span className="text-[8px] text-content-tertiary">
-                {doc.pages > 0 ? `${doc.pages}p` : ''} {formatFileSize(doc.size_bytes)}
-              </span>
-              {/* Delete button on hover */}
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); onDeleteDoc(doc.id); }}
-                className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-semantic-error text-white flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity"
-                title={t('common.delete', 'Delete')}
-              >
-                <X size={8} />
-              </button>
-            </button>
-          ))}
+        <div className="flex items-center gap-2 px-4 pb-2.5 overflow-x-auto">
+          {isLoading && documents.length === 0 ? (
+            <Loader2 size={14} className="animate-spin text-content-tertiary" />
+          ) : documents.length > 0 ? (
+            documents.map((doc) => {
+              const isActive = doc.id === activeDocId;
+              const hasError = !!doc.uploadError;
+              const isUploading = !!doc.uploading;
+              return (
+                <button
+                  key={doc.id}
+                  type="button"
+                  onClick={() => onSelectDoc(doc.id)}
+                  disabled={isUploading || hasError}
+                  className={clsx(
+                    'group relative shrink-0 w-44 text-start rounded-lg border transition-all duration-200 overflow-hidden',
+                    hasError
+                      ? 'border-semantic-error/40 bg-semantic-error-bg/40'
+                      : isActive
+                        ? 'border-oe-blue bg-oe-blue-subtle/40 shadow-sm'
+                        : 'border-border-light bg-surface-secondary/40 hover:bg-surface-secondary hover:border-oe-blue/30',
+                    (isUploading || hasError) && 'cursor-not-allowed',
+                  )}
+                >
+                  <div className="px-2.5 py-2">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      {isUploading ? (
+                        <Loader2 size={12} className="shrink-0 text-oe-blue animate-spin" />
+                      ) : (
+                        <FileText
+                          size={12}
+                          className={clsx(
+                            'shrink-0',
+                            isActive ? 'text-oe-blue' : 'text-content-tertiary',
+                          )}
+                        />
+                      )}
+                      <span
+                        className={clsx(
+                          'text-[11px] font-semibold truncate',
+                          isActive ? 'text-oe-blue' : 'text-content-primary',
+                        )}
+                      >
+                        {doc.filename}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-content-quaternary">
+                      {doc.pages > 0 && (
+                        <>
+                          <span>
+                            {doc.pages} {t('takeoff.pages_short', { defaultValue: 'p' })}
+                          </span>
+                          <span>&middot;</span>
+                        </>
+                      )}
+                      <span>{formatFileSize(doc.size_bytes)}</span>
+                      {doc.uploaded_at && (
+                        <>
+                          <span>&middot;</span>
+                          <span>{formatTimeAgo(doc.uploaded_at, t)}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  {/* Delete button on hover */}
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteDoc(doc.id);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.stopPropagation();
+                        onDeleteDoc(doc.id);
+                      }
+                    }}
+                    className="absolute top-1 right-1 p-1 rounded text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg opacity-0 group-hover:opacity-100 transition-all"
+                    title={t('common.delete', 'Delete')}
+                  >
+                    <X size={11} />
+                  </span>
+                </button>
+              );
+            })
+          ) : (
+            <span className="text-[11px] text-content-quaternary">
+              {t('takeoff.no_documents_filmstrip', {
+                defaultValue: 'No documents uploaded yet',
+              })}
+            </span>
+          )}
           {/* Upload new doc button */}
           <button
             type="button"
             onClick={onUploadNew}
-            className="flex items-center justify-center shrink-0 w-16 h-16 rounded-xl border-2 border-dashed border-border-medium hover:border-oe-blue/50 hover:bg-oe-blue/5 transition-all group"
+            className="flex items-center justify-center shrink-0 w-14 h-14 rounded-lg border-2 border-dashed border-border-medium hover:border-oe-blue/50 hover:bg-oe-blue/5 transition-all group"
             title={t('takeoff.upload_pdf', 'Upload PDF')}
           >
-            <Plus size={20} className="text-content-quaternary group-hover:text-oe-blue transition-colors" />
+            <Plus
+              size={18}
+              className="text-content-quaternary group-hover:text-oe-blue transition-colors"
+            />
           </button>
         </div>
       </div>
@@ -842,6 +894,9 @@ export function TakeoffPage() {
   const [addToBOQSuccess, setAddToBOQSuccess] = useState<string | null>(null);
   const [uploadErrorToast, setUploadErrorToast] = useState<string | null>(null);
   const filmstripUploadRef = useRef<HTMLInputElement>(null);
+
+  /** Currently opened document in the Measurements viewer. */
+  const [viewerDoc, setViewerDoc] = useState<{ url: string; name: string } | null>(null);
 
   /* ── Handle ?doc= deep link from Documents page ─────────────────── */
 
@@ -883,6 +938,17 @@ export function TakeoffPage() {
     queryKey: ['boqs', selectedProjectId],
     queryFn: () => apiGet<BOQ[]>(`/v1/boq/boqs/?project_id=${selectedProjectId}`),
     enabled: !!selectedProjectId,
+  });
+
+  /** Server-side list of previously uploaded takeoff documents for the active project. */
+  const {
+    data: serverDocuments,
+    isLoading: serverDocumentsLoading,
+    refetch: refetchServerDocuments,
+  } = useQuery({
+    queryKey: ['takeoff-documents', selectedProjectId],
+    queryFn: () => takeoffApi.listDocuments(selectedProjectId || undefined),
+    staleTime: 30_000,
   });
 
   /* ── Mutations ──────────────────────────────────────────────────────── */
@@ -1082,6 +1148,8 @@ export function TakeoffPage() {
             setActiveDocId(data.id);
             // Also save to Documents module (fire-and-forget)
             createDocumentRecord(file);
+            // Refresh server-side document list (fire-and-forget)
+            refetchServerDocuments();
           },
           onError: (err) => {
             // Keep the entry visible with error state instead of removing it
@@ -1096,13 +1164,24 @@ export function TakeoffPage() {
         });
       }
     },
-    [uploadMutation, createDocumentRecord],
+    [uploadMutation, createDocumentRecord, refetchServerDocuments],
   );
 
-  const handleRemoveDocument = useCallback((docId: string) => {
-    setDocuments((prev) => prev.filter((d) => d.id !== docId));
-    setActiveDocId((prev) => (prev === docId ? null : prev));
-  }, []);
+  const handleRemoveDocument = useCallback(
+    (docId: string) => {
+      setDocuments((prev) => prev.filter((d) => d.id !== docId));
+      setActiveDocId((prev) => (prev === docId ? null : prev));
+      setViewerDoc((prev) => (prev && prev.url.includes(`/${docId}/`) ? null : prev));
+      // Best-effort server delete; silently ignore errors for legacy temp ids
+      takeoffApi
+        .deleteDocument(docId)
+        .then(() => refetchServerDocuments())
+        .catch(() => {
+          /* ignore — document may be local-only */
+        });
+    },
+    [refetchServerDocuments],
+  );
 
   const handleAnalyze = useCallback(
     (docId: string) => {
@@ -1222,70 +1301,94 @@ export function TakeoffPage() {
 
   const hasBoqSelected = !!selectedBoqId;
 
+  /**
+   * Merged list of documents for the filmstrip: server-side uploads (from /v1/takeoff/documents/)
+   * unioned with locally-tracked ones (in-progress uploads, errors, fresh uploads not yet refetched).
+   * Local entries take precedence when IDs collide (they have upload/analysis state).
+   */
+  const filmstripDocuments: UploadedDocument[] = useMemo(() => {
+    const byId = new Map<string, UploadedDocument>();
+    (serverDocuments ?? []).forEach((d: TakeoffDocumentResponse) => {
+      byId.set(d.id, {
+        id: d.id,
+        filename: d.filename,
+        pages: d.pages,
+        size_bytes: d.size_bytes,
+        uploaded_at: d.uploaded_at ?? new Date().toISOString(),
+        analysis: null,
+        analyzing: false,
+        extractingTables: false,
+      });
+    });
+    documents.forEach((d) => byId.set(d.id, d));
+    return Array.from(byId.values());
+  }, [serverDocuments, documents]);
+
+  /** Open a server-side document in the Measurements viewer. */
+  const handleOpenDocInViewer = useCallback(
+    (docId: string) => {
+      const doc = filmstripDocuments.find((d) => d.id === docId);
+      if (!doc) return;
+      // Local-only (not yet uploaded or failed) docs can't be opened via URL
+      if (doc.uploading || doc.uploadError || docId.startsWith('temp-')) {
+        setUploadErrorToast(
+          t(
+            'takeoff.doc_not_ready',
+            { defaultValue: 'Document is not ready to open yet.' },
+          ),
+        );
+        setTimeout(() => setUploadErrorToast(null), 4000);
+        return;
+      }
+      setActiveDocId(docId);
+      setViewerDoc({
+        url: `/api/v1/takeoff/documents/${docId}/download/`,
+        name: doc.filename,
+      });
+      setActiveTab('measurements');
+    },
+    [filmstripDocuments, t],
+  );
+
   /* ── Render ─────────────────────────────────────────────────────────── */
 
   return (
     <div className="w-full animate-fade-in">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
-            <FileSearch size={20} strokeWidth={1.5} />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-content-primary">
-              {t('takeoff.title', 'Quantity Takeoff')}
-            </h1>
-            <p className="text-xs text-content-tertiary">
-              {t(
-                'takeoff.subtitle',
-                'Extract quantities from PDF drawings using AI or manual measurements',
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Header removed — the page title is already in the left sidebar
+          nav, and the subtitle was purely decorative. Saves ~80px of
+          vertical space so the main workspace fits in one viewport. */}
 
-      {/* Tabs */}
-      <div className="mb-6 flex gap-2 rounded-2xl bg-surface-secondary/60 p-1.5">
+      {/* Tabs — Measurements primary (first), AI second. Lower radius
+          for a sharper, more "tool-like" feel; no ring-halo. */}
+      <div className="mb-6 flex gap-1 rounded-md border border-border-light/80 bg-surface-secondary/40 p-1">
+        <button
+          onClick={() => setActiveTab('measurements')}
+          className={clsx(
+            'flex flex-1 items-center justify-center gap-2 rounded-sm px-4 py-2.5 text-sm font-semibold transition-colors',
+            activeTab === 'measurements'
+              ? 'bg-surface-primary text-oe-blue shadow-sm'
+              : 'text-content-tertiary hover:text-content-primary hover:bg-surface-primary/60',
+          )}
+        >
+          <Ruler size={15} strokeWidth={2.1} />
+          {t('takeoff.tab_measurements', 'Measurements')}
+        </button>
         <button
           onClick={() => setActiveTab('documents')}
           className={clsx(
-            'flex flex-1 items-center justify-center gap-2.5 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200',
+            'flex flex-1 items-center justify-center gap-2 rounded-sm px-4 py-2.5 text-sm font-semibold transition-colors',
             activeTab === 'documents'
-              ? 'bg-surface-primary text-oe-blue shadow-md ring-1 ring-oe-blue/20'
-              : 'text-content-tertiary hover:text-content-primary hover:bg-surface-primary/50',
+              ? 'bg-surface-primary text-oe-blue shadow-sm'
+              : 'text-content-tertiary hover:text-content-primary hover:bg-surface-primary/60',
           )}
         >
-          <div className={clsx(
-            'flex h-7 w-7 items-center justify-center rounded-lg transition-colors',
-            activeTab === 'documents' ? 'bg-oe-blue-subtle' : 'bg-surface-tertiary/50',
-          )}>
-            <Sparkles size={14} strokeWidth={2} className={activeTab === 'documents' ? 'text-oe-blue' : ''} />
-          </div>
+          <Sparkles size={15} strokeWidth={2.1} />
           {t('takeoff.tab_documents', 'Documents & AI')}
           {documents.length > 0 && (
             <Badge variant={activeTab === 'documents' ? 'blue' : 'neutral'} size="sm">
               {documents.length}
             </Badge>
           )}
-        </button>
-        <button
-          onClick={() => setActiveTab('measurements')}
-          className={clsx(
-            'flex flex-1 items-center justify-center gap-2.5 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200',
-            activeTab === 'measurements'
-              ? 'bg-surface-primary text-oe-blue shadow-md ring-1 ring-oe-blue/20'
-              : 'text-content-tertiary hover:text-content-primary hover:bg-surface-primary/50',
-          )}
-        >
-          <div className={clsx(
-            'flex h-7 w-7 items-center justify-center rounded-lg transition-colors',
-            activeTab === 'measurements' ? 'bg-oe-blue-subtle' : 'bg-surface-tertiary/50',
-          )}>
-            <Ruler size={14} strokeWidth={2} className={activeTab === 'measurements' ? 'text-oe-blue' : ''} />
-          </div>
-          {t('takeoff.tab_measurements', 'Measurements')}
         </button>
       </div>
 
@@ -1452,15 +1555,32 @@ export function TakeoffPage() {
             )}
           </Card>
 
-          {/* Bottom document filmstrip panel */}
+        </>
+      ) : (
+        <>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-20">
+                <Loader2 size={24} className="animate-spin text-oe-blue" />
+              </div>
+            }
+          >
+            <TakeoffViewerModule
+              initialPdfUrl={viewerDoc?.url}
+              initialPdfName={viewerDoc?.name}
+            />
+          </Suspense>
+
+          {/* Bottom filmstrip — list previously uploaded takeoff documents. */}
           <TakeoffDocFilmstrip
-            documents={documents}
+            documents={filmstripDocuments}
             activeDocId={activeDocId}
-            onSelectDoc={(id) => setActiveDocId(id)}
+            isLoading={serverDocumentsLoading}
+            onSelectDoc={handleOpenDocInViewer}
             onDeleteDoc={handleRemoveDocument}
             onUploadNew={() => filmstripUploadRef.current?.click()}
           />
-          {/* Hidden file input for filmstrip "+" button */}
+          {/* Hidden file input shared between Documents tab and Measurements filmstrip. */}
           <input
             ref={filmstripUploadRef}
             type="file"
@@ -1478,16 +1598,6 @@ export function TakeoffPage() {
             }}
           />
         </>
-      ) : (
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center py-20">
-              <Loader2 size={24} className="animate-spin text-oe-blue" />
-            </div>
-          }
-        >
-          <TakeoffViewerModule />
-        </Suspense>
       )}
     </div>
   );

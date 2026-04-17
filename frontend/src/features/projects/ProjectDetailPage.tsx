@@ -35,9 +35,14 @@ import {
   HardHat,
   Calendar,
 } from 'lucide-react';
-import { Button, Card, CardHeader, Badge, Skeleton, EmptyState, Breadcrumb } from '@/shared/ui';
-import { apiGet } from '@/shared/lib/api';
-import { projectsApi } from './api';
+import {
+  Button, Card, CardHeader, Badge, Skeleton, EmptyState, Breadcrumb,
+  ProjectMap, ProjectWeather,
+} from '@/shared/ui';
+import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
+import { apiGet, apiPatch } from '@/shared/lib/api';
+import clsx from 'clsx';
+import { projectsApi, type Project } from './api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useRecentStore } from '@/stores/useRecentStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -351,6 +356,97 @@ function computeProjectHealth(
  *   - "What should I do next?" (one prominent button + description)
  *   - "Where am I in the workflow?" (5 checkpoint dots, hover for label)
  */
+/**
+ * ProjectLocationPanel — full-width panel combining an interactive OSM
+ * map (left, 60%) with a 16-day weather forecast (right, 40%).  Each
+ * half is independently toggleable via widget settings, and the panel
+ * collapses entirely if the project has no address and both widgets
+ * are off.
+ */
+function ProjectLocationPanel({ project }: { project: Project }) {
+  const mapEnabled = useWidgetSettingsStore((s) => s.projectMapEnabled);
+  const weatherEnabled = useWidgetSettingsStore((s) => s.projectWeatherEnabled);
+  const queryClient = useQueryClient();
+  const [resolved, setResolved] = useState<{ lat: number; lng: number } | null>(
+    project.address?.lat && project.address?.lng
+      ? { lat: project.address.lat, lng: project.address.lng }
+      : null,
+  );
+
+  // Persist the resolved lat/lng back to the project so subsequent
+  // renders (and other users of the same project) don't re-hit
+  // Nominatim.  Only fires when we have an address but no stored
+  // coords yet, and stops after the first successful write.
+  const [persisted, setPersisted] = useState(
+    !!(project.address?.lat && project.address?.lng),
+  );
+  const persistCoords = useMutation({
+    mutationFn: (coords: { lat: number; lng: number }) =>
+      apiPatch(`/v1/projects/${project.id}`, {
+        address: {
+          ...(project.address ?? {}),
+          lat: coords.lat,
+          lng: coords.lng,
+        },
+      }),
+    onSuccess: () => {
+      setPersisted(true);
+      queryClient.invalidateQueries({ queryKey: ['project', project.id] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+
+  const hasAddress = !!(
+    project.address &&
+    (project.address.street || project.address.city || project.address.country)
+  );
+
+  if (!hasAddress || (!mapEnabled && !weatherEnabled)) return null;
+
+  const addressLabel = [
+    project.address?.street,
+    project.address?.city,
+    project.address?.country,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
+  const handleResolved = (coords: { lat: number; lng: number }) => {
+    setResolved(coords);
+    if (!persisted && !persistCoords.isPending) {
+      persistCoords.mutate(coords);
+    }
+  };
+
+  return (
+    <div
+      className={clsx(
+        'mb-4 grid gap-3',
+        mapEnabled && weatherEnabled
+          ? 'grid-cols-1 lg:grid-cols-[3fr_2fr]'
+          : 'grid-cols-1',
+      )}
+    >
+      {mapEnabled && (
+        <ProjectMap
+          variant="detail"
+          lat={project.address?.lat ?? null}
+          lng={project.address?.lng ?? null}
+          address={project.address?.street}
+          city={project.address?.city}
+          country={project.address?.country}
+          label={addressLabel}
+          onResolved={handleResolved}
+          className="h-64"
+        />
+      )}
+      {weatherEnabled && (
+        <ProjectWeather lat={resolved?.lat} lng={resolved?.lng} />
+      )}
+    </div>
+  );
+}
+
 function ProjectHealthBar({
   projectId,
   boqs,
@@ -379,7 +475,7 @@ function ProjectHealthBar({
     : 'text-amber-500';
 
   return (
-    <Card padding="md" className="mb-6">
+    <Card padding="md" className="h-full flex flex-col justify-center">
       <div className="flex items-center gap-5">
         {/* Circular progress ring */}
         <div className="relative shrink-0">
@@ -479,19 +575,21 @@ function SummaryCard({
   };
 
   return (
-    <Card padding="md" className="flex-1 min-w-[180px]">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
+    <Card padding="sm" className="flex-1 min-w-[180px]">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide truncate">
             {label}
           </p>
-          <p className="mt-1.5 text-2xl font-bold text-content-primary tabular-nums">{value}</p>
+          <p className="mt-0.5 text-xl font-bold text-content-primary tabular-nums leading-tight">
+            {value}
+          </p>
           {subtitle && (
-            <p className="text-xs text-content-secondary mt-1 tabular-nums">{subtitle}</p>
+            <p className="text-2xs text-content-secondary tabular-nums truncate">{subtitle}</p>
           )}
         </div>
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${bgMap[variant]}`}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${bgMap[variant]}`}
         >
           {icon}
         </div>
@@ -936,11 +1034,33 @@ export function ProjectDetailPage() {
   });
 
   // Fetch project
-  const { data: project, isLoading: projectLoading } = useQuery({
+  const { data: project, isLoading: projectLoading, isError: projectError } = useQuery({
     queryKey: ['project', projectId],
     queryFn: () => projectsApi.get(projectId!),
     enabled: !!projectId,
+    retry: false,
   });
+
+  // Auto-clean stale references when the project ID points to something that
+  // no longer exists (e.g. after reseed or project deletion).  Without this,
+  // the sidebar/recent list keeps advertising dead IDs forever.
+  const clearProject = useProjectContextStore((s) => s.clearProject);
+  const activeProjectIdInStore = useProjectContextStore((s) => s.activeProjectId);
+  const recentItems = useRecentStore((s) => s.items);
+  const clearRecent = useRecentStore((s) => s.clearRecent);
+  useEffect(() => {
+    if (!projectError || !projectId) return;
+    if (activeProjectIdInStore === projectId) clearProject();
+    if (recentItems.some((it) => it.id === projectId)) {
+      const remaining = recentItems.filter((it) => it.id !== projectId);
+      clearRecent();
+      remaining.forEach((it) => {
+        useRecentStore.getState().addRecent({
+          type: it.type, id: it.id, title: it.title, url: it.url,
+        });
+      });
+    }
+  }, [projectError, projectId, activeProjectIdInStore, clearProject, recentItems, clearRecent]);
 
   const addRecent = useRecentStore((s) => s.addRecent);
 
@@ -1082,10 +1202,13 @@ export function ProjectDetailPage() {
       <div className="w-full">
         <EmptyState
           title={t('projects.not_found', { defaultValue: 'Project not found' })}
-          description={t('projects.not_found_desc', { defaultValue: 'The project you are looking for does not exist or has been deleted.' })}
+          description={t('projects.not_found_desc', {
+            defaultValue:
+              'The project you are looking for does not exist or has been deleted. Stale bookmarks have been cleared — pick an active project below.',
+          })}
           action={
-            <Button variant="secondary" onClick={() => navigate('/projects')}>
-              {t('projects.title')}
+            <Button variant="primary" onClick={() => navigate('/projects')}>
+              {t('projects.browse_projects', { defaultValue: 'Browse projects' })}
             </Button>
           }
         />
@@ -1106,8 +1229,16 @@ export function ProjectDetailPage() {
         ]}
       />
 
+      {/* ── Top row: Project Info (left) + Health ring (right) ─────────────
+          The two cards end up roughly the same height, so pairing them
+          side-by-side kills a big chunk of vertical whitespace and gives
+          the page a calmer opening grid. Collapses to a stacked single
+          column below `lg`. `items-stretch` + `h-full` on both children
+          keeps their outer borders aligned; the inner Health content
+          vertically centers so the ring doesn't hug the top. */}
+      <div className="mb-4 grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3 items-stretch">
       {/* ── Project Info Card ───────────────────────────────────────────── */}
-      <Card padding="lg" className="mb-6">
+      <Card padding="md" className="h-full">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             {isEditing ? (
@@ -1213,11 +1344,15 @@ export function ProjectDetailPage() {
         </div>
       </Card>
 
-      {/* ── Project Health & Next Step ──────────────────────────────────── */}
+      {/* Health block moves into the top grid (right column). */}
       <ProjectHealthBar projectId={projectId!} boqs={boqs} boqDetails={boqDetails} />
+      </div>
+
+      {/* ── Location map + weather (toggleable in widget settings) ───────── */}
+      <ProjectLocationPanel project={project} />
 
       {/* ── Summary Cards ───────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         {(() => {
           const areaMatch = project.description?.match(/(\d[\d.,]*)\s*m[²2]/i);
           const area = areaMatch ? parseFloat((areaMatch[1] ?? '0').replace(',', '')) : null;
@@ -1258,7 +1393,7 @@ export function ProjectDetailPage() {
       </div>
 
       {/* ── Tab Bar ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-1 mb-6 border-b border-border-light">
+      <div className="flex items-center gap-1 mb-4 border-b border-border-light">
         {([
           { key: 'dashboard' as ProjectTab, label: t('projects.dashboard', { defaultValue: 'Dashboard' }), icon: <LayoutDashboard size={15} /> },
           { key: 'overview' as ProjectTab, label: t('projects.overview'), icon: <Table2 size={15} /> },
@@ -1303,9 +1438,9 @@ export function ProjectDetailPage() {
               </div>
             </div>
           ) : dashboardData ? (
-            <div className="space-y-6 animate-fade-in">
+            <div className="space-y-4 animate-fade-in">
               {/* KPI Cards Row */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Budget consumed */}
                 <Card padding="md" className="relative overflow-hidden">
                   <div className="flex items-start justify-between">
@@ -1313,7 +1448,7 @@ export function ProjectDetailPage() {
                       <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
                         {t('projects.dash_budget_consumed', { defaultValue: 'Budget Consumed' })}
                       </p>
-                      <p className="mt-1.5 text-2xl font-bold text-content-primary tabular-nums">
+                      <p className="mt-0.5 text-xl font-bold text-content-primary tabular-nums leading-tight">
                         {parseFloat(dashboardData.budget.consumed_pct).toFixed(1)}%
                       </p>
                       <p className="text-xs text-content-secondary mt-1 tabular-nums">
@@ -1355,7 +1490,7 @@ export function ProjectDetailPage() {
                       <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
                         {t('projects.dash_schedule_progress', { defaultValue: 'Schedule Progress' })}
                       </p>
-                      <p className="mt-1.5 text-2xl font-bold text-content-primary tabular-nums">
+                      <p className="mt-0.5 text-xl font-bold text-content-primary tabular-nums leading-tight">
                         {parseFloat(dashboardData.schedule.progress_pct).toFixed(1)}%
                       </p>
                       <p className="text-xs text-content-secondary mt-1">
@@ -1381,7 +1516,7 @@ export function ProjectDetailPage() {
                       <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
                         {t('projects.dash_quality', { defaultValue: 'Quality Score' })}
                       </p>
-                      <p className="mt-1.5 text-2xl font-bold text-content-primary tabular-nums">
+                      <p className="mt-0.5 text-xl font-bold text-content-primary tabular-nums leading-tight">
                         {(parseFloat(dashboardData.quality.validation_score) * 100).toFixed(0)}%
                       </p>
                       <p className="text-xs text-content-secondary mt-1">
@@ -1409,7 +1544,7 @@ export function ProjectDetailPage() {
                       <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
                         {t('projects.dash_open_items', { defaultValue: 'Open Items' })}
                       </p>
-                      <p className="mt-1.5 text-2xl font-bold text-content-primary tabular-nums">
+                      <p className="mt-0.5 text-xl font-bold text-content-primary tabular-nums leading-tight">
                         {dashboardData.communication.open_rfis +
                           dashboardData.communication.open_submittals +
                           dashboardData.communication.open_tasks +
@@ -1497,10 +1632,10 @@ export function ProjectDetailPage() {
               </Card>
 
               {/* Middle row: Schedule + Open Items */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {/* Schedule section */}
                 <Card padding="md">
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
                     <CalendarClock size={16} className="text-content-tertiary" />
                     <h3 className="text-sm font-semibold text-content-primary">
                       {t('projects.dash_schedule', { defaultValue: 'Schedule' })}
@@ -1562,7 +1697,7 @@ export function ProjectDetailPage() {
 
                 {/* Open Items Grid */}
                 <Card padding="md">
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
                     <MessageSquare size={16} className="text-content-tertiary" />
                     <h3 className="text-sm font-semibold text-content-primary">
                       {t('projects.dash_open_items_detail', { defaultValue: 'Open Items' })}
@@ -1640,7 +1775,7 @@ export function ProjectDetailPage() {
               </div>
 
               {/* Bottom row: Recent Activity + Quick Actions */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                 {/* Recent Activity Feed */}
                 <Card padding="none" className="lg:col-span-2">
                   <div className="px-5 pt-5 pb-2">
@@ -1699,7 +1834,7 @@ export function ProjectDetailPage() {
 
                 {/* Quick Actions */}
                 <Card padding="md">
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
                     <Sparkles size={16} className="text-content-tertiary" />
                     <h3 className="text-sm font-semibold text-content-primary">
                       {t('projects.dash_quick_actions', { defaultValue: 'Quick Actions' })}

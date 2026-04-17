@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useMemo, useEffect, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import type { ICellRendererParams } from 'ag-grid-community';
 import {
   ChevronDown,
@@ -18,6 +19,8 @@ import {
   Loader2,
   Info,
   Trash2,
+  FileText,
+  FileBox,
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useQuery, useQueries } from '@tanstack/react-query';
@@ -398,6 +401,20 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
   const bimLinkCount = bimLinkIds.length;
   const hasBimLink = bimLinkCount > 0 && !!ctx?.bimModelId;
 
+  // PDF + DWG link metadata is stored under position.metadata so the
+  // relationship is persistent and survives reloads.
+  const meta = (data.metadata ?? {}) as Record<string, unknown>;
+  const pdfMeasurementId = meta.pdf_measurement_id as string | undefined;
+  const pdfDocumentId = meta.pdf_document_id as string | undefined;
+  const pdfPage = meta.pdf_page as number | undefined;
+  const pdfSource = meta.pdf_measurement_source as string | undefined;
+  const hasPdfLink = !!pdfMeasurementId || !!pdfSource;
+
+  const dwgAnnotationId = meta.dwg_annotation_id as string | undefined;
+  const dwgDrawingId = meta.dwg_drawing_id as string | undefined;
+  const dwgSource = meta.dwg_annotation_source as string | undefined;
+  const hasDwgLink = !!dwgAnnotationId || !!dwgDrawingId || !!dwgSource;
+
   const [showPreview, setShowPreview] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
@@ -411,7 +428,32 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
     ctx?.onHighlightBIMElements?.(bimLinkIds);
   }, [bimLinkIds, ctx]);
 
-  if (!hasBimLink) return null;
+  const navigate = useNavigate();
+
+  const handleOpenPdf = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const params = new URLSearchParams();
+    params.set('tab', 'measurements');
+    if (pdfMeasurementId) params.set('focus', pdfMeasurementId);
+    if (pdfDocumentId) params.set('document', pdfDocumentId);
+    if (pdfPage) params.set('page', String(pdfPage));
+    // In-place navigation keeps the auth/session alive.  Ctrl/Cmd-click
+    // falls through to the browser's native "open in new tab" behavior
+    // via a wrapping <a> would be nicer, but keeping a button is fine —
+    // new-tab users lose auth if "remember me" is off, which would send
+    // them to /login.
+    navigate(`/takeoff?${params.toString()}`);
+  }, [pdfMeasurementId, pdfDocumentId, pdfPage, navigate]);
+
+  const handleOpenDwg = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    const params = new URLSearchParams();
+    if (dwgDrawingId) params.set('drawing', dwgDrawingId);
+    if (dwgAnnotationId) params.set('focus', dwgAnnotationId);
+    navigate(`/dwg-takeoff?${params.toString()}`);
+  }, [dwgDrawingId, dwgAnnotationId, navigate]);
+
+  if (!hasBimLink && !hasPdfLink && !hasDwgLink) return null;
 
   const popoverStyle = anchorRect
     ? {
@@ -423,23 +465,55 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
     : undefined;
 
   return (
-    <div className="flex items-center justify-center h-full w-full">
-      <button
-        ref={btnRef}
-        onClick={(e) => {
-          e.stopPropagation();
-          handleOpen();
-        }}
-        onMouseDown={(e) => e.stopPropagation()}
-        className="h-6 px-1.5 inline-flex items-center gap-0.5 rounded
-                   bg-oe-blue/10 text-oe-blue text-[10px] font-semibold
-                   hover:bg-oe-blue/25 transition-colors cursor-pointer"
-        title={t('boq.bim_link_tooltip', { defaultValue: '{{count}} BIM element(s) linked — click to preview', count: bimLinkCount })}
-        aria-label={t('boq.bim_link_tooltip', { defaultValue: '{{count}} BIM element(s) linked — click to preview', count: bimLinkCount })}
-      >
-        <Cuboid size={11} />
-        {bimLinkCount}
-      </button>
+    <div className="flex items-center justify-center gap-0.5 h-full w-full">
+      {hasBimLink && (
+        <button
+          ref={btnRef}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleOpen();
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="h-6 px-1.5 inline-flex items-center gap-0.5 rounded
+                     bg-oe-blue/10 text-oe-blue text-[10px] font-semibold
+                     hover:bg-oe-blue/25 transition-colors cursor-pointer"
+          title={t('boq.bim_link_tooltip', { defaultValue: '{{count}} BIM element(s) linked — click to preview', count: bimLinkCount })}
+          aria-label={t('boq.bim_link_tooltip', { defaultValue: '{{count}} BIM element(s) linked — click to preview', count: bimLinkCount })}
+        >
+          <Cuboid size={11} />
+          {bimLinkCount}
+        </button>
+      )}
+      {hasPdfLink && (
+        <button
+          onClick={handleOpenPdf}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="h-6 w-6 inline-flex items-center justify-center rounded
+                     bg-rose-500/10 text-rose-600 dark:text-rose-400
+                     hover:bg-rose-500/25 transition-colors cursor-pointer"
+          title={pdfSource
+            ? `${t('boq.pdf_link_tooltip', { defaultValue: 'Open linked PDF takeoff' })} — ${pdfSource}`
+            : t('boq.pdf_link_tooltip', { defaultValue: 'Open linked PDF takeoff' })}
+          aria-label={t('boq.pdf_link_tooltip', { defaultValue: 'Open linked PDF takeoff' })}
+        >
+          <FileText size={12} />
+        </button>
+      )}
+      {hasDwgLink && (
+        <button
+          onClick={handleOpenDwg}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="h-6 w-6 inline-flex items-center justify-center rounded
+                     bg-amber-500/10 text-amber-600 dark:text-amber-400
+                     hover:bg-amber-500/25 transition-colors cursor-pointer"
+          title={dwgSource
+            ? `${t('boq.dwg_link_tooltip', { defaultValue: 'Open linked DWG drawing' })} — ${dwgSource}`
+            : t('boq.dwg_link_tooltip', { defaultValue: 'Open linked DWG drawing' })}
+          aria-label={t('boq.dwg_link_tooltip', { defaultValue: 'Open linked DWG drawing' })}
+        >
+          <FileBox size={12} />
+        </button>
+      )}
       {showPreview && anchorRect && ctx?.bimModelId &&
         createPortal(
           <>
@@ -508,6 +582,7 @@ const BimLinkPopover = forwardRef<
 
   const [glbOk, setGlbOk] = useState(true);
   const [showAllProps, setShowAllProps] = useState(false);
+  const [showAllSums, setShowAllSums] = useState(false);
   const { data, isLoading } = useQuery({
     queryKey: ['bim-link-preview', modelId, ...elementIds],
     queryFn: () => fetchBIMElementsByIds(modelId, elementIds),
@@ -714,15 +789,21 @@ const BimLinkPopover = forwardRef<
           dbKeys.add(k);
         }
       }
-      // Parquet fallback — only if the DB had no numeric quantities at
-      // all for this element, to avoid polluting sums with cosmetic
-      // numerics (material id, color code, …) when real area/volume
-      // already came through.
-      if (dbKeys.size === 0) {
+      // Parquet enrichment.
+      //   - Default (collapsed): only fire if the DB had no numeric
+      //     quantities at all, to avoid polluting sums with cosmetic
+      //     numerics (material id, color code, …) when real area/volume
+      //     already came through.
+      //   - Expanded (showAllSums=true): merge every numeric Parquet
+      //     column so the Apply panel surfaces the same set the BIM
+      //     Quantities picker shows. Keys already counted from the DB
+      //     are skipped to avoid double-counting.
+      if (dbKeys.size === 0 || showAllSums) {
         const parquet = parquetByElementId[el.id];
         if (parquet) {
           for (const [k, v] of Object.entries(parquet)) {
             if (k === 'id') continue;
+            if (dbKeys.has(k)) continue;
             const num = typeof v === 'number' ? v : parseFloat(String(v));
             if (isNaN(num) || num === 0) continue;
             bump(k, num);
@@ -737,7 +818,7 @@ const BimLinkPopover = forwardRef<
       if (a.agg === 'sum') return b.sum - a.sum;
       return b.uniqueValues.length - a.uniqueValues.length;
     });
-  }, [elements, parquetByElementId]);
+  }, [elements, parquetByElementId, showAllSums]);
 
   return (
     <div
@@ -769,7 +850,128 @@ const BimLinkPopover = forwardRef<
       </div>
 
       <div className={canApply ? 'flex flex-1 min-h-0 overflow-hidden' : ''}>
-        {/* Left column: 3D preview + element cards */}
+        {/* LEFT column: properties (moved out of the middle so the BIM
+            properties read first, like a spec sheet next to the
+            geometry).  Header is a static label — the toggle that
+            expands the list is an explicit "Show all" pill button on
+            the right so the affordance is obvious. */}
+        {canApply && (
+          <div className="w-[260px] shrink-0 flex flex-col border-r border-border-light dark:border-border-dark">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 w-full bg-blue-50/50 dark:bg-blue-950/20 border-b border-border-light/50 dark:border-border-dark/50 shrink-0">
+              <Info size={11} className="text-blue-600 shrink-0" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex-1 text-left">
+                {t('boq.bim_properties', { defaultValue: 'Properties' })}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowAllProps((v) => !v)}
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold transition-colors ${
+                  showAllProps
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-white dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/60'
+                }`}
+                title={
+                  showAllProps
+                    ? t('boq.bim_props_show_basic_title', { defaultValue: 'Hide non-quantity properties' })
+                    : t('boq.bim_props_show_all_title', { defaultValue: 'Include every numeric property from BIM' })
+                }
+              >
+                {showAllProps
+                  ? t('boq.bim_show_less', { defaultValue: 'Show less' })
+                  : t('boq.bim_show_all', { defaultValue: 'Show all' })}
+                <ChevronDown size={10} className={`transition-transform ${showAllProps ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              {isLoading && (
+                <div className="flex items-center justify-center gap-2 py-4">
+                  <Loader2 size={12} className="animate-spin text-content-tertiary" />
+                </div>
+              )}
+              {!isLoading && elements.map((el) => {
+                const numericEntries = extractNumerics(el, showAllProps);
+                if (numericEntries.length === 0) return null;
+                return (
+                  <div key={el.id} className="px-3 py-1.5 border-b border-border-light/30 dark:border-border-dark/30 last:border-b-0">
+                    {elements.length > 1 && (
+                      <div className="text-[9px] font-medium text-content-tertiary mb-0.5 truncate">{el.name || el.element_type}</div>
+                    )}
+                    {numericEntries.map(({ key, value, source }) => {
+                      const isCurrent = canApply && Math.abs(value - currentQuantity) < 0.001;
+                      const paramLabel = key.replace(/_/g, ' ');
+                      return (
+                        <div
+                          key={key}
+                          className="group/prow flex items-center justify-between gap-1.5 py-0.5 rounded-sm hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition-colors"
+                        >
+                          <span
+                            className={`text-[10px] truncate ${
+                              source === 'qty'
+                                ? 'text-content-secondary'
+                                : source === 'parquet'
+                                  ? 'text-emerald-700 dark:text-emerald-400'
+                                  : 'text-content-tertiary italic'
+                            }`}
+                            title={source === 'parquet' ? 'From Parquet row (DDC export)' : source === 'prop' ? 'From element properties' : 'From element quantities'}
+                          >
+                            {paramLabel}
+                          </span>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className="text-[10px] font-mono text-content-primary tabular-nums font-medium">
+                              {value.toLocaleString(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+                            </span>
+                            {canApply && (
+                              isCurrent ? (
+                                <span
+                                  className="text-[8px] font-semibold uppercase text-emerald-600 bg-emerald-100 dark:bg-emerald-900/40 px-1 py-0.5 rounded"
+                                  title={t('boq.bim_qty_current_title', { defaultValue: 'Already the position quantity' })}
+                                >
+                                  {t('boq.bim_qty_current', { defaultValue: 'current' })}
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleUseQuantity(value, `BIM: ${paramLabel}`);
+                                  }}
+                                  className="inline-flex items-center gap-0.5 px-1.5 h-4 rounded-sm text-[9px] font-semibold
+                                             text-emerald-700 dark:text-emerald-300
+                                             bg-emerald-100/70 dark:bg-emerald-900/30
+                                             hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500
+                                             opacity-0 group-hover/prow:opacity-100 transition-all"
+                                  title={t('boq.set_as_quantity_title', { defaultValue: 'Push this value into the BOQ quantity field' })}
+                                >
+                                  {t('boq.set_as_quantity', { defaultValue: 'Set as qty' })}
+                                  <ArrowRight size={8} />
+                                </button>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+              {!isLoading && !isEnriching && elements.every((el) => extractNumerics(el, showAllProps).length === 0) && (
+                <div className="py-3 text-center text-[10px] text-content-tertiary">
+                  {!showAllProps
+                    ? t('boq.no_quantities_hint_button', { defaultValue: 'No quantities — press "Show all" above to surface every BIM property' })
+                    : t('boq.no_numeric_found', { defaultValue: 'No numeric values in this element' })}
+                </div>
+              )}
+              {isEnriching && !isLoading && (
+                <div className="flex items-center justify-center gap-2 py-2 text-[10px] text-content-tertiary">
+                  <Loader2 size={10} className="animate-spin" />
+                  {t('boq.loading_full_properties', { defaultValue: 'Loading full properties…' })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* MIDDLE column: 3D preview + element cards */}
         <div className={canApply ? 'w-[380px] shrink-0 border-r border-border-light dark:border-border-dark flex flex-col' : 'w-full'}>
           {/* 3D Preview */}
           {glbOk && (
@@ -806,84 +1008,41 @@ const BimLinkPopover = forwardRef<
           </div>
         </div>
 
-        {/* Middle column: properties */}
-        {canApply && (
-          <div className="w-[260px] shrink-0 flex flex-col border-r border-border-light dark:border-border-dark">
-            {/* Properties header + toggle */}
-            <button
-              onClick={() => setShowAllProps((v) => !v)}
-              className="flex items-center gap-1.5 px-3 py-1.5 w-full bg-blue-50/50 dark:bg-blue-950/20 border-b border-border-light/50 dark:border-border-dark/50 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors shrink-0"
-            >
-              <Info size={11} className="text-blue-600 shrink-0" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex-1 text-left">
-                {t('boq.bim_properties', { defaultValue: 'Properties' })}
-              </span>
-              <ChevronDown size={12} className={`text-blue-500 transition-transform ${showAllProps ? 'rotate-180' : ''}`} />
-            </button>
-            <div className="flex-1 min-h-0 overflow-y-auto">
-              {isLoading && (
-                <div className="flex items-center justify-center gap-2 py-4">
-                  <Loader2 size={12} className="animate-spin text-content-tertiary" />
-                </div>
-              )}
-              {!isLoading && elements.map((el) => {
-                const numericEntries = extractNumerics(el, showAllProps);
-                if (numericEntries.length === 0) return null;
-                return (
-                  <div key={el.id} className="px-3 py-1.5 border-b border-border-light/30 dark:border-border-dark/30 last:border-b-0">
-                    {elements.length > 1 && (
-                      <div className="text-[9px] font-medium text-content-tertiary mb-0.5 truncate">{el.name || el.element_type}</div>
-                    )}
-                    {numericEntries.map(({ key, value, source }) => (
-                      <div key={key} className="flex items-baseline justify-between gap-2 py-0.5">
-                        <span
-                          className={`text-[10px] truncate ${
-                            source === 'qty'
-                              ? 'text-content-secondary'
-                              : source === 'parquet'
-                                ? 'text-emerald-700 dark:text-emerald-400'
-                                : 'text-content-tertiary italic'
-                          }`}
-                          title={source === 'parquet' ? 'From Parquet row (DDC export)' : source === 'prop' ? 'From element properties' : 'From element quantities'}
-                        >
-                          {key.replace(/_/g, ' ')}
-                        </span>
-                        <span className="text-[10px] font-mono text-content-primary tabular-nums shrink-0 font-medium">
-                          {value.toLocaleString(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-              {!isLoading && !isEnriching && elements.every((el) => extractNumerics(el, showAllProps).length === 0) && (
-                <div className="py-3 text-center text-[10px] text-content-tertiary">
-                  {!showAllProps
-                    ? t('boq.no_quantities_hint', { defaultValue: 'No quantities — click to show all properties' })
-                    : t('boq.no_numeric_found', { defaultValue: 'No numeric values in this element' })}
-                </div>
-              )}
-              {isEnriching && !isLoading && (
-                <div className="flex items-center justify-center gap-2 py-2 text-[10px] text-content-tertiary">
-                  <Loader2 size={10} className="animate-spin" />
-                  {t('boq.loading_full_properties', { defaultValue: 'Loading full properties…' })}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Right column: Apply to BOQ — quantity sums that drop values
+        {/* RIGHT column: Apply to BOQ — quantity sums that drop values
             into the position quantity on click. Own scroll container so
             the "Use" buttons are always reachable even when the
-            properties column has many rows. */}
+            properties column has many rows. Header is a static label;
+            an explicit "Show all" pill toggles whether every Parquet
+            numeric is summed (vs only the headline area/volume/length). */}
         {canApply && (
           <div className="w-[260px] shrink-0 flex flex-col">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/50 dark:bg-emerald-950/20 border-b border-border-light/50 dark:border-border-dark/50 shrink-0">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 w-full bg-emerald-50/50 dark:bg-emerald-950/20 border-b border-border-light/50 dark:border-border-dark/50 shrink-0">
               <Ruler size={11} className="text-emerald-600 shrink-0" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex-1 text-left">
                 {t('boq.apply_to_boq', { defaultValue: 'Apply to BOQ' })}
               </span>
+              {isEnriching && (
+                <Loader2 size={10} className="animate-spin text-emerald-600/60 shrink-0" />
+              )}
+              <button
+                type="button"
+                onClick={() => setShowAllSums((v) => !v)}
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold transition-colors ${
+                  showAllSums
+                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                    : 'bg-white dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
+                }`}
+                title={
+                  showAllSums
+                    ? t('boq.bim_collapse_sums', { defaultValue: 'Show only headline quantities' })
+                    : t('boq.bim_expand_sums', { defaultValue: 'Show all numeric values from BIM' })
+                }
+              >
+                {showAllSums
+                  ? t('boq.bim_show_less', { defaultValue: 'Show less' })
+                  : t('boq.bim_show_all', { defaultValue: 'Show all' })}
+                <ChevronDown size={10} className={`transition-transform ${showAllSums ? 'rotate-180' : ''}`} />
+              </button>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto">
               {isLoading && (
