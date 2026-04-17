@@ -43,6 +43,9 @@ import {
   WifiOff,
   BarChart3,
   Download,
+  CheckSquare,
+  CalendarDays,
+  ClipboardCheck,
 } from 'lucide-react';
 import { Badge, ConfirmDialog, ElementInfoPopover, type DWGElementPayload } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -938,6 +941,87 @@ export function DwgTakeoffPage() {
     t,
   ]);
 
+  /** PDF export of the summary: totals + per-layer + per-type table.
+   *  Lean first pass — text-only tabular report, no viewport canvas.
+   *  Viewport rasterisation is tracked as a v2 polish item. */
+  const handleExportSummaryPdf = useCallback(async () => {
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const drawingName =
+      drawings.find((d) => d.id === selectedDrawingId)?.name || 'Drawing';
+    const margin = 15;
+    let y = margin;
+
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('DWG Summary Measurements', margin, y);
+    y += 8;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Drawing: ${drawingName}`, margin, y);
+    y += 5;
+    doc.text(`Entities: ${filteredEntities.length}`, margin, y);
+    y += 5;
+    doc.text(`Σ area: ${summaryAggregate.area.toFixed(2)} m²`, margin, y);
+    y += 5;
+    doc.text(`Σ perimeter: ${summaryAggregate.perimeter.toFixed(2)} m`, margin, y);
+    y += 5;
+    doc.text(`Σ length: ${summaryAggregate.length.toFixed(2)} m`, margin, y);
+    y += 8;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('By layer', margin, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    for (const row of summaryByLayer.slice(0, 40)) {
+      if (y > 270) {
+        doc.addPage();
+        y = margin;
+      }
+      doc.text(
+        `${row.layer.slice(0, 40).padEnd(42)} × ${String(row.count).padStart(4)}  ` +
+          `area ${row.area.toFixed(2)} m²  length ${row.length.toFixed(2)} m`,
+        margin,
+        y,
+      );
+      y += 4;
+    }
+
+    y += 4;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('By type', margin, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    for (const row of summaryByType.slice(0, 40)) {
+      if (y > 270) {
+        doc.addPage();
+        y = margin;
+      }
+      doc.text(`${row.type.padEnd(22)} × ${row.count}`, margin, y);
+      y += 4;
+    }
+
+    const file = `dwg-summary-${selectedDrawingId?.slice(0, 8) ?? 'drawing'}.pdf`;
+    doc.save(file);
+    addToast({
+      type: 'success',
+      title: t('dwg_takeoff.pdf_exported', { defaultValue: 'PDF exported' }),
+    });
+  }, [
+    filteredEntities.length,
+    summaryAggregate,
+    summaryByLayer,
+    summaryByType,
+    drawings,
+    selectedDrawingId,
+    addToast,
+    t,
+  ]);
+
   const closeUploadModal = useCallback(() => {
     setShowUpload(false);
     setUploadFile(null);
@@ -1595,6 +1679,43 @@ export function DwgTakeoffPage() {
                     handleOpenLinkToBoq(contextMenu.entityId);
                   }}
                   onSaveAsGroup={handleSaveSelectionAsGroup}
+                  onCreateTask={() => {
+                    setContextMenu(null);
+                    const params = new URLSearchParams({
+                      create: '1',
+                      source: 'dwg',
+                      drawing_id: selectedDrawingId ?? '',
+                      entity_ids: Array.from(selectedEntityIds).join(','),
+                    });
+                    window.open(`/tasks?${params.toString()}`, '_blank', 'noopener');
+                  }}
+                  onLinkSchedule={() => {
+                    setContextMenu(null);
+                    const params = new URLSearchParams({
+                      link: 'dwg',
+                      drawing_id: selectedDrawingId ?? '',
+                      entity_ids: Array.from(selectedEntityIds).join(','),
+                    });
+                    window.open(`/schedule?${params.toString()}`, '_blank', 'noopener');
+                  }}
+                  onLinkDocument={() => {
+                    setContextMenu(null);
+                    const params = new URLSearchParams({
+                      link: 'dwg',
+                      drawing_id: selectedDrawingId ?? '',
+                      entity_ids: Array.from(selectedEntityIds).join(','),
+                    });
+                    window.open(`/documents?${params.toString()}`, '_blank', 'noopener');
+                  }}
+                  onLinkRequirement={() => {
+                    setContextMenu(null);
+                    const params = new URLSearchParams({
+                      link: 'dwg',
+                      drawing_id: selectedDrawingId ?? '',
+                      entity_ids: Array.from(selectedEntityIds).join(','),
+                    });
+                    window.open(`/requirements?${params.toString()}`, '_blank', 'noopener');
+                  }}
                   onClose={() => setContextMenu(null)}
                 />
               )}
@@ -2245,6 +2366,7 @@ export function DwgTakeoffPage() {
                   byLayer={summaryByLayer}
                   byType={summaryByType}
                   onExportCsv={handleExportSummaryCsv}
+                  onExportPdf={handleExportSummaryPdf}
                 />
               )}
             </div>
@@ -2665,6 +2787,7 @@ interface SummaryTabProps {
   byLayer: { layer: string; area: number; length: number; count: number }[];
   byType: { type: string; count: number }[];
   onExportCsv: () => void;
+  onExportPdf: () => void;
 }
 
 /**
@@ -2681,6 +2804,7 @@ function SummaryTab({
   byLayer,
   byType,
   onExportCsv,
+  onExportPdf,
 }: SummaryTabProps) {
   const { t } = useTranslation();
 
@@ -2724,6 +2848,18 @@ function SummaryTab({
         >
           <Download size={11} />
           {t('dwg_takeoff.export_csv_short', { defaultValue: 'Export CSV' })}
+        </button>
+        <button
+          type="button"
+          onClick={onExportPdf}
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-secondary px-2 py-1 text-[10px] font-medium text-content-secondary hover:text-content-primary hover:bg-surface-tertiary transition-colors"
+          data-testid="dwg-summary-export-pdf"
+          title={t('dwg_takeoff.export_pdf', {
+            defaultValue: 'Export current viewport as PDF',
+          })}
+        >
+          <Download size={11} />
+          {t('dwg_takeoff.export_pdf_short', { defaultValue: 'Export PDF' })}
         </button>
       </div>
 
@@ -2855,7 +2991,7 @@ function SummaryTab({
   );
 }
 
-/** Right-click context menu for DWG entities (RFC 11 §4.4). */
+/** Right-click context menu for DWG entities (RFC 11 §4.4 + R4 #14 cross-module links). */
 function DwgContextMenu({
   screenX,
   screenY,
@@ -2864,6 +3000,10 @@ function DwgContextMenu({
   onIsolate,
   onLink,
   onSaveAsGroup,
+  onCreateTask,
+  onLinkSchedule,
+  onLinkDocument,
+  onLinkRequirement,
   onClose,
 }: {
   screenX: number;
@@ -2873,6 +3013,10 @@ function DwgContextMenu({
   onIsolate: () => void;
   onLink: () => void;
   onSaveAsGroup: () => void;
+  onCreateTask: () => void;
+  onLinkSchedule: () => void;
+  onLinkDocument: () => void;
+  onLinkRequirement: () => void;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -2889,7 +3033,7 @@ function DwgContextMenu({
     <div
       id="dwg-context-menu"
       data-testid="dwg-context-menu"
-      className="absolute z-40 min-w-[160px] rounded-lg border border-white/15 bg-[#1e1e38]/95 shadow-2xl backdrop-blur-md py-1"
+      className="absolute z-40 min-w-[180px] rounded-lg border border-white/15 bg-[#1e1e38]/95 shadow-2xl backdrop-blur-md py-1"
       style={{ left: screenX, top: screenY }}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -2915,6 +3059,19 @@ function DwgContextMenu({
           t('dwg_takeoff.save_as_group', { defaultValue: 'Save as group' })
         } />
       )}
+      <div className="my-1 border-t border-white/10" />
+      <MenuItem onClick={onCreateTask} icon={<CheckSquare size={12} />} label={
+        t('dwg_takeoff.create_task', { defaultValue: 'Create task' })
+      } />
+      <MenuItem onClick={onLinkSchedule} icon={<CalendarDays size={12} />} label={
+        t('dwg_takeoff.link_schedule', { defaultValue: 'Link to schedule' })
+      } />
+      <MenuItem onClick={onLinkDocument} icon={<FileText size={12} />} label={
+        t('dwg_takeoff.link_document', { defaultValue: 'Link to document' })
+      } />
+      <MenuItem onClick={onLinkRequirement} icon={<ClipboardCheck size={12} />} label={
+        t('dwg_takeoff.link_requirement', { defaultValue: 'Link to requirement' })
+      } />
     </div>
   );
 }

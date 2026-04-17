@@ -5,6 +5,20 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.3] — 2026-04-18
+
+### R4 new features
+
+- **#10 DWG progress bar + background upload** — new `useDwgUploadStore` (Zustand, mirrors `useBIMUploadStore`): jobs carry progress + stage + error, AbortController per job, simulated stage timer with phases `uploading → converting → extracting → finalizing`. Uploads survive navigation away from `/dwg-takeoff`. Store is free-standing for now; integration into an "Upload Dock" UI component is tracked as v1.9.4 polish.
+- **#14 DWG element link-to-other-modules** — extended the right-click context menu (`DwgContextMenu`) with four cross-module actions: Create task, Link to schedule, Link to document, Link to requirement. Each opens the target module page in a new tab with `drawing_id` + `entity_ids` query params so the receiving page can pre-populate forms / filters. No new backend endpoints — uses the existing URL-parameter pattern shared across modules.
+- **#15 DWG PDF export** — "Export PDF" button in the Summary tab beside "Export CSV". Generates a multi-page A4 report via jsPDF: totals (count, Σ area, Σ perimeter, Σ length) + per-layer breakdown (up to 40 rows) + per-type breakdown. Rasterised viewport snapshot is deferred; the tabular report is the primary user ask.
+- **#22 Split BIM Rules module** — deferred to v1.9.4. The redesigned RuleEditorModal from v1.9.1 (RFC 24) already handles the Quantity Rules concern cleanly; splitting into a separate BIM data-quality page needs a new rule schema + endpoints + migration. Explicitly tracked on the roadmap; does not block v1.9.3.
+
+### Quality gates
+
+- `tsc --noEmit`: 0 errors across the whole frontend
+- All prior v1.9.1 + v1.9.2 tests still passing
+
 ## [1.9.2] — 2026-04-18
 
 ### R3 UX polish — remaining items
