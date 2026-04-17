@@ -16,6 +16,9 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listSessions } from '../cad-explorer/api';
+import { fetchBIMModels } from '../bim/api';
+import { fetchDrawings } from '../dwg-takeoff/api';
+import { takeoffApi } from '../takeoff/api';
 
 /* ── Types ───────────────────────────────────────────────────────────── */
 
@@ -97,11 +100,37 @@ function isPreviewable(mime: string): 'pdf' | 'image' | null {
   return null;
 }
 
-/** Returns true when a document card should be clickable (previewable OR DWG/DXF navigable). */
+/** Returns true when a document card should be clickable (previewable OR CAD/BIM navigable). */
 function isCardClickable(doc: DocItem): boolean {
   if (isPreviewable(doc.mime_type)) return true;
   const lower = doc.name.toLowerCase();
-  return lower.endsWith('.dwg') || lower.endsWith('.dxf');
+  return (
+    lower.endsWith('.dwg') || lower.endsWith('.dxf') ||
+    lower.endsWith('.rvt') || lower.endsWith('.ifc') ||
+    lower.endsWith('.nwd') || lower.endsWith('.nwc') ||
+    lower.endsWith('.dgn')
+  );
+}
+
+/** Returns the target module route for a document based on its extension.  */
+function routeForDocument(doc: DocItem): { path: string; module: 'takeoff' | 'dwg-takeoff' | 'bim' | 'preview' | 'download' } {
+  const lower = doc.name.toLowerCase();
+  if (lower.endsWith('.dwg') || lower.endsWith('.dxf') || lower.endsWith('.dgn')) {
+    return {
+      path: `/dwg-takeoff?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`,
+      module: 'dwg-takeoff',
+    };
+  }
+  if (lower.endsWith('.rvt') || lower.endsWith('.ifc') || lower.endsWith('.nwd') || lower.endsWith('.nwc')) {
+    return {
+      path: `/bim?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`,
+      module: 'bim',
+    };
+  }
+  if (doc.mime_type.includes('pdf') || lower.endsWith('.pdf')) {
+    return { path: '', module: 'preview' };
+  }
+  return { path: `/api/v1/documents/${doc.id}/download`, module: 'download' };
 }
 
 function useDebounce<T>(value: T, delayMs: number): T {
@@ -429,6 +458,30 @@ export function DocumentsPage() {
     queryFn: () => listSessions(),
   });
 
+  /* ── Cross-module project files ──────────────────────────────────────
+   * Documents module mirrors files uploaded via other modules so the
+   * user has a single "everything for this project" view.  Each card
+   * deep-links back to its native module on click. */
+  const { data: bimModelsData } = useQuery({
+    queryKey: ['bim-models', projectId],
+    queryFn: () => fetchBIMModels(projectId ?? ''),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  });
+  const bimModels = bimModelsData?.items ?? [];
+  const { data: dwgDrawings = [] } = useQuery({
+    queryKey: ['dwg-drawings', projectId],
+    queryFn: () => fetchDrawings(projectId ?? ''),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  });
+  const { data: takeoffDocs = [] } = useQuery({
+    queryKey: ['takeoff-documents', projectId],
+    queryFn: () => takeoffApi.listDocuments(projectId ?? undefined),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  });
+
   /* ── Sorted documents ───────────────────────────────────────────────── */
 
   const sortedDocuments = useMemo(() => {
@@ -598,20 +651,17 @@ export function DocumentsPage() {
   /* ── Card click handler ─────────────────────────────────────────────── */
 
   const handleCardClick = useCallback((doc: DocItem) => {
-    // DWG/DXF files -> navigate to DWG Takeoff page with document name for matching
-    const lowerName = doc.name.toLowerCase();
-    if (lowerName.endsWith('.dwg') || lowerName.endsWith('.dxf')) {
-      navigate(`/dwg-takeoff?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`);
+    const route = routeForDocument(doc);
+    if (route.module === 'dwg-takeoff' || route.module === 'bim') {
+      navigate(route.path);
       return;
     }
-
-    const kind = isPreviewable(doc.mime_type);
-    if (kind) {
+    if (route.module === 'preview') {
       setPreviewDoc(doc);
-    } else {
-      // Non-previewable — trigger download
-      window.open(`/api/v1/documents/${doc.id}/download`, '_blank');
+      return;
     }
+    // Fallback — download in-place (same tab preserves auth).
+    window.location.href = route.path;
   }, [navigate]);
 
   /* ── Close preview ──────────────────────────────────────────────────── */
@@ -926,6 +976,86 @@ export function DocumentsPage() {
         </div>
       )}
 
+      {/* ── Project files mirrored from other modules ───────────────────
+           Compact section listing BIM models, DWG drawings, and takeoff
+           PDFs uploaded via their native modules.  Clicking a card jumps
+           to that module with the right deep-link so the user can pick
+           up where they left off. */}
+      {(bimModels.length > 0 || dwgDrawings.length > 0 || takeoffDocs.length > 0) && (
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
+            <File size={13} className="text-oe-blue" />
+            {t('documents.module_files', { defaultValue: 'Module Files' })}
+            <Badge variant="blue" size="sm">{bimModels.length + dwgDrawings.length + takeoffDocs.length}</Badge>
+          </h3>
+          <div className="grid gap-2 md:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {bimModels.map((m) => (
+              <button
+                key={`bim-${m.id}`}
+                type="button"
+                onClick={() => navigate(`/bim/${m.id}`)}
+                className="group text-left rounded-lg border border-border-light bg-surface-primary px-3 py-2 hover:border-oe-blue/30 hover:shadow-sm transition-all"
+                title={m.name}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded bg-blue-50 dark:bg-blue-950/30 shrink-0">
+                    <File size={13} className="text-blue-500" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-content-primary truncate">{m.name}</p>
+                    <p className="text-[10px] text-content-tertiary">
+                      {(m.model_format || m.format || 'BIM').toUpperCase()} &middot; {(m.element_count ?? 0).toLocaleString()} elem
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+            {dwgDrawings.map((d) => (
+              <button
+                key={`dwg-${d.id}`}
+                type="button"
+                onClick={() => navigate(`/dwg-takeoff?drawingId=${encodeURIComponent(d.id)}`)}
+                className="group text-left rounded-lg border border-border-light bg-surface-primary px-3 py-2 hover:border-oe-blue/30 hover:shadow-sm transition-all"
+                title={d.name}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded bg-orange-50 dark:bg-orange-950/30 shrink-0">
+                    <File size={13} className="text-orange-500" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-content-primary truncate">{d.name}</p>
+                    <p className="text-[10px] text-content-tertiary">
+                      DWG &middot; {d.entity_count ?? 0} ent
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+            {takeoffDocs.map((td) => (
+              <button
+                key={`tk-${td.id}`}
+                type="button"
+                onClick={() => navigate(`/takeoff?tab=measurements&doc=${encodeURIComponent(td.id)}&name=${encodeURIComponent(td.filename)}`)}
+                className="group text-left rounded-lg border border-border-light bg-surface-primary px-3 py-2 hover:border-oe-blue/30 hover:shadow-sm transition-all"
+                title={td.filename}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded bg-red-50 dark:bg-red-950/30 shrink-0">
+                    <FileText size={13} className="text-red-500" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-content-primary truncate">{td.filename}</p>
+                    <p className="text-[10px] text-content-tertiary">
+                      PDF &middot; {td.pages ?? 0} pg
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Documents grid ──────────────────────────────────────────────── */}
       {isLoading ? (
         <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -1091,7 +1221,7 @@ export function DocumentsPage() {
                                 {t('documents.open_in_takeoff', { defaultValue: 'Measure & Takeoff' })}
                               </button>
                             )}
-                            {(doc.name.toLowerCase().endsWith('.dwg') || doc.name.toLowerCase().endsWith('.dxf')) && (
+                            {(doc.name.toLowerCase().endsWith('.dwg') || doc.name.toLowerCase().endsWith('.dxf') || doc.name.toLowerCase().endsWith('.dgn')) && (
                               <button
                                 role="menuitem"
                                 onClick={() => { setOpenMenuId(null); navigate(`/dwg-takeoff?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`); }}
@@ -1099,6 +1229,16 @@ export function DocumentsPage() {
                               >
                                 <Ruler size={14} className="text-oe-blue" />
                                 {t('documents.open_in_dwg_takeoff', { defaultValue: 'Open in DWG Takeoff' })}
+                              </button>
+                            )}
+                            {(doc.name.toLowerCase().endsWith('.rvt') || doc.name.toLowerCase().endsWith('.ifc') || doc.name.toLowerCase().endsWith('.nwd') || doc.name.toLowerCase().endsWith('.nwc')) && (
+                              <button
+                                role="menuitem"
+                                onClick={() => { setOpenMenuId(null); navigate(`/bim?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`); }}
+                                className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                              >
+                                <Ruler size={14} className="text-oe-blue" />
+                                {t('documents.open_in_bim', { defaultValue: 'Open in BIM Viewer' })}
                               </button>
                             )}
                             <a

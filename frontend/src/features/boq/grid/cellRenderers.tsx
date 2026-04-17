@@ -435,20 +435,19 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
     const params = new URLSearchParams();
     params.set('tab', 'measurements');
     if (pdfMeasurementId) params.set('focus', pdfMeasurementId);
-    if (pdfDocumentId) params.set('document', pdfDocumentId);
+    // pdf_document_id in metadata is the *filename* (not a UUID), so we
+    // pass it as `name` and let TakeoffPage resolve it against the
+    // server documents list.
+    if (pdfDocumentId) params.set('name', pdfDocumentId);
     if (pdfPage) params.set('page', String(pdfPage));
-    // In-place navigation keeps the auth/session alive.  Ctrl/Cmd-click
-    // falls through to the browser's native "open in new tab" behavior
-    // via a wrapping <a> would be nicer, but keeping a button is fine —
-    // new-tab users lose auth if "remember me" is off, which would send
-    // them to /login.
     navigate(`/takeoff?${params.toString()}`);
   }, [pdfMeasurementId, pdfDocumentId, pdfPage, navigate]);
 
   const handleOpenDwg = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     const params = new URLSearchParams();
-    if (dwgDrawingId) params.set('drawing', dwgDrawingId);
+    // DwgTakeoffPage reads `drawingId` (not `drawing`) — see DwgTakeoffPage.tsx:275.
+    if (dwgDrawingId) params.set('drawingId', dwgDrawingId);
     if (dwgAnnotationId) params.set('focus', dwgAnnotationId);
     navigate(`/dwg-takeoff?${params.toString()}`);
   }, [dwgDrawingId, dwgAnnotationId, navigate]);
