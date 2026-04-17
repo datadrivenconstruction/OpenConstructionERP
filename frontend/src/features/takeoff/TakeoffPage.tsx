@@ -1174,6 +1174,17 @@ export function TakeoffPage() {
               ),
             );
             setActiveDocId(data.id);
+            // Persist the newly-opened document in the URL so reload keeps
+            // it mounted (prevents the "uploaded project disappears on
+            // refresh" bug — backend persistence was already fine).
+            setSearchParams(
+              (prev) => {
+                const next = new URLSearchParams(prev);
+                next.set('doc', data.id);
+                return next;
+              },
+              { replace: true },
+            );
             // Also save to Documents module (fire-and-forget)
             createDocumentRecord(file);
             // Refresh server-side document list (fire-and-forget)
@@ -1200,6 +1211,17 @@ export function TakeoffPage() {
       setDocuments((prev) => prev.filter((d) => d.id !== docId));
       setActiveDocId((prev) => (prev === docId ? null : prev));
       setViewerDoc((prev) => (prev && prev.url.includes(`/${docId}/`) ? null : prev));
+      // Drop the doc param if it matched, so a reload doesn't revive the
+      // deleted entry as a placeholder via the initial-read effect.
+      setSearchParams(
+        (prev) => {
+          if (prev.get('doc') !== docId) return prev;
+          const next = new URLSearchParams(prev);
+          next.delete('doc');
+          return next;
+        },
+        { replace: true },
+      );
       // Best-effort server delete; silently ignore errors for legacy temp ids
       takeoffApi
         .deleteDocument(docId)
@@ -1374,8 +1396,18 @@ export function TakeoffPage() {
         name: doc.filename,
       });
       setActiveTab('measurements');
+      // Pin the current doc to the URL so reload restores the viewer.
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set('doc', docId);
+          next.set('tab', 'measurements');
+          return next;
+        },
+        { replace: true },
+      );
     },
-    [filmstripDocuments, t],
+    [filmstripDocuments, t, setSearchParams],
   );
 
   /* ── Render ─────────────────────────────────────────────────────────── */
