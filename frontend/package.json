@@ -1,7 +1,7 @@
 {
   "name": "openestimate-frontend",
   "private": true,
-  "version": "1.7.2",
+  "version": "1.8.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.0",
+    "@types/leaflet": "^1.9.21",
     "@types/three": "^0.183.1",
     "@xyflow/react": "^12.10.2",
     "ag-grid-community": "^32.3.0",
@@ -31,11 +32,13 @@
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
     "jszip": "^3.10.1",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.460.0",
     "pdfjs-dist": "^4.8.69",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^15.1.0",
+    "react-leaflet": "^4.2.1",
     "react-resizable-panels": "^4.9.0",
     "react-router-dom": "^6.28.0",
     "recharts": "^3.8.1",

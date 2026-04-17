@@ -1208,265 +1208,6 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
   );
 }
 
-/* ── Data Explorer Empty State Animation ────────────────────────────── */
-
-/** Decorative animation palette for the empty-state data explorer illustration */
-const EXPLORER_ANIM = {
-  indigo: '#6366f1',
-  violet: '#8b5cf6',
-  emerald: '#10b981',
-  emeraldLight: '#34d399',
-  emeraldDark: '#059669',
-  blue: '#3b82f6',
-  /* rgba building blocks for gradient stops & translucent fills */
-  indigoRgb: '99,102,241',
-  emeraldRgb: '16,185,129',
-  blueRgb: '59,130,246',
-  violetRgb: '139,92,246',
-  emeraldDarkRgb: '5,150,105',
-  surface: 'var(--surface-primary, #ffffff)',
-} as const;
-
-function DataExplorerEmptyAnimation() {
-  return (
-    <div className="mx-auto mb-6 relative" style={{ width: 260, height: 150, opacity: 0.6 }}>
-      <style>{`
-        /* Bar chart columns grow upward */
-        @keyframes explorerBarGrow0 {
-          0%, 5% { transform: scaleY(0); opacity: 0; }
-          15%, 52% { transform: scaleY(1); opacity: 1; }
-          65%, 100% { transform: scaleY(1); opacity: 0.2; }
-        }
-        @keyframes explorerBarGrow1 {
-          0%, 9% { transform: scaleY(0); opacity: 0; }
-          20%, 52% { transform: scaleY(1); opacity: 1; }
-          65%, 100% { transform: scaleY(1); opacity: 0.2; }
-        }
-        @keyframes explorerBarGrow2 {
-          0%, 13% { transform: scaleY(0); opacity: 0; }
-          25%, 52% { transform: scaleY(1); opacity: 1; }
-          65%, 100% { transform: scaleY(1); opacity: 0.2; }
-        }
-        @keyframes explorerBarGrow3 {
-          0%, 17% { transform: scaleY(0); opacity: 0; }
-          30%, 52% { transform: scaleY(1); opacity: 1; }
-          65%, 100% { transform: scaleY(1); opacity: 0.2; }
-        }
-        @keyframes explorerBarGrow4 {
-          0%, 21% { transform: scaleY(0); opacity: 0; }
-          35%, 52% { transform: scaleY(1); opacity: 1; }
-          65%, 100% { transform: scaleY(1); opacity: 0.2; }
-        }
-        /* Pie chart segments rotate into view */
-        @keyframes explorerPieSegA {
-          0%, 6% { opacity: 0; transform: rotate(-90deg) scale(0.5); }
-          20%, 52% { opacity: 1; transform: rotate(0deg) scale(1); }
-          65%, 100% { opacity: 0.2; transform: rotate(0deg) scale(1); }
-        }
-        @keyframes explorerPieSegB {
-          0%, 12% { opacity: 0; transform: rotate(90deg) scale(0.5); }
-          26%, 52% { opacity: 1; transform: rotate(0deg) scale(1); }
-          65%, 100% { opacity: 0.2; transform: rotate(0deg) scale(1); }
-        }
-        @keyframes explorerPieSegC {
-          0%, 18% { opacity: 0; transform: rotate(-120deg) scale(0.5); }
-          32%, 52% { opacity: 1; transform: rotate(0deg) scale(1); }
-          65%, 100% { opacity: 0.2; transform: rotate(0deg) scale(1); }
-        }
-        /* Data table rows slide in one by one */
-        @keyframes explorerRowSlide {
-          0%, 30% { transform: translateX(16px); opacity: 0; }
-          42%, 55% { transform: translateX(0); opacity: 0.85; }
-          68%, 100% { transform: translateX(0); opacity: 0.15; }
-        }
-        /* Dashboard cards fade and scale in */
-        @keyframes explorerCardIn {
-          0%, 45% { transform: scale(0.85) translateY(8px); opacity: 0; }
-          56%, 65% { transform: scale(1) translateY(0); opacity: 0.9; }
-          78%, 100% { transform: scale(1) translateY(0); opacity: 0.15; }
-        }
-        /* Subtle overall float */
-        @keyframes explorerFloat {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-2px); }
-        }
-        /* Axis line fade */
-        @keyframes explorerAxisIn {
-          0%, 3% { opacity: 0; transform: scaleX(0); }
-          12%, 55% { opacity: 0.5; transform: scaleX(1); }
-          68%, 100% { opacity: 0.1; transform: scaleX(1); }
-        }
-        @keyframes explorerAxisYIn {
-          0%, 3% { opacity: 0; transform: scaleY(0); }
-          12%, 55% { opacity: 0.5; transform: scaleY(1); }
-          68%, 100% { opacity: 0.1; transform: scaleY(1); }
-        }
-      `}</style>
-
-      <div style={{ animation: 'explorerFloat 7s ease-in-out infinite' }}>
-        {/* ── Bar Chart (left section) ── */}
-        <div style={{ position: 'absolute', left: 0, top: 10, width: 100, height: 120 }}>
-          {/* Y axis */}
-          <div style={{
-            position: 'absolute', left: 0, top: 0, width: 2, height: 100,
-            background: `linear-gradient(180deg, rgba(${EXPLORER_ANIM.indigoRgb},0.3), rgba(${EXPLORER_ANIM.emeraldRgb},0.3))`,
-            borderRadius: 1,
-            transformOrigin: 'top center',
-            animation: 'explorerAxisYIn 9s ease-out infinite',
-          }} />
-          {/* X axis */}
-          <div style={{
-            position: 'absolute', left: 0, top: 100, width: 95, height: 2,
-            background: `linear-gradient(90deg, rgba(${EXPLORER_ANIM.indigoRgb},0.3), rgba(${EXPLORER_ANIM.emeraldRgb},0.3))`,
-            borderRadius: 1,
-            transformOrigin: 'left center',
-            animation: 'explorerAxisIn 9s ease-out infinite',
-          }} />
-          {/* Bar columns */}
-          {[
-            { h: 60, color: `linear-gradient(180deg, var(--oe-blue), ${EXPLORER_ANIM.indigo})`, idx: 0 },
-            { h: 82, color: `linear-gradient(180deg, ${EXPLORER_ANIM.indigo}, ${EXPLORER_ANIM.violet})`, idx: 1 },
-            { h: 45, color: `linear-gradient(180deg, ${EXPLORER_ANIM.emerald}, ${EXPLORER_ANIM.emeraldDark})`, idx: 2 },
-            { h: 72, color: `linear-gradient(180deg, var(--oe-blue), ${EXPLORER_ANIM.blue})`, idx: 3 },
-            { h: 55, color: `linear-gradient(180deg, ${EXPLORER_ANIM.emerald}, ${EXPLORER_ANIM.emeraldLight})`, idx: 4 },
-          ].map((bar, i) => (
-            <div key={i} style={{
-              position: 'absolute',
-              left: 8 + i * 18,
-              bottom: 20,
-              width: 12,
-              height: bar.h,
-              borderRadius: '3px 3px 0 0',
-              background: bar.color,
-              transformOrigin: 'bottom center',
-              animation: `explorerBarGrow${bar.idx} 9s ease-out infinite`,
-              boxShadow: `0 -2px 6px rgba(${EXPLORER_ANIM.indigoRgb},0.08)`,
-            }} />
-          ))}
-          {/* Bar chart label placeholder */}
-          <div style={{
-            position: 'absolute', left: 8, top: 106, width: 82, height: 4,
-            borderRadius: 2,
-            background: `rgba(${EXPLORER_ANIM.indigoRgb},0.1)`,
-            animation: 'explorerAxisIn 9s ease-out infinite',
-          }} />
-        </div>
-
-        {/* ── Pie Chart (center-top section) ── */}
-        <div style={{ position: 'absolute', left: 110, top: 6, width: 52, height: 52 }}>
-          {/* Pie segment A — large slice (top-right) */}
-          <div style={{
-            position: 'absolute', left: 0, top: 0, width: 52, height: 52,
-            borderRadius: '50%',
-            background: `conic-gradient(
-              var(--oe-blue) 0deg 140deg,
-              transparent 140deg 360deg
-            )`,
-            transformOrigin: 'center center',
-            animation: 'explorerPieSegA 9s ease-out infinite',
-          }} />
-          {/* Pie segment B — medium slice */}
-          <div style={{
-            position: 'absolute', left: 0, top: 0, width: 52, height: 52,
-            borderRadius: '50%',
-            background: `conic-gradient(
-              transparent 0deg 140deg,
-              ${EXPLORER_ANIM.emerald} 140deg 250deg,
-              transparent 250deg 360deg
-            )`,
-            transformOrigin: 'center center',
-            animation: 'explorerPieSegB 9s ease-out infinite',
-          }} />
-          {/* Pie segment C — small slice */}
-          <div style={{
-            position: 'absolute', left: 0, top: 0, width: 52, height: 52,
-            borderRadius: '50%',
-            background: `conic-gradient(
-              transparent 0deg 250deg,
-              ${EXPLORER_ANIM.violet} 250deg 330deg,
-              transparent 330deg 360deg
-            )`,
-            transformOrigin: 'center center',
-            animation: 'explorerPieSegC 9s ease-out infinite',
-          }} />
-          {/* Remaining slice (static, appears last) */}
-          <div style={{
-            position: 'absolute', left: 0, top: 0, width: 52, height: 52,
-            borderRadius: '50%',
-            background: `conic-gradient(
-              transparent 0deg 330deg,
-              rgba(${EXPLORER_ANIM.indigoRgb},0.25) 330deg 360deg
-            )`,
-            transformOrigin: 'center center',
-            animation: 'explorerPieSegC 9s ease-out infinite',
-            animationDelay: '0.2s',
-          }} />
-          {/* Center hole (donut) */}
-          <div style={{
-            position: 'absolute', left: 14, top: 14, width: 24, height: 24,
-            borderRadius: '50%',
-            background: EXPLORER_ANIM.surface,
-            boxShadow: 'inset 0 0 8px rgba(0,0,0,0.03)',
-          }} />
-        </div>
-
-        {/* ── Data Table Rows (right section) ── */}
-        <div style={{ position: 'absolute', right: 0, top: 8, width: 80, height: 110 }}>
-          {/* Table header */}
-          <div style={{
-            display: 'flex', gap: 2, marginBottom: 4,
-            animation: 'explorerRowSlide 9s ease-out infinite',
-          }}>
-            <div style={{ flex: 2, height: 9, borderRadius: '4px 0 0 0', background: `linear-gradient(90deg, var(--oe-blue), ${EXPLORER_ANIM.indigo})` }} />
-            <div style={{ flex: 1, height: 9, borderRadius: '0 4px 0 0', background: `linear-gradient(90deg, ${EXPLORER_ANIM.indigo}, ${EXPLORER_ANIM.violet})` }} />
-          </div>
-          {/* Table data rows */}
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} style={{
-              display: 'flex', gap: 2, marginBottom: 3,
-              animation: 'explorerRowSlide 9s ease-out infinite',
-              animationDelay: `${0.1 + i * 0.08}s`,
-            }}>
-              <div style={{
-                flex: 2, height: 7, borderRadius: 2,
-                background: i % 2 === 0
-                  ? `rgba(${EXPLORER_ANIM.indigoRgb},0.12)`
-                  : `rgba(${EXPLORER_ANIM.emeraldRgb},0.12)`,
-              }} />
-              <div style={{
-                flex: 1, height: 7, borderRadius: 2,
-                background: `rgba(${EXPLORER_ANIM.violetRgb},0.1)`,
-              }} />
-            </div>
-          ))}
-        </div>
-
-        {/* ── Dashboard Mini Cards (bottom center) ── */}
-        <div style={{ position: 'absolute', left: 106, bottom: 2, display: 'flex', gap: 6 }}>
-          {[
-            { w: 46, bg: `linear-gradient(135deg, rgba(${EXPLORER_ANIM.blueRgb},0.1), rgba(${EXPLORER_ANIM.indigoRgb},0.05))`, border: `rgba(${EXPLORER_ANIM.blueRgb},0.15)` },
-            { w: 46, bg: `linear-gradient(135deg, rgba(${EXPLORER_ANIM.emeraldRgb},0.1), rgba(${EXPLORER_ANIM.emeraldDarkRgb},0.05))`, border: `rgba(${EXPLORER_ANIM.emeraldRgb},0.15)` },
-            { w: 46, bg: `linear-gradient(135deg, rgba(${EXPLORER_ANIM.violetRgb},0.1), rgba(${EXPLORER_ANIM.indigoRgb},0.05))`, border: `rgba(${EXPLORER_ANIM.violetRgb},0.15)` },
-          ].map((card, i) => (
-            <div key={i} style={{
-              width: card.w, height: 36, borderRadius: 6,
-              background: card.bg,
-              border: `1px solid ${card.border}`,
-              animation: 'explorerCardIn 9s ease-out infinite',
-              animationDelay: `${i * 0.15}s`,
-              display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-              justifyContent: 'center', padding: '0 6px', gap: 3,
-            }}>
-              {/* Mini stat line */}
-              <div style={{ width: '60%', height: 4, borderRadius: 2, background: i === 0 ? `rgba(${EXPLORER_ANIM.blueRgb},0.25)` : i === 1 ? `rgba(${EXPLORER_ANIM.emeraldRgb},0.25)` : `rgba(${EXPLORER_ANIM.violetRgb},0.25)` }} />
-              <div style={{ width: '40%', height: 3, borderRadius: 2, background: `rgba(${EXPLORER_ANIM.indigoRgb},0.1)` }} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ── Upload & Convert Zone ──────────────────────────────────────────────── */
 
@@ -1907,8 +1648,77 @@ export function CadDataExplorerPage() {
           ]} />
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-blue-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20">
-          <div className="max-w-7xl mx-auto pt-20 pb-4">
+        {/* Soft modern background — calm base gradient, muted blurred
+            colour blobs, plus a barely-visible decorative spreadsheet
+            grid behind everything so the "data explorer" identity is
+            legible the moment the page paints. */}
+        <div className="relative flex-1 overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
+          {/* Decorative data table — SVG pattern at ~4-6% opacity.
+              Header row + alternating row bands + fake column text
+              blocks; all pointer-events:none so it never interferes. */}
+          <svg
+            aria-hidden
+            className="pointer-events-none absolute inset-0 w-full h-full text-slate-400/40 dark:text-slate-300/20"
+            preserveAspectRatio="xMidYMid slice"
+            viewBox="0 0 1200 900"
+          >
+            <defs>
+              <linearGradient id="tblFade" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="white" stopOpacity="0" />
+                <stop offset="22%" stopColor="white" stopOpacity="1" />
+                <stop offset="78%" stopColor="white" stopOpacity="1" />
+                <stop offset="100%" stopColor="white" stopOpacity="0" />
+              </linearGradient>
+              <mask id="tblMask">
+                <rect width="1200" height="900" fill="url(#tblFade)" />
+              </mask>
+            </defs>
+            <g mask="url(#tblMask)" opacity="0.55">
+              {/* Column separators (vertical faint lines) */}
+              {[120, 300, 480, 660, 780, 900, 1020].map((x) => (
+                <line key={x} x1={x} y1="40" x2={x} y2="860" stroke="currentColor" strokeWidth="0.6" strokeDasharray="2 3" />
+              ))}
+              {/* Header band */}
+              <rect x="40" y="60" width="1120" height="34" rx="4" fill="currentColor" fillOpacity="0.08" />
+              {[
+                { x: 60, w: 50 },   { x: 140, w: 140 }, { x: 320, w: 140 },
+                { x: 500, w: 140 }, { x: 680, w: 80 },  { x: 800, w: 80 },
+                { x: 920, w: 80 },  { x: 1040, w: 70 },
+              ].map((c, i) => (
+                <rect key={`h-${i}`} x={c.x} y="72" width={c.w} height="10" rx="2" fill="currentColor" fillOpacity="0.35" />
+              ))}
+              {/* 18 data rows — alternating bands with text-block bars */}
+              {Array.from({ length: 18 }).map((_, r) => {
+                const y = 110 + r * 40;
+                const rowBandOpacity = r % 2 === 0 ? 0 : 0.04;
+                return (
+                  <g key={`r-${r}`}>
+                    <rect x="40" y={y} width="1120" height="34" fill="currentColor" fillOpacity={rowBandOpacity} />
+                    {/* Id col (narrower) */}
+                    <rect x="60" y={y + 13} width={28 + (r * 3) % 22} height="8" rx="1.5" fill="currentColor" fillOpacity="0.22" />
+                    {/* Name cols (wider) */}
+                    <rect x="140" y={y + 13} width={110 - (r * 7) % 40} height="8" rx="1.5" fill="currentColor" fillOpacity="0.18" />
+                    <rect x="320" y={y + 13} width={120 - (r * 5) % 50} height="8" rx="1.5" fill="currentColor" fillOpacity="0.16" />
+                    <rect x="500" y={y + 13} width={110 - (r * 3) % 35} height="8" rx="1.5" fill="currentColor" fillOpacity="0.18" />
+                    {/* Numeric cols (right-aligned) */}
+                    <rect x={760 - (r * 4) % 24} y={y + 13} width={20 + (r * 4) % 20} height="8" rx="1.5" fill="currentColor" fillOpacity="0.22" />
+                    <rect x={880 - (r * 5) % 20} y={y + 13} width={20 + (r * 5) % 18} height="8" rx="1.5" fill="currentColor" fillOpacity="0.22" />
+                    <rect x={1000 - (r * 6) % 16} y={y + 13} width={20 + (r * 6) % 16} height="8" rx="1.5" fill="currentColor" fillOpacity="0.22" />
+                    {/* Badge-ish last col */}
+                    <rect x="1040" y={y + 11} width={50 + (r * 5) % 20} height="14" rx="7" fill="currentColor" fillOpacity="0.12" />
+                  </g>
+                );
+              })}
+              {/* Horizontal grid lines between rows */}
+              {Array.from({ length: 19 }).map((_, i) => (
+                <line key={`hl-${i}`} x1="40" y1={110 + i * 40} x2="1160" y2={110 + i * 40} stroke="currentColor" strokeWidth="0.3" />
+              ))}
+            </g>
+          </svg>
+          <div aria-hidden className="pointer-events-none absolute -top-32 -left-32 w-[520px] h-[520px] rounded-full bg-blue-200/25 dark:bg-blue-500/8 blur-[140px]" />
+          <div aria-hidden className="pointer-events-none absolute -bottom-32 -right-32 w-[520px] h-[520px] rounded-full bg-violet-200/20 dark:bg-violet-500/8 blur-[140px]" />
+          <div className="absolute inset-0 overflow-y-auto overflow-x-hidden scrollbar-none z-10">
+          <div className="relative max-w-7xl mx-auto px-6 pt-6 pb-4">
 
             {/* 2-column layout: Upload card (left) + Hero text (right) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch mb-8">
@@ -1920,7 +1730,10 @@ export function CadDataExplorerPage() {
                 </div>
               </div>
 
-              {/* RIGHT — Hero text + animation */}
+              {/* RIGHT — Hero text + local-processing badge (chip
+                  styled to match /bim and /dwg-takeoff). The
+                  decorative animation was removed; the modern mesh
+                  background carries the visual weight. */}
               <div className="flex flex-col justify-center gap-4">
                 <div>
                   <h1 className="text-2xl font-bold text-content-primary tracking-tight leading-tight">
@@ -1932,18 +1745,23 @@ export function CadDataExplorerPage() {
                   <p className="text-xs text-content-tertiary mt-3 leading-relaxed">
                     IFC 2x3, 4.0, 4.1, 4.3 &middot; Revit 2015–2026 &middot; DWG &middot; DGN &middot; DXF &middot; RFA
                   </p>
-                  <p className="mt-2 flex items-center gap-1.5 text-[11px] text-content-tertiary">
-                    <ShieldCheck size={12} className="shrink-0" />
-                    <span>
-                      {t('common.local_processing', { defaultValue: '100% Local Processing — Your files never leave your computer' })}
-                      {' \u00B7 '}
-                      {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC cad2data' })}
-                    </span>
-                  </p>
-                </div>
-                {/* Animation */}
-                <div className="hidden lg:block mt-auto opacity-60 overflow-hidden">
-                  <DataExplorerEmptyAnimation />
+                  <div className="mt-4 flex items-center justify-start">
+                    <div className="inline-flex flex-wrap items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                      <ShieldCheck size={14} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
+                      <span className="text-xs text-emerald-700 dark:text-emerald-300/90 font-medium">
+                        {t('common.local_processing', { defaultValue: '100% Local Processing \u00B7 Your files never leave your computer' })}
+                      </span>
+                      <span className="text-[10px] text-emerald-500/40">|</span>
+                      <a
+                        href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-emerald-600/80 dark:text-emerald-400/70 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline whitespace-nowrap"
+                      >
+                        {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC cad2data' })}
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1969,6 +1787,7 @@ export function CadDataExplorerPage() {
 
             {/* Privacy + converter bar moved to top fixed header */}
           </div>{/* end max-w-7xl */}
+          </div>{/* end absolute scroll wrapper */}
         </div>{/* end scroll area */}
       {/* ── Bottom Filmstrip: Recent Sessions (fixed, inside outer flex-col) ── */}
       {recentSessions.length > 0 && (

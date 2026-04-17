@@ -5,6 +5,38 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] — 2026-04-17
+
+### BOQ ↔ Takeoff linking, UI polish sprint, decorative backgrounds
+
+- **BOQ ↔ PDF Takeoff deep linking** — individual measurements can now be linked
+  to specific BOQ positions. The measurement's quantity auto-transfers to the
+  position and stays in sync. Bidirectional metadata: `measurement.linked_boq_position_id`
+  + `position.metadata.pdf_document_id / pdf_page / pdf_measurement_id`.
+- **BOQ grid link icons** — rose PDF icon + amber DWG icon next to positions
+  that have linked documents. Click opens the document in the same tab so the
+  auth session is preserved (no more login bounce).
+- **BOQ Linked Geometry popover** — "Set as quantity" buttons next to each BIM
+  parameter value; one click applies the value to the position's quantity field.
+- **Takeoff UI refresh** — tab order swapped (Measurements first, Documents & AI
+  second); tighter rounded corners; per-tool hover colours. Bottom filmstrip
+  of previously uploaded documents with click-to-open.
+- **Takeoff decorative background** — barely-visible polygons, distance lines,
+  scale rulers behind the viewer, evoking field-surveyor chalkmarks.
+- **BIM landing** — tileable isometric-cube SVG pattern at ~1% opacity; airy
+  spacing; inner scroll hidden with `scrollbar-none`; content fits 1080p viewport.
+- **BIM filmstrip** — no longer auto-collapses after 10s; always visible.
+- **DWG Takeoff** — toolbar palette switched to white-glass for contrast on the
+  dark `#3f3f3f` canvas; right-panel re-themed dark with readable slate-100
+  text; drawings filmstrip already dark (1.7.2).
+- **CAD Data Explorer** — subtle semi-transparent spreadsheet grid decoration;
+  landing now fits without horizontal *or* vertical scroll on typical viewports.
+- **Chat** — markdown links like `[Settings](/settings)` now render as proper
+  clickable anchors; external links open in a new tab.
+- **Projects** — self-healing bookmark URLs: navigating to a stale project ID
+  (e.g. after a demo reseed) auto-clears it from `useProjectContextStore` and
+  `useRecentStore` so the user isn't stuck on "Project not found".
+
 ## [1.7.0] — 2026-04-15
 
 ### BIM, DWG Takeoff, and cross-module UI improvements

@@ -50,6 +50,7 @@ interface ProjectSummary {
   region: string;
   classification_standard: string;
   currency: string;
+  locale?: string;
   created_at: string;
 }
 
@@ -1776,13 +1777,19 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
     );
   }
 
-  // Deduplicate by ID and show only latest 10
+  // Deduplicate by ID, then pin `en` + `de` projects to the top so the
+  // US and German demos anchor the dashboard's "recent projects" tile.
+  // Same priority rule as ProjectsPage; keep them in sync if you change it.
   const seen = new Set<string>();
-  const unique = projects.filter((p) => {
-    if (seen.has(p.id)) return false;
-    seen.add(p.id);
-    return true;
-  }).slice(0, 6);
+  const localePriority = (loc?: string) => (loc === 'en' ? 0 : loc === 'de' ? 1 : 2);
+  const unique = projects
+    .filter((p) => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return true;
+    })
+    .sort((a, b) => localePriority(a.locale) - localePriority(b.locale))
+    .slice(0, 6);
 
   return (
     <div className="divide-y divide-border-light">

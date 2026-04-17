@@ -45,6 +45,7 @@ import { fetchBIMElementProperties } from '@/features/bim/api';
 import { SceneManager } from './SceneManager';
 import { ElementManager } from './ElementManager';
 import type { BIMElementData } from './ElementManager';
+import { aggregateBIMQuantities, type AggResult } from './aggregation';
 import { SelectionManager } from './SelectionManager';
 import { BIMContextMenu } from './BIMContextMenu';
 import type { BIMContextMenuState } from './BIMContextMenu';
@@ -118,6 +119,13 @@ export interface BIMViewerProps {
   showBoundingBoxes?: boolean;
   /** Element IDs to isolate (hide everything else). Empty = show all. */
   isolatedIds?: string[] | null;
+  /** Fired when the user changes isolation from inside the viewer
+   *  (keyboard `I`, context menu, "Isolate selection" button, "Show
+   *  all" button).  Pass through to the parent so the filter panel
+   *  banner, summary panels and any other UI bound to `isolatedIds`
+   *  stay in sync — without this callback, internal isolation would
+   *  invisibly diverge from the prop. */
+  onIsolationChange?: (ids: string[] | null) => void;
   /** Element IDs to highlight in orange WITHOUT hiding the rest of the
    *  model — used to show which BIM elements are linked to the currently
    *  selected BOQ position.  Pass null/empty to clear. */
@@ -378,6 +386,7 @@ export function BIMViewer({
   filterPredicate = null,
   colorByMode = 'default',
   isolatedIds = null,
+  onIsolationChange,
   highlightedIds = null,
   onGeometryLoaded,
   onAddToBOQ,
@@ -399,6 +408,13 @@ export function BIMViewer({
   const sceneRef = useRef<SceneManager | null>(null);
   const elementMgrRef = useRef<ElementManager | null>(null);
   const selectionMgrRef = useRef<SelectionManager | null>(null);
+  // Latest onIsolationChange callback — needed because the
+  // SelectionManager init effect runs only on mount and would
+  // otherwise capture a stale prop reference.
+  const onIsolationChangeRef = useRef(onIsolationChange);
+  useEffect(() => {
+    onIsolationChangeRef.current = onIsolationChange;
+  }, [onIsolationChange]);
 
   const [wireframe, setWireframe] = useState(false);
   const [gridVisible, setGridVisible] = useState(false);
@@ -564,6 +580,7 @@ export function BIMViewer({
           const toIsolate = ids.includes(elementId) ? ids : [elementId];
           elementMgr.isolate(toIsolate);
           setIsIsolated(true);
+          onIsolationChangeRef.current?.(toIsolate);
           // Zoom to the isolated elements
           const meshes = toIsolate
             .map((id) => elementMgr.getMesh(id))
@@ -575,6 +592,7 @@ export function BIMViewer({
           // Double-click empty space -> exit isolation, show all
           elementMgr.showAll();
           setIsIsolated(false);
+          onIsolationChangeRef.current?.(null);
           setHiddenIds(new Set());
           scene.zoomToFit();
         }
@@ -1057,13 +1075,14 @@ export function BIMViewer({
     if (ids.length === 0) return;
     elementMgrRef.current.isolate(ids);
     setIsIsolated(true);
+    onIsolationChange?.(ids);
     const meshes = ids
       .map((id) => elementMgrRef.current!.getMesh(id))
       .filter((m): m is NonNullable<typeof m> => m != null);
     if (meshes.length > 0 && sceneRef.current) {
       sceneRef.current.zoomToSelection(meshes);
     }
-  }, [contextMenu]);
+  }, [contextMenu, onIsolationChange]);
 
   const handleCtxHide = useCallback(() => {
     if (!contextMenu || !elementMgrRef.current) return;
@@ -1085,8 +1104,9 @@ export function BIMViewer({
     elementMgrRef.current.showAll();
     setHiddenIds(new Set());
     setIsIsolated(false);
+    onIsolationChange?.(null);
     sceneRef.current?.zoomToFit();
-  }, []);
+  }, [onIsolationChange]);
 
   const handleClearSelection = useCallback(() => {
     selectionMgrRef.current?.clearSelection();
@@ -1101,13 +1121,14 @@ export function BIMViewer({
     if (ids.length === 0) return;
     elementMgrRef.current.isolate(ids);
     setIsIsolated(true);
+    onIsolationChange?.(ids);
     const meshes = ids
       .map((id) => elementMgrRef.current!.getMesh(id))
       .filter((m): m is NonNullable<typeof m> => m != null);
     if (meshes.length > 0 && sceneRef.current) {
       sceneRef.current.zoomToSelection(meshes);
     }
-  }, []);
+  }, [onIsolationChange]);
 
   const handleSelectionHide = useCallback(() => {
     if (!selectionMgrRef.current || !elementMgrRef.current) return;
@@ -1244,19 +1265,30 @@ export function BIMViewer({
     const all = elements ?? [];
     if (all.length === 0) return null;
 
+    // Establish the "viewport universe" — elements the user actually
+    // sees. Isolation narrows this BEFORE any other scope reasoning so
+    // the summary numbers match the geometry visible on screen (a
+    // 109-element filter that isolates 6 walls should report 6, not 109).
+    const isolationSet =
+      isolatedIds && isolatedIds.length > 0 ? new Set(isolatedIds) : null;
+    const universe = isolationSet ? all.filter((el) => isolationSet.has(el.id)) : all;
+    if (universe.length === 0) return null;
+
     const selectedIds = selectedElementIds ?? [];
     let subset: BIMElementData[];
     let scope: 'all' | 'filtered' | 'selection';
     if (selectedIds.length > 1) {
       const set = new Set(selectedIds);
-      subset = all.filter((el) => set.has(el.id));
+      subset = universe.filter((el) => set.has(el.id));
       scope = 'selection';
     } else if (filterPredicate) {
-      subset = all.filter(filterPredicate);
+      subset = universe.filter(filterPredicate);
       scope = 'filtered';
     } else {
-      subset = all;
-      scope = 'all';
+      subset = universe;
+      // When isolation is the ONLY narrowing in play, badge it as
+      // "filtered" so the panel header and "of N" caption switch on.
+      scope = isolationSet ? 'filtered' : 'all';
     }
     if (subset.length === 0) return null;
 
@@ -1278,17 +1310,28 @@ export function BIMViewer({
     }
     const categories = [...byCat.entries()].sort((a, b) => b[1] - a[1]);
     const storeys = [...byStorey.entries()].sort((a, b) => b[1] - a[1]);
+    // Per-key aggregation (SUM / AVG / DISTINCT) — replaces the
+    // hard-coded Volume/Area/Length triplet with a deep, classifier-
+    // driven roll-up that handles thickness as average, mark numbers
+    // as distinct counts, etc.  Computed for any narrowed scope —
+    // selection, filter, isolation — because each of these answers
+    // "what are the totals for THIS subset?". Skipped only for the
+    // unscoped "all" view, where the basic Volume/Area/Length triplet
+    // above already covers the model-wide rollup at lower cost.
+    const aggregations: AggResult[] =
+      scope !== 'all' ? aggregateBIMQuantities(subset) : [];
     return {
       categories,
       storeys,
       totalVolume,
       totalArea,
       totalLength,
+      aggregations,
       scope,
       total: all.length,
       shown: subset.length,
     };
-  }, [elements, filterPredicate, selectedElementIds]);
+  }, [elements, filterPredicate, selectedElementIds, isolatedIds]);
 
   const elementQuantities = useMemo(() => {
     if (!selectedElement?.quantities) return {};
@@ -1867,6 +1910,181 @@ export function BIMViewer({
                 </div>
               </div>
             )}
+            {/* Deep aggregations — any narrowed scope (selection,
+                filtered, isolated). Each numeric key is rolled up with
+                the rule that actually means something for it: SUM for
+                additive totals, AVG (with min/max) for per-element
+                dimensions, DISTINCT for categorical values. The
+                section title adapts so the user knows whether they're
+                seeing totals for "what I picked" vs "what I isolated"
+                vs "what the filter narrowed to". */}
+            {modelSummary.aggregations.length > 0 && (
+              <div className="pt-2 border-t border-border-light">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-content-tertiary mb-2">
+                  {modelSummary.scope === 'selection'
+                    ? t('bim.group_quantities_selection', {
+                        defaultValue: 'Selection quantities',
+                      })
+                    : t('bim.group_quantities_filtered', {
+                        defaultValue: 'Quantities for visible group',
+                      })}
+                </h4>
+                <div className="space-y-1">
+                  {modelSummary.aggregations.map((a) => {
+                    const fmtNum = (n: number) =>
+                      Number.isInteger(n)
+                        ? n.toLocaleString()
+                        : n.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 4,
+                          });
+                    if (a.mode === 'sum') {
+                      return (
+                        <div
+                          key={a.key}
+                          className="flex items-baseline justify-between gap-2 rounded-md bg-emerald-50/60 dark:bg-emerald-950/20 px-2 py-1"
+                          title={t('bim.agg_sum_tooltip', {
+                            defaultValue: 'Σ across {{count}} elements',
+                            count: a.count,
+                          })}
+                        >
+                          <div className="flex items-center gap-1 min-w-0">
+                            <span
+                              className="text-[9px] font-bold uppercase text-emerald-600/90 tracking-wider shrink-0"
+                              aria-hidden
+                            >
+                              Σ
+                            </span>
+                            <span className="text-[11px] text-content-secondary truncate">
+                              {a.label}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-1 shrink-0">
+                            <span className="text-[12px] font-semibold text-content-primary tabular-nums">
+                              {fmtNum(a.sum)}
+                            </span>
+                            {a.unit && (
+                              <span className="text-[9px] text-content-quaternary font-mono">
+                                {a.unit}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                    if (a.mode === 'avg') {
+                      const sameMinMax = Math.abs(a.max - a.min) < 0.0001;
+                      return (
+                        <div
+                          key={a.key}
+                          className="rounded-md bg-blue-50/50 dark:bg-blue-950/20 px-2 py-1"
+                          title={t('bim.agg_avg_tooltip', {
+                            defaultValue:
+                              'Per-element value — averaged across {{count}} elements',
+                            count: a.count,
+                          })}
+                        >
+                          <div className="flex items-baseline justify-between gap-2">
+                            <div className="flex items-center gap-1 min-w-0">
+                              <span
+                                className="text-[9px] font-bold uppercase text-blue-600/90 tracking-wider shrink-0"
+                                aria-hidden
+                              >
+                                ⌀
+                              </span>
+                              <span className="text-[11px] text-content-secondary truncate">
+                                {a.label}
+                              </span>
+                            </div>
+                            <div className="flex items-baseline gap-1 shrink-0">
+                              <span className="text-[12px] font-semibold text-content-primary tabular-nums">
+                                {fmtNum(a.avg)}
+                              </span>
+                              {a.unit && (
+                                <span className="text-[9px] text-content-quaternary font-mono">
+                                  {a.unit}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          {!sameMinMax && (
+                            <div className="flex items-center justify-end gap-2 mt-0.5 text-[9px] text-content-quaternary tabular-nums">
+                              <span>
+                                {t('bim.agg_min', { defaultValue: 'min' })}{' '}
+                                {fmtNum(a.min)}
+                              </span>
+                              <span>·</span>
+                              <span>
+                                {t('bim.agg_max', { defaultValue: 'max' })}{' '}
+                                {fmtNum(a.max)}
+                              </span>
+                              <span>·</span>
+                              <span>
+                                {t('bim.agg_uniq', {
+                                  defaultValue: '{{n}} uniq.',
+                                  n: a.uniqueValues.length,
+                                })}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+                    // DISTINCT — show up to 5 unique values inline as
+                    // chips; collapse the rest behind "+N more".
+                    const cap = 5;
+                    const head = a.uniqueValues.slice(0, cap);
+                    const rest = a.uniqueValues.length - head.length;
+                    return (
+                      <div
+                        key={a.key}
+                        className="rounded-md bg-sky-50/40 dark:bg-sky-950/20 px-2 py-1"
+                        title={t('bim.agg_distinct_tooltip', {
+                          defaultValue:
+                            'Per-element value — listing the {{n}} unique value(s) seen',
+                          n: a.uniqueValues.length,
+                        })}
+                      >
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <span className="text-[11px] text-content-secondary truncate flex-1">
+                            {a.label}
+                          </span>
+                          <span className="text-[9px] text-sky-600/90 font-bold uppercase tracking-wider shrink-0">
+                            {a.uniqueValues.length === 1
+                              ? '='
+                              : t('bim.agg_distinct_label', {
+                                  defaultValue: '{{n}} values',
+                                  n: a.uniqueValues.length,
+                                })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 flex-wrap">
+                          {head.map((v) => (
+                            <span
+                              key={v}
+                              className="inline-flex items-baseline gap-0.5 px-1.5 py-0.5 rounded border border-border-light bg-surface-secondary text-[10px] tabular-nums font-mono text-content-primary"
+                            >
+                              {fmtNum(v)}
+                              {a.unit && (
+                                <span className="text-[8px] text-content-quaternary">
+                                  {a.unit}
+                                </span>
+                              )}
+                            </span>
+                          ))}
+                          {rest > 0 && (
+                            <span className="text-[10px] text-content-quaternary italic">
+                              + {rest}{' '}
+                              {t('common.more', { defaultValue: 'more' })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             {/* Keyboard shortcuts hint */}
             <div className="pt-2 border-t border-border-light">
               <h4 className="text-[10px] font-semibold text-content-quaternary uppercase tracking-wider mb-1">
@@ -1890,8 +2108,13 @@ export function BIMViewer({
         </div>
       )}
 
-      {/* Properties panel (when element selected) — tabbed layout */}
-      {selectedElement && (
+      {/* Properties panel (when EXACTLY ONE element is selected) — tabbed
+          layout. When 2+ elements are selected the Selection summary
+          panel above takes priority at the same anchor position; showing
+          both would visually stack them on top of each other. The
+          summary aggregates the multi-pick, which is what the user
+          actually wants in that case. */}
+      {selectedElement && (!selectedElementIds || selectedElementIds.length <= 1) && (
         <div data-testid="bim-properties-panel" className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur-sm border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] flex flex-col">
           <div className="p-3 border-b border-border-light shrink-0">
             {(() => {

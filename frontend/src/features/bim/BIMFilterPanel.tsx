@@ -36,6 +36,7 @@ import {
   Unlink,
   CheckSquare,
   FileText,
+  Focus,
 } from 'lucide-react';
 import type { BIMElementGroup } from './api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
@@ -123,6 +124,15 @@ interface BIMFilterPanelProps {
   onSmartFilter?: (
     filterId: 'errors' | 'warnings' | 'unlinked_boq' | 'has_tasks' | 'has_docs',
   ) => void;
+  /** Active isolation set in the viewer.  When non-null, the panel
+   *  narrows its "visible" calculations (counts, type/storey buckets,
+   *  Link-to-BOQ button, CSV export) to just these IDs so the user sees
+   *  the same scope as the 3D viewport.  `null` means no isolation. */
+  isolatedIds?: string[] | null;
+  /** Clear the isolation set (parent → setIsolatedIds(null)).  Wired to
+   *  the "Clear" button on the isolation banner so the user can exit
+   *  isolation from the same place where its scope is displayed. */
+  onClearIsolation?: () => void;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -289,6 +299,8 @@ export default function BIMFilterPanel({
   onLinkGroupToBOQ,
   onDeleteGroup,
   onSmartFilter,
+  isolatedIds,
+  onClearIsolation,
 }: BIMFilterPanelProps) {
   const { t } = useTranslation();
 
@@ -627,9 +639,21 @@ export default function BIMFilterPanel({
     state.search.length > 0 || state.storeys.size > 0 || state.types.size > 0;
 
   // ── Grouped element tree (for element explorer) ─────────────────────
+  //
+  // When the viewport has an isolation set active (Esc-clearable subset
+  // shown by itself in 3D), the panel narrows its "visible" universe to
+  // that subset BEFORE applying the user's filter chips. This keeps the
+  // counts, Link-to-BOQ button and CSV export aligned with what the
+  // user actually sees on screen — otherwise they'd link 109 elements
+  // expecting "those few I isolated" and quietly link the whole filter.
+  const isolationSet = useMemo(
+    () => (isolatedIds && isolatedIds.length > 0 ? new Set(isolatedIds) : null),
+    [isolatedIds],
+  );
   const visibleElements = useMemo(() => {
     const search = state.search.trim().toLowerCase();
     return elements.filter((el) => {
+      if (isolationSet && !isolationSet.has(el.id)) return false;
       const tpe = getTypeKey(el, format);
       if (state.buildingsOnly && isNoiseCategory(tpe)) return false;
       if (state.storeys.size > 0 && !state.storeys.has(el.storey || '—'))
@@ -649,7 +673,7 @@ export default function BIMFilterPanel({
       }
       return true;
     });
-  }, [elements, state, format]);
+  }, [elements, state, format, isolationSet]);
 
   const groupedElements = useMemo(() => {
     const groups = new Map<string, BIMElementData[]>();
@@ -708,6 +732,45 @@ export default function BIMFilterPanel({
           </button>
         )}
       </div>
+
+      {/* Isolation banner — when the 3D viewer has an isolation set
+          active, surface it as a prominent filter-style chip at the top
+          of the panel so the user understands WHY the counts below
+          differ from the model total.  Acts as a real filter: counts
+          and the Link-to-BOQ button respect isolation, and the user
+          can exit isolation directly from this banner. */}
+      {isolatedIds && isolatedIds.length > 0 && (
+        <div className="px-4 py-2 border-b border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 shrink-0">
+          <div className="flex items-center gap-2">
+            <Focus size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-semibold text-amber-800 dark:text-amber-200">
+                {t('bim.isolation_active', { defaultValue: 'Isolation active' })}
+              </div>
+              <div className="text-[10px] text-amber-700/90 dark:text-amber-300/80 tabular-nums">
+                {t('bim.isolation_scope', {
+                  defaultValue: '{{n}} of {{total}} elements visible in viewport',
+                  n: isolatedIds.length,
+                  total: elements.length,
+                })}
+              </div>
+            </div>
+            {onClearIsolation && (
+              <button
+                type="button"
+                onClick={onClearIsolation}
+                className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-semibold bg-white dark:bg-amber-900/50 text-amber-700 dark:text-amber-200 border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/70 transition-colors"
+                title={t('bim.isolation_clear_title', {
+                  defaultValue: 'Exit isolation — show all model elements again',
+                })}
+              >
+                <X size={10} />
+                {t('bim.isolation_clear', { defaultValue: 'Clear' })}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Search */}
       <div className="px-4 py-3 border-b border-border-light shrink-0">
@@ -769,11 +832,25 @@ export default function BIMFilterPanel({
         {/* Visible count + clear */}
         <div className="flex items-center justify-between mt-2 text-[11px] text-content-tertiary">
           <span>
-            {t('bim.filter_visible_count', {
-              defaultValue: '{{visible}} of {{total}} visible',
-              visible: visibleElements.length,
-              total: elements.length,
-            })}
+            {isolationSet ? (
+              <>
+                <span className="inline-flex items-center gap-1 mr-1 px-1 py-0.5 rounded bg-oe-blue/10 text-oe-blue text-[10px] font-semibold">
+                  {t('bim.isolated', { defaultValue: 'Isolated' })}
+                </span>
+                {t('bim.filter_visible_in_isolation', {
+                  defaultValue: '{{visible}} of {{isolated}} isolated ({{total}} total)',
+                  visible: visibleElements.length,
+                  isolated: isolationSet.size,
+                  total: elements.length,
+                })}
+              </>
+            ) : (
+              t('bim.filter_visible_count', {
+                defaultValue: '{{visible}} of {{total}} visible',
+                visible: visibleElements.length,
+                total: elements.length,
+              })
+            )}
           </span>
           {hasActiveFilters && (
             <button onClick={clearAll} className="text-oe-blue hover:underline">
