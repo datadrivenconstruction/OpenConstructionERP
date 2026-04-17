@@ -1844,12 +1844,12 @@ function DrawingFilmstrip({
         />
       </button>
 
-      {/* Collapsible drawing cards */}
+      {/* Collapsible drawing cards — taller for clearer thumbnails + metadata */}
       <div
         className="overflow-hidden transition-all duration-300 ease-in-out"
-        style={{ maxHeight: expanded ? '100px' : '0px', opacity: expanded ? 1 : 0 }}
+        style={{ maxHeight: expanded ? '150px' : '0px', opacity: expanded ? 1 : 0 }}
       >
-        <div className="flex items-center gap-2 px-4 pb-2 overflow-x-auto">
+        <div className="flex items-center gap-2.5 px-4 pb-3 pt-1 overflow-x-auto">
           {isLoading ? (
             <Loader2 size={14} className="animate-spin text-slate-400" />
           ) : drawings.length > 0 ? (
@@ -1858,7 +1858,7 @@ function DrawingFilmstrip({
                 key={d.id}
                 onClick={() => onSelectDrawing(d.id)}
                 className={clsx(
-                  'group relative shrink-0 w-44 text-start rounded-lg border transition-all duration-200 overflow-hidden',
+                  'group relative shrink-0 w-52 h-[108px] text-start rounded-lg border transition-all duration-200 overflow-hidden flex flex-col',
                   activeDrawingId === d.id
                     ? 'border-blue-500/80 bg-blue-500/10 shadow-md shadow-blue-500/20'
                     : 'border-[#3a3a3a] bg-[#363636] hover:bg-[#3d3d3d] hover:border-[#4a4a4a]',

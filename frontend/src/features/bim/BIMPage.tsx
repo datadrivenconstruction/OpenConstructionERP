@@ -1404,6 +1404,8 @@ export function BIMPage() {
   // from the URL after one shot so a refresh doesn't reapply it.
   const [searchParams, setSearchParams] = useSearchParams();
   const deepLinkElementId = searchParams.get('element');
+  const deepLinkDocName = searchParams.get('docName');
+  const deepLinkDocId = searchParams.get('docId');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadConvertedName, setUploadConvertedName] = useState<string | null>(null);
   const [showUploadOverride, setShowUploadOverride] = useState<boolean | null>(null);
@@ -1454,6 +1456,36 @@ export function BIMPage() {
   const showFullPageUpload = showUploadOverride !== null ? showUploadOverride : !hasModels;
 
   useEffect(() => { if (hasModels && showUploadOverride === false) setShowUploadOverride(null); }, [hasModels, showUploadOverride]);
+
+  /* ── Deep-link from Documents page ──────────────────────────────────────
+   * When navigating from /documents with ?docName= or ?docId=, try to
+   * match an existing BIM model by filename (strip extension too).  If
+   * found, auto-select it.  If not, open the upload panel so the user
+   * can upload + convert right away.  URL params are cleaned up after
+   * one shot so a refresh doesn't keep re-triggering. */
+  useEffect(() => {
+    if (!deepLinkDocName && !deepLinkDocId) return;
+    if (!models.length) return;
+    const targetName = deepLinkDocName ? decodeURIComponent(deepLinkDocName).toLowerCase() : '';
+    const nameNoExt = targetName.replace(/\.[^.]+$/, '');
+    const match = models.find((m) => {
+      const mLower = (m.name || '').toLowerCase();
+      return mLower === targetName || mLower === nameNoExt || mLower.startsWith(nameNoExt);
+    });
+    if (match) {
+      setActiveModelId(match.id);
+      setShowUploadOverride(false);
+    } else {
+      // No matching model — open the upload panel so the user can convert.
+      setUploadOpen(true);
+      if (deepLinkDocName) setUploadConvertedName(decodeURIComponent(deepLinkDocName));
+    }
+    const next = new URLSearchParams(searchParams);
+    next.delete('docName');
+    next.delete('docId');
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLinkDocName, deepLinkDocId, models.length]);
 
   const activeModel = useMemo(() => models.find((m) => m.id === activeModelId) ?? null, [models, activeModelId]);
 
