@@ -687,33 +687,40 @@ function UploadPanel({
             {disciplines.map((d) => <option key={d.v} value={d.v}>{d.l}</option>)}
           </select>
         </div>
-        <div>
-          <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}</label>
-          <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={conversionDepth} onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'medium' | 'complete')}>
-            <option value="standard">{t('bim.upload_depth_standard', { defaultValue: 'Standard · main categories (fast)' })}</option>
-            <option value="medium">{t('bim.upload_depth_medium', { defaultValue: 'Medium · extended categories (balanced)' })}</option>
-            <option value="complete">{t('bim.upload_depth_complete', { defaultValue: 'Complete · all categories (slow)' })}</option>
-          </select>
-          <p className="mt-1 text-[10px] text-content-quaternary leading-relaxed">{t('bim.upload_depth_help', { defaultValue: 'Controls how many Revit categories are extracted. Element IDs and full properties are always preserved.' })}</p>
-        </div>
-        <div>
-          <label className="flex items-start gap-2 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={generatePdfSheets}
-              onChange={(e) => setGeneratePdfSheets(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-border-medium text-oe-blue focus:ring-1 focus:ring-oe-blue cursor-pointer"
-            />
-            <div className="flex-1 min-w-0">
-              <span className="block text-[11px] font-medium text-content-primary group-hover:text-oe-blue transition-colors">
-                {t('bim.upload_generate_pdf_label', { defaultValue: 'Also export existing project sheets as PDF (background)' })}
-              </span>
-              <span className="block text-[10px] text-content-quaternary leading-relaxed mt-0.5">
-                {t('bim.upload_generate_pdf_help', { defaultValue: 'Exports the sheets the designer prepared inside the model as a single PDF into Documents. Runs after the model is ready — upload is not delayed.' })}
-              </span>
+        {/* Conversion depth and PDF-sheet export are RVT-only — the options
+            control Revit category extraction / sheet export. Hide them for
+            IFC uploads where neither applies. */}
+        {file && getFileExtension(file.name) === '.rvt' && (
+          <>
+            <div>
+              <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}</label>
+              <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={conversionDepth} onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'medium' | 'complete')}>
+                <option value="standard">{t('bim.upload_depth_standard', { defaultValue: 'Standard · main categories (fast)' })}</option>
+                <option value="medium">{t('bim.upload_depth_medium', { defaultValue: 'Medium · extended categories (balanced)' })}</option>
+                <option value="complete">{t('bim.upload_depth_complete', { defaultValue: 'Complete · all categories (slow)' })}</option>
+              </select>
+              <p className="mt-1 text-[10px] text-content-quaternary leading-relaxed">{t('bim.upload_depth_help', { defaultValue: 'Controls how many Revit categories are extracted. Element IDs and full properties are always preserved.' })}</p>
             </div>
-          </label>
-        </div>
+            <div>
+              <label className="flex items-start gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={generatePdfSheets}
+                  onChange={(e) => setGeneratePdfSheets(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-border-medium text-oe-blue focus:ring-1 focus:ring-oe-blue cursor-pointer"
+                />
+                <div className="flex-1 min-w-0">
+                  <span className="block text-[11px] font-medium text-content-primary group-hover:text-oe-blue transition-colors">
+                    {t('bim.upload_generate_pdf_label', { defaultValue: 'Also export existing project sheets as PDF (background)' })}
+                  </span>
+                  <span className="block text-[10px] text-content-quaternary leading-relaxed mt-0.5">
+                    {t('bim.upload_generate_pdf_help', { defaultValue: 'Exports the sheets the designer prepared inside the model as a single PDF into Documents. Runs after the model is ready — upload is not delayed.' })}
+                  </span>
+                </div>
+              </label>
+            </div>
+          </>
+        )}
 
         {uploading && (
           <div className="space-y-2">
@@ -1108,7 +1115,9 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                 {file && (
                   <div className="mt-4 space-y-3">
                     <input type="text" className="w-full text-sm py-2.5 px-4 rounded-xl border border-border-light bg-surface-secondary text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/30" placeholder={t('bim.model_name')} value={modelName} onChange={(e) => setModelName(e.target.value)} />
-                    {isCADFile(file.name) && (
+                    {/* RVT-only options — Revit category extraction depth
+                        and sheet-to-PDF export don't apply to IFC uploads. */}
+                    {getFileExtension(file.name) === '.rvt' && (
                       <>
                         <div>
                           <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">
