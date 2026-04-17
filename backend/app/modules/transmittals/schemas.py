@@ -41,6 +41,7 @@ class ItemCreate(BaseModel):
     """Add a line item to a transmittal."""
 
     document_id: UUID | None = None
+    revision_id: UUID | None = None
     item_number: int = Field(..., ge=1)
     description: str | None = Field(default=None, max_length=500)
     notes: str | None = Field(default=None, max_length=5000)
@@ -54,6 +55,7 @@ class ItemResponse(BaseModel):
     id: UUID
     transmittal_id: UUID
     document_id: UUID | None = None
+    revision_id: UUID | None = None
     item_number: int
     description: str | None = None
     notes: str | None = None

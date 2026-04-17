@@ -32,6 +32,8 @@ export interface TransmittalItem {
   document_title: string;
   document_ref: string | null;
   revision: string | null;
+  revision_id?: string | null;
+  document_id?: string | null;
 }
 
 export interface Transmittal {
@@ -57,12 +59,21 @@ export interface TransmittalFilters {
   status?: TransmittalStatus | '';
 }
 
+export interface CreateItemPayload {
+  document_id?: string;
+  revision_id?: string;
+  item_number: number;
+  description?: string;
+  notes?: string;
+}
+
 export interface CreateTransmittalPayload {
   project_id: string;
   subject: string;
   purpose_code: TransmittalPurpose;
   cover_note?: string;
   response_due_date?: string;
+  items?: CreateItemPayload[];
 }
 
 /* ── API Functions ─────────────────────────────────────────────────────── */

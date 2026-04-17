@@ -9,7 +9,12 @@ import uuid
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.dwg_takeoff.models import DwgAnnotation, DwgDrawing, DwgDrawingVersion
+from app.modules.dwg_takeoff.models import (
+    DwgAnnotation,
+    DwgDrawing,
+    DwgDrawingVersion,
+    DwgEntityGroup,
+)
 
 
 class DwgDrawingRepository:
@@ -180,6 +185,49 @@ class DwgAnnotationRepository:
     async def delete(self, annotation_id: uuid.UUID) -> None:
         """Hard delete an annotation."""
         item = await self.get_by_id(annotation_id)
+        if item is not None:
+            await self.session.delete(item)
+            await self.session.flush()
+
+
+class DwgEntityGroupRepository:
+    """Data access for DwgEntityGroup models (RFC 11)."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def get_by_id(self, group_id: uuid.UUID) -> DwgEntityGroup | None:
+        """Get entity group by ID."""
+        return await self.session.get(DwgEntityGroup, group_id)
+
+    async def list_for_drawing(
+        self,
+        drawing_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 200,
+    ) -> tuple[list[DwgEntityGroup], int]:
+        """List saved groups for a drawing with pagination."""
+        base = select(DwgEntityGroup).where(DwgEntityGroup.drawing_id == drawing_id)
+
+        count_stmt = select(func.count()).select_from(base.subquery())
+        total = (await self.session.execute(count_stmt)).scalar_one()
+
+        stmt = base.order_by(DwgEntityGroup.created_at.desc()).offset(offset).limit(limit)
+        result = await self.session.execute(stmt)
+        items = list(result.scalars().all())
+
+        return items, total
+
+    async def create(self, item: DwgEntityGroup) -> DwgEntityGroup:
+        """Insert a new entity group."""
+        self.session.add(item)
+        await self.session.flush()
+        return item
+
+    async def delete(self, group_id: uuid.UUID) -> None:
+        """Hard delete an entity group."""
+        item = await self.get_by_id(group_id)
         if item is not None:
             await self.session.delete(item)
             await self.session.flush()

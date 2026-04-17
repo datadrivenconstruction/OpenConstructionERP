@@ -520,4 +520,24 @@ class BIMElementGroupResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+
+# ── Model schema introspection (RFC 24 — Quantity Rules editor) ──────────────
+
+
+class BIMModelSchemaResponse(BaseModel):
+    """Distinct types + property keys/values harvested from a BIM model.
+
+    Feeds the quantity-rule editor comboboxes so the user picks real values
+    from their actual model instead of typing blindly. Caps at 1000 distinct
+    values per property to protect the response payload.
+    """
+
+    distinct_types: list[str] = Field(default_factory=list)
+    property_keys: dict[str, list[str]] = Field(default_factory=dict)
+    property_keys_truncated: dict[str, bool] = Field(default_factory=dict)
+    available_quantities: list[str] = Field(
+        default_factory=lambda: ["area_m2", "volume_m3", "length_m", "weight_kg", "count"],
+    )
+    element_count: int = 0
     member_element_ids: list[UUID] = Field(default_factory=list)

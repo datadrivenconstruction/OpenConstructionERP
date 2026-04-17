@@ -4,11 +4,12 @@ Tables:
     oe_dwg_takeoff_drawing          — uploaded DWG/DXF drawing files
     oe_dwg_takeoff_drawing_version  — parsed versions with layer/entity data
     oe_dwg_takeoff_annotation       — user annotations on drawings
+    oe_dwg_entity_group             — saved multi-entity selections (RFC 11)
 """
 
 import uuid
 
-from sqlalchemy import Float, ForeignKey, Index, Integer, JSON, String, Text
+from sqlalchemy import JSON, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -138,3 +139,41 @@ class DwgAnnotation(Base):
 
     def __repr__(self) -> str:
         return f"<DwgAnnotation {self.annotation_type} drawing={self.drawing_id}>"
+
+
+class DwgEntityGroup(Base):
+    """Saved multi-entity selection on a DWG drawing (RFC 11).
+
+    A group is a named bag of entity ids that can be linked as a single
+    unit to a BOQ position. Stored as a separate table so groups have
+    their own lifecycle (rename, delete, audit) independent of the
+    underlying annotations.
+    """
+
+    __tablename__ = "oe_dwg_entity_group"
+
+    drawing_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_dwg_takeoff_drawing.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    entity_ids: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=list, server_default="[]"
+    )
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    created_by: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+
+    __table_args__ = (
+        Index("ix_dwg_entity_group_drawing", "drawing_id"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<DwgEntityGroup {self.name} drawing={self.drawing_id} n={len(self.entity_ids or [])}>"

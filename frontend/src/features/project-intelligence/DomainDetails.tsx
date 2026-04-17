@@ -69,6 +69,8 @@ interface DomainDetailsProps {
   onSelectDomain: (domain: string | null) => void;
   onAction: (actionId: string) => void;
   actions: ActionDef[];
+  /** RFC 25: restrict the tab bar to a subset (e.g. BOQ / Cost / Schedule / Risk). */
+  allowedDomains?: string[];
 }
 
 export function DomainDetails({
@@ -78,14 +80,18 @@ export function DomainDetails({
   onSelectDomain,
   onAction,
   actions,
+  allowedDomains,
 }: DomainDetailsProps) {
   const { t } = useTranslation();
+  const visibleTabs = allowedDomains
+    ? DOMAIN_TABS.filter((tab) => allowedDomains.includes(tab.id))
+    : DOMAIN_TABS;
 
   return (
     <div className="bg-surface-secondary rounded-xl border border-border-light overflow-hidden">
       {/* Tab bar */}
       <div className="flex overflow-x-auto border-b border-border-light px-2 pt-2 gap-0.5">
-        {DOMAIN_TABS.map((tab) => {
+        {visibleTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = selectedDomain === tab.id;
           const score = scores[tab.id] ?? 0;

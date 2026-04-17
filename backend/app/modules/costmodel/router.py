@@ -22,7 +22,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.costmodel.schemas import (
     BudgetLineCreate,
     BudgetLineResponse,
@@ -36,6 +36,7 @@ from app.modules.costmodel.schemas import (
     SnapshotCreate,
     SnapshotResponse,
     SnapshotUpdate,
+    VarianceResponse,
     WhatIfAdjustments,
     WhatIfResult,
 )
@@ -504,3 +505,23 @@ async def run_monte_carlo(
         "std_dev": round((sum((r - mean) ** 2 for r in results) / n) ** 0.5, 2),
         "histogram": histogram,
     }
+
+
+# ── Project Intelligence (RFC 25) ───────────────────────────────────────────
+
+
+@router.get(
+    "/variance/",
+    response_model=VarianceResponse,
+    summary="Budget variance KPI (RFC 25)",
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_variance(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(..., description="Project scope"),
+    service: CostModelService = Depends(_get_service),
+) -> VarianceResponse:
+    """Return budget-variance KPI for the Estimation Dashboard."""
+    await verify_project_access(project_id, user_id, session)
+    return await service.get_variance(project_id)

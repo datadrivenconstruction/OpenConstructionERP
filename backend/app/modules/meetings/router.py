@@ -60,6 +60,7 @@ def _meeting_to_response(meeting: object) -> MeetingResponse:
         action_items=meeting.action_items or [],  # type: ignore[attr-defined]
         minutes=meeting.minutes,  # type: ignore[attr-defined]
         status=meeting.status,  # type: ignore[attr-defined]
+        document_ids=[str(d) for d in (getattr(meeting, "document_ids", None) or [])],
         created_by=meeting.created_by,  # type: ignore[attr-defined]
         metadata=getattr(meeting, "metadata_", {}),
         created_at=meeting.created_at,  # type: ignore[attr-defined]

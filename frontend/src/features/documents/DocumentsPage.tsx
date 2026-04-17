@@ -436,6 +436,8 @@ export function DocumentsPage() {
   const debouncedQuery = useDebounce(query, 300);
   const [category, setCategory] = useState('all');
   const [sortBy, setSortBy] = useState<SortField>('date');
+  const [fileTypeFilter, setFileTypeFilter] = useState<'all' | 'pdf' | 'dwg' | 'ifc' | 'rvt' | 'other'>('all');
+  const [revisionFilter, setRevisionFilter] = useState<'all' | 'latest' | 'versioned'>('all');
   const [dragOver, setDragOver] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<DocItem | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -522,9 +524,56 @@ export function DocumentsPage() {
 
   /* ── Sorted documents ───────────────────────────────────────────────── */
 
+  /**
+   * Classify a document into a file-type bucket used by the client-side
+   * type filter.  Works off both MIME and filename extension for reliability
+   * against documents with generic application/octet-stream mime types.
+   */
+  const classifyFileType = useCallback(
+    (doc: DocItem): 'pdf' | 'dwg' | 'ifc' | 'rvt' | 'other' => {
+      const mime = doc.mime_type.toLowerCase();
+      const lower = doc.name.toLowerCase();
+      if (mime.includes('pdf') || lower.endsWith('.pdf')) return 'pdf';
+      if (/\.(dwg|dxf)$/.test(lower)) return 'dwg';
+      if (lower.endsWith('.ifc')) return 'ifc';
+      if (lower.endsWith('.rvt')) return 'rvt';
+      return 'other';
+    },
+    [],
+  );
+
   const sortedDocuments = useMemo(() => {
     const docs = documents ?? [];
-    return [...docs].sort((a, b) => {
+    // Group by name to compute version counts for the revision filter
+    const versionCountByName = new Map<string, number>();
+    for (const d of docs) {
+      versionCountByName.set(d.name, (versionCountByName.get(d.name) ?? 0) + 1);
+    }
+    // Track latest document per name (highest version, tie-break by most recent created_at)
+    const latestByName = new Map<string, DocItem>();
+    for (const d of docs) {
+      const current = latestByName.get(d.name);
+      if (!current) {
+        latestByName.set(d.name, d);
+        continue;
+      }
+      if (
+        d.version > current.version ||
+        (d.version === current.version &&
+          new Date(d.created_at).getTime() > new Date(current.created_at).getTime())
+      ) {
+        latestByName.set(d.name, d);
+      }
+    }
+
+    const filtered = docs.filter((d) => {
+      if (fileTypeFilter !== 'all' && classifyFileType(d) !== fileTypeFilter) return false;
+      if (revisionFilter === 'latest' && latestByName.get(d.name)?.id !== d.id) return false;
+      if (revisionFilter === 'versioned' && (versionCountByName.get(d.name) ?? 1) < 2) return false;
+      return true;
+    });
+
+    return filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name);
@@ -535,7 +584,7 @@ export function DocumentsPage() {
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-  }, [documents, sortBy]);
+  }, [documents, sortBy, fileTypeFilter, revisionFilter, classifyFileType]);
 
   /* ── Stats ──────────────────────────────────────────────────────────── */
 
@@ -953,6 +1002,45 @@ export function DocumentsPage() {
               {t(`documents.cat_${c}`, { defaultValue: c === 'all' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1) })}
             </button>
           ))}
+        </div>
+        {/* File-type filter (client-side) */}
+        <div className="relative">
+          <select
+            value={fileTypeFilter}
+            onChange={(e) =>
+              setFileTypeFilter(e.target.value as 'all' | 'pdf' | 'dwg' | 'ifc' | 'rvt' | 'other')
+            }
+            aria-label={t('documents.filter_file_type', { defaultValue: 'Filter by file type' })}
+            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+          >
+            <option value="all">{t('documents.type_all', { defaultValue: 'All types' })}</option>
+            <option value="pdf">{t('documents.type_pdf', { defaultValue: 'PDF' })}</option>
+            <option value="dwg">{t('documents.type_dwg', { defaultValue: 'DWG' })}</option>
+            <option value="ifc">{t('documents.type_ifc', { defaultValue: 'IFC' })}</option>
+            <option value="rvt">{t('documents.type_rvt', { defaultValue: 'RVT' })}</option>
+            <option value="other">{t('documents.type_other', { defaultValue: 'Other' })}</option>
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+            <ChevronDown size={14} />
+          </div>
+        </div>
+        {/* Revision filter (client-side) */}
+        <div className="relative">
+          <select
+            value={revisionFilter}
+            onChange={(e) => setRevisionFilter(e.target.value as 'all' | 'latest' | 'versioned')}
+            aria-label={t('documents.filter_revision', { defaultValue: 'Filter by revision' })}
+            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+          >
+            <option value="all">{t('documents.rev_all', { defaultValue: 'All revisions' })}</option>
+            <option value="latest">{t('documents.rev_latest', { defaultValue: 'Latest only' })}</option>
+            <option value="versioned">
+              {t('documents.rev_versioned', { defaultValue: 'Has multiple versions' })}
+            </option>
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+            <ChevronDown size={14} />
+          </div>
         </div>
         <SortDropdown value={sortBy} onChange={setSortBy} />
       </div>

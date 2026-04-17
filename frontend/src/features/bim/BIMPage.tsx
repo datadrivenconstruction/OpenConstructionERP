@@ -52,8 +52,9 @@ import { useConfirm } from '@/shared/hooks/useConfirm';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import BIMFilterPanel from './BIMFilterPanel';
-import BIMLinkedBOQPanel from './BIMLinkedBOQPanel';
 import BIMGroupsPanel from './BIMGroupsPanel';
+import BIMRightPanelTabs from './BIMRightPanelTabs';
+import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
 import { BIMConverterStatusBanner } from './BIMConverterStatusBanner';
 import { InstallConverterPrompt } from './InstallConverterPrompt';
 import AddToBOQModal from './AddToBOQModal';
@@ -1418,7 +1419,10 @@ export function BIMPage() {
   const [uploadConvertedName, setUploadConvertedName] = useState<string | null>(null);
   const [showUploadOverride, setShowUploadOverride] = useState<boolean | null>(null);
   const [filterPanelOpen, setFilterPanelOpen] = useState(true);
-  const [boqPanelOpen, setBoqPanelOpen] = useState(false);
+  // Right-panel visibility lives in the shared BIM viewer store so the
+  // keyboard shortcut `S` (RFC 19) can open the Tools tab from anywhere.
+  const boqPanelOpen = useBIMViewerStore((s) => s.rightPanelOpen);
+  const setBoqPanelOpen = useBIMViewerStore((s) => s.setRightPanelOpen);
   const [filterPredicate, setFilterPredicate] = useState<
     ((el: BIMElementData) => boolean) | null
   >(null);
@@ -2119,7 +2123,7 @@ export function BIMPage() {
               </button>
 
               <button
-                onClick={() => setBoqPanelOpen((p) => !p)}
+                onClick={() => setBoqPanelOpen(!boqPanelOpen)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
                   boqPanelOpen
                     ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
@@ -2409,20 +2413,30 @@ export function BIMPage() {
         )}
         </div>
 
-        {/* Linked BOQ sidebar -- right side, mirrors filter panel on left.
+        {/* Right-panel tab container (RFC 19 §4.5): Properties / Layers /
+            Tools / Groups.
             z-index 15 keeps it below the upload panel (z-30) when both are open. */}
         {activeModelId && !isModelNonReady && elements.length > 0 && boqPanelOpen && (
-          <div className="absolute top-0 end-0 h-full z-[15] overflow-y-auto">
-            <BIMLinkedBOQPanel
+          <div className="absolute top-0 end-0 h-full z-[15] w-[340px] bg-surface-primary border-s border-border-light flex flex-col">
+            <BIMRightPanelTabs
+              modelId={activeModelId}
               elements={elements}
-              onHighlightElements={(ids) => {
+              savedGroups={savedGroups}
+              projectId={projectId}
+              onClose={() => setBoqPanelOpen(false)}
+              onIsolateGroup={handleIsolateGroup}
+              onHighlightGroup={handleHighlightGroup}
+              onLinkGroupToBOQ={handleLinkGroupToBOQ}
+              onNavigateToBOQ={handleNavigateToBOQ}
+              onDeleteGroup={handleDeleteGroup}
+              onGroupUpdated={handleGroupUpdated}
+              onHighlightBOQElements={(ids) => {
                 if (ids.length > 0) {
                   setIsolatedIds(ids);
                 } else {
                   setIsolatedIds(null);
                 }
               }}
-              onClose={() => setBoqPanelOpen(false)}
             />
           </div>
         )}

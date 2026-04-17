@@ -10,7 +10,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-
 # ── Drawing schemas ────────────────────────────────────────────────────
 
 
@@ -208,6 +207,51 @@ class DwgMeasurementResult(BaseModel):
     value: float
     unit: str = "m"
     method: str = "calculated"
+
+
+# ── Entity Group schemas (RFC 11) ──────────────────────────────────────
+
+
+class DwgEntityGroupCreate(BaseModel):
+    """Create a saved group of DWG entities."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    drawing_id: UUID
+    entity_ids: list[str] = Field(..., min_length=1)
+    name: str = Field(..., min_length=1, max_length=200)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class DwgEntityGroupResponse(BaseModel):
+    """A saved entity group returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    drawing_id: UUID
+    entity_ids: list[str] = Field(default_factory=list)
+    name: str
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    created_at: datetime
+    updated_at: datetime
+
+
+# ── Offline readiness (R3 #9) ──────────────────────────────────────────
+
+
+class DwgOfflineReadinessResponse(BaseModel):
+    """Local-converter availability probe result for the DWG takeoff page.
+
+    Sibling to the BIM converter-preflight endpoint. ``ready`` is the
+    top-level traffic light shown in the UI badge; ``converter_available``
+    is what actually drives it (everything else already runs locally).
+    """
+
+    ready: bool
+    converter_available: bool
+    version: str | None = None
+    message: str
 
 
 # Forward reference resolution
