@@ -14,6 +14,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.8.3',
+    date: '2026-04-17',
+    changes: [
+      'BOQ Linked Geometry "Apply to BOQ" column: redesigned "Set as quantity" buttons — gradient CTA for SUM rows, hover-to-apply chips with arrow indicators for DISTINCT values',
+      'BIM filmstrip always-visible: removed conditional that made "Your Models" bar vanish when models were empty or during LandingPage↔main-view transitions; shows "No models yet" empty state instead',
+      'Dashboard: new compact file-upload drop zone that writes into the Documents module — toast + live count with link to /documents',
+      'Cross-link module uploads → Documents: every BIM model, DWG drawing, and Takeoff PDF uploaded via its native module now also appears in /documents with source_module/source_id metadata (no file duplication)',
+      'DocumentsPage routing: prefers metadata.source_module over filename extension — routes straight back to the source module (bim_hub / dwg_takeoff / takeoff)',
+    ],
+  },
+  {
     version: '1.8.2',
     date: '2026-04-17',
     changes: [

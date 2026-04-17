@@ -1312,18 +1312,27 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
         </div>
       </div>
 
-      {/* ── Bottom Filmstrip: Your Models (fixed, like DWG Takeoff) ── */}
-      {landingModels && landingModels.length > 0 && (
-        <div className="shrink-0 border-t border-border-light bg-surface-primary">
+      {/* ── Bottom Filmstrip: Your Models — always visible so the user
+           keeps a consistent anchor to switch or upload models.
+           Previously guarded by `landingModels.length > 0` which made the
+           panel appear on first render then vanish when the LandingPage
+           unmounted into the main view.  Keeping it always-rendered with
+           an empty-state string removes that flicker. ── */}
+      <div className="shrink-0 border-t border-border-light bg-surface-primary">
           <div className="flex items-center px-4 py-1.5">
             <Database size={14} className="text-content-tertiary mr-2 shrink-0" />
             <span className="text-xs font-semibold text-content-primary">
               {t('bim.your_models', { defaultValue: 'Your Models' })}
             </span>
-            <span className="text-[11px] text-content-quaternary ml-1.5">({landingModels.length})</span>
+            <span className="text-[11px] text-content-quaternary ml-1.5">({(landingModels ?? []).length})</span>
           </div>
           <div className="flex items-center gap-2.5 px-4 pb-2.5 overflow-x-auto">
-            {landingModels.map((m) => {
+            {(!landingModels || landingModels.length === 0) && (
+              <span className="text-[11px] text-content-quaternary italic py-1">
+                {t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}
+              </span>
+            )}
+            {(landingModels ?? []).map((m) => {
               const fmt = (m.model_format || m.format || '').toUpperCase();
               const isReady = m.status === 'ready';
               const isProcessing = m.status === 'processing';
@@ -1373,7 +1382,6 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
             })}
           </div>
         </div>
-      )}
     </div>
   );
 }

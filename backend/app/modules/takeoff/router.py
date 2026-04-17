@@ -2085,6 +2085,10 @@ async def upload_document(
                 version=1,
                 uploaded_by=user_id or "",
                 tags=["takeoff", "pdf"],
+                metadata_={
+                    "source_module": "takeoff",
+                    "source_id": str(doc.id),
+                },
             )
             service.session.add(xlink_doc)
             await service.session.flush()

@@ -5,6 +5,33 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.3] — 2026-04-17
+
+### BOQ quantity CTA, BIM filmstrip fix, Dashboard upload, cross-link
+
+- **BOQ Linked Geometry → "Apply to BOQ" CTA refresh.** The "Set as
+  quantity" buttons are now prominent — a green gradient CTA with arrow
+  on every SUM row, and hover-reveal chips with an arrow indicator for
+  DISTINCT values. `CheckCircle2` badge replaces the plain "current" tag.
+- **BIM filmstrip no longer disappears.** Removed the
+  `landingModels.length > 0` conditional that hid the "Your Models" bar
+  between LandingPage unmount and main-view mount; the filmstrip is now
+  always rendered with a "No models yet" empty state so users keep a
+  consistent anchor to switch or upload models.
+- **Dashboard upload dropzone.** New `QuickUploadCard` component drops
+  files straight into the Documents module with client-side 100 MB limit,
+  toasts, live document count, and a `→ Documents` jump link.
+- **Cross-link module uploads into Documents.** BIM (`upload_cad_file`),
+  DWG Takeoff (`DwgTakeoffService.upload_drawing`), and PDF Takeoff
+  (`takeoff/router.py upload_document`) now best-effort create a Document
+  row pointing at the same physical file (no duplication) with
+  `metadata.source_module` + `source_id` so every file a user uploads —
+  in any module — is visible in `/documents`.
+- **DocumentsPage routing prefers metadata.** `routeForDocument` and
+  `isCardClickable` read `metadata.source_module` first and fall back to
+  filename extension, so cross-linked files always jump back to the
+  correct module.
+
 ## [1.8.2] — 2026-04-17
 
 ### Documents routing, BOQ link fixes, DWG filmstrip
