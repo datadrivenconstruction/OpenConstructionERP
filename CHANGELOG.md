@@ -5,6 +5,35 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1] — 2026-04-17
+
+### DWG Takeoff depth pass + Takeoff decorative background
+
+- **DWG ↔ BOQ deep linking** — full picker mirrors the PDF-takeoff flow:
+  project + BOQ dropdowns, pick-existing-or-create-and-link, search filter,
+  already-linked badge. On link, a `text_pin` annotation is auto-created at
+  the selected entity's centroid (if none exists), `linkAnnotationToBoq`
+  ties it to the position, and the position's `quantity` + `unit` +
+  `metadata.{dwg_drawing_id, dwg_entity_id, linked_annotation_id}` are
+  updated — matching the PDF linking model end-to-end.
+- **DWG summary bar** in the right panel: total entities, Σ area, Σ distance,
+  plus a one-click CSV export of all measurements (type, text, value, unit,
+  linked position id).
+- **DWG right panel refinement** — back to light theme, width bumped to 72px,
+  elevated shadow for separation from the dark canvas.
+- **DWG toolbar palette** — white-glass on dark `#3f3f3f` canvas so tool
+  icons read clearly in both light and dark app themes.
+- **Takeoff decorative background** — field-surveyor chalkmarks (rectangles,
+  irregular polygons, distance dimension lines, vertex pins, scale ruler) at
+  ~6% opacity, fixed to viewport so both Measurements and Documents tabs
+  share the same bg.
+- **Documents API** — frontend wrappers for general-document upload/list/
+  delete (`uploadDocument`, `fetchDocuments`, `deleteDocument`). Foundation
+  for the upcoming Dashboard ↔ Documents module integration.
+- **Demo storyboard** — full 6-minute walkthrough script saved to
+  `docs/VIDEO_DEMO_v1.8.md` (hook → CAD/BIM → takeoff → BOQ → validation
+  → tender → 4D/5D).
+
 ## [1.8.0] — 2026-04-17
 
 ### BOQ ↔ Takeoff linking, UI polish sprint, decorative backgrounds

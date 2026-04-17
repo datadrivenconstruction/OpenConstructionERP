@@ -34,12 +34,16 @@ import {
   X,
   ChevronUp,
   ShieldCheck,
+  Link2,
 } from 'lucide-react';
 import { Badge, ConfirmDialog, ElementInfoPopover, type DWGElementPayload } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { apiGet } from '@/shared/lib/api';
+import { boqApi, normalizePositions, type Position } from '@/features/boq/api';
+import { projectsApi } from '@/features/projects/api';
 import {
   fetchDrawings,
   uploadDrawing,
@@ -48,6 +52,7 @@ import {
   fetchAnnotations,
   createAnnotation,
   deleteAnnotation,
+  linkAnnotationToBoq,
 } from './api';
 import type { DxfEntity, DxfLayer, DwgAnnotation, CreateAnnotationPayload } from './api';
 import { DxfViewer, type EntitySelectEvent } from './components/DxfViewer';
@@ -198,6 +203,64 @@ function toDWGElementPayload(
   };
 }
 
+/**
+ * Compute a geometric centroid for a DXF entity. Used as the insertion
+ * point for the `text_pin` annotation that backs a BOQ link.  Falls back
+ * sensibly when the entity doesn't carry the shape it "should" (defensive —
+ * DXF files in the wild are messy).
+ */
+function computeEntityCentroid(entity: DxfEntity): { x: number; y: number } {
+  if (entity.type === 'LINE' && entity.start && entity.end) {
+    return {
+      x: (entity.start.x + entity.end.x) / 2,
+      y: (entity.start.y + entity.end.y) / 2,
+    };
+  }
+  if (entity.vertices && entity.vertices.length > 0) {
+    const n = entity.vertices.length;
+    const sum = entity.vertices.reduce(
+      (acc, v) => ({ x: acc.x + v.x, y: acc.y + v.y }),
+      { x: 0, y: 0 },
+    );
+    return { x: sum.x / n, y: sum.y / n };
+  }
+  if (entity.start) return entity.start;
+  return { x: 0, y: 0 };
+}
+
+/**
+ * Derive the primary BOQ-relevant measurement from a DXF entity.
+ * Returns the canonical backend unit (`m` / `m2`) and rounded value,
+ * or null when the entity carries no measurable geometry.
+ */
+function extractEntityMeasurement(
+  entity: DxfEntity,
+): { value: number; unit: string; kind: 'length' | 'area' | 'radius' } | null {
+  if (entity.type === 'LWPOLYLINE' && entity.vertices && entity.vertices.length >= 2) {
+    const closed = !!entity.closed;
+    if (closed) {
+      const area = calculateArea(entity.vertices);
+      if (area > 0) {
+        return { value: Math.round(area * 100) / 100, unit: 'm2', kind: 'area' };
+      }
+    }
+    const perimeter = calculatePerimeter(entity.vertices, closed);
+    return { value: Math.round(perimeter * 100) / 100, unit: 'm', kind: 'length' };
+  }
+  if (entity.type === 'LINE' && entity.start && entity.end) {
+    const len = calculateDistance(entity.start, entity.end);
+    return { value: Math.round(len * 100) / 100, unit: 'm', kind: 'length' };
+  }
+  if (entity.type === 'CIRCLE' && entity.radius != null) {
+    const area = Math.PI * entity.radius ** 2;
+    return { value: Math.round(area * 100) / 100, unit: 'm2', kind: 'area' };
+  }
+  if (entity.type === 'ARC' && entity.radius != null) {
+    return { value: Math.round(entity.radius * 100) / 100, unit: 'm', kind: 'radius' };
+  }
+  return null;
+}
+
 /* ── Component ─────────────────────────────────────────────────────── */
 
 export function DwgTakeoffPage() {
@@ -231,6 +294,23 @@ export function DwgTakeoffPage() {
   const [filmstripExpanded, setFilmstripExpanded] = useState(true);
   /** Screen position for floating entity info popup. */
   const [entityPopup, setEntityPopup] = useState<{ x: number; y: number } | null>(null);
+
+  /* ── BOQ-link picker state ─────────────────────────────────────────
+   * Mirrors the self-contained picker from the PDF takeoff module
+   * (frontend/src/modules/pdf-takeoff/TakeoffViewerModule.tsx).  The picker
+   * can discover project + BOQ on its own and supports creating a new
+   * position inline. */
+  const [linkingEntityId, setLinkingEntityId] = useState<string | null>(null);
+  const [linkPickerProjectId, setLinkPickerProjectId] = useState('');
+  const [linkPickerBoqId, setLinkPickerBoqId] = useState('');
+  const [linkPickerProjects, setLinkPickerProjects] = useState<{ id: string; name: string }[]>([]);
+  const [linkPickerBoqs, setLinkPickerBoqs] = useState<{ id: string; name: string }[]>([]);
+  const [linkBoqPositions, setLinkBoqPositions] = useState<Position[]>([]);
+  const [linkBoqsLoading, setLinkBoqsLoading] = useState(false);
+  const [linkPositionsLoading, setLinkPositionsLoading] = useState(false);
+  const [linkingInProgress, setLinkingInProgress] = useState(false);
+  const [linkPickerSearch, setLinkPickerSearch] = useState('');
+  const [linkPickerMode, setLinkPickerMode] = useState<'pick' | 'create'>('pick');
 
   // Queries
   const { data: drawings = [], isLoading: loadingDrawings } = useQuery({
@@ -519,6 +599,253 @@ export function DwgTakeoffPage() {
     setUploadDiscipline('architectural');
   }, []);
 
+  /* ── BOQ-link picker handlers ──────────────────────────────────────
+   * Mirror the PDF-takeoff pattern: self-contained picker loads projects,
+   * BOQs, and positions on demand.  "Pick existing" pushes quantity onto
+   * the chosen position.  "Create new" mints a DW.NNN ordinal. */
+
+  /** Canonical unit normalization — maps display glyph → canonical backend unit. */
+  const normalizeUnit = useCallback((unit: string) => {
+    const map: Record<string, string> = { m: 'm', 'm\u00B2': 'm2', 'm\u00B3': 'm3', pcs: 'pcs' };
+    return map[unit] ?? unit;
+  }, []);
+
+  const loadPickerBoqs = useCallback(async (pid: string) => {
+    if (!pid) { setLinkPickerBoqs([]); return; }
+    setLinkBoqsLoading(true);
+    try {
+      const boqs = await apiGet<{ id: string; name: string }[]>(`/v1/boq/boqs/?project_id=${pid}`);
+      setLinkPickerBoqs(boqs);
+    } catch {
+      setLinkPickerBoqs([]);
+    } finally {
+      setLinkBoqsLoading(false);
+    }
+  }, []);
+
+  const loadPickerPositions = useCallback(async (boqId: string) => {
+    if (!boqId) { setLinkBoqPositions([]); return; }
+    setLinkPositionsLoading(true);
+    try {
+      const boqData = await boqApi.get(boqId);
+      setLinkBoqPositions(normalizePositions(boqData.positions || []));
+    } catch {
+      setLinkBoqPositions([]);
+    } finally {
+      setLinkPositionsLoading(false);
+    }
+  }, []);
+
+  const activeBoqIdFromStore = useProjectContextStore((s) => s.activeBOQId);
+
+  /** Open the picker for the currently-selected DWG entity. */
+  const handleOpenLinkToBoq = useCallback(async (entityId: string) => {
+    setLinkingEntityId(entityId);
+    setLinkPickerSearch('');
+    setLinkPickerMode('pick');
+
+    const seedProject = projectId || '';
+    const seedBoq = activeBoqIdFromStore ?? '';
+    setLinkPickerProjectId(seedProject);
+    setLinkPickerBoqId(seedBoq);
+
+    try {
+      const projects = await projectsApi.list();
+      setLinkPickerProjects(projects.map((p) => ({ id: p.id, name: p.name })));
+    } catch {
+      setLinkPickerProjects([]);
+    }
+
+    if (seedProject) {
+      await loadPickerBoqs(seedProject);
+    } else {
+      setLinkPickerBoqs([]);
+    }
+    if (seedBoq) {
+      await loadPickerPositions(seedBoq);
+    } else {
+      setLinkBoqPositions([]);
+    }
+  }, [projectId, activeBoqIdFromStore, loadPickerBoqs, loadPickerPositions]);
+
+  const handlePickerProjectChange = useCallback(async (pid: string) => {
+    setLinkPickerProjectId(pid);
+    setLinkPickerBoqId('');
+    setLinkBoqPositions([]);
+    await loadPickerBoqs(pid);
+  }, [loadPickerBoqs]);
+
+  const handlePickerBoqChange = useCallback(async (bid: string) => {
+    setLinkPickerBoqId(bid);
+    await loadPickerPositions(bid);
+  }, [loadPickerPositions]);
+
+  /**
+   * Ensure we have a `text_pin` annotation backing the link, creating one
+   * at the entity centroid if none exists yet.  Returns the annotation id
+   * (server-assigned), or null if creation fails.
+   */
+  const ensureAnnotationForEntity = useCallback(async (
+    entity: DxfEntity,
+    measurement: { value: number; unit: string } | null,
+  ): Promise<string | null> => {
+    if (!selectedDrawingId || !projectId) return null;
+
+    // Reuse an existing text_pin annotation anchored to this entity, if any.
+    const existing = annotations.find(
+      (a) => a.type === 'text_pin'
+        && (a.metadata as Record<string, unknown> | undefined)?.['dwg_entity_id'] === entity.id,
+    );
+    if (existing) return existing.id;
+
+    const centroid = computeEntityCentroid(entity);
+    try {
+      const created = await createAnnotation({
+        project_id: projectId,
+        drawing_id: selectedDrawingId,
+        annotation_type: 'text_pin',
+        geometry: { points: [centroid] },
+        text: entity.layer,
+        color: activeColor,
+        measurement_value: measurement?.value,
+        measurement_unit: measurement?.unit,
+        metadata: { dwg_entity_id: entity.id, dwg_entity_type: entity.type },
+      });
+      queryClient.invalidateQueries({ queryKey: ['dwg-annotations', selectedDrawingId] });
+      return created.id;
+    } catch {
+      return null;
+    }
+  }, [selectedDrawingId, projectId, annotations, activeColor, queryClient]);
+
+  const handleLinkToPosition = useCallback(async (entityId: string, position: Position) => {
+    const entity = entities.find((e) => e.id === entityId);
+    if (!entity || !selectedDrawingId) return;
+    setLinkingInProgress(true);
+    try {
+      const measurement = extractEntityMeasurement(entity);
+      const annotationId = await ensureAnnotationForEntity(entity, measurement);
+
+      if (annotationId) {
+        try { await linkAnnotationToBoq(annotationId, position.id); } catch { /* non-critical */ }
+      }
+
+      const existingMeta = (position.metadata ?? {}) as Record<string, unknown>;
+      const patch: Record<string, unknown> = {
+        metadata: {
+          ...existingMeta,
+          dwg_drawing_id: selectedDrawingId,
+          dwg_entity_id: entity.id,
+          dwg_entity_type: entity.type,
+          linked_annotation_id: annotationId ?? undefined,
+        },
+      };
+      if (measurement) {
+        patch['quantity'] = measurement.value;
+        patch['unit'] = measurement.unit;
+      }
+      await boqApi.updatePosition(position.id, patch);
+
+      queryClient.invalidateQueries({ queryKey: ['dwg-annotations', selectedDrawingId] });
+      queryClient.invalidateQueries({ queryKey: ['boq', position.boq_id] });
+
+      addToast({
+        type: 'success',
+        title: t('dwg_takeoff.linked_to_boq', { defaultValue: 'Linked to BOQ' }),
+        message: measurement
+          ? `${measurement.value} ${measurement.unit} \u2192 ${position.ordinal}`
+          : position.ordinal,
+      });
+      setLinkingEntityId(null);
+      setEntityPopup(null);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('dwg_takeoff.link_failed', { defaultValue: 'Link failed' }),
+        message: err instanceof Error ? err.message : '',
+      });
+    } finally {
+      setLinkingInProgress(false);
+    }
+  }, [entities, selectedDrawingId, ensureAnnotationForEntity, queryClient, addToast, t]);
+
+  const handleCreateAndLink = useCallback(async (entityId: string) => {
+    const entity = entities.find((e) => e.id === entityId);
+    if (!entity) return;
+    if (!linkPickerBoqId) {
+      addToast({
+        type: 'warning',
+        title: t('dwg_takeoff.link_need_boq', { defaultValue: 'Pick a BOQ first' }),
+      });
+      return;
+    }
+    setLinkingInProgress(true);
+    try {
+      // Derive next DW.NNN ordinal from existing positions.
+      const dwgOrdinals = linkBoqPositions
+        .map((p) => {
+          const match = /^DW\.(\d+)$/.exec(p.ordinal || '');
+          return match ? parseInt(match[1]!, 10) : 0;
+        })
+        .filter((n) => n > 0);
+      const nextNum = (dwgOrdinals.length ? Math.max(...dwgOrdinals) : 0) + 1;
+      const ordinal = `DW.${String(nextNum).padStart(3, '0')}`;
+
+      const measurement = extractEntityMeasurement(entity);
+      const qty = measurement?.value ?? 0;
+      const unit = measurement?.unit ?? 'pcs';
+      const description = t('dwg_takeoff.position_default_desc', {
+        defaultValue: 'From DWG: {{layer}}',
+        layer: entity.layer,
+      });
+
+      const newPos = await boqApi.addPosition({
+        boq_id: linkPickerBoqId,
+        ordinal,
+        description,
+        unit,
+        quantity: qty,
+        unit_rate: 0,
+      });
+
+      const annotationId = await ensureAnnotationForEntity(entity, measurement);
+      if (annotationId) {
+        try { await linkAnnotationToBoq(annotationId, newPos.id); } catch { /* non-critical */ }
+      }
+
+      try {
+        await boqApi.updatePosition(newPos.id, {
+          metadata: {
+            dwg_drawing_id: selectedDrawingId ?? undefined,
+            dwg_entity_id: entity.id,
+            dwg_entity_type: entity.type,
+            linked_annotation_id: annotationId ?? undefined,
+          },
+        });
+      } catch { /* metadata is non-critical */ }
+
+      setLinkBoqPositions((prev) => [...prev, newPos]);
+      queryClient.invalidateQueries({ queryKey: ['dwg-annotations', selectedDrawingId] });
+      queryClient.invalidateQueries({ queryKey: ['boq', linkPickerBoqId] });
+
+      addToast({
+        type: 'success',
+        title: t('dwg_takeoff.linked_created', { defaultValue: 'Position created & linked' }),
+        message: `${ordinal} \u2014 ${qty} ${unit}`,
+      });
+      setLinkingEntityId(null);
+      setEntityPopup(null);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('dwg_takeoff.create_link_failed', { defaultValue: 'Create & link failed' }),
+        message: err instanceof Error ? err.message : '',
+      });
+    } finally {
+      setLinkingInProgress(false);
+    }
+  }, [entities, linkPickerBoqId, linkBoqPositions, ensureAnnotationForEntity, selectedDrawingId, queryClient, addToast, t]);
+
   // Global keyboard shortcuts for the page
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -731,23 +1058,243 @@ export function DwgTakeoffPage() {
                     top: Math.min(entityPopup.y + 16, (document.documentElement.clientHeight || 600) - 320),
                   }}
                   onClose={() => setEntityPopup(null)}
-                  onLinkToBOQ={() => {
-                    /* TODO: open a BOQ position picker modal and, on select,
-                       create a `text_pin` annotation at the entity centroid
-                       with `linked_boq_position_id`.  For now, provide a
-                       clear toast so the button isn't a silent no-op. */
+                  onLinkToBOQ={(elementId) => {
                     setEntityPopup(null);
-                    setRightTab('properties');
-                    addToast({
-                      type: 'info',
-                      title: t('dwg_takeoff.link_boq_wip', {
-                        defaultValue:
-                          'BOQ linking is coming soon — open the BOQ editor to link positions from there for now.',
-                      }),
-                    });
+                    handleOpenLinkToBoq(elementId);
                   }}
                 />
               )}
+
+              {/* Right-docked BOQ-link picker panel — mirrors the PDF takeoff
+                  picker pattern but slides in from the right edge of the
+                  canvas. */}
+              {linkingEntityId && selectedEntity && (() => {
+                const measurement = extractEntityMeasurement(selectedEntity);
+                const alreadyLinked = annotations.find(
+                  (a) => a.type === 'text_pin'
+                    && (a.metadata as Record<string, unknown> | undefined)?.['dwg_entity_id']
+                      === selectedEntity.id
+                    && a.linked_boq_position_id,
+                );
+                return (
+                  <div className="absolute top-3 right-3 z-20 flex flex-col w-80 max-h-[calc(100%-1.5rem)] rounded-lg border border-[#3a3a3a] bg-[#2f2f2f] text-slate-100 shadow-2xl">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-3 py-2 border-b border-[#3a3a3a]">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-100">
+                        <Link2 size={13} className="text-blue-400" />
+                        {alreadyLinked
+                          ? t('dwg_takeoff.relink_title', { defaultValue: 'Linked — pick new' })
+                          : t('dwg_takeoff.link_to_boq_title', { defaultValue: 'Link to BOQ position' })}
+                      </div>
+                      <button
+                        onClick={() => setLinkingEntityId(null)}
+                        className="text-slate-400 hover:text-slate-100 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                      {/* Already-linked badge */}
+                      {alreadyLinked && (
+                        <div className="flex items-center gap-1.5 rounded-sm bg-emerald-950/40 border border-emerald-800/40 px-2 py-1 text-[11px]">
+                          <Link2 size={11} className="text-emerald-400 shrink-0" />
+                          <span className="text-emerald-300 truncate">
+                            {t('dwg_takeoff.already_linked', { defaultValue: 'Already linked to a BOQ position' })}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Entity summary */}
+                      <div className="rounded-sm bg-[#262626] border border-[#3a3a3a] p-2 text-[11px] space-y-0.5">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">{t('dwg_takeoff.prop_type', 'Type')}</span>
+                          <span className="font-mono text-slate-100">{selectedEntity.type}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">{t('dwg_takeoff.prop_layer', 'Layer')}</span>
+                          <span className="font-mono text-slate-100 truncate ml-2">{selectedEntity.layer}</span>
+                        </div>
+                        {measurement && (
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">
+                              {measurement.kind === 'area'
+                                ? t('dwg_takeoff.area', 'Area')
+                                : measurement.kind === 'radius'
+                                  ? t('dwg_takeoff.prop_radius', 'Radius')
+                                  : t('dwg_takeoff.length', { defaultValue: 'Length' })}
+                            </span>
+                            <span className="font-mono font-semibold text-blue-300">
+                              {measurement.value} {measurement.unit}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Project + BOQ dropdowns */}
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <select
+                          value={linkPickerProjectId}
+                          onChange={(e) => handlePickerProjectChange(e.target.value)}
+                          className="text-[11px] rounded-sm border border-[#3a3a3a] bg-[#262626] px-1.5 py-1 text-slate-100"
+                        >
+                          <option value="">
+                            {t('dwg_takeoff.pick_project', { defaultValue: '— project —' })}
+                          </option>
+                          {linkPickerProjects.map((p) => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={linkPickerBoqId}
+                          onChange={(e) => handlePickerBoqChange(e.target.value)}
+                          disabled={!linkPickerProjectId || linkBoqsLoading}
+                          className="text-[11px] rounded-sm border border-[#3a3a3a] bg-[#262626] px-1.5 py-1 text-slate-100 disabled:opacity-60"
+                        >
+                          <option value="">
+                            {linkBoqsLoading
+                              ? t('common.loading', 'Loading...')
+                              : t('dwg_takeoff.pick_boq', { defaultValue: '— BOQ —' })}
+                          </option>
+                          {linkPickerBoqs.map((b) => (
+                            <option key={b.id} value={b.id}>{b.name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Mode switch */}
+                      <div className="flex gap-1 text-[11px]">
+                        <button
+                          type="button"
+                          onClick={() => setLinkPickerMode('pick')}
+                          className={clsx(
+                            'flex-1 px-2 py-1 rounded-sm font-medium transition-colors',
+                            linkPickerMode === 'pick'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-[#363636] text-slate-300 hover:bg-[#404040]',
+                          )}
+                        >
+                          {t('dwg_takeoff.mode_pick', { defaultValue: 'Pick existing' })}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLinkPickerMode('create')}
+                          disabled={!linkPickerBoqId}
+                          className={clsx(
+                            'flex-1 px-2 py-1 rounded-sm font-medium transition-colors disabled:opacity-50',
+                            linkPickerMode === 'create'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-[#363636] text-slate-300 hover:bg-[#404040]',
+                          )}
+                        >
+                          {t('dwg_takeoff.mode_create', { defaultValue: '+ Create new' })}
+                        </button>
+                      </div>
+
+                      {linkPickerMode === 'pick' ? (
+                        !linkPickerBoqId ? (
+                          <p className="text-[11px] text-slate-400 py-2 text-center">
+                            {t('dwg_takeoff.link_need_project_boq', {
+                              defaultValue: 'Pick a project and BOQ above.',
+                            })}
+                          </p>
+                        ) : linkPositionsLoading ? (
+                          <div className="flex items-center justify-center gap-1.5 py-3">
+                            <Loader2 size={12} className="animate-spin text-blue-400" />
+                            <span className="text-[11px] text-slate-400">
+                              {t('common.loading', 'Loading...')}
+                            </span>
+                          </div>
+                        ) : linkBoqPositions.filter((p) => p.unit).length === 0 ? (
+                          <p className="text-[11px] text-slate-400 py-2 text-center">
+                            {t('dwg_takeoff.link_boq_empty', {
+                              defaultValue: 'BOQ is empty — switch to "Create new".',
+                            })}
+                          </p>
+                        ) : (
+                          <>
+                            <input
+                              type="text"
+                              value={linkPickerSearch}
+                              onChange={(e) => setLinkPickerSearch(e.target.value)}
+                              placeholder={t('dwg_takeoff.link_search_placeholder', {
+                                defaultValue: 'Search ordinal or description...',
+                              })}
+                              className="w-full text-[11px] rounded-sm border border-[#3a3a3a] bg-[#262626] px-2 py-1 text-slate-100 placeholder:text-slate-500"
+                            />
+                            <div className="max-h-56 overflow-y-auto space-y-0.5">
+                              {linkBoqPositions
+                                .filter((p) => p.unit)
+                                .filter((p) => {
+                                  if (!linkPickerSearch) return true;
+                                  const q = linkPickerSearch.toLowerCase();
+                                  return (
+                                    (p.ordinal || '').toLowerCase().includes(q) ||
+                                    (p.description || '').toLowerCase().includes(q)
+                                  );
+                                })
+                                .slice(0, 100)
+                                .map((pos) => (
+                                  <button
+                                    key={pos.id}
+                                    type="button"
+                                    onClick={() => handleLinkToPosition(selectedEntity.id, pos)}
+                                    disabled={linkingInProgress}
+                                    className="w-full text-left px-2 py-1 rounded-sm text-[11px] hover:bg-blue-900/40 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                                  >
+                                    <span className="font-mono text-blue-300 shrink-0">
+                                      {pos.ordinal}
+                                    </span>
+                                    <span className="text-slate-100 truncate flex-1">
+                                      {pos.description}
+                                    </span>
+                                    <span className="text-slate-400 shrink-0 text-[10px]">
+                                      {pos.unit}
+                                    </span>
+                                  </button>
+                                ))}
+                            </div>
+                          </>
+                        )
+                      ) : (
+                        /* Create new position */
+                        <div className="rounded-sm bg-[#262626] border border-[#3a3a3a] p-2 space-y-1.5">
+                          <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[11px]">
+                            <span className="text-slate-400">
+                              {t('dwg_takeoff.description', { defaultValue: 'Description' })}:
+                            </span>
+                            <span className="text-slate-100 truncate">
+                              {t('dwg_takeoff.position_default_desc', {
+                                defaultValue: 'From DWG: {{layer}}',
+                                layer: selectedEntity.layer,
+                              })}
+                            </span>
+                            <span className="text-slate-400">
+                              {t('dwg_takeoff.quantity', { defaultValue: 'Quantity' })}:
+                            </span>
+                            <span className="text-slate-100 font-mono">
+                              {measurement
+                                ? `${measurement.value} ${measurement.unit}`
+                                : `0 ${normalizeUnit('pcs')}`}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleCreateAndLink(selectedEntity.id)}
+                            disabled={linkingInProgress || !linkPickerBoqId}
+                            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-sm text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                          >
+                            {linkingInProgress && <Loader2 size={11} className="animate-spin" />}
+                            {t('dwg_takeoff.create_and_link', {
+                              defaultValue: 'Create position & link',
+                            })}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
             </>
           )}
@@ -768,7 +1315,70 @@ export function DwgTakeoffPage() {
 
         {/* ── Right Panel: Layers / Annotations / Properties ───── */}
         {selectedDrawingId && (
-          <div className="flex w-64 flex-shrink-0 flex-col border-l border-[#2a2a2a] bg-[#2f2f2f] text-slate-100 [&_h3]:text-slate-100 [&_.text-foreground]:text-slate-100 [&_.text-muted-foreground]:text-slate-400 [&_.text-content-primary]:text-slate-100 [&_.text-content-secondary]:text-slate-200 [&_.text-content-tertiary]:text-slate-400 [&_.text-content-quaternary]:text-slate-500 [&_.border-border]:border-[#3a3a3a] [&_.border-border-light]:border-[#3a3a3a] [&_.bg-surface-secondary]:bg-[#363636] [&_.bg-surface-tertiary]:bg-[#404040] [&_.hover\\:bg-surface-secondary:hover]:bg-[#363636] [&_.hover\\:bg-surface-tertiary:hover]:bg-[#404040]">
+          <div className="flex w-72 flex-shrink-0 flex-col border-l border-border-light bg-surface-primary text-content-primary shadow-xl shadow-black/30">
+            {/* Summary bar — totals across current drawing */}
+            {(entities.length > 0 || annotations.length > 0) && (() => {
+              const areaSum = annotations
+                .filter((a) => a.type === 'area' && a.measurement_value != null)
+                .reduce((s, a) => s + (a.measurement_value ?? 0), 0);
+              const distSum = annotations
+                .filter((a) => a.type === 'distance' && a.measurement_value != null)
+                .reduce((s, a) => s + (a.measurement_value ?? 0), 0);
+              const handleExportCsv = () => {
+                const rows = [
+                  ['type', 'text', 'value', 'unit', 'linked_boq_position_id'].join(','),
+                  ...annotations.map((a) =>
+                    [
+                      a.type,
+                      JSON.stringify(a.text ?? ''),
+                      a.measurement_value ?? '',
+                      a.measurement_unit ?? '',
+                      a.linked_boq_position_id ?? '',
+                    ].join(','),
+                  ),
+                ];
+                const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `annotations-${selectedDrawingId?.slice(0, 8) ?? 'dwg'}.csv`;
+                link.click();
+                URL.revokeObjectURL(url);
+                addToast({ type: 'success', title: t('dwg_takeoff.csv_exported', 'Measurements exported') });
+              };
+              return (
+                <div className="border-b border-border-light px-3 py-2 bg-surface-secondary/40">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+                      {t('dwg_takeoff.summary', 'Summary')}
+                    </span>
+                    <button
+                      onClick={handleExportCsv}
+                      disabled={annotations.length === 0}
+                      className="text-[10px] font-medium text-oe-blue hover:text-oe-blue/80 disabled:text-content-quaternary disabled:cursor-not-allowed"
+                      title={t('dwg_takeoff.export_csv', 'Export measurements as CSV')}
+                    >
+                      {t('dwg_takeoff.export_csv_short', 'Export CSV')}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5 text-[11px]">
+                    <div>
+                      <div className="font-semibold text-content-primary tabular-nums">{entities.length}</div>
+                      <div className="text-content-tertiary text-[9px] uppercase">{t('dwg_takeoff.entities', 'Entities')}</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-content-primary tabular-nums">{areaSum > 0 ? areaSum.toFixed(1) : '—'}</div>
+                      <div className="text-content-tertiary text-[9px] uppercase">m²</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-content-primary tabular-nums">{distSum > 0 ? distSum.toFixed(1) : '—'}</div>
+                      <div className="text-content-tertiary text-[9px] uppercase">m</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Tab bar */}
             <div className="flex border-b border-border">
               {(

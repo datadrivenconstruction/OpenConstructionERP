@@ -14,6 +14,19 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.8.1',
+    date: '2026-04-17',
+    changes: [
+      'DWG Takeoff: full "Link to BOQ" picker — select existing position or create-and-link, quantity auto-transfers, centroid annotation created automatically',
+      'DWG Takeoff: summary bar in right panel with total entities, Σ area, Σ distance + one-click CSV export of all measurements',
+      'DWG Takeoff: right panel switched back to light theme with compact 72-col width and elevated shadow',
+      'DWG Takeoff: toolbar palette white-glass for contrast on dark #3f3f3f canvas (visible in both themes)',
+      'Takeoff: barely-visible field-surveyor decorative background (polygons, polylines, distance lines, scale ruler, vertex pins) spanning the full page',
+      'Documents API: frontend wrappers for general-document upload/list/delete (foundation for upcoming Dashboard ↔ Documents integration)',
+      'Demo storyboard: 6-minute walkthrough script saved to docs/VIDEO_DEMO_v1.8.md',
+    ],
+  },
+  {
     version: '1.8.0',
     date: '2026-04-17',
     changes: [

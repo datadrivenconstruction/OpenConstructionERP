@@ -130,3 +130,57 @@ export async function updatePhoto(id: string, data: PhotoUpdatePayload): Promise
 export async function deletePhoto(id: string): Promise<void> {
   return apiDelete(`/v1/documents/photos/${id}`);
 }
+
+/* ── General documents (non-photo) ─────────────────────────────────────── */
+
+export interface DocumentItem {
+  id: string;
+  project_id: string;
+  filename: string;
+  size_bytes: number;
+  mime_type: string | null;
+  category: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function fetchDocuments(projectId: string): Promise<DocumentItem[]> {
+  if (!projectId) return [];
+  return apiGet<DocumentItem[]>(`/v1/documents/?project_id=${projectId}`);
+}
+
+export async function uploadDocument(
+  projectId: string,
+  file: File,
+  category: string = 'other',
+): Promise<DocumentItem> {
+  if (!projectId) throw new Error('projectId is required');
+  const formData = new FormData();
+  formData.append('file', file);
+  const token = useAuthStore.getState().accessToken;
+  const res = await fetch(
+    `/api/v1/documents/upload/?project_id=${projectId}&category=${encodeURIComponent(category)}`,
+    {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'X-DDC-Client': 'OE/1.0',
+      },
+      body: formData,
+    },
+  );
+  if (!res.ok) {
+    let detail = 'Upload failed';
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = body.detail;
+    } catch { /* ignore */ }
+    throw new Error(detail);
+  }
+  return res.json();
+}
+
+export async function deleteDocument(id: string): Promise<void> {
+  return apiDelete(`/v1/documents/${id}`);
+}
