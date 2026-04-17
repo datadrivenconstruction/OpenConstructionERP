@@ -2567,14 +2567,14 @@ export default function TakeoffViewerModule({
                           {measurementOnly.map((m) => (
                             <div
                               key={m.id}
-                              className="rounded-sm bg-surface-secondary/70 hover:bg-surface-secondary border border-transparent hover:border-border-light px-2.5 py-2 group/item transition-all"
+                              className="rounded-sm bg-surface-secondary/70 hover:bg-surface-secondary border border-transparent hover:border-border-light px-2 py-1 group/item transition-all"
                             >
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 leading-tight">
                                 <span
                                   className="h-2 w-2 rounded-full shrink-0"
                                   style={{ backgroundColor: groupColor }}
                                 />
-                                <div className="flex-1 min-w-0">
+                                <div className="flex-1 min-w-0 flex items-center gap-1.5">
                                   {editingAnnotationId === m.id ? (
                                     <input
                                       type="text"
@@ -2595,27 +2595,27 @@ export default function TakeoffViewerModule({
                                   ) : (
                                     <button
                                       onClick={() => startEditAnnotation(m)}
-                                      className="flex items-center gap-1 text-xs font-medium text-content-primary truncate hover:text-oe-blue transition-colors w-full text-left"
+                                      className="flex items-center gap-1 text-xs font-medium text-content-primary truncate hover:text-oe-blue transition-colors min-w-0 text-left"
                                       title={t('takeoff.add_label', { defaultValue: 'Add label...' })}
                                     >
                                       <span className="truncate">{m.annotation}</span>
                                       <Pencil size={10} className="shrink-0 opacity-0 group-hover/item:opacity-60 transition-opacity" />
                                     </button>
                                   )}
-                                  <p className="text-2xs text-content-tertiary capitalize flex items-center gap-1.5">
-                                    <span>{m.type}: {m.label}</span>
-                                    {m.linkedPositionOrdinal && (
-                                      <button
-                                        type="button"
-                                        onClick={() => handleOpenLinkedPosition(m)}
-                                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-[9px] font-mono font-semibold hover:bg-emerald-200 dark:hover:bg-emerald-900/70 transition-colors"
-                                        title={`${t('takeoff.linked_badge_title', { defaultValue: 'Linked to BOQ' })}: ${m.linkedPositionOrdinal}`}
-                                      >
-                                        <Link2 size={8} />
-                                        {m.linkedPositionOrdinal}
-                                      </button>
-                                    )}
-                                  </p>
+                                  <span className="text-2xs text-content-tertiary capitalize truncate shrink">
+                                    {m.label}
+                                  </span>
+                                  {m.linkedPositionOrdinal && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenLinkedPosition(m)}
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-[9px] font-mono font-semibold hover:bg-emerald-200 dark:hover:bg-emerald-900/70 transition-colors shrink-0"
+                                      title={`${t('takeoff.linked_badge_title', { defaultValue: 'Linked to BOQ' })}: ${m.linkedPositionOrdinal}`}
+                                    >
+                                      <Link2 size={8} />
+                                      {m.linkedPositionOrdinal}
+                                    </button>
+                                  )}
                                 </div>
                                 <div className="flex items-center gap-0.5 shrink-0">
                                   {/* Link to BOQ button — always visible if linked, hover-only otherwise */}
@@ -2864,15 +2864,15 @@ export default function TakeoffViewerModule({
                             return (
                               <div
                                 key={m.id}
-                                className="rounded-lg bg-surface-secondary px-2.5 py-2 group/item"
+                                className="rounded-lg bg-surface-secondary px-2 py-1 group/item"
                               >
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 leading-tight">
                                   <TypeIcon
                                     size={12}
                                     className="shrink-0"
                                     style={{ color: m.color || '#EF4444' }}
                                   />
-                                  <div className="flex-1 min-w-0">
+                                  <div className="flex-1 min-w-0 flex items-center gap-1.5">
                                     {editingAnnotationId === m.id ? (
                                       <input
                                         type="text"
@@ -2893,7 +2893,7 @@ export default function TakeoffViewerModule({
                                     ) : (
                                       <button
                                         onClick={() => startEditAnnotation(m)}
-                                        className="flex items-center gap-1 text-xs font-medium text-content-primary truncate hover:text-oe-blue transition-colors w-full text-left"
+                                        className="flex items-center gap-1 text-xs font-medium text-content-primary truncate hover:text-oe-blue transition-colors min-w-0 text-left"
                                         title={t('takeoff.add_label', { defaultValue: 'Add label...' })}
                                       >
                                         <span className="truncate">
@@ -2902,7 +2902,7 @@ export default function TakeoffViewerModule({
                                         <Pencil size={10} className="shrink-0 opacity-0 group-hover/item:opacity-60 transition-opacity" />
                                       </button>
                                     )}
-                                    <p className="text-2xs text-content-tertiary capitalize">{m.type}</p>
+                                    <span className="text-2xs text-content-tertiary capitalize truncate shrink">{m.type}</span>
                                   </div>
                                   <button
                                     onClick={() => deleteMeasurement(m.id)}

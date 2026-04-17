@@ -3784,3 +3784,210 @@ class BOQService:
             "model_used": provider,
             "tokens_used": tokens,
         }
+
+    # ── Project Intelligence (RFC 25) ──────────────────────────────────────
+
+    async def _list_positions_for_project(self, project_id: uuid.UUID) -> list[Position]:
+        """Return every non-section Position across all BOQs of a project."""
+        from sqlalchemy import select as _select
+
+        stmt = (
+            _select(Position)
+            .join(BOQ, Position.boq_id == BOQ.id)
+            .where(BOQ.project_id == project_id)
+            .where(Position.unit != "")
+            .order_by(Position.sort_order, Position.ordinal)
+        )
+        rows = await self.session.execute(stmt)
+        return list(rows.scalars().all())
+
+    async def get_line_items(
+        self,
+        project_id: uuid.UUID,
+        *,
+        group: str = "cost",
+        top_n: int = 20,
+    ) -> list[dict[str, Any]]:
+        """Top-N line items by cost for the Pareto widget (RFC 25)."""
+        top_n = max(1, min(top_n, 200))
+        positions = await self._list_positions_for_project(project_id)
+        if not positions:
+            return []
+
+        aggregate = sum(_str_to_float(p.total) for p in positions) or 0.0
+        sorted_positions = sorted(
+            positions,
+            key=lambda p: (-_str_to_float(p.total), p.ordinal or ""),
+        )
+
+        results: list[dict[str, Any]] = []
+        for pos in sorted_positions[:top_n]:
+            total = _str_to_float(pos.total)
+            share = (total / aggregate) if aggregate > 0 else 0.0
+            results.append(
+                {
+                    "position_id": str(pos.id),
+                    "description": pos.description or "",
+                    "unit": pos.unit,
+                    "quantity": _str_to_float(pos.quantity),
+                    "unit_rate": _str_to_float(pos.unit_rate),
+                    "total_cost": round(total, 2),
+                    "share_of_total": round(share, 6),
+                }
+            )
+        return results
+
+    async def get_cost_rollup(
+        self,
+        project_id: uuid.UUID,
+        *,
+        group_by: str = "din276",
+    ) -> list[dict[str, Any]]:
+        """Aggregate position totals by classification code (RFC 25)."""
+        effective_key = "din276" if group_by == "cost_code" else group_by
+        positions = await self._list_positions_for_project(project_id)
+        if not positions:
+            return []
+
+        buckets: dict[str, dict[str, Any]] = {}
+        for pos in positions:
+            classification = pos.classification or {}
+            code = str(classification.get(effective_key) or "").strip()
+            key = code or "(unclassified)"
+            entry = buckets.setdefault(
+                key,
+                {"code": key, "label": key, "total": 0.0, "position_count": 0},
+            )
+            entry["total"] += _str_to_float(pos.total)
+            entry["position_count"] += 1
+
+        rows = list(buckets.values())
+        rows.sort(key=lambda r: (-r["total"], r["code"]))
+        for row in rows:
+            row["total"] = round(row["total"], 2)
+        return rows
+
+    async def get_anomalies(self, project_id: uuid.UUID) -> list[dict[str, Any]]:
+        """Statistical anomaly detection for v1.9.1 (RFC 25)."""
+        positions = await self._list_positions_for_project(project_id)
+        if not positions:
+            return []
+
+        anomalies: list[dict[str, Any]] = []
+
+        # format: missing / zero required fields
+        for pos in positions:
+            unit = pos.unit or ""
+            qty = _str_to_float(pos.quantity)
+            rate = _str_to_float(pos.unit_rate)
+            missing: list[str] = []
+            if not unit.strip():
+                missing.append("unit")
+            if qty <= 0:
+                missing.append("quantity")
+            if rate <= 0:
+                missing.append("unit_rate")
+            if missing:
+                anomalies.append(
+                    {
+                        "position_id": str(pos.id),
+                        "ordinal": pos.ordinal or "",
+                        "description": pos.description or "",
+                        "type": "format",
+                        "severity": "error" if "unit_rate" in missing else "warning",
+                        "detail": f"Missing or zero: {', '.join(missing)}",
+                        "value": None,
+                        "reference": None,
+                    }
+                )
+
+        # outlier: z-score > 3 within classification group
+        groups: dict[str, list[tuple[Position, float]]] = {}
+        for pos in positions:
+            rate = _str_to_float(pos.unit_rate)
+            if rate <= 0:
+                continue
+            classification = pos.classification or {}
+            group_key = (
+                str(classification.get("din276") or "")
+                or str(classification.get("masterformat") or "")
+                or str(classification.get("nrm") or "")
+                or "(unclassified)"
+            )
+            groups.setdefault(group_key, []).append((pos, rate))
+
+        for _group_key, items in groups.items():
+            if len(items) < 4:
+                continue
+            rates = [r for _, r in items]
+            mean = sum(rates) / len(rates)
+            variance = sum((r - mean) ** 2 for r in rates) / len(rates)
+            stddev = variance**0.5
+            if stddev <= 0:
+                continue
+            for pos, rate in items:
+                z = (rate - mean) / stddev
+                if abs(z) > 3.0:
+                    anomalies.append(
+                        {
+                            "position_id": str(pos.id),
+                            "ordinal": pos.ordinal or "",
+                            "description": pos.description or "",
+                            "type": "outlier",
+                            "severity": "warning",
+                            "detail": (
+                                f"Unit rate {rate:.2f} is {z:+.2f}\u03c3 from the "
+                                f"group mean {mean:.2f}"
+                            ),
+                            "value": round(rate, 2),
+                            "reference": round(mean, 2),
+                        }
+                    )
+
+        # jump: > 2x median of immediate neighbours (within same BOQ)
+        by_boq: dict[uuid.UUID, list[Position]] = {}
+        for pos in positions:
+            by_boq.setdefault(pos.boq_id, []).append(pos)
+
+        for boq_positions in by_boq.values():
+            ordered = sorted(
+                boq_positions, key=lambda p: (p.sort_order, p.ordinal or "")
+            )
+            for idx, pos in enumerate(ordered):
+                rate = _str_to_float(pos.unit_rate)
+                if rate <= 0:
+                    continue
+                neighbours: list[float] = []
+                for offset in (-2, -1, 1, 2):
+                    n_idx = idx + offset
+                    if 0 <= n_idx < len(ordered):
+                        n_rate = _str_to_float(ordered[n_idx].unit_rate)
+                        if n_rate > 0:
+                            neighbours.append(n_rate)
+                if len(neighbours) < 2:
+                    continue
+                neighbours.sort()
+                mid = len(neighbours) // 2
+                median = (
+                    neighbours[mid]
+                    if len(neighbours) % 2 == 1
+                    else (neighbours[mid - 1] + neighbours[mid]) / 2
+                )
+                if median > 0 and rate > 2 * median:
+                    anomalies.append(
+                        {
+                            "position_id": str(pos.id),
+                            "ordinal": pos.ordinal or "",
+                            "description": pos.description or "",
+                            "type": "jump",
+                            "severity": "warning",
+                            "detail": (
+                                f"Unit rate {rate:.2f} exceeds 2x the "
+                                f"neighbour median {median:.2f}"
+                            ),
+                            "value": round(rate, 2),
+                            "reference": round(median, 2),
+                        }
+                    )
+
+        return anomalies

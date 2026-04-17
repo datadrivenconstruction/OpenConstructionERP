@@ -20,8 +20,9 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
-from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep
+from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep, verify_project_access
 from app.modules.tendering.schemas import (
+    BidAnalysisResponse,
     BidComparisonResponse,
     BidCreate,
     BidResponse,
@@ -468,3 +469,22 @@ async def export_tender_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+# ── Project Intelligence (RFC 25) ───────────────────────────────────────────
+
+
+@router.get(
+    "/bid-analysis/",
+    response_model=BidAnalysisResponse,
+    summary="Bid vendor concentration + outlier + spread (RFC 25)",
+)
+async def get_bid_analysis(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(..., description="Project scope"),
+    service: TenderingService = Depends(_get_service),
+) -> BidAnalysisResponse:
+    """Cross-package bid analysis for the Estimation Dashboard."""
+    await verify_project_access(project_id, user_id, session)
+    return await service.get_bid_analysis(project_id)

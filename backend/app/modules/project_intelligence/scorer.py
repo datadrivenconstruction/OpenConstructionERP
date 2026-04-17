@@ -17,16 +17,20 @@ logger = logging.getLogger(__name__)
 
 # ── Domain weights (must sum to 1.0) ──────────────────────────────────────
 
+# RFC 25 — reweighted for the Estimation Dashboard (v1.9.1): BOQ / Cost Model /
+# Validation / Risk are the four domains shown in the reshaped ring. The four
+# remaining domains keep 0 weight so they no longer influence the headline
+# score — the detail tabs still show them when data is present.
 DOMAIN_WEIGHTS: dict[str, float] = {
-    "boq": 0.30,
+    "boq": 0.40,
+    "cost_model": 0.30,
     "validation": 0.20,
-    "schedule": 0.15,
-    "cost_model": 0.10,
-    "takeoff": 0.08,
-    "risk": 0.07,
-    "tendering": 0.05,
-    "documents": 0.03,
-    "reports": 0.02,
+    "risk": 0.10,
+    "schedule": 0.0,
+    "takeoff": 0.0,
+    "tendering": 0.0,
+    "documents": 0.0,
+    "reports": 0.0,
 }
 
 
@@ -342,7 +346,8 @@ def compute_score(state: ProjectState) -> ProjectScore:
     # serious project. Optional domains (tendering, documents, reports) only
     # contribute to the denominator when they have been touched, so a project
     # that skips optional phases isn't unfairly penalized.
-    ESSENTIAL_DOMAINS = {"boq", "validation", "schedule", "cost_model"}
+    # RFC 25: headline ring covers BOQ / Cost Model / Validation / Risk.
+    ESSENTIAL_DOMAINS = {"boq", "validation", "cost_model", "risk"}
 
     weighted_sum = 0.0
     total_weight = 0.0

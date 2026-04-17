@@ -155,3 +155,45 @@ class BidComparisonResponse(BaseModel):
     budget_total: float = 0.0
     rows: list[BidComparisonRow] = Field(default_factory=list)
     bid_totals: list[dict[str, Any]] = Field(default_factory=list)
+
+
+# ── Project Intelligence (RFC 25) ───────────────────────────────────────────
+
+
+class BidVendorEntry(BaseModel):
+    """Aggregated summary for a single bidder across all packages."""
+
+    company_name: str
+    total: float = 0.0
+    currency: str = "EUR"
+    bid_count: int = 0
+
+
+class BidOutlierEntry(BaseModel):
+    """One bid identified as an outlier vs the spread (IQR-based)."""
+
+    bid_id: UUID
+    company_name: str
+    total: float = 0.0
+    reason: str = Field("", description="Why the bid is flagged (too_high | too_low)")
+
+
+class BidSpread(BaseModel):
+    """Statistical spread across all bid totals for a project."""
+
+    min: float = 0.0
+    max: float = 0.0
+    p25: float = 0.0
+    p50: float = 0.0
+    p75: float = 0.0
+    mean: float = 0.0
+    std: float = 0.0
+    sample_size: int = 0
+
+
+class BidAnalysisResponse(BaseModel):
+    """Vendor concentration + outlier + spread summary for the project."""
+
+    vendors: list[BidVendorEntry] = Field(default_factory=list)
+    outliers: list[BidOutlierEntry] = Field(default_factory=list)
+    spread: BidSpread = Field(default_factory=BidSpread)

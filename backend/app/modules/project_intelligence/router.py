@@ -123,7 +123,9 @@ async def _verify_project_access(
 # ── Simple in-memory cache (keyed by user + project to avoid leakage) ─────
 
 _state_cache: dict[tuple[str, str], tuple[float, Any]] = {}
-CACHE_TTL_SECONDS = 300  # 5 minutes
+# RFC 25 — reduced from 300 s to 60 s so the Estimation Dashboard reflects
+# sibling-module edits within one minute of a save.
+CACHE_TTL_SECONDS = 60
 
 
 def _cache_key(user_id: str | None, project_id: str) -> tuple[str, str]:
