@@ -2195,13 +2195,15 @@ export function BIMPage() {
                     : t('bim.isolate', { defaultValue: 'Isolate' })}
                 </button>
               )}
-              <button onClick={() => navigate('/boq')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
-                <Link2 size={13} /> {t('bim.link_to_boq', { defaultValue: 'Link to BOQ' })}
-              </button>
               <button onClick={() => navigate('/bim/rules')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
                 <SlidersHorizontal size={13} /> {t('bim.rules_button', { defaultValue: 'Rules' })}
               </button>
-              <button onClick={() => navigate('/schedule')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
+              <button
+                disabled
+                aria-disabled="true"
+                title={t('bim.schedule_4d_coming_soon', { defaultValue: '4D Schedule — coming soon' })}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-tertiary bg-surface-secondary border border-border-light opacity-60 cursor-not-allowed"
+              >
                 <CalendarDays size={13} /> {t('bim.schedule_4d', { defaultValue: '4D Schedule' })}
               </button>
             </>

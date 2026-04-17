@@ -5,6 +5,18 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2] — 2026-04-18
+
+### R3 UX polish — remaining items
+
+- **#20 BIM top Link-to-BOQ removed** — the top-toolbar button was a duplicate of the entry point in the selection toolbar / context menu. Selection-toolbar entry remains intact.
+- **#21 4D Schedule button disabled** — visually grayed with `aria-disabled` + "coming soon" tooltip. Feature wiring tracked as R5.
+
+### Quality gates
+
+- `tsc --noEmit`: 0 errors across the whole frontend
+- All prior v1.9.1 tests still passing
+
 ## [1.9.1] — 2026-04-18
 
 ### R2 deep-research items (8 items with RFCs)
