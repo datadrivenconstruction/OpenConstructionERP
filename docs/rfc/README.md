@@ -33,10 +33,11 @@ Unit + E2E + visual + a11y coverage plan.
 
 | RFC | Item | Status |
 |-----|------|--------|
-| 11 | DWG polyline/layer selection rework | 🔲 draft |
-| 16 | Data Explorer Power BI-style analytics | 🔲 draft |
-| 19 | BIM viewer control panel expansion | 🔲 draft |
-| 24 | Quantity Rules redesign (BETA) | 🔲 draft |
-| 25 | Project Intelligence audit | 🔲 draft |
-| 29 | Meetings edit + attachments | 🔲 draft |
+| 11 | DWG polyline/layer selection rework | 🟡 drafted |
+| 13 | DWG scale + annotation text | 🟡 drafted |
+| 16 | Data Explorer Power BI-style analytics | 🟡 drafted |
+| 19 | BIM viewer control panel expansion | 🟡 drafted |
+| 24 | Quantity Rules redesign (BETA) | 🟡 drafted |
+| 25 | Project Intelligence audit | 🟡 drafted |
+| 29 | Meetings edit + attachments | 🟡 drafted |
 | 33 | CDE module deep audit (ISO 19650) | 🔲 draft |
