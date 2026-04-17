@@ -35,7 +35,7 @@ import {
   ChevronUp,
   ShieldCheck,
 } from 'lucide-react';
-import { Badge, Breadcrumb, ConfirmDialog, ElementInfoPopover, type DWGElementPayload } from '@/shared/ui';
+import { Badge, ConfirmDialog, ElementInfoPopover, type DWGElementPayload } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -466,11 +466,12 @@ export function DwgTakeoffPage() {
       measurement_value?: number;
       measurement_unit?: string;
     }) => {
-      if (!selectedDrawingId) return;
+      if (!selectedDrawingId || !projectId) return;
       createAnnotationMutation.mutate({
+        project_id: projectId,
         drawing_id: selectedDrawingId,
-        type: ann.type,
-        points: ann.points,
+        annotation_type: ann.type,
+        geometry: { points: ann.points },
         text: ann.text,
         color: ann.color ?? activeColor,
         measurement_value: ann.measurement_value,
@@ -478,7 +479,7 @@ export function DwgTakeoffPage() {
         metadata: ann.fontSize ? { font_size: ann.fontSize } : undefined,
       });
     },
-    [selectedDrawingId, activeColor, createAnnotationMutation],
+    [selectedDrawingId, projectId, activeColor, createAnnotationMutation],
   );
 
   const handleSelectEntity = useCallback((id: string | null, event?: EntitySelectEvent) => {
@@ -551,28 +552,13 @@ export function DwgTakeoffPage() {
     return () => window.removeEventListener('keydown', handler);
   }, [selectedEntityId, selectedAnnotationId]);
 
-  const breadcrumbs = [
-    { label: t('nav.group_takeoff', 'Takeoff'), to: '/takeoff' },
-    { label: t('dwg_takeoff.title', 'DWG Takeoff') },
-  ];
-
   /* ── Render ──────────────────────────────────────────────────────── */
 
   return (
     <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-4 overflow-hidden" style={{ height: 'calc(100vh - 56px)' }}>
-      <div className="flex items-center justify-between border-b border-border px-4 py-2">
-        <Breadcrumb items={breadcrumbs} />
-        <div className="flex items-center gap-2">
-          {selectedDrawingId && (
-            <ToolPalette
-              activeTool={activeTool}
-              onToolChange={setActiveTool}
-              activeColor={activeColor}
-              onColorChange={setActiveColor}
-            />
-          )}
-        </div>
-      </div>
+      {/* Top filter bar removed — ToolPalette now floats inside the viewer
+          in the top-left corner so the drawing gets maximum vertical space
+          and the tools live where the cursor already is while drawing. */}
 
       <div className="flex flex-1 overflow-hidden">
         {/* ── Center: DXF Viewer ──────────────────────────────────── */}
@@ -580,7 +566,7 @@ export function DwgTakeoffPage() {
           {!selectedDrawingId ? (
             <div
               className="oe-dwg-canvas relative flex flex-1 overflow-hidden overflow-y-auto"
-              style={{ background: '#1a1d23' }}
+              style={{ background: '#3f3f3f' }}
             >
               {/* AutoCAD-style drafting grid + vignette */}
               <GridBackground className="z-0" />
@@ -718,6 +704,19 @@ export function DwgTakeoffPage() {
                 onSelectAnnotation={setSelectedAnnotationId}
                 onAnnotationCreated={handleAnnotationCreated}
               />
+
+              {/* Floating ToolPalette — top-left corner, above the canvas.
+                  Lives here (not in a fixed header bar) so the drawing gets
+                  the full viewport height and tools stay visually attached
+                  to the thing they act on. */}
+              <div className="absolute top-3 left-3 z-10 rounded-lg border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md shadow-xl shadow-black/30 ring-1 ring-black/5">
+                <ToolPalette
+                  activeTool={activeTool}
+                  onToolChange={setActiveTool}
+                  activeColor={activeColor}
+                  onColorChange={setActiveColor}
+                />
+              </div>
               {/* Floating entity info popup (shared ElementInfoPopover) */}
               {selectedEntity && entityPopup && activeTool === 'select' && (
                 <ElementInfoPopover
@@ -733,10 +732,19 @@ export function DwgTakeoffPage() {
                   }}
                   onClose={() => setEntityPopup(null)}
                   onLinkToBOQ={() => {
-                    /* Close the popover and switch to the properties tab so the user
-                       can see full entity details and use the right-panel BOQ actions. */
+                    /* TODO: open a BOQ position picker modal and, on select,
+                       create a `text_pin` annotation at the entity centroid
+                       with `linked_boq_position_id`.  For now, provide a
+                       clear toast so the button isn't a silent no-op. */
                     setEntityPopup(null);
                     setRightTab('properties');
+                    addToast({
+                      type: 'info',
+                      title: t('dwg_takeoff.link_boq_wip', {
+                        defaultValue:
+                          'BOQ linking is coming soon — open the BOQ editor to link positions from there for now.',
+                      }),
+                    });
                   }}
                 />
               )}
@@ -760,7 +768,7 @@ export function DwgTakeoffPage() {
 
         {/* ── Right Panel: Layers / Annotations / Properties ───── */}
         {selectedDrawingId && (
-          <div className="flex w-64 flex-shrink-0 flex-col border-l border-border-light bg-surface-primary text-content-primary">
+          <div className="flex w-64 flex-shrink-0 flex-col border-l border-[#2a2a2a] bg-[#2f2f2f] text-slate-100 [&_h3]:text-slate-100 [&_.text-foreground]:text-slate-100 [&_.text-muted-foreground]:text-slate-400 [&_.text-content-primary]:text-slate-100 [&_.text-content-secondary]:text-slate-200 [&_.text-content-tertiary]:text-slate-400 [&_.text-content-quaternary]:text-slate-500 [&_.border-border]:border-[#3a3a3a] [&_.border-border-light]:border-[#3a3a3a] [&_.bg-surface-secondary]:bg-[#363636] [&_.bg-surface-tertiary]:bg-[#404040] [&_.hover\\:bg-surface-secondary:hover]:bg-[#363636] [&_.hover\\:bg-surface-tertiary:hover]:bg-[#404040]">
             {/* Tab bar */}
             <div className="flex border-b border-border">
               {(
@@ -1201,26 +1209,26 @@ function DrawingFilmstrip({
   const { t } = useTranslation();
 
   return (
-    <div className="shrink-0 border-t border-border-light bg-surface-primary">
+    <div className="shrink-0 border-t border-[#2a2a2a] bg-[#2f2f2f] text-slate-200">
       {/* Header -- always visible */}
       <button
         type="button"
         onClick={onToggleExpanded}
-        className="flex items-center w-full px-4 py-1.5 cursor-pointer group hover:bg-surface-secondary transition-colors"
+        className="flex items-center w-full px-4 py-1.5 cursor-pointer group hover:bg-white/5 transition-colors"
       >
-        <div className="flex flex-col items-center gap-[2px] mr-3 opacity-50 group-hover:opacity-80 transition-opacity">
-          <div className="w-4 h-[2px] rounded-full bg-content-tertiary" />
-          <div className="w-4 h-[2px] rounded-full bg-content-tertiary" />
+        <div className="flex flex-col items-center gap-[2px] mr-3 opacity-60 group-hover:opacity-90 transition-opacity">
+          <div className="w-4 h-[2px] rounded-full bg-slate-400" />
+          <div className="w-4 h-[2px] rounded-full bg-slate-400" />
         </div>
-        <Layers size={14} className="text-content-tertiary mr-2 shrink-0" />
-        <span className="text-xs font-semibold text-content-primary">
+        <Layers size={14} className="text-slate-300 mr-2 shrink-0" />
+        <span className="text-xs font-semibold text-slate-100">
           {t('dwg_takeoff.drawings', 'Drawings')}
         </span>
-        <span className="text-[11px] text-content-quaternary ml-1.5">({drawings.length})</span>
+        <span className="text-[11px] text-slate-400 ml-1.5">({drawings.length})</span>
         <ChevronUp
           size={14}
           className={clsx(
-            'ml-auto text-content-tertiary transition-transform duration-200',
+            'ml-auto text-slate-300 transition-transform duration-200',
             expanded ? '' : 'rotate-180',
           )}
         />
@@ -1233,7 +1241,7 @@ function DrawingFilmstrip({
       >
         <div className="flex items-center gap-2 px-4 pb-2 overflow-x-auto">
           {isLoading ? (
-            <Loader2 size={14} className="animate-spin text-content-quaternary" />
+            <Loader2 size={14} className="animate-spin text-slate-400" />
           ) : drawings.length > 0 ? (
             drawings.map((d) => (
               <button
@@ -1242,24 +1250,24 @@ function DrawingFilmstrip({
                 className={clsx(
                   'group relative shrink-0 w-44 text-start rounded-lg border transition-all duration-200 overflow-hidden',
                   activeDrawingId === d.id
-                    ? 'border-oe-blue bg-oe-blue/5 shadow-md shadow-oe-blue/10'
-                    : 'border-border-light bg-surface-secondary hover:bg-surface-tertiary hover:border-border',
+                    ? 'border-blue-500/80 bg-blue-500/10 shadow-md shadow-blue-500/20'
+                    : 'border-[#3a3a3a] bg-[#363636] hover:bg-[#3d3d3d] hover:border-[#4a4a4a]',
                 )}
               >
                 <div className="px-2.5 py-2">
                   <div className="flex items-center gap-1.5 mb-1">
                     <FileText size={12} className={clsx(
                       'shrink-0',
-                      activeDrawingId === d.id ? 'text-oe-blue' : 'text-content-tertiary',
+                      activeDrawingId === d.id ? 'text-blue-400' : 'text-slate-400',
                     )} />
                     <span className={clsx(
                       'text-[11px] font-semibold truncate',
-                      activeDrawingId === d.id ? 'text-oe-blue' : 'text-content-primary',
+                      activeDrawingId === d.id ? 'text-blue-300' : 'text-slate-100',
                     )}>
                       {d.name}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] text-content-quaternary">
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400">
                     <span className="capitalize">{d.discipline}</span>
                     <span>&middot;</span>
                     <span>
@@ -1277,7 +1285,7 @@ function DrawingFilmstrip({
                     onDeleteDrawing(d.id);
                   }}
                   className="absolute top-1 right-1 h-5 w-5 rounded flex items-center justify-center
-                             text-transparent group-hover:text-content-quaternary hover:!text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30
+                             text-transparent group-hover:text-slate-400 hover:!text-red-400 hover:bg-red-500/20
                              transition-all"
                 >
                   <Trash2 size={11} />
@@ -1285,7 +1293,7 @@ function DrawingFilmstrip({
               </button>
             ))
           ) : (
-            <span className="text-[11px] text-content-quaternary">
+            <span className="text-[11px] text-slate-400">
               {t('dwg_takeoff.no_drawings', 'No drawings uploaded yet')}
             </span>
           )}
@@ -1293,10 +1301,10 @@ function DrawingFilmstrip({
           <button
             onClick={onUpload}
             className="flex items-center justify-center shrink-0 w-14 h-14 rounded-lg border-2 border-dashed
-                       border-border-light hover:border-oe-blue/50 hover:bg-oe-blue/5 transition-all group"
+                       border-[#4a4a4a] hover:border-blue-400/60 hover:bg-blue-500/10 transition-all group"
             title={t('dwg_takeoff.upload_drawing', 'Upload drawing')}
           >
-            <Plus size={18} className="text-content-quaternary group-hover:text-oe-blue transition-colors" />
+            <Plus size={18} className="text-slate-400 group-hover:text-blue-300 transition-colors" />
           </button>
         </div>
       </div>

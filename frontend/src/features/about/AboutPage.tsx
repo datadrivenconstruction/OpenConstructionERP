@@ -70,7 +70,7 @@ export function AboutPage() {
               { value: '55K+', label: t('about.stat_costs', { defaultValue: 'Cost Items (CWICR)' }) },
               { value: '20+', label: t('about.stat_langs', { defaultValue: 'Languages' }) },
               { value: '11', label: t('about.stat_regions', { defaultValue: 'Regional Databases' }) },
-              { value: '4', label: t('about.stat_cad_formats', { defaultValue: 'CAD/BIM Reverse Engineering' }) },
+              { value: '4', label: t('about.stat_cad_formats', { defaultValue: 'Reverse engineering of CAD/BIM formats' }) },
             ].map((s, i) => (
               <div key={i} className="text-center rounded-xl bg-surface-secondary/50 p-4">
                 <div className="text-2xl font-bold text-content-primary">{s.value}</div>
@@ -280,18 +280,25 @@ export function AboutPage() {
         </div>
       </Card>
 
-      {/* Support the Project */}
-      <Card className="animate-card-in overflow-hidden" style={{ animationDelay: '250ms' }}>
+      {/* Support the Project — edge-to-edge gradient, no inner padding */}
+      <Card
+        padding="none"
+        className="animate-card-in overflow-hidden"
+        style={{ animationDelay: '250ms' }}
+      >
         <div className="relative">
-          {/* Gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.06] via-orange-500/[0.04] to-rose-500/[0.06]" />
+          {/* Richer gradient so the full-bleed feels intentional */}
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.10] via-orange-500/[0.06] to-rose-500/[0.10]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(251,191,36,0.12),transparent_50%),radial-gradient(circle_at_90%_100%,rgba(244,63,94,0.12),transparent_55%)]" />
 
-          <div className="relative p-6">
-            {/* Big heading */}
-            <div className="text-center mb-5">
-              <div className="inline-flex items-center gap-2 mb-3">
-                <Handshake size={22} className="text-oe-blue" />
-                <h2 className="text-xl font-bold text-content-primary">
+          <div className="relative">
+            {/* Hero — no horizontal padding, text centered on gradient */}
+            <div className="text-center pt-8 pb-6 px-6">
+              <div className="inline-flex items-center gap-2.5 mb-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/70 dark:bg-white/5 shadow-sm ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
+                  <Handshake size={18} className="text-oe-blue" />
+                </div>
+                <h2 className="text-2xl font-bold tracking-tight text-content-primary">
                   {t('about.support_title', { defaultValue: 'Support OpenConstructionERP' })}
                 </h2>
               </div>
@@ -300,36 +307,36 @@ export function AboutPage() {
               </p>
             </div>
 
-            {/* Support options grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+            {/* Support options — flush to card edges, no side gaps */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border-light/60 dark:bg-white/[0.06]">
               {/* Star on GitHub */}
               <a
                 href="https://github.com/datadrivenconstruction/OpenConstructionERP"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 rounded-xl border border-amber-200/60 dark:border-amber-800/30 bg-amber-50/50 dark:bg-amber-900/10 p-5 hover:border-amber-400 hover:shadow-md transition-all group"
+                className="group relative flex flex-col items-center gap-2 bg-surface-primary/80 backdrop-blur-sm px-5 py-6 hover:bg-amber-50/70 dark:hover:bg-amber-900/15 transition-colors"
               >
-                <Star size={28} className="text-amber-500 group-hover:scale-110 transition-transform" />
+                <Star size={30} className="text-amber-500 transition-transform group-hover:scale-110 group-hover:-rotate-6" fill="currentColor" />
                 <span className="text-sm font-bold text-content-primary">
                   {t('about.support_star', { defaultValue: 'Star on GitHub' })}
                 </span>
-                <span className="text-2xs text-content-tertiary text-center">
+                <span className="text-2xs text-content-tertiary text-center leading-snug">
                   {t('about.support_star_desc', { defaultValue: 'Show your support — it takes 2 seconds and helps others discover the project' })}
                 </span>
               </a>
 
-              {/* Buy a Coffee / Sponsor */}
+              {/* Sponsor */}
               <a
                 href="https://github.com/sponsors/datadrivenconstruction"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 rounded-xl border border-rose-200/60 dark:border-rose-800/30 bg-rose-50/50 dark:bg-rose-900/10 p-5 hover:border-rose-400 hover:shadow-md transition-all group"
+                className="group relative flex flex-col items-center gap-2 bg-surface-primary/80 backdrop-blur-sm px-5 py-6 hover:bg-rose-50/70 dark:hover:bg-rose-900/15 transition-colors"
               >
-                <Coffee size={28} className="text-rose-500 group-hover:scale-110 transition-transform" />
+                <Coffee size={30} className="text-rose-500 transition-transform group-hover:scale-110" />
                 <span className="text-sm font-bold text-content-primary">
                   {t('about.support_sponsor', { defaultValue: 'Become a Sponsor' })}
                 </span>
-                <span className="text-2xs text-content-tertiary text-center">
+                <span className="text-2xs text-content-tertiary text-center leading-snug">
                   {t('about.support_sponsor_desc', { defaultValue: 'Fund new features, regional databases, and keep the project free for everyone' })}
                 </span>
               </a>
@@ -339,25 +346,25 @@ export function AboutPage() {
                 href="https://datadrivenconstruction.io/contact-support/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 rounded-xl border border-oe-blue/20 dark:border-blue-800/30 bg-oe-blue/[0.04] dark:bg-blue-900/10 p-5 hover:border-oe-blue hover:shadow-md transition-all group"
+                className="group relative flex flex-col items-center gap-2 bg-surface-primary/80 backdrop-blur-sm px-5 py-6 hover:bg-oe-blue/[0.06] dark:hover:bg-blue-900/15 transition-colors"
               >
-                <Rocket size={28} className="text-oe-blue group-hover:scale-110 transition-transform" />
+                <Rocket size={30} className="text-oe-blue transition-transform group-hover:scale-110 group-hover:-translate-y-0.5" />
                 <span className="text-sm font-bold text-content-primary">
                   {t('about.support_consulting', { defaultValue: 'Order Consulting' })}
                 </span>
-                <span className="text-2xs text-content-tertiary text-center">
+                <span className="text-2xs text-content-tertiary text-center leading-snug">
                   {t('about.support_consulting_desc', { defaultValue: 'Need custom features, deployment, or training? We deliver professional solutions worldwide' })}
                 </span>
               </a>
             </div>
 
-            {/* What your support enables */}
-            <div className="rounded-xl bg-surface-secondary/50 border border-border-light/40 p-4">
-              <p className="text-xs font-semibold text-content-primary mb-2 flex items-center gap-1.5">
-                <Rocket size={13} className="text-oe-blue" />
+            {/* Enables footer — also edge-to-edge */}
+            <div className="px-6 py-5 border-t border-border-light/60 dark:border-white/[0.06]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3 flex items-center gap-1.5">
+                <Rocket size={12} className="text-oe-blue" />
                 {t('about.support_enables', { defaultValue: 'Your support enables:' })}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
                 {[
                   t('about.support_e1', { defaultValue: 'New regional cost databases (CWICR)' }),
                   t('about.support_e2', { defaultValue: 'AI estimation improvements' }),

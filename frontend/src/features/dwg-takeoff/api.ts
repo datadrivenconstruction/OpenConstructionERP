@@ -107,11 +107,18 @@ export interface DwgPin {
 }
 
 export interface CreateAnnotationPayload {
+  /** Required by backend: the project the drawing belongs to. */
+  project_id: string;
   drawing_id: string;
-  type: DwgAnnotation['type'];
-  points: { x: number; y: number }[];
+  /** Backend field name. The `DwgAnnotation` response still exposes `type`
+   *  for backwards-compat with existing viewer code. */
+  annotation_type: DwgAnnotation['type'];
+  /** Backend stores all shape-specific data inside a single `geometry`
+   *  JSON column; the viewer's `points` array goes in as `geometry.points`. */
+  geometry: { points: { x: number; y: number }[]; [k: string]: unknown };
   text?: string;
   color?: string;
+  line_width?: number;
   measurement_value?: number;
   measurement_unit?: string;
   metadata?: Record<string, unknown>;

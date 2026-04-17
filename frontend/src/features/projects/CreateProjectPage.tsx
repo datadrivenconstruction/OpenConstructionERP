@@ -2,9 +2,10 @@ import { useState, useEffect, type FormEvent, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { X, FolderPlus, AlertTriangle } from 'lucide-react';
+import { X, FolderPlus, AlertTriangle, MapPin, Map as MapIcon, CloudSun } from 'lucide-react';
 import { Button, Input, InfoHint } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
+import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { projectsApi, type CreateProjectData, type Project } from './api';
 
 // ── Regions (grouped by continent) ────────────────────────────────────────
@@ -249,6 +250,21 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
   const [regionalFactor, setRegionalFactor] = useState<number>(1.0);
   const [duplicateConfirmed, setDuplicateConfirmed] = useState(false);
 
+  // Address components — plain strings in the UI, assembled into the JSON
+  // `address` object on submit.  All optional; an empty address is allowed
+  // and simply means the project has no map / weather.
+  const [addressStreet, setAddressStreet] = useState('');
+  const [addressCity, setAddressCity] = useState('');
+  const [addressCountry, setAddressCountry] = useState('');
+  const [addressPostal, setAddressPostal] = useState('');
+
+  // Live-bound to the global widget settings store so flipping these in
+  // the create dialog immediately flips the same toggles in the toolbar.
+  const mapEnabled = useWidgetSettingsStore((s) => s.projectMapEnabled);
+  const weatherEnabled = useWidgetSettingsStore((s) => s.projectWeatherEnabled);
+  const toggleMap = useWidgetSettingsStore((s) => s.toggleProjectMap);
+  const toggleWeather = useWidgetSettingsStore((s) => s.toggleProjectWeather);
+
   // Reset form when modal opens
   useEffect(() => {
     if (open) {
@@ -258,6 +274,10 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
       setCustomCurrency('');
       setRegionalFactor(1.0);
       setDuplicateConfirmed(false);
+      setAddressStreet('');
+      setAddressCity('');
+      setAddressCountry('');
+      setAddressPostal('');
     }
   }, [open]);
 
@@ -305,6 +325,16 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
       return;
     }
 
+    // Build address only if the user filled anything — an empty object
+    // is semantically different from "no address set".
+    const addressParts = {
+      street: addressStreet.trim() || null,
+      city: addressCity.trim() || null,
+      country: addressCountry.trim() || null,
+      postal_code: addressPostal.trim() || null,
+    };
+    const hasAnyAddress = Object.values(addressParts).some((v) => !!v);
+
     const data: CreateProjectData = {
       ...form,
       region: form.region === '__custom__' ? customRegion : form.region,
@@ -314,6 +344,7 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
           : form.classification_standard,
       currency: form.currency === '__custom__' ? customCurrency : form.currency,
       regional_factor: regionalFactor,
+      address: hasAnyAddress ? addressParts : null,
     };
 
     mutation.mutate(data);
@@ -487,6 +518,77 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                 options={LANGUAGES}
                 onChange={(v) => set('locale', v)}
               />
+            </div>
+
+            {/* ── Address — drives map + weather ───────────────────── */}
+            <div className="rounded-xl border border-border-light bg-surface-secondary/30 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <MapPin size={14} className="text-oe-blue" />
+                <label className="text-sm font-semibold text-content-primary">
+                  {t('projects.address', { defaultValue: 'Site address' })}
+                </label>
+                <span className="text-[10px] text-content-quaternary">
+                  {t('projects.address_hint', { defaultValue: 'Optional — enables the location map and weather forecast' })}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  value={addressStreet}
+                  onChange={(e) => setAddressStreet(e.target.value)}
+                  placeholder={t('projects.address_street', { defaultValue: 'Street & number' })}
+                  className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                />
+                <input
+                  type="text"
+                  value={addressCity}
+                  onChange={(e) => setAddressCity(e.target.value)}
+                  placeholder={t('projects.address_city', { defaultValue: 'City' })}
+                  className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                />
+                <input
+                  type="text"
+                  value={addressCountry}
+                  onChange={(e) => setAddressCountry(e.target.value)}
+                  placeholder={t('projects.address_country', { defaultValue: 'Country' })}
+                  className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                />
+                <input
+                  type="text"
+                  value={addressPostal}
+                  onChange={(e) => setAddressPostal(e.target.value)}
+                  placeholder={t('projects.address_postal', { defaultValue: 'Postal code' })}
+                  className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                />
+              </div>
+
+              {/* Widget toggles — apply globally, but exposed here so the
+                  user sees "these will show for my new project" in-context. */}
+              <div className="flex items-center gap-4 pt-1 border-t border-border-light/60 mt-2">
+                <span className="text-xs text-content-tertiary">
+                  {t('projects.widgets_for_project', { defaultValue: 'Show on this project:' })}
+                </span>
+                <label className="inline-flex items-center gap-1.5 text-xs text-content-primary cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={mapEnabled}
+                    onChange={toggleMap}
+                    className="h-3.5 w-3.5 rounded border-border accent-oe-blue"
+                  />
+                  <MapIcon size={11} className="text-oe-blue" />
+                  {t('widget_settings.map', { defaultValue: 'Map' })}
+                </label>
+                <label className="inline-flex items-center gap-1.5 text-xs text-content-primary cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={weatherEnabled}
+                    onChange={toggleWeather}
+                    className="h-3.5 w-3.5 rounded border-border accent-oe-blue"
+                  />
+                  <CloudSun size={11} className="text-oe-blue" />
+                  {t('widget_settings.weather', { defaultValue: 'Weather' })}
+                </label>
+              </div>
             </div>
 
             {/* Regional price coefficient */}

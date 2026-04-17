@@ -63,6 +63,15 @@ export interface MeasurementSummary {
   by_group: Record<string, number>;
 }
 
+export interface TakeoffDocumentResponse {
+  id: string;
+  filename: string;
+  pages: number;
+  size_bytes: number;
+  status: string;
+  uploaded_at: string | null;
+}
+
 /* ── API functions ────────────────────────────────────────────────────── */
 
 export const takeoffApi = {
@@ -102,6 +111,18 @@ export const takeoffApi = {
   /** Export measurements as CSV or JSON. */
   export: (projectId: string, format: 'csv' | 'json' = 'json') =>
     apiGet<unknown>(`/v1/takeoff/measurements/export/?project_id=${projectId}&format=${format}`),
+
+  /** List uploaded takeoff documents for a project. */
+  listDocuments: (projectId?: string) => {
+    const url = projectId
+      ? `/v1/takeoff/documents/?project_id=${encodeURIComponent(projectId)}`
+      : '/v1/takeoff/documents/';
+    return apiGet<TakeoffDocumentResponse[]>(url);
+  },
+
+  /** Delete an uploaded takeoff document. */
+  deleteDocument: (docId: string) =>
+    apiDelete(`/v1/takeoff/documents/${docId}`),
 
   /** Save a CAD takeoff session to a project as a BIM model. */
   saveToProject: (

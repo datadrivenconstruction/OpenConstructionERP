@@ -1,5 +1,17 @@
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 
+export interface ProjectAddress {
+  street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  postal_code?: string | null;
+  /** Resolved coordinates are cached here after the first geocode so
+   *  the client doesn't re-hit Nominatim on every project open. */
+  lat?: number | null;
+  lng?: number | null;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -11,6 +23,7 @@ export interface Project {
   validation_rule_sets: string[];
   status: string;
   owner_id: string;
+  address?: ProjectAddress | null;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -24,6 +37,8 @@ export interface CreateProjectData {
   currency?: string;
   locale?: string;
   regional_factor?: number;
+  /** Optional postal address — used to anchor the project map + weather. */
+  address?: ProjectAddress | null;
 }
 
 /* ── Unified Project Dashboard types ─────────────────────────────────── */

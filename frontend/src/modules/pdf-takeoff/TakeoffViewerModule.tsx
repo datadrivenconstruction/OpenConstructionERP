@@ -39,7 +39,6 @@ import {
   Loader2,
   Link2,
   FileUp,
-  ShieldCheck,
   Crosshair,
   Scan,
   FileText,
@@ -48,8 +47,10 @@ import {
   Layers,
   X,
 } from 'lucide-react';
+import clsx from 'clsx';
 import { useToastStore } from '../../stores/useToastStore';
 import { useProjectContextStore } from '../../stores/useProjectContextStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { boqApi, type CreatePositionData, type Position } from '../../features/boq/api';
 import { takeoffApi } from '../../features/takeoff/api';
 import { apiGet } from '../../shared/lib/api';
@@ -112,6 +113,16 @@ interface Measurement {
   color?: string; // Color for annotation tools
   width?: number; // Width for rectangle/highlight
   height?: number; // Height for rectangle/highlight
+  /** Server ID (set after first persistence sync). */
+  serverId?: string;
+  /** Linked BOQ position id — the canonical "this measurement feeds that position". */
+  linkedPositionId?: string;
+  /** Linked BOQ position ordinal, cached for the badge. */
+  linkedPositionOrdinal?: string;
+  /** Linked BOQ id — so the badge can deep-link straight into the editor. */
+  linkedBoqId?: string;
+  /** Human label of the linked position (description), for tooltip. */
+  linkedPositionLabel?: string;
 }
 
 /* ── Annotation Colors ───────────────────────────────────────────── */
@@ -171,7 +182,17 @@ type UndoOperation =
 
 /* ── Component ─────────────────────────────────────────────────────── */
 
-export default function TakeoffViewerModule() {
+interface TakeoffViewerModuleProps {
+  /** URL to pre-load a PDF from (e.g. `/api/v1/takeoff/documents/{id}/download/`). */
+  initialPdfUrl?: string;
+  /** Optional filename to associate with the pre-loaded PDF (used for persistence key). */
+  initialPdfName?: string;
+}
+
+export default function TakeoffViewerModule({
+  initialPdfUrl,
+  initialPdfName,
+}: TakeoffViewerModuleProps = {}) {
   const { t } = useTranslation();
 
   // PDF state
@@ -242,11 +263,20 @@ export default function TakeoffViewerModule() {
   const [isExporting, setIsExporting] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  // Link measurement to BOQ state
+  // Link measurement to BOQ state.  The picker is self-contained: it can
+  // discover project + BOQ on its own (no dependency on the Export dialog
+  // being opened first) and supports creating a new position inline.
   const [linkingMeasurementId, setLinkingMeasurementId] = useState<string | null>(null);
+  const [linkPickerProjectId, setLinkPickerProjectId] = useState('');
+  const [linkPickerBoqId, setLinkPickerBoqId] = useState('');
+  const [linkPickerProjects, setLinkPickerProjects] = useState<{ id: string; name: string }[]>([]);
+  const [linkPickerBoqs, setLinkPickerBoqs] = useState<{ id: string; name: string }[]>([]);
   const [linkBoqPositions, setLinkBoqPositions] = useState<Position[]>([]);
   const [linkBoqsLoading, setLinkBoqsLoading] = useState(false);
+  const [linkPositionsLoading, setLinkPositionsLoading] = useState(false);
   const [linkingInProgress, setLinkingInProgress] = useState(false);
+  const [linkPickerSearch, setLinkPickerSearch] = useState('');
+  const [linkPickerMode, setLinkPickerMode] = useState<'pick' | 'create'>('pick');
 
   // Document persistence + server sync
   const [fileName, setFileName] = useState<string | null>(null);
@@ -293,6 +323,54 @@ export default function TakeoffViewerModule() {
       setIsLoading(false);
     }
   }, []);
+
+  /* ── Load PDF from URL (filmstrip click / deep link) ────────────── */
+
+  useEffect(() => {
+    if (!initialPdfUrl) return;
+    let cancelled = false;
+    setIsLoading(true);
+    (async () => {
+      try {
+        const token = useAuthStore.getState().accessToken;
+        const headers: HeadersInit = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const response = await fetch(initialPdfUrl, { headers });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch PDF (${response.status})`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        if (cancelled) return;
+        const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        if (cancelled) return;
+        setPdfDoc(doc);
+        setTotalPages(doc.numPages);
+        setCurrentPage(1);
+        setFileName(initialPdfName || 'Document.pdf');
+        setActivePoints([]);
+        undoStackRef.current = [];
+        setUndoCount(0);
+        annotationCounterRef.current = { distance: 0, polyline: 0, area: 0, volume: 0, count: 0, cloud: 0, arrow: 0, text: 0, rectangle: 0, highlight: 0 };
+        setShowVolumeDepthInput(false);
+        setPendingVolumePoints([]);
+        setShowTextInput(false);
+        setRectStartPoint(null);
+        setIsDraggingRect(false);
+      } catch (err) {
+        if (cancelled) return;
+        console.error('Failed to load PDF from URL:', err);
+        addToast({
+          type: 'error',
+          title: t('takeoff_viewer.pdf_load_failed', { defaultValue: 'Failed to load PDF' }),
+          message: err instanceof Error ? err.message : t('takeoff_viewer.pdf_load_error_hint', { defaultValue: 'The file may be corrupted or not a valid PDF.' }),
+        });
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPdfUrl, initialPdfName]);
 
   /* ── Warn on unsaved changes (tab close / navigation) ────────────── */
 
@@ -1472,63 +1550,141 @@ export default function TakeoffViewerModule() {
 
   /* ── Link measurement to BOQ ─────────────────────────────────────── */
 
-  /** Open the BOQ position picker for a measurement */
-  const handleOpenLinkToBoq = useCallback(async (measurementId: string) => {
-    if (!selectedBoqId && !selectedProjectId) {
-      addToast({
-        type: 'warning',
-        title: t('takeoff.link_boq_no_project', { defaultValue: 'Select project & BOQ first' }),
-        message: t('takeoff.link_boq_no_project_desc', { defaultValue: 'Use "Export to BOQ" to select a project and BOQ, then link measurements.' }),
-      });
-      return;
-    }
-    setLinkingMeasurementId(measurementId);
-    if (selectedBoqId) {
-      setLinkBoqsLoading(true);
-      try {
-        const boqData = await apiGet<{ positions: Position[] }>(`/v1/boq/boqs/${selectedBoqId}`);
-        setLinkBoqPositions(boqData.positions || []);
-      } catch {
-        setLinkBoqPositions([]);
-      } finally {
-        setLinkBoqsLoading(false);
-      }
-    }
-  }, [selectedBoqId, selectedProjectId, addToast, t]);
+  const activeBoqIdFromStore = useProjectContextStore((s) => s.activeBOQId);
 
-  /** Link a measurement to a specific BOQ position, updating quantity + metadata */
+  /** Canonical unit normalization — maps display glyph → canonical backend unit. */
+  const normalizeUnit = useCallback((unit: string) => {
+    const map: Record<string, string> = { m: 'm', 'm\u00B2': 'm2', 'm\u00B3': 'm3', pcs: 'pcs' };
+    return map[unit] ?? unit;
+  }, []);
+
+  /** Load BOQs for a project (picker-side). */
+  const loadPickerBoqs = useCallback(async (projectId: string) => {
+    if (!projectId) { setLinkPickerBoqs([]); return; }
+    setLinkBoqsLoading(true);
+    try {
+      const boqs = await apiGet<{ id: string; name: string }[]>(`/v1/boq/boqs/?project_id=${projectId}`);
+      setLinkPickerBoqs(boqs);
+    } catch {
+      setLinkPickerBoqs([]);
+    } finally {
+      setLinkBoqsLoading(false);
+    }
+  }, []);
+
+  /** Load positions for a BOQ (picker-side). */
+  const loadPickerPositions = useCallback(async (boqId: string) => {
+    if (!boqId) { setLinkBoqPositions([]); return; }
+    setLinkPositionsLoading(true);
+    try {
+      const boqData = await apiGet<{ positions: Position[] }>(`/v1/boq/boqs/${boqId}`);
+      setLinkBoqPositions(boqData.positions || []);
+    } catch {
+      setLinkBoqPositions([]);
+    } finally {
+      setLinkPositionsLoading(false);
+    }
+  }, []);
+
+  /** Open the BOQ position picker for a measurement.
+   *  Self-sufficient: discovers project + BOQ even if the Export dialog was
+   *  never opened.  Reuses the export selection if it exists, otherwise
+   *  falls back to the app's active project/BOQ context.
+   */
+  const handleOpenLinkToBoq = useCallback(async (measurementId: string) => {
+    setLinkingMeasurementId(measurementId);
+    setLinkPickerSearch('');
+    setLinkPickerMode('pick');
+
+    // Seed picker selection.  Priority: export-dialog pick > active context.
+    const seedProject = selectedProjectId || activeProjectId || '';
+    const seedBoq = (selectedProjectId ? selectedBoqId : '') || (activeProjectId ? activeBoqIdFromStore ?? '' : '') || '';
+    setLinkPickerProjectId(seedProject);
+    setLinkPickerBoqId(seedBoq);
+
+    // Always (re-)load the project list lazily so the user can switch.
+    try {
+      const projects = await apiGet<{ id: string; name: string }[]>('/v1/projects/');
+      setLinkPickerProjects(projects);
+    } catch {
+      setLinkPickerProjects([]);
+    }
+
+    if (seedProject) {
+      await loadPickerBoqs(seedProject);
+    } else {
+      setLinkPickerBoqs([]);
+    }
+    if (seedBoq) {
+      await loadPickerPositions(seedBoq);
+    } else {
+      setLinkBoqPositions([]);
+    }
+  }, [selectedProjectId, selectedBoqId, activeProjectId, activeBoqIdFromStore, loadPickerBoqs, loadPickerPositions]);
+
+  /** Picker: user switched project.  Reset BOQ + positions, load BOQs for new project. */
+  const handlePickerProjectChange = useCallback(async (projectId: string) => {
+    setLinkPickerProjectId(projectId);
+    setLinkPickerBoqId('');
+    setLinkBoqPositions([]);
+    await loadPickerBoqs(projectId);
+  }, [loadPickerBoqs]);
+
+  /** Picker: user picked a BOQ.  Load its positions. */
+  const handlePickerBoqChange = useCallback(async (boqId: string) => {
+    setLinkPickerBoqId(boqId);
+    await loadPickerPositions(boqId);
+  }, [loadPickerPositions]);
+
+  /** Link a measurement to a specific existing BOQ position, pushing the
+   *  measurement's quantity/unit into the position and recording both
+   *  sides of the link (measurement.linked_boq_position_id +
+   *  position.metadata.pdf_measurement_source).
+   */
   const handleLinkToPosition = useCallback(async (measurementId: string, position: Position) => {
     const measurement = measurements.find((m) => m.id === measurementId);
     if (!measurement) return;
     setLinkingInProgress(true);
     try {
-      // Update BOQ position quantity + metadata with pdf_measurement_source
-      const sourceLabel = `Takeoff: ${measurement.type} on Page ${measurement.page}`;
-      const unitMap: Record<string, string> = { m: 'm', 'm\u00B2': 'm2', 'm\u00B3': 'm3', pcs: 'pcs' };
+      const sourceLabel = `Takeoff: ${measurement.annotation || measurement.type} (page ${measurement.page})`;
       const newQty = Math.round(measurement.value * 100) / 100;
+      const canonicalUnit = normalizeUnit(measurement.unit);
       const existingMeta = (position.metadata ?? {}) as Record<string, unknown>;
+
       await boqApi.updatePosition(position.id, {
         quantity: newQty,
-        unit: unitMap[measurement.unit] ?? measurement.unit,
-        metadata: { ...existingMeta, pdf_measurement_source: sourceLabel },
+        unit: canonicalUnit,
+        metadata: {
+          ...existingMeta,
+          pdf_measurement_source: sourceLabel,
+          pdf_measurement_id: measurement.serverId ?? measurement.id,
+          pdf_document_id: fileName ?? undefined,
+          pdf_page: measurement.page,
+        },
       });
-      // Also link measurement on the server if it has a real UUID
-      if (measurementId && !measurementId.startsWith('temp-')) {
-        try {
-          await takeoffApi.linkToBoq(measurementId, position.id);
-        } catch {
-          // Non-critical: takeoff measurement may be local-only
-        }
+
+      // Link on server (only if the measurement has a real server id).
+      if (measurement.serverId) {
+        try { await takeoffApi.linkToBoq(measurement.serverId, position.id); } catch { /* non-critical */ }
       }
+
+      // Update local measurement so the badge appears immediately.
+      setMeasurements((prev) => prev.map((m) =>
+        m.id === measurementId
+          ? {
+              ...m,
+              linkedPositionId: position.id,
+              linkedPositionOrdinal: position.ordinal,
+              linkedBoqId: position.boq_id,
+              linkedPositionLabel: position.description,
+            }
+          : m,
+      ));
+
       addToast({
         type: 'success',
         title: t('takeoff.linked_to_boq', { defaultValue: 'Linked to BOQ' }),
-        message: t('takeoff.linked_to_boq_desc', {
-          defaultValue: '{{value}} {{unit}} applied to "{{desc}}"',
-          value: newQty,
-          unit: measurement.unit,
-          desc: position.description?.slice(0, 40) || position.ordinal,
-        }),
+        message: `${newQty} ${canonicalUnit} → ${position.ordinal} ${position.description?.slice(0, 40) || ''}`.trim(),
       });
       setLinkingMeasurementId(null);
     } catch (err) {
@@ -1540,7 +1696,148 @@ export default function TakeoffViewerModule() {
     } finally {
       setLinkingInProgress(false);
     }
+  }, [measurements, addToast, t, normalizeUnit]);
+
+  /** Create a brand-new BOQ position from the measurement and link to it.
+   *  The ordinal is auto-generated as TK.NNN based on existing TK positions.
+   */
+  const handleCreateAndLink = useCallback(async (measurementId: string) => {
+    const measurement = measurements.find((m) => m.id === measurementId);
+    if (!measurement) return;
+    if (!linkPickerBoqId) {
+      addToast({
+        type: 'warning',
+        title: t('takeoff.link_need_boq', { defaultValue: 'Pick a BOQ first' }),
+      });
+      return;
+    }
+    setLinkingInProgress(true);
+    try {
+      // Derive next TK.NNN ordinal from existing positions.
+      const takeoffOrdinals = linkBoqPositions
+        .map((p) => {
+          const match = /^TK\.(\d+)$/.exec(p.ordinal || '');
+          return match ? parseInt(match[1]!, 10) : 0;
+        })
+        .filter((n) => n > 0);
+      const nextNum = (takeoffOrdinals.length ? Math.max(...takeoffOrdinals) : 0) + 1;
+      const ordinal = `TK.${String(nextNum).padStart(3, '0')}`;
+
+      const newQty = Math.round(measurement.value * 100) / 100;
+      const canonicalUnit = normalizeUnit(measurement.unit);
+      const description = measurement.annotation
+        || t('takeoff.position_default_desc', {
+          defaultValue: 'Takeoff · {{type}} page {{page}}',
+          type: measurement.type,
+          page: measurement.page,
+        });
+
+      const newPos = await boqApi.addPosition({
+        boq_id: linkPickerBoqId,
+        ordinal,
+        description,
+        unit: canonicalUnit,
+        quantity: newQty,
+        unit_rate: 0,
+      });
+
+      // Write measurement-source metadata via a follow-up patch so the BOQ
+      // cell renderers show the PDF source badge + can deep-link back.
+      try {
+        await boqApi.updatePosition(newPos.id, {
+          metadata: {
+            pdf_measurement_source: `Takeoff: ${measurement.annotation || measurement.type} (page ${measurement.page})`,
+            pdf_measurement_id: measurement.serverId ?? measurement.id,
+            pdf_document_id: fileName ?? undefined,
+            pdf_page: measurement.page,
+          },
+        });
+      } catch { /* metadata is non-critical */ }
+
+      if (measurement.serverId) {
+        try { await takeoffApi.linkToBoq(measurement.serverId, newPos.id); } catch { /* non-critical */ }
+      }
+
+      setMeasurements((prev) => prev.map((m) =>
+        m.id === measurementId
+          ? {
+              ...m,
+              linkedPositionId: newPos.id,
+              linkedPositionOrdinal: newPos.ordinal,
+              linkedBoqId: newPos.boq_id,
+              linkedPositionLabel: newPos.description,
+            }
+          : m,
+      ));
+      // Also keep the local position list fresh so subsequent ordinals
+      // increment correctly without a round-trip.
+      setLinkBoqPositions((prev) => [...prev, newPos]);
+
+      addToast({
+        type: 'success',
+        title: t('takeoff.linked_created', { defaultValue: 'Position created & linked' }),
+        message: `${ordinal} — ${newQty} ${canonicalUnit}`,
+      });
+      setLinkingMeasurementId(null);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('takeoff.create_link_failed', { defaultValue: 'Create & link failed' }),
+        message: err instanceof Error ? err.message : '',
+      });
+    } finally {
+      setLinkingInProgress(false);
+    }
+  }, [measurements, linkPickerBoqId, linkBoqPositions, addToast, t, normalizeUnit]);
+
+  /** Remove the link between a measurement and its BOQ position.
+   *  We intentionally leave the BOQ position alone — unlinking just
+   *  detaches the relationship, so the user doesn't accidentally wipe a
+   *  quantity they've reviewed.
+   */
+  const handleUnlinkMeasurement = useCallback(async (measurementId: string) => {
+    const measurement = measurements.find((m) => m.id === measurementId);
+    if (!measurement) return;
+    setLinkingInProgress(true);
+    try {
+      if (measurement.serverId) {
+        try {
+          await takeoffApi.update(measurement.serverId, { linked_boq_position_id: null });
+        } catch { /* non-critical */ }
+      }
+      setMeasurements((prev) => prev.map((m) =>
+        m.id === measurementId
+          ? {
+              ...m,
+              linkedPositionId: undefined,
+              linkedPositionOrdinal: undefined,
+              linkedBoqId: undefined,
+              linkedPositionLabel: undefined,
+            }
+          : m,
+      ));
+      addToast({
+        type: 'success',
+        title: t('takeoff.unlinked', { defaultValue: 'Unlinked from BOQ' }),
+      });
+      setLinkingMeasurementId(null);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('takeoff.unlink_failed', { defaultValue: 'Unlink failed' }),
+        message: err instanceof Error ? err.message : '',
+      });
+    } finally {
+      setLinkingInProgress(false);
+    }
   }, [measurements, addToast, t]);
+
+  /** Jump into the BOQ editor focused on the linked position. */
+  const handleOpenLinkedPosition = useCallback((m: Measurement) => {
+    if (!m.linkedBoqId || !m.linkedPositionId) return;
+    // Absolute navigation; takeoff is embedded under /takeoff route.
+    window.open(`/boq/${m.linkedBoqId}?highlight=${m.linkedPositionId}`, '_blank', 'noopener');
+  }, []);
 
   /* ── Undo ────────────────────────────────────────────────────────── */
 
@@ -1666,23 +1963,99 @@ export default function TakeoffViewerModule() {
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Header — only shown when a PDF is loaded */}
-      {pdfDoc && (
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
-            <Ruler className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-content-primary">
-              {t('takeoff_viewer.title', { defaultValue: 'PDF Takeoff Viewer' })}
-            </h1>
-            <p className="text-sm text-content-tertiary">
-              {t('takeoff_viewer.subtitle', { defaultValue: 'View drawings and take measurements' })}
-            </p>
-          </div>
-        </div>
-      )}
+    <div className="relative space-y-4">
+      {/* Decorative field-surveyor geometry — rectangles and polylines
+          like what an estimator drags across a drawing to measure
+          area or perimeter.  Very low opacity, behind everything,
+          pointer-events disabled so it never interferes. */}
+      <svg
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10 w-full h-full text-slate-500 dark:text-slate-400"
+        preserveAspectRatio="xMidYMid slice"
+        viewBox="0 0 1600 1000"
+      >
+        <defs>
+          <linearGradient id="tkoFade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="white" stopOpacity="0.3" />
+            <stop offset="40%" stopColor="white" stopOpacity="1" />
+            <stop offset="100%" stopColor="white" stopOpacity="0.15" />
+          </linearGradient>
+          <mask id="tkoMask">
+            <rect width="1600" height="1000" fill="url(#tkoFade)" />
+          </mask>
+        </defs>
+        <g mask="url(#tkoMask)" opacity="0.07" fill="none" stroke="currentColor" strokeWidth="1.1">
+          {/* Rectangle A — top-left, dashed outline w/ vertex handles */}
+          <rect x="110" y="90" width="280" height="170" strokeDasharray="8 6" />
+          <circle cx="110" cy="90" r="4" fill="currentColor" />
+          <circle cx="390" cy="90" r="4" fill="currentColor" />
+          <circle cx="390" cy="260" r="4" fill="currentColor" />
+          <circle cx="110" cy="260" r="4" fill="currentColor" />
+          <text x="250" y="180" textAnchor="middle" fill="currentColor" stroke="none" fontSize="14" fontFamily="ui-monospace,monospace" opacity="0.6">47.6 m²</text>
+
+          {/* Polygon B — irregular room outline with vertex handles */}
+          <polygon points="820,120 1080,140 1180,260 1140,390 940,430 820,340 760,230" strokeDasharray="6 4" />
+          {([
+            [820, 120], [1080, 140], [1180, 260], [1140, 390], [940, 430], [820, 340], [760, 230],
+          ] as [number, number][]).map(([x, y], i) => <circle key={i} cx={x} cy={y} r="3.5" fill="currentColor" />)}
+          <text x="960" y="290" textAnchor="middle" fill="currentColor" stroke="none" fontSize="13" fontFamily="ui-monospace,monospace" opacity="0.55">83.2 m²</text>
+
+          {/* Distance line C — two endpoints + dimension text */}
+          <g strokeDasharray="3 3">
+            <line x1="1280" y1="130" x2="1540" y2="200" />
+            <line x1="1275" y1="120" x2="1285" y2="140" strokeDasharray="0" strokeWidth="2" />
+            <line x1="1535" y1="190" x2="1545" y2="210" strokeDasharray="0" strokeWidth="2" />
+          </g>
+          <text x="1410" y="155" textAnchor="middle" fill="currentColor" stroke="none" fontSize="12" fontFamily="ui-monospace,monospace" opacity="0.55">12.43 m</text>
+
+          {/* Polyline D — open path like a wall run with vertex handles */}
+          <polyline points="140,620 260,560 380,620 520,560 640,640" />
+          {([
+            [140, 620], [260, 560], [380, 620], [520, 560], [640, 640],
+          ] as [number, number][]).map(([x, y], i) => <rect key={i} x={x - 3} y={y - 3} width="6" height="6" fill="currentColor" />)}
+
+          {/* Rectangle E — bottom right, solid dashed outline */}
+          <rect x="1080" y="620" width="360" height="220" strokeDasharray="8 6" />
+          {([[1080, 620], [1440, 620], [1440, 840], [1080, 840]] as [number, number][]).map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r="4" fill="currentColor" />
+          ))}
+          <text x="1260" y="740" textAnchor="middle" fill="currentColor" stroke="none" fontSize="14" fontFamily="ui-monospace,monospace" opacity="0.55">79.2 m²</text>
+
+          {/* Polygon F — low-angle quad on mid-left */}
+          <polygon points="60,440 270,460 320,640 90,630" strokeDasharray="4 4" />
+          {([[60, 440], [270, 460], [320, 640], [90, 630]] as [number, number][]).map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r="3" fill="currentColor" />
+          ))}
+
+          {/* Scale tick ruler bottom-center (stylised) */}
+          <g>
+            <line x1="660" y1="920" x2="940" y2="920" strokeWidth="1" />
+            {Array.from({ length: 11 }).map((_, i) => (
+              <line
+                key={i}
+                x1={660 + i * 28}
+                y1={i % 2 === 0 ? 912 : 916}
+                x2={660 + i * 28}
+                y2="928"
+                strokeWidth="1"
+              />
+            ))}
+          </g>
+
+          {/* Tiny vertex-count pins scattered — estimator's clicked points */}
+          {([
+            [480, 200], [540, 260], [700, 360], [1240, 500], [960, 820], [200, 780], [1500, 520],
+          ] as [number, number][]).map(([x, y], i) => (
+            <g key={i}>
+              <circle cx={x} cy={y} r="4" fill="currentColor" opacity="0.45" />
+              <circle cx={x} cy={y} r="9" stroke="currentColor" strokeWidth="0.6" />
+            </g>
+          ))}
+        </g>
+      </svg>
+
+      {/* Header removed — the parent TakeoffPage already shows the page
+          title / subtitle, so the duplicate is pure noise. */}
 
       {/* Landing (BIM-style) — when no PDF loaded */}
       {!pdfDoc && (
@@ -1736,7 +2109,7 @@ export default function TakeoffViewerModule() {
                 </div>
               </div>
 
-              {/* RIGHT — Hero text */}
+              {/* RIGHT — Hero text + supported formats cards */}
               <div className="flex flex-col justify-center gap-4">
                 <div>
                   <h1 className="text-2xl font-bold text-content-primary tracking-tight leading-tight">
@@ -1747,19 +2120,53 @@ export default function TakeoffViewerModule() {
                       defaultValue: 'Click-to-measure on any drawing \u2014 lengths, areas, counts \u2014 with AI that suggests quantities and sends them straight into your BOQ.',
                     })}
                   </p>
-                  <p className="text-xs text-content-tertiary mt-3 leading-relaxed">
-                    {t('takeoff.landing_formats_detailed', {
-                      defaultValue: 'PDF (vector & raster) \u00B7 PNG \u00B7 JPG \u00B7 TIFF \u00B7 scales 1:50, 1:100, custom. DWG \u2192 DWG Takeoff module.',
-                    })}
-                  </p>
-                  <p className="mt-2 flex items-center gap-1.5 text-[11px] text-content-tertiary">
-                    <ShieldCheck size={12} className="shrink-0" />
-                    <span>
-                      {t('common.local_processing', { defaultValue: '100% Local Processing \u2014 Your files never leave your computer' })}
-                      {' \u00B7 '}
-                      {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC cad2data' })}
-                    </span>
-                  </p>
+                </div>
+
+                {/* Supported formats — compact cards tucked right under the
+                    hero subtitle.  Used to live in its own full-width row
+                    below; pulling it up here keeps the formats-at-a-glance
+                    without the redundant textual line. */}
+                <div>
+                  <h2 className="text-[10px] font-bold text-content-tertiary uppercase tracking-widest mb-2">
+                    {t('takeoff.landing_supported_formats', { defaultValue: 'Supported formats' })}
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {landingFormats.map((f, i) => (
+                      <div
+                        key={i}
+                        className={`flex items-start gap-2 rounded-lg p-2 bg-white dark:bg-gray-800/40 border transition-all ${
+                          f.primary
+                            ? 'border-oe-blue/30 shadow-sm ring-1 ring-oe-blue/10'
+                            : f.muted
+                              ? 'border-border-light/60 opacity-70'
+                              : 'border-border-light/60 hover:border-border-light hover:shadow-sm'
+                        }`}
+                      >
+                        <div
+                          className={`w-7 h-7 rounded-md border flex items-center justify-center shrink-0 ${
+                            f.primary
+                              ? 'bg-oe-blue/10 border-oe-blue/20 text-oe-blue'
+                              : 'bg-surface-secondary border-border-light text-content-tertiary'
+                          }`}
+                        >
+                          <f.icon size={13} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1">
+                            <span className={`text-[11px] font-mono font-bold ${f.primary ? 'text-oe-blue' : 'text-content-primary'}`}>
+                              .{f.ext.toLowerCase()}
+                            </span>
+                            {f.primary && (
+                              <span className="text-[8px] font-semibold uppercase tracking-wider text-oe-blue">
+                                {t('takeoff.landing_fmt_primary', { defaultValue: 'Primary' })}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-content-tertiary leading-snug mt-0.5 truncate">{f.label}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1787,51 +2194,6 @@ export default function TakeoffViewerModule() {
               </div>
             </div>
 
-            {/* Row 3: Supported formats */}
-            <div>
-              <h2 className="text-xs font-bold text-content-tertiary uppercase tracking-widest mb-3">
-                {t('takeoff.landing_supported_formats', { defaultValue: 'Supported formats' })}
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                {landingFormats.map((f, i) => (
-                  <div
-                    key={i}
-                    className={`flex items-start gap-3 rounded-xl p-3.5 bg-white dark:bg-gray-800/40 border transition-all ${
-                      f.primary
-                        ? 'border-oe-blue/30 shadow-sm ring-1 ring-oe-blue/10'
-                        : f.muted
-                          ? 'border-border-light/60 opacity-70'
-                          : 'border-border-light/60 hover:border-border-light hover:shadow-sm'
-                    }`}
-                  >
-                    <div
-                      className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${
-                        f.primary
-                          ? 'bg-oe-blue/10 border-oe-blue/20 text-oe-blue'
-                          : 'bg-surface-secondary border-border-light text-content-tertiary'
-                      }`}
-                    >
-                      <f.icon size={15} />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className={`text-[11px] font-mono font-bold ${f.primary ? 'text-oe-blue' : 'text-content-primary'}`}>
-                          .{f.ext.toLowerCase()}
-                        </span>
-                        {f.primary && (
-                          <span className="text-[9px] font-semibold uppercase tracking-wider text-oe-blue">
-                            {t('takeoff.landing_fmt_primary', { defaultValue: 'Primary' })}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-content-tertiary leading-snug mt-0.5">{f.label}</p>
-                      <p className="text-[10px] text-content-quaternary mt-0.5">{f.size}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
           </div>
         </div>
       )}
@@ -1842,7 +2204,7 @@ export default function TakeoffViewerModule() {
         </div>
       )}
 
-      {/* Viewer + Sidebar */}
+      {/* Viewer + Sidebar (PDF on the left, Measurements panel on the right) */}
       {pdfDoc && (
         <div className="flex gap-4 min-w-0">
           {/* Left: PDF + Toolbar */}
@@ -2037,14 +2399,14 @@ export default function TakeoffViewerModule() {
             </div>
           </div>
 
-          {/* Right: Measurements panel */}
-          <div className="w-72 shrink-0 space-y-3">
+          {/* Left-visually / DOM-first: Measurements panel */}
+          <div className="w-72 shrink-0 space-y-2">
             {/* Scale info */}
-            <div className="rounded-lg border border-border bg-surface-primary p-3">
-              <p className="text-xs font-medium text-content-tertiary mb-1">
+            <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-content-tertiary mb-1">
                 {t('takeoff_viewer.scale', { defaultValue: 'Scale' })}
               </p>
-              <p className="text-sm font-semibold text-content-primary">
+              <p className="text-sm font-semibold text-content-primary tabular-nums">
                 1px = {(1 / scale.pixelsPerUnit).toFixed(4)} {scale.unitLabel}
               </p>
               <div className="mt-2 flex gap-1 flex-wrap">
@@ -2052,7 +2414,7 @@ export default function TakeoffViewerModule() {
                   <button
                     key={s.label}
                     onClick={() => setScale({ pixelsPerUnit: 72 / (0.0254 * s.ratio), unitLabel: 'm' })}
-                    className="text-2xs px-1.5 py-0.5 rounded bg-surface-secondary hover:bg-surface-tertiary text-content-tertiary transition-colors"
+                    className="text-[10px] px-1.5 py-0.5 rounded-sm bg-surface-secondary hover:bg-oe-blue hover:text-white text-content-secondary transition-all font-medium"
                   >
                     {s.label}
                   </button>
@@ -2061,19 +2423,19 @@ export default function TakeoffViewerModule() {
             </div>
 
             {/* Active group selector */}
-            <div className="rounded-lg border border-border bg-surface-primary p-3">
-              <label className="text-xs font-medium text-content-tertiary block mb-1">
+            <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-content-tertiary block mb-1">
                 {t('takeoff_viewer.active_group', { defaultValue: 'Active Group' })}
               </label>
               <div className="flex items-center gap-2">
                 <span
-                  className="h-3 w-3 rounded-full shrink-0"
+                  className="h-3 w-3 rounded-full shrink-0 ring-2 ring-white dark:ring-gray-900"
                   style={{ backgroundColor: GROUP_COLOR_MAP[activeGroup] || '#3B82F6' }}
                 />
                 <select
                   value={activeGroup}
                   onChange={(e) => setActiveGroup(e.target.value)}
-                  className="flex-1 rounded border border-border bg-surface-secondary px-2 py-1 text-xs text-content-primary"
+                  className="flex-1 rounded-sm border border-border bg-surface-secondary px-2 py-1 text-xs text-content-primary"
                 >
                   {MEASUREMENT_GROUPS.map((g) => (
                     <option key={g.name} value={g.name}>{g.name}</option>
@@ -2084,23 +2446,23 @@ export default function TakeoffViewerModule() {
 
             {/* Count label (when count tool active) */}
             {activeTool === 'count' && (
-              <div className="rounded-lg border border-border bg-surface-primary p-3">
-                <label className="text-xs font-medium text-content-tertiary block mb-1">
+              <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-content-tertiary block mb-1">
                   {t('takeoff_viewer.count_label', { defaultValue: 'Count Label' })}
                 </label>
                 <input
                   type="text"
                   value={countLabel}
                   onChange={(e) => setCountLabel(e.target.value)}
-                  className="w-full rounded border border-border bg-surface-secondary px-2 py-1 text-xs text-content-primary"
+                  className="w-full rounded-sm border border-border bg-surface-secondary px-2 py-1 text-xs text-content-primary"
                 />
               </div>
             )}
 
             {/* Annotation color picker (when annotation tool active) */}
             {isAnnotationTool(activeTool) && (
-              <div className="rounded-lg border border-border bg-surface-primary p-3">
-                <label className="text-xs font-medium text-content-tertiary block mb-1.5">
+              <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-content-tertiary block mb-1.5">
                   {t('takeoff_viewer.annotation_color', { defaultValue: 'Annotation Color' })}
                 </label>
                 <div className="flex items-center gap-1.5">
@@ -2123,7 +2485,7 @@ export default function TakeoffViewerModule() {
             )}
 
             {/* Measurements list (grouped) */}
-            <div className="rounded-lg border border-border bg-surface-primary p-3">
+            <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-semibold text-content-primary">
                   {t('takeoff_viewer.measurements', { defaultValue: 'Measurements' })} ({pageMeasurements.filter((m) => !isAnnotationType(m.type)).length})
@@ -2205,7 +2567,7 @@ export default function TakeoffViewerModule() {
                           {measurementOnly.map((m) => (
                             <div
                               key={m.id}
-                              className="rounded-lg bg-surface-secondary px-2.5 py-2 group/item"
+                              className="rounded-sm bg-surface-secondary/70 hover:bg-surface-secondary border border-transparent hover:border-border-light px-2.5 py-2 group/item transition-all"
                             >
                               <div className="flex items-center gap-2">
                                 <span
@@ -2240,13 +2602,31 @@ export default function TakeoffViewerModule() {
                                       <Pencil size={10} className="shrink-0 opacity-0 group-hover/item:opacity-60 transition-opacity" />
                                     </button>
                                   )}
-                                  <p className="text-2xs text-content-tertiary capitalize">{m.type}: {m.label}</p>
+                                  <p className="text-2xs text-content-tertiary capitalize flex items-center gap-1.5">
+                                    <span>{m.type}: {m.label}</span>
+                                    {m.linkedPositionOrdinal && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenLinkedPosition(m)}
+                                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-[9px] font-mono font-semibold hover:bg-emerald-200 dark:hover:bg-emerald-900/70 transition-colors"
+                                        title={`${t('takeoff.linked_badge_title', { defaultValue: 'Linked to BOQ' })}: ${m.linkedPositionOrdinal}`}
+                                      >
+                                        <Link2 size={8} />
+                                        {m.linkedPositionOrdinal}
+                                      </button>
+                                    )}
+                                  </p>
                                 </div>
                                 <div className="flex items-center gap-0.5 shrink-0">
-                                  {/* Link to BOQ button */}
+                                  {/* Link to BOQ button — always visible if linked, hover-only otherwise */}
                                   <button
                                     onClick={() => handleOpenLinkToBoq(m.id)}
-                                    className="opacity-0 group-hover/item:opacity-100 text-content-tertiary hover:text-rose-700 dark:hover:text-rose-400 transition-all p-0.5 rounded"
+                                    className={clsx(
+                                      'transition-all p-0.5 rounded',
+                                      m.linkedPositionId
+                                        ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300'
+                                        : 'opacity-0 group-hover/item:opacity-100 text-content-tertiary hover:text-rose-700 dark:hover:text-rose-400',
+                                    )}
                                     aria-label={t('takeoff_viewer.link_to_boq', { defaultValue: 'Link to BOQ' })}
                                     title={t('takeoff_viewer.link_to_boq', { defaultValue: 'Link to BOQ' })}
                                   >
@@ -2261,12 +2641,14 @@ export default function TakeoffViewerModule() {
                                   </button>
                                 </div>
                               </div>
-                              {/* Link to BOQ position picker dropdown */}
+                              {/* Link to BOQ picker — self-contained, no prerequisites */}
                               {linkingMeasurementId === m.id && (
                                 <div className="mt-1.5 rounded-lg border border-rose-200 dark:border-rose-800/40 bg-rose-50/50 dark:bg-rose-950/20 p-2 animate-fade-in">
                                   <div className="flex items-center justify-between mb-1.5">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">
-                                      {t('takeoff_viewer.link_to_boq_title', { defaultValue: 'Link to BOQ position' })}
+                                      {m.linkedPositionId
+                                        ? t('takeoff_viewer.relink_title', { defaultValue: 'Linked — pick new or unlink' })
+                                        : t('takeoff_viewer.link_to_boq_title', { defaultValue: 'Link to BOQ position' })}
                                     </span>
                                     <button
                                       onClick={() => setLinkingMeasurementId(null)}
@@ -2275,36 +2657,160 @@ export default function TakeoffViewerModule() {
                                       <X size={10} />
                                     </button>
                                   </div>
-                                  {linkBoqsLoading ? (
-                                    <div className="flex items-center gap-1.5 py-2">
-                                      <Loader2 size={12} className="animate-spin text-rose-600" />
-                                      <span className="text-[10px] text-content-tertiary">
-                                        {t('common.loading', { defaultValue: 'Loading...' })}
+
+                                  {/* Currently-linked summary + unlink */}
+                                  {m.linkedPositionId && (
+                                    <div className="mb-1.5 flex items-center gap-1.5 rounded bg-emerald-100/60 dark:bg-emerald-950/30 px-1.5 py-1">
+                                      <Link2 size={10} className="text-emerald-700 dark:text-emerald-400 shrink-0" />
+                                      <span className="flex-1 min-w-0 text-[10px]">
+                                        <span className="font-mono text-emerald-700 dark:text-emerald-400">{m.linkedPositionOrdinal}</span>
+                                        {m.linkedPositionLabel && (
+                                          <span className="text-content-secondary"> — {m.linkedPositionLabel.slice(0, 40)}</span>
+                                        )}
                                       </span>
+                                      <button
+                                        onClick={() => handleUnlinkMeasurement(m.id)}
+                                        disabled={linkingInProgress}
+                                        className="text-[10px] text-rose-600 dark:text-rose-400 hover:underline disabled:opacity-50"
+                                      >
+                                        {t('takeoff.unlink', { defaultValue: 'Unlink' })}
+                                      </button>
                                     </div>
-                                  ) : !selectedBoqId ? (
-                                    <p className="text-[10px] text-content-tertiary py-1">
-                                      {t('takeoff.link_boq_select_first', { defaultValue: 'Select a BOQ via "Export to BOQ" first.' })}
-                                    </p>
-                                  ) : linkBoqPositions.length === 0 ? (
-                                    <p className="text-[10px] text-content-tertiary py-1">
-                                      {t('takeoff.link_boq_no_positions', { defaultValue: 'No positions in this BOQ.' })}
-                                    </p>
-                                  ) : (
-                                    <div className="max-h-32 overflow-y-auto space-y-0.5">
-                                      {linkBoqPositions.filter((p) => !p.parent_id || p.quantity != null).map((pos) => (
-                                        <button
-                                          key={pos.id}
-                                          type="button"
-                                          onClick={() => handleLinkToPosition(m.id, pos)}
-                                          disabled={linkingInProgress}
-                                          className="w-full text-left px-2 py-1 rounded text-[10px] hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors flex items-center gap-1.5 disabled:opacity-50"
-                                        >
-                                          <span className="font-mono text-rose-600 dark:text-rose-400 shrink-0">{pos.ordinal}</span>
-                                          <span className="text-content-primary truncate flex-1">{pos.description}</span>
-                                          {linkingInProgress && <Loader2 size={10} className="animate-spin text-rose-500 shrink-0" />}
-                                        </button>
+                                  )}
+
+                                  {/* Project + BOQ pickers */}
+                                  <div className="grid grid-cols-2 gap-1 mb-1.5">
+                                    <select
+                                      value={linkPickerProjectId}
+                                      onChange={(e) => handlePickerProjectChange(e.target.value)}
+                                      className="text-[10px] rounded border border-border-subtle bg-surface-primary px-1 py-0.5 text-content-primary"
+                                    >
+                                      <option value="">{t('takeoff.pick_project', { defaultValue: '— project —' })}</option>
+                                      {linkPickerProjects.map((p) => (
+                                        <option key={p.id} value={p.id}>{p.name}</option>
                                       ))}
+                                    </select>
+                                    <select
+                                      value={linkPickerBoqId}
+                                      onChange={(e) => handlePickerBoqChange(e.target.value)}
+                                      disabled={!linkPickerProjectId || linkBoqsLoading}
+                                      className="text-[10px] rounded border border-border-subtle bg-surface-primary px-1 py-0.5 text-content-primary disabled:opacity-60"
+                                    >
+                                      <option value="">
+                                        {linkBoqsLoading
+                                          ? t('common.loading', { defaultValue: 'Loading...' })
+                                          : t('takeoff.pick_boq', { defaultValue: '— BOQ —' })}
+                                      </option>
+                                      {linkPickerBoqs.map((b) => (
+                                        <option key={b.id} value={b.id}>{b.name}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+
+                                  {/* Mode switch: Pick existing / Create new */}
+                                  <div className="flex gap-1 mb-1.5 text-[10px]">
+                                    <button
+                                      type="button"
+                                      onClick={() => setLinkPickerMode('pick')}
+                                      className={clsx(
+                                        'flex-1 px-1.5 py-0.5 rounded font-medium transition-colors',
+                                        linkPickerMode === 'pick'
+                                          ? 'bg-rose-600 text-white'
+                                          : 'bg-surface-primary text-content-secondary hover:bg-rose-100 dark:hover:bg-rose-900/30',
+                                      )}
+                                    >
+                                      {t('takeoff.mode_pick', { defaultValue: 'Pick existing' })}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setLinkPickerMode('create')}
+                                      disabled={!linkPickerBoqId}
+                                      className={clsx(
+                                        'flex-1 px-1.5 py-0.5 rounded font-medium transition-colors disabled:opacity-50',
+                                        linkPickerMode === 'create'
+                                          ? 'bg-rose-600 text-white'
+                                          : 'bg-surface-primary text-content-secondary hover:bg-rose-100 dark:hover:bg-rose-900/30',
+                                      )}
+                                    >
+                                      {t('takeoff.mode_create', { defaultValue: '+ Create new' })}
+                                    </button>
+                                  </div>
+
+                                  {linkPickerMode === 'pick' ? (
+                                    !linkPickerBoqId ? (
+                                      <p className="text-[10px] text-content-tertiary py-1">
+                                        {t('takeoff.link_need_project_boq', { defaultValue: 'Pick a project and BOQ above.' })}
+                                      </p>
+                                    ) : linkPositionsLoading ? (
+                                      <div className="flex items-center gap-1.5 py-2">
+                                        <Loader2 size={12} className="animate-spin text-rose-600" />
+                                        <span className="text-[10px] text-content-tertiary">
+                                          {t('common.loading', { defaultValue: 'Loading...' })}
+                                        </span>
+                                      </div>
+                                    ) : linkBoqPositions.filter((p) => p.unit).length === 0 ? (
+                                      <p className="text-[10px] text-content-tertiary py-1">
+                                        {t('takeoff.link_boq_empty', { defaultValue: 'BOQ is empty — switch to "Create new".' })}
+                                      </p>
+                                    ) : (
+                                      <>
+                                        <input
+                                          type="text"
+                                          value={linkPickerSearch}
+                                          onChange={(e) => setLinkPickerSearch(e.target.value)}
+                                          placeholder={t('takeoff.link_search_placeholder', { defaultValue: 'Search ordinal or description...' })}
+                                          className="w-full mb-1 text-[10px] rounded border border-border-subtle bg-surface-primary px-1.5 py-0.5 text-content-primary"
+                                        />
+                                        <div className="max-h-32 overflow-y-auto space-y-0.5">
+                                          {linkBoqPositions
+                                            .filter((p) => p.unit)
+                                            .filter((p) => {
+                                              if (!linkPickerSearch) return true;
+                                              const q = linkPickerSearch.toLowerCase();
+                                              return (
+                                                (p.ordinal || '').toLowerCase().includes(q) ||
+                                                (p.description || '').toLowerCase().includes(q)
+                                              );
+                                            })
+                                            .slice(0, 100)
+                                            .map((pos) => (
+                                              <button
+                                                key={pos.id}
+                                                type="button"
+                                                onClick={() => handleLinkToPosition(m.id, pos)}
+                                                disabled={linkingInProgress}
+                                                className="w-full text-left px-2 py-1 rounded text-[10px] hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                                              >
+                                                <span className="font-mono text-rose-600 dark:text-rose-400 shrink-0">{pos.ordinal}</span>
+                                                <span className="text-content-primary truncate flex-1">{pos.description}</span>
+                                                <span className="text-content-tertiary shrink-0 text-[9px]">{pos.unit}</span>
+                                              </button>
+                                            ))}
+                                        </div>
+                                      </>
+                                    )
+                                  ) : (
+                                    /* Create new position from measurement */
+                                    <div className="rounded bg-surface-primary/60 p-1.5 space-y-1">
+                                      <div className="grid grid-cols-[auto_1fr] gap-x-1.5 text-[10px] text-content-secondary">
+                                        <span className="font-semibold">{t('takeoff.description', { defaultValue: 'Description' })}:</span>
+                                        <span className="text-content-primary truncate">
+                                          {m.annotation || `${m.type} page ${m.page}`}
+                                        </span>
+                                        <span className="font-semibold">{t('takeoff.quantity', { defaultValue: 'Quantity' })}:</span>
+                                        <span className="text-content-primary font-mono">
+                                          {Math.round(m.value * 100) / 100} {normalizeUnit(m.unit)}
+                                        </span>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleCreateAndLink(m.id)}
+                                        disabled={linkingInProgress || !linkPickerBoqId}
+                                        className="w-full flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[10px] font-semibold bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 transition-colors"
+                                      >
+                                        {linkingInProgress && <Loader2 size={10} className="animate-spin" />}
+                                        {t('takeoff.create_and_link', { defaultValue: 'Create position & link' })}
+                                      </button>
                                     </div>
                                   )}
                                 </div>
