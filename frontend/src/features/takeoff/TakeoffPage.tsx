@@ -871,7 +871,7 @@ export function TakeoffPage() {
 
   /* ── Tab state (synced with ?tab= query parameter from sidebar) ──── */
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const tabFromUrl = searchParams.get('tab');
   const initialTab: TakeoffTab =
     tabFromUrl === 'measurements' || tabFromUrl === 'documents' ? tabFromUrl : 'documents';
@@ -898,7 +898,7 @@ export function TakeoffPage() {
   /** Currently opened document in the Measurements viewer. */
   const [viewerDoc, setViewerDoc] = useState<{ url: string; name: string } | null>(null);
 
-  /* ── Handle ?doc= deep link from Documents page ─────────────────── */
+  /* ── Handle ?doc= / ?name= deep link from Documents / BOQ link icon ─ */
 
   useEffect(() => {
     const docId = searchParams.get('doc');
@@ -926,6 +926,8 @@ export function TakeoffPage() {
     }
   }, [searchParams]);
 
+  /* ── Open linked PDF by filename — moved below serverDocuments query */
+
   /* ── Queries ────────────────────────────────────────────────────────── */
 
   const { data: projects, isLoading: projectsLoading } = useQuery({
@@ -950,6 +952,32 @@ export function TakeoffPage() {
     queryFn: () => takeoffApi.listDocuments(selectedProjectId || undefined),
     staleTime: 30_000,
   });
+
+  /* ── Open linked PDF by filename (from BOQ link icon) ─────────────── */
+  useEffect(() => {
+    const docName = searchParams.get('name');
+    const tab = searchParams.get('tab');
+    if (!docName || tab !== 'measurements' || searchParams.get('doc')) return;
+    if (!serverDocuments || serverDocuments.length === 0) return;
+    const target = decodeURIComponent(docName).toLowerCase();
+    const match = serverDocuments.find(
+      (d) =>
+        d.filename.toLowerCase() === target ||
+        d.filename.toLowerCase() === target.replace(/\.[^.]+$/, ''),
+    );
+    if (!match) return;
+    setActiveDocId(match.id);
+    setViewerDoc({
+      url: `/api/v1/takeoff/documents/${match.id}/download/`,
+      name: match.filename,
+    });
+    setActiveTab('measurements');
+    const next = new URLSearchParams(searchParams);
+    next.delete('name');
+    next.delete('page');
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, serverDocuments]);
 
   /* ── Mutations ──────────────────────────────────────────────────────── */
 
