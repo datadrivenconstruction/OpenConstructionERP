@@ -34,6 +34,11 @@ interface DocItem {
   tags: string[];
   created_at: string;
   cde_state?: 'wip' | 'shared' | 'published' | 'archived' | null;
+  metadata?: {
+    source_module?: string;
+    source_id?: string;
+    [key: string]: unknown;
+  };
 }
 
 type SortField = 'date' | 'name' | 'size';
@@ -103,6 +108,14 @@ function isPreviewable(mime: string): 'pdf' | 'image' | null {
 /** Returns true when a document card should be clickable (previewable OR CAD/BIM navigable). */
 function isCardClickable(doc: DocItem): boolean {
   if (isPreviewable(doc.mime_type)) return true;
+  const sourceModule = doc.metadata?.source_module;
+  if (
+    sourceModule === 'bim_hub' ||
+    sourceModule === 'dwg_takeoff' ||
+    sourceModule === 'takeoff'
+  ) {
+    return true;
+  }
   const lower = doc.name.toLowerCase();
   return (
     lower.endsWith('.dwg') || lower.endsWith('.dxf') ||
@@ -112,8 +125,33 @@ function isCardClickable(doc: DocItem): boolean {
   );
 }
 
-/** Returns the target module route for a document based on its extension.  */
+/** Returns the target module route for a document.
+ *
+ * Prefers ``metadata.source_module`` (set by cross-linking uploads in
+ * BIM/DWG/Takeoff modules) over the filename extension. Falls back to
+ * extension matching for legacy rows without source metadata.
+ */
 function routeForDocument(doc: DocItem): { path: string; module: 'takeoff' | 'dwg-takeoff' | 'bim' | 'preview' | 'download' } {
+  const sourceModule = doc.metadata?.source_module;
+  if (sourceModule === 'bim_hub') {
+    return {
+      path: `/bim?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`,
+      module: 'bim',
+    };
+  }
+  if (sourceModule === 'dwg_takeoff') {
+    return {
+      path: `/dwg-takeoff?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`,
+      module: 'dwg-takeoff',
+    };
+  }
+  if (sourceModule === 'takeoff') {
+    return {
+      path: `/takeoff?doc=${encodeURIComponent(doc.id)}&name=${encodeURIComponent(doc.name)}`,
+      module: 'takeoff',
+    };
+  }
+
   const lower = doc.name.toLowerCase();
   if (lower.endsWith('.dwg') || lower.endsWith('.dxf') || lower.endsWith('.dgn')) {
     return {

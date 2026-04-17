@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
+import { uploadDocument, fetchDocuments, type DocumentItem } from '@/features/documents/api';
 import {
   FolderPlus,
   ArrowRight,
@@ -1340,6 +1342,214 @@ function SystemStatusSummary({
   );
 }
 
+/* ── Quick Upload Card ────────────────────────────────────────────────── */
+
+const MAX_UPLOAD_BYTES = 100 * 1024 * 1024; // 100 MB
+
+function QuickUploadCard() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const { data: documents } = useQuery({
+    queryKey: ['documents', activeProjectId],
+    queryFn: () => fetchDocuments(activeProjectId ?? ''),
+    enabled: !!activeProjectId,
+    staleTime: 30_000,
+  });
+
+  const handleFiles = useCallback(
+    async (files: FileList | File[]) => {
+      if (!activeProjectId) {
+        addToast({
+          type: 'warning',
+          title: t('dashboard.upload_no_project', {
+            defaultValue: 'Select a project first',
+          }),
+          message: t('dashboard.upload_no_project_desc', {
+            defaultValue: 'Choose an active project to upload files.',
+          }),
+        });
+        return;
+      }
+      const fileArray = Array.from(files);
+      if (fileArray.length === 0) return;
+
+      const oversized = fileArray.filter((f) => f.size > MAX_UPLOAD_BYTES);
+      if (oversized.length > 0) {
+        addToast({
+          type: 'warning',
+          title: t('dashboard.upload_too_large', { defaultValue: 'Files too large' }),
+          message: t('dashboard.upload_too_large_desc', {
+            defaultValue:
+              '{{count}} file(s) exceed 100 MB and were skipped: {{names}}',
+            count: oversized.length,
+            names: oversized.map((f) => f.name).join(', '),
+          }),
+        });
+      }
+
+      const validFiles = fileArray.filter((f) => f.size <= MAX_UPLOAD_BYTES);
+      if (validFiles.length === 0) return;
+
+      setUploading(true);
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const file of validFiles) {
+        try {
+          await uploadDocument(activeProjectId, file, 'other');
+          successCount += 1;
+        } catch (err) {
+          failCount += 1;
+          addToast({
+            type: 'error',
+            title: t('dashboard.upload_failed', { defaultValue: 'Upload failed' }),
+            message: err instanceof Error ? err.message : file.name,
+          });
+        }
+      }
+
+      setUploading(false);
+      await queryClient.invalidateQueries({ queryKey: ['documents', activeProjectId] });
+      await queryClient.invalidateQueries({ queryKey: ['documents'] });
+
+      if (successCount > 0) {
+        addToast({
+          type: 'success',
+          title: t('dashboard.upload_success', {
+            defaultValue: '{{count}} file(s) uploaded',
+            count: successCount,
+          }),
+          message: failCount > 0
+            ? t('dashboard.upload_partial', {
+                defaultValue: '{{failed}} failed',
+                failed: failCount,
+              })
+            : undefined,
+        });
+      }
+    },
+    [activeProjectId, addToast, queryClient, t],
+  );
+
+  const onDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setDragOver(false);
+      if (e.dataTransfer.files.length > 0) {
+        void handleFiles(e.dataTransfer.files);
+      }
+    },
+    [handleFiles],
+  );
+
+  const onDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragOver(true);
+  }, []);
+
+  const onDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragOver(false);
+  }, []);
+
+  const documentCount = (documents as DocumentItem[] | undefined)?.length ?? 0;
+  const hasProject = !!activeProjectId;
+
+  return (
+    <div className="animate-card-in" style={{ animationDelay: '120ms' }}>
+      <Card padding="none">
+        <div
+          onDrop={onDrop}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          className={[
+            'relative flex items-center gap-4 rounded-xl border-2 border-dashed px-5 py-5 transition-all',
+            dragOver
+              ? 'border-oe-blue bg-oe-blue-subtle/40'
+              : 'border-border-light bg-surface-secondary/30 hover:border-oe-blue/40',
+            !hasProject ? 'opacity-60' : '',
+          ].join(' ')}
+          style={{ minHeight: 160 }}
+          role="region"
+          aria-label={t('dashboard.upload_zone', { defaultValue: 'File upload area' })}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                void handleFiles(e.target.files);
+                e.target.value = '';
+              }
+            }}
+          />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
+            {uploading ? (
+              <Loader2 size={22} className="animate-spin" />
+            ) : (
+              <Upload size={22} strokeWidth={1.75} />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold text-content-primary">
+              {t('dashboard.upload_title', {
+                defaultValue: 'Drop files here',
+              })}
+            </div>
+            <p className="mt-0.5 text-xs text-content-tertiary line-clamp-1">
+              {hasProject
+                ? t('dashboard.upload_desc', {
+                    defaultValue: 'Upload to {{project}} — PDF, DWG, IFC, RVT, images (max 100 MB).',
+                    project: activeProjectName || t('dashboard.active_project', { defaultValue: 'active project' }),
+                  })
+                : t('dashboard.upload_select_project', {
+                    defaultValue: 'Select an active project to upload files.',
+                  })}
+            </p>
+            <div className="mt-2 flex items-center gap-3 text-2xs text-content-tertiary">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-oe-blue hover:text-oe-blue-dark transition-colors"
+                onClick={() => navigate('/documents')}
+                disabled={!hasProject}
+              >
+                <FileText size={11} />
+                <span>
+                  {t('dashboard.upload_count_link', {
+                    defaultValue: '{{count}} documents · open in Documents →',
+                    count: documentCount,
+                  })}
+                </span>
+              </button>
+            </div>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<Upload size={13} />}
+              disabled={!hasProject || uploading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {t('dashboard.upload_browse', { defaultValue: 'Upload Files' })}
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function DashboardPage() {
@@ -1630,6 +1840,9 @@ export function DashboardPage() {
 
       {/* ─── 6. BIM Coverage ─────────────────────────────────────────── */}
       <BIMCoverageCard />
+
+      {/* ─── 6b. Quick Upload ─────────────────────────────────────────── */}
+      <QuickUploadCard />
 
       {/* ─── 7. Getting Started (onboarding — hidden once all done) ─── */}
       <OnboardingSteps projects={projects} regionStats={regionStats} boqs={allBoqs} vectorCount={vectorCount} />

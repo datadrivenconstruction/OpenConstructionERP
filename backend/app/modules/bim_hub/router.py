@@ -1369,6 +1369,10 @@ async def upload_cad_file(
             version=1,
             uploaded_by=user_id or "",
             tags=["bim", model_format, discipline],
+            metadata_={
+                "source_module": "bim_hub",
+                "source_id": str(model_id),
+            },
         )
         service.session.add(doc)
         await service.session.flush()

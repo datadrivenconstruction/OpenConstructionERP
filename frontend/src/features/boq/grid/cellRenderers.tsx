@@ -21,6 +21,7 @@ import {
   Trash2,
   FileText,
   FileBox,
+  CheckCircle2,
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useQuery, useQueries } from '@tanstack/react-query';
@@ -1089,7 +1090,8 @@ const BimLinkPopover = forwardRef<
                         </div>
                       </div>
                       {isCurrent ? (
-                        <span className="text-[9px] text-emerald-600 font-semibold shrink-0 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">
+                        <span className="text-[9px] text-emerald-600 font-semibold shrink-0 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded inline-flex items-center gap-0.5">
+                          <CheckCircle2 size={9} />
                           {t('boq.bim_qty_current', { defaultValue: 'current' })}
                         </span>
                       ) : (
@@ -1098,11 +1100,15 @@ const BimLinkPopover = forwardRef<
                             e.stopPropagation();
                             handleUseQuantity(s.sum, `BIM: ${s.label} (Σ)`);
                           }}
-                          className="shrink-0 h-6 flex items-center gap-0.5 px-2.5 rounded text-[10px] font-semibold
-                                     text-white bg-emerald-500 hover:bg-emerald-600
-                                     shadow-sm transition-all"
+                          className="shrink-0 h-6 flex items-center gap-1 px-2.5 rounded-md text-[10px] font-semibold
+                                     text-white bg-gradient-to-r from-emerald-500 to-emerald-600
+                                     hover:from-emerald-600 hover:to-emerald-700
+                                     shadow-sm hover:shadow-md ring-1 ring-emerald-500/20 hover:ring-emerald-500/40
+                                     active:scale-[0.97] transition-all"
+                          title={t('boq.bim_qty_use_as_quantity', { defaultValue: 'Set as quantity' })}
                         >
-                          {t('boq.bim_qty_use', { defaultValue: 'Use' })} <ArrowRight size={9} />
+                          {t('boq.bim_qty_use_as_quantity', { defaultValue: 'Set as quantity' })}
+                          <ArrowRight size={10} />
                         </button>
                       )}
                     </div>
@@ -1148,19 +1154,22 @@ const BimLinkPopover = forwardRef<
                               if (!isCurrent) handleUseQuantity(v, `BIM: ${s.label} = ${fmtVal(v)}`);
                             }}
                             disabled={isCurrent}
-                            className={`inline-flex items-baseline gap-0.5 px-1.5 py-0.5 rounded border text-[10px] tabular-nums font-mono transition-colors ${
+                            className={`group/chip inline-flex items-center gap-0.5 px-2 py-1 rounded-md border text-[10px] tabular-nums font-mono transition-all ${
                               isCurrent
                                 ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border-emerald-300 cursor-default'
-                                : 'bg-surface-secondary text-content-primary border-border-light hover:bg-sky-100 hover:border-sky-400 dark:hover:bg-sky-900/40'
+                                : 'bg-surface-primary text-content-primary border-border-light hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-sm active:scale-[0.97]'
                             }`}
                             title={
                               isCurrent
                                 ? t('boq.bim_qty_current', { defaultValue: 'current' })
-                                : t('boq.bim_qty_use_this', { defaultValue: 'Use this value' })
+                                : t('boq.bim_qty_use_as_quantity', { defaultValue: 'Set as quantity' })
                             }
                           >
-                            {fmtVal(v)}
-                            {s.unit && <span className="text-[8px] text-content-quaternary">{s.unit}</span>}
+                            <span className="font-semibold">{fmtVal(v)}</span>
+                            {s.unit && <span className="text-[8px] opacity-70 group-hover/chip:opacity-100">{s.unit}</span>}
+                            {!isCurrent && (
+                              <ArrowRight size={8} className="opacity-0 group-hover/chip:opacity-100 transition-opacity -mr-0.5" />
+                            )}
                           </button>
                         );
                       })}

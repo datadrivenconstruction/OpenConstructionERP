@@ -1333,6 +1333,24 @@ class BOQService:
         if "quantity" in fields or "unit_rate" in fields or triggered_by_resources:
             fields["total"] = _compute_total(_str_to_float(new_quantity), _str_to_float(new_unit_rate))
 
+        # Manual quantity override: drop BIM/PDF link artifacts and reset validation.
+        # When the user hand-edits the quantity, any previously-linked BIM or PDF
+        # source is no longer authoritative — the unit-column badges disappear and
+        # the red validation border clears until re-validation runs.
+        if triggered_by_qty:
+            existing_meta = position.metadata_ if isinstance(position.metadata_, dict) else {}
+            incoming_meta = fields.get("metadata_")
+            base_meta = incoming_meta if isinstance(incoming_meta, dict) else dict(existing_meta)
+            stripped = False
+            for link_key in ("bim_qty_source", "pdf_measurement_source"):
+                if link_key in base_meta:
+                    base_meta.pop(link_key)
+                    stripped = True
+            if stripped:
+                fields["metadata_"] = base_meta
+            if "validation_status" not in fields:
+                fields["validation_status"] = "pending"
+
         if fields:
             await self.position_repo.update_fields(position_id, **fields)
             # Flush to DB, then refresh ORM state from DB (avoids MissingGreenlet on lazy load)
