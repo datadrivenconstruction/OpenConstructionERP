@@ -61,8 +61,14 @@ export interface BIMViewerProps {
   projectId: string;
   /** Element IDs to highlight (controlled selection from parent). */
   selectedElementIds?: string[];
-  /** Callback when an element is clicked. */
+  /** Callback when an element is clicked. Receives the LAST clicked element
+   *  id; for the full multi-selection set use `onSelectionChange`. */
   onElementSelect?: (elementId: string | null) => void;
+  /** Callback firing on every selection change with the FULL set of selected
+   *  element ids. Use this (not `onElementSelect`) to track Ctrl+click /
+   *  Shift+click multi-selection in the parent so highlights stay correct
+   *  across renders. */
+  onSelectionChange?: (elementIds: string[]) => void;
   /** Callback when an element is hovered. */
   onElementHover?: (elementId: string | null) => void;
   /** View mode coloring scheme. */
@@ -359,6 +365,7 @@ export function BIMViewer({
   projectId: _projectId,
   selectedElementIds,
   onElementSelect,
+  onSelectionChange,
   onElementHover,
   viewMode: _viewMode = 'default',
   showMeasureTools: _showMeasureTools = false,
@@ -527,8 +534,12 @@ export function BIMViewer({
         }
         // Flag so the parent's selectedElementIds change doesn't reset our multi-select
         internalSelectionRef.current = true;
-        // Notify parent with the last clicked element
+        // Notify parent with both signals: the LAST clicked id (back-compat
+        // for callers that only need single-selection) and the FULL set
+        // (so the parent can echo it back via selectedElementIds and keep
+        // every Ctrl+click highlighted across renders).
         onElementSelect?.(ids.length > 0 ? ids[ids.length - 1]! : null);
+        onSelectionChange?.(ids);
         // Close context menu on selection change
         setContextMenu(null);
       },
