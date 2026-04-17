@@ -5,6 +5,30 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] — 2026-04-17
+
+### R1 critical bug fixes (8 items from the 33-item v1.9 roadmap)
+
+- **BOQ resource add** (#2): optimistic cache write in `handleCatalogSelect` + `networkMode: 'offlineFirst'` + retry guard on the BOQ query. Resources appear instantly; reload no longer hangs.
+- **BOQ list offline** (#5): global QueryClient hardened with `navigator.onLine` retry guard and 4xx no-retry — no more `AbortError: signal is aborted without reason` when the network drops.
+- **Project not-found vs network error** (#6): `ApiError.status === 404` distinction; new Offline / Can't-reach-server / Retry UI branch; auto-clear-recents gated on true 404 only.
+- **Takeoff persistence** (#8): `activeDocId` synced to URL param on upload / click / remove so reload restores the open document.
+- **BIM Type Name grouping** (#18): `BIMFilterPanel` condition relaxed to show Link-to-BOQ and Save-Group whenever any elements are visible.
+- **BIM Rules** (#23): `mutationKey` + awaited invalidate + filter fix (no-project-context leakage).
+- **Tasks category tab** (#27): create modal defaults `task_type` to the active `typeFilter` instead of hard-coded `'task'`.
+- **CDE New Container** (#33): `mutationKey`, awaited invalidate, concrete error fallback with dev `console.error` — silent failures are now visible.
+
+### Quality gates
+
+- `tsc --noEmit`: 0 errors
+- Playwright `e2e/v1.9/`: 5/5 runnable tests green (2 skipped — pending BIM-model seed data)
+- See `docs/ROADMAP_v1.9.md` for per-item detail, rationale, and CTO review checklist
+
+### Scope changes from the original 10-item R1 target
+
+- `#9` (DWG offline) → moved to R3 (UX badge only; backend already offline-capable)
+- `#13` (DWG scale + annotation text) → moved to R2 (needs RFC for scale semantics + live repro for text)
+
 ## [1.8.3] — 2026-04-17
 
 ### BOQ quantity CTA, BIM filmstrip fix, Dashboard upload, cross-link

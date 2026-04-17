@@ -1679,7 +1679,14 @@ export function TasksPage() {
             priority: editingTask.priority,
             assigned_to: editingTask.assigned_to_name || '',
             due_date: editingTask.due_date || '',
-          } : null}
+          } : (typeFilter
+              // When the create dialog opens while a type tab is active
+              // (Topic / Information / Decision / Personal / custom), pre-fill
+              // task_type with that tab's value. Otherwise the new task lands
+              // under "Task" by default and silently disappears from the tab
+              // the user thought they were creating it on.
+              ? { ...EMPTY_FORM, task_type: typeFilter as TaskFormData['task_type'] }
+              : null)}
           customCategories={customCategories}
         />
       )}

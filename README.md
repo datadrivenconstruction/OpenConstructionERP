@@ -9,7 +9,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-1.8.3-green)
+![Version](https://img.shields.io/badge/version-1.9.0-green)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 ![Standards](https://img.shields.io/badge/standards-20-blueviolet)

@@ -1842,8 +1842,12 @@ export function BIMQuantityRulesPage() {
 
   const rules = useMemo<BIMQuantityMap[]>(() => {
     const items = rulesQuery.data?.items ?? [];
-    if (!activeProjectId) return items;
-    // Show project-specific rules + org-wide rules (project_id=null)
+    // No active project → only show org-wide rules. Previously we returned
+    // every rule regardless of project_id, which leaked project-scoped rules
+    // from other projects and made it look like a just-created project-scoped
+    // rule "didn't appear" after the user switched projects.
+    if (!activeProjectId) return items.filter((r) => !r.project_id);
+    // Active project → show org-wide rules + rules scoped to this project.
     return items.filter(
       (r) => !r.project_id || r.project_id === activeProjectId,
     );
@@ -1905,9 +1909,16 @@ export function BIMQuantityRulesPage() {
   /* ── Mutations ─────────────────────────────────────────────────────── */
 
   const createMutation = useMutation({
+    // Explicit key so the global MutationCache handler in main.tsx also
+    // invalidates the list — guards against a forgotten refetch if the
+    // local onSuccess below is ever skipped (e.g. component unmount mid-flight).
+    mutationKey: ['bim-quantity-maps', 'create'],
     mutationFn: createQuantityMap,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bim-quantity-maps'] });
+    onSuccess: async () => {
+      // Await the invalidation so the list is guaranteed to have been
+      // refetched before the dialog closes and the success toast fires.
+      // Without the await, the user briefly sees an empty list after close.
+      await queryClient.invalidateQueries({ queryKey: ['bim-quantity-maps'] });
       setEditorOpen(false);
       addToast({
         type: 'success',
