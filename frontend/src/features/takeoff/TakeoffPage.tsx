@@ -1353,7 +1353,75 @@ export function TakeoffPage() {
   /* ── Render ─────────────────────────────────────────────────────────── */
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="relative w-full animate-fade-in">
+      {/* Barely-visible field-surveyor geometry — rectangles, irregular
+          polygons, distance dimension lines, vertex pins — the kind of
+          marks an estimator drags across a drawing to measure area or
+          perimeter.  Fixed to viewport so both tabs share the same
+          background; pointer-events disabled and opacity tiny so it
+          never interferes with foreground controls. */}
+      <svg
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10 w-full h-full text-slate-500 dark:text-slate-300"
+        preserveAspectRatio="xMidYMid slice"
+        viewBox="0 0 1600 1000"
+      >
+        <defs>
+          <linearGradient id="tkoPageFade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="white" stopOpacity="0.25" />
+            <stop offset="45%" stopColor="white" stopOpacity="1" />
+            <stop offset="100%" stopColor="white" stopOpacity="0.15" />
+          </linearGradient>
+          <mask id="tkoPageMask">
+            <rect width="1600" height="1000" fill="url(#tkoPageFade)" />
+          </mask>
+        </defs>
+        <g mask="url(#tkoPageMask)" opacity="0.06" fill="none" stroke="currentColor" strokeWidth="1.1">
+          <rect x="110" y="90" width="280" height="170" strokeDasharray="8 6" />
+          <circle cx="110" cy="90" r="4" fill="currentColor" />
+          <circle cx="390" cy="90" r="4" fill="currentColor" />
+          <circle cx="390" cy="260" r="4" fill="currentColor" />
+          <circle cx="110" cy="260" r="4" fill="currentColor" />
+          <text x="250" y="180" textAnchor="middle" fill="currentColor" stroke="none" fontSize="14" fontFamily="ui-monospace,monospace" opacity="0.55">47.6 m²</text>
+
+          <polygon points="820,120 1080,140 1180,260 1140,390 940,430 820,340 760,230" strokeDasharray="6 4" />
+          {([[820, 120], [1080, 140], [1180, 260], [1140, 390], [940, 430], [820, 340], [760, 230]] as [number, number][]).map(([x, y], i) => (
+            <circle key={`pA${i}`} cx={x} cy={y} r="3.5" fill="currentColor" />
+          ))}
+          <text x="960" y="290" textAnchor="middle" fill="currentColor" stroke="none" fontSize="13" fontFamily="ui-monospace,monospace" opacity="0.5">83.2 m²</text>
+
+          <g strokeDasharray="3 3">
+            <line x1="1280" y1="130" x2="1540" y2="200" />
+            <line x1="1275" y1="120" x2="1285" y2="140" strokeDasharray="0" strokeWidth="2" />
+            <line x1="1535" y1="190" x2="1545" y2="210" strokeDasharray="0" strokeWidth="2" />
+          </g>
+          <text x="1410" y="155" textAnchor="middle" fill="currentColor" stroke="none" fontSize="12" fontFamily="ui-monospace,monospace" opacity="0.5">12.43 m</text>
+
+          <polyline points="140,620 260,560 380,620 520,560 640,640" />
+          {([[140, 620], [260, 560], [380, 620], [520, 560], [640, 640]] as [number, number][]).map(([x, y], i) => (
+            <rect key={`pB${i}`} x={x - 3} y={y - 3} width="6" height="6" fill="currentColor" />
+          ))}
+
+          <rect x="1080" y="620" width="360" height="220" strokeDasharray="8 6" />
+          {([[1080, 620], [1440, 620], [1440, 840], [1080, 840]] as [number, number][]).map(([x, y], i) => (
+            <circle key={`pC${i}`} cx={x} cy={y} r="4" fill="currentColor" />
+          ))}
+          <text x="1260" y="740" textAnchor="middle" fill="currentColor" stroke="none" fontSize="14" fontFamily="ui-monospace,monospace" opacity="0.5">79.2 m²</text>
+
+          <polygon points="60,440 270,460 320,640 90,630" strokeDasharray="4 4" />
+          {([[60, 440], [270, 460], [320, 640], [90, 630]] as [number, number][]).map(([x, y], i) => (
+            <circle key={`pD${i}`} cx={x} cy={y} r="3" fill="currentColor" />
+          ))}
+
+          <g>
+            <line x1="660" y1="920" x2="940" y2="920" strokeWidth="1" />
+            {Array.from({ length: 11 }).map((_, i) => (
+              <line key={`tick${i}`} x1={660 + i * 28} y1="916" x2={660 + i * 28} y2="924" strokeWidth="1" />
+            ))}
+            <text x="800" y="950" textAnchor="middle" fill="currentColor" stroke="none" fontSize="10" fontFamily="ui-monospace,monospace" opacity="0.5">0   1   2   3   4   5 m</text>
+          </g>
+        </g>
+      </svg>
       {/* Header removed — the page title is already in the left sidebar
           nav, and the subtitle was purely decorative. Saves ~80px of
           vertical space so the main workspace fits in one viewport. */}
