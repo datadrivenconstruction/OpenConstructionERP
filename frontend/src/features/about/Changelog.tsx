@@ -14,6 +14,18 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.8.2',
+    date: '2026-04-17',
+    changes: [
+      'Documents page: file-type routing — PDF opens preview / takeoff, DWG/DXF/DGN opens DWG Takeoff, RVT/IFC/NWD/NWC opens BIM Viewer (all with deep-link)',
+      'Documents page: new "Module Files" section showing BIM models, DWG drawings, Takeoff PDFs with one-click navigation to their native module',
+      'BOQ link icons: fixed PDF + DWG deep-link params — clicking the red PDF or amber DWG icon now opens the exact file that was linked (not the landing page)',
+      'BIM page: supports ?docName= / ?docId= deep-link from Documents — auto-selects matching model or opens upload dialog',
+      'DWG Takeoff: filmstrip taller (108px cards, 150px max-height) for clearer thumbnails + metadata',
+      'Header: "Report Issues" → "Email Issues" with mail icon and direct mailto:info@datadrivenconstruction.io link',
+    ],
+  },
+  {
     version: '1.8.1',
     date: '2026-04-17',
     changes: [

@@ -5,6 +5,28 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.2] — 2026-04-17
+
+### Documents routing, BOQ link fixes, DWG filmstrip
+
+- **Documents → correct module by file type** — PDFs open in preview or
+  `/takeoff`, DWG/DXF/DGN open in `/dwg-takeoff`, RVT/IFC/NWD/NWC open in
+  `/bim`. All with deep-link params so the right file is loaded on arrival.
+- **Documents — "Module Files" section** — new compact grid showing BIM
+  models, DWG drawings, and Takeoff PDFs uploaded via their native modules,
+  each clickable straight into that module.
+- **BOQ link icons — deep-link fix** — the red PDF and amber DWG icons next
+  to BOQ positions now pass the correct URL params (`drawingId` for DWG,
+  `name` for PDF) so clicking them opens the specific linked file instead
+  of bouncing to the module landing page.
+- **BIM ?docName= / ?docId= deep-link** — `/bim?docName=xxx.rvt` auto-selects
+  the matching model if it exists, otherwise opens the upload dialog with
+  the filename pre-filled.
+- **DWG Takeoff filmstrip** — taller (108-px cards, 150-px max-height) for
+  clearer per-drawing metadata.
+- **Header** — "Report Issues" → "Email Issues" with mail icon linking
+  directly to `mailto:info@datadrivenconstruction.io`.
+
 ## [1.8.1] — 2026-04-17
 
 ### DWG Takeoff depth pass + Takeoff decorative background
