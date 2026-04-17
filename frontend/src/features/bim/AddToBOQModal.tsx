@@ -249,11 +249,21 @@ export default function AddToBOQModal({
   const positions: Position[] = positionsQuery.data?.positions ?? [];
 
   // Filter out sections (pure headers) from the pickable list — you link
-  // to real cost-bearing positions, not to their parent headers.
+  // to real cost-bearing positions, not to their parent headers. A row is
+  // a section if EITHER the unit field is blank/dash OR the row is the
+  // parent of any other position (sections always have children, leaves
+  // never do).
   const pickablePositions = useMemo(() => {
     const q = search.trim().toLowerCase();
+    const parentIds = new Set<string>();
+    for (const p of positions) {
+      if (p.parent_id) parentIds.add(p.parent_id);
+    }
     return positions.filter((p) => {
-      if (p.unit === '' || p.unit === '—') return false;
+      const unit = (p.unit ?? '').trim();
+      if (unit === '' || unit === '—' || unit === '-') return false;
+      // Position acts as a section header when other rows are nested under it.
+      if (parentIds.has(p.id)) return false;
       if (!q) return true;
       return (
         p.description.toLowerCase().includes(q) ||
