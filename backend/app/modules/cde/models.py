@@ -1,13 +1,15 @@
 """CDE (Common Data Environment) ORM models.
 
 Tables:
-    oe_cde_container — ISO 19650 document containers
-    oe_cde_revision  — document revisions within containers
+    oe_cde_container         — ISO 19650 document containers
+    oe_cde_revision          — document revisions within containers
+    oe_cde_state_transition  — audit log of every CDE state transition
 """
 
 import uuid
+from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -74,6 +76,9 @@ class DocumentRevision(Base):
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
     approved_by: Mapped[str | None] = mapped_column(GUID(), nullable=True)
     change_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Cross-link to the Documents hub row materialised when a revision carries a file.
+    # Kept as a String(36) so it is nullable + safe across PG/SQLite without a FK.
+    document_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -85,3 +90,39 @@ class DocumentRevision(Base):
 
     def __repr__(self) -> str:
         return f"<DocumentRevision {self.revision_code} ({self.status})>"
+
+
+class StateTransition(Base):
+    """Persistent audit log of every CDE state transition.
+
+    One row is written inline inside ``CDEService.transition_state`` for every
+    valid gate crossing — so a rolled-back transaction never leaves an orphan
+    audit row (event-bus consumers can't guarantee that).
+    """
+
+    __tablename__ = "oe_cde_state_transition"
+
+    container_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_cde_container.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    from_state: Mapped[str] = mapped_column(String(50), nullable=False)
+    to_state: Mapped[str] = mapped_column(String(50), nullable=False)
+    gate_code: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    user_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    user_role: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    signature: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    transitioned_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<StateTransition {self.from_state}->{self.to_state} "
+            f"container={self.container_id}>"
+        )

@@ -33,6 +33,7 @@ export interface CDERevision {
   content_hash: string | null;
   change_summary: string | null;
   approved_by: string | null;
+  document_id: string | null;
   created_by: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
@@ -73,11 +74,48 @@ export interface CreateCDEContainerPayload {
   classification_code?: string;
   classification_system?: string;
   description?: string;
+  cde_state?: CDEState;
 }
 
 export interface TransitionPayload {
   target_state: CDEState;
-  comments?: string;
+  reason?: string;
+  approver_signature?: string;
+  approval_comments?: string;
+}
+
+export interface SuitabilityCodeEntry {
+  code: string;
+  label: string;
+  state: CDEState;
+}
+
+export interface SuitabilityCodesResponse {
+  codes: SuitabilityCodeEntry[];
+  by_state: Record<CDEState, SuitabilityCodeEntry[]>;
+}
+
+export interface StateTransitionEntry {
+  id: string;
+  container_id: string;
+  from_state: CDEState;
+  to_state: CDEState;
+  gate_code: string | null;
+  user_id: string | null;
+  user_role: string | null;
+  reason: string | null;
+  signature: string | null;
+  transitioned_at: string;
+}
+
+export interface ContainerTransmittalLink {
+  transmittal_id: string;
+  transmittal_number: string;
+  subject: string;
+  status: string;
+  issued_date: string | null;
+  revision_id: string | null;
+  revision_code: string | null;
 }
 
 /* ── API Functions ─────────────────────────────────────────────────────── */
@@ -122,4 +160,22 @@ export async function createContainerRevision(
   data: CreateRevisionPayload,
 ): Promise<CDERevision> {
   return apiPost<CDERevision>(`/v1/cde/containers/${containerId}/revisions/`, data);
+}
+
+export async function fetchSuitabilityCodes(): Promise<SuitabilityCodesResponse> {
+  return apiGet<SuitabilityCodesResponse>('/v1/cde/suitability-codes/');
+}
+
+export async function fetchContainerHistory(
+  containerId: string,
+): Promise<StateTransitionEntry[]> {
+  return apiGet<StateTransitionEntry[]>(`/v1/cde/containers/${containerId}/history/`);
+}
+
+export async function fetchContainerTransmittals(
+  containerId: string,
+): Promise<ContainerTransmittalLink[]> {
+  return apiGet<ContainerTransmittalLink[]>(
+    `/v1/cde/containers/${containerId}/transmittals/`,
+  );
 }

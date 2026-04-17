@@ -17,15 +17,22 @@ from typing import Any
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.dwg_takeoff.models import DwgAnnotation, DwgDrawing, DwgDrawingVersion
+from app.modules.dwg_takeoff.models import (
+    DwgAnnotation,
+    DwgDrawing,
+    DwgDrawingVersion,
+    DwgEntityGroup,
+)
 from app.modules.dwg_takeoff.repository import (
     DwgAnnotationRepository,
     DwgDrawingRepository,
     DwgDrawingVersionRepository,
+    DwgEntityGroupRepository,
 )
 from app.modules.dwg_takeoff.schemas import (
     DwgAnnotationCreate,
     DwgAnnotationUpdate,
+    DwgEntityGroupCreate,
 )
 
 logger = logging.getLogger(__name__)
@@ -158,6 +165,7 @@ class DwgTakeoffService:
         self.drawing_repo = DwgDrawingRepository(session)
         self.version_repo = DwgDrawingVersionRepository(session)
         self.annotation_repo = DwgAnnotationRepository(session)
+        self.group_repo = DwgEntityGroupRepository(session)
 
     # ── Drawing upload & processing ─────────────────────────────────────
 
@@ -708,3 +716,99 @@ class DwgTakeoffService:
     async def get_pins(self, drawing_id: uuid.UUID) -> list[DwgAnnotation]:
         """Get annotations linked to tasks or punchlist items for a drawing."""
         return await self.annotation_repo.list_pins_for_drawing(drawing_id)
+
+    # ── Entity Groups (RFC 11) ──────────────────────────────────────────
+
+    async def create_entity_group(
+        self,
+        data: DwgEntityGroupCreate,
+        user_id: str,
+    ) -> DwgEntityGroup:
+        """Create a saved group of DWG entity ids on a drawing."""
+        await self.get_drawing(data.drawing_id)
+
+        item = DwgEntityGroup(
+            drawing_id=data.drawing_id,
+            name=data.name,
+            entity_ids=list(data.entity_ids),
+            metadata_=data.metadata,
+            created_by=user_id,
+        )
+        item = await self.group_repo.create(item)
+        logger.info(
+            "Entity group created: %s drawing=%s n=%d",
+            item.id,
+            data.drawing_id,
+            len(data.entity_ids),
+        )
+        return item
+
+    async def get_entity_group(self, group_id: uuid.UUID) -> DwgEntityGroup:
+        """Get entity group by ID. Raises 404 if not found."""
+        item = await self.group_repo.get_by_id(group_id)
+        if item is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Entity group not found",
+            )
+        return item
+
+    async def list_entity_groups(
+        self,
+        drawing_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 200,
+    ) -> tuple[list[DwgEntityGroup], int]:
+        """List saved entity groups for a drawing."""
+        return await self.group_repo.list_for_drawing(
+            drawing_id, offset=offset, limit=limit,
+        )
+
+    async def delete_entity_group(self, group_id: uuid.UUID) -> None:
+        """Delete an entity group."""
+        await self.get_entity_group(group_id)
+        await self.group_repo.delete(group_id)
+        logger.info("Entity group deleted: %s", group_id)
+
+    # ── Offline readiness (R3 #9) ───────────────────────────────────────
+
+    @staticmethod
+    def get_offline_readiness() -> dict[str, Any]:
+        """Probe local DWG converter availability.
+
+        The parser itself (ezdxf + ddc_dwg_parser) is fully local, so the
+        only thing that could push the user online is the ``DwgExporter``
+        binary needed for the ``.dwg`` path. DXF files already work without
+        it. Returns a dict matching :class:`DwgOfflineReadinessResponse`.
+        """
+        try:
+            from app.modules.boq.cad_import import find_converter
+
+            converter = find_converter("dwg")
+        except ImportError:
+            converter = None
+
+        if converter is None:
+            return {
+                "ready": False,
+                "converter_available": False,
+                "version": None,
+                "message": (
+                    "Install dwg2data to enable offline DWG conversion. "
+                    "DXF files already work without it."
+                ),
+            }
+
+        version: str | None = None
+        try:
+            version = converter.name
+        except Exception:  # noqa: BLE001 — defensive: filesystem quirks
+            version = None
+
+        return {
+            "ready": True,
+            "converter_available": True,
+            "version": version,
+            "message": "DWG conversion runs locally on this machine.",
+        }

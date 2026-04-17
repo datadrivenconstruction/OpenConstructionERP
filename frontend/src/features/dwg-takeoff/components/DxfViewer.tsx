@@ -48,6 +48,15 @@ export interface EntitySelectEvent {
   /** Screen-space coordinates relative to the viewer container for floating UI. */
   screenX: number;
   screenY: number;
+  /** Whether Shift was held — caller adds/toggles vs replaces the selection. */
+  shiftKey?: boolean;
+}
+
+/** Right-click context menu target. */
+export interface EntityContextMenuEvent {
+  entityId: string;
+  screenX: number;
+  screenY: number;
 }
 
 interface Props {
@@ -56,10 +65,14 @@ interface Props {
   visibleLayers: Set<string>;
   activeTool: DwgTool;
   activeColor: string;
-  selectedEntityId: string | null;
+  /** Multi-select (RFC 11): empty set = no selection. Single-select is a one-item set. */
+  selectedEntityIds: Set<string>;
+  /** Per-entity hide (RFC 11): hidden entities are not rendered and are not hit-testable. */
+  hiddenEntityIds: Set<string>;
   selectedAnnotationId: string | null;
   onSelectEntity: (id: string | null, event?: EntitySelectEvent) => void;
   onSelectAnnotation: (id: string | null) => void;
+  onEntityContextMenu?: (event: EntityContextMenuEvent) => void;
   onAnnotationCreated: (ann: {
     type: DwgAnnotation['type'];
     points: { x: number; y: number }[];
@@ -119,10 +132,12 @@ export function DxfViewer({
   visibleLayers,
   activeTool,
   activeColor,
-  selectedEntityId,
+  selectedEntityIds,
+  hiddenEntityIds,
   selectedAnnotationId,
   onSelectEntity,
   onSelectAnnotation,
+  onEntityContextMenu,
   onAnnotationCreated,
 }: Props) {
   const { t } = useTranslation();
@@ -138,10 +153,25 @@ export function DxfViewer({
   activeToolRef.current = activeTool;
   const activeColorRef = useRef(activeColor);
   activeColorRef.current = activeColor;
-  const selectedEntityIdRef = useRef(selectedEntityId);
-  selectedEntityIdRef.current = selectedEntityId;
+  const selectedEntityIdsRef = useRef(selectedEntityIds);
+  selectedEntityIdsRef.current = selectedEntityIds;
+  const hiddenEntityIdsRef = useRef(hiddenEntityIds);
+  hiddenEntityIdsRef.current = hiddenEntityIds;
   const selectedAnnotationIdRef = useRef(selectedAnnotationId);
   selectedAnnotationIdRef.current = selectedAnnotationId;
+  /**
+   * Last click position + candidate cycle index (RFC 11 §4.2).
+   * Tracks the ranked hit-test candidates at the last click so that a
+   * second click at the same spot (within 6px + 300ms) advances to the
+   * next candidate in the ranked list.
+   */
+  const lastHitRef = useRef<{
+    x: number;
+    y: number;
+    index: number;
+    ts: number;
+    candidateIds: string[];
+  } | null>(null);
   const [, forceRender] = useState(0);
   const [textPinPopup, setTextPinPopup] = useState<TextPinPopupState | null>(null);
   const [isPanning, setIsPanning] = useState(false);
@@ -273,13 +303,27 @@ export function DxfViewer({
         ctx.stroke();
       }
 
-      renderEntities(ctx, entities, vp, visibleLayers, selectedEntityIdRef.current, cw, ch);
+      // Filter out hidden entities from both rendering and hit-testing
+      const hidden = hiddenEntityIdsRef.current;
+      const visibleEntities = hidden.size > 0
+        ? entities.filter((e) => !hidden.has(e.id))
+        : entities;
+      // Highlight only the first selected id via the legacy single-id API; any
+      // additional selected entities get a secondary halo drawn below.
+      const selectedIds = selectedEntityIdsRef.current;
+      const primarySelId = selectedIds.size > 0 ? selectedIds.values().next().value ?? null : null;
+      renderEntities(ctx, visibleEntities, vp, visibleLayers, primarySelId, cw, ch);
+
+      // Draw secondary selection halos for additional selected entities (multi-select)
+      if (selectedIds.size > 1) {
+        renderMultiSelectionHalos(ctx, visibleEntities, vp, selectedIds, primarySelId);
+      }
+
       renderAnnotations(ctx, annotations, vp, selectedAnnotationIdRef.current);
 
-      // Draw polyline measurements overlay for selected entity
-      const selId = selectedEntityIdRef.current;
-      if (selId) {
-        const selEnt = entities.find((e) => e.id === selId);
+      // Draw polyline measurements overlay for the primary selected entity only
+      if (primarySelId) {
+        const selEnt = entities.find((e) => e.id === primarySelId);
         if (selEnt?.type === 'LWPOLYLINE' && selEnt.vertices && selEnt.vertices.length >= 2) {
           renderPolylineMeasurements(ctx, selEnt, vp);
         }
@@ -429,92 +473,52 @@ export function DxfViewer({
       }
 
       if (activeTool === 'select') {
-        // Hit test entities — tests points, segments, and circles
+        // Ranked hit-test (RFC 11 §4.2): build candidate list, score, cycle.
         const world = screenToWorld(sx, sy, vpRef.current);
-        let closest: string | null = null;
-        let closestDist = 10 / vpRef.current.scale; // 10px tolerance in world units
+        const tolerance = 10 / vpRef.current.scale;
+        const hidden = hiddenEntityIdsRef.current;
 
-        for (const ent of entities) {
-          if (!visibleLayers.has(ent.layer)) continue;
-          let d = Infinity;
+        const candidates = collectHitCandidates(
+          world,
+          entities,
+          visibleLayers,
+          hidden,
+          tolerance,
+        );
 
-          // LWPOLYLINE — test every segment + interior for closed polygons
-          if (ent.type === 'LWPOLYLINE' && ent.vertices && ent.vertices.length >= 2) {
-            // Test distance to each segment edge
-            for (let i = 0; i < ent.vertices.length - 1; i++) {
-              const sd = pointToSegmentDistance(world, ent.vertices[i]!, ent.vertices[i + 1]!);
-              if (sd < d) d = sd;
-            }
-            // Closing segment
-            if (ent.closed && ent.vertices.length >= 3) {
-              const sd = pointToSegmentDistance(world, ent.vertices[ent.vertices.length - 1]!, ent.vertices[0]!);
-              if (sd < d) d = sd;
-            }
-            // For closed polygons, also allow clicking inside the filled area
-            if (ent.closed && ent.vertices.length >= 3 && pointInPolygon(world, ent.vertices)) {
-              d = 0;
-            }
-          }
-          // HATCH — test interior of boundary polygon
-          else if (ent.type === 'HATCH' && ent.vertices && ent.vertices.length >= 3) {
-            if (pointInPolygon(world, ent.vertices)) {
-              d = 0;
-            } else {
-              for (let i = 0; i < ent.vertices.length - 1; i++) {
-                const sd = pointToSegmentDistance(world, ent.vertices[i]!, ent.vertices[i + 1]!);
-                if (sd < d) d = sd;
-              }
-              // Closing segment
-              const sd = pointToSegmentDistance(world, ent.vertices[ent.vertices.length - 1]!, ent.vertices[0]!);
-              if (sd < d) d = sd;
-            }
-          }
-          // LINE — test segment
-          else if (ent.type === 'LINE' && ent.start && ent.end) {
-            d = pointToSegmentDistance(world, ent.start, ent.end);
-          }
-          // CIRCLE — test distance to circumference
-          else if (ent.type === 'CIRCLE' && ent.start && ent.radius) {
-            const toCenter = calculateDistance(world, ent.start);
-            d = Math.abs(toCenter - ent.radius);
-          }
-          // ARC — test distance to arc circumference within angle range
-          else if (ent.type === 'ARC' && ent.start && ent.radius) {
-            const toCenter = calculateDistance(world, ent.start);
-            const distToCirc = Math.abs(toCenter - ent.radius);
-            // Check if click angle falls within the arc's sweep
-            if (ent.start_angle != null && ent.end_angle != null) {
-              let clickAngle = Math.atan2(world.y - ent.start.y, world.x - ent.start.x);
-              if (clickAngle < 0) clickAngle += Math.PI * 2;
-              let sa = ent.start_angle % (Math.PI * 2);
-              if (sa < 0) sa += Math.PI * 2;
-              let ea = ent.end_angle % (Math.PI * 2);
-              if (ea < 0) ea += Math.PI * 2;
-              const inArc = sa <= ea
-                ? clickAngle >= sa && clickAngle <= ea
-                : clickAngle >= sa || clickAngle <= ea;
-              d = inArc ? distToCirc : distToCirc + closestDist;
-            } else {
-              d = distToCirc;
-            }
-          }
-          // ELLIPSE — test distance to center (approximation)
-          else if (ent.type === 'ELLIPSE' && ent.start) {
-            d = calculateDistance(world, ent.start);
-            const maxR = Math.max(ent.major_radius ?? 0, ent.minor_radius ?? 0, ent.radius ?? 0);
-            if (maxR > 0) d = Math.abs(d - maxR);
-          }
-          // Fallback — test start point
-          else if (ent.start) {
-            d = calculateDistance(world, ent.start);
-          }
+        let picked: string | null = null;
 
-          if (d < closestDist) {
-            closestDist = d;
-            closest = ent.id;
-          }
+        if (candidates.length > 0) {
+          // Cycle-through: within 6 CSS px + 300 ms, advance to the next
+          // ranked candidate if the same set is under the cursor.
+          const now = performance.now();
+          const last = lastHitRef.current;
+          const sameSpot =
+            last != null &&
+            Math.hypot(sx - last.x, sy - last.y) < 6 &&
+            now - last.ts < 300 &&
+            last.candidateIds.length === candidates.length &&
+            last.candidateIds.every((id, i) => id === candidates[i]!.id);
+
+          const index = sameSpot ? (last!.index + 1) % candidates.length : 0;
+          picked = candidates[index]!.id;
+          lastHitRef.current = {
+            x: sx,
+            y: sy,
+            index,
+            ts: now,
+            candidateIds: candidates.map((c) => c.id),
+          };
+        } else {
+          lastHitRef.current = null;
         }
-        onSelectEntity(closest, closest ? { entityId: closest, screenX: sx, screenY: sy } : undefined);
+
+        onSelectEntity(
+          picked,
+          picked
+            ? { entityId: picked, screenX: sx, screenY: sy, shiftKey: e.shiftKey }
+            : undefined,
+        );
         onSelectAnnotation(null);
         return;
       }
@@ -583,6 +587,37 @@ export function DxfViewer({
     mousePosRef.current = null;
   }, []);
 
+  /**
+   * Right-click context menu. Hit-test once to find what was clicked on,
+   * then hand off to the parent to render the actual menu.
+   */
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (!onEntityContextMenu) return;
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      const world = screenToWorld(sx, sy, vpRef.current);
+      const tolerance = 10 / vpRef.current.scale;
+      const candidates = collectHitCandidates(
+        world,
+        entities,
+        visibleLayers,
+        hiddenEntityIdsRef.current,
+        tolerance,
+      );
+      if (candidates.length === 0) return;
+      onEntityContextMenu({
+        entityId: candidates[0]!.id,
+        screenX: sx,
+        screenY: sy,
+      });
+    },
+    [entities, visibleLayers, onEntityContextMenu],
+  );
+
   // Double-click to finish area polygon
   const handleDoubleClick = useCallback(() => {
     if (activeTool === 'area' && drawPointsRef.current.length >= 3) {
@@ -638,7 +673,7 @@ export function DxfViewer({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
         onDoubleClick={handleDoubleClick}
-        onContextMenu={(e) => e.preventDefault()}
+        onContextMenu={handleContextMenu}
         className="h-full w-full"
       />
       {/* Text pin floating popup */}
@@ -1060,4 +1095,214 @@ function roundRect(
   ctx.lineTo(x, y + r);
   ctx.arcTo(x, y, x + r, y, r);
   ctx.closePath();
+}
+
+/* ── Ranked hit-test (RFC 11 §4.2) ───────────────────────────────────── */
+
+/** One entity matching the click, annotated for scoring. */
+export interface HitCandidate {
+  id: string;
+  /** Distance from click to the nearest boundary, normalized by tolerance (0..1 inside tolerance). */
+  distance: number;
+  /** Whether the click is inside the closed boundary. */
+  inside: boolean;
+  /** Pre-computed polygon area (0 for non-polygons). Smaller areas win ties. */
+  area: number;
+}
+
+/**
+ * Score a candidate. Lower is better (i.e. we sort ascending and pick index 0).
+ *
+ *   score = 0.5·min(d,1) + 0.5·(inside ? 0 : 1) + (inside ? 0.1·log(area+1) : 0)
+ *
+ * Inside-hits win over boundary-hits (the +0.5 penalty for outside). Among
+ * inside-hits, smaller polygons (smaller log(area+1)) win — this fixes the
+ * "outer polyline always wins" bug because the inner polygon contains fewer
+ * square meters and therefore scores lower.
+ *
+ * (The RFC draft originally wrote a subtraction for the area term; that
+ * inverts the intent — larger log(area+1) would pull the outer polygon to
+ * the top. We add instead. The sign was a typo in the RFC snippet; the
+ * behaviour matches §4.2's stated goal.)
+ */
+export function scoreOf(c: HitCandidate): number {
+  return (
+    0.5 * Math.min(c.distance, 1)
+    + 0.5 * (c.inside ? 0 : 1)
+    + (c.inside ? 0.1 * Math.log(Math.max(c.area, 0) + 1) : 0)
+  );
+}
+
+/**
+ * Extract the cached area for a closed polyline. The `_area` field is
+ * attached at entity-load time in the page component — see
+ * `DwgTakeoffPage.tsx` `annotatedEntities`. Falls back to 0 for
+ * non-polygons so the score reduces to pure distance.
+ */
+function areaOf(entity: DxfEntity): number {
+  const e = entity as DxfEntity & { _area?: number };
+  if (typeof e._area === 'number' && Number.isFinite(e._area)) return e._area;
+  return 0;
+}
+
+/**
+ * Per-entity minimum distance + inside-test used by both the click
+ * handler and the right-click context-menu handler. Pure function; the
+ * only side effect is pushing onto the output array.
+ *
+ * Extracted from the legacy inline loop at `DxfViewer.tsx:431-520` so it
+ * can be unit-tested without a DOM and without React state.
+ */
+export function collectHitCandidates(
+  world: { x: number; y: number },
+  entities: DxfEntity[],
+  visibleLayers: Set<string>,
+  hiddenEntityIds: Set<string>,
+  tolerance: number,
+): HitCandidate[] {
+  const out: HitCandidate[] = [];
+
+  for (const ent of entities) {
+    if (!visibleLayers.has(ent.layer)) continue;
+    if (hiddenEntityIds.has(ent.id)) continue;
+
+    let d = Infinity;
+    let inside = false;
+
+    if (ent.type === 'LWPOLYLINE' && ent.vertices && ent.vertices.length >= 2) {
+      for (let i = 0; i < ent.vertices.length - 1; i++) {
+        const sd = pointToSegmentDistance(world, ent.vertices[i]!, ent.vertices[i + 1]!);
+        if (sd < d) d = sd;
+      }
+      if (ent.closed && ent.vertices.length >= 3) {
+        const sd = pointToSegmentDistance(
+          world, ent.vertices[ent.vertices.length - 1]!, ent.vertices[0]!,
+        );
+        if (sd < d) d = sd;
+        if (pointInPolygon(world, ent.vertices)) {
+          inside = true;
+          d = 0;
+        }
+      }
+    } else if (ent.type === 'HATCH' && ent.vertices && ent.vertices.length >= 3) {
+      if (pointInPolygon(world, ent.vertices)) {
+        inside = true;
+        d = 0;
+      } else {
+        for (let i = 0; i < ent.vertices.length - 1; i++) {
+          const sd = pointToSegmentDistance(world, ent.vertices[i]!, ent.vertices[i + 1]!);
+          if (sd < d) d = sd;
+        }
+        const sd = pointToSegmentDistance(
+          world, ent.vertices[ent.vertices.length - 1]!, ent.vertices[0]!,
+        );
+        if (sd < d) d = sd;
+      }
+    } else if (ent.type === 'LINE' && ent.start && ent.end) {
+      d = pointToSegmentDistance(world, ent.start, ent.end);
+    } else if (ent.type === 'CIRCLE' && ent.start && ent.radius) {
+      const toCenter = calculateDistance(world, ent.start);
+      d = Math.abs(toCenter - ent.radius);
+      // Inside-test: click within the disc. Closed polylines win against the
+      // ring-only hit-test — matches the intuition that clicking inside a
+      // circular floor plate should select the floor.
+      if (toCenter < ent.radius) {
+        inside = true;
+        if (d > tolerance) d = 0;
+      }
+    } else if (ent.type === 'ARC' && ent.start && ent.radius) {
+      const toCenter = calculateDistance(world, ent.start);
+      const distToCirc = Math.abs(toCenter - ent.radius);
+      if (ent.start_angle != null && ent.end_angle != null) {
+        let clickAngle = Math.atan2(world.y - ent.start.y, world.x - ent.start.x);
+        if (clickAngle < 0) clickAngle += Math.PI * 2;
+        let sa = ent.start_angle % (Math.PI * 2);
+        if (sa < 0) sa += Math.PI * 2;
+        let ea = ent.end_angle % (Math.PI * 2);
+        if (ea < 0) ea += Math.PI * 2;
+        const inArc = sa <= ea
+          ? clickAngle >= sa && clickAngle <= ea
+          : clickAngle >= sa || clickAngle <= ea;
+        d = inArc ? distToCirc : Infinity;
+      } else {
+        d = distToCirc;
+      }
+    } else if (ent.type === 'ELLIPSE' && ent.start) {
+      d = calculateDistance(world, ent.start);
+      const maxR = Math.max(ent.major_radius ?? 0, ent.minor_radius ?? 0, ent.radius ?? 0);
+      if (maxR > 0) d = Math.abs(d - maxR);
+    } else if (ent.start) {
+      d = calculateDistance(world, ent.start);
+    }
+
+    if (d > tolerance && !inside) continue;
+
+    out.push({
+      id: ent.id,
+      distance: d / tolerance,
+      inside,
+      area: areaOf(ent),
+    });
+  }
+
+  out.sort((a, b) => scoreOf(a) - scoreOf(b));
+  return out;
+}
+
+/* ── Multi-selection halos ────────────────────────────────────────────── */
+
+/**
+ * Draws a secondary halo around every selected entity other than the
+ * primary one (which is already highlighted by `applyStyle` inside
+ * `renderEntities`). A cheap visual cue that the extra entities are
+ * part of the same multi-select group.
+ */
+function renderMultiSelectionHalos(
+  ctx: CanvasRenderingContext2D,
+  entities: DxfEntity[],
+  vp: ViewportState,
+  selectedIds: Set<string>,
+  primaryId: string | null,
+): void {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(245, 158, 11, 0.9)';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = 'rgba(245, 158, 11, 0.45)';
+  ctx.shadowBlur = 6;
+
+  for (const ent of entities) {
+    if (!selectedIds.has(ent.id) || ent.id === primaryId) continue;
+
+    if (ent.type === 'LWPOLYLINE' && ent.vertices && ent.vertices.length >= 2) {
+      ctx.beginPath();
+      const sp0 = worldToScreen(ent.vertices[0]!.x, ent.vertices[0]!.y, vp);
+      ctx.moveTo(sp0.x, sp0.y);
+      for (let i = 1; i < ent.vertices.length; i++) {
+        const sp = worldToScreen(ent.vertices[i]!.x, ent.vertices[i]!.y, vp);
+        ctx.lineTo(sp.x, sp.y);
+      }
+      if (ent.closed) ctx.closePath();
+      ctx.stroke();
+    } else if (ent.type === 'LINE' && ent.start && ent.end) {
+      const a = worldToScreen(ent.start.x, ent.start.y, vp);
+      const b = worldToScreen(ent.end.x, ent.end.y, vp);
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    } else if (ent.type === 'CIRCLE' && ent.start && ent.radius) {
+      const c = worldToScreen(ent.start.x, ent.start.y, vp);
+      const r = ent.radius * vp.scale;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (ent.start) {
+      const c = worldToScreen(ent.start.x, ent.start.y, vp);
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, 6, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  ctx.restore();
 }

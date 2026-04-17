@@ -3,24 +3,29 @@
 Stateless service layer. Handles:
 - Document container CRUD
 - CDE state transitions (wip -> shared -> published -> archived) via CDEStateMachine
-- Revision management with auto-numbering and content-addressable storage
+- Revision management with auto-numbering, content-addressable storage,
+  and a cross-link into the Documents hub when a file is supplied
+- Persistent audit log of every state transition
 """
 
 import hashlib
 import logging
 import uuid
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.cde_states import CDEStateMachine
+from app.core.cde_states import CDEState, CDEStateMachine
 from app.core.events import event_bus
-from app.modules.cde.models import DocumentContainer, DocumentRevision
+from app.modules.cde.models import DocumentContainer, DocumentRevision, StateTransition
 from app.modules.cde.repository import ContainerRepository, RevisionRepository
 from app.modules.cde.schemas import (
     CDEStatsResponse,
     ContainerCreate,
+    ContainerTransmittalLink,
     ContainerUpdate,
     RevisionCreate,
     StateTransitionRequest,
@@ -183,11 +188,20 @@ class CDEService:
         container_id: uuid.UUID,
         data: StateTransitionRequest,
         user_role: str = "editor",
+        user_id: str | None = None,
     ) -> DocumentContainer:
         """Transition a container's CDE state following ISO 19650 rules.
 
         Uses the CDEStateMachine from core/cde_states.py to validate both
         structural validity and role-based gate conditions.
+
+        Gate B (SHARED → PUBLISHED) additionally requires an
+        ``approver_signature`` in the request body — this is captured in
+        ``container.metadata_.last_approval`` for the compliance trail.
+
+        A ``StateTransition`` audit row is written inline (same session) so
+        rollback leaves no orphan audit rows — the event bus is still used
+        for cross-module notification.
         """
         container = await self.get_container(container_id)
         current_state = container.cde_state
@@ -209,18 +223,62 @@ class CDEService:
                 detail=reason,
             )
 
-        await self.container_repo.update_fields(container_id, cde_state=target_state)
+        gate_meta = _state_machine.get_gate_requirements(current_state, target_state)
+        gate_code = gate_meta.get("gate")
+
+        # Gate B — SHARED → PUBLISHED requires an explicit approver signature.
+        updated_metadata: dict[str, Any] | None = None
+        is_gate_b = (
+            target_state == CDEState.PUBLISHED.value
+            and current_state == CDEState.SHARED.value
+        )
+        if is_gate_b:
+            if not data.approver_signature or not data.approver_signature.strip():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Gate B (SHARED → PUBLISHED) requires approver_signature",
+                )
+            # Merge-in the approval block into metadata_ so it's persisted.
+            md = dict(container.metadata_ or {})
+            md["last_approval"] = {
+                "by": user_id,
+                "at": datetime.now(UTC).isoformat(),
+                "signature": data.approver_signature,
+                "comments": data.approval_comments,
+            }
+            updated_metadata = md
+
+        # Apply state change (and optional metadata update) in one UPDATE.
+        update_fields: dict[str, Any] = {"cde_state": target_state}
+        if updated_metadata is not None:
+            update_fields["metadata_"] = updated_metadata
+        await self.container_repo.update_fields(container_id, **update_fields)
+
+        # Audit row — inline in the same session so a rollback cleans it up.
+        audit = StateTransition(
+            container_id=container_id,
+            from_state=current_state,
+            to_state=target_state,
+            gate_code=gate_code,
+            user_id=user_id,
+            user_role=user_role,
+            reason=data.reason,
+            signature=data.approver_signature if is_gate_b else None,
+        )
+        self.session.add(audit)
+        await self.session.flush()
         await self.session.refresh(container)
 
         logger.info(
-            "CDE state transition: %s -> %s for container %s (reason: %s)",
+            "CDE state transition: %s -> %s for container %s (gate=%s, user=%s)",
             current_state,
             target_state,
             container_id,
-            data.reason,
+            gate_code,
+            user_id,
         )
 
-        # Emit event for cross-module handlers (audit, notifications)
+        # Emit event for cross-module handlers (notifications, analytics).
         await event_bus.publish(
             "cde.container.promoted",
             data={
@@ -230,11 +288,86 @@ class CDEService:
                 "from_state": current_state,
                 "to_state": target_state,
                 "reason": data.reason,
+                "gate_code": gate_code,
+                "user_id": user_id,
+                "user_role": user_role,
             },
             source_module="cde",
         )
 
         return container
+
+    async def get_container_history(
+        self,
+        container_id: uuid.UUID,
+    ) -> list[StateTransition]:
+        """Return the state-transition audit log for a container, newest first."""
+        # Verify container exists — throws 404 otherwise.
+        await self.get_container(container_id)
+        stmt = (
+            select(StateTransition)
+            .where(StateTransition.container_id == container_id)
+            .order_by(StateTransition.transitioned_at.desc())
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def get_container_transmittals(
+        self,
+        container_id: uuid.UUID,
+    ) -> list[ContainerTransmittalLink]:
+        """Return transmittals that include any revision of this container.
+
+        Driven by ``TransmittalItem.revision_id`` → revision → container join.
+        Used by the container view to show "this rev was sent in TR-00N …".
+
+        Returns plain data (IDs, strings) rather than ORM objects so the
+        caller can serialise safely without triggering additional lazy loads.
+        """
+        # Verify container exists.
+        await self.get_container(container_id)
+
+        # Run a single tuple-yielding query — we pull only the columns we
+        # need, so no relationship lazy-loading is triggered when the
+        # caller serialises the response.
+        from app.modules.transmittals.models import Transmittal, TransmittalItem
+
+        stmt = (
+            select(
+                Transmittal.id,
+                Transmittal.transmittal_number,
+                Transmittal.subject,
+                Transmittal.status,
+                Transmittal.issued_date,
+                Transmittal.created_at,
+                TransmittalItem.revision_id,
+                DocumentRevision.revision_code,
+            )
+            .join(TransmittalItem, TransmittalItem.transmittal_id == Transmittal.id)
+            .join(
+                DocumentRevision,
+                DocumentRevision.id == TransmittalItem.revision_id,
+            )
+            .where(DocumentRevision.container_id == container_id)
+            .order_by(Transmittal.created_at.desc())
+        )
+        result = await self.session.execute(stmt)
+        rows = result.all()
+
+        links: list[ContainerTransmittalLink] = []
+        for tr_id, tr_num, subject, tr_status, issued, _created_at, rev_id, rev_code in rows:
+            links.append(
+                ContainerTransmittalLink(
+                    transmittal_id=tr_id,
+                    transmittal_number=tr_num,
+                    subject=subject,
+                    status=tr_status,
+                    issued_date=issued,
+                    revision_id=rev_id,
+                    revision_code=rev_code,
+                )
+            )
+        return links
 
     # ── Revision Management ───────────────────────────────────────────────
 
@@ -244,7 +377,14 @@ class CDEService:
         data: RevisionCreate,
         user_id: str | None = None,
     ) -> DocumentRevision:
-        """Create a new revision for a container."""
+        """Create a new revision for a container.
+
+        When ``storage_key`` is provided, also materialise a ``Document`` row
+        in the Documents hub so the file appears at ``/documents`` (per the
+        platform cross-link rule — see meetings/router.py:991-1020 pattern).
+        If no storage_key is supplied, the revision is metadata-only and no
+        Document is created (no error).
+        """
         container = await self.get_container(container_id)
 
         if container.cde_state == "archived":
@@ -284,14 +424,64 @@ class CDEService:
         )
         revision = await self.revision_repo.create(revision)
 
+        # Cache the revision id up-front so later update_fields() calls
+        # (which call ``session.expire_all()``) don't force a lazy reload
+        # of the primary key outside the async context.
+        revision_id = revision.id
+
+        # Cross-link into the Documents hub when the revision carries a file.
+        # Best-effort: failure here must not break the revision create — the
+        # CDE row is the source of truth, the Documents row is an index.
+        if data.storage_key:
+            try:
+                from app.modules.documents.models import Document
+
+                try:
+                    file_size_int = int(data.file_size) if data.file_size else 0
+                except (TypeError, ValueError):
+                    file_size_int = 0
+                doc = Document(
+                    project_id=container.project_id,
+                    name=data.file_name,
+                    description=(
+                        f"CDE rev {revision_code} — {container.container_code}"
+                    ),
+                    category="cde",
+                    file_size=file_size_int,
+                    mime_type=data.mime_type or "",
+                    file_path=data.storage_key,
+                    version=rev_number,
+                    uploaded_by=str(user_id) if user_id else "",
+                    tags=["cde", container.container_code],
+                )
+                self.session.add(doc)
+                await self.session.flush()
+                # Read out doc.id before any expire_all() invalidates it.
+                doc_id = doc.id
+                await self.revision_repo.update_fields(
+                    revision_id, document_id=str(doc_id)
+                )
+                logger.info(
+                    "Cross-linked CDE revision %s -> document %s",
+                    revision_id,
+                    doc_id,
+                )
+            except Exception:
+                logger.exception(
+                    "Failed to cross-link CDE revision to Documents hub (revision=%s)",
+                    revision_id,
+                )
+
         # Update the container's current_revision_id
         await self.container_repo.update_fields(
             container_id,
-            current_revision_id=str(revision.id),
+            current_revision_id=str(revision_id),
         )
 
-        # Refresh the revision so its attributes are re-loaded after expire_all()
-        await self.session.refresh(revision)
+        # Re-fetch the revision with all fields freshly loaded so the caller
+        # (the router) can serialise it without hitting a lazy-load IO path.
+        revision = await self.revision_repo.get_by_id(revision_id)
+        assert revision is not None, "Revision vanished between insert and re-read"
 
         logger.info(
             "CDE revision created: %s (rev %s) for container %s",

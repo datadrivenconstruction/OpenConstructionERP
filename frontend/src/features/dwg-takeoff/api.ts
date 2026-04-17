@@ -222,3 +222,49 @@ export async function linkAnnotationToBoq(
 export async function fetchPins(drawingId: string): Promise<DwgPin[]> {
   return apiGet<DwgPin[]>(`/v1/dwg_takeoff/drawings/${drawingId}/pins`);
 }
+
+/* ── Entity Groups (RFC 11) ───────────────────────────────────────────── */
+
+export interface DwgEntityGroup {
+  id: string;
+  drawing_id: string;
+  entity_ids: string[];
+  name: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateEntityGroupPayload {
+  drawing_id: string;
+  entity_ids: string[];
+  name: string;
+  metadata?: Record<string, unknown>;
+}
+
+export async function createEntityGroup(
+  data: CreateEntityGroupPayload,
+): Promise<DwgEntityGroup> {
+  return apiPost<DwgEntityGroup>('/v1/dwg_takeoff/groups/', data);
+}
+
+export async function fetchEntityGroups(drawingId: string): Promise<DwgEntityGroup[]> {
+  return apiGet<DwgEntityGroup[]>(`/v1/dwg_takeoff/groups/?drawing_id=${drawingId}`);
+}
+
+export async function deleteEntityGroup(groupId: string): Promise<void> {
+  return apiDelete(`/v1/dwg_takeoff/groups/${groupId}`);
+}
+
+/* ── Offline Readiness (R3 #9) ─────────────────────────────────────────── */
+
+export interface DwgOfflineReadiness {
+  ready: boolean;
+  converter_available: boolean;
+  version: string | null;
+  message: string;
+}
+
+export async function fetchOfflineReadiness(): Promise<DwgOfflineReadiness> {
+  return apiGet<DwgOfflineReadiness>('/v1/dwg_takeoff/offline-readiness/');
+}

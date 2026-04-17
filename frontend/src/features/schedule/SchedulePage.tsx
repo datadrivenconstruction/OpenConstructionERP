@@ -1783,7 +1783,8 @@ function ProjectSchedules({
         </div>
         <Button
           variant="primary"
-          icon={<Plus size={16} />}
+          size="lg"
+          icon={<Plus size={18} />}
           onClick={() => setShowCreate(true)}
         >
           {t('schedule.create_schedule', 'Create Schedule')}

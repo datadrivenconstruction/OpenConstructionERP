@@ -113,76 +113,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           <span className="hidden lg:inline">GitHub</span>
         </a>
 
-        {/* Email issues — direct mailto so the user can write without
-             leaving to GitHub and without needing an account. */}
-        <a
-          href="mailto:info@datadrivenconstruction.io?subject=OpenConstructionERP%20Issue%20Report"
-          className={clsx(
-            'hidden sm:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
-            'text-xs font-medium',
-            'text-content-tertiary border border-border-light',
-            'transition-all duration-fast ease-oe',
-            'hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-400 hover:border-amber-500/40',
-          )}
-          title={t('header.email_issue', { defaultValue: 'Email an issue to the team' })}
-          aria-label={t('header.email_issue', { defaultValue: 'Email an issue to the team' })}
-        >
-          {/* mail icon */}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <rect width="20" height="16" x="2" y="4" rx="2" />
-            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-          </svg>
-          <span className="hidden lg:inline">{t('header.email_issues', { defaultValue: 'Email Issues' })}</span>
-        </a>
-
-        {/* Search — opens CommandPalette */}
-        <button
-          onClick={openCommandPalette}
-          className={clsx(
-            'hidden sm:flex h-9 items-center gap-2 rounded-lg px-3',
-            'border border-border bg-surface-secondary',
-            'text-sm text-content-tertiary',
-            'transition-all duration-fast ease-oe',
-            'hover:border-content-tertiary hover:text-content-secondary',
-            'w-48 lg:w-56',
-          )}
-        >
-          <Search size={15} strokeWidth={1.75} />
-          <span>{t('common.search')}</span>
-          <kbd className="ml-auto text-2xs text-content-tertiary font-mono bg-surface-primary border border-border-light rounded px-1.5 py-0.5">
-            /
-          </kbd>
-        </button>
-
-        {/* Mobile search icon */}
-        <button
-          onClick={openCommandPalette}
-          aria-label={t('common.search', { defaultValue: 'Search' })}
-          className="flex sm:hidden h-8 w-8 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary"
-        >
-          <Search size={17} />
-        </button>
-
-        {/* Keyboard shortcuts hint */}
-        <button
-          onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }))}
-          className={clsx(
-            'hidden sm:flex h-8 w-8 items-center justify-center rounded-lg',
-            'text-content-tertiary transition-colors',
-            'hover:bg-surface-secondary hover:text-content-secondary',
-          )}
-          title={t('common.keyboard_shortcuts', 'Keyboard shortcuts') + ' (?)'}
-          aria-label={t('common.keyboard_shortcuts', 'Keyboard shortcuts')}
-        >
-          <kbd className="text-2xs font-mono font-medium bg-surface-primary border border-border-light rounded px-1.5 py-0.5">
-            ?
-          </kbd>
-        </button>
-
-        {/* Notification bell */}
-        <NotificationBell />
-
-        {/* Bug report — Variant A (file download) + B (URL params) + C (direct POST) */}
+        {/* Report Issue — bug report download + contact form + direct POST */}
         <button
           onClick={() => {
             // Variant A: Download JSON file
@@ -236,6 +167,75 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           <Bug size={14} />
           <span className="hidden lg:inline">{t('feedback.report_issue', { defaultValue: 'Report Issue' })}</span>
         </button>
+
+        {/* Search — opens CommandPalette */}
+        <button
+          onClick={openCommandPalette}
+          className={clsx(
+            'hidden sm:flex h-9 items-center gap-2 rounded-lg px-3',
+            'border border-border bg-surface-secondary',
+            'text-sm text-content-tertiary',
+            'transition-all duration-fast ease-oe',
+            'hover:border-content-tertiary hover:text-content-secondary',
+            'w-48 lg:w-56',
+          )}
+        >
+          <Search size={15} strokeWidth={1.75} />
+          <span>{t('common.search')}</span>
+          <kbd className="ml-auto text-2xs text-content-tertiary font-mono bg-surface-primary border border-border-light rounded px-1.5 py-0.5">
+            /
+          </kbd>
+        </button>
+
+        {/* Mobile search icon */}
+        <button
+          onClick={openCommandPalette}
+          aria-label={t('common.search', { defaultValue: 'Search' })}
+          className="flex sm:hidden h-8 w-8 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary"
+        >
+          <Search size={17} />
+        </button>
+
+        {/* Keyboard shortcuts hint */}
+        <button
+          onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }))}
+          className={clsx(
+            'hidden sm:flex h-8 w-8 items-center justify-center rounded-lg',
+            'text-content-tertiary transition-colors',
+            'hover:bg-surface-secondary hover:text-content-secondary',
+          )}
+          title={t('common.keyboard_shortcuts', 'Keyboard shortcuts') + ' (?)'}
+          aria-label={t('common.keyboard_shortcuts', 'Keyboard shortcuts')}
+        >
+          <kbd className="text-2xs font-mono font-medium bg-surface-primary border border-border-light rounded px-1.5 py-0.5">
+            ?
+          </kbd>
+        </button>
+
+        {/* Notification bell */}
+        <NotificationBell />
+
+        {/* Email issues — direct mailto so the user can write without
+             leaving to GitHub and without needing an account. */}
+        <a
+          href="mailto:info@datadrivenconstruction.io?subject=OpenConstructionERP%20Issue%20Report"
+          className={clsx(
+            'hidden sm:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
+            'text-xs font-medium',
+            'text-content-tertiary border border-border-light',
+            'transition-all duration-fast ease-oe',
+            'hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-400 hover:border-amber-500/40',
+          )}
+          title={t('header.email_issue', { defaultValue: 'Email an issue to the team' })}
+          aria-label={t('header.email_issue', { defaultValue: 'Email an issue to the team' })}
+        >
+          {/* mail icon */}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <rect width="20" height="16" x="2" y="4" rx="2" />
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+          </svg>
+          <span className="hidden lg:inline">{t('header.email_issues', { defaultValue: 'Email Issues' })}</span>
+        </a>
 
         {/* Documentation link */}
         <a

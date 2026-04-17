@@ -83,6 +83,7 @@ class MeetingService:
         attendees_data = [entry.model_dump() for entry in data.attendees]
         agenda_data = [entry.model_dump() for entry in data.agenda_items]
         action_data = [entry.model_dump() for entry in data.action_items]
+        document_ids = [str(x) for x in data.document_ids]
 
         meeting = Meeting(
             project_id=data.project_id,
@@ -97,6 +98,7 @@ class MeetingService:
             action_items=action_data,
             minutes=data.minutes,
             status=data.status,
+            document_ids=document_ids,
             created_by=user_id,
             metadata_=data.metadata,
         )
@@ -201,6 +203,17 @@ class MeetingService:
                     entry.model_dump() if hasattr(entry, "model_dump") else entry
                     for entry in fields[key]
                 ]
+
+        # Stringify + deduplicate document_ids for JSON storage
+        if "document_ids" in fields and fields["document_ids"] is not None:
+            seen: set[str] = set()
+            deduped: list[str] = []
+            for raw in fields["document_ids"]:
+                s = str(raw)
+                if s not in seen:
+                    seen.add(s)
+                    deduped.append(s)
+            fields["document_ids"] = deduped
 
         if not fields:
             return meeting

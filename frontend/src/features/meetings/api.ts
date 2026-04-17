@@ -4,7 +4,7 @@
  * All endpoints are prefixed with /v1/meetings/.
  */
 
-import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 /* -- Types ----------------------------------------------------------------- */
@@ -58,6 +58,8 @@ export interface Meeting {
   agenda_items: AgendaItem[];
   action_items: ActionItem[];
   notes: string;
+  minutes?: string | null;
+  document_ids: string[];
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -77,6 +79,20 @@ export interface CreateMeetingPayload {
   location?: string;
   chairperson_id?: string;
   attendees?: { name: string; company?: string; status?: string }[];
+  minutes?: string;
+  document_ids?: string[];
+}
+
+export interface UpdateMeetingPayload {
+  title?: string;
+  meeting_type?: MeetingType;
+  meeting_date?: string;
+  location?: string;
+  chairperson_id?: string;
+  attendees?: { name: string; company?: string; status?: string }[];
+  minutes?: string;
+  document_ids?: string[];
+  status?: MeetingStatus;
 }
 
 /* -- API Functions --------------------------------------------------------- */
@@ -96,13 +112,88 @@ export async function createMeeting(data: CreateMeetingPayload): Promise<Meeting
 
 export async function updateMeeting(
   id: string,
-  data: Partial<CreateMeetingPayload>,
+  data: UpdateMeetingPayload,
 ): Promise<Meeting> {
   return apiPatch<Meeting>(`/v1/meetings/${id}`, data);
 }
 
+export async function deleteMeeting(id: string): Promise<void> {
+  return apiDelete(`/v1/meetings/${id}`);
+}
+
 export async function completeMeeting(id: string): Promise<Meeting> {
   return apiPost<Meeting>(`/v1/meetings/${id}/complete/`);
+}
+
+/* -- Meeting attachment upload (delegates to DocumentService) ------------- */
+
+export interface MeetingAttachment {
+  id: string;
+  name: string;
+  size: number;
+  mime_type?: string | null;
+}
+
+export async function uploadMeetingDocument(
+  projectId: string,
+  file: File,
+): Promise<MeetingAttachment> {
+  if (!projectId) throw new Error('projectId is required');
+  const token = useAuthStore.getState().accessToken;
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await fetch(
+    `/api/v1/documents/upload/?project_id=${encodeURIComponent(projectId)}&category=meeting`,
+    {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'X-DDC-Client': 'OE/1.0',
+      },
+      body: formData,
+    },
+  );
+  if (!res.ok) {
+    let detail = 'Upload failed';
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = body.detail;
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(detail);
+  }
+  const body = await res.json();
+  return {
+    id: String(body.id),
+    name: String(body.name ?? body.filename ?? file.name),
+    size: Number(body.file_size ?? body.size_bytes ?? file.size),
+    mime_type: body.mime_type ?? file.type ?? null,
+  };
+}
+
+export function getMeetingDocumentDownloadUrl(documentId: string): string {
+  return `/api/v1/documents/${documentId}/download`;
+}
+
+export async function fetchMeetingDocument(
+  documentId: string,
+): Promise<MeetingAttachment> {
+  const body = await apiGet<{
+    id: string;
+    name?: string;
+    filename?: string;
+    file_size?: number;
+    size_bytes?: number;
+    mime_type?: string | null;
+  }>(`/v1/documents/${documentId}`);
+  return {
+    id: String(body.id),
+    name: String(body.name ?? body.filename ?? documentId),
+    size: Number(body.file_size ?? body.size_bytes ?? 0),
+    mime_type: body.mime_type ?? null,
+  };
 }
 
 /* -- Import Preview Types -------------------------------------------------- */
