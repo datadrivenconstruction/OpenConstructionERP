@@ -1,6 +1,13 @@
-import { lazy } from 'react';
+import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 import { Ruler } from 'lucide-react';
 import type { ModuleManifest } from '../_types';
+
+// The module accepts optional props (for in-app embedding); cast to the
+// module-route's `ComponentType<unknown>` signature so the manifest type
+// remains uniform across all modules.
+const TakeoffViewerModule = lazy(
+  () => import('./TakeoffViewerModule'),
+) as unknown as LazyExoticComponent<ComponentType<unknown>>;
 
 export const manifest: ModuleManifest = {
   id: 'pdf-takeoff',
@@ -14,7 +21,7 @@ export const manifest: ModuleManifest = {
     {
       path: '/takeoff-viewer',
       title: 'PDF Takeoff',
-      component: lazy(() => import('./TakeoffViewerModule')),
+      component: TakeoffViewerModule,
     },
   ],
   navItems: [],

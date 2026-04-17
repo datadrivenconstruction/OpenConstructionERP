@@ -270,6 +270,25 @@ export function BOQEditorPage() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdatePositionData }) =>
       boqApi.updatePosition(id, data),
+    onMutate: ({ id, data }: { id: string; data: UpdatePositionData }) => {
+      // Manual quantity edit clears BIM/PDF link badges and the red validation
+      // border immediately, without waiting for the server round-trip.
+      if (data.quantity === undefined) return;
+      queryClient.setQueryData(['boq', boqId], (old: unknown) => {
+        if (!old || typeof old !== 'object') return old;
+        const cur = old as { positions: Position[]; [k: string]: unknown };
+        return {
+          ...cur,
+          positions: cur.positions.map((p) => {
+            if (p.id !== id) return p;
+            const meta = { ...(p.metadata ?? {}) } as Record<string, unknown>;
+            delete meta.bim_qty_source;
+            delete meta.pdf_measurement_source;
+            return { ...p, metadata: meta, validation_status: 'pending' };
+          }),
+        };
+      });
+    },
     onSuccess: () => invalidateAll(),
     onError: (err: Error) => {
       addToast({ type: 'error', title: t('boq.update_failed', { defaultValue: 'Failed to update position' }), message: err.message });

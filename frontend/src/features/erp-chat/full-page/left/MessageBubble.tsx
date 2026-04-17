@@ -34,6 +34,21 @@ function renderMarkdown(text: string): string {
     return `<code style="background:var(--chat-surface-3,rgba(0,0,0,.06));padding:1px 5px;border-radius:4px;font-size:0.9em;font-family:var(--chat-font-mono,monospace)">${code}</code>`;
   });
 
+  // Links: [text](url) — must run before bold so labels containing "**" are
+  // still parsed as bold inside the rendered anchor.  External (http/https)
+  // opens in a new tab with rel=noopener; internal (starts with `/`)
+  // stays in the current app context so auth survives.
+  html = html.replace(
+    /\[([^\]]+)\]\(([^)\s]+)\)/g,
+    (_m, label: string, href: string) => {
+      const isExternal = /^https?:\/\//i.test(href);
+      const attrs = isExternal
+        ? ' target="_blank" rel="noopener noreferrer"'
+        : '';
+      return `<a href="${href}"${attrs} style="color:var(--chat-accent,#3b82f6);text-decoration:underline;font-weight:500">${label}</a>`;
+    },
+  );
+
   // Bold: **text**
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
