@@ -1443,6 +1443,11 @@ export function BIMPage() {
 
   const [activeModelId, setActiveModelId] = useState<string | null>(urlModelId || null);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  // Full Ctrl+click / Shift+click multi-selection set, fed by the viewer's
+  // onSelectionChange. Echoed back to BIMViewer so every selected mesh stays
+  // highlighted across renders (parent's `[selectedElementId]` would collapse
+  // the highlight to the most recent click only).
+  const [multiSelectedIds, setMultiSelectedIds] = useState<string[]>([]);
 
   // Deep-link auto-select: Cmd+Shift+K global semantic search and the
   // similar-items panel land here with `?element=<element_id>` — pick
@@ -1969,7 +1974,7 @@ export function BIMPage() {
   }, [elementsQuery.data, filterPredicate, addToast, t]);
 
   const handleUploadComplete = useCallback((modelId: string) => {
-    setActiveModelId(modelId); setShowUploadOverride(false); setSelectedElementId(null);
+    setActiveModelId(modelId); setShowUploadOverride(false); setSelectedElementId(null); setMultiSelectedIds([]);
     setUploadOpen(false); setUploadConvertedName(null);
     // Invalidate both model list and elements — the model is ready on the
     // backend but the list cache may still show 'processing' for a moment.
@@ -2028,7 +2033,7 @@ export function BIMPage() {
     try {
       await deleteBIMModel(modelId);
       addToast({ type: 'success', title: t('bim.toast_model_deleted_title'), message: name });
-      if (activeModelId === modelId) { setActiveModelId(null); setSelectedElementId(null); }
+      if (activeModelId === modelId) { setActiveModelId(null); setSelectedElementId(null); setMultiSelectedIds([]); }
       queryClient.invalidateQueries({ queryKey: ['bim-models', projectId] });
     } catch (err) { addToast({ type: 'error', title: t('bim.toast_delete_failed_title'), message: err instanceof Error ? err.message : String(err) }); }
   }, [activeModelId, addToast, queryClient, projectId, t]);
@@ -2040,12 +2045,15 @@ export function BIMPage() {
     return items;
   }, [t, projectId, contextProjectName]);
 
-  // For multi-select: track all selected IDs from the viewer's internal SelectionManager.
-  // selectedElementId tracks the LAST clicked element (for properties panel);
-  // selectedElementIds drives the BIMViewer highlight.
-  // The viewer's onSelectionChange callback handles multi-select internally —
-  // we just pass the last-clicked ID so the properties panel shows something.
-  const selectedElementIds = useMemo(() => (selectedElementId ? [selectedElementId] : []), [selectedElementId]);
+  // For multi-select: keep the FULL list of selected IDs in parent state so
+  // re-renders never collapse a Ctrl+click multi-selection back to a single
+  // element. The viewer's onSelectionChange callback feeds it; the array is
+  // then echoed back via selectedElementIds so highlights stay in sync.
+  // selectedElementId still tracks the LAST clicked id (for properties panel
+  // and deep-link navigation).
+  const selectedElementIds = multiSelectedIds.length > 0
+    ? multiSelectedIds
+    : (selectedElementId ? [selectedElementId] : []);
 
   if (!projectId) {
     return (
@@ -2058,7 +2066,7 @@ export function BIMPage() {
   if (showFullPageUpload && !modelsQuery.isLoading) {
     return (
       <>
-        <LandingPage projectId={projectId} onUploadComplete={handleUploadComplete} breadcrumbItems={breadcrumbItems} models={models} onSelectModel={(id) => { setActiveModelId(id); setShowUploadOverride(false); setSelectedElementId(null); }} onDeleteModel={handleDeleteModel} />
+        <LandingPage projectId={projectId} onUploadComplete={handleUploadComplete} breadcrumbItems={breadcrumbItems} models={models} onSelectModel={(id) => { setActiveModelId(id); setShowUploadOverride(false); setSelectedElementId(null); setMultiSelectedIds([]); }} onDeleteModel={handleDeleteModel} />
         <ConfirmDialog {...confirmProps} />
       </>
     );
@@ -2316,6 +2324,7 @@ export function BIMPage() {
             projectId={projectId}
             selectedElementIds={selectedElementIds}
             onElementSelect={handleElementSelect}
+            onSelectionChange={setMultiSelectedIds}
             highlightedIds={highlightedBIMElementIds.length > 0 ? highlightedBIMElementIds : null}
             elements={elements}
             isLoading={elementsQuery.isLoading}
@@ -2432,7 +2441,7 @@ export function BIMPage() {
         models={models}
         isLoading={modelsQuery.isLoading}
         activeModelId={activeModelId}
-        onSelectModel={(id) => { setActiveModelId(id); setSelectedElementId(null); }}
+        onSelectModel={(id) => { setActiveModelId(id); setSelectedElementId(null); setMultiSelectedIds([]); }}
         onDeleteModel={handleDeleteModel}
         onUpload={() => setUploadOpen(true)}
       />
