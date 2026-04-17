@@ -859,9 +859,11 @@ export default function BIMFilterPanel({
           )}
         </div>
 
-        {/* Quick-takeoff button + Save as group button + Export CSV — all act
-            on the currently filtered subset. */}
-        {visibleElements.length > 0 && visibleElements.length < elements.length && (
+        {/* Quick-takeoff button + Save as group button + Export CSV — act on
+            the currently visible subset. Shown whenever any elements are
+            visible, so grouping-without-filter cases (e.g. picking a Type
+            Name without reducing the set) still expose the link/save buttons. */}
+        {visibleElements.length > 0 && (
           <div className="mt-2 flex gap-1 flex-wrap">
             {onQuickTakeoff && (
               <button

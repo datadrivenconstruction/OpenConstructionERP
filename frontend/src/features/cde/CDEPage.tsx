@@ -791,21 +791,42 @@ export function CDEPage() {
 
   // Mutations
   const createMut = useMutation({
+    mutationKey: ['cde-containers', 'create'],
     mutationFn: (data: CreateCDEContainerPayload) => createCDEContainer(data),
-    onSuccess: () => {
-      invalidateAll();
+    onSuccess: async () => {
+      // Await invalidation so the new container is present in the list by
+      // the time the modal closes — avoids the "I clicked create but nothing
+      // happened" perception that the user reported.
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['cde-containers'] }),
+        qc.invalidateQueries({ queryKey: ['cde-revisions'] }),
+      ]);
       setShowCreateModal(false);
       addToast({
         type: 'success',
         title: t('cde.created', { defaultValue: 'Container created' }),
       });
     },
-    onError: (e: Error) =>
+    onError: (e: Error) => {
+      // Surface the actual server/client error rather than a generic "Error"
+      // with an empty message — item #33 reported "New Container doesn't
+      // work" because a silent 4xx/5xx gave no feedback.
+      const detail =
+        e.message?.trim() ||
+        t('cde.create_failed_generic', {
+          defaultValue:
+            'Container could not be created. Check that a project is selected and the code/title are unique.',
+        });
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('[CDE] Create container failed:', e);
+      }
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
-        message: e.message,
-      }),
+        title: t('cde.create_failed', { defaultValue: 'Failed to create container' }),
+        message: detail,
+      });
+    },
   });
 
   const transitionMut = useMutation({

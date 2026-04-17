@@ -103,6 +103,10 @@ export function BOQEditorPage() {
     // makes typed text disappear mid-keystroke).
     staleTime: 5 * 60_000,
     refetchOnWindowFocus: false,
+    // Don't spin forever when the network drops — offlineStore (shared/lib/api.ts)
+    // serves cached responses; bail out fast if we're offline and there's no cache.
+    networkMode: 'offlineFirst',
+    retry: (count) => navigator.onLine && count < 2,
     select: (data) => ({
       ...data,
       positions: normalizePositions(data.positions),
@@ -1719,6 +1723,27 @@ export function BOQEditorPage() {
       }
       newRate = Math.round(newRate * 100) / 100;
 
+      // Optimistic cache write: reflect the new resource instantly in the grid.
+      // Without this, the user sees no feedback until the server round-trip
+      // completes, and onMutate in updateMutation skips non-quantity payloads.
+      queryClient.setQueryData(['boq', boqId], (old: unknown) => {
+        if (!old || typeof old !== 'object') return old;
+        const cur = old as { positions: Position[]; [k: string]: unknown };
+        return {
+          ...cur,
+          positions: cur.positions.map((p) =>
+            p.id === catalogForPositionId
+              ? {
+                  ...p,
+                  unit_rate: newRate,
+                  total: newRate * (p.quantity ?? 1),
+                  metadata: { ...p.metadata, resources: existing },
+                }
+              : p,
+          ),
+        };
+      });
+
       updateMutation.mutate({
         id: catalogForPositionId,
         data: {
@@ -1734,7 +1759,7 @@ export function BOQEditorPage() {
         title: t('boq.resource_added_from_catalog', { defaultValue: 'Resource added from catalog' }),
       });
     },
-    [catalogForPositionId, boq, updateMutation, addToast, t],
+    [catalogForPositionId, boq, boqId, queryClient, updateMutation, addToast, t],
   );
 
   /** Add a manual resource (not from database) to a position. */

@@ -40,7 +40,7 @@ import {
   ProjectMap, ProjectWeather,
 } from '@/shared/ui';
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
-import { apiGet, apiPatch } from '@/shared/lib/api';
+import { apiGet, apiPatch, ApiError } from '@/shared/lib/api';
 import clsx from 'clsx';
 import { projectsApi, type Project } from './api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -1034,22 +1034,43 @@ export function ProjectDetailPage() {
   });
 
   // Fetch project
-  const { data: project, isLoading: projectLoading, isError: projectError } = useQuery({
+  const {
+    data: project,
+    isLoading: projectLoading,
+    isError: projectError,
+    error: projectQueryError,
+    refetch: refetchProject,
+  } = useQuery({
     queryKey: ['project', projectId],
     queryFn: () => projectsApi.get(projectId!),
     enabled: !!projectId,
-    retry: false,
+    // Retry on network errors (1x) but not on 4xx — a real 404 shouldn't
+    // spin while the user waits.
+    retry: (count, err) => {
+      if (err instanceof ApiError && err.status >= 400 && err.status < 500) return false;
+      return navigator.onLine && count < 1;
+    },
+    networkMode: 'offlineFirst',
   });
 
-  // Auto-clean stale references when the project ID points to something that
-  // no longer exists (e.g. after reseed or project deletion).  Without this,
-  // the sidebar/recent list keeps advertising dead IDs forever.
+  // Distinguish "the project is truly gone" (404 from server) from
+  // "we can't reach the server right now" (offline or 5xx). Only the
+  // 404 case should clear sidebar recents — otherwise a transient
+  // network blip wipes the user's navigation history.
+  const is404 = projectQueryError instanceof ApiError && projectQueryError.status === 404;
+  const isServerError =
+    projectQueryError instanceof ApiError && projectQueryError.status >= 500;
+  const isOffline =
+    projectError && !is404 && !isServerError && typeof navigator !== 'undefined' && !navigator.onLine;
+  const isNetworkError = projectError && !is404 && !isServerError && !isOffline;
+
+  // Auto-clean stale references only when the project is actually gone.
   const clearProject = useProjectContextStore((s) => s.clearProject);
   const activeProjectIdInStore = useProjectContextStore((s) => s.activeProjectId);
   const recentItems = useRecentStore((s) => s.items);
   const clearRecent = useRecentStore((s) => s.clearRecent);
   useEffect(() => {
-    if (!projectError || !projectId) return;
+    if (!is404 || !projectId) return;
     if (activeProjectIdInStore === projectId) clearProject();
     if (recentItems.some((it) => it.id === projectId)) {
       const remaining = recentItems.filter((it) => it.id !== projectId);
@@ -1060,7 +1081,7 @@ export function ProjectDetailPage() {
         });
       });
     }
-  }, [projectError, projectId, activeProjectIdInStore, clearProject, recentItems, clearRecent]);
+  }, [is404, projectId, activeProjectIdInStore, clearProject, recentItems, clearRecent]);
 
   const addRecent = useRecentStore((s) => s.addRecent);
 
@@ -1196,7 +1217,38 @@ export function ProjectDetailPage() {
     );
   }
 
-  // ── Not found ──────────────────────────────────────────────────────────
+  // ── Offline / network error — the project may still exist server-side ──
+  if (!project && (isOffline || isNetworkError || isServerError)) {
+    return (
+      <div className="w-full">
+        <EmptyState
+          title={
+            isOffline
+              ? t('projects.offline_title', { defaultValue: 'You appear to be offline' })
+              : t('projects.network_error_title', { defaultValue: "Can't reach the server" })
+          }
+          description={
+            isOffline
+              ? t('projects.offline_desc', {
+                  defaultValue:
+                    "We'll load this project as soon as your connection returns. Your sidebar bookmarks are kept intact.",
+                })
+              : t('projects.network_error_desc', {
+                  defaultValue:
+                    'The server is not responding right now. This does not mean the project is deleted — try again in a moment.',
+                })
+          }
+          action={
+            <Button variant="primary" onClick={() => refetchProject()}>
+              {t('common.retry', { defaultValue: 'Retry' })}
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
+
+  // ── Not found (true 404) ───────────────────────────────────────────────
   if (!project) {
     return (
       <div className="w-full">
