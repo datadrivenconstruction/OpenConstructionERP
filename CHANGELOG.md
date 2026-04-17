@@ -5,6 +5,44 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] — 2026-04-18
+
+### R2 deep-research items (8 items with RFCs)
+
+- **#11 DWG polyline selection rework** (RFC 11): ranked area/proximity hit-test fixes outer-polyline bias; `Set<string>` multi-select with Shift+Click + Escape; cycle-through within 6 px / 300 ms; new `aggregateEntities` helper (Σ area / Σ perimeter / Σ length by type); new backend `POST/GET/DELETE /v1/dwg_takeoff/groups/` with `DwgEntityGroup` model; 6 backend tests + 25 frontend unit tests.
+- **#16 Data Explorer analytics** (RFC 16): `useAnalysisStateStore` (slicers + chart config + saved views, localStorage-persisted); `numberFormat` lib (currency / percent / number with Intl caching); `aggregation.ts` (Top-N + slicer composition); Recharts lazy-loaded (Bar / Line / Pie / Scatter + ResponsiveContainer); SlicerBanner + TopNToggle + DrillDownModal + ViewsDrawer; 39 unit tests + 5 E2E cases.
+- **#19 BIM viewer controls** (RFC 19): `SavedViewsStore` (100-view localStorage cap, ordered eviction); per-category transparency via `ElementManager.setCategoryOpacity` (cloned materials, leak-free dispose); `THREE.BoxHelper` on selection; `MeasureManager` with state-machine + `M` shortcut + `Escape` cancel; 4-tab right panel (Properties / Layers / Tools / Groups); unit tests for all three managers.
+- **#24 Quantity Rules redesign** (RFC 24): new `GET /v1/bim_hub/models/{id}/schema/` with 1000-value cap per property; RuleEditorModal with Seed-from-model + datalist comboboxes (element type, property key/value, quantity source); required-field asterisks; Advanced mode toggle (AND/OR/NOT + regex hint + raw JSON editor); BETA badge on page header; 6 backend tests.
+- **#25 Project Intelligence → Estimation Dashboard** (RFC 25): `ProjectKPIHero` (Budget variance / Schedule health / Risk-adjusted cost with traffic-light thresholds); `ProjectAnalyticsGrid` (Pareto cost drivers, price volatility, vendor concentration, scope coverage, live validation); 5 new backend endpoints (`/v1/costmodel/variance`, `/v1/boq/line-items`, `/v1/boq/cost-rollup`, `/v1/tendering/bid-analysis`, `/v1/boq/anomalies`); dropped Achievements card + hero onboarding; cache TTL 5 min → 60 s; rename "Estimation Dashboard" (URL unchanged); 14 backend tests.
+- **#29 Meetings edit + attachments + description** (RFC 29): new `document_ids: JSON` column with migration + server default `[]`; `EditMeetingModal` mirroring Create (pre-fill + diff-PATCH); delete with `useConfirm`; attachment dropzone with `DocumentService` cross-link; minutes textarea (50 000 char cap); Playwright spec.
+- **#33 CDE deep audit (ISO 19650)** (RFC 33): `suitability.py` lookup (S0 / S1–S7 / A1–A5 / AR with state-cross-check validator); new `StateTransition` table + inline audit writes (pre-commit, same-session); revision→Document cross-link on upload; Gate B requires `approver_signature` (400 otherwise); history + transmittals endpoints; `TransmittalItem.revision_id` cross-link; CDEHistoryDrawer + CDETransmittalsBadge; 21 backend tests (17 unit + 4 integration).
+
+### R3 UX polish items bundled
+
+- **#1 Local DDC logo** — Dashboard logo swapped to `/brand/ddc-logo.webp` (no external image fetches on page load).
+- **#3 Offline banner removed** — redundant with offline-first pattern from v1.9.0.
+- **#4 Header issue menu order** — Report Issue (bug download) now before Email Issues.
+- **#7 Takeoff measurements row density** — tighter row height in `TakeoffViewerModule` for both measurement and annotation rows.
+- **#17 cad-explorer "Columns" label** — renamed to "Parameter columns" / "Parameter-Spalten" / "Колонки параметров" for clarity.
+- **#26 Schedule Create button** — bigger, `Plus`-iconed, size `lg`.
+- **#28 5D EVM scope indicator** — banner shows "Viewing all projects (N)" or "Project: {name}" with switch link.
+- **#30 Submittals Edit dialog** — row-level Edit button + `EditSubmittalModal` + `updateSubmittal` API wrapper.
+- **#32 Documents filters** — client-side file-type dropdown (PDF / DWG / IFC / RVT / Other) + revision filter (All / Latest / Has versions).
+
+### Quality gates
+
+- `tsc --noEmit`: 0 errors across the whole frontend
+- Backend `tests/unit/v1_9/` + `tests/integration/v1_9/`: **49/49 passing**
+- Frontend unit tests: 600/633 passing (9 pre-existing failures in jsPDF stub + visual-regression snapshots — documented in release notes)
+- 7 new RFCs committed in `docs/rfc/` before implementation
+- See `docs/ROADMAP_v1.9.md` for per-item detail
+
+### Upgrade notes
+
+- Alembic migrations: three new heads chained — `v191_meetings_document_ids`, `v191_dwg_entity_groups`, `v191_cde_audit`. Run `alembic upgrade head`.
+- DWG viewer: `selectedEntityId: string | null` prop is now `selectedEntityIds: Set<string>` (breaking). Two internal call-sites updated; no external consumers affected.
+- CDE: `suitability_code` is now state-validated — existing rows with free-text codes continue to work (nullable column + validator only runs on create / update payloads).
+
 ## [1.9.0] — 2026-04-17
 
 ### R1 critical bug fixes (8 items from the 33-item v1.9 roadmap)

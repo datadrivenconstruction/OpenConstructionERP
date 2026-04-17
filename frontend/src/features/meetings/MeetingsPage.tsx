@@ -31,6 +31,9 @@ import {
   Rocket,
   MapPin,
   AlertTriangle,
+  Paperclip,
+  Download,
+  FileText,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -43,17 +46,24 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import {
   fetchMeetings,
   createMeeting,
+  updateMeeting,
+  deleteMeeting,
   completeMeeting,
   importMeetingSummary,
   importMeetingSummaryPreview,
+  uploadMeetingDocument,
+  fetchMeetingDocument,
+  getMeetingDocumentDownloadUrl,
   type Meeting,
   type MeetingType,
   type MeetingStatus,
   type CreateMeetingPayload,
+  type UpdateMeetingPayload,
   type AttendeeStatus,
   type ImportPreviewResponse,
   type ImportPreviewAttendee,
   type ImportPreviewActionItem,
+  type MeetingAttachment,
 } from './api';
 
 /* -- Constants ------------------------------------------------------------- */
@@ -159,6 +169,8 @@ interface MeetingFormData {
   location: string;
   chairperson: string;
   attendees: string;
+  minutes: string;
+  attachments: MeetingAttachment[];
 }
 
 const todayStr = () => {
@@ -175,18 +187,176 @@ const EMPTY_FORM: MeetingFormData = {
   location: '',
   chairperson: '',
   attendees: '',
+  minutes: '',
+  attachments: [],
 };
+
+function formatBytes(bytes: number): string {
+  if (!bytes || bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/* -- Attachment Dropzone (shared by Create + Edit modals) ------------------ */
+
+function AttachmentDropzone({
+  projectId,
+  attachments,
+  onAdd,
+  onRemove,
+  disabled,
+}: {
+  projectId: string;
+  attachments: MeetingAttachment[];
+  onAdd: (att: MeetingAttachment) => void;
+  onRemove: (id: string) => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const [dragOver, setDragOver] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFiles = useCallback(
+    async (files: FileList | File[]) => {
+      if (!projectId || disabled) return;
+      const list = Array.from(files);
+      if (list.length === 0) return;
+      setUploading(true);
+      for (const file of list) {
+        try {
+          const att = await uploadMeetingDocument(projectId, file);
+          onAdd(att);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          addToast({
+            type: 'error',
+            title: t('meetings.upload_failed', { defaultValue: 'Attachment upload failed' }),
+            message: msg,
+          });
+        }
+      }
+      setUploading(false);
+    },
+    [projectId, disabled, onAdd, addToast, t],
+  );
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-content-primary mb-1.5">
+        {t('meetings.field_attachments', { defaultValue: 'Attachments' })}
+      </label>
+
+      <div
+        onDragOver={(e) => {
+          if (disabled) return;
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          if (!disabled) void handleFiles(e.dataTransfer.files);
+        }}
+        className={clsx(
+          'border-2 border-dashed rounded-lg p-4 text-center transition-colors',
+          dragOver
+            ? 'border-oe-blue bg-oe-blue-subtle'
+            : 'border-border-light hover:border-oe-blue hover:bg-surface-secondary',
+          (disabled || uploading) && 'opacity-60 pointer-events-none',
+          'cursor-pointer',
+        )}
+        onClick={() => {
+          if (!disabled) document.getElementById('meeting-attachment-input')?.click();
+        }}
+      >
+        <input
+          id="meeting-attachment-input"
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files) void handleFiles(e.target.files);
+            e.target.value = '';
+          }}
+        />
+        <div className="flex items-center justify-center gap-2 text-sm text-content-secondary">
+          {uploading ? (
+            <>
+              <Loader2 size={16} className="animate-spin text-oe-blue" />
+              <span>{t('meetings.uploading', { defaultValue: 'Uploading...' })}</span>
+            </>
+          ) : (
+            <>
+              <Paperclip size={16} className="text-content-tertiary" />
+              <span>
+                {t('meetings.dropzone_hint', {
+                  defaultValue: 'Drop files here or click to browse',
+                })}
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {attachments.length > 0 && (
+        <ul className="mt-2 space-y-1" data-testid="meeting-attachments-list">
+          {attachments.map((att) => (
+            <li
+              key={att.id}
+              className="flex items-center gap-2 rounded-md border border-border-light bg-surface-secondary px-2 py-1.5 text-sm"
+            >
+              <FileText size={14} className="text-content-tertiary shrink-0" />
+              <span className="flex-1 truncate text-content-primary" title={att.name}>
+                {att.name}
+              </span>
+              <span className="text-xs text-content-tertiary tabular-nums shrink-0">
+                {formatBytes(att.size)}
+              </span>
+              <a
+                href={getMeetingDocumentDownloadUrl(att.id)}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-oe-blue hover:bg-surface-primary transition-colors shrink-0"
+                aria-label={t('common.download', { defaultValue: 'Download' })}
+                data-testid="meeting-attachment-download"
+              >
+                <Download size={12} />
+              </a>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove(att.id);
+                }}
+                className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors shrink-0"
+                aria-label={t('common.remove', { defaultValue: 'Remove' })}
+                data-testid="meeting-attachment-remove"
+              >
+                <Trash2 size={12} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 function CreateMeetingModal({
   onClose,
   onSubmit,
   isPending,
   projectName,
+  projectId,
 }: {
   onClose: () => void;
   onSubmit: (data: MeetingFormData) => void;
   isPending: boolean;
   projectName?: string;
+  projectId: string;
 }) {
   const { t } = useTranslation();
   const [form, setForm] = useState<MeetingFormData>({ ...EMPTY_FORM, date: todayStr() });
@@ -412,6 +582,43 @@ function CreateMeetingModal({
               })}
             </p>
           </div>
+
+          {/* Minutes / Description */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('meetings.field_minutes', { defaultValue: 'Description / Minutes' })}
+            </label>
+            <textarea
+              value={form.minutes}
+              onChange={(e) => set('minutes', e.target.value)}
+              rows={8}
+              maxLength={50000}
+              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-vertical"
+              placeholder={t('meetings.minutes_placeholder', {
+                defaultValue: 'Meeting description, minutes, or notes...',
+              })}
+              data-testid="meeting-minutes-input"
+            />
+          </div>
+
+          {/* Attachments */}
+          <AttachmentDropzone
+            projectId={projectId}
+            attachments={form.attachments}
+            onAdd={(att) =>
+              setForm((prev) => ({
+                ...prev,
+                attachments: [...prev.attachments.filter((a) => a.id !== att.id), att],
+              }))
+            }
+            onRemove={(id) =>
+              setForm((prev) => ({
+                ...prev,
+                attachments: prev.attachments.filter((a) => a.id !== id),
+              }))
+            }
+            disabled={isPending}
+          />
         </div>
 
         {/* Footer */}
@@ -426,6 +633,347 @@ function CreateMeetingModal({
               <Plus size={16} className="mr-1.5 shrink-0" />
             )}
             <span>{t('meetings.create_meeting', { defaultValue: 'Create Meeting' })}</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* -- Edit Meeting Modal ---------------------------------------------------- */
+
+function EditMeetingModal({
+  meeting,
+  onClose,
+  onSubmit,
+  isPending,
+  projectId,
+}: {
+  meeting: Meeting;
+  onClose: () => void;
+  onSubmit: (diff: UpdateMeetingPayload) => void;
+  isPending: boolean;
+  projectId: string;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const initialAttendees = useMemo(
+    () => (meeting.attendees ?? []).map((a) => a.name).filter(Boolean).join('\n'),
+    [meeting.attendees],
+  );
+
+  const initialForm = useMemo<MeetingFormData>(
+    () => ({
+      title: meeting.title ?? '',
+      meeting_type: meeting.meeting_type,
+      date: (meeting as unknown as { meeting_date?: string }).meeting_date
+        ? String((meeting as unknown as { meeting_date?: string }).meeting_date)
+        : (meeting.date ?? ''),
+      location: meeting.location ?? '',
+      chairperson: meeting.chairperson ?? '',
+      attendees: initialAttendees,
+      minutes: meeting.minutes ?? (meeting as unknown as { notes?: string }).notes ?? '',
+      attachments: [],
+    }),
+    [meeting, initialAttendees],
+  );
+
+  const [form, setForm] = useState<MeetingFormData>(initialForm);
+  const [touched, setTouched] = useState(false);
+  const [attachmentsLoaded, setAttachmentsLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const ids = meeting.document_ids ?? [];
+    if (ids.length === 0) {
+      setAttachmentsLoaded(true);
+      return;
+    }
+    (async () => {
+      const loaded: MeetingAttachment[] = [];
+      for (const id of ids) {
+        try {
+          const att = await fetchMeetingDocument(id);
+          loaded.push(att);
+        } catch {
+          loaded.push({ id, name: id, size: 0, mime_type: null });
+        }
+      }
+      if (!cancelled) {
+        setForm((prev) => ({ ...prev, attachments: loaded }));
+        setAttachmentsLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [meeting.document_ids]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const set = <K extends keyof MeetingFormData>(key: K, value: MeetingFormData[K]) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
+
+  const titleError = touched && form.title.trim().length === 0;
+  const dateError = touched && form.date.trim().length === 0;
+  const canSubmit = form.title.trim().length > 0 && form.date.trim().length > 0;
+
+  const handleSubmit = () => {
+    setTouched(true);
+    if (!canSubmit) return;
+
+    const diff: UpdateMeetingPayload = {};
+    if (form.title !== initialForm.title) diff.title = form.title;
+    if (form.meeting_type !== initialForm.meeting_type) diff.meeting_type = form.meeting_type;
+
+    const normDate = form.date?.split('T')[0] || form.date;
+    const initDate = initialForm.date?.split('T')[0] || initialForm.date;
+    if (normDate !== initDate) diff.meeting_date = normDate;
+
+    if (form.location !== initialForm.location) diff.location = form.location || '';
+    if (form.chairperson !== initialForm.chairperson)
+      diff.chairperson_id = form.chairperson || undefined;
+
+    if (form.attendees !== initialForm.attendees) {
+      const list = form.attendees
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      diff.attendees = list.map((name) => ({ name }));
+    }
+
+    if (form.minutes !== initialForm.minutes) diff.minutes = form.minutes;
+
+    const currentIds = form.attachments.map((a) => a.id).sort();
+    const originalIds = (meeting.document_ids ?? []).slice().sort();
+    const changed =
+      currentIds.length !== originalIds.length ||
+      currentIds.some((id, idx) => id !== originalIds[idx]);
+    if (changed) diff.document_ids = form.attachments.map((a) => a.id);
+
+    if (Object.keys(diff).length === 0) {
+      addToast({
+        type: 'info',
+        title: t('meetings.no_changes', { defaultValue: 'No changes to save' }),
+      });
+      onClose();
+      return;
+    }
+
+    onSubmit(diff);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div
+        className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[85vh] flex flex-col"
+        role="dialog"
+        aria-label={t('meetings.edit_meeting', { defaultValue: 'Edit Meeting' })}
+        data-testid="edit-meeting-modal"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light sticky top-0 z-10 bg-surface-elevated rounded-t-xl">
+          <div>
+            <h2 className="text-lg font-semibold text-content-primary">
+              {t('meetings.edit_meeting', { defaultValue: 'Edit Meeting' })}
+            </h2>
+            <p className="text-xs text-content-tertiary mt-0.5">
+              MTG-{String(meeting.meeting_number).padStart(3, '0')}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <div className="px-6 py-4 space-y-5 overflow-y-auto flex-1">
+          {/* Meeting Type */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-2">
+              {t('meetings.field_type', { defaultValue: 'Meeting Type' })}
+            </label>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {MEETING_TYPES.map((mt) => {
+                const cfg = MEETING_TYPE_CARD_CONFIG[mt];
+                const TypeIcon = cfg.icon;
+                const selected = form.meeting_type === mt;
+                return (
+                  <button
+                    key={mt}
+                    type="button"
+                    onClick={() => set('meeting_type', mt)}
+                    className={clsx(
+                      'flex flex-col items-center gap-1.5 rounded-lg border-2 px-2 py-2.5 text-center transition-all',
+                      selected
+                        ? cfg.color + ' ring-2 ring-oe-blue/30'
+                        : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
+                    )}
+                  >
+                    <TypeIcon size={18} />
+                    <span className="text-2xs font-medium leading-tight">
+                      {t(`meetings.type_${mt}`, {
+                        defaultValue: mt.charAt(0).toUpperCase() + mt.slice(1),
+                      })}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('meetings.field_title', { defaultValue: 'Title' })}{' '}
+              <span className="text-semantic-error">*</span>
+            </label>
+            <input
+              value={form.title}
+              onChange={(e) => {
+                set('title', e.target.value);
+                setTouched(true);
+              }}
+              className={clsx(
+                inputCls,
+                titleError &&
+                  'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              )}
+              data-testid="edit-meeting-title"
+            />
+            {titleError && (
+              <p className="mt-1 text-xs text-semantic-error">
+                {t('meetings.title_required', { defaultValue: 'Title is required' })}
+              </p>
+            )}
+          </div>
+
+          {/* Date */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('meetings.field_date', { defaultValue: 'Date & Time' })}{' '}
+              <span className="text-semantic-error">*</span>
+            </label>
+            <input
+              type="date"
+              value={form.date?.split('T')[0] || form.date}
+              onChange={(e) => {
+                set('date', e.target.value);
+                setTouched(true);
+              }}
+              className={clsx(
+                inputCls,
+                dateError &&
+                  'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              )}
+            />
+            {dateError && (
+              <p className="mt-1 text-xs text-semantic-error">
+                {t('meetings.date_required', { defaultValue: 'Date is required' })}
+              </p>
+            )}
+          </div>
+
+          {/* Location */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('meetings.field_location', { defaultValue: 'Location' })}
+            </label>
+            <input
+              value={form.location}
+              onChange={(e) => set('location', e.target.value)}
+              className={inputCls}
+            />
+          </div>
+
+          {/* Attendees */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('meetings.field_attendees', { defaultValue: 'Attendees' })}
+            </label>
+            <textarea
+              value={form.attendees}
+              onChange={(e) => set('attendees', e.target.value)}
+              rows={3}
+              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+              placeholder={t('meetings.attendees_placeholder', {
+                defaultValue: 'One name per line',
+              })}
+            />
+          </div>
+
+          {/* Minutes */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('meetings.field_minutes', { defaultValue: 'Description / Minutes' })}
+            </label>
+            <textarea
+              value={form.minutes}
+              onChange={(e) => set('minutes', e.target.value)}
+              rows={8}
+              maxLength={50000}
+              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-vertical"
+              data-testid="edit-meeting-minutes"
+            />
+          </div>
+
+          {/* Attachments */}
+          {attachmentsLoaded ? (
+            <AttachmentDropzone
+              projectId={projectId}
+              attachments={form.attachments}
+              onAdd={(att) =>
+                setForm((prev) => ({
+                  ...prev,
+                  attachments: [...prev.attachments.filter((a) => a.id !== att.id), att],
+                }))
+              }
+              onRemove={(id) =>
+                setForm((prev) => ({
+                  ...prev,
+                  attachments: prev.attachments.filter((a) => a.id !== id),
+                }))
+              }
+              disabled={isPending}
+            />
+          ) : (
+            <div className="flex items-center gap-2 text-sm text-content-tertiary">
+              <Loader2 size={14} className="animate-spin" />
+              <span>
+                {t('meetings.loading_attachments', { defaultValue: 'Loading attachments...' })}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light sticky bottom-0 z-10 bg-surface-elevated rounded-b-xl">
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={isPending || !canSubmit}
+            data-testid="edit-meeting-save"
+          >
+            {isPending ? (
+              <Loader2 size={16} className="mr-1.5 animate-spin shrink-0" />
+            ) : (
+              <Edit3 size={16} className="mr-1.5 shrink-0" />
+            )}
+            <span>{t('common.save', { defaultValue: 'Save' })}</span>
           </Button>
         </div>
       </div>
@@ -1042,12 +1590,16 @@ const MeetingRow = React.memo(function MeetingRow({
   meeting,
   onComplete,
   onExportPdf,
+  onEdit,
+  onDelete,
   isExporting,
   projectId,
 }: {
   meeting: Meeting;
   onComplete: (id: string) => void;
   onExportPdf: (id: string) => void;
+  onEdit: (meeting: Meeting) => void;
+  onDelete: (meeting: Meeting) => void;
   isExporting: boolean;
   projectId: string;
 }) {
@@ -1056,6 +1608,8 @@ const MeetingRow = React.memo(function MeetingRow({
   const statusCfg = STATUS_CONFIG[meeting.status] ?? STATUS_CONFIG.scheduled;
   const typeCfg = MEETING_TYPE_COLORS[meeting.meeting_type] ?? 'neutral';
   const attendeeCount = meeting.attendees?.length ?? 0;
+  const attachmentCount = meeting.document_ids?.length ?? 0;
+  const editLocked = meeting.status === 'completed' || meeting.status === 'cancelled';
 
   return (
     <div className="border-b border-border-light last:border-b-0">
@@ -1233,8 +1787,48 @@ const MeetingRow = React.memo(function MeetingRow({
             </div>
           )}
 
+          {/* Minutes / Description */}
+          {meeting.minutes && (
+            <div className="rounded-lg bg-surface-secondary p-3">
+              <p className="text-xs text-content-tertiary mb-2 font-medium uppercase tracking-wide">
+                {t('meetings.label_minutes', { defaultValue: 'Minutes' })}
+              </p>
+              <p className="text-sm text-content-primary whitespace-pre-wrap">{meeting.minutes}</p>
+            </div>
+          )}
+
+          {/* Attachments */}
+          {attachmentCount > 0 && (
+            <div className="rounded-lg bg-surface-secondary p-3" data-testid="meeting-row-attachments">
+              <p className="text-xs text-content-tertiary mb-2 font-medium uppercase tracking-wide flex items-center gap-1">
+                <Paperclip size={12} />
+                {t('meetings.label_attachments', {
+                  defaultValue: 'Attachments ({{count}})',
+                  count: attachmentCount,
+                })}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {(meeting.document_ids ?? []).map((docId) => (
+                  <a
+                    key={docId}
+                    href={getMeetingDocumentDownloadUrl(docId)}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary hover:border-oe-blue hover:text-oe-blue transition-colors"
+                    data-testid="meeting-row-attachment-chip"
+                  >
+                    <FileText size={10} />
+                    <span className="font-mono truncate max-w-[140px]">{docId.slice(0, 8)}</span>
+                    <Download size={10} />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
-          <div className="flex items-center gap-2 pt-1">
+          <div className="flex items-center gap-2 pt-1 flex-wrap">
             {(meeting.status === 'scheduled' || meeting.status === 'in_progress') && (
               <Button
                 variant="primary"
@@ -1248,6 +1842,39 @@ const MeetingRow = React.memo(function MeetingRow({
                 {t('meetings.action_complete', { defaultValue: 'Complete Meeting' })}
               </Button>
             )}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(meeting);
+              }}
+              disabled={editLocked}
+              title={
+                editLocked
+                  ? t('meetings.edit_locked', {
+                      defaultValue:
+                        'Cannot edit a completed or cancelled meeting',
+                    })
+                  : undefined
+              }
+              data-testid="meeting-row-edit"
+            >
+              <Edit3 size={14} className="mr-1.5" />
+              {t('common.edit', { defaultValue: 'Edit' })}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(meeting);
+              }}
+              data-testid="meeting-row-delete"
+            >
+              <Trash2 size={14} className="mr-1.5" />
+              {t('common.delete', { defaultValue: 'Delete' })}
+            </Button>
             <Button
               variant="secondary"
               size="sm"
@@ -1283,6 +1910,7 @@ export function MeetingsPage() {
   // State
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<MeetingType | ''>('');
   const [statusFilter, setStatusFilter] = useState<MeetingStatus | ''>('');
@@ -1356,6 +1984,42 @@ export function MeetingsPage() {
       addToast({
         type: 'error',
         title: t('meetings.create_failed', { defaultValue: 'Failed to create meeting' }),
+        message: e.message,
+      }),
+  });
+
+  const updateMut = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateMeetingPayload }) =>
+      updateMeeting(id, data),
+    onSuccess: () => {
+      invalidateAll();
+      setEditingMeeting(null);
+      addToast({
+        type: 'success',
+        title: t('meetings.updated', { defaultValue: 'Meeting updated successfully' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('meetings.update_failed', { defaultValue: 'Failed to update meeting' }),
+        message: e.message,
+      }),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => deleteMeeting(id),
+    onSuccess: () => {
+      invalidateAll();
+      addToast({
+        type: 'success',
+        title: t('meetings.deleted', { defaultValue: 'Meeting deleted' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('meetings.delete_failed', { defaultValue: 'Failed to delete meeting' }),
         message: e.message,
       }),
   });
@@ -1457,12 +2121,40 @@ export function MeetingsPage() {
         attendees: attendeesList.length > 0
           ? attendeesList.map((name) => ({ name }))
           : undefined,
+        minutes: formData.minutes || undefined,
+        document_ids: formData.attachments.length > 0
+          ? formData.attachments.map((a) => a.id)
+          : undefined,
       });
     },
     [createMut, projectId, addToast, t],
   );
 
+  const handleEditSubmit = useCallback(
+    (diff: UpdateMeetingPayload) => {
+      if (!editingMeeting) return;
+      updateMut.mutate({ id: editingMeeting.id, data: diff });
+    },
+    [updateMut, editingMeeting],
+  );
+
   const { confirm, ...confirmProps } = useConfirm();
+
+  const handleDelete = useCallback(
+    async (meeting: Meeting) => {
+      const ok = await confirm({
+        title: t('meetings.confirm_delete_title', { defaultValue: 'Delete meeting?' }),
+        message: t('meetings.confirm_delete_msg', {
+          defaultValue:
+            'This meeting will be permanently deleted. Attached documents remain available in Documents.',
+        }),
+        confirmLabel: t('common.delete', { defaultValue: 'Delete' }),
+        variant: 'danger',
+      });
+      if (ok) deleteMut.mutate(meeting.id);
+    },
+    [deleteMut, confirm, t],
+  );
 
   const handleComplete = useCallback(
     async (id: string) => {
@@ -1732,6 +2424,8 @@ export function MeetingsPage() {
                   meeting={meeting}
                   onComplete={handleComplete}
                   onExportPdf={handleExportPdf}
+                  onEdit={(m) => setEditingMeeting(m)}
+                  onDelete={handleDelete}
                   isExporting={exportPdfMut.isPending && exportPdfMut.variables === meeting.id}
                   projectId={projectId}
                 />
@@ -1756,6 +2450,18 @@ export function MeetingsPage() {
           onSubmit={handleCreateSubmit}
           isPending={createMut.isPending}
           projectName={projectName}
+          projectId={projectId}
+        />
+      )}
+
+      {/* Edit Modal */}
+      {editingMeeting && (
+        <EditMeetingModal
+          meeting={editingMeeting}
+          onClose={() => setEditingMeeting(null)}
+          onSubmit={handleEditSubmit}
+          isPending={updateMut.isPending}
+          projectId={projectId}
         />
       )}
 

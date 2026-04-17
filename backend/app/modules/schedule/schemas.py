@@ -635,3 +635,24 @@ class ProgressUpdateResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+
+# ── Project Intelligence (RFC 25) ───────────────────────────────────────────
+
+
+class LaborCostByPhaseRow(BaseModel):
+    """Rolled-up labour cost for a single schedule phase / WBS group."""
+
+    phase: str = Field("", description="Phase label — wbs_code prefix or activity_type")
+    activity_count: int = 0
+    labor_cost: float = 0.0
+    total_cost: float = 0.0
+    start_date: str | None = None
+    end_date: str | None = None
+
+
+class LaborCostByPhaseResponse(BaseModel):
+    """Container for the labour-cost-by-phase stacked area chart."""
+
+    phases: list[LaborCostByPhaseRow] = Field(default_factory=list)
+    currency: str = "EUR"

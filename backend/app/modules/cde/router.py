@@ -1,11 +1,14 @@
 """CDE (Common Data Environment) API routes.
 
 Endpoints:
+    GET    /suitability-codes                     - ISO 19650 suitability codes
     GET    /containers?project_id=X              - List containers
     POST   /containers                           - Create container
     GET    /containers/{container_id}             - Get single container
     PATCH  /containers/{container_id}             - Update container
     POST   /containers/{container_id}/transition  - CDE state transition
+    GET    /containers/{container_id}/history     - State transition audit log
+    GET    /containers/{container_id}/transmittals - Transmittals carrying revisions
     GET    /containers/{container_id}/revisions   - List revisions
     POST   /containers/{container_id}/revisions   - Create new revision
     GET    /revisions/{revision_id}               - Get single revision
@@ -21,12 +24,17 @@ from app.modules.cde.schemas import (
     CDEStatsResponse,
     ContainerCreate,
     ContainerResponse,
+    ContainerTransmittalLink,
     ContainerUpdate,
     RevisionCreate,
     RevisionResponse,
+    StateTransitionEntry,
     StateTransitionRequest,
+    SuitabilityCodeEntry,
+    SuitabilityCodesResponse,
 )
 from app.modules.cde.service import CDEService
+from app.modules.cde.suitability import SUITABILITY_CODES
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -83,11 +91,35 @@ def _revision_to_response(revision: object) -> RevisionResponse:
             str(revision.approved_by) if revision.approved_by else None  # type: ignore[attr-defined]
         ),
         change_summary=revision.change_summary,  # type: ignore[attr-defined]
+        document_id=getattr(revision, "document_id", None),
         created_by=revision.created_by,  # type: ignore[attr-defined]
         metadata=getattr(revision, "metadata_", {}),
         created_at=revision.created_at,  # type: ignore[attr-defined]
         updated_at=revision.updated_at,  # type: ignore[attr-defined]
     )
+
+
+# ── Suitability codes (ISO 19650 lookup) ─────────────────────────────────────
+
+
+@router.get("/suitability-codes/", response_model=SuitabilityCodesResponse)
+async def list_suitability_codes() -> SuitabilityCodesResponse:
+    """Return the ISO 19650 suitability-code table.
+
+    Used by the frontend container-create/edit dropdown to drive a state-aware
+    picker. Labels here are English defaults — the frontend runs them through
+    i18n using the code as the key (``cde.suitability_<code>``).
+    """
+    all_entries: list[SuitabilityCodeEntry] = []
+    by_state: dict[str, list[SuitabilityCodeEntry]] = {}
+    for state, entries in SUITABILITY_CODES.items():
+        bucket: list[SuitabilityCodeEntry] = []
+        for code, label in entries:
+            entry = SuitabilityCodeEntry(code=code, label=label, state=state)
+            bucket.append(entry)
+            all_entries.append(entry)
+        by_state[state] = bucket
+    return SuitabilityCodesResponse(codes=all_entries, by_state=by_state)
 
 
 # ── Stats ────────────────────────────────────────────────────────────────────
@@ -186,12 +218,48 @@ async def transition_state(
     """Transition a container's CDE state (wip -> shared -> published -> archived).
 
     Role-based gate validation is performed via the ISO 19650 CDEStateMachine.
+    Gate B (SHARED → PUBLISHED) also requires ``approver_signature`` in the
+    request body.
     """
     user_role = user_payload.get("role", "editor")
+    user_id = user_payload.get("sub")
     container = await service.transition_state(
-        container_id, data, user_role=user_role,
+        container_id, data, user_role=user_role, user_id=user_id,
     )
     return _container_to_response(container)
+
+
+# ── Container History (audit log) ────────────────────────────────────────────
+
+
+@router.get(
+    "/containers/{container_id}/history/",
+    response_model=list[StateTransitionEntry],
+)
+async def get_container_history(
+    container_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: CDEService = Depends(_get_service),
+) -> list[StateTransitionEntry]:
+    """Return the state-transition audit log for a container, newest first."""
+    rows = await service.get_container_history(container_id)
+    return [StateTransitionEntry.model_validate(r) for r in rows]
+
+
+# ── Container Transmittals (backlink) ────────────────────────────────────────
+
+
+@router.get(
+    "/containers/{container_id}/transmittals/",
+    response_model=list[ContainerTransmittalLink],
+)
+async def get_container_transmittals(
+    container_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: CDEService = Depends(_get_service),
+) -> list[ContainerTransmittalLink]:
+    """Return transmittals that carry any revision from this container."""
+    return await service.get_container_transmittals(container_id)
 
 
 # ── Revision List ─────────────────────────────────────────────────────────────

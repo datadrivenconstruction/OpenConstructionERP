@@ -29,7 +29,14 @@ import {
   type TransmittalStatus,
   type TransmittalPurpose,
   type CreateTransmittalPayload,
+  type CreateItemPayload,
 } from './api';
+import {
+  fetchCDEContainers,
+  fetchContainerRevisions,
+  type CDEContainer,
+  type CDERevision,
+} from '@/features/cde/api';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -97,6 +104,13 @@ const textareaCls =
 
 /* ── Create Modal ─────────────────────────────────────────────────────── */
 
+interface SelectedRevision {
+  container_id: string;
+  container_code: string;
+  revision_id: string;
+  revision_code: string;
+}
+
 interface TransmittalFormData {
   subject: string;
   purpose: TransmittalPurpose;
@@ -104,6 +118,7 @@ interface TransmittalFormData {
   response_due: string;
   recipients: string;
   items: string;
+  revisions: SelectedRevision[];
 }
 
 const EMPTY_FORM: TransmittalFormData = {
@@ -113,6 +128,7 @@ const EMPTY_FORM: TransmittalFormData = {
   response_due: '',
   recipients: '',
   items: '',
+  revisions: [],
 };
 
 function CreateTransmittalModal({
@@ -120,11 +136,15 @@ function CreateTransmittalModal({
   onSubmit,
   isPending,
   initialItems,
+  projectId,
+  initialContainerId,
 }: {
   onClose: () => void;
   onSubmit: (data: TransmittalFormData) => void;
   isPending: boolean;
   initialItems?: string;
+  projectId: string;
+  initialContainerId?: string | null;
 }) {
   const { t } = useTranslation();
   const [form, setForm] = useState<TransmittalFormData>({
@@ -132,6 +152,45 @@ function CreateTransmittalModal({
     items: initialItems || '',
   });
   const [touched, setTouched] = useState(false);
+  const [pickerContainerId, setPickerContainerId] = useState<string>(
+    initialContainerId || '',
+  );
+
+  // Load containers for the picker (CDE revision selection).
+  const { data: containers = [] } = useQuery({
+    queryKey: ['transmittals-cde-containers', projectId],
+    queryFn: () => fetchCDEContainers({ project_id: projectId }),
+    enabled: !!projectId,
+  });
+  const { data: revisions = [] } = useQuery({
+    queryKey: ['transmittals-cde-revisions', pickerContainerId],
+    queryFn: () => fetchContainerRevisions(pickerContainerId),
+    enabled: !!pickerContainerId,
+  });
+
+  const addRevision = (rev: CDERevision) => {
+    if (form.revisions.some((r) => r.revision_id === rev.id)) return;
+    const container = containers.find((c: CDEContainer) => c.id === pickerContainerId);
+    if (!container) return;
+    setForm((prev) => ({
+      ...prev,
+      revisions: [
+        ...prev.revisions,
+        {
+          container_id: container.id,
+          container_code: container.container_code,
+          revision_id: rev.id,
+          revision_code: rev.revision_code,
+        },
+      ],
+    }));
+  };
+  const removeRevision = (revision_id: string) => {
+    setForm((prev) => ({
+      ...prev,
+      revisions: prev.revisions.filter((r) => r.revision_id !== revision_id),
+    }));
+  };
 
   const set = <K extends keyof TransmittalFormData>(key: K, value: TransmittalFormData[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -272,6 +331,83 @@ function CreateTransmittalModal({
               })}
               className={inputCls}
             />
+          </div>
+
+          {/* CDE Revision picker */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('transmittals.field_link_revision', {
+                defaultValue: 'Link CDE Revision',
+              })}
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="relative">
+                <select
+                  aria-label={t('transmittals.picker_container_label', { defaultValue: 'Container' })}
+                  value={pickerContainerId}
+                  onChange={(e) => setPickerContainerId(e.target.value)}
+                  className={inputCls + ' appearance-none pr-9'}
+                >
+                  <option value="">
+                    {t('transmittals.picker_select_container', { defaultValue: 'Select container…' })}
+                  </option>
+                  {containers.map((c: CDEContainer) => (
+                    <option key={c.id} value={c.id}>
+                      {c.container_code}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+                  <ChevronDown size={14} />
+                </div>
+              </div>
+              <div className="relative">
+                <select
+                  aria-label={t('transmittals.picker_revision_label', { defaultValue: 'Revision' })}
+                  value=""
+                  onChange={(e) => {
+                    const rev = revisions.find((r) => r.id === e.target.value);
+                    if (rev) addRevision(rev);
+                  }}
+                  className={inputCls + ' appearance-none pr-9'}
+                  disabled={!pickerContainerId}
+                >
+                  <option value="">
+                    {t('transmittals.picker_select_revision', { defaultValue: 'Select revision…' })}
+                  </option>
+                  {revisions.map((r: CDERevision) => (
+                    <option key={r.id} value={r.id}>
+                      {r.revision_code} — {r.file_name}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+                  <ChevronDown size={14} />
+                </div>
+              </div>
+            </div>
+            {form.revisions.length > 0 && (
+              <div className="mt-2 space-y-1">
+                {form.revisions.map((r) => (
+                  <div
+                    key={r.revision_id}
+                    className="flex items-center justify-between rounded-lg bg-surface-secondary px-3 py-2 text-sm"
+                  >
+                    <span className="font-mono">
+                      {r.container_code} · {r.revision_code}
+                    </span>
+                    <button
+                      type="button"
+                      className="text-content-tertiary hover:text-semantic-error"
+                      onClick={() => removeRevision(r.revision_id)}
+                      aria-label={t('common.remove', { defaultValue: 'Remove' })}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Cover Note */}
@@ -565,6 +701,7 @@ export function TransmittalsPage() {
       const next = new URLSearchParams(searchParams);
       next.delete('create');
       next.delete('doc_ids');
+      next.delete('container_id');
       setSearchParams(next, { replace: true });
     }
   }, [autoCreate, searchParams, setSearchParams]);
@@ -657,12 +794,19 @@ export function TransmittalsPage() {
         addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
         return;
       }
+      // Map selected CDE revisions into TransmittalItem payloads (RFC 33 §3.3).
+      const items: CreateItemPayload[] = formData.revisions.map((r, idx) => ({
+        revision_id: r.revision_id,
+        item_number: idx + 1,
+        description: `${r.container_code} · ${r.revision_code}`,
+      }));
       createMut.mutate({
         project_id: projectId,
         subject: formData.subject,
         purpose_code: formData.purpose,
         cover_note: formData.cover_note || undefined,
         response_due_date: formData.response_due || undefined,
+        items: items.length > 0 ? items : undefined,
       });
     },
     [createMut, projectId, addToast, t],
@@ -975,6 +1119,8 @@ export function TransmittalsPage() {
           onSubmit={handleCreateSubmit}
           isPending={createMut.isPending}
           initialItems={docIdsParam}
+          projectId={projectId}
+          initialContainerId={searchParams.get('container_id')}
         />
       )}
 

@@ -1904,3 +1904,114 @@ class ScheduleService:
             risk_buffer_days=risk_buffer,
             activity_risks=activity_risks,
         )
+
+    # ── Project Intelligence (RFC 25) ──────────────────────────────────────
+
+    async def get_labor_cost_by_phase(self, project_id: uuid.UUID):
+        """Roll up labour cost per schedule phase (RFC 25)."""
+        from sqlalchemy import select as _select
+
+        from app.modules.boq.models import Position
+        from app.modules.schedule.models import Activity, Schedule
+        from app.modules.schedule.schemas import (
+            LaborCostByPhaseResponse,
+            LaborCostByPhaseRow,
+        )
+
+        stmt = (
+            _select(Activity)
+            .join(Schedule, Activity.schedule_id == Schedule.id)
+            .where(Schedule.project_id == project_id)
+        )
+        result = await self.session.execute(stmt)
+        activities: list[Activity] = list(result.scalars().all())
+
+        if not activities:
+            return LaborCostByPhaseResponse()
+
+        # Gather linked BOQ position ids for aggregate lookup
+        all_boq_ids: list[uuid.UUID] = []
+        for act in activities:
+            for pid in act.boq_position_ids or []:
+                try:
+                    all_boq_ids.append(uuid.UUID(str(pid)))
+                except (TypeError, ValueError):
+                    continue
+
+        position_totals: dict[uuid.UUID, float] = {}
+        if all_boq_ids:
+            pos_stmt = _select(Position.id, Position.total).where(
+                Position.id.in_(all_boq_ids)
+            )
+            pos_result = await self.session.execute(pos_stmt)
+            for pid, total in pos_result.all():
+                position_totals[pid] = _str_to_float(total)
+
+        phases: dict[str, dict[str, object]] = {}
+        for act in activities:
+            wbs = (act.wbs_code or "").strip()
+            if wbs:
+                phase = wbs.split(".")[0]
+            else:
+                phase = (act.activity_type or "task").strip() or "task"
+
+            labour = 0.0
+            for resource in act.resources or []:
+                if not isinstance(resource, dict):
+                    continue
+                if resource.get("type") != "labor":
+                    continue
+                tc = resource.get("total_cost")
+                if tc not in (None, "", 0):
+                    labour += _str_to_float(tc)
+                else:
+                    units = _str_to_float(resource.get("units"))
+                    rate = _str_to_float(resource.get("rate"))
+                    labour += units * rate
+
+            linked_total = 0.0
+            for pid in act.boq_position_ids or []:
+                try:
+                    linked_total += position_totals.get(uuid.UUID(str(pid)), 0.0)
+                except (TypeError, ValueError):
+                    continue
+
+            entry = phases.setdefault(
+                phase,
+                {
+                    "phase": phase,
+                    "activity_count": 0,
+                    "labor_cost": 0.0,
+                    "total_cost": 0.0,
+                    "start_date": act.start_date,
+                    "end_date": act.end_date,
+                },
+            )
+            entry["activity_count"] = int(entry["activity_count"]) + 1
+            entry["labor_cost"] = float(entry["labor_cost"]) + labour
+            entry["total_cost"] = (
+                float(entry["total_cost"]) + labour + linked_total
+            )
+            start = str(entry["start_date"] or "")
+            end = str(entry["end_date"] or "")
+            if act.start_date and (not start or act.start_date < start):
+                entry["start_date"] = act.start_date
+            if act.end_date and (not end or act.end_date > end):
+                entry["end_date"] = act.end_date
+
+        rows = [
+            LaborCostByPhaseRow(
+                phase=str(p["phase"]),
+                activity_count=int(p["activity_count"]),
+                labor_cost=round(float(p["labor_cost"]), 2),
+                total_cost=round(float(p["total_cost"]), 2),
+                start_date=(str(p["start_date"]) if p["start_date"] else None),
+                end_date=(str(p["end_date"]) if p["end_date"] else None),
+            )
+            for p in sorted(
+                phases.values(),
+                key=lambda e: (str(e["start_date"] or ""), str(e["phase"])),
+            )
+        ]
+
+        return LaborCostByPhaseResponse(phases=rows)

@@ -1707,6 +1707,21 @@ async def update_model(
     return BIMModelResponse.model_validate(model)
 
 
+@router.get("/models/{model_id}/schema/")
+async def get_model_schema(
+    model_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
+    service: BIMHubService = Depends(_get_service),
+):
+    """Return distinct element types + property keys/values for the model.
+
+    Used by the quantity-rule editor (RFC 24) to seed combobox options.
+    """
+    await _verify_model_access(service, model_id, user_id or "")
+    return await service.get_model_schema(model_id)
+
+
 @router.delete("/{model_id}", status_code=204)
 async def delete_model(
     model_id: uuid.UUID,

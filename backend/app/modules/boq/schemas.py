@@ -1032,3 +1032,48 @@ class EscalateRateResponse(BaseModel):
     reasoning: str = ""
     model_used: str = ""
     tokens_used: int = 0
+
+
+# ── Project Intelligence (RFC 25) ───────────────────────────────────────────
+
+
+class LineItemResponse(BaseModel):
+    """A single line item in the cost-drivers Pareto widget."""
+
+    position_id: str
+    description: str = ""
+    unit: str = ""
+    quantity: float = 0.0
+    unit_rate: float = 0.0
+    total_cost: float = 0.0
+    share_of_total: float = Field(
+        0.0, description="Share of the aggregate project total — 0.0 to 1.0"
+    )
+
+
+class CostRollupItem(BaseModel):
+    """One row in the classification-grouped cost rollup."""
+
+    code: str = ""
+    label: str = ""
+    total: float = 0.0
+    position_count: int = 0
+
+
+class AnomalyResponse(BaseModel):
+    """Single anomaly flag on a BOQ position.
+
+    Anomaly detection for v1.9.1 is pure statistics (z-score on unit_rate
+    within the same classification group, neighbour-median jump detection,
+    and simple missing-field checks). ML-based detection is deferred to
+    v1.9.2 — see RFC 25.
+    """
+
+    position_id: str
+    ordinal: str = ""
+    description: str = ""
+    type: str = Field(..., description="outlier | jump | format")
+    severity: str = Field("warning", description="info | warning | error")
+    detail: str = ""
+    value: float | None = None
+    reference: float | None = None

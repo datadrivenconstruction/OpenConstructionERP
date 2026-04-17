@@ -10,11 +10,11 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Table2, BarChart3, PieChart, FileSpreadsheet, Database, Filter,
+  Table2, BarChart3, PieChart, LineChart as LineChartIcon, FileSpreadsheet, Database, Filter,
   ArrowUpDown, ChevronDown, ChevronRight, ChevronLeft, Layers, X, Save,
   Download as DownloadIcon, Columns3, Search as SearchIcon,
   Upload, FileUp, Loader2, CheckCircle2, AlertCircle, FolderOpen,
-  TrendingUp, Hash, Clock, ShieldCheck,
+  TrendingUp, Hash, Clock, ShieldCheck, Bookmark, ScatterChart as ScatterIcon, Trash2,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
@@ -33,6 +33,30 @@ import {
   type AggregateGroup,
 } from './api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import {
+  useAnalysisStateStore,
+  type ChartKind,
+  type ChartFormat,
+} from '@/stores/useAnalysisStateStore';
+import { formatValue, formatChartValue } from '@/shared/lib/numberFormat';
+import { applyTopN, groupMatchesSlicers } from './aggregation';
+
+/* ── Recharts — lazy-loaded so the initial Data Explorer bundle stays lean.
+      Charts live in a ~38 kB gzipped chunk that only loads once the user
+      opens the Charts tab. See RFC 16 §6. ────────────────────────────── */
+type RechartsApi = typeof import('recharts');
+function useRecharts(): { api: RechartsApi | null; error: Error | null } {
+  const [api, setApi] = useState<RechartsApi | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    import('recharts')
+      .then((m) => { if (!cancelled) setApi(m); })
+      .catch((e: Error) => { if (!cancelled) setError(e); });
+    return () => { cancelled = true; };
+  }, []);
+  return { api, error };
+}
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -59,11 +83,128 @@ function formatNumber(n: number | null | undefined): string {
 
 /* ── (Stats now rendered as header pills in the session view) ──────────── */
 
+/* ── Top-N radio (shared by Charts + Pivot) ────────────────────────────── */
+
+interface TopNToggleProps {
+  value: number | null;
+  direction: 'top' | 'bottom';
+  onChange: (value: number | null, direction: 'top' | 'bottom') => void;
+  testIdPrefix: string;
+}
+
+const TOP_N_OPTIONS = [5, 10, 20] as const;
+
+function TopNToggle({ value, direction, onChange, testIdPrefix }: TopNToggleProps) {
+  const { t } = useTranslation();
+  const active = (n: number | null, d: 'top' | 'bottom'): boolean =>
+    value === n && (n == null || direction === d);
+
+  const btnCls = (isActive: boolean): string =>
+    `h-7 px-2.5 rounded-md text-2xs font-medium border transition-colors whitespace-nowrap ${
+      isActive
+        ? 'bg-oe-blue text-white border-oe-blue'
+        : 'bg-surface-secondary text-content-tertiary border-border-light hover:bg-surface-tertiary'
+    }`;
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <label className="text-2xs font-semibold text-content-secondary uppercase tracking-wide">
+        {t('explorer.limit', { defaultValue: 'Limit' })}
+      </label>
+      <button
+        type="button"
+        data-testid={`${testIdPrefix}-topn-all`}
+        onClick={() => onChange(null, direction)}
+        className={btnCls(active(null, direction))}
+      >
+        {t('explorer.show_all', { defaultValue: 'All' })}
+      </button>
+      {TOP_N_OPTIONS.map((n) => (
+        <button
+          key={`top-${n}`}
+          type="button"
+          data-testid={`${testIdPrefix}-topn-top-${n}`}
+          onClick={() => onChange(n, 'top')}
+          className={btnCls(active(n, 'top'))}
+        >
+          {t('explorer.show_top', { defaultValue: 'Top {{n}}', n })}
+        </button>
+      ))}
+      {TOP_N_OPTIONS.map((n) => (
+        <button
+          key={`bot-${n}`}
+          type="button"
+          data-testid={`${testIdPrefix}-topn-bottom-${n}`}
+          onClick={() => onChange(n, 'bottom')}
+          className={btnCls(active(n, 'bottom'))}
+        >
+          {t('explorer.show_bottom', { defaultValue: 'Bottom {{n}}', n })}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ── Slicer banner (shared across Data / Pivot / Charts tabs) ──────────── */
+
+function SlicerBanner() {
+  const { t } = useTranslation();
+  const slicers = useAnalysisStateStore((s) => s.slicers);
+  const removeSlicer = useAnalysisStateStore((s) => s.removeSlicer);
+  const clearSlicers = useAnalysisStateStore((s) => s.clearSlicers);
+
+  return (
+    <div
+      data-testid="explorer-slicer-banner"
+      className="flex items-center gap-2 flex-wrap px-3 py-2 border-b border-border-light bg-surface-secondary/40"
+    >
+      <Filter size={12} className="text-content-tertiary shrink-0" />
+      <span className="text-2xs font-semibold text-content-tertiary uppercase tracking-wide shrink-0">
+        {t('explorer.active_filters', { defaultValue: 'Active filters' })}
+      </span>
+      {slicers.length === 0 ? (
+        <span className="text-2xs text-content-quaternary">
+          {t('explorer.no_active_filters', {
+            defaultValue: 'Click any chart bar or slice to filter across tabs.',
+          })}
+        </span>
+      ) : (
+        <>
+          {slicers.map((s) => (
+            <button
+              key={s.column}
+              type="button"
+              data-testid={`slicer-chip-${s.column}`}
+              onClick={() => removeSlicer(s.column)}
+              className="group inline-flex items-center gap-1 rounded-full border border-oe-blue/30 bg-oe-blue/10 px-2.5 py-0.5 text-2xs font-medium text-oe-blue hover:bg-oe-blue/20"
+              title={t('explorer.delete_view', { defaultValue: 'Remove' })}
+            >
+              <span className="max-w-[140px] truncate">
+                {s.column} = {s.values.join(', ')}
+              </span>
+              <X size={10} />
+            </button>
+          ))}
+          <button
+            type="button"
+            data-testid="slicer-clear-all"
+            onClick={clearSlicers}
+            className="text-2xs text-content-tertiary hover:text-content-primary underline underline-offset-2"
+          >
+            {t('explorer.clear_all_filters', { defaultValue: 'Clear all' })}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
 /* ── Data Table Tab ────────────────────────────────────────────────────── */
 
 function DataTableTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
+  const slicers = useAnalysisStateStore((s) => s.slicers);
   const [page, setPage] = useState(0);
   const [pageSize] = useState(50);
   const [sortBy, setSortBy] = useState<string>('');
@@ -75,6 +216,16 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
   const [showColumnPicker, setShowColumnPicker] = useState(false);
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set());
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
+
+  // When slicers change, jump back to page 1 so the user sees filtered rows
+  // from the top. Guard prevents infinite loops on mount.
+  const slicerSignature = useMemo(
+    () => slicers.map((s) => `${s.column}=${s.values.join(',')}`).join(';'),
+    [slicers],
+  );
+  useEffect(() => {
+    setPage(0);
+  }, [slicerSignature]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['cad-elements', sessionId, page, pageSize, sortBy, sortOrder, activeFilter],
@@ -131,15 +282,28 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
     return cols.slice(0, 15); // max 15 visible
   }, [allCols, hiddenCols]);
 
-  // Client-side global search on visible rows
+  // Client-side filters: active slicer chips (cross-filter from charts /
+  // pivot) first, then the global-search box. Slicers AND across columns.
   const displayRows = useMemo(() => {
     if (!data?.rows) return [];
-    if (!globalSearch.trim()) return data.rows;
-    const q = globalSearch.toLowerCase();
-    return data.rows.filter((row) =>
-      Object.values(row).some((v) => v != null && String(v).toLowerCase().includes(q))
-    );
-  }, [data?.rows, globalSearch]);
+    let rows = data.rows;
+    if (slicers.length > 0) {
+      rows = rows.filter((row) =>
+        slicers.every((s) => {
+          if (s.values.length === 0) return true;
+          const cell = row[s.column];
+          return s.values.includes(cell == null ? '' : String(cell));
+        }),
+      );
+    }
+    if (globalSearch.trim()) {
+      const q = globalSearch.toLowerCase();
+      rows = rows.filter((row) =>
+        Object.values(row).some((v) => v != null && String(v).toLowerCase().includes(q)),
+      );
+    }
+    return rows;
+  }, [data?.rows, globalSearch, slicers]);
 
   // Export current view to CSV
   const handleExportCSV = useCallback(() => {
@@ -386,6 +550,9 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
 function PivotTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
+  const slicers = useAnalysisStateStore((s) => s.slicers);
+  const pivotSnapshot = useAnalysisStateStore((s) => s.pivot);
+  const setPivotSnapshot = useAnalysisStateStore((s) => s.setPivotSnapshot);
 
   // All text columns for grouping, sorted by usefulness
   const stringCols = useMemo(() => describe.columns
@@ -413,8 +580,11 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
   // Top quantity columns (shown as buttons)
   const topNumericCols = useMemo(() => numericCols.slice(0, 10), [numericCols]);
 
-  // Default: prefer 'category', then 'type name', then first available
+  // Default: prefer 'category', then 'type name', then first available.
+  // If a saved pivot snapshot is present in the analysis store, hydrate
+  // from that so restored views show the same group-by / aggCols layout.
   const [groupBy, setGroupBy] = useState<string[]>(() => {
+    if (pivotSnapshot?.groupBy?.length) return pivotSnapshot.groupBy;
     const preferred = ['category', 'type name', 'family', 'level'];
     for (const p of preferred) {
       const found = stringCols.find((c) => c.name.toLowerCase() === p);
@@ -424,6 +594,7 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
   });
   // Allow multiple aggregate columns — auto-select exact matches first
   const [aggCols, setAggCols] = useState<string[]>(() => {
+    if (pivotSnapshot?.aggCols?.length) return pivotSnapshot.aggCols;
     const defaults: string[] = [];
     for (const name of ['volume', 'area', 'length', 'count']) {
       const exact = numericCols.find((c) => c.name.toLowerCase() === name);
@@ -431,13 +602,45 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
     }
     return defaults.length > 0 ? defaults : topNumericCols.slice(0, 3).map((c) => c.name);
   });
-  const [aggFn, setAggFn] = useState('sum');
+  const [aggFn, setAggFn] = useState<string>(() => pivotSnapshot?.aggFn || 'sum');
+  const [topN, setTopN] = useState<number | null>(() => pivotSnapshot?.topN ?? null);
+  const [topNDir, setTopNDir] = useState<'top' | 'bottom'>(
+    () => pivotSnapshot?.topNDirection ?? 'top',
+  );
   const [result, setResult] = useState<AggregateResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [sortCol, setSortCol] = useState<string | null>(null);
   const [sortDesc, setSortDesc] = useState(true);
   const [showCreateBOQ, setShowCreateBOQ] = useState(false);
+
+  // Persist the live pivot config to the analysis store so Save View
+  // captures the current layout and a restored view reapplies it here.
+  useEffect(() => {
+    setPivotSnapshot({ groupBy, aggCols, aggFn, topN, topNDirection: topNDir });
+  }, [groupBy, aggCols, aggFn, topN, topNDir, setPivotSnapshot]);
+
+  // Re-hydrate local state when the store's pivot snapshot changes from
+  // elsewhere (e.g. Load View). Diff before applying so we don't thrash.
+  useEffect(() => {
+    if (!pivotSnapshot) return;
+    setGroupBy((cur) =>
+      cur.length === pivotSnapshot.groupBy.length &&
+      cur.every((c, i) => c === pivotSnapshot.groupBy[i])
+        ? cur
+        : pivotSnapshot.groupBy,
+    );
+    setAggCols((cur) =>
+      cur.length === pivotSnapshot.aggCols.length &&
+      cur.every((c, i) => c === pivotSnapshot.aggCols[i])
+        ? cur
+        : pivotSnapshot.aggCols,
+    );
+    if (aggFn !== pivotSnapshot.aggFn) setAggFn(pivotSnapshot.aggFn);
+    if (topN !== pivotSnapshot.topN) setTopN(pivotSnapshot.topN);
+    if (topNDir !== pivotSnapshot.topNDirection) setTopNDir(pivotSnapshot.topNDirection);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pivotSnapshot]);
 
   // Auto-run pivot on first render and when groupBy/aggCols change
   const runPivot = useCallback(async () => {
@@ -477,19 +680,38 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
     setExpanded((prev) => { const next = new Set(prev); next.has(key) ? next.delete(key) : next.add(key); return next; });
   }, []);
 
-  // Sort results
+  // Sort results and apply cross-filter slicers + top-N trim. Slicers run
+  // first (can only match on group-by columns, so rows not covered by a
+  // chip are silently passed through) and then the top-N slice crops the
+  // list for chart-style "top 10" analysis.
   const sortedGroups = useMemo(() => {
     if (!result) return [];
-    const groups = [...result.groups];
+    let groups = [...result.groups];
+    if (slicers.length > 0) {
+      groups = groups.filter((g) => groupMatchesSlicers(g, slicers));
+    }
     if (sortCol) {
       groups.sort((a, b) => {
         const va = a.results[sortCol] ?? 0;
         const vb = b.results[sortCol] ?? 0;
-        return sortDesc ? vb - va : va - vb;
+        if (va !== vb) return sortDesc ? vb - va : va - vb;
+        // Stable tie-break by first group-by column label.
+        const first = groupBy[0];
+        if (!first) return 0;
+        return String(a.key[first] ?? '').localeCompare(String(b.key[first] ?? ''));
       });
     }
+    if (topN != null && topN > 0 && sortCol) {
+      // When the user explicitly asked for top-N or bottom-N, trim.
+      // Slicing honours the current sort direction.
+      groups = topNDir === 'top' ? groups.slice(0, topN) : groups.slice(-topN).reverse();
+    } else if (topN != null && topN > 0) {
+      // No active sort column — fall back to the first agg col.
+      const k = aggCols[0];
+      if (k) groups = applyTopN(groups, k, topN, topNDir, groupBy[0]);
+    }
     return groups;
-  }, [result, sortCol, sortDesc]);
+  }, [result, sortCol, sortDesc, slicers, topN, topNDir, aggCols, groupBy]);
 
   // Tree grouping for multi-level
   const tree = useMemo(() => {
@@ -586,6 +808,14 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
             </Button>
           </div>
         </div>
+
+        {/* Row 3: Top-N / Bottom-N limit (RFC 16 #3) */}
+        <TopNToggle
+          value={topN}
+          direction={topNDir}
+          onChange={(n, dir) => { setTopN(n); setTopNDir(dir); }}
+          testIdPrefix="pivot"
+        />
       </Card>
 
       {/* Results */}
@@ -713,15 +943,39 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
   );
 }
 
-/* ── Charts Tab ────────────────────────────────────────────────────────── */
+/* ── Charts Tab (Recharts, lazy-loaded) ───────────────────────────────── */
+
+/** Category palette — deliberately hardcoded for consistent data viz. */
+const BAR_COLORS = [
+  '#3B82F6', '#22C55E', '#F97316', '#A855F7', '#EF4444',
+  '#06B6D4', '#EC4899', '#84CC16', '#F59E0B', '#6366F1',
+];
+
+interface ChartSlice {
+  label: string;
+  value: number;
+  count: number;
+  colour: string;
+  /** Original aggregated group — used for the drill-down modal. */
+  group: AggregateGroup;
+}
+
+interface DrillContext {
+  label: string;
+  slice: ChartSlice;
+}
 
 function ChartsTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
   const { t } = useTranslation();
+  const chart = useAnalysisStateStore((s) => s.chart);
+  const setChartConfig = useAnalysisStateStore((s) => s.setChartConfig);
+  const slicers = useAnalysisStateStore((s) => s.slicers);
+  const addSlicer = useAnalysisStateStore((s) => s.addSlicer);
+
   // For charts: text columns with reasonable cardinality (< 100 unique for good visualization)
   const stringCols = describe.columns
     .filter((c) => c.dtype === 'string' && c.non_null > 0 && c.unique < 100)
     .sort((a, b) => b.non_null - a.non_null);
-  // Only useful numeric for values — same keyword priority as Pivot
   const QTY_KEYS = ['volume', 'area', 'length', 'count', 'width', 'height', 'depth', 'weight', 'mass', 'perimeter'];
   const numericCols = useMemo(() => describe.columns
     .filter((c) => c.dtype === 'number' && c.non_null > 0)
@@ -732,40 +986,93 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
     })
     .slice(0, 20), [describe]);
 
-  const [chartGroupBy, setChartGroupBy] = useState(() => {
-    const cat = stringCols.find((c) => c.name.toLowerCase() === 'category');
-    return cat?.name || stringCols[0]?.name || '';
-  });
-  const [chartValue, setChartValue] = useState(
-    numericCols.find((c) => c.name.toLowerCase() === 'volume')?.name || numericCols[0]?.name || '',
-  );
-  const [chartType, setChartType] = useState<'bar' | 'pie'>('bar');
+  // Initialise chart config on first mount (if empty) — leave user choices
+  // intact on subsequent renders.
+  useEffect(() => {
+    if (chart.category && chart.value) return;
+    const defaultCat =
+      stringCols.find((c) => c.name.toLowerCase() === 'category')?.name ||
+      stringCols[0]?.name ||
+      '';
+    const defaultVal =
+      numericCols.find((c) => c.name.toLowerCase() === 'volume')?.name ||
+      numericCols[0]?.name ||
+      '';
+    if ((defaultCat && !chart.category) || (defaultVal && !chart.value)) {
+      setChartConfig({
+        category: chart.category || defaultCat,
+        value: chart.value || defaultVal,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [describe]);
+
   const [chartData, setChartData] = useState<AggregateResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [drill, setDrill] = useState<DrillContext | null>(null);
 
   const loadChart = useCallback(async () => {
-    if (!chartGroupBy || !chartValue) return;
+    if (!chart.category || !chart.value) return;
     setLoading(true);
     try {
-      const data = await aggregate(sessionId, [chartGroupBy], { [chartValue]: 'sum' });
+      const data = await aggregate(sessionId, [chart.category], { [chart.value]: 'sum' });
       setChartData(data);
     } catch { /* */ } finally { setLoading(false); }
-  }, [sessionId, chartGroupBy, chartValue]);
+  }, [sessionId, chart.category, chart.value]);
 
   useEffect(() => { loadChart(); }, [loadChart]);
 
-  const sortedGroups = useMemo(() => {
+  // Active slicers do NOT re-run the backend query — we filter client-side
+  // so cross-filter is instant.
+  const filteredGroups = useMemo(() => {
     if (!chartData) return [];
-    return [...chartData.groups]
-      .sort((a, b) => (b.results[chartValue] ?? 0) - (a.results[chartValue] ?? 0))
-      .slice(0, 20);
-  }, [chartData, chartValue]);
+    if (slicers.length === 0) return chartData.groups;
+    return chartData.groups.filter((g) => groupMatchesSlicers(g, slicers));
+  }, [chartData, slicers]);
 
-  const maxVal = sortedGroups.length > 0 ? Math.max(...sortedGroups.map((g) => g.results[chartValue] ?? 0)) : 1;
-  const totalVal = sortedGroups.reduce((s, g) => s + (g.results[chartValue] ?? 0), 0);
+  const slicedGroups = useMemo(() => {
+    return applyTopN(filteredGroups, chart.value, chart.topN, chart.topNDirection, chart.category)
+      .slice(0, chart.topN ?? 20);
+  }, [filteredGroups, chart.value, chart.topN, chart.topNDirection, chart.category]);
 
-  /** Category bar chart palette — deliberately hardcoded for consistent data viz */
-  const BAR_COLORS = ['#3B82F6', '#22C55E', '#F97316', '#A855F7', '#EF4444', '#06B6D4', '#EC4899', '#84CC16', '#F59E0B', '#6366F1'];
+  const chartSlices: ChartSlice[] = useMemo(() =>
+    slicedGroups.map((g, i) => ({
+      label: String(g.key[chart.category] ?? '—') || '—',
+      value: g.results[chart.value] ?? 0,
+      count: g.count,
+      colour: BAR_COLORS[i % BAR_COLORS.length]!,
+      group: g,
+    })),
+    [slicedGroups, chart.category, chart.value],
+  );
+
+  // Debounced cross-filter — RFC 16 §6: coalesce rapid clicks.
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleSliceClick = useCallback((slice: ChartSlice) => {
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+    clickTimerRef.current = setTimeout(() => {
+      addSlicer(chart.category, [slice.label]);
+    }, 100);
+  }, [addSlicer, chart.category]);
+
+  const handleDrillDown = useCallback((slice: ChartSlice) => {
+    setDrill({ label: slice.label, slice });
+  }, []);
+
+  // Close drill modal when the underlying data changes shape.
+  useEffect(() => {
+    if (drill && !chartSlices.some((s) => s.label === drill.label)) setDrill(null);
+  }, [chartSlices, drill]);
+
+  const formatForDisplay = useCallback((v: number | null | undefined): string =>
+    formatValue(v, chart.format),
+    [chart.format],
+  );
+
+  const fmtChartValue = useCallback((v: number | string): string =>
+    formatChartValue(v, chart.format),
+    [chart.format],
+  );
 
   return (
     <div className="space-y-4">
@@ -773,101 +1080,102 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
         <div className="flex items-end gap-4 flex-wrap">
           <div>
             <label className="text-2xs font-medium text-content-tertiary uppercase block mb-1">{t('explorer.group_by', { defaultValue: 'Group By' })}</label>
-            <select value={chartGroupBy} onChange={(e) => setChartGroupBy(e.target.value)} className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs">
+            <select
+              value={chart.category}
+              onChange={(e) => setChartConfig({ category: e.target.value })}
+              className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs"
+              data-testid="chart-category-select"
+            >
               {stringCols.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
             </select>
           </div>
           <div>
             <label className="text-2xs font-medium text-content-tertiary uppercase block mb-1">{t('explorer.value', { defaultValue: 'Value' })}</label>
-            <select value={chartValue} onChange={(e) => setChartValue(e.target.value)} className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs">
+            <select
+              value={chart.value}
+              onChange={(e) => setChartConfig({ value: e.target.value })}
+              className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs"
+              data-testid="chart-value-select"
+            >
               {numericCols.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
             </select>
           </div>
           <div>
             <label className="text-2xs font-medium text-content-tertiary uppercase block mb-1">{t('explorer.chart_type', { defaultValue: 'Type' })}</label>
             <div className="flex gap-1">
-              <button onClick={() => setChartType('bar')} className={`px-2 py-1 rounded text-2xs font-medium border ${chartType === 'bar' ? 'bg-oe-blue text-white border-oe-blue' : 'border-border text-content-tertiary'}`}>
-                <BarChart3 size={12} className="inline mr-1" />{t('explorer.bar', { defaultValue: 'Bar' })}
-              </button>
-              <button onClick={() => setChartType('pie')} className={`px-2 py-1 rounded text-2xs font-medium border ${chartType === 'pie' ? 'bg-oe-blue text-white border-oe-blue' : 'border-border text-content-tertiary'}`}>
-                <PieChart size={12} className="inline mr-1" />{t('explorer.pie', { defaultValue: 'Pie' })}
-              </button>
+              {([
+                { k: 'bar' as ChartKind, Icon: BarChart3, labelKey: 'explorer.bar', fallback: 'Bar' },
+                { k: 'line' as ChartKind, Icon: LineChartIcon, labelKey: 'explorer.line', fallback: 'Line' },
+                { k: 'pie' as ChartKind, Icon: PieChart, labelKey: 'explorer.pie', fallback: 'Pie' },
+                { k: 'scatter' as ChartKind, Icon: ScatterIcon, labelKey: 'explorer.scatter', fallback: 'Scatter' },
+              ]).map(({ k, Icon, labelKey, fallback }) => (
+                <button
+                  key={k}
+                  onClick={() => setChartConfig({ kind: k })}
+                  className={`px-2 py-1 rounded text-2xs font-medium border ${
+                    chart.kind === k
+                      ? 'bg-oe-blue text-white border-oe-blue'
+                      : 'border-border text-content-tertiary'
+                  }`}
+                  data-testid={`chart-type-${k}`}
+                >
+                  <Icon size={12} className="inline mr-1" />{t(labelKey, { defaultValue: fallback })}
+                </button>
+              ))}
             </div>
           </div>
+          <div>
+            <label className="text-2xs font-medium text-content-tertiary uppercase block mb-1">{t('explorer.format', { defaultValue: 'Format' })}</label>
+            <select
+              value={chart.format}
+              onChange={(e) => setChartConfig({ format: e.target.value as ChartFormat })}
+              className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs"
+              data-testid="chart-format-select"
+            >
+              <option value="number">{t('explorer.format_number', { defaultValue: 'Number' })}</option>
+              <option value="currency">{t('explorer.format_currency', { defaultValue: 'Currency' })}</option>
+              <option value="percent">{t('explorer.format_percent', { defaultValue: 'Percent' })}</option>
+            </select>
+          </div>
         </div>
+
+        <div className="mt-3">
+          <TopNToggle
+            value={chart.topN}
+            direction={chart.topNDirection}
+            onChange={(n, dir) => setChartConfig({ topN: n, topNDirection: dir })}
+            testIdPrefix="chart"
+          />
+        </div>
+
+        <p className="mt-2 text-2xs text-content-quaternary">
+          {t('explorer.chart_click_hint', { defaultValue: 'Click a bar / slice / point to cross-filter' })}
+        </p>
       </Card>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12"><div className="h-5 w-5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" /></div>
-      ) : chartData && sortedGroups.length > 0 ? (
-        <Card className="p-4">
-          {chartType === 'bar' ? (
-            <div className="space-y-2">
-              {sortedGroups.map((g, i) => {
-                const val = g.results[chartValue] ?? 0;
-                const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
-                const color = BAR_COLORS[i % BAR_COLORS.length]!;
-                return (
-                  <div key={Object.values(g.key).join('-')} className="flex items-center gap-3">
-                    <span className="w-32 text-xs text-content-secondary truncate shrink-0 text-right">
-                      {Object.values(g.key)[0] || '—'}
-                    </span>
-                    <div className="flex-1 h-6 bg-surface-secondary rounded-md overflow-hidden relative">
-                      <div
-                        className="h-full rounded-md transition-all duration-500"
-                        style={{ width: `${pct}%`, backgroundColor: color }}
-                      />
-                      <span className="absolute inset-y-0 right-2 flex items-center text-2xs font-medium text-content-primary tabular-nums">
-                        {formatNumber(val)}
-                      </span>
-                    </div>
-                    <span className="text-2xs text-content-quaternary tabular-nums w-12 text-right shrink-0">
-                      {g.count.toLocaleString()}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            /* Pie chart — CSS-based */
-            <div className="flex items-start gap-6">
-              <div className="relative w-48 h-48 shrink-0">
-                <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-                  {(() => {
-                    let offset = 0;
-                    return sortedGroups.slice(0, 10).map((g, i) => {
-                      const val = g.results[chartValue] ?? 0;
-                      const pct = totalVal > 0 ? (val / totalVal) * 100 : 0;
-                      const dashArray = `${pct} ${100 - pct}`;
-                      const el = (
-                        <circle key={Object.values(g.key).join('-')} cx="50" cy="50" r="40" fill="none"
-                          stroke={BAR_COLORS[i % BAR_COLORS.length]}
-                          strokeWidth="20" strokeDasharray={dashArray}
-                          strokeDashoffset={-offset}
-                        />
-                      );
-                      offset += pct;
-                      return el;
-                    });
-                  })()}
-                </svg>
-              </div>
-              <div className="flex-1 space-y-1.5">
-                {sortedGroups.slice(0, 10).map((g, i) => {
-                  const val = g.results[chartValue] ?? 0;
-                  const pct = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : '0';
-                  return (
-                    <div key={Object.values(g.key).join('-')} className="flex items-center gap-2 text-xs">
-                      <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: BAR_COLORS[i % BAR_COLORS.length] }} />
-                      <span className="flex-1 text-content-secondary truncate">{Object.values(g.key)[0] || '—'}</span>
-                      <span className="text-content-primary font-medium tabular-nums">{formatNumber(val)}</span>
-                      <span className="text-content-quaternary tabular-nums w-10 text-right">{pct}%</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+        <div className="flex items-center justify-center py-12" data-testid="chart-loading">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
+        </div>
+      ) : chartData && chartSlices.length > 0 ? (
+        <Card className="p-4" data-testid="chart-canvas">
+          <LazyRechart
+            slices={chartSlices}
+            kind={chart.kind}
+            formatAxis={fmtChartValue}
+            onSliceClick={handleSliceClick}
+            onSliceDoubleClick={handleDrillDown}
+          />
+          <div className="mt-3 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              data-testid="chart-drill-first"
+              onClick={() => chartSlices[0] && handleDrillDown(chartSlices[0])}
+              className="text-2xs text-content-tertiary hover:text-content-primary underline underline-offset-2"
+            >
+              {t('explorer.drill_down_title', { defaultValue: 'Rows for {{label}}', label: chartSlices[0]?.label || '' })}
+            </button>
+          </div>
         </Card>
       ) : (
         <EmptyState
@@ -876,6 +1184,396 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
           description={t('explorer.select_columns_for_chart', { defaultValue: 'Select group by and value columns to generate a chart.' })}
         />
       )}
+
+      <DrillDownModal
+        open={!!drill}
+        onClose={() => setDrill(null)}
+        sessionId={sessionId}
+        categoryCol={chart.category}
+        valueCol={chart.value}
+        slice={drill?.slice ?? null}
+        format={chart.format}
+        formatValue={formatForDisplay}
+      />
+    </div>
+  );
+}
+
+/* ── Lazy-loaded Recharts surface ─────────────────────────────────────── */
+
+interface LazyRechartProps {
+  slices: ChartSlice[];
+  kind: ChartKind;
+  formatAxis: (v: number | string) => string;
+  onSliceClick: (slice: ChartSlice) => void;
+  onSliceDoubleClick: (slice: ChartSlice) => void;
+}
+
+function LazyRechart({ slices, kind, formatAxis, onSliceClick, onSliceDoubleClick }: LazyRechartProps) {
+  const { t } = useTranslation();
+  const { api, error } = useRecharts();
+
+  if (error) {
+    return (
+      <p className="text-xs text-red-500 py-6 text-center">
+        Recharts failed to load: {error.message}
+      </p>
+    );
+  }
+  if (!api) {
+    return (
+      <div className="flex items-center justify-center py-12" data-testid="chart-recharts-loading">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
+      </div>
+    );
+  }
+
+  const {
+    ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,
+    LineChart, Line, PieChart: RPieChart, Pie, Cell,
+    ScatterChart, Scatter, ZAxis,
+  } = api;
+
+  const data = slices.map((s, i) => ({
+    name: s.label,
+    value: s.value,
+    count: s.count,
+    index: i,
+  }));
+
+  // Recharts v3 type signatures are quite strict; use a permissive wrapper
+  // that accepts their opaque event payloads. We narrow inside the body.
+  const tooltipFormatter = ((v: unknown): string => formatAxis(v as number)) as unknown as (
+    value: unknown,
+    name: unknown,
+    entry: unknown,
+    index: number,
+    payload: unknown,
+  ) => string;
+
+  const handleChartClick = (payload: unknown): void => {
+    const p = payload as { activePayload?: Array<{ payload?: { index?: number } }> } | null;
+    const idx = p?.activePayload?.[0]?.payload?.index;
+    if (idx != null && slices[idx]) onSliceClick(slices[idx]!);
+  };
+  const handleCellClick = (index: number): void => {
+    if (slices[index]) onSliceClick(slices[index]!);
+  };
+  const handleDoubleClickRow = (idx: number): void => {
+    if (slices[idx]) onSliceDoubleClick(slices[idx]!);
+  };
+  // Cast slice-aware click handlers through unknown so they line up with
+  // whichever Recharts overload the compiler picks this build.
+  const pieClickHandler = ((d: { index?: number }): void => {
+    if (d?.index != null && slices[d.index]) onSliceClick(slices[d.index]!);
+  }) as unknown as () => void;
+  const scatterClickHandler = ((d: { index?: number }): void => {
+    if (d?.index != null && slices[d.index]) onSliceClick(slices[d.index]!);
+  }) as unknown as () => void;
+  const activeDotClickHandler = ((_e: unknown, d: { index?: number }): void => {
+    if (d?.index != null && slices[d.index]) onSliceDoubleClick(slices[d.index]!);
+  }) as unknown as () => void;
+
+  if (kind === 'pie') {
+    return (
+      <div data-testid="chart-pie" className="w-full h-[360px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <RPieChart>
+            <Pie
+              data={data}
+              dataKey="value"
+              nameKey="name"
+              outerRadius={120}
+              isAnimationActive={false}
+              onClick={pieClickHandler}
+            >
+              {data.map((_d, i) => (
+                <Cell
+                  key={`cell-${i}`}
+                  fill={slices[i]?.colour}
+                  onClick={() => handleCellClick(i)}
+                  onDoubleClick={() => handleDoubleClickRow(i)}
+                  style={{ cursor: 'pointer' }}
+                />
+              ))}
+            </Pie>
+            <Tooltip formatter={tooltipFormatter} />
+          </RPieChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
+  if (kind === 'line') {
+    return (
+      <div data-testid="chart-line" className="w-full h-[360px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data} onClick={handleChartClick} margin={{ top: 10, right: 20, left: 10, bottom: 40 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="name" angle={-25} textAnchor="end" interval={0} height={60} fontSize={11} />
+            <YAxis tickFormatter={(v: number) => formatAxis(v)} fontSize={11} />
+            <Tooltip formatter={tooltipFormatter} />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#3B82F6"
+              strokeWidth={2}
+              dot={{ r: 4, stroke: '#3B82F6', strokeWidth: 2, fill: 'white' }}
+              activeDot={{ r: 6, onClick: activeDotClickHandler }}
+              isAnimationActive={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
+  if (kind === 'scatter') {
+    return (
+      <div data-testid="chart-scatter" className="w-full h-[360px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <ScatterChart margin={{ top: 10, right: 20, left: 10, bottom: 40 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="count" name="Count" fontSize={11} />
+            <YAxis dataKey="value" name="Value" tickFormatter={(v: number) => formatAxis(v)} fontSize={11} />
+            <ZAxis range={[60, 240]} />
+            <Tooltip cursor={{ strokeDasharray: '3 3' }} formatter={tooltipFormatter} />
+            <Scatter
+              data={data}
+              fill="#3B82F6"
+              isAnimationActive={false}
+              onClick={scatterClickHandler}
+            >
+              {data.map((_d, i) => (
+                <Cell key={`sc-${i}`} fill={slices[i]?.colour} />
+              ))}
+            </Scatter>
+          </ScatterChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+
+  // Default: bar
+  return (
+    <div data-testid="chart-bar" className="w-full h-[360px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} onClick={handleChartClick} margin={{ top: 10, right: 20, left: 10, bottom: 40 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <XAxis dataKey="name" angle={-25} textAnchor="end" interval={0} height={60} fontSize={11} />
+          <YAxis tickFormatter={(v: number) => formatAxis(v)} fontSize={11} />
+          <Tooltip formatter={tooltipFormatter} />
+          <Bar dataKey="value" isAnimationActive={false}>
+            {data.map((_d, i) => (
+              <Cell
+                key={`bar-${i}`}
+                fill={slices[i]?.colour}
+                onClick={() => handleCellClick(i)}
+                onDoubleClick={() => handleDoubleClickRow(i)}
+                style={{ cursor: 'pointer' }}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+      {/* Reserve testing hook so E2E can reliably trigger a drill-down. */}
+      <button
+        type="button"
+        data-testid="chart-drill-first-bar"
+        onClick={() => slices[0] && onSliceDoubleClick(slices[0])}
+        className="sr-only"
+      >
+        {t('explorer.drill_down_title', { defaultValue: 'Drill down', label: '' })}
+      </button>
+    </div>
+  );
+}
+
+/* ── Drill-down modal ─────────────────────────────────────────────────── */
+
+interface DrillDownModalProps {
+  open: boolean;
+  onClose: () => void;
+  sessionId: string;
+  categoryCol: string;
+  valueCol: string;
+  slice: ChartSlice | null;
+  format: ChartFormat;
+  formatValue: (v: number | null | undefined) => string;
+}
+
+function DrillDownModal({
+  open, onClose, sessionId, categoryCol, valueCol, slice, format: _fmt, formatValue: fmt,
+}: DrillDownModalProps) {
+  const { t } = useTranslation();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['cad-elements', 'drill', sessionId, categoryCol, slice?.label],
+    queryFn: () => fetchElements(sessionId, {
+      offset: 0,
+      limit: 200,
+      filter_column: categoryCol,
+      filter_value: slice?.label ?? '',
+    }),
+    enabled: open && !!slice,
+  });
+
+  if (!open || !slice) return null;
+
+  const rows = data?.rows ?? [];
+  const cols: string[] = data?.columns
+    ? (() => {
+        const priority = [categoryCol, valueCol, 'Category', 'Type Name', 'Family', 'Level'];
+        const uniq = Array.from(new Set([...priority.filter((c) => data.columns.includes(c)), ...data.columns]));
+        return uniq.slice(0, 8);
+      })()
+    : [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" data-testid="chart-drill-modal">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      <div className="relative w-full max-w-3xl mx-4 rounded-2xl bg-surface-elevated border border-border-light shadow-2xl animate-fade-in">
+        <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-border-light">
+          <div>
+            <h2 className="text-base font-semibold text-content-primary">
+              {t('explorer.drill_down_title', { defaultValue: 'Rows for {{label}}', label: slice.label })}
+            </h2>
+            <p className="text-xs text-content-tertiary">
+              {categoryCol} = {slice.label} · {valueCol} = {fmt(slice.value)}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            data-testid="chart-drill-close"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-hover"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        <div className="px-6 py-4 max-h-[60vh] overflow-auto">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
+            </div>
+          ) : rows.length === 0 ? (
+            <p className="text-xs text-content-tertiary text-center py-6">
+              {t('explorer.drill_down_empty', { defaultValue: 'No rows match this slice.' })}
+            </p>
+          ) : (
+            <>
+              <p className="text-2xs text-content-quaternary mb-2">
+                {t('explorer.showing_rows', { defaultValue: 'Showing {{count}} rows', count: rows.length })}
+              </p>
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-border bg-surface-secondary/50">
+                    {cols.map((c) => (
+                      <th key={c} className="px-2 py-1.5 text-left font-medium text-content-tertiary whitespace-nowrap">{c}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row, i) => (
+                    <tr key={`drill-row-${i}`} className="border-b border-border-light">
+                      {cols.map((c) => {
+                        const v = row[c];
+                        const isNum = typeof v === 'number';
+                        return (
+                          <td key={c} className={`px-2 py-1.5 truncate max-w-[160px] ${isNum ? 'text-right tabular-nums' : ''}`}>
+                            {v == null || v === '' ? <span className="text-content-quaternary italic">null</span> : isNum ? formatNumber(v) : String(v)}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+        </div>
+        <div className="flex items-center justify-end gap-2 px-6 py-3 border-t border-border-light">
+          <Button variant="secondary" size="sm" onClick={onClose}>
+            {t('explorer.close', { defaultValue: 'Close' })}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Saved views drawer ───────────────────────────────────────────────── */
+
+interface ViewsDrawerProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+function ViewsDrawer({ open, onClose }: ViewsDrawerProps) {
+  const { t } = useTranslation();
+  const views = useAnalysisStateStore((s) => s.views);
+  const loadView = useAnalysisStateStore((s) => s.loadView);
+  const deleteView = useAnalysisStateStore((s) => s.deleteView);
+  const addToast = useToastStore((s) => s.addToast);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-40" data-testid="views-drawer">
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <aside className="absolute right-0 top-0 bottom-0 w-80 bg-surface-elevated border-l border-border-light shadow-xl overflow-y-auto">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border-light sticky top-0 bg-surface-elevated">
+          <h3 className="text-sm font-semibold text-content-primary">
+            {t('explorer.saved_views', { defaultValue: 'Saved views' })}
+          </h3>
+          <button onClick={onClose} className="h-7 w-7 rounded-lg hover:bg-surface-hover flex items-center justify-center" data-testid="views-drawer-close">
+            <X size={16} />
+          </button>
+        </div>
+        <div className="p-3 space-y-2">
+          {views.length === 0 ? (
+            <p className="text-xs text-content-tertiary py-6 text-center">
+              {t('explorer.no_saved_views', {
+                defaultValue: 'No saved views yet. Save your filters, chart and pivot configuration for later.',
+              })}
+            </p>
+          ) : (
+            views.map((v) => (
+              <div
+                key={v.id}
+                data-testid={`view-item-${v.id}`}
+                className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2.5"
+              >
+                <p className="text-sm font-medium text-content-primary truncate">{v.name}</p>
+                <p className="text-2xs text-content-quaternary">
+                  {new Date(v.createdAt).toLocaleString()} · {v.slicers.length} filters · {v.chart.kind}
+                </p>
+                <div className="mt-2 flex gap-2">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => {
+                      loadView(v.id);
+                      addToast({ type: 'success', title: t('explorer.view_loaded', { defaultValue: 'View restored' }) });
+                      onClose();
+                    }}
+                    data-testid={`view-load-${v.id}`}
+                  >
+                    {t('explorer.load_view', { defaultValue: 'Load' })}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteView(v.id)}
+                    data-testid={`view-delete-${v.id}`}
+                  >
+                    <Trash2 size={12} className="mr-1" />
+                    {t('explorer.delete_view', { defaultValue: 'Delete' })}
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </aside>
     </div>
   );
 }
@@ -1596,11 +2294,23 @@ function SaveToProjectDialog({
 export function CadDataExplorerPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
   const [searchParams, setSearchParams] = useSearchParams();
   const sessionId = searchParams.get('session') || '';
   const [activeTab, setActiveTab] = useState<TabId>('table');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showSaveToProjectDialog, setShowSaveToProjectDialog] = useState(false);
+  const [showViewsDrawer, setShowViewsDrawer] = useState(false);
+
+  const setAnalysisSession = useAnalysisStateStore((s) => s.setSessionId);
+  const saveAnalysisView = useAnalysisStateStore((s) => s.saveView);
+  const savedViewsCount = useAnalysisStateStore((s) => s.views.length);
+
+  // Bind the analysis-state store to the active session. setSessionId is a
+  // no-op when the id hasn't changed, so this is safe to run on every render.
+  useEffect(() => {
+    setAnalysisSession(sessionId || null);
+  }, [sessionId, setAnalysisSession]);
 
   const { data: describe, isLoading, error } = useQuery({
     queryKey: ['cad-describe', sessionId],
@@ -1611,6 +2321,17 @@ export function CadDataExplorerPage() {
   const handleSessionReady = useCallback((newSessionId: string) => {
     setSearchParams({ session: newSessionId });
   }, [setSearchParams]);
+
+  const handleSaveView = useCallback(() => {
+    const name = window.prompt(
+      t('explorer.save_view_prompt', { defaultValue: 'Name this view' }),
+      new Date().toLocaleString(),
+    );
+    if (!name) return;
+    saveAnalysisView(name);
+    addToast({ type: 'success', title: t('explorer.view_saved', { defaultValue: 'View saved' }) });
+    setShowViewsDrawer(true);
+  }, [saveAnalysisView, addToast, t]);
 
   // Load all sessions for landing page
   const { data: allSessions = [] } = useQuery({
@@ -1894,7 +2615,7 @@ export function CadDataExplorerPage() {
               </div>
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light">
                 <Columns3 size={12} className="text-content-quaternary" />
-                <span className="text-[10px] font-medium text-content-tertiary">{t('explorer.columns', { defaultValue: 'Columns' })}</span>
+                <span className="text-[10px] font-medium text-content-tertiary">{t('explorer.columns', { defaultValue: 'Parameter columns' })}</span>
                 <span className="text-[10px] font-bold text-content-primary tabular-nums">{describe.total_columns}</span>
               </div>
               {describe.format && (
@@ -1908,6 +2629,29 @@ export function CadDataExplorerPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleSaveView}
+            data-testid="explorer-save-view-btn"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+            title={t('explorer.save_view', { defaultValue: 'Save view' })}
+          >
+            <Bookmark size={13} />
+            <span className="hidden sm:inline">{t('explorer.save_view', { defaultValue: 'Save view' })}</span>
+          </button>
+          <button
+            onClick={() => setShowViewsDrawer(true)}
+            data-testid="explorer-views-btn"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+            title={t('explorer.views', { defaultValue: 'Views' })}
+          >
+            <Layers size={13} />
+            <span className="hidden sm:inline">{t('explorer.views', { defaultValue: 'Views' })}</span>
+            {savedViewsCount > 0 && (
+              <span className="ml-1 px-1.5 py-0.5 rounded-full text-2xs tabular-nums bg-oe-blue/10 text-oe-blue">
+                {savedViewsCount}
+              </span>
+            )}
+          </button>
           <button
             onClick={() => setShowSaveToProjectDialog(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border bg-oe-blue/10 text-oe-blue border-oe-blue/30 hover:bg-oe-blue/20"
@@ -1980,6 +2724,10 @@ export function CadDataExplorerPage() {
               ))}
             </div>
 
+            {/* Shared slicer banner — cross-filter chips are visible to
+                 Data / Pivot / Charts tabs. Hidden on Describe (stats). */}
+            {activeTab !== 'describe' && <SlicerBanner />}
+
             {/* Tab content — scrollable */}
             <div className="flex-1 overflow-y-auto p-4">
               {activeTab === 'table' && <DataTableTab sessionId={sessionId} describe={describe} />}
@@ -1990,6 +2738,8 @@ export function CadDataExplorerPage() {
           </>
         ) : null}
       </div>
+
+      <ViewsDrawer open={showViewsDrawer} onClose={() => setShowViewsDrawer(false)} />
 
       {/* Save dialog */}
       {showSaveDialog && describe && (

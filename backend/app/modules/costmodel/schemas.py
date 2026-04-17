@@ -321,3 +321,27 @@ class WhatIfResult(BaseModel):
     delta_pct: float = Field(0.0, description="Percentage change in EAC")
     adjustments_applied: dict[str, float] = Field(default_factory=dict)
     snapshot_id: UUID | None = Field(None, description="ID of the snapshot created for this scenario")
+
+
+# ── Project Intelligence (RFC 25) ───────────────────────────────────────────
+
+
+class VarianceResponse(BaseModel):
+    """Budget variance KPI payload for the Estimation Dashboard hero.
+
+    Budget is derived from the BOQ baseline (unit_rate * quantity across all
+    positions of the project's primary BOQ, summed before any overrides).
+    Current is the live BOQ total. Variance is expressed both in absolute
+    currency and as a percentage of budget.
+    """
+
+    budget: float = 0.0
+    current: float = 0.0
+    variance_abs: float = Field(0.0, description="current - budget")
+    variance_pct: float = Field(
+        0.0, description="(current - budget) / budget * 100 — 0.0 when budget is 0"
+    )
+    red_line: float = Field(
+        5.0, description="Absolute % threshold that flips the KPI to red"
+    )
+    currency: str = "EUR"

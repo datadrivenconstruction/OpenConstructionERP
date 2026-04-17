@@ -1093,6 +1093,70 @@ class CostModelService:
         )
         return created
 
+    # ── Project Intelligence (RFC 25) ──────────────────────────────────────
+
+    async def get_variance(self, project_id: uuid.UUID):
+        """Compute the budget-variance KPI for the Estimation Dashboard.
+
+        Budget is ``sum(unit_rate * quantity)`` across all positions of the
+        largest BOQ for the project — there is no dedicated ``baseline_total``
+        column in the Position model today, so the current rate is used as
+        the baseline. ``current`` is the live ``sum(total)``; any manual
+        overrides (totals that diverge from quantity * rate) therefore
+        surface as variance.
+
+        Empty projects return zeros and a neutral ``red_line`` of 5.0%.
+        """
+        from sqlalchemy import select
+        from sqlalchemy.orm import selectinload
+
+        from app.modules.boq.models import BOQ
+        from app.modules.costmodel.schemas import VarianceResponse
+
+        stmt = (
+            select(BOQ)
+            .options(selectinload(BOQ.positions))
+            .where(BOQ.project_id == project_id)
+            .order_by(BOQ.updated_at.desc())
+        )
+        result = await self.session.execute(stmt)
+        boqs = list(result.scalars().all())
+
+        currency = await self._get_project_currency(project_id)
+
+        if not boqs:
+            return VarianceResponse(currency=currency)
+
+        # Aggregate across every BOQ for the project — estimators usually
+        # work in one BOQ, but summing protects us when multiple revisions
+        # exist and all contribute to the live cost signal.
+        budget = 0.0
+        current = 0.0
+        for boq in boqs:
+            for pos in boq.positions:
+                # Skip section headers (empty unit)
+                if not pos.unit:
+                    continue
+                qty = _str_to_float(pos.quantity)
+                rate = _str_to_float(pos.unit_rate)
+                total = _str_to_float(pos.total)
+                budget += qty * rate
+                current += total
+
+        variance_abs = round(current - budget, 2)
+        variance_pct = (
+            round((current - budget) / budget * 100, 2) if budget > 0 else 0.0
+        )
+
+        return VarianceResponse(
+            budget=round(budget, 2),
+            current=round(current, 2),
+            variance_abs=variance_abs,
+            variance_pct=variance_pct,
+            red_line=5.0,
+            currency=currency,
+        )
+
 
 def _month_range(start: str, end: str) -> list[str]:
     """Generate list of YYYY-MM strings from start to end (inclusive).
