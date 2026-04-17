@@ -1689,7 +1689,7 @@ export function DashboardPage() {
             style={{ animationDelay: '100ms' }}
           >
             <img
-              src="https://datadrivenconstruction.io/wp-content/uploads/2023/07/DataDrivenConstruction-1-1.png.webp"
+              src="/brand/ddc-logo.webp"
               alt="DataDrivenConstruction"
               className="h-[34px] w-auto opacity-75 group-hover/ddc:opacity-100 transition-opacity shrink-0"
             />

@@ -46,6 +46,7 @@ from app.modules.schedule.schemas import (
     GanttData,
     GenerateFromBOQRequest,
     ImportResult,
+    LaborCostByPhaseResponse,
     LinkPositionRequest,
     ProgressUpdateCreate,
     ProgressUpdateEdit,
@@ -1912,3 +1913,23 @@ async def critical_path_activities(
     activities = list(act_result.scalars().all())
 
     return [_activity_to_response(a) for a in activities]
+
+
+# ── Project Intelligence (RFC 25) ───────────────────────────────────────────
+
+
+@router.get(
+    "/labor-cost-by-phase/",
+    response_model=LaborCostByPhaseResponse,
+    summary="Labour cost rolled up by schedule phase (RFC 25)",
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def get_labor_cost_by_phase(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(..., description="Project scope"),
+    service: ScheduleService = Depends(_get_service),
+) -> LaborCostByPhaseResponse:
+    """Return labour cost per WBS phase for the Estimation Dashboard."""
+    await verify_project_access(project_id, _user_id, session)
+    return await service.get_labor_cost_by_phase(project_id)

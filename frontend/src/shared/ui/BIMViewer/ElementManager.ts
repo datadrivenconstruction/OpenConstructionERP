@@ -282,6 +282,13 @@ export class ElementManager {
    */
   private createdMaterials = new Set<THREE.Material>();
   /**
+   * Per-category materials cloned from the base material when the user
+   * drags a transparency slider in the Layers tab.  Tracked separately from
+   * `createdMaterials` because their lifetime is tied to the category
+   * filter state, not the colorBy mode. Disposed in `dispose()`.
+   */
+  private categoryMaterials = new Map<string, THREE.Material>();
+  /**
    * Fraction of loaded elements that the viewer was able to match to DAE
    * mesh nodes by stable_id. < 0.02 means we effectively have no mesh-level
    * mapping — the parent UI uses this to show a hint explaining why
@@ -1417,6 +1424,44 @@ export class ElementManager {
   }
 
   /**
+   * Apply an opacity (0..1) to every mesh whose element_type matches the
+   * given category. Clones the base material on first use per category so
+   * the change does not leak into other categories sharing the base.
+   *
+   * Setting opacity === 1 flips `transparent=false` for renderer perf; any
+   * value below 1 enables transparency.
+   */
+  setCategoryOpacity(category: string, opacity: number): void {
+    const clamped = Math.max(0, Math.min(1, opacity));
+    let categoryMat = this.categoryMaterials.get(category);
+    for (const [elementId, mesh] of this.meshMap) {
+      const el = this.elementDataMap.get(elementId);
+      if (!el || el.element_type !== category) continue;
+      if (!categoryMat) {
+        const base = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+        if (!base || !('clone' in base)) continue;
+        const cloned = (base as THREE.Material & { clone(): THREE.Material }).clone();
+        categoryMat = cloned;
+        this.categoryMaterials.set(category, cloned);
+      }
+      const ud = mesh.userData as {
+        originalMaterial?: THREE.Material | THREE.Material[];
+        categoryMaterial?: boolean;
+      };
+      if (!ud.originalMaterial) ud.originalMaterial = mesh.material;
+      mesh.material = categoryMat;
+      ud.categoryMaterial = true;
+    }
+    if (categoryMat && 'opacity' in categoryMat) {
+      const m = categoryMat as THREE.Material & { opacity: number; transparent: boolean };
+      m.opacity = clamped;
+      m.transparent = clamped < 1;
+      m.needsUpdate = true;
+    }
+    this.sceneManager.requestRender();
+  }
+
+  /**
    * Dispose all cloned materials from previous colorBy* calls.
    * Must be called at the start of every colorBy method to prevent
    * leaking one WebGL program per element per mode switch.
@@ -1610,6 +1655,11 @@ export class ElementManager {
       mat.dispose();
     }
     this.createdMaterials.clear();
+    // Release per-category material clones from setCategoryOpacity.
+    for (const mat of this.categoryMaterials.values()) {
+      mat.dispose();
+    }
+    this.categoryMaterials.clear();
     this.sceneManager.scene.remove(this.elementGroup);
   }
 }

@@ -4,7 +4,7 @@
  * All endpoints are prefixed with /v1/submittals/.
  */
 
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -58,6 +58,13 @@ export interface CreateSubmittalPayload {
   date_required?: string;
 }
 
+export interface UpdateSubmittalPayload {
+  title?: string;
+  spec_section?: string;
+  submittal_type?: SubmittalType;
+  date_required?: string;
+}
+
 export interface ReviewSubmittalPayload {
   comments: string;
 }
@@ -79,6 +86,10 @@ export async function fetchSubmittals(filters?: SubmittalFilters): Promise<Submi
 
 export async function createSubmittal(data: CreateSubmittalPayload): Promise<Submittal> {
   return apiPost<Submittal>('/v1/submittals/', data);
+}
+
+export async function updateSubmittal(id: string, data: UpdateSubmittalPayload): Promise<Submittal> {
+  return apiPatch<Submittal, UpdateSubmittalPayload>(`/v1/submittals/${id}`, data);
 }
 
 export async function submitSubmittal(id: string): Promise<Submittal> {

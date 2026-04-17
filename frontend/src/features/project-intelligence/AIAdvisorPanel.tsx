@@ -130,7 +130,9 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
         <div className="flex items-center gap-2">
           <Sparkles size={15} className="text-amber-400" />
           <h3 className="text-sm font-semibold text-content-primary">
-            {t('project_intelligence.ai_advisor', { defaultValue: 'AI Advisor' })}
+            {t('project_intelligence.ai.cost_advisor_title', {
+              defaultValue: 'Cost Intelligence Advisor',
+            })}
           </h3>
           <span className="text-2xs text-content-quaternary capitalize">{role}</span>
         </div>

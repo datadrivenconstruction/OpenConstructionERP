@@ -433,6 +433,68 @@ class BIMHubService:
             )
         return count
 
+    async def get_model_schema(self, model_id: uuid.UUID) -> "BIMModelSchemaResponse":
+        """Harvest distinct element types and property key/value pairs from a
+        model's element set (RFC 24).
+
+        Caps each property's distinct-value list at 1000 (alpha-sorted) and
+        flags truncation so the UI can show a "show more" hint. Null / empty
+        property values are excluded from the value lists. Elements without
+        an ``element_type`` do not contribute a type but still contribute
+        properties.
+        """
+        from app.modules.bim_hub.schemas import BIMModelSchemaResponse
+
+        model = await self.model_repo.get(model_id)
+        if model is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="BIM model not found",
+            )
+
+        fetch_limit = max(int(getattr(model, "element_count", 0) or 0), 50_000)
+        elements, _total = await self.element_repo.list_for_model(
+            model_id,
+            offset=0,
+            limit=fetch_limit,
+        )
+
+        distinct_types: set[str] = set()
+        property_values: dict[str, set[str]] = {}
+        cap = 1000
+
+        for el in elements:
+            etype = getattr(el, "element_type", None)
+            if etype:
+                distinct_types.add(etype)
+            props = getattr(el, "properties", None) or {}
+            if not isinstance(props, dict):
+                continue
+            for key, value in props.items():
+                if value is None:
+                    property_values.setdefault(key, set())
+                    continue
+                str_val = str(value).strip()
+                if not str_val:
+                    continue
+                property_values.setdefault(key, set()).add(str_val)
+
+        property_keys: dict[str, list[str]] = {}
+        property_keys_truncated: dict[str, bool] = {}
+        for key, values in property_values.items():
+            sorted_vals = sorted(values)
+            truncated = len(sorted_vals) > cap
+            property_keys[key] = sorted_vals[:cap]
+            property_keys_truncated[key] = truncated
+
+        return BIMModelSchemaResponse(
+            distinct_types=sorted(distinct_types),
+            property_keys=property_keys,
+            property_keys_truncated=property_keys_truncated,
+            available_quantities=["area_m2", "volume_m3", "length_m", "weight_kg", "count"],
+            element_count=len(elements),
+        )
+
     # ── BIM Elements ─────────────────────────────────────────────────────────
 
     async def list_elements(

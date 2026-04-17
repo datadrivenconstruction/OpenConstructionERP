@@ -9,7 +9,7 @@
  *  - Bottom filmstrip: drawing list + upload (like BIM page)
  */
 
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect, type ReactNode } from 'react';
 import {
   calculateArea,
   calculateDistance,
@@ -35,6 +35,14 @@ import {
   ChevronUp,
   ShieldCheck,
   Link2,
+  EyeOff,
+  Eye,
+  FolderPlus,
+  Sigma,
+  Wifi,
+  WifiOff,
+  BarChart3,
+  Download,
 } from 'lucide-react';
 import { Badge, ConfirmDialog, ElementInfoPopover, type DWGElementPayload } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -53,9 +61,22 @@ import {
   createAnnotation,
   deleteAnnotation,
   linkAnnotationToBoq,
+  createEntityGroup,
+  fetchOfflineReadiness,
 } from './api';
-import type { DxfEntity, DxfLayer, DwgAnnotation, CreateAnnotationPayload } from './api';
-import { DxfViewer, type EntitySelectEvent } from './components/DxfViewer';
+import type {
+  DxfEntity,
+  DxfLayer,
+  DwgAnnotation,
+  CreateAnnotationPayload,
+  DwgOfflineReadiness,
+} from './api';
+import {
+  DxfViewer,
+  type EntitySelectEvent,
+  type EntityContextMenuEvent,
+} from './components/DxfViewer';
+import { aggregateEntities } from './lib/group-aggregation';
 import { ToolPalette, type DwgTool } from './components/ToolPalette';
 import { LayerPanel } from './components/LayerPanel';
 import { EntityNameFilter, entityDisplayName } from './components/EntityNameFilter';
@@ -261,6 +282,134 @@ function extractEntityMeasurement(
   return null;
 }
 
+/* ── Offline Ready badge (R3 #9) ──────────────────────────────────── */
+
+/**
+ * Small pill that surfaces the backend "offline-readiness" probe.
+ *
+ * Traffic-light states:
+ *   🟢 ``ready`` — local DWG converter present; everything runs offline.
+ *   🟡 ``converter_available=false`` — DXF-only mode; hint to install
+ *      the binary to unlock ``.dwg`` upload. Also surfaced when the
+ *      probe failed to reach the backend (treated as "unknown").
+ * Clicking the pill reveals a concise install hint; the tooltip on
+ * hover conveys the 80 % case without any interaction.
+ */
+function OfflineReadyBadge({
+  readiness,
+  isLoading,
+  'data-testid': testId,
+}: {
+  readiness: DwgOfflineReadiness | undefined;
+  isLoading: boolean;
+  'data-testid'?: string;
+}) {
+  const { t } = useTranslation();
+  const [showHint, setShowHint] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light text-[11px] text-content-tertiary"
+        data-testid={testId}
+      >
+        <Loader2 size={11} className="animate-spin" />
+        {t('dwg_takeoff.offline_checking', { defaultValue: 'Checking...' })}
+      </div>
+    );
+  }
+
+  const ready = readiness?.ready ?? false;
+  const converterMissing = readiness && !readiness.converter_available;
+
+  return (
+    <div className="relative" data-testid={testId}>
+      <button
+        type="button"
+        onClick={() => setShowHint((v) => !v)}
+        className={clsx(
+          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-colors',
+          ready
+            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/15'
+            : 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/15',
+        )}
+        title={
+          ready
+            ? t('dwg_takeoff.offline_ready_tooltip', {
+                defaultValue:
+                  'This tool works fully offline — conversions run on your machine.',
+              })
+            : t('dwg_takeoff.offline_install_tooltip', {
+                defaultValue:
+                  'Install the local DWG converter to enable offline .dwg conversion. DXF files already work.',
+              })
+        }
+        aria-label={
+          ready
+            ? t('dwg_takeoff.offline_ready', { defaultValue: 'Offline Ready' })
+            : t('dwg_takeoff.offline_install', { defaultValue: 'Install converter' })
+        }
+      >
+        {ready ? <Wifi size={11} /> : <WifiOff size={11} />}
+        <span className="relative flex h-1.5 w-1.5">
+          <span
+            className={clsx(
+              'absolute inline-flex h-full w-full rounded-full opacity-75',
+              ready ? 'bg-emerald-400 animate-ping' : 'bg-amber-400',
+            )}
+          />
+          <span
+            className={clsx(
+              'relative inline-flex h-1.5 w-1.5 rounded-full',
+              ready ? 'bg-emerald-400' : 'bg-amber-400',
+            )}
+          />
+        </span>
+        {ready
+          ? t('dwg_takeoff.offline_ready', { defaultValue: 'Offline Ready' })
+          : t('dwg_takeoff.offline_install', { defaultValue: 'Install converter' })}
+      </button>
+
+      {showHint && (
+        <div
+          className="absolute top-full right-0 mt-1.5 z-30 w-72 rounded-lg border border-border-light bg-surface-elevated shadow-xl p-3 text-[11px]"
+          data-testid="dwg-offline-hint"
+        >
+          <div className="flex items-start justify-between gap-2 mb-1.5">
+            <div className="font-semibold text-content-primary">
+              {ready
+                ? t('dwg_takeoff.offline_ready', { defaultValue: 'Offline Ready' })
+                : t('dwg_takeoff.offline_install', { defaultValue: 'Install converter' })}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowHint(false)}
+              className="text-content-tertiary hover:text-content-primary"
+            >
+              <X size={12} />
+            </button>
+          </div>
+          <p className="text-content-secondary leading-relaxed">
+            {readiness?.message ??
+              t('dwg_takeoff.offline_ready_tooltip', {
+                defaultValue:
+                  'This tool works fully offline — conversions run on your machine.',
+              })}
+          </p>
+          {converterMissing && (
+            <div className="mt-2 rounded-md bg-amber-500/10 border border-amber-500/20 px-2 py-1.5 text-[10px] text-amber-300">
+              {t('dwg_takeoff.offline_install_hint', {
+                defaultValue:
+                  'Upload DXF files to continue without the converter, or install it to enable .dwg support.',
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Component ─────────────────────────────────────────────────────── */
 
 export function DwgTakeoffPage() {
@@ -281,9 +430,23 @@ export function DwgTakeoffPage() {
   const [activeColor, setActiveColor] = useState('#ef4444');
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
   const [visibleNames, setVisibleNames] = useState<Set<string>>(new Set());
-  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+  /**
+   * Multi-entity selection (RFC 11). A single-click produces a one-item set;
+   * Shift+click toggles membership; Escape clears. `primarySelectedEntityId`
+   * below is the first element of the set and drives the single-entity UI
+   * affordances (properties panel, link-to-BOQ popover).
+   */
+  const [selectedEntityIds, setSelectedEntityIds] = useState<Set<string>>(new Set());
+  /** Per-entity hide state (RFC 11). Filter is applied in DxfViewer. */
+  const [hiddenEntityIds, setHiddenEntityIds] = useState<Set<string>>(new Set());
   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
-  const [rightTab, setRightTab] = useState<'layers' | 'annotations' | 'properties'>('layers');
+  /** Right-click context menu state. */
+  const [contextMenu, setContextMenu] = useState<
+    { entityId: string; screenX: number; screenY: number } | null
+  >(null);
+  const [rightTab, setRightTab] = useState<
+    'layers' | 'annotations' | 'properties' | 'summary'
+  >('layers');
   const [showUpload, setShowUpload] = useState(false);
   const [uploadName, setUploadName] = useState('');
   const [uploadDiscipline, setUploadDiscipline] = useState('architectural');
@@ -329,6 +492,19 @@ export function DwgTakeoffPage() {
     queryKey: ['dwg-annotations', selectedDrawingId],
     queryFn: () => fetchAnnotations(selectedDrawingId!),
     enabled: !!selectedDrawingId,
+  });
+
+  /**
+   * Offline-readiness probe (R3 #9). 60 s staleTime — the binary either
+   * is or isn't on disk; polling would only add noise. Retry once on
+   * network error, then fall through to the yellow "install converter"
+   * state which is still a correct user signal.
+   */
+  const { data: offlineReadiness, isLoading: loadingOfflineReadiness } = useQuery({
+    queryKey: ['dwg-offline-readiness'],
+    queryFn: fetchOfflineReadiness,
+    staleTime: 60_000,
+    retry: 1,
   });
 
   // Deep-link: auto-select drawing when ?drawingId= or ?docName= is in URL
@@ -392,11 +568,27 @@ export function DwgTakeoffPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layouts]);
 
+  /**
+   * Area-cache entities at load time so the ranked hit-test (RFC 11 §4.1) can
+   * score candidates in O(1) per entity without recomputing the polygon
+   * area on every click. The cached ``_area`` field is an internal,
+   * non-API detail — consumed only by ``DxfViewer``'s ``collectHitCandidates``.
+   */
+  const annotatedEntities = useMemo<DxfEntity[]>(() => {
+    if (entities.length === 0) return entities;
+    return entities.map((e) => {
+      if (e.type === 'LWPOLYLINE' && e.closed && e.vertices && e.vertices.length >= 3) {
+        return { ...e, _area: calculateArea(e.vertices) } as DxfEntity & { _area: number };
+      }
+      return e;
+    });
+  }, [entities]);
+
   // Filter entities by selected layout
   const filteredEntities = useMemo(() => {
-    if (!selectedLayout || layouts.length === 0) return entities;
-    return entities.filter((e) => e.layout === selectedLayout);
-  }, [entities, selectedLayout, layouts]);
+    if (!selectedLayout || layouts.length === 0) return annotatedEntities;
+    return annotatedEntities.filter((e) => e.layout === selectedLayout);
+  }, [annotatedEntities, selectedLayout, layouts]);
 
   // Computed layers (from filtered entities)
   const layers = useMemo(() => extractLayers(filteredEntities), [filteredEntities]);
@@ -562,35 +754,189 @@ export function DwgTakeoffPage() {
     [selectedDrawingId, projectId, activeColor, createAnnotationMutation],
   );
 
+  /**
+   * Click handler. Shift+Click toggles the entity in/out of the selection;
+   * a plain click replaces the selection with a one-item set. Clicking
+   * empty space with no modifier clears the selection.
+   */
   const handleSelectEntity = useCallback((id: string | null, event?: EntitySelectEvent) => {
-    setSelectedEntityId(id);
-    if (id) {
-      // Auto-switch to properties tab when an entity is selected
+    if (id == null) {
+      if (!event?.shiftKey) {
+        setSelectedEntityIds(new Set());
+        setEntityPopup(null);
+      }
+      return;
+    }
+
+    setContextMenu(null);
+
+    if (event?.shiftKey) {
+      setSelectedEntityIds((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+      // Don't open the single-entity popup when building a multi-selection —
+      // the group aggregation panel on the right is the right affordance.
+      setEntityPopup(null);
+    } else {
+      setSelectedEntityIds(new Set([id]));
       setRightTab('properties');
-      // Show floating popup at click position
       if (event) {
         setEntityPopup({ x: event.screenX, y: event.screenY });
       }
-    } else {
-      setEntityPopup(null);
     }
+  }, []);
+
+  const handleEntityContextMenu = useCallback((event: EntityContextMenuEvent) => {
+    // Right-click implicitly selects the target unless it is already part of
+    // the current multi-selection.
+    setSelectedEntityIds((prev) => {
+      if (prev.has(event.entityId)) return prev;
+      return new Set([event.entityId]);
+    });
+    setContextMenu({
+      entityId: event.entityId,
+      screenX: event.screenX,
+      screenY: event.screenY,
+    });
+    setEntityPopup(null);
   }, []);
 
   const handleSelectDrawing = useCallback((id: string) => {
     setSelectedDrawingId(id);
     setVisibleLayers(new Set());
     setVisibleNames(new Set());
-    setSelectedEntityId(null);
+    setSelectedEntityIds(new Set());
+    setHiddenEntityIds(new Set());
     setSelectedAnnotationId(null);
     setSelectedLayout(null);
     setEntityPopup(null);
+    setContextMenu(null);
   }, []);
 
-  // Selected entity details
-  const selectedEntity = useMemo(
-    () => entities.find((e) => e.id === selectedEntityId) ?? null,
-    [entities, selectedEntityId],
+  /** First entity in the selection set — drives single-entity UI affordances. */
+  const primarySelectedEntityId = useMemo(
+    () => (selectedEntityIds.size > 0 ? selectedEntityIds.values().next().value ?? null : null),
+    [selectedEntityIds],
   );
+
+  // Selected entity details (primary = first in the set)
+  const selectedEntity = useMemo(
+    () => entities.find((e) => e.id === primarySelectedEntityId) ?? null,
+    [entities, primarySelectedEntityId],
+  );
+
+  /** Entities in the current multi-selection (used by the group aggregation panel). */
+  const selectedEntities = useMemo(
+    () => entities.filter((e) => selectedEntityIds.has(e.id)),
+    [entities, selectedEntityIds],
+  );
+
+  /** Σ area / Σ perimeter / Σ length for the current selection. */
+  const selectionAggregate = useMemo(
+    () => aggregateEntities(selectedEntities),
+    [selectedEntities],
+  );
+
+  /**
+   * Drawing-wide aggregate for the Summary tab (R3 #12). Uses the same
+   * helper as the selection panel so totals are consistent — if a polygon
+   * contributes 12 m² to the selection aggregate, it contributes the same
+   * 12 m² to the drawing totals.
+   */
+  const summaryAggregate = useMemo(
+    () => aggregateEntities(filteredEntities),
+    [filteredEntities],
+  );
+
+  /**
+   * Breakdown by DXF layer: count + Σ area + Σ length per layer, sorted
+   * by area descending so the visually dominant layer lands on top.
+   * Entities with zero measurable geometry still contribute to ``count``.
+   */
+  const summaryByLayer = useMemo(() => {
+    const buckets = new Map<string, { area: number; length: number; count: number }>();
+    for (const e of filteredEntities) {
+      const entry = buckets.get(e.layer) ?? { area: 0, length: 0, count: 0 };
+      entry.count++;
+      if (e.type === 'LWPOLYLINE' && e.vertices && e.vertices.length >= 2) {
+        const closed = !!e.closed;
+        if (closed && e.vertices.length >= 3) {
+          entry.area += calculateArea(e.vertices);
+        } else {
+          entry.length += calculatePerimeter(e.vertices, false);
+        }
+      } else if (e.type === 'LINE' && e.start && e.end) {
+        entry.length += calculateDistance(e.start, e.end);
+      } else if (e.type === 'CIRCLE' && e.radius != null) {
+        entry.area += Math.PI * e.radius * e.radius;
+      }
+      buckets.set(e.layer, entry);
+    }
+    return Array.from(buckets.entries())
+      .map(([layer, v]) => ({ layer, ...v }))
+      .sort((a, b) => (b.area || b.length || b.count) - (a.area || a.length || a.count));
+  }, [filteredEntities]);
+
+  /** Breakdown by DXF entity type, already computed by ``aggregateEntities``. */
+  const summaryByType = useMemo(() => {
+    const rows = Object.entries(summaryAggregate.byType)
+      .map(([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count);
+    return rows;
+  }, [summaryAggregate]);
+
+  /** CSV export of the summary (entity-type breakdown + totals). */
+  const handleExportSummaryCsv = useCallback(() => {
+    const lines: string[] = [
+      '# DWG Summary Measurements',
+      `# Entities: ${filteredEntities.length}`,
+      `# Total area (m2): ${summaryAggregate.area.toFixed(3)}`,
+      `# Total perimeter (m): ${summaryAggregate.perimeter.toFixed(3)}`,
+      `# Total length (m): ${summaryAggregate.length.toFixed(3)}`,
+      '',
+      'scope,key,count,area_m2,length_m',
+    ];
+    for (const row of summaryByLayer) {
+      lines.push([
+        'layer',
+        JSON.stringify(row.layer),
+        row.count,
+        row.area.toFixed(3),
+        row.length.toFixed(3),
+      ].join(','));
+    }
+    for (const row of summaryByType) {
+      lines.push([
+        'type',
+        JSON.stringify(row.type),
+        row.count,
+        '',
+        '',
+      ].join(','));
+    }
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `dwg-summary-${selectedDrawingId?.slice(0, 8) ?? 'drawing'}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    addToast({
+      type: 'success',
+      title: t('dwg_takeoff.csv_exported', { defaultValue: 'Measurements exported' }),
+    });
+  }, [
+    filteredEntities.length,
+    summaryAggregate,
+    summaryByLayer,
+    summaryByType,
+    selectedDrawingId,
+    addToast,
+    t,
+  ]);
 
   const closeUploadModal = useCallback(() => {
     setShowUpload(false);
@@ -846,6 +1192,148 @@ export function DwgTakeoffPage() {
     }
   }, [entities, linkPickerBoqId, linkBoqPositions, ensureAnnotationForEntity, selectedDrawingId, queryClient, addToast, t]);
 
+  /* ── RFC 11: per-entity hide / isolate / group handlers ───────────── */
+
+  /** Hide the currently-selected entities (or a single right-clicked one). */
+  const handleHideEntities = useCallback((ids: string[]) => {
+    if (ids.length === 0) return;
+    setHiddenEntityIds((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) next.add(id);
+      return next;
+    });
+    setSelectedEntityIds(new Set());
+    setContextMenu(null);
+    setEntityPopup(null);
+  }, []);
+
+  /** Isolate: hide everything EXCEPT the given ids. */
+  const handleIsolateEntities = useCallback((ids: string[]) => {
+    if (ids.length === 0) return;
+    const keep = new Set(ids);
+    const hide = new Set<string>();
+    for (const e of entities) {
+      if (!keep.has(e.id)) hide.add(e.id);
+    }
+    setHiddenEntityIds(hide);
+    setContextMenu(null);
+  }, [entities]);
+
+  /** Unhide all hidden entities. */
+  const handleShowAllEntities = useCallback(() => {
+    setHiddenEntityIds(new Set());
+  }, []);
+
+  /**
+   * Save the current selection as a named DwgEntityGroup on the backend.
+   * Uses a simple prompt for the group name — good enough for v1.9.1;
+   * a proper dialog can land in v1.9.2 if we need validation hints or
+   * description fields.
+   */
+  const handleSaveSelectionAsGroup = useCallback(async () => {
+    if (!selectedDrawingId || selectedEntityIds.size === 0) return;
+    const defaultName = t('dwg_takeoff.group_default_name', {
+      defaultValue: 'Group of {{count}}',
+      count: selectedEntityIds.size,
+    });
+    // eslint-disable-next-line no-alert
+    const name = window.prompt(
+      t('dwg_takeoff.group_prompt', { defaultValue: 'Name this group:' }),
+      defaultName,
+    );
+    if (!name || !name.trim()) return;
+    try {
+      await createEntityGroup({
+        drawing_id: selectedDrawingId,
+        entity_ids: Array.from(selectedEntityIds),
+        name: name.trim(),
+      });
+      addToast({
+        type: 'success',
+        title: t('dwg_takeoff.group_saved', { defaultValue: 'Group saved' }),
+        message: `${name.trim()} (${selectedEntityIds.size})`,
+      });
+      setContextMenu(null);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('dwg_takeoff.group_save_failed', { defaultValue: 'Could not save group' }),
+        message: err instanceof Error ? err.message : '',
+      });
+    }
+  }, [selectedDrawingId, selectedEntityIds, addToast, t]);
+
+  /**
+   * Link the current multi-selection to a BOQ position. Creates a persisted
+   * DwgEntityGroup first (so the link survives reloads and has an audit
+   * trail), then reuses the existing position-patch path used by single
+   * entities — writes ``dwg_group_id`` into position metadata alongside
+   * the existing ``dwg_entity_id`` field so consumers can find either shape.
+   *
+   * Auto-fills quantity from the aggregated Σ area or Σ length depending
+   * on the first selected entity's shape (closed polys → area; otherwise
+   * length).
+   */
+  const handleLinkGroupToPosition = useCallback(async (position: Position) => {
+    if (!selectedDrawingId || selectedEntityIds.size === 0) return;
+    setLinkingInProgress(true);
+    try {
+      const ids = Array.from(selectedEntityIds);
+      const groupName = t('dwg_takeoff.group_default_name', {
+        defaultValue: 'Group of {{count}}',
+        count: ids.length,
+      });
+      const group = await createEntityGroup({
+        drawing_id: selectedDrawingId,
+        entity_ids: ids,
+        name: groupName,
+      });
+
+      const agg = aggregateEntities(selectedEntities);
+      const prefersArea = agg.area > 0 && agg.length === 0;
+      const quantity = prefersArea ? agg.area : agg.length > 0 ? agg.length : agg.perimeter;
+      const unit = prefersArea ? 'm2' : 'm';
+
+      const existingMeta = (position.metadata ?? {}) as Record<string, unknown>;
+      const patch: Record<string, unknown> = {
+        metadata: {
+          ...existingMeta,
+          dwg_drawing_id: selectedDrawingId,
+          dwg_group_id: group.id,
+          dwg_entity_ids: ids,
+        },
+      };
+      if (quantity > 0) {
+        patch['quantity'] = Math.round(quantity * 100) / 100;
+        patch['unit'] = unit;
+      }
+      await boqApi.updatePosition(position.id, patch);
+
+      queryClient.invalidateQueries({ queryKey: ['boq', position.boq_id] });
+      addToast({
+        type: 'success',
+        title: t('dwg_takeoff.linked_to_boq', { defaultValue: 'Linked to BOQ' }),
+        message: `${ids.length} \u2192 ${position.ordinal}`,
+      });
+      setLinkingEntityId(null);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('dwg_takeoff.link_failed', { defaultValue: 'Link failed' }),
+        message: err instanceof Error ? err.message : '',
+      });
+    } finally {
+      setLinkingInProgress(false);
+    }
+  }, [
+    selectedDrawingId,
+    selectedEntityIds,
+    selectedEntities,
+    queryClient,
+    addToast,
+    t,
+  ]);
+
   // Global keyboard shortcuts for the page
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -855,8 +1343,14 @@ export function DwgTakeoffPage() {
 
       switch (e.key) {
         case 'Escape':
-          if (selectedEntityId) { setSelectedEntityId(null); setEntityPopup(null); }
-          else if (selectedAnnotationId) setSelectedAnnotationId(null);
+          if (contextMenu) {
+            setContextMenu(null);
+          } else if (selectedEntityIds.size > 0) {
+            setSelectedEntityIds(new Set());
+            setEntityPopup(null);
+          } else if (selectedAnnotationId) {
+            setSelectedAnnotationId(null);
+          }
           break;
         case 'v': case 'V':
           setActiveTool('select');
@@ -877,7 +1371,7 @@ export function DwgTakeoffPage() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [selectedEntityId, selectedAnnotationId]);
+  }, [selectedEntityIds, selectedAnnotationId, contextMenu]);
 
   /* ── Render ──────────────────────────────────────────────────────── */
 
@@ -947,9 +1441,16 @@ export function DwgTakeoffPage() {
                   {/* RIGHT · Hero text + feature cards + local-processing badge */}
                   <div className="flex flex-col justify-center gap-4">
                     <div>
-                      <h1 className="text-2xl font-bold text-gray-100 tracking-tight leading-tight">
-                        {t('dwg_takeoff.hero_title', { defaultValue: 'DWG Takeoff' })}
-                      </h1>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h1 className="text-2xl font-bold text-gray-100 tracking-tight leading-tight">
+                          {t('dwg_takeoff.hero_title', { defaultValue: 'DWG Takeoff' })}
+                        </h1>
+                        <OfflineReadyBadge
+                          readiness={offlineReadiness}
+                          isLoading={loadingOfflineReadiness}
+                          data-testid="dwg-offline-badge"
+                        />
+                      </div>
                       <p className="text-base text-gray-400 mt-3 leading-relaxed">
                         {t('dwg_takeoff.hero_subtitle', { defaultValue: 'Open DWG/DXF drawings, measure areas and lengths, annotate directly on the drawing, and link measurements to your BOQ positions.' })}
                       </p>
@@ -1025,10 +1526,12 @@ export function DwgTakeoffPage() {
                 visibleLayers={visibleLayers}
                 activeTool={activeTool}
                 activeColor={activeColor}
-                selectedEntityId={selectedEntityId}
+                selectedEntityIds={selectedEntityIds}
+                hiddenEntityIds={hiddenEntityIds}
                 selectedAnnotationId={selectedAnnotationId}
                 onSelectEntity={handleSelectEntity}
                 onSelectAnnotation={setSelectedAnnotationId}
+                onEntityContextMenu={handleEntityContextMenu}
                 onAnnotationCreated={handleAnnotationCreated}
               />
 
@@ -1044,8 +1547,22 @@ export function DwgTakeoffPage() {
                   onColorChange={setActiveColor}
                 />
               </div>
-              {/* Floating entity info popup (shared ElementInfoPopover) */}
-              {selectedEntity && entityPopup && activeTool === 'select' && (
+
+              {/* Floating Offline Ready badge — top-right corner of viewer
+                  (opposite the ToolPalette). Surfaces the local converter
+                  status without stealing space from the drawing. */}
+              <div className="absolute top-3 right-3 z-10">
+                <OfflineReadyBadge
+                  readiness={offlineReadiness}
+                  isLoading={loadingOfflineReadiness}
+                  data-testid="dwg-offline-badge"
+                />
+              </div>
+              {/* Floating entity info popup (shared ElementInfoPopover) —
+                  only shown for a single-entity click, hidden during
+                  multi-select to keep the screen readable. */}
+              {selectedEntity && entityPopup && activeTool === 'select'
+                && selectedEntityIds.size === 1 && (
                 <ElementInfoPopover
                   element={toDWGElementPayload(selectedEntity, {
                     calculatePerimeter,
@@ -1062,6 +1579,23 @@ export function DwgTakeoffPage() {
                     setEntityPopup(null);
                     handleOpenLinkToBoq(elementId);
                   }}
+                />
+              )}
+
+              {/* Right-click context menu (RFC 11 §4.4) */}
+              {contextMenu && (
+                <DwgContextMenu
+                  screenX={contextMenu.screenX}
+                  screenY={contextMenu.screenY}
+                  selectionSize={selectedEntityIds.size}
+                  onHide={() => handleHideEntities(Array.from(selectedEntityIds))}
+                  onIsolate={() => handleIsolateEntities(Array.from(selectedEntityIds))}
+                  onLink={() => {
+                    setContextMenu(null);
+                    handleOpenLinkToBoq(contextMenu.entityId);
+                  }}
+                  onSaveAsGroup={handleSaveSelectionAsGroup}
+                  onClose={() => setContextMenu(null)}
                 />
               )}
 
@@ -1238,7 +1772,13 @@ export function DwgTakeoffPage() {
                                   <button
                                     key={pos.id}
                                     type="button"
-                                    onClick={() => handleLinkToPosition(selectedEntity.id, pos)}
+                                    onClick={() => {
+                                      if (selectedEntityIds.size > 1) {
+                                        handleLinkGroupToPosition(pos);
+                                      } else {
+                                        handleLinkToPosition(selectedEntity.id, pos);
+                                      }
+                                    }}
                                     disabled={linkingInProgress}
                                     className="w-full text-left px-2 py-1 rounded-sm text-[11px] hover:bg-blue-900/40 transition-colors flex items-center gap-1.5 disabled:opacity-50"
                                   >
@@ -1316,6 +1856,117 @@ export function DwgTakeoffPage() {
         {/* ── Right Panel: Layers / Annotations / Properties ───── */}
         {selectedDrawingId && (
           <div className="flex w-72 flex-shrink-0 flex-col border-l border-border-light bg-surface-primary text-content-primary shadow-xl shadow-black/30">
+            {/* Group aggregation panel (RFC 11 §4.5) — visible when 2+ entities selected */}
+            {selectedEntityIds.size > 1 && (
+              <div
+                className="border-b border-border-light px-3 py-2.5 bg-amber-950/20"
+                data-testid="dwg-group-panel"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Sigma size={13} className="text-amber-400" />
+                    <span className="text-[11px] font-semibold text-content-primary">
+                      {t('dwg_takeoff.group_selection', { defaultValue: 'Group selection' })}
+                    </span>
+                    <span className="text-[10px] text-content-tertiary tabular-nums">
+                      ({selectedEntityIds.size})
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => { setSelectedEntityIds(new Set()); setEntityPopup(null); }}
+                    className="text-content-tertiary hover:text-content-primary"
+                    title={t('dwg_takeoff.clear_selection', { defaultValue: 'Clear selection' })}
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+                <div
+                  className="grid grid-cols-3 gap-1.5 text-[11px]"
+                  data-testid="dwg-group-aggregate"
+                >
+                  <div>
+                    <div
+                      className="font-semibold text-content-primary tabular-nums"
+                      data-testid="dwg-group-area"
+                    >
+                      {selectionAggregate.area > 0 ? selectionAggregate.area.toFixed(2) : '—'}
+                    </div>
+                    <div className="text-content-tertiary text-[9px] uppercase">
+                      {t('dwg_takeoff.area', 'Area')} m²
+                    </div>
+                  </div>
+                  <div>
+                    <div
+                      className="font-semibold text-content-primary tabular-nums"
+                      data-testid="dwg-group-perimeter"
+                    >
+                      {selectionAggregate.perimeter > 0
+                        ? selectionAggregate.perimeter.toFixed(2) : '—'}
+                    </div>
+                    <div className="text-content-tertiary text-[9px] uppercase">
+                      {t('dwg_takeoff.perimeter', 'Perimeter')} m
+                    </div>
+                  </div>
+                  <div>
+                    <div
+                      className="font-semibold text-content-primary tabular-nums"
+                      data-testid="dwg-group-length"
+                    >
+                      {selectionAggregate.length > 0
+                        ? selectionAggregate.length.toFixed(2) : '—'}
+                    </div>
+                    <div className="text-content-tertiary text-[9px] uppercase">
+                      {t('dwg_takeoff.length', 'Length')} m
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 mt-2">
+                  <button
+                    onClick={() => {
+                      const firstId = selectedEntityIds.values().next().value;
+                      if (firstId) handleOpenLinkToBoq(firstId);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1 rounded-md bg-oe-blue text-white text-[11px] font-semibold px-2 py-1 hover:bg-oe-blue-dark transition-colors"
+                    data-testid="dwg-group-link-boq"
+                  >
+                    <Link2 size={11} />
+                    {t('dwg_takeoff.link_n_to_boq', {
+                      defaultValue: 'Link {{count}} to BOQ',
+                      count: selectedEntityIds.size,
+                    })}
+                  </button>
+                  <button
+                    onClick={handleSaveSelectionAsGroup}
+                    className="flex items-center justify-center rounded-md border border-border-medium bg-surface-secondary text-content-primary text-[11px] px-2 py-1 hover:bg-surface-tertiary transition-colors"
+                    title={t('dwg_takeoff.save_as_group', { defaultValue: 'Save as group' })}
+                    data-testid="dwg-group-save"
+                  >
+                    <FolderPlus size={11} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Hidden-entities toolbar */}
+            {hiddenEntityIds.size > 0 && (
+              <div className="flex items-center justify-between border-b border-border-light bg-surface-secondary/60 px-3 py-1.5">
+                <span className="text-[10px] text-content-tertiary flex items-center gap-1">
+                  <EyeOff size={11} />
+                  {t('dwg_takeoff.hidden_count', {
+                    defaultValue: '{{count}} hidden',
+                    count: hiddenEntityIds.size,
+                  })}
+                </span>
+                <button
+                  onClick={handleShowAllEntities}
+                  className="text-[10px] font-medium text-oe-blue hover:text-oe-blue/80 flex items-center gap-0.5"
+                >
+                  <Eye size={11} />
+                  {t('dwg_takeoff.show_all', { defaultValue: 'Show all' })}
+                </button>
+              </div>
+            )}
+
             {/* Summary bar — totals across current drawing */}
             {(entities.length > 0 || annotations.length > 0) && (() => {
               const areaSum = annotations
@@ -1386,6 +2037,7 @@ export function DwgTakeoffPage() {
                   { id: 'layers' as const, icon: Layers, labelKey: 'dwg_takeoff.layers', count: layers.length },
                   { id: 'annotations' as const, icon: MessageSquare, labelKey: 'dwg_takeoff.annotations', count: annotations.length },
                   { id: 'properties' as const, icon: Info, labelKey: 'dwg_takeoff.properties', count: 0 },
+                  { id: 'summary' as const, icon: BarChart3, labelKey: 'dwg_takeoff.summary', count: 0 },
                 ]
               ).map(({ id, icon: Icon, labelKey, count }) => (
                 <button
@@ -1585,6 +2237,16 @@ export function DwgTakeoffPage() {
                   )}
                 </div>
               )}
+
+              {rightTab === 'summary' && (
+                <SummaryTab
+                  entityCount={filteredEntities.length}
+                  aggregate={summaryAggregate}
+                  byLayer={summaryByLayer}
+                  byType={summaryByType}
+                  onExportCsv={handleExportSummaryCsv}
+                />
+              )}
             </div>
           </div>
         )}
@@ -1713,6 +2375,32 @@ export function DwgTakeoffPage() {
                 </>
               )}
             </button>
+
+            {/* Install-hint banner — shown when user picks a .dwg but the
+                local converter isn't installed. DXF uploads bypass it. */}
+            {uploadFile
+              && uploadFile.name.toLowerCase().endsWith('.dwg')
+              && offlineReadiness
+              && !offlineReadiness.converter_available && (
+              <div
+                className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-[11px] text-amber-700 dark:text-amber-300"
+                data-testid="dwg-upload-install-hint"
+              >
+                <WifiOff size={14} className="shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-semibold">
+                    {t('dwg_takeoff.offline_install', { defaultValue: 'Install converter' })}
+                  </p>
+                  <p className="leading-relaxed">
+                    {offlineReadiness.message
+                      || t('dwg_takeoff.offline_install_hint', {
+                        defaultValue:
+                          'Upload DXF files to continue without the converter, or install it to enable .dwg support.',
+                      })}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Drawing name */}
             <div className="space-y-1.5">
@@ -1930,5 +2618,324 @@ function PropertyRow({ label, value }: { label: string; value: string }) {
       <span className="text-muted-foreground">{label}</span>
       <span className="font-mono text-foreground">{value}</span>
     </div>
+  );
+}
+
+/* ── Summary tab (R3 #12) ─────────────────────────────────────────────── */
+
+interface SummaryKpiCardProps {
+  label: string;
+  value: string;
+  unit?: string;
+  accent: 'blue' | 'emerald' | 'amber' | 'violet';
+}
+
+/** One KPI tile in the Summary tab — count, area, perimeter, length. */
+function SummaryKpiCard({ label, value, unit, accent }: SummaryKpiCardProps) {
+  const accentMap: Record<SummaryKpiCardProps['accent'], string> = {
+    blue: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+    emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+    amber: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    violet: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
+  };
+  return (
+    <div
+      className={clsx(
+        'rounded-lg border px-2.5 py-2 flex flex-col gap-0.5 min-w-0',
+        accentMap[accent],
+      )}
+      data-testid="dwg-summary-kpi"
+    >
+      <div className="text-[9px] uppercase tracking-wider opacity-80 truncate">
+        {label}
+      </div>
+      <div className="text-lg font-bold tabular-nums leading-tight truncate">
+        {value}
+        {unit && (
+          <span className="text-[10px] font-medium ml-1 opacity-70">{unit}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface SummaryTabProps {
+  entityCount: number;
+  aggregate: { area: number; perimeter: number; length: number; count: number };
+  byLayer: { layer: string; area: number; length: number; count: number }[];
+  byType: { type: string; count: number }[];
+  onExportCsv: () => void;
+}
+
+/**
+ * Summary tab (R3 #12) — KPI cards + per-layer breakdown + per-type breakdown.
+ *
+ * Data comes straight from ``aggregateEntities`` + the layer/type memos in
+ * the parent. The per-layer "share" bar uses the maximum of area or
+ * length across layers so both kinds of geometry render meaningfully
+ * (an all-lines drawing still gets a bar, not a flatline).
+ */
+function SummaryTab({
+  entityCount,
+  aggregate,
+  byLayer,
+  byType,
+  onExportCsv,
+}: SummaryTabProps) {
+  const { t } = useTranslation();
+
+  const maxLayerMetric = useMemo(() => {
+    let m = 0;
+    for (const row of byLayer) {
+      const v = row.area > 0 ? row.area : row.length;
+      if (v > m) m = v;
+    }
+    return m;
+  }, [byLayer]);
+
+  if (entityCount === 0) {
+    return (
+      <p className="text-xs text-muted-foreground py-4 text-center">
+        {t('dwg_takeoff.summary_empty', {
+          defaultValue: 'No entities to summarize. Upload a drawing to see totals.',
+        })}
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4" data-testid="dwg-summary-tab">
+      {/* Header + export */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <BarChart3 size={14} className="text-oe-blue" />
+          <h3 className="text-sm font-semibold text-foreground">
+            {t('dwg_takeoff.summary_title', { defaultValue: 'Measurements Summary' })}
+          </h3>
+        </div>
+        <button
+          type="button"
+          onClick={onExportCsv}
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-secondary px-2 py-1 text-[10px] font-medium text-content-secondary hover:text-content-primary hover:bg-surface-tertiary transition-colors"
+          data-testid="dwg-summary-export"
+          title={t('dwg_takeoff.export_csv', {
+            defaultValue: 'Export measurements as CSV',
+          })}
+        >
+          <Download size={11} />
+          {t('dwg_takeoff.export_csv_short', { defaultValue: 'Export CSV' })}
+        </button>
+      </div>
+
+      {/* KPI cards */}
+      <div
+        className="grid grid-cols-2 gap-2"
+        data-testid="dwg-summary-kpis"
+      >
+        <SummaryKpiCard
+          label={t('dwg_takeoff.kpi_total_entities', { defaultValue: 'Total entities' })}
+          value={entityCount.toLocaleString()}
+          accent="blue"
+        />
+        <SummaryKpiCard
+          label={t('dwg_takeoff.kpi_total_area', { defaultValue: 'Σ Area' })}
+          value={aggregate.area > 0 ? aggregate.area.toFixed(2) : '—'}
+          unit={aggregate.area > 0 ? 'm²' : undefined}
+          accent="emerald"
+        />
+        <SummaryKpiCard
+          label={t('dwg_takeoff.kpi_total_perimeter', { defaultValue: 'Σ Perimeter' })}
+          value={aggregate.perimeter > 0 ? aggregate.perimeter.toFixed(2) : '—'}
+          unit={aggregate.perimeter > 0 ? 'm' : undefined}
+          accent="amber"
+        />
+        <SummaryKpiCard
+          label={t('dwg_takeoff.kpi_total_length', { defaultValue: 'Σ Length' })}
+          value={aggregate.length > 0 ? aggregate.length.toFixed(2) : '—'}
+          unit={aggregate.length > 0 ? 'm' : undefined}
+          accent="violet"
+        />
+      </div>
+
+      {/* By Layer */}
+      <div data-testid="dwg-summary-by-layer">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <Layers size={11} className="text-content-tertiary" />
+          <h4 className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+            {t('dwg_takeoff.summary_by_layer', { defaultValue: 'By layer' })}
+          </h4>
+          <span className="text-[10px] text-content-quaternary tabular-nums">
+            ({byLayer.length})
+          </span>
+        </div>
+        <div className="space-y-1 max-h-56 overflow-y-auto pr-1">
+          {byLayer.slice(0, 20).map((row) => {
+            const metric = row.area > 0 ? row.area : row.length;
+            const share = maxLayerMetric > 0 ? (metric / maxLayerMetric) * 100 : 0;
+            return (
+              <div
+                key={row.layer}
+                className="rounded-md border border-border-light bg-surface-secondary/50 px-2 py-1.5 hover:bg-surface-secondary transition-colors"
+              >
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="font-mono text-[11px] text-content-primary truncate">
+                    {row.layer}
+                  </span>
+                  <span className="text-[10px] tabular-nums text-content-tertiary shrink-0">
+                    {row.count}
+                  </span>
+                </div>
+                <div className="relative h-1 rounded-full bg-surface-tertiary overflow-hidden">
+                  <div
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-oe-blue to-blue-400"
+                    style={{ width: `${Math.max(share, 3)}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-1 text-[10px] tabular-nums">
+                  {row.area > 0 && (
+                    <span className="text-emerald-400">
+                      {row.area.toFixed(2)} m²
+                    </span>
+                  )}
+                  {row.length > 0 && (
+                    <span className="text-violet-400">
+                      {row.length.toFixed(2)} m
+                    </span>
+                  )}
+                  {row.area === 0 && row.length === 0 && (
+                    <span className="text-content-quaternary">
+                      {t('dwg_takeoff.summary_no_measure', {
+                        defaultValue: 'no measurable geometry',
+                      })}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          {byLayer.length > 20 && (
+            <p className="text-[10px] text-content-tertiary text-center py-1">
+              {t('dwg_takeoff.summary_layers_more', {
+                defaultValue: '+{{count}} more',
+                count: byLayer.length - 20,
+              })}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* By Type */}
+      <div data-testid="dwg-summary-by-type">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <Sigma size={11} className="text-content-tertiary" />
+          <h4 className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+            {t('dwg_takeoff.summary_by_type', { defaultValue: 'By entity type' })}
+          </h4>
+          <span className="text-[10px] text-content-quaternary tabular-nums">
+            ({byType.length})
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-1">
+          {byType.map((row) => (
+            <div
+              key={row.type}
+              className="flex items-center justify-between rounded-md border border-border-light bg-surface-secondary/50 px-2 py-1 text-[10px]"
+            >
+              <span className="font-mono text-content-primary truncate">
+                {row.type}
+              </span>
+              <span className="tabular-nums font-semibold text-content-secondary">
+                {row.count}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Right-click context menu for DWG entities (RFC 11 §4.4). */
+function DwgContextMenu({
+  screenX,
+  screenY,
+  selectionSize,
+  onHide,
+  onIsolate,
+  onLink,
+  onSaveAsGroup,
+  onClose,
+}: {
+  screenX: number;
+  screenY: number;
+  selectionSize: number;
+  onHide: () => void;
+  onIsolate: () => void;
+  onLink: () => void;
+  onSaveAsGroup: () => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const menu = document.getElementById('dwg-context-menu');
+      if (menu && !menu.contains(e.target as Node)) onClose();
+    };
+    window.addEventListener('mousedown', handler);
+    return () => window.removeEventListener('mousedown', handler);
+  }, [onClose]);
+
+  return (
+    <div
+      id="dwg-context-menu"
+      data-testid="dwg-context-menu"
+      className="absolute z-40 min-w-[160px] rounded-lg border border-white/15 bg-[#1e1e38]/95 shadow-2xl backdrop-blur-md py-1"
+      style={{ left: screenX, top: screenY }}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      <MenuItem onClick={onHide} icon={<EyeOff size={12} />} label={
+        selectionSize > 1
+          ? t('dwg_takeoff.hide_n', { defaultValue: 'Hide {{count}}', count: selectionSize })
+          : t('dwg_takeoff.hide', { defaultValue: 'Hide' })
+      } />
+      <MenuItem onClick={onIsolate} icon={<Eye size={12} />} label={
+        t('dwg_takeoff.isolate', { defaultValue: 'Isolate' })
+      } />
+      <div className="my-1 border-t border-white/10" />
+      <MenuItem onClick={onLink} icon={<Link2 size={12} />} label={
+        selectionSize > 1
+          ? t('dwg_takeoff.link_n_to_boq', {
+              defaultValue: 'Link {{count}} to BOQ',
+              count: selectionSize,
+            })
+          : t('dwg_takeoff.link_to_boq', { defaultValue: 'Link to BOQ' })
+      } />
+      {selectionSize > 1 && (
+        <MenuItem onClick={onSaveAsGroup} icon={<FolderPlus size={12} />} label={
+          t('dwg_takeoff.save_as_group', { defaultValue: 'Save as group' })
+        } />
+      )}
+    </div>
+  );
+}
+
+function MenuItem({
+  onClick,
+  icon,
+  label,
+}: {
+  onClick: () => void;
+  icon: ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-center gap-2 w-full px-3 py-1.5 text-left text-[11px] text-white/85 hover:bg-white/10 transition-colors"
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
   );
 }

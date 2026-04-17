@@ -47,9 +47,12 @@ import { ElementManager } from './ElementManager';
 import type { BIMElementData } from './ElementManager';
 import { aggregateBIMQuantities, type AggResult } from './aggregation';
 import { SelectionManager } from './SelectionManager';
+import { MeasureManager } from './MeasureManager';
+import { addViewpoint } from './SavedViewsStore';
 import { BIMContextMenu } from './BIMContextMenu';
 import type { BIMContextMenuState } from './BIMContextMenu';
 import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
+import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -175,6 +178,8 @@ export interface BIMViewerProps {
   /** Width (in px) of the left filter panel — used to offset the toolbar
    *  when `leftPanelOpen` is true. Defaults to 320 to match BIMFilterPanel. */
   leftPanelWidth?: number;
+  /** Fired when the user saves a viewpoint from the toolbar. */
+  onViewpointSaved?: (viewpointId: string, quotaExceeded: boolean) => void;
 }
 
 /* ── Properties Table ──────────────────────────────────────────────────── */
@@ -402,12 +407,19 @@ export function BIMViewer({
   onSmartFilter,
   leftPanelOpen = false,
   leftPanelWidth = 320,
+  onViewpointSaved,
 }: BIMViewerProps) {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<SceneManager | null>(null);
   const elementMgrRef = useRef<ElementManager | null>(null);
   const selectionMgrRef = useRef<SelectionManager | null>(null);
+  const measureMgrRef = useRef<MeasureManager | null>(null);
+  const categoryOpacity = useBIMViewerStore((s) => s.categoryOpacity);
+  const hiddenCategories = useBIMViewerStore((s) => s.hiddenCategories);
+  const measureActive = useBIMViewerStore((s) => s.measureActive);
+  const setMeasureActive = useBIMViewerStore((s) => s.setMeasureActive);
+  const [measureCount, setMeasureCount] = useState(0);
   // Latest onIsolationChange callback — needed because the
   // SelectionManager init effect runs only on mount and would
   // otherwise capture a stale prop reference.
@@ -600,6 +612,11 @@ export function BIMViewer({
     });
     selectionMgrRef.current = selectionMgr;
 
+    const measureMgr = new MeasureManager(scene, elementMgr, {
+      onMeasurementsChanged: (count) => setMeasureCount(count),
+    });
+    measureMgrRef.current = measureMgr;
+
     // Track mouse position for hover tooltip
     const handleMouseMoveForTooltip = (e: MouseEvent) => {
       const container = containerRef.current;
@@ -614,12 +631,14 @@ export function BIMViewer({
 
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMoveForTooltip);
+      measureMgr.dispose();
       selectionMgr.dispose();
       elementMgr.dispose();
       scene.dispose();
       sceneRef.current = null;
       elementMgrRef.current = null;
       selectionMgrRef.current = null;
+      measureMgrRef.current = null;
     };
     // Intentionally only run on mount — stable refs
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -823,6 +842,56 @@ export function BIMViewer({
       mgr.resetColors();
     }
   }, [colorByMode, elements]);
+
+  // Sync per-category opacity (RFC 19 §4.2) from the shared store — materials
+  // are cloned on first use so this is cheap on subsequent slider drags.
+  useEffect(() => {
+    const mgr = elementMgrRef.current;
+    if (!mgr) return;
+    for (const [category, opacity] of Object.entries(categoryOpacity)) {
+      mgr.setCategoryOpacity(category, opacity);
+    }
+  }, [categoryOpacity, elements]);
+
+  // Sync hidden-category toggles from the Layers tab.
+  useEffect(() => {
+    const mgr = elementMgrRef.current;
+    if (!mgr) return;
+    for (const el of mgr.getAllElements()) {
+      const mesh = mgr.getMesh(el.id);
+      if (!mesh) continue;
+      if (hiddenCategories[el.element_type] === true) {
+        mesh.visible = false;
+      }
+    }
+    sceneRef.current?.requestRender();
+  }, [hiddenCategories, elements]);
+
+  // Toggle the measure tool in response to the Zustand flag.
+  useEffect(() => {
+    measureMgrRef.current?.setActive(measureActive);
+  }, [measureActive]);
+
+  // Expose a tiny camera bridge on `window.__oeBim` so sibling right-panel
+  // tabs can snapshot/restore the camera without a direct SceneManager handle.
+  useEffect(() => {
+    const w = window as unknown as {
+      __oeBim?: {
+        getViewpoint: () => ReturnType<SceneManager['getViewpoint']> | null;
+        setViewpoint: (
+          pos: { x: number; y: number; z: number },
+          target: { x: number; y: number; z: number },
+        ) => void;
+      };
+    };
+    w.__oeBim = {
+      getViewpoint: () => sceneRef.current?.getViewpoint() ?? null,
+      setViewpoint: (pos, target) => sceneRef.current?.setViewpoint(pos, target),
+    };
+    return () => {
+      if (w.__oeBim) delete w.__oeBim;
+    };
+  }, []);
 
   // Sync selection from parent — ONLY when the parent explicitly changes
   // selection (e.g. clicking a row in the filter panel). Skip when the
@@ -1144,6 +1213,28 @@ export function BIMViewer({
     onElementSelect?.(null);
   }, [hiddenIds, onElementSelect]);
 
+  /** Save the current camera pose as a named viewpoint (RFC 19 §4.1). */
+  const handleSaveViewpoint = useCallback(() => {
+    const scene = sceneRef.current;
+    if (!scene || !modelId) return;
+    const fallback = new Date().toLocaleString();
+    const name =
+      typeof window !== 'undefined' && typeof window.prompt === 'function'
+        ? window.prompt(
+            t('bim.save_view_prompt', { defaultValue: 'Name this view:' }),
+            fallback,
+          )
+        : fallback;
+    if (name == null) return;
+    const vp = scene.getViewpoint();
+    const result = addViewpoint(modelId, {
+      name: name.trim() || fallback,
+      cameraPos: [vp.position.x, vp.position.y, vp.position.z],
+      target: [vp.target.x, vp.target.y, vp.target.z],
+    });
+    onViewpointSaved?.(result.viewpoint.id, result.quotaExceeded);
+  }, [modelId, onViewpointSaved, t]);
+
   // ── Keyboard shortcuts ──────────────────────────────────────────────
   //   F     — zoom to fit all
   //   W     — toggle wireframe
@@ -1161,10 +1252,33 @@ export function BIMViewer({
       // Also ignore when modifier keys are held (Ctrl/Cmd combos are browser shortcuts)
       if (e.ctrlKey || e.metaKey || e.altKey) return;
 
+      // MeasureManager consumes Escape while active so pending points are
+      // cancelled before the global deselect path runs.
+      if (measureMgrRef.current?.handleKeyDown(e)) {
+        e.preventDefault();
+        return;
+      }
+
       switch (e.key.toLowerCase()) {
         case 'f':
           e.preventDefault();
           sceneRef.current?.zoomToFit();
+          break;
+        case 'm':
+          // Toggle measure tool (RFC 19 §4.4).
+          e.preventDefault();
+          setMeasureActive(!useBIMViewerStore.getState().measureActive);
+          break;
+        case 's':
+          // Toggle Tools tab on the right panel (RFC 19 §4.5).
+          e.preventDefault();
+          useBIMViewerStore
+            .getState()
+            .setRightPanelTab(
+              useBIMViewerStore.getState().rightPanelTab === 'tools'
+                ? 'properties'
+                : 'tools',
+            );
           break;
         case 'w':
           e.preventDefault();
@@ -1510,7 +1624,34 @@ export function BIMViewer({
           active={boxesVisible}
           variant="group"
         />
+        <div className="w-px h-5 bg-border-light mx-1.5" />
+        <ToolbarButton
+          icon={Ruler}
+          label={t('bim.measure_toggle', { defaultValue: 'Measure distance (M)' })}
+          onClick={() => setMeasureActive(!measureActive)}
+          active={measureActive}
+          variant="group"
+        />
+        <ToolbarButton
+          icon={Tag}
+          label={t('bim.save_view_toggle', { defaultValue: 'Save current view' })}
+          onClick={handleSaveViewpoint}
+          variant="group"
+        />
       </div>
+      {/* Measure hint shown while the tool is active (RFC 19 §4.4). */}
+      {measureActive && (
+        <div
+          className="absolute top-14 start-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-md bg-surface-primary border border-oe-blue/40 shadow-sm text-[11px] text-content-secondary"
+          data-testid="bim-measure-hint"
+        >
+          {t('bim.measure_hint', {
+            defaultValue:
+              'Click two points to measure. Esc to cancel. {{count}} saved.',
+            count: measureCount,
+          })}
+        </div>
+      )}
 
       {/* Selection toolbar — appears above the viewport when 1+ elements
           are selected.  Gives quick access to BOQ/Hide/Isolate/Clear without

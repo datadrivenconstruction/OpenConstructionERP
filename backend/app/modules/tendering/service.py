@@ -307,3 +307,111 @@ class TenderingService:
             rows=rows,
             bid_totals=bid_totals,
         )
+
+    # ── Project Intelligence (RFC 25) ──────────────────────────────────────
+
+    async def get_bid_analysis(self, project_id: uuid.UUID):
+        """Aggregate all bids for a project: vendors, outliers, spread."""
+        from sqlalchemy import select
+
+        from app.modules.tendering.schemas import (
+            BidAnalysisResponse,
+            BidOutlierEntry,
+            BidSpread,
+            BidVendorEntry,
+        )
+
+        stmt = (
+            select(TenderBid)
+            .join(TenderPackage, TenderBid.package_id == TenderPackage.id)
+            .where(TenderPackage.project_id == project_id)
+        )
+        result = await self.session.execute(stmt)
+        bids: list[TenderBid] = list(result.scalars().all())
+
+        if not bids:
+            return BidAnalysisResponse()
+
+        def _to_float(value: str | None) -> float:
+            try:
+                return float(value) if value not in (None, "") else 0.0
+            except (TypeError, ValueError):
+                return 0.0
+
+        totals: list[float] = [_to_float(b.total_amount) for b in bids]
+
+        # Vendor rollup
+        vendor_map: dict[str, dict[str, float | int | str]] = {}
+        for bid, total in zip(bids, totals, strict=True):
+            company = (bid.company_name or "").strip() or "(unnamed)"
+            entry = vendor_map.setdefault(
+                company,
+                {
+                    "company_name": company,
+                    "total": 0.0,
+                    "currency": bid.currency or "EUR",
+                    "bid_count": 0,
+                },
+            )
+            entry["total"] = float(entry["total"]) + total
+            entry["bid_count"] = int(entry["bid_count"]) + 1
+
+        vendors = [
+            BidVendorEntry(
+                company_name=str(v["company_name"]),
+                total=round(float(v["total"]), 2),
+                currency=str(v["currency"]),
+                bid_count=int(v["bid_count"]),
+            )
+            for v in sorted(
+                vendor_map.values(),
+                key=lambda e: -float(e["total"]),
+            )
+        ]
+
+        # Spread
+        sorted_totals = sorted(totals)
+
+        def _pct(values: list[float], p: float) -> float:
+            if not values:
+                return 0.0
+            idx = max(0, min(len(values) - 1, int(round((len(values) - 1) * p))))
+            return values[idx]
+
+        p25 = _pct(sorted_totals, 0.25)
+        p50 = _pct(sorted_totals, 0.50)
+        p75 = _pct(sorted_totals, 0.75)
+        mean = sum(totals) / len(totals)
+        variance = sum((t - mean) ** 2 for t in totals) / len(totals)
+        std = variance**0.5
+
+        spread = BidSpread(
+            min=round(sorted_totals[0], 2),
+            max=round(sorted_totals[-1], 2),
+            p25=round(p25, 2),
+            p50=round(p50, 2),
+            p75=round(p75, 2),
+            mean=round(mean, 2),
+            std=round(std, 2),
+            sample_size=len(totals),
+        )
+
+        # Outliers (IQR rule)
+        iqr = p75 - p25
+        low_bound = p25 - 1.5 * iqr
+        high_bound = p75 + 1.5 * iqr
+        outliers: list[BidOutlierEntry] = []
+        if len(totals) >= 4 and iqr > 0:
+            for bid, total in zip(bids, totals, strict=True):
+                if total < low_bound or total > high_bound:
+                    reason = "too_low" if total < low_bound else "too_high"
+                    outliers.append(
+                        BidOutlierEntry(
+                            bid_id=bid.id,
+                            company_name=(bid.company_name or "").strip() or "(unnamed)",
+                            total=round(total, 2),
+                            reason=reason,
+                        )
+                    )
+
+        return BidAnalysisResponse(vendors=vendors, outliers=outliers, spread=spread)

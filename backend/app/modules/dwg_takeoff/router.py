@@ -37,7 +37,10 @@ from app.modules.dwg_takeoff.schemas import (
     DwgAnnotationUpdate,
     DwgDrawingResponse,
     DwgDrawingVersionResponse,
+    DwgEntityGroupCreate,
+    DwgEntityGroupResponse,
     DwgLayerVisibilityUpdate,
+    DwgOfflineReadinessResponse,
 )
 from app.modules.dwg_takeoff.service import DwgTakeoffService
 
@@ -374,3 +377,80 @@ async def get_pins(
     """Get task/punchlist pins for a drawing."""
     items = await service.get_pins(drawing_id)
     return [_annotation_to_response(i) for i in items]
+
+
+# ── Entity Groups (RFC 11) ───────────────────────────────────────────────────
+
+
+def _group_to_response(item: object) -> DwgEntityGroupResponse:
+    """Build a DwgEntityGroupResponse from a DwgEntityGroup ORM object."""
+    return DwgEntityGroupResponse(
+        id=item.id,  # type: ignore[attr-defined]
+        drawing_id=item.drawing_id,  # type: ignore[attr-defined]
+        entity_ids=list(item.entity_ids or []),  # type: ignore[attr-defined]
+        name=item.name,  # type: ignore[attr-defined]
+        metadata=getattr(item, "metadata_", {}),
+        created_at=item.created_at,  # type: ignore[attr-defined]
+        updated_at=item.updated_at,  # type: ignore[attr-defined]
+    )
+
+
+@router.post("/groups/", response_model=DwgEntityGroupResponse, status_code=201)
+async def create_entity_group(
+    data: DwgEntityGroupCreate,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("dwg_takeoff.create")),
+    service: DwgTakeoffService = Depends(_get_service),
+) -> DwgEntityGroupResponse:
+    """Create a saved group of DWG entities."""
+    try:
+        item = await service.create_entity_group(data, user_id)
+        return _group_to_response(item)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unable to create entity group")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to create entity group — please try again",
+        )
+
+
+@router.get("/groups/", response_model=list[DwgEntityGroupResponse])
+async def list_entity_groups(
+    drawing_id: uuid.UUID = Query(...),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=200, ge=1, le=500),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("dwg_takeoff.read")),
+    service: DwgTakeoffService = Depends(_get_service),
+) -> list[DwgEntityGroupResponse]:
+    """List saved entity groups for a drawing."""
+    items, _ = await service.list_entity_groups(drawing_id, offset=offset, limit=limit)
+    return [_group_to_response(i) for i in items]
+
+
+@router.delete("/groups/{group_id}", status_code=204)
+async def delete_entity_group(
+    group_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("dwg_takeoff.delete")),
+    service: DwgTakeoffService = Depends(_get_service),
+) -> None:
+    """Delete an entity group."""
+    await service.delete_entity_group(group_id)
+
+
+# ── Offline Readiness (R3 #9) ────────────────────────────────────────────────
+
+
+@router.get("/offline-readiness/", response_model=DwgOfflineReadinessResponse)
+async def offline_readiness() -> DwgOfflineReadinessResponse:
+    """Probe local-converter availability for the DWG takeoff page.
+
+    The backend runs fully offline; this endpoint surfaces whether the
+    optional DWG-to-data binary is present so the UI can show an
+    "Offline Ready" vs "Install converter" badge.
+    """
+    payload = DwgTakeoffService.get_offline_readiness()
+    return DwgOfflineReadinessResponse(**payload)

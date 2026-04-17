@@ -73,6 +73,7 @@ class TransmittalService:
             item = TransmittalItem(
                 transmittal_id=transmittal.id,
                 document_id=item_data.document_id,
+                revision_id=item_data.revision_id,
                 item_number=item_data.item_number,
                 description=item_data.description,
                 notes=item_data.notes,
@@ -154,6 +155,7 @@ class TransmittalService:
                 item = TransmittalItem(
                     transmittal_id=transmittal_id,
                     document_id=item_data.document_id,
+                    revision_id=item_data.revision_id,
                     item_number=item_data.item_number,
                     description=item_data.description,
                     notes=item_data.notes,

@@ -29,12 +29,16 @@ import {
   transitionContainer,
   fetchContainerRevisions,
   createContainerRevision,
+  fetchSuitabilityCodes,
   type CDEContainer,
   type CDEState,
   type CDEDiscipline,
   type CDERevision,
   type CreateCDEContainerPayload,
+  type TransitionPayload,
 } from './api';
+import { CDEHistoryDrawer } from './CDEHistoryDrawer';
+import { CDETransmittalsBadge } from './CDETransmittalsBadge';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -104,6 +108,7 @@ interface CDEFormData {
   discipline: CDEDiscipline;
   suitability_code: string;
   classification: string;
+  cde_state: CDEState;
 }
 
 const EMPTY_FORM: CDEFormData = {
@@ -112,6 +117,7 @@ const EMPTY_FORM: CDEFormData = {
   discipline: 'architecture',
   suitability_code: '',
   classification: '',
+  cde_state: 'wip',
 };
 
 function CreateCDEModal({
@@ -126,6 +132,26 @@ function CreateCDEModal({
   const { t } = useTranslation();
   const [form, setForm] = useState<CDEFormData>(EMPTY_FORM);
   const [touched, setTouched] = useState(false);
+
+  // ISO 19650 suitability codes (RFC 33 §3.1) — filtered by the chosen state.
+  const { data: suitabilityCodes } = useQuery({
+    queryKey: ['cde-suitability-codes'],
+    queryFn: fetchSuitabilityCodes,
+    staleTime: Infinity,
+  });
+  const availableCodes = suitabilityCodes?.by_state?.[form.cde_state] ?? [];
+
+  // If the user changes the state and the current code is no longer valid,
+  // reset it so we never submit an invalid combo (which would 422 anyway).
+  useEffect(() => {
+    if (
+      form.suitability_code &&
+      availableCodes.length > 0 &&
+      !availableCodes.some((c) => c.code === form.suitability_code)
+    ) {
+      setForm((prev) => ({ ...prev, suitability_code: '' }));
+    }
+  }, [form.cde_state, availableCodes, form.suitability_code]);
 
   const set = <K extends keyof CDEFormData>(key: K, value: CDEFormData[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -246,32 +272,74 @@ function CreateCDEModal({
             )}
           </div>
 
-          {/* Two-column: Suitability Code + Classification */}
+          {/* Two-column: State + Suitability Code (state-aware dropdown) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('cde.field_suitability', { defaultValue: 'Suitability Code' })}
+                {t('cde.field_state', { defaultValue: 'State' })}
               </label>
-              <input
-                value={form.suitability_code}
-                onChange={(e) => set('suitability_code', e.target.value)}
-                placeholder={t('cde.suitability_placeholder', { defaultValue: 'e.g. S2' })}
-                className={inputCls}
-              />
+              <div className="relative">
+                <select
+                  value={form.cde_state}
+                  onChange={(e) => set('cde_state', e.target.value as CDEState)}
+                  className={inputCls + ' appearance-none pr-9'}
+                  aria-label={t('cde.field_state', { defaultValue: 'State' })}
+                >
+                  {STATE_ORDER.map((s) => (
+                    <option key={s} value={s}>
+                      {t(`cde.state_${s}`, { defaultValue: STATE_CONFIG[s].label })}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+                  <ChevronDown size={14} />
+                </div>
+              </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('cde.field_classification', { defaultValue: 'Classification' })}
+              <label
+                htmlFor="cde-suitability-select"
+                className="block text-sm font-medium text-content-primary mb-1.5"
+              >
+                {t('cde.field_suitability', { defaultValue: 'Suitability Code' })}
               </label>
-              <input
-                value={form.classification}
-                onChange={(e) => set('classification', e.target.value)}
-                placeholder={t('cde.classification_placeholder', {
-                  defaultValue: 'e.g. Uniclass Ss_20_05',
-                })}
-                className={inputCls}
-              />
+              <div className="relative">
+                <select
+                  id="cde-suitability-select"
+                  value={form.suitability_code}
+                  onChange={(e) => set('suitability_code', e.target.value)}
+                  className={inputCls + ' appearance-none pr-9'}
+                  aria-label={t('cde.field_suitability', { defaultValue: 'Suitability Code' })}
+                >
+                  <option value="">
+                    {t('cde.suitability_none', { defaultValue: '— None —' })}
+                  </option>
+                  {availableCodes.map((entry) => (
+                    <option key={entry.code} value={entry.code}>
+                      {entry.code} — {t(`cde.suitability_${entry.code}`, { defaultValue: entry.label })}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+                  <ChevronDown size={14} />
+                </div>
+              </div>
             </div>
+          </div>
+
+          {/* Classification */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('cde.field_classification', { defaultValue: 'Classification' })}
+            </label>
+            <input
+              value={form.classification}
+              onChange={(e) => set('classification', e.target.value)}
+              placeholder={t('cde.classification_placeholder', {
+                defaultValue: 'e.g. Uniclass Ss_20_05',
+              })}
+              className={inputCls}
+            />
           </div>
         </div>
 
@@ -287,6 +355,145 @@ function CreateCDEModal({
               <Plus size={16} className="mr-1.5 shrink-0" />
             )}
             <span>{t('cde.create_container', { defaultValue: 'Create Container' })}</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Approval Signature Modal (Gate B) ─────────────────────────────────── */
+
+function ApprovalSignatureModal({
+  container,
+  onClose,
+  onSubmit,
+  isPending,
+}: {
+  container: CDEContainer;
+  onClose: () => void;
+  onSubmit: (payload: TransitionPayload) => void;
+  isPending: boolean;
+}) {
+  const { t } = useTranslation();
+  const [signature, setSignature] = useState('');
+  const [comments, setComments] = useState('');
+  const [touched, setTouched] = useState(false);
+
+  const sigError = touched && signature.trim().length === 0;
+  const canSubmit = signature.trim().length > 0;
+
+  const handleSubmit = () => {
+    setTouched(true);
+    if (!canSubmit) return;
+    onSubmit({
+      target_state: 'published',
+      approver_signature: signature.trim(),
+      approval_comments: comments.trim() || undefined,
+    });
+  };
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in"
+      role="dialog"
+      aria-label={t('cde.approval_modal_title', { defaultValue: 'Gate B approval signature' })}
+    >
+      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <h2 className="text-lg font-semibold text-content-primary">
+            {t('cde.approval_modal_title', { defaultValue: 'Gate B approval signature' })}
+          </h2>
+          <button
+            onClick={onClose}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="px-6 py-4 space-y-4">
+          <p className="text-sm text-content-secondary">
+            {t('cde.approval_modal_body', {
+              defaultValue:
+                'Promoting {{code}} from SHARED to PUBLISHED requires a signed approval (ISO 19650). Your signature and comments are recorded in the audit log.',
+              code: container.container_code,
+            })}
+          </p>
+          <div>
+            <label
+              htmlFor="cde-approval-sig"
+              className="block text-sm font-medium text-content-primary mb-1.5"
+            >
+              {t('cde.approval_field_signature', { defaultValue: 'Signature' })}{' '}
+              <span className="text-semantic-error">*</span>
+            </label>
+            <input
+              id="cde-approval-sig"
+              value={signature}
+              onChange={(e) => {
+                setSignature(e.target.value);
+                setTouched(true);
+              }}
+              placeholder={t('cde.approval_signature_placeholder', {
+                defaultValue: 'Full name / initials',
+              })}
+              className={clsx(
+                inputCls,
+                sigError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              )}
+              autoFocus
+            />
+            {sigError && (
+              <p className="mt-1 text-xs text-semantic-error">
+                {t('cde.approval_signature_required', {
+                  defaultValue: 'Signature is required',
+                })}
+              </p>
+            )}
+          </div>
+          <div>
+            <label
+              htmlFor="cde-approval-comments"
+              className="block text-sm font-medium text-content-primary mb-1.5"
+            >
+              {t('cde.approval_field_comments', { defaultValue: 'Comments' })}
+            </label>
+            <textarea
+              id="cde-approval-comments"
+              value={comments}
+              onChange={(e) => setComments(e.target.value)}
+              rows={3}
+              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+              placeholder={t('cde.approval_comments_placeholder', {
+                defaultValue: 'Optional notes for the audit trail...',
+              })}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={isPending || !canSubmit}
+          >
+            {isPending && (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            )}
+            {t('cde.approval_submit', { defaultValue: 'Sign and publish' })}
           </Button>
         </div>
       </div>
@@ -532,10 +739,12 @@ const ContainerRow = React.memo(function ContainerRow({
   container,
   onPromote,
   onLinkDocument,
+  onShowHistory,
 }: {
   container: CDEContainer;
   onPromote: (c: CDEContainer) => void;
   onLinkDocument: (c: CDEContainer) => void;
+  onShowHistory: (c: CDEContainer) => void;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -659,12 +868,26 @@ const ContainerRow = React.memo(function ContainerRow({
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate('/transmittals?create=true');
+                navigate(`/transmittals?create=true&container_id=${container.id}`);
               }}
             >
               <Send size={13} className="mr-1" />
               {t('cde.send_transmittal', { defaultValue: 'Send via Transmittal' })}
             </Button>
+            {/* History drawer */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onShowHistory(container);
+              }}
+              title={t('cde.view_history', { defaultValue: 'View state transition history' })}
+            >
+              {t('cde.view_history', { defaultValue: 'History' })}
+            </Button>
+            {/* Transmittal backlink badge — only renders when there are links */}
+            <CDETransmittalsBadge containerId={container.id} />
           </div>
 
           {/* Revision history / Documents in container */}
@@ -830,10 +1053,11 @@ export function CDEPage() {
   });
 
   const transitionMut = useMutation({
-    mutationFn: ({ id, targetState }: { id: string; targetState: CDEState }) =>
-      transitionContainer(id, { target_state: targetState }),
+    mutationFn: ({ id, payload }: { id: string; payload: TransitionPayload }) =>
+      transitionContainer(id, payload),
     onSuccess: () => {
       invalidateAll();
+      qc.invalidateQueries({ queryKey: ['cde-history'] });
       addToast({
         type: 'success',
         title: t('cde.promoted', { defaultValue: 'Container promoted' }),
@@ -864,6 +1088,7 @@ export function CDEPage() {
         discipline_code: formData.discipline,
         suitability_code: formData.suitability_code || undefined,
         classification_code: formData.classification || undefined,
+        cde_state: formData.cde_state,
       });
     },
     [createMut, projectId, addToast, t],
@@ -871,9 +1096,17 @@ export function CDEPage() {
 
   const { confirm, ...confirmProps } = useConfirm();
   const [linkTarget, setLinkTarget] = useState<CDEContainer | null>(null);
+  // Gate B approval modal target (SHARED -> PUBLISHED requires signature).
+  const [approvalTarget, setApprovalTarget] = useState<CDEContainer | null>(null);
+  // Right-drawer audit log target.
+  const [historyTarget, setHistoryTarget] = useState<CDEContainer | null>(null);
 
   const handleLinkDocument = useCallback((container: CDEContainer) => {
     setLinkTarget(container);
+  }, []);
+
+  const handleShowHistory = useCallback((container: CDEContainer) => {
+    setHistoryTarget(container);
   }, []);
 
   const handlePromote = useCallback(
@@ -882,6 +1115,15 @@ export function CDEPage() {
       const nextIdx = STATE_ORDER.indexOf(currentState) + 1;
       const nextState = STATE_ORDER[nextIdx];
       if (!nextState) return;
+
+      // Gate B (SHARED -> PUBLISHED) requires an approver signature — open
+      // the dedicated modal instead of a simple confirm.
+      const isGateB = currentState === 'shared' && nextState === 'published';
+      if (isGateB) {
+        setApprovalTarget(container);
+        return;
+      }
+
       const ok = await confirm({
         title: t('cde.confirm_promote_title', { defaultValue: 'Promote container?' }),
         message: t('cde.confirm_promote_msg', {
@@ -891,7 +1133,12 @@ export function CDEPage() {
         confirmLabel: t('cde.action_promote', { defaultValue: 'Promote' }),
         variant: 'warning',
       });
-      if (ok) transitionMut.mutate({ id: container.id, targetState: nextState });
+      if (ok) {
+        transitionMut.mutate({
+          id: container.id,
+          payload: { target_state: nextState },
+        });
+      }
     },
     [transitionMut, confirm, t],
   );
@@ -1133,6 +1380,7 @@ export function CDEPage() {
                   container={c}
                   onPromote={handlePromote}
                   onLinkDocument={handleLinkDocument}
+                  onShowHistory={handleShowHistory}
                 />
               ))}
             </Card>
@@ -1162,6 +1410,30 @@ export function CDEPage() {
             qc.invalidateQueries({ queryKey: ['cde-revisions', linkTarget.id] });
             setLinkTarget(null);
           }}
+        />
+      )}
+
+      {/* Gate B approval signature modal */}
+      {approvalTarget && (
+        <ApprovalSignatureModal
+          container={approvalTarget}
+          onClose={() => setApprovalTarget(null)}
+          onSubmit={(payload) => {
+            transitionMut.mutate(
+              { id: approvalTarget.id, payload },
+              { onSuccess: () => setApprovalTarget(null) },
+            );
+          }}
+          isPending={transitionMut.isPending}
+        />
+      )}
+
+      {/* State transition history drawer */}
+      {historyTarget && (
+        <CDEHistoryDrawer
+          containerId={historyTarget.id}
+          containerCode={historyTarget.container_code}
+          onClose={() => setHistoryTarget(null)}
         />
       )}
     </div>

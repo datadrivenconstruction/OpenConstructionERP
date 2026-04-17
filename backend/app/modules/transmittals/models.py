@@ -103,6 +103,11 @@ class TransmittalItem(Base):
         index=True,
     )
     document_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Cross-link to a specific CDE document revision when the item was picked
+    # from the CDE container browser. ``document_id`` and ``revision_id`` are
+    # not mutually exclusive — when both are set, ``revision_id`` is the
+    # authoritative reference; ``document_id`` remains for free-form attachments.
+    revision_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     item_number: Mapped[int] = mapped_column(Integer, nullable=False)
     description: Mapped[str | None] = mapped_column(String(500), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)

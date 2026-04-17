@@ -11,6 +11,7 @@ import {
   ChevronDown,
   ChevronRight,
   Info,
+  Edit3,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, DateDisplay, SkeletonTable, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -20,12 +21,14 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
   fetchSubmittals,
   createSubmittal,
+  updateSubmittal,
   submitSubmittal,
   approveSubmittal,
   type Submittal,
   type SubmittalStatus,
   type SubmittalType,
   type CreateSubmittalPayload,
+  type UpdateSubmittalPayload,
   type ApproveSubmittalPayload,
 } from './api';
 
@@ -286,6 +289,194 @@ function CreateSubmittalModal({
   );
 }
 
+/* ── Edit Modal ───────────────────────────────────────────────────────── */
+
+function EditSubmittalModal({
+  submittal,
+  onClose,
+  onSubmit,
+  isPending,
+}: {
+  submittal: Submittal;
+  onClose: () => void;
+  onSubmit: (data: SubmittalFormData) => void;
+  isPending: boolean;
+}) {
+  const { t } = useTranslation();
+  const [form, setForm] = useState<SubmittalFormData>({
+    title: submittal.title,
+    spec_section: submittal.spec_section ?? '',
+    type: submittal.type,
+    date_required: submittal.date_required ?? '',
+    description: submittal.description ?? '',
+  });
+  const [touched, setTouched] = useState(false);
+
+  const set = <K extends keyof SubmittalFormData>(key: K, value: SubmittalFormData[K]) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
+
+  const titleError = touched && form.title.trim().length === 0;
+  const specError = touched && form.spec_section.trim().length === 0;
+  const canSubmit = form.title.trim().length > 0 && form.spec_section.trim().length > 0;
+
+  const handleSubmit = () => {
+    setTouched(true);
+    if (canSubmit) onSubmit(form);
+  };
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div
+        className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('submittals.edit_submittal', { defaultValue: 'Edit Submittal' })}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <h2 className="text-lg font-semibold text-content-primary">
+            {t('submittals.edit_submittal', { defaultValue: 'Edit Submittal' })}
+          </h2>
+          <button
+            onClick={onClose}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <div className="px-6 py-4 space-y-4">
+          {/* Title */}
+          <div>
+            <label htmlFor="edit-submittal-title" className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('submittals.field_title', { defaultValue: 'Title' })}{' '}
+              <span className="text-semantic-error">*</span>
+            </label>
+            <input
+              id="edit-submittal-title"
+              value={form.title}
+              onChange={(e) => {
+                set('title', e.target.value);
+                setTouched(true);
+              }}
+              className={clsx(
+                inputCls,
+                titleError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              )}
+              autoFocus
+            />
+            {titleError && (
+              <p className="mt-1 text-xs text-semantic-error">
+                {t('submittals.title_required', { defaultValue: 'Title is required' })}
+              </p>
+            )}
+          </div>
+
+          {/* Two-column: Spec Section + Type */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="edit-submittal-spec-section" className="block text-sm font-medium text-content-primary mb-1.5">
+                {t('submittals.field_spec_section', { defaultValue: 'Spec Section' })}{' '}
+                <span className="text-semantic-error">*</span>
+              </label>
+              <input
+                id="edit-submittal-spec-section"
+                value={form.spec_section}
+                onChange={(e) => {
+                  set('spec_section', e.target.value);
+                  setTouched(true);
+                }}
+                className={clsx(
+                  inputCls,
+                  specError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+                )}
+              />
+              {specError && (
+                <p className="mt-1 text-xs text-semantic-error">
+                  {t('submittals.spec_required', { defaultValue: 'Spec section is required' })}
+                </p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="edit-submittal-type" className="block text-sm font-medium text-content-primary mb-1.5">
+                {t('submittals.field_type', { defaultValue: 'Type' })}
+              </label>
+              <div className="relative">
+                <select
+                  id="edit-submittal-type"
+                  value={form.type}
+                  onChange={(e) => set('type', e.target.value as SubmittalType)}
+                  className={inputCls + ' appearance-none pr-9'}
+                >
+                  {(Object.keys(TYPE_LABELS) as SubmittalType[]).map((tp) => (
+                    <option key={tp} value={tp}>
+                      {t(`submittals.type_${tp}`, { defaultValue: TYPE_LABELS[tp] })}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+                  <ChevronDown size={14} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Date Required */}
+          <div>
+            <label htmlFor="edit-submittal-date-required" className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('submittals.field_date_required', { defaultValue: 'Date Required' })}
+            </label>
+            <input
+              id="edit-submittal-date-required"
+              type="date"
+              value={form.date_required}
+              onChange={(e) => set('date_required', e.target.value)}
+              className={inputCls}
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label htmlFor="edit-submittal-description" className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('submittals.field_description', { defaultValue: 'Description' })}
+            </label>
+            <textarea
+              id="edit-submittal-description"
+              value={form.description}
+              onChange={(e) => set('description', e.target.value)}
+              rows={3}
+              className={textareaCls}
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
+            {isPending && (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            )}
+            <span>{t('submittals.save_changes', { defaultValue: 'Save Changes' })}</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Approve/Review Modal ──────────────────────────────────────────────── */
 
 function ApproveModal({
@@ -409,10 +600,12 @@ const SubmittalRow = React.memo(function SubmittalRow({
   submittal,
   onSubmit,
   onReview,
+  onEdit,
 }: {
   submittal: Submittal;
   onSubmit: (id: string) => void;
   onReview: (s: Submittal) => void;
+  onEdit: (s: Submittal) => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -551,6 +744,17 @@ const SubmittalRow = React.memo(function SubmittalRow({
                 {t('submittals.action_review', { defaultValue: 'Review' })}
               </Button>
             )}
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Edit3 size={14} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(submittal);
+              }}
+            >
+              {t('common.edit', { defaultValue: 'Edit' })}
+            </Button>
           </div>
         </div>
       )}
@@ -570,6 +774,7 @@ export function SubmittalsPage() {
   // State
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [reviewingSubmittal, setReviewingSubmittal] = useState<Submittal | null>(null);
+  const [editingSubmittal, setEditingSubmittal] = useState<Submittal | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<SubmittalStatus | ''>('');
   const [infoDismissed, setInfoDismissed] = useState(
@@ -684,6 +889,25 @@ export function SubmittalsPage() {
       }),
   });
 
+  const updateMut = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateSubmittalPayload }) =>
+      updateSubmittal(id, data),
+    onSuccess: () => {
+      invalidateAll();
+      setEditingSubmittal(null);
+      addToast({
+        type: 'success',
+        title: t('submittals.updated', { defaultValue: 'Submittal updated' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
+
   const handleCreateSubmit = useCallback(
     (formData: SubmittalFormData) => {
       if (!projectId) {
@@ -726,6 +950,26 @@ export function SubmittalsPage() {
       approveMut.mutate({ id: reviewingSubmittal.id, data });
     },
     [approveMut, reviewingSubmittal],
+  );
+
+  const handleEdit = useCallback((s: Submittal) => {
+    setEditingSubmittal(s);
+  }, []);
+
+  const handleEditSubmit = useCallback(
+    (formData: SubmittalFormData) => {
+      if (!editingSubmittal) return;
+      updateMut.mutate({
+        id: editingSubmittal.id,
+        data: {
+          title: formData.title,
+          spec_section: formData.spec_section || undefined,
+          submittal_type: formData.type,
+          date_required: formData.date_required || undefined,
+        },
+      });
+    },
+    [updateMut, editingSubmittal],
   );
 
   return (
@@ -984,6 +1228,7 @@ export function SubmittalsPage() {
                   submittal={s}
                   onSubmit={handleSubmit}
                   onReview={handleReview}
+                  onEdit={handleEdit}
                 />
               ))}
             </Card>
@@ -1007,6 +1252,16 @@ export function SubmittalsPage() {
           onClose={() => setReviewingSubmittal(null)}
           onSubmit={handleApproveSubmit}
           isPending={approveMut.isPending}
+        />
+      )}
+
+      {/* Edit Modal */}
+      {editingSubmittal && (
+        <EditSubmittalModal
+          submittal={editingSubmittal}
+          onClose={() => setEditingSubmittal(null)}
+          onSubmit={handleEditSubmit}
+          isPending={updateMut.isPending}
         />
       )}
 

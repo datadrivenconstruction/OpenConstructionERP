@@ -66,6 +66,7 @@ class MeetingCreate(BaseModel):
         default="draft",
         pattern=r"^(draft|scheduled|in_progress|completed|cancelled)$",
     )
+    document_ids: list[UUID] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -93,6 +94,7 @@ class MeetingUpdate(BaseModel):
         default=None,
         pattern=r"^(draft|scheduled|in_progress|completed|cancelled)$",
     )
+    document_ids: list[UUID] | None = None
     metadata: dict[str, Any] | None = None
 
 
@@ -117,6 +119,7 @@ class MeetingResponse(BaseModel):
     action_items: list[dict[str, Any]] = Field(default_factory=list)
     minutes: str | None = None
     status: str = "draft"
+    document_ids: list[UUID] = Field(default_factory=list)
     created_by: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime

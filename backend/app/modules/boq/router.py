@@ -57,12 +57,19 @@ from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Upload
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep
+from app.dependencies import (
+    CurrentUserId,
+    CurrentUserPayload,
+    RequirePermission,
+    SessionDep,
+    verify_project_access,
+)
 from app.modules.boq.schemas import (
     ActivityLogList,
     AIChatRequest,
     AIChatResponse,
     AnomalyCheckResponse,
+    AnomalyResponse,
     BOQCreate,
     BOQFromTemplateRequest,
     BOQListItem,
@@ -89,12 +96,14 @@ from app.modules.boq.schemas import (
     CostRiskHistogramBin,
     CostRiskPercentiles,
     CostRiskResponse,
+    CostRollupItem,
     EnhanceDescriptionRequest,
     EnhanceDescriptionResponse,
     EscalateRateRequest,
     EscalateRateResponse,
     EscalationFactors,
     EstimateClassificationResponse,
+    LineItemResponse,
     MarkupCreate,
     MarkupResponse,
     MarkupUpdate,
@@ -4768,3 +4777,68 @@ async def boq_position_similar(
         "cross_project": cross_project,
         "hits": [h.to_dict() for h in hits],
     }
+
+
+# ── Project Intelligence (RFC 25) ───────────────────────────────────────────
+
+
+@router.get(
+    "/line-items/",
+    response_model=list[LineItemResponse],
+    summary="Top cost drivers by BOQ line (RFC 25)",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_line_items(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(..., description="Project scope"),
+    group: str = Query(
+        default="cost", description="Grouping strategy — reserved; defaults to 'cost'"
+    ),
+    top_n: int = Query(default=20, ge=1, le=200),
+    service: BOQService = Depends(_get_service),
+) -> list[LineItemResponse]:
+    """Return the top-N cost drivers across every BOQ in the project."""
+    await verify_project_access(project_id, user_id, session)
+    rows = await service.get_line_items(project_id, group=group, top_n=top_n)
+    return [LineItemResponse(**r) for r in rows]
+
+
+@router.get(
+    "/cost-rollup/",
+    response_model=list[CostRollupItem],
+    summary="Cost rollup by classification (RFC 25)",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_cost_rollup(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(..., description="Project scope"),
+    group_by: str = Query(
+        default="din276",
+        description="Classification key: din276 | nrm | masterformat | cost_code",
+    ),
+    service: BOQService = Depends(_get_service),
+) -> list[CostRollupItem]:
+    """Roll up BOQ totals by classification code (DIN 276 by default)."""
+    await verify_project_access(project_id, user_id, session)
+    rows = await service.get_cost_rollup(project_id, group_by=group_by)
+    return [CostRollupItem(**r) for r in rows]
+
+
+@router.get(
+    "/anomalies/",
+    response_model=list[AnomalyResponse],
+    summary="BOQ anomaly flags (RFC 25, statistical)",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_anomalies(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(..., description="Project scope"),
+    service: BOQService = Depends(_get_service),
+) -> list[AnomalyResponse]:
+    """Statistical anomaly detection (z-score + IQR + format checks)."""
+    await verify_project_access(project_id, user_id, session)
+    rows = await service.get_anomalies(project_id)
+    return [AnomalyResponse(**r) for r in rows]

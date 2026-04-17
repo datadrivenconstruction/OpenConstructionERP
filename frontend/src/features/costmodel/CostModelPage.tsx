@@ -2392,6 +2392,28 @@ export function CostModelPage() {
           {t('costmodel.back_to_projects', 'Back to projects')}
         </button>
 
+        {/* Scope indicator — single project */}
+        <div
+          className="mb-4 flex items-center gap-2 rounded-lg border border-oe-blue/30 bg-oe-blue-subtle/40 px-3 py-2"
+          role="status"
+          aria-live="polite"
+        >
+          <Target size={14} className="text-oe-blue shrink-0" />
+          <span className="text-xs font-medium text-oe-blue">
+            {t('costmodel.scope_single_project', {
+              defaultValue: 'Project: {{name}}',
+              name: selectedProject.name,
+            })}
+          </span>
+          <button
+            type="button"
+            onClick={handleBack}
+            className="ml-auto text-xs font-medium text-oe-blue hover:underline"
+          >
+            {t('costmodel.scope_view_all', { defaultValue: 'View all projects' })}
+          </button>
+        </div>
+
         <div className="mb-6 flex items-start gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue">
             <BarChart3 size={22} />
@@ -2474,6 +2496,24 @@ export function CostModelPage() {
         />
       ) : (
         <>
+          {/* Scope indicator — all projects aggregated view */}
+          <div
+            className="mb-6 flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/60 px-3 py-2"
+            role="status"
+            aria-live="polite"
+          >
+            <BarChart3 size={14} className="text-content-secondary shrink-0" />
+            <span className="text-xs font-medium text-content-primary">
+              {t('costmodel.scope_all_projects', {
+                defaultValue: 'Viewing all projects ({{count}})',
+                count: projects.length,
+              })}
+            </span>
+            <span className="text-2xs text-content-tertiary">
+              {t('costmodel.scope_all_hint', { defaultValue: 'Select a project below to drill into its cost model.' })}
+            </span>
+          </div>
+
           {/* Compact feature strip when projects exist */}
           <div className="mb-6 flex flex-wrap gap-2">
             {featureCards.map((feat) => (

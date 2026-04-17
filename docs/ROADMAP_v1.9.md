@@ -200,13 +200,13 @@ Each item gets an RFC at `docs/rfc/NN-slug.md` written **before** implementation
 - **RFC:** `docs/rfc/11-dwg-selection.md`
 - **Scope:** outer-polyline bias, click-to-hide, multi-select (box + layer), group linking, group aggregate (perimeter/length/area).
 - **Research needed:** current hit-testing code in `DxfViewer.tsx`, z-order, layer model.
-- **Status:** 🔲
+- **Status:** 🟢 Implemented — ranked hit-test via `collectHitCandidates` + `scoreOf` (RFC sign-flip corrected); `Set<string>` multi-select (breaking prop change); `hiddenEntityIds` state + right-click context menu; `aggregateEntities` helper (Σ area/perimeter/length + byType); new backend `POST/GET/DELETE /v1/dwg_takeoff/groups/` + migration + 6 backend tests + 25 frontend unit tests + Playwright spec.
 
 ### #16 — Data Explorer Power BI / Tableau features
 - **RFC:** `docs/rfc/16-data-explorer-analytics.md`
 - **Scope:** pivot, cross-filter, chart types, measure creation, drill-down, save view.
 - **Research needed:** current feature inventory, what libs available (AG Grid charts? ECharts?).
-- **Status:** 🔲
+- **Status:** 🟢 Implemented — `useAnalysisStateStore` with slicers/views/chart config + localStorage persistence; `numberFormat` lib (currency/percent/number); `aggregation.ts` helpers; Recharts lazy-loaded (Bar/Line/Pie/Scatter); SlicerBanner + TopNToggle + DrillDownModal + ViewsDrawer; 39 unit tests + 5 E2E cases. Backend PATCH persistence deferred to R3.
 
 ### #19 — BIM viewer control panel expansion
 - **RFC:** `docs/rfc/19-bim-viewer-controls.md`

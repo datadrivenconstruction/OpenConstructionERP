@@ -45,6 +45,9 @@ export class SelectionManager {
   private originalMaterials = new Map<string, THREE.Material>();
   private highlightMaterial: THREE.MeshStandardMaterial;
   private hoverMaterial: THREE.MeshStandardMaterial;
+  /** Per-selection bounding-box outlines (RFC 19 §4.3) — one helper per
+   *  selected element, removed and disposed on deselect. */
+  private boxHelpers = new Map<string, THREE.BoxHelper>();
 
   private canvas: HTMLCanvasElement;
   private boundOnPointerDown: (e: PointerEvent) => void;
@@ -304,11 +307,13 @@ export class SelectionManager {
     this.saveMaterial(elementId, mesh);
     mesh.material = this.highlightMaterial;
     this.selectedIds.add(elementId);
+    this.addBoxHelper(elementId, mesh);
   }
 
   /** Deselect an element. */
   deselectElement(elementId: string): void {
     this.restoreMaterial(elementId);
+    this.removeBoxHelper(elementId);
     this.selectedIds.delete(elementId);
   }
 
@@ -316,6 +321,7 @@ export class SelectionManager {
   clearSelection(): void {
     for (const id of this.selectedIds) {
       this.restoreMaterial(id);
+      this.removeBoxHelper(id);
     }
     this.selectedIds.clear();
   }
@@ -366,6 +372,35 @@ export class SelectionManager {
     this.originalMaterials.delete(elementId);
   }
 
+  /** Attach a dashed white BoxHelper around the newly selected mesh. */
+  private addBoxHelper(elementId: string, mesh: THREE.Mesh): void {
+    const existing = this.boxHelpers.get(elementId);
+    if (existing) {
+      this.sceneManager.scene.remove(existing);
+      existing.geometry.dispose();
+      (existing.material as THREE.LineBasicMaterial).dispose();
+    }
+    const helper = new THREE.BoxHelper(mesh, 0xffffff);
+    const mat = helper.material as THREE.LineBasicMaterial;
+    mat.transparent = true;
+    mat.opacity = 0.8;
+    mat.depthTest = false;
+    helper.renderOrder = 999;
+    this.sceneManager.scene.add(helper);
+    this.boxHelpers.set(elementId, helper);
+    this.sceneManager.requestRender();
+  }
+
+  private removeBoxHelper(elementId: string): void {
+    const helper = this.boxHelpers.get(elementId);
+    if (!helper) return;
+    this.sceneManager.scene.remove(helper);
+    helper.geometry.dispose();
+    (helper.material as THREE.LineBasicMaterial).dispose();
+    this.boxHelpers.delete(elementId);
+    this.sceneManager.requestRender();
+  }
+
   /** Notify parent about selection changes. */
   private notifySelectionChange(): void {
     this.callbacks.onSelectionChange?.(this.getSelectedIds());
@@ -380,6 +415,12 @@ export class SelectionManager {
     this.canvas.removeEventListener('dblclick', this.boundOnDblClick);
     this.highlightMaterial.dispose();
     this.hoverMaterial.dispose();
+    for (const helper of this.boxHelpers.values()) {
+      this.sceneManager.scene.remove(helper);
+      helper.geometry.dispose();
+      (helper.material as THREE.LineBasicMaterial).dispose();
+    }
+    this.boxHelpers.clear();
     this.originalMaterials.clear();
     this.selectedIds.clear();
     this.canvas.style.cursor = 'default';
