@@ -224,6 +224,40 @@ class DwgTakeoffService:
             project_id,
         )
 
+        # Cross-link: create a Document row pointing at the same file on
+        # disk so the drawing also appears in the Documents hub.  This is
+        # best-effort — failure here MUST NOT break the drawing upload.
+        # The document is NOT a copy: ``file_path`` references the same
+        # blob already persisted by the dwg_takeoff module.
+        try:
+            from app.modules.documents.models import Document
+
+            xlink_doc = Document(
+                project_id=project_id,
+                name=filename,
+                description=f"DWG/DXF drawing: {name or filename}",
+                category="drawing",
+                file_size=size_bytes,
+                mime_type=f"image/vnd.{file_format}",
+                file_path=file_path,
+                version=1,
+                uploaded_by=user_id or "",
+                tags=["dwg-takeoff", file_format] + ([discipline] if discipline else []),
+                metadata_={
+                    "source_module": "dwg_takeoff",
+                    "source_id": str(drawing_id),
+                },
+            )
+            self.session.add(xlink_doc)
+            await self.session.flush()
+            logger.info(
+                "Cross-linked DWG drawing %s → document %s",
+                drawing_id,
+                xlink_doc.id,
+            )
+        except Exception as exc:
+            logger.warning("Failed to cross-link DWG to documents hub: %s", exc)
+
         # Trigger processing
         if file_format == "dxf":
             await self._process_drawing(drawing_id, file_path)
