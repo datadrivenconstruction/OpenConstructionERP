@@ -27,6 +27,11 @@ interface Measurement {
   height?: number;
   /** Server-side ID (set after first sync). */
   serverId?: string;
+  /** BOQ link metadata carried through persistence. */
+  linkedPositionId?: string;
+  linkedPositionOrdinal?: string;
+  linkedBoqId?: string;
+  linkedPositionLabel?: string;
 }
 
 interface ScaleConfig {
@@ -109,12 +114,16 @@ function toApiFormat(m: Measurement, projectId: string, documentId: string): Mea
     volume: m.type === 'volume' ? m.value : null,
     count_value: m.type === 'count' ? Math.round(m.value) : null,
     scale_pixels_per_unit: null,
+    linked_boq_position_id: m.linkedPositionId ?? null,
     metadata: {
       text: m.text,
       width: m.width,
       height: m.height,
       area: m.area,
       frontend_id: m.id,
+      linked_boq_id: m.linkedBoqId,
+      linked_position_ordinal: m.linkedPositionOrdinal,
+      linked_position_label: m.linkedPositionLabel,
     },
   };
 }
@@ -138,6 +147,10 @@ function fromApiFormat(r: MeasurementResponse): Measurement {
     color: r.group_color || undefined,
     width: (meta.width as number) ?? undefined,
     height: (meta.height as number) ?? undefined,
+    linkedPositionId: r.linked_boq_position_id ?? undefined,
+    linkedBoqId: (meta.linked_boq_id as string) ?? undefined,
+    linkedPositionOrdinal: (meta.linked_position_ordinal as string) ?? undefined,
+    linkedPositionLabel: (meta.linked_position_label as string) ?? undefined,
   };
 }
 

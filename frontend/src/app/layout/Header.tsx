@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Search, ChevronDown, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, CheckCircle2, XCircle, Bug, BookOpen, Loader2, Upload } from 'lucide-react';
 import clsx from 'clsx';
@@ -472,9 +472,55 @@ function UserMenu() {
 
 /* ── Project Switcher (global dropdown in header) ─────────────────────── */
 
+/**
+ * Compute where to navigate after switching projects in the global picker.
+ *
+ * We stay on the same module but never keep a URL that points at an
+ * entity (BOQ / BIM model / assembly / transmittal / …) owned by the
+ * *previous* project — that entity doesn't belong to the new project,
+ * so the page would either 404 or silently show stale data.
+ *
+ * Rules:
+ *   `/projects/:oldId` or `/projects/:oldId/sub` → swap in the new id
+ *       (e.g. /projects/AAA/finance → /projects/BBB/finance)
+ *   `/<module>/:entityId` where `<module>` is one of the entity-scoped
+ *       list-plus-detail modules → redirect to the module list `/<module>`
+ *   everything else → stay on the same URL
+ */
+export function resolveRouteAfterProjectSwitch(
+  pathname: string,
+  newProjectId: string,
+): string | null {
+  const projectSub = pathname.match(/^\/projects\/[^/]+(\/.*)?$/);
+  if (projectSub) {
+    const suffix = projectSub[1] ?? '';
+    return `/projects/${newProjectId}${suffix}`;
+  }
+  // Module-scoped detail routes.  The list lives at /<module>.
+  const entityRoutes: Array<[RegExp, string]> = [
+    [/^\/boq\/[^/]+/, '/boq'],
+    [/^\/bim\/[^/]+/, '/bim'],
+    [/^\/assemblies\/[^/]+/, '/assemblies'],
+    [/^\/takeoff\/[^/]+/, '/takeoff'],
+    [/^\/documents\/[^/]+/, '/documents'],
+    [/^\/transmittals\/[^/]+/, '/transmittals'],
+    [/^\/rfi\/[^/]+/, '/rfi'],
+    [/^\/submittals\/[^/]+/, '/submittals'],
+    [/^\/contacts\/[^/]+/, '/contacts'],
+    [/^\/tasks\/[^/]+/, '/tasks'],
+    [/^\/markups\/[^/]+/, '/markups'],
+    [/^\/reports\/[^/]+/, '/reports'],
+  ];
+  for (const [re, list] of entityRoutes) {
+    if (re.test(pathname)) return list;
+  }
+  return null;
+}
+
 function ProjectSwitcher() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
   const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
@@ -601,7 +647,12 @@ function ProjectSwitcher() {
             {visibleProjects.map((p) => (
               <button
                 key={p.id}
-                onClick={() => { setActiveProject(p.id, p.name); setOpen(false); }}
+                onClick={() => {
+                  setActiveProject(p.id, p.name);
+                  const target = resolveRouteAfterProjectSwitch(location.pathname, p.id);
+                  if (target && target !== location.pathname) navigate(target);
+                  setOpen(false);
+                }}
                 className={clsx(
                   'flex w-full items-center gap-2.5 px-4 py-2 text-sm transition-colors',
                   p.id === activeProjectId

@@ -14,6 +14,26 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.8.0',
+    date: '2026-04-17',
+    changes: [
+      'BOQ ↔ PDF Takeoff deep linking: individual measurements now link to positions; quantity auto-transfers bidirectionally (measurement ↔ position metadata)',
+      'BOQ grid: red PDF + amber DWG link icons next to positions; click opens document in same tab (auth preserved)',
+      'BOQ Linked Geometry popover: "Set as quantity" buttons next to BIM parameter values for one-click apply',
+      'Takeoff: tab order swapped (Measurements first, AI/Documents second); reduced rounded corners; cleaner tool buttons',
+      'Takeoff: bottom filmstrip of previously uploaded project documents with click-to-open',
+      'Takeoff: barely-visible decorative geometry behind viewer (rectangles, polylines, scale rulers) like field-surveyor markings',
+      'BIM landing: tileable isometric-cube pattern background (airy, near-invisible, no scrollbar)',
+      'BIM filmstrip: no longer auto-collapses — always visible for quick model switching',
+      'DWG Takeoff: toolbar palette now white-glass for visibility on dark #3f3f3f canvas',
+      'DWG Takeoff: right-side panel re-themed to match dark canvas (readable contrast)',
+      'DWG Takeoff: drawings filmstrip re-themed dark to match page background',
+      'CAD Data Explorer: decorative semi-transparent spreadsheet grid background; no horizontal or vertical scroll on landing',
+      'Chat: markdown links like [Settings](/settings) now render as proper clickable anchors',
+      'Projects: self-healing stale project IDs — auto-cleanup of context and recent stores on 404',
+    ],
+  },
+  {
     version: '1.7.2',
     date: '2026-04-16',
     changes: [

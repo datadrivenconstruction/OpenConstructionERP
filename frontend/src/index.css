@@ -1276,12 +1276,16 @@ tbody tr:nth-child(20) { animation-delay: 570ms; }
    Dark mode = faint white lines on a deep drafting-board canvas.
    1:5 minor:major ratio mirrors AutoCAD's default grid snap. */
 .oe-dwg-canvas {
-  --oe-dwg-grid-minor: rgba(255, 255, 255, 0.04);
-  --oe-dwg-grid-major: rgba(255, 255, 255, 0.08);
+  /* Bumped from 0.04/0.08 → 0.10/0.20 so the drafting grid actually
+     reads as a grid rather than a barely-visible texture. */
+  --oe-dwg-grid-minor: rgba(255, 255, 255, 0.10);
+  --oe-dwg-grid-major: rgba(255, 255, 255, 0.20);
   --oe-dwg-vignette: rgba(0, 0, 0, 0.45);
 }
 :root:not(.dark) .oe-dwg-canvas {
-  --oe-dwg-grid-minor: rgba(0, 0, 0, 0.04);
-  --oe-dwg-grid-major: rgba(0, 0, 0, 0.08);
+  /* Light mode: bumped from 0.04/0.08 → 0.09/0.18 so the lines stand
+     out against the pale canvas without becoming distracting. */
+  --oe-dwg-grid-minor: rgba(0, 0, 0, 0.09);
+  --oe-dwg-grid-major: rgba(0, 0, 0, 0.18);
   --oe-dwg-vignette: rgba(0, 0, 0, 0.10);
 }

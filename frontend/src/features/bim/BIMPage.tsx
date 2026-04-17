@@ -132,14 +132,6 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
 
-  // Auto-collapse after 10 seconds, but only when there are 3+ models
-  // (1-2 models are fast to scan, no need to hide the filmstrip)
-  useEffect(() => {
-    if (models.length < 3) return;
-    const timer = setTimeout(() => setExpanded(false), 10_000);
-    return () => clearTimeout(timer);
-  }, [models.length]);
-
   return (
     <div className="shrink-0 bg-surface-primary border-t border-border-light">
       {/* Header — always visible with drag handle, title, and count */}
@@ -854,119 +846,6 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
   );
 }
 
-/* ── BIM Empty State Animation ──────────────────────────────────────── */
-
-/** Decorative animation palette for the BIM empty-state 3D building illustration */
-const BIM_ANIM = {
-  /* Tower 1 (indigo) */
-  indigoLight: '#818cf8',
-  indigo: '#6366f1',
-  indigoDark: '#4338ca',
-  /* Tower 2 (emerald) */
-  emeraldLight: '#34d399',
-  emerald: '#10b981',
-  emeraldDark: '#059669',
-  /* Tower 3 (violet) */
-  violetLight: '#a78bfa',
-  violet: '#8b5cf6',
-  violetDark: '#6d28d9',
-  /* rgba building blocks for translucent fills */
-  indigoRgb: '99,102,241',
-  emeraldRgb: '16,185,129',
-  violetRgb: '139,92,246',
-  indigoDarkRgb: '67,56,202',
-  emeraldDarkRgb: '5,150,105',
-  violetDarkRgb: '109,40,217',
-} as const;
-
-function BIMEmptyAnimation() {
-  return (
-    <div className="relative w-full" style={{ maxWidth: 440, height: 260, margin: '0 auto' }}>
-      <style>{`
-        @keyframes bim3dRotate {
-          0% { transform: perspective(1200px) rotateX(12deg) rotateY(-18deg); }
-          50% { transform: perspective(1200px) rotateX(8deg) rotateY(8deg); }
-          100% { transform: perspective(1200px) rotateX(12deg) rotateY(-18deg); }
-        }
-        @keyframes bimSlideUp {
-          0%, 8% { transform: translateY(30px) scale(0.9); opacity: 0; }
-          18%, 72% { transform: translateY(0) scale(1); opacity: 1; }
-          85%, 100% { transform: translateY(0) scale(1); opacity: 0.2; }
-        }
-        @keyframes bimGlow {
-          0%, 100% { box-shadow: 0 0 0 rgba(${BIM_ANIM.indigoRgb},0); }
-          50% { box-shadow: 0 0 20px rgba(${BIM_ANIM.indigoRgb},0.15); }
-        }
-        @keyframes bimScan {
-          0%, 100% { top: 10%; opacity: 0; }
-          20% { opacity: 0.6; }
-          80% { opacity: 0.6; }
-          50% { top: 80%; }
-        }
-        @keyframes bimDataFlow {
-          0%, 15% { transform: translateX(-10px); opacity: 0; width: 0; }
-          30%, 68% { transform: translateX(0); opacity: 0.6; width: 100%; }
-          82%, 100% { transform: translateX(0); opacity: 0; width: 100%; }
-        }
-        @keyframes bimRowIn {
-          0%, 40% { transform: translateX(8px); opacity: 0; }
-          55%, 72% { transform: translateX(0); opacity: 0.8; }
-          85%, 100% { opacity: 0; }
-        }
-        @keyframes bimPulseRing {
-          0%, 100% { transform: scale(0.8); opacity: 0; }
-          50% { transform: scale(1.3); opacity: 0.3; }
-        }
-      `}</style>
-
-      {/* 3D isometric building */}
-      <div style={{ position: 'absolute', left: 24, top: 10, width: 170, height: 240, animation: 'bim3dRotate 12s ease-in-out infinite' }}>
-        {/* Ground plane */}
-        <div style={{ position: 'absolute', bottom: 0, left: -12, right: -12, height: 6, borderRadius: 3, background: `linear-gradient(90deg, rgba(${BIM_ANIM.indigoRgb},0.08), rgba(${BIM_ANIM.indigoRgb},0.15), rgba(${BIM_ANIM.indigoRgb},0.08))` }} />
-        {/* Tower 1 */}
-        <div style={{ position: 'absolute', left: 0, bottom: 6, width: 44, height: 160, borderRadius: '6px 6px 2px 2px', background: `linear-gradient(180deg, ${BIM_ANIM.indigoLight} 0%, var(--oe-blue) 60%, ${BIM_ANIM.indigoDark} 100%)`, animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0s', boxShadow: `4px 4px 0 rgba(${BIM_ANIM.indigoDarkRgb},0.3)` }}>
-          {[24, 44, 64, 84, 104, 124, 144].map((t, i) => <div key={i} style={{ position: 'absolute', left: 6, top: t, width: 12, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.35)' }} />)}
-          {[24, 44, 64, 84, 104, 124, 144].map((t, i) => <div key={`r${i}`} style={{ position: 'absolute', left: 24, top: t, width: 12, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.25)' }} />)}
-        </div>
-        {/* Tower 2 */}
-        <div style={{ position: 'absolute', left: 52, bottom: 6, width: 38, height: 115, borderRadius: '5px 5px 2px 2px', background: `linear-gradient(180deg, ${BIM_ANIM.emeraldLight} 0%, ${BIM_ANIM.emerald} 60%, ${BIM_ANIM.emeraldDark} 100%)`, animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.3s', boxShadow: `4px 4px 0 rgba(${BIM_ANIM.emeraldDarkRgb},0.3)` }}>
-          {[18, 36, 54, 72, 90].map((t, i) => <div key={i} style={{ position: 'absolute', left: 6, top: t, width: 10, height: 6, borderRadius: 1, background: 'rgba(255,255,255,0.35)' }} />)}
-        </div>
-        {/* Tower 3 */}
-        <div style={{ position: 'absolute', left: 98, bottom: 6, width: 54, height: 135, borderRadius: '6px 6px 2px 2px', background: `linear-gradient(180deg, ${BIM_ANIM.violetLight} 0%, ${BIM_ANIM.violet} 60%, ${BIM_ANIM.violetDark} 100%)`, animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.6s', boxShadow: `4px 4px 0 rgba(${BIM_ANIM.violetDarkRgb},0.3)` }}>
-          {[20, 40, 60, 80, 100, 120].map((t, i) => <div key={i} style={{ position: 'absolute', left: 7, top: t, width: 14, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.3)' }} />)}
-          {[20, 40, 60, 80, 100, 120].map((t, i) => <div key={`r${i}`} style={{ position: 'absolute', left: 30, top: t, width: 14, height: 7, borderRadius: 1, background: 'rgba(255,255,255,0.2)' }} />)}
-        </div>
-        {/* Bridge between towers */}
-        <div style={{ position: 'absolute', left: 42, bottom: 72, width: 60, height: 9, borderRadius: 2, background: `linear-gradient(90deg, var(--oe-blue), ${BIM_ANIM.violet})`, animation: 'bimSlideUp 10s ease-out infinite', animationDelay: '0.9s' }} />
-        {/* Scanning line */}
-        <div style={{ position: 'absolute', left: -5, width: 'calc(100% + 10px)', height: 2, background: 'linear-gradient(90deg, transparent, var(--oe-blue), transparent)', animation: 'bimScan 4s ease-in-out infinite', borderRadius: 1 }} />
-        {/* Glow ring around building */}
-        <div style={{ position: 'absolute', inset: -8, borderRadius: 12, border: `1px solid rgba(${BIM_ANIM.indigoRgb},0.1)`, animation: 'bimGlow 3s ease-in-out infinite' }} />
-      </div>
-
-      {/* Data flow arrows */}
-      <div style={{ position: 'absolute', left: 200, top: 100, width: 50, height: 2, background: `linear-gradient(90deg, var(--oe-blue), ${BIM_ANIM.emerald})`, borderRadius: 1, transformOrigin: 'left', animation: 'bimDataFlow 10s ease-out infinite', animationDelay: '1.5s' }} />
-      <div style={{ position: 'absolute', left: 200, top: 135, width: 50, height: 2, background: `linear-gradient(90deg, ${BIM_ANIM.violet}, var(--oe-blue))`, borderRadius: 1, transformOrigin: 'left', animation: 'bimDataFlow 10s ease-out infinite', animationDelay: '1.8s' }} />
-      {/* Pulse dots at connection */}
-      <div style={{ position: 'absolute', left: 197, top: 96, width: 10, height: 10, borderRadius: '50%', border: '1.5px solid var(--oe-blue)', animation: 'bimPulseRing 3s ease-out infinite' }} />
-      <div style={{ position: 'absolute', left: 197, top: 131, width: 10, height: 10, borderRadius: '50%', border: `1.5px solid ${BIM_ANIM.violet}`, animation: 'bimPulseRing 3s ease-out infinite', animationDelay: '0.5s' }} />
-
-      {/* BOQ Table */}
-      <div style={{ position: 'absolute', right: 10, top: 60, width: 120, height: 150 }}>
-        <div style={{ width: '100%', height: 14, borderRadius: '6px 6px 0 0', background: `linear-gradient(135deg, var(--oe-blue), ${BIM_ANIM.indigo})`, animation: 'bimRowIn 10s ease-out infinite', animationDelay: '2s' }} />
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <div key={i} style={{ display: 'flex', gap: 2, marginTop: 3, animation: 'bimRowIn 10s ease-out infinite', animationDelay: `${2.2 + i * 0.15}s` }}>
-            <div style={{ flex: 2, height: 10, borderRadius: 3, background: i % 2 === 0 ? `linear-gradient(90deg, rgba(${BIM_ANIM.indigoRgb},0.2), rgba(${BIM_ANIM.indigoRgb},0.08))` : `linear-gradient(90deg, rgba(${BIM_ANIM.emeraldRgb},0.2), rgba(${BIM_ANIM.emeraldRgb},0.08))` }} />
-            <div style={{ flex: 1, height: 10, borderRadius: 3, background: `rgba(${BIM_ANIM.violetRgb},0.12)` }} />
-          </div>
-        ))}
-        <div style={{ position: 'absolute', inset: 0, border: `1px solid rgba(${BIM_ANIM.indigoRgb},0.1)`, borderRadius: 6, pointerEvents: 'none' }} />
-      </div>
-    </div>
-  );
-}
-
 /* ── Landing Page ────────────────────────────────────────────────────── */
 
 function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrumbItems, models: landingModels, onSelectModel, onDeleteModel }: {
@@ -1050,8 +929,68 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
   return (
     <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
       <div className="px-6 pt-4 pb-3 border-b border-border-light"><Breadcrumb items={breadcrumbItems} /></div>
-      <div className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-blue-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20">
-        <div className="max-w-7xl mx-auto pt-20 pb-4">
+      {/* Soft modern background — calm base gradient plus two muted
+          blurred colour blobs (top-left blue, bottom-right violet) for
+          subtle depth.  Restrained on purpose: enough colour to feel
+          "designed" without competing with the foreground content. */}
+      <div className="relative flex-1 overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-slate-900">
+        {/* Decorative cubes — tiled SVG pattern.  Large sparse tile
+            (960×720) so cubes feel airy, not cluttered.  Stroke + fill
+            both near-invisible (0.015 / 0.12) so the layer is pure
+            texture.  Container uses `overflow-hidden` so the scrollbar
+            the user was seeing is gone — the landing content scrolls
+            inside its own inner area instead. */}
+        <svg
+          aria-hidden
+          className="pointer-events-none absolute inset-0 w-full h-full z-0 text-slate-500 dark:text-slate-300"
+          preserveAspectRatio="xMidYMid slice"
+        >
+          <defs>
+            <linearGradient id="bimCubeFadeTop" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="currentColor" stopOpacity="0.012" />
+              <stop offset="100%" stopColor="currentColor" stopOpacity="0.003" />
+            </linearGradient>
+            <linearGradient id="bimCubeFadeLeft" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="currentColor" stopOpacity="0.009" />
+              <stop offset="100%" stopColor="currentColor" stopOpacity="0.002" />
+            </linearGradient>
+            <linearGradient id="bimCubeFadeRight" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="currentColor" stopOpacity="0.002" />
+              <stop offset="100%" stopColor="currentColor" stopOpacity="0.008" />
+            </linearGradient>
+            <symbol id="bimIsoCube" viewBox="-100 -120 200 240">
+              <polygon points="0,-100 90,-50 0,0 -90,-50" fill="url(#bimCubeFadeTop)" stroke="currentColor" strokeWidth="0.5" strokeOpacity="0.12" />
+              <polygon points="-90,-50 0,0 0,100 -90,50" fill="url(#bimCubeFadeLeft)" stroke="currentColor" strokeWidth="0.5" strokeOpacity="0.12" />
+              <polygon points="90,-50 0,0 0,100 90,50" fill="url(#bimCubeFadeRight)" stroke="currentColor" strokeWidth="0.5" strokeOpacity="0.12" />
+              <line x1="0" y1="-100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.25" strokeOpacity="0.1" />
+            </symbol>
+            {/* Smaller denser tile — many small cubes so the page
+                reads as a subtle isometric grid rather than a few
+                big, heavy shapes.  520×400, cubes at scale ≈0.28-0.36. */}
+            <pattern id="bimCubeTile" x="0" y="0" width="520" height="400" patternUnits="userSpaceOnUse">
+              <g transform="translate(90 120) scale(0.32)"><use href="#bimIsoCube" /></g>
+              <g transform="translate(270 90) scale(0.28)"><use href="#bimIsoCube" /></g>
+              <g transform="translate(430 160) scale(0.3)"><use href="#bimIsoCube" /></g>
+              <g transform="translate(180 270) scale(0.36)"><use href="#bimIsoCube" /></g>
+              <g transform="translate(380 330) scale(0.26)"><use href="#bimIsoCube" /></g>
+              <g transform="translate(60 330)" opacity="0.1" stroke="currentColor" strokeWidth="0.4" fill="none">
+                <polygon points="0,-32 27,-16 0,0 -27,-16" />
+                <polygon points="-27,-16 0,0 0,32 -27,16" />
+                <polygon points="27,-16 0,0 0,32 27,16" strokeDasharray="3 3" />
+              </g>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#bimCubeTile)" />
+        </svg>
+        {/* Content wrapper — compact layout + `overflow-y-auto` with
+            hidden scrollbar means scrolling still works on short
+            viewports but the scrollbar is invisible.  Tight padding
+            below so the typical 1080p viewport fits everything without
+            needing to scroll. */}
+        <div className="absolute inset-0 overflow-y-auto overflow-x-hidden scrollbar-none z-10">
+        <div aria-hidden className="pointer-events-none absolute -top-32 -left-32 w-[520px] h-[520px] rounded-full bg-blue-200/25 dark:bg-blue-500/8 blur-[140px]" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-32 -right-32 w-[520px] h-[520px] rounded-full bg-violet-200/20 dark:bg-violet-500/8 blur-[140px]" />
+        <div className="relative max-w-7xl mx-auto px-6 pt-6 pb-4">
 
           {/* Row 1: Upload card (left) + Hero text (right) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch mb-8">
@@ -1187,7 +1126,11 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
               )}
             </div>
 
-            {/* RIGHT — Hero text + animation */}
+            {/* RIGHT — Hero text + local-processing badge (chip styled to
+                match /dwg-takeoff so the trust signal reads identically
+                across CAD modules). The decorative animation was
+                removed to keep the page calm and let the modern mesh
+                background carry the visual weight. */}
             <div className="flex flex-col justify-center gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-content-primary tracking-tight leading-tight">{t('bim.landing_hero_title')}</h1>
@@ -1197,18 +1140,23 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                 <p className="text-xs text-content-tertiary mt-3 leading-relaxed">
                   {t('bim.landing_formats_detailed', { defaultValue: 'Revit 2015\u20132026 (.rvt) \u00B7 IFC 2x3, 4.0, 4.1, 4.3 (.ifc) \u00B7 CSV \u00B7 Excel. DWG \u2192 DWG Takeoff.' })}
                 </p>
-                <p className="mt-2 flex items-center gap-1.5 text-[11px] text-content-tertiary">
-                  <ShieldCheck size={12} className="shrink-0" />
-                  <span>
-                    {t('common.local_processing', { defaultValue: '100% Local Processing — Your files never leave your computer' })}
-                    {' \u00B7 '}
-                    {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC cad2data' })}
-                  </span>
-                </p>
-              </div>
-              {/* Animation — fills remaining space */}
-              <div className="hidden lg:block mt-auto opacity-60 overflow-hidden">
-                <BIMEmptyAnimation />
+                <div className="mt-4 flex items-center justify-start">
+                  <div className="inline-flex flex-wrap items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                    <ShieldCheck size={14} className="text-emerald-500 dark:text-emerald-400 shrink-0" />
+                    <span className="text-xs text-emerald-700 dark:text-emerald-300/90 font-medium">
+                      {t('common.local_processing', { defaultValue: '100% Local Processing \u00B7 Your files never leave your computer' })}
+                    </span>
+                    <span className="text-[10px] text-emerald-500/40">|</span>
+                    <a
+                      href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-emerald-600/80 dark:text-emerald-400/70 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline whitespace-nowrap"
+                    >
+                      {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC cad2data' })}
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1360,6 +1308,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
             </div>
           )}
 
+        </div>
         </div>
       </div>
 
@@ -2243,6 +2192,8 @@ export function BIMPage() {
               onLinkGroupToBOQ={handleLinkGroupToBOQ}
               onDeleteGroup={handleDeleteGroup}
               onSmartFilter={handleSmartFilter}
+              isolatedIds={isolatedIds}
+              onClearIsolation={() => setIsolatedIds(null)}
             />
             {/* Saved Groups panel — shows all groups with quantities + BOQ links */}
             {savedGroups.length > 0 && (
@@ -2334,6 +2285,7 @@ export function BIMPage() {
             filterPredicate={filterPredicate}
             colorByMode={colorByMode}
             isolatedIds={isolatedIds}
+            onIsolationChange={setIsolatedIds}
             onGeometryLoaded={setMeshMatchRatio}
             onAddToBOQ={handleAddToBOQ}
             onUnlinkBOQ={handleUnlinkBOQ}
