@@ -14,6 +14,20 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.9.0',
+    date: '2026-04-17',
+    changes: [
+      'BOQ editor: adding a catalog resource to a position now updates the grid instantly via optimistic cache write + networkMode offlineFirst; reload no longer hangs on the BOQ query (issue #2)',
+      'Offline hardening: global React Query client switched to networkMode offlineFirst with navigator.onLine retry guard — eliminates "AbortError: signal is aborted without reason" on /boq and other list pages when the network drops (issue #5)',
+      'Project detail page: distinguishes true 404 from network / 5xx errors. New Offline / Retry UI replaces the misleading "Project not found" empty state; sidebar recents are only cleared when the project really is gone (issue #6)',
+      'Takeoff: uploaded documents persist across reloads via activeDocId URL sync. Backend was already persisting + cross-linking to /documents (issue #8)',
+      'BIM viewer: Link-to-BOQ and Save-as-Group buttons now appear whenever any elements are visible — previously hidden when grouped by Type Name without an active filter (issue #18)',
+      'BIM Quantity Rules: created rules reliably appear in the list (mutationKey + awaited invalidate); no-project-context view now correctly shows only org-wide rules instead of leaking project-scoped ones (issue #23)',
+      'Tasks: create dialog pre-fills task_type with the active category tab (Topic / Information / Decision / Personal / custom) — previously every new task landed under "Task" regardless of which tab opened the dialog (issue #27)',
+      'CDE: New Container surfaces concrete error messages (was silent on 4xx/5xx); list refreshes before the dialog closes (issue #33)',
+    ],
+  },
+  {
     version: '1.8.3',
     date: '2026-04-17',
     changes: [

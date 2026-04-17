@@ -12,10 +12,26 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 30_000, // 30s — data considered fresh for 30s, then refetch on focus/mount
       gcTime: 5 * 60_000, // 5min — keep in cache for 5 min after unmount
-      retry: 1,
+      // Offline-first: try the cache before spinning a 300s AbortController.
+      // `api.ts` falls back to IndexedDB via offlineStore on network errors,
+      // so we never want to retry a query that's going to fail for the same
+      // reason anyway.
+      networkMode: 'offlineFirst',
+      retry: (count, error) => {
+        if (!navigator.onLine) return false;
+        // 4xx responses are deterministic — don't retry.
+        if (error && typeof error === 'object' && 'status' in error) {
+          const status = (error as { status: number }).status;
+          if (status >= 400 && status < 500) return false;
+        }
+        return count < 1;
+      },
       refetchOnWindowFocus: true, // refetch when user tabs back
     },
     mutations: {
+      // Mutations while offline are queued by offlineStore and replayed on
+      // reconnect — no need for react-query-level retry.
+      networkMode: 'offlineFirst',
       retry: 0,
     },
   },
