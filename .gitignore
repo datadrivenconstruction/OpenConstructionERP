@@ -47,6 +47,8 @@ coverage.xml
 .pytest_cache/
 frontend/test-results/
 frontend/e2e-results/
+frontend/e2e/v1.9/.auth-token.txt
+frontend/e2e/v1.9/.auth-state.json
 *.trace.zip
 
 # Build

@@ -9,7 +9,11 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+# Bound ints at PostgreSQL INT4 max — anything above is clearly bad input and
+# would overflow the underlying column.
+_INT32_MAX = 2_147_483_647
 
 # ── Change Order schemas ─────────────────────────────────────────────────────
 
@@ -17,7 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class ChangeOrderCreate(BaseModel):
     """Create a new change order."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     project_id: UUID
     title: str = Field(..., min_length=1, max_length=255)
@@ -26,15 +30,30 @@ class ChangeOrderCreate(BaseModel):
         default="client_request",
         pattern=r"^(client_request|design_change|unforeseen|regulatory|error)$",
     )
-    schedule_impact_days: int = Field(default=0, ge=0)
+    schedule_impact_days: int = Field(default=0, ge=0, le=_INT32_MAX)
     currency: str = Field(default="EUR", max_length=10)
+    # BUG-385: cost_impact was silently dropped at create time because
+    # it wasn't on the schema. Accept it here for the common manual-entry
+    # case; when line items are added ``add_item`` will still recompute.
+    cost_impact: str | None = Field(
+        default=None,
+        max_length=50,
+        description="Optional initial cost impact (signed decimal string, e.g. '1250.50'). Recomputed from items when items are added.",
+    )
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ChangeOrderUpdate(BaseModel):
-    """Partial update for a change order."""
+    """Partial update for a change order.
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    Status transitions must go through the dedicated action endpoints
+    (``/submit``, ``/approve``, ``/reject``). Sending ``status`` here
+    returns 422 instead of silently ignoring it — the silent-ignore
+    behaviour was :bug:`385` and made the whole CO workflow look
+    non-functional.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     title: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=5000)
@@ -42,9 +61,24 @@ class ChangeOrderUpdate(BaseModel):
         default=None,
         pattern=r"^(client_request|design_change|unforeseen|regulatory|error)$",
     )
-    schedule_impact_days: int | None = Field(default=None, ge=0)
+    schedule_impact_days: int | None = Field(default=None, ge=0, le=_INT32_MAX)
     currency: str | None = Field(default=None, max_length=10)
+    cost_impact: str | None = Field(default=None, max_length=50)
     metadata: dict[str, Any] | None = None
+    status: str | None = Field(
+        default=None,
+        description="Reserved — use /submit, /approve, /reject to change status.",
+    )
+
+    @field_validator("status")
+    @classmethod
+    def _reject_status_in_patch(cls, v: str | None) -> str | None:
+        if v is not None:
+            raise ValueError(
+                "Status cannot be changed via PATCH. "
+                "Use POST /changeorders/{id}/submit, /approve, or /reject."
+            )
+        return v
 
 
 class ChangeOrderItemResponse(BaseModel):
@@ -105,38 +139,38 @@ class ChangeOrderWithItems(ChangeOrderResponse):
 class ChangeOrderItemCreate(BaseModel):
     """Create a new change order item."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     description: str = Field(..., min_length=1, max_length=5000)
     change_type: str = Field(
         default="modified",
         pattern=r"^(added|removed|modified)$",
     )
-    original_quantity: float = Field(default=0.0, ge=0.0)
-    new_quantity: float = Field(default=0.0, ge=0.0)
-    original_rate: float = Field(default=0.0, ge=0.0)
-    new_rate: float = Field(default=0.0, ge=0.0)
+    original_quantity: float = Field(default=0.0, ge=0.0, le=1e12, allow_inf_nan=False)
+    new_quantity: float = Field(default=0.0, ge=0.0, le=1e12, allow_inf_nan=False)
+    original_rate: float = Field(default=0.0, ge=0.0, le=1e12, allow_inf_nan=False)
+    new_rate: float = Field(default=0.0, ge=0.0, le=1e12, allow_inf_nan=False)
     unit: str = Field(default="", max_length=20)
-    sort_order: int = Field(default=0, ge=0)
+    sort_order: int = Field(default=0, ge=0, le=_INT32_MAX)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ChangeOrderItemUpdate(BaseModel):
     """Partial update for a change order item."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     description: str | None = Field(default=None, min_length=1, max_length=5000)
     change_type: str | None = Field(
         default=None,
         pattern=r"^(added|removed|modified)$",
     )
-    original_quantity: float | None = Field(default=None, ge=0.0)
-    new_quantity: float | None = Field(default=None, ge=0.0)
-    original_rate: float | None = Field(default=None, ge=0.0)
-    new_rate: float | None = Field(default=None, ge=0.0)
+    original_quantity: float | None = Field(default=None, ge=0.0, le=1e12, allow_inf_nan=False)
+    new_quantity: float | None = Field(default=None, ge=0.0, le=1e12, allow_inf_nan=False)
+    original_rate: float | None = Field(default=None, ge=0.0, le=1e12, allow_inf_nan=False)
+    new_rate: float | None = Field(default=None, ge=0.0, le=1e12, allow_inf_nan=False)
     unit: str | None = Field(default=None, max_length=20)
-    sort_order: int | None = Field(default=None, ge=0)
+    sort_order: int | None = Field(default=None, ge=0, le=_INT32_MAX)
     metadata: dict[str, Any] | None = None
 
 

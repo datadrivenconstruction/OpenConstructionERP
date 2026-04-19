@@ -12,7 +12,7 @@ No IfcOpenShell. No BCF. No native IFC processing.
 ```
 DWG  → DDC cad2data → Python bridge → Canonical JSON
 DGN  → DDC cad2data → Python bridge → Canonical JSON
-RVT  → Rust parser (reverse engineering) → Canonical JSON
+RVT  → DDC cad2data → Python bridge → Canonical JSON
 IFC  → DDC cad2data → Python bridge → Canonical JSON
 PDF  → PyMuPDF → vector/raster extraction → elements
 ```
@@ -24,11 +24,11 @@ Every conversion produces:
 2. `metadata.json` — source info, converter version, warnings
 3. `quantities.parquet` — DuckDB-queryable quantities table
 
-## Rust RVT Parser
+## RVT Parser
 
-Our own reverse-engineered parser for Autodesk Revit files.
-Currently ~82% accuracy against C# MCP server ground truth.
-Located in `rvt-parser/`.
+RVT import is handled by the DDC cad2data pipeline. Accuracy against
+the upstream RVT ground truth is tracked in the pipeline's regression
+suite.
 
 ## Important
 

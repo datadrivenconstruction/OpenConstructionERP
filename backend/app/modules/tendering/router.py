@@ -337,6 +337,25 @@ async def compare_bids(
     return await service.compare_bids(package_id)
 
 
+@router.post("/packages/{package_id}/apply-winner/")
+async def apply_tender_winner(
+    package_id: uuid.UUID,
+    bid_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+) -> dict:
+    """Award the package to *bid_id* and copy its unit rates into the BOQ.
+
+    Closes the loop between tendering and estimation: once a winner is
+    chosen, the BOQ positions are updated with the winning unit_rates so
+    the project budget reflects the actual contracted price.
+    """
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    return await service.apply_winner(package_id, bid_id)
+
+
 # ── Export Endpoints ──────────────────────────────────────────────────────────
 
 

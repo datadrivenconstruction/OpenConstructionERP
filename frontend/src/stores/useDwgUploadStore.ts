@@ -76,7 +76,13 @@ export const useDwgUploadStore = create<DwgUploadState>((set, get) => {
     let currentPct = 5;
 
     const tick = () => {
-      if (phaseIdx >= phases.length) return;
+      // Phases exhausted → self-terminate. Prior code only returned
+      // early, leaving setInterval firing every 300ms forever — the
+      // zombie timer Artem reported as "конвертация постоянно".
+      if (phaseIdx >= phases.length) {
+        clearStageTimer(jobId);
+        return;
+      }
       const phase = phases[phaseIdx]!;
       const remaining = phase.target - currentPct;
       const increment = Math.max(0.2, Math.min(phase.step, remaining * 0.15));
@@ -219,3 +225,47 @@ export const useDwgUploadStore = create<DwgUploadState>((set, get) => {
     },
   };
 });
+
+
+// ── Zombie-job janitor ─────────────────────────────────────────────────────
+//
+// Same pattern as useBIMUploadStore. A DWG upload that dies mid-flight
+// (network drop, browser crash, Vite HMR revival) can leave a job pinned
+// in `uploading` / `converting` state forever — the indicator spins with
+// no way to clear it. Every 2 minutes, flip anything older than 45 min
+// to `error` so the UI drops it. Reported as "конвертация проходит
+// постоянно" alongside the BIM-side zombie.
+
+if (typeof window !== 'undefined') {
+  const MAX_ACTIVE_MS = 45 * 60 * 1000;
+  const PATROL_MS = 2 * 60 * 1000;
+
+  const sweep = () => {
+    const state = useDwgUploadStore.getState();
+    const now = Date.now();
+    let dirty = false;
+    const nextJobs = new Map(state.jobs);
+    for (const [id, job] of nextJobs) {
+      const active = job.status === 'uploading' || job.status === 'converting';
+      if (!active) continue;
+      if (now - job.startedAt < MAX_ACTIVE_MS) continue;
+      nextJobs.set(id, {
+        ...job,
+        status: 'error',
+        progress: 0,
+        stage: 'dwg_upload.stage_stalled',
+        errorMessage:
+          job.errorMessage ??
+          'Upload abandoned after 45 min — reload to retry if the file is still needed.',
+        completedAt: now,
+      });
+      dirty = true;
+    }
+    if (dirty) {
+      useDwgUploadStore.setState({ jobs: nextJobs });
+    }
+  };
+
+  sweep();
+  setInterval(sweep, PATROL_MS);
+}

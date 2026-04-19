@@ -11,6 +11,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+# Bound ints at PostgreSQL INT4 max.
+_INT32_MAX = 2_147_483_647
+# Schedules don't go beyond ~100 years (36500 days). A 10x safety margin.
+_MAX_SCHEDULE_DAYS = 365_000
+
 
 def _validate_date_range(start: str | None, end: str | None) -> None:
     """Reject schedules/activities where end_date is before start_date.
@@ -98,23 +103,28 @@ class ScheduleResponse(BaseModel):
 class ActivityDependency(BaseModel):
     """Dependency between two activities."""
 
+    model_config = ConfigDict(extra="ignore")
+
     activity_id: UUID
     type: str = Field(default="FS", pattern=r"^(FS|SS|FF|SF)$")
-    lag_days: int = 0
+    # Negative lag allowed (lead time); bound both sides at int32.
+    lag_days: int = Field(default=0, ge=-_INT32_MAX, le=_INT32_MAX)
 
 
 class ActivityResource(BaseModel):
     """Resource allocation for an activity."""
 
-    name: str
-    type: str = ""
-    allocation_pct: float = 100.0
+    model_config = ConfigDict(extra="ignore")
+
+    name: str = Field(..., max_length=255)
+    type: str = Field(default="", max_length=100)
+    allocation_pct: float = Field(default=100.0, ge=0.0, le=1000.0, allow_inf_nan=False)
 
 
 class ActivityCreate(BaseModel):
     """Create a new activity."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     schedule_id: UUID = Field(default=None)  # type: ignore[assignment]
     parent_id: UUID | None = None
@@ -123,22 +133,24 @@ class ActivityCreate(BaseModel):
     wbs_code: str = Field(default="", max_length=50)
     start_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
     end_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
-    duration_days: int = Field(default=0, ge=0)
-    progress_pct: float = Field(default=0.0, ge=0.0, le=100.0)
+    # ``None`` triggers auto-computation from start/end dates. Explicit ``0``
+    # is respected so milestone-style zero-duration activities are creatable.
+    duration_days: int | None = Field(default=None, ge=0, le=_MAX_SCHEDULE_DAYS)
+    progress_pct: float = Field(default=0.0, ge=0.0, le=100.0, allow_inf_nan=False)
     status: str = Field(
         default="not_started",
         pattern=r"^(not_started|in_progress|completed|delayed)$",
     )
     activity_type: str = Field(default="task", pattern=r"^(task|milestone|summary)$")
-    dependencies: list[ActivityDependency] = Field(default_factory=list)
-    resources: list[ActivityResource] = Field(default_factory=list)
-    boq_position_ids: list[UUID] = Field(default_factory=list)
+    dependencies: list[ActivityDependency] = Field(default_factory=list, max_length=1000)
+    resources: list[ActivityResource] = Field(default_factory=list, max_length=1000)
+    boq_position_ids: list[UUID] = Field(default_factory=list, max_length=10_000)
     color: str = Field(default="#0071e3", max_length=20)
-    sort_order: int = Field(default=0, ge=0)
+    sort_order: int = Field(default=0, ge=0, le=_INT32_MAX)
     constraint_type: str | None = Field(default=None, max_length=50)
     constraint_date: str | None = Field(default=None, max_length=20)
     activity_code: str | None = Field(default=None, max_length=50)
-    bim_element_ids: list[str] | None = None
+    bim_element_ids: list[str] | None = Field(default=None, max_length=100_000)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -150,7 +162,7 @@ class ActivityCreate(BaseModel):
 class ActivityUpdate(BaseModel):
     """Partial update for an activity."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     parent_id: UUID | None = None
     name: str | None = Field(default=None, min_length=1, max_length=255)
@@ -158,22 +170,22 @@ class ActivityUpdate(BaseModel):
     wbs_code: str | None = Field(default=None, max_length=50)
     start_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
     end_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
-    duration_days: int | None = Field(default=None, ge=0)
-    progress_pct: float | None = Field(default=None, ge=0.0, le=100.0)
+    duration_days: int | None = Field(default=None, ge=0, le=_MAX_SCHEDULE_DAYS)
+    progress_pct: float | None = Field(default=None, ge=0.0, le=100.0, allow_inf_nan=False)
     status: str | None = Field(
         default=None,
         pattern=r"^(not_started|in_progress|completed|delayed)$",
     )
     activity_type: str | None = Field(default=None, pattern=r"^(task|milestone|summary)$")
-    dependencies: list[ActivityDependency] | None = None
-    resources: list[ActivityResource] | None = None
-    boq_position_ids: list[UUID] | None = None
+    dependencies: list[ActivityDependency] | None = Field(default=None, max_length=1000)
+    resources: list[ActivityResource] | None = Field(default=None, max_length=1000)
+    boq_position_ids: list[UUID] | None = Field(default=None, max_length=10_000)
     color: str | None = Field(default=None, max_length=20)
-    sort_order: int | None = Field(default=None, ge=0)
+    sort_order: int | None = Field(default=None, ge=0, le=_INT32_MAX)
     constraint_type: str | None = Field(default=None, max_length=50)
     constraint_date: str | None = Field(default=None, max_length=20)
     activity_code: str | None = Field(default=None, max_length=50)
-    bim_element_ids: list[str] | None = None
+    bim_element_ids: list[str] | None = Field(default=None, max_length=100_000)
     metadata: dict[str, Any] | None = None
 
     @model_validator(mode="after")
@@ -273,7 +285,7 @@ class ProgressUpdateRequest(BaseModel):
 class WorkOrderCreate(BaseModel):
     """Create a new work order."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     activity_id: UUID = Field(default=None)  # type: ignore[assignment]
     assembly_id: UUID | None = None
@@ -285,8 +297,8 @@ class WorkOrderCreate(BaseModel):
     planned_end: str | None = Field(default=None, max_length=20)
     actual_start: str | None = Field(default=None, max_length=20)
     actual_end: str | None = Field(default=None, max_length=20)
-    planned_cost: float = Field(default=0.0, ge=0.0)
-    actual_cost: float = Field(default=0.0, ge=0.0)
+    planned_cost: float = Field(default=0.0, ge=0.0, le=1e12, allow_inf_nan=False)
+    actual_cost: float = Field(default=0.0, ge=0.0, le=1e12, allow_inf_nan=False)
     status: str = Field(
         default="planned",
         pattern=r"^(planned|issued|in_progress|completed|cancelled)$",
@@ -297,7 +309,7 @@ class WorkOrderCreate(BaseModel):
 class WorkOrderUpdate(BaseModel):
     """Partial update for a work order."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     assembly_id: UUID | None = None
     boq_position_id: UUID | None = None
@@ -308,8 +320,8 @@ class WorkOrderUpdate(BaseModel):
     planned_end: str | None = Field(default=None, max_length=20)
     actual_start: str | None = Field(default=None, max_length=20)
     actual_end: str | None = Field(default=None, max_length=20)
-    planned_cost: float | None = Field(default=None, ge=0.0)
-    actual_cost: float | None = Field(default=None, ge=0.0)
+    planned_cost: float | None = Field(default=None, ge=0.0, le=1e12, allow_inf_nan=False)
+    actual_cost: float | None = Field(default=None, ge=0.0, le=1e12, allow_inf_nan=False)
     status: str | None = Field(
         default=None,
         pattern=r"^(planned|issued|in_progress|completed|cancelled)$",
@@ -423,10 +435,13 @@ class GanttData(BaseModel):
 class GenerateFromBOQRequest(BaseModel):
     """Request body for generating schedule activities from a BOQ."""
 
+    model_config = ConfigDict(extra="ignore")
+
     boq_id: UUID
     total_project_days: int | None = Field(
         default=None,
         ge=1,
+        le=_MAX_SCHEDULE_DAYS,
         description=(
             "Total project duration in calendar days. "
             "If omitted, defaults to 365 (residential) or 540 (office) based on BOQ metadata."
@@ -492,12 +507,13 @@ class ImportResult(BaseModel):
 class RelationshipCreate(BaseModel):
     """Create a CPM dependency relationship between two activities."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     predecessor_id: UUID
     successor_id: UUID
     relationship_type: str = Field(default="FS", pattern=r"^(FS|FF|SS|SF)$")
-    lag_days: int = Field(default=0)
+    # Negative lag allowed (lead time); bound both sides at int32.
+    lag_days: int = Field(default=0, ge=-_INT32_MAX, le=_INT32_MAX)
 
 
 class RelationshipResponse(BaseModel):
@@ -544,13 +560,19 @@ class BaselineCreate(BaseModel):
 
 
 class BaselineUpdate(BaseModel):
-    """Partial update for a schedule baseline."""
+    """Partial update for a schedule baseline.
+
+    Baselines are snapshot-in-time records — ``name``, ``baseline_date``
+    and ``snapshot_data`` are immutable by design. ``is_active`` stays
+    writable because it's a workflow flag (which baseline is "current"
+    for EVM comparisons), not a property of the snapshot itself.
+    Renames, if ever needed for typo fixes, go through a dedicated
+    admin-only endpoint; they are not allowed here.
+    """
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    name: str | None = Field(default=None, min_length=1, max_length=255)
     is_active: bool | None = None
-    metadata: dict[str, Any] | None = None
 
 
 class BaselineResponse(BaseModel):

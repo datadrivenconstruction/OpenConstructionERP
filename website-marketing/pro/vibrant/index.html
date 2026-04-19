@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OpenConstructionERP Pro — Vibrant edition</title>
+<link rel="icon" type="image/svg+xml" href="/pro/cinematic/assets/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@800&display=swap" rel="stylesheet" />
+<style>
+  /* ---------- RESET ---------- */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 500;
+    background: #fef7e5;
+    color: #0a0a0b;
+    min-height: 100svh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a { text-decoration: none; color: inherit; }
+  button { border: none; cursor: pointer; font-family: inherit; }
+
+  /* ---------- TOKENS ---------- */
+  :root {
+    --sun: #fbbf24;
+    --pink: #ec4899;
+    --indigo: #4338ca;
+    --mint: #86efac;
+    --cream: #fef7e5;
+    --black: #0a0a0b;
+    --white: #ffffff;
+    --gray: #5b5b5f;
+    --spring: cubic-bezier(.34, 1.56, .64, 1);
+    --display: 'Clash Display', 'Manrope', system-ui, sans-serif;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--cream);
+    border-bottom: 3px solid var(--black);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: var(--black);
+  }
+  .pro-sticker {
+    display: inline-block;
+    background: var(--pink);
+    color: var(--white);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border: 2px solid var(--black);
+    box-shadow: 4px 4px 0 var(--black);
+    transform: rotate(-4deg);
+    transition: transform 0.3s var(--spring);
+  }
+  .pro-sticker:hover { transform: rotate(4deg) scale(1.1); }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .nav-links a {
+    transition: color 0.2s;
+    position: relative;
+  }
+  .nav-links a:hover { color: var(--indigo); }
+  .nav-install {
+    background: var(--sun);
+    color: var(--black);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    padding: 10px 20px;
+    border: 2px solid var(--black);
+    box-shadow: 4px 4px 0 var(--black);
+    transition: all 0.15s var(--spring);
+  }
+  .nav-install:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--black);
+  }
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+    .nav { padding: 12px 18px; }
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    padding: 120px 48px 80px;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 48px;
+    align-items: center;
+    overflow: hidden;
+  }
+  @media (max-width: 960px) {
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 110px 24px 60px;
+      gap: 60px;
+    }
+  }
+
+  /* ---------- BACKGROUND SHAPES ---------- */
+  .bg-shapes {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .shape-yellow {
+    position: absolute;
+    top: -20%;
+    left: -10%;
+    width: 600px;
+    height: 600px;
+    background: var(--sun);
+    border-radius: 50%;
+    border: 3px solid var(--black);
+    animation: float-slow 12s ease-in-out infinite;
+    opacity: 0.9;
+  }
+  .shape-pink-blob {
+    position: absolute;
+    bottom: -15%;
+    right: -10%;
+    width: 800px;
+    height: 700px;
+    animation: rotate-slow 30s linear infinite;
+    opacity: 0.8;
+  }
+  .shape-pink-blob svg { width: 100%; height: 100%; }
+  .shape-indigo {
+    position: absolute;
+    right: 8%;
+    top: 45%;
+    width: 300px;
+    height: 200px;
+    background: var(--indigo);
+    border: 3px solid var(--black);
+    transform: rotate(12deg);
+    box-shadow: 8px 8px 0 var(--black);
+    animation: float-slow 9s ease-in-out infinite reverse;
+  }
+  @media (max-width: 960px) {
+    .shape-yellow { width: 360px; height: 360px; }
+    .shape-pink-blob { width: 500px; height: 450px; }
+    .shape-indigo { width: 180px; height: 120px; right: -8%; top: 60%; }
+  }
+
+  /* Confetti dots */
+  .dot {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid var(--black);
+    animation: float-slow 8s ease-in-out infinite;
+  }
+
+  /* ---------- HERO CONTENT ---------- */
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 780px;
+  }
+
+  .eyebrow-sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--mint);
+    color: var(--black);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px 14px;
+    border: 2px solid var(--black);
+    box-shadow: 4px 4px 0 var(--black);
+    transform: rotate(-2deg);
+    margin-bottom: 28px;
+    transition: transform 0.3s var(--spring);
+  }
+  .eyebrow-sticker:hover { transform: rotate(2deg) scale(1.04); }
+
+  .headline {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(56px, 11vw, 170px);
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    color: var(--black);
+    margin-bottom: 32px;
+  }
+  .word-indigo { color: var(--indigo); }
+  .word-pink { color: var(--pink); }
+  .word-speed {
+    position: relative;
+    display: inline-block;
+  }
+  .squiggle {
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 100%;
+    height: 22px;
+    pointer-events: none;
+  }
+  .squiggle path {
+    fill: none;
+    stroke: var(--pink);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    animation: draw-squiggle 1.6s var(--spring) 0.6s forwards;
+  }
+  .period-dot {
+    display: inline-block;
+    width: 0.75ch;
+    height: 0.75ch;
+    background: var(--sun);
+    border-radius: 50%;
+    border: 3px solid var(--black);
+    vertical-align: baseline;
+    margin-left: 0.05em;
+    transform: translateY(0.05em);
+  }
+
+  .subhead {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: clamp(16px, 1.6vw, 20px);
+    line-height: 1.5;
+    color: var(--gray);
+    max-width: 620px;
+    margin-bottom: 36px;
+  }
+
+  .cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+  .cta {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 17px;
+    padding: 16px 26px;
+    border: 2px solid var(--black);
+    box-shadow: 6px 6px 0 var(--black);
+    transition: all 0.15s var(--spring);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cta:hover {
+    transform: translate(4px, 4px);
+    box-shadow: 2px 2px 0 var(--black);
+  }
+  .cta-indigo {
+    background: var(--indigo);
+    color: var(--white);
+  }
+  .cta-yellow {
+    background: var(--sun);
+    color: var(--black);
+  }
+
+  .install-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--white);
+    padding: 12px 18px;
+    border: 2px solid var(--black);
+    box-shadow: 4px 4px 0 var(--pink);
+    transform: rotate(-2deg);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 28px;
+    cursor: pointer;
+    transition: all 0.2s var(--spring);
+  }
+  .install-badge:hover {
+    transform: rotate(1deg) scale(1.03);
+    box-shadow: 6px 6px 0 var(--pink);
+  }
+  .install-badge .dollar { color: var(--pink); }
+  .install-badge .copy-icon {
+    width: 16px; height: 16px;
+    stroke: var(--black);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .meta-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .chip {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 7px 13px;
+    border: 2px solid var(--black);
+    box-shadow: 3px 3px 0 var(--black);
+    transition: transform 0.3s var(--spring);
+  }
+  .chip:hover { transform: scale(1.08) rotate(0deg) !important; }
+  .chip-mint { background: var(--mint); transform: rotate(-3deg); }
+  .chip-pink { background: var(--pink); color: var(--white); transform: rotate(2deg); }
+  .chip-yellow { background: var(--sun); transform: rotate(-1deg); }
+
+  /* ---------- HERO RIGHT (ICON CLUSTER) ---------- */
+  .cluster {
+    position: relative;
+    z-index: 2;
+    height: 560px;
+    width: 100%;
+  }
+  @media (max-width: 960px) {
+    .cluster { height: 380px; margin-top: 20px; }
+  }
+
+  .sticker-icon {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    background: var(--white);
+    border: 3px solid var(--black);
+    box-shadow: 6px 6px 0 var(--black);
+    border-radius: 18px;
+    transition: transform 0.3s var(--spring);
+    cursor: pointer;
+  }
+  .sticker-icon:hover {
+    transform: scale(1.12) rotate(var(--hover-rot, 8deg)) !important;
+    z-index: 10;
+  }
+
+  .icon-crane {
+    top: 5%;
+    left: 35%;
+    background: var(--sun);
+    transform: rotate(-8deg);
+    --hover-rot: 4deg;
+  }
+  .icon-ruler {
+    top: 20%;
+    right: 5%;
+    width: 100px; height: 100px;
+    font-size: 50px;
+    background: var(--mint);
+    transform: rotate(12deg);
+    --hover-rot: -6deg;
+  }
+  .icon-chart {
+    top: 45%;
+    left: 10%;
+    width: 110px; height: 110px;
+    font-size: 56px;
+    background: var(--pink);
+    transform: rotate(-5deg);
+    --hover-rot: 8deg;
+    animation: float-slow 7s ease-in-out infinite;
+  }
+  .icon-hammer {
+    bottom: 12%;
+    right: 15%;
+    background: var(--indigo);
+    transform: rotate(8deg);
+    --hover-rot: -4deg;
+    animation: float-slow 9s ease-in-out infinite reverse;
+  }
+  .icon-globe {
+    top: 58%;
+    right: 32%;
+    width: 95px; height: 95px;
+    font-size: 48px;
+    background: var(--white);
+    transform: rotate(-10deg);
+    --hover-rot: 6deg;
+    animation: float-slow 11s ease-in-out infinite;
+  }
+
+  /* Connector squiggle between icons */
+  .connector {
+    position: absolute;
+    top: 18%;
+    left: 28%;
+    width: 200px;
+    height: 120px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .connector path {
+    fill: none;
+    stroke: var(--indigo);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+    animation: draw-squiggle 2s var(--spring) 1.2s forwards;
+  }
+
+  /* Stamp */
+  .stamp {
+    position: absolute;
+    bottom: 2%;
+    left: 8%;
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--pink);
+    border: 3px solid var(--pink);
+    padding: 10px 16px;
+    transform: rotate(-8deg);
+    opacity: 0.85;
+    background: rgba(254, 247, 229, 0.5);
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    text-align: center;
+    max-width: 160px;
+  }
+
+  /* ---------- KEYFRAMES ---------- */
+  @keyframes float-slow {
+    0%, 100% { transform: translate(0, 0) rotate(var(--base-rot, 0deg)); }
+    50% { transform: translate(10px, -18px) rotate(var(--base-rot, 0deg)); }
+  }
+  .shape-yellow { --base-rot: 0deg; }
+  .shape-indigo { --base-rot: 12deg; }
+  .icon-chart { --base-rot: -5deg; }
+  .icon-hammer { --base-rot: 8deg; }
+  .icon-globe { --base-rot: -10deg; }
+
+  @keyframes rotate-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes draw-squiggle {
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fade-up 0.8s var(--spring) forwards; }
+  .delay-1 { animation-delay: 0.1s; opacity: 0; }
+  .delay-2 { animation-delay: 0.25s; opacity: 0; }
+  .delay-3 { animation-delay: 0.4s; opacity: 0; }
+  .delay-4 { animation-delay: 0.55s; opacity: 0; }
+  .delay-5 { animation-delay: 0.7s; opacity: 0; }
+  .delay-6 { animation-delay: 0.85s; opacity: 0; }
+
+  /* ---------- FOOTER ---------- */
+  .footer {
+    background: var(--black);
+    color: var(--cream);
+    padding: 22px 32px;
+    text-align: center;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    border-top: 3px solid var(--black);
+    position: relative;
+    z-index: 5;
+  }
+  .footer a {
+    transition: color 0.2s;
+  }
+  .footer a:hover { color: var(--sun); }
+
+  /* ---------- RESPONSIVE TWEAKS ---------- */
+  @media (max-width: 480px) {
+    .hero { padding: 110px 18px 50px; }
+    .cta { font-size: 15px; padding: 14px 20px; }
+    .sticker-icon { width: 80px; height: 80px; font-size: 40px; }
+    .icon-ruler, .icon-chart, .icon-globe { width: 70px; height: 70px; font-size: 34px; }
+    .cluster { height: 300px; }
+    .install-badge { font-size: 12px; }
+    .stamp { font-size: 16px; max-width: 120px; }
+  }
+  @media (max-width: 360px) {
+    .hero { padding: 100px 14px 40px; }
+    .chip { font-size: 11px; padding: 6px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== NAV ============== -->
+<nav class="nav">
+  <div class="nav-brand">
+    <span>OpenConstructionERP</span>
+    <span class="pro-sticker">PRO</span>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#docs">Docs</a>
+    <a href="#github">GitHub</a>
+  </div>
+  <a href="#install" class="nav-install">Install now</a>
+</nav>
+
+<!-- ============== HERO ============== -->
+<section class="hero">
+
+  <!-- Background shapes -->
+  <div class="bg-shapes">
+    <div class="shape-yellow"></div>
+    <div class="shape-pink-blob">
+      <svg viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 400 50 C 600 80 750 220 720 380 C 700 520 580 640 420 660 C 260 680 120 580 90 420 C 60 260 200 20 400 50 Z"
+              fill="#ec4899" stroke="#0a0a0b" stroke-width="3" />
+      </svg>
+    </div>
+    <div class="shape-indigo"></div>
+
+    <!-- Confetti dots -->
+    <div class="dot" style="background: var(--mint); width: 12px; height: 12px; top: 15%; left: 45%; animation-delay: 0s;"></div>
+    <div class="dot" style="background: var(--pink); width: 10px; height: 10px; top: 30%; left: 55%; animation-delay: 1s;"></div>
+    <div class="dot" style="background: var(--sun); width: 14px; height: 14px; top: 68%; left: 38%; animation-delay: 2s;"></div>
+    <div class="dot" style="background: var(--mint); width: 9px; height: 9px; top: 80%; left: 20%; animation-delay: 0.5s;"></div>
+    <div class="dot" style="background: var(--pink); width: 11px; height: 11px; top: 12%; left: 62%; animation-delay: 1.5s;"></div>
+    <div class="dot" style="background: var(--sun); width: 10px; height: 10px; top: 55%; left: 60%; animation-delay: 2.5s;"></div>
+    <div class="dot" style="background: var(--indigo); width: 8px; height: 8px; top: 40%; left: 48%; animation-delay: 0.8s;"></div>
+    <div class="dot" style="background: var(--mint); width: 10px; height: 10px; top: 88%; left: 70%; animation-delay: 1.8s;"></div>
+  </div>
+
+  <!-- Left: content -->
+  <div class="hero-content">
+    <div class="eyebrow-sticker fade-in delay-1">🚀 v1.7.2 · new AI takeoff</div>
+
+    <h1 class="headline fade-in delay-2">
+      Estimate <span class="word-indigo">buildings</span> at the <span class="word-speed">speed<svg class="squiggle" viewBox="0 0 300 22" preserveAspectRatio="none"><path d="M 5 14 Q 40 2, 75 12 T 145 12 T 215 12 T 290 12" /></svg></span> <span class="word-pink">of thought<span class="period-dot"></span></span>
+    </h1>
+
+    <p class="subhead fade-in delay-3">
+      Open-source construction ERP. AI BOQ. Multi-CAD ingest. 55,000+ cost items. 11 regions. Self-host free. Replace $25K/year enterprise tools in a weekend.
+    </p>
+
+    <div class="cta-row fade-in delay-4">
+      <a href="#install" class="cta cta-indigo">Install now →</a>
+      <a href="#github" class="cta cta-yellow">⭐ Star on GitHub</a>
+    </div>
+
+    <div class="install-badge fade-in delay-5" id="installBadge" title="Click to copy">
+      <span class="dollar">$</span>
+      <span id="installCmd">docker compose up</span>
+      <svg class="copy-icon" viewBox="0 0 24 24">
+        <rect x="9" y="9" width="11" height="11" rx="2" />
+        <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+      </svg>
+    </div>
+
+    <div class="meta-chips fade-in delay-6">
+      <span class="chip chip-mint">✅ AGPL-3.0</span>
+      <span class="chip chip-pink">🏠 Self-hosted</span>
+      <span class="chip chip-yellow">⚡ 2GB RAM</span>
+    </div>
+  </div>
+
+  <!-- Right: icon cluster -->
+  <div class="cluster" id="cluster">
+
+    <svg class="connector" viewBox="0 0 200 120">
+      <path d="M 20 80 Q 60 10, 110 50 T 190 30" />
+    </svg>
+
+    <div class="sticker-icon icon-crane" data-depth="0.04">🏗️</div>
+    <div class="sticker-icon icon-ruler" data-depth="0.06">📐</div>
+    <div class="sticker-icon icon-chart" data-depth="0.03">📊</div>
+    <div class="sticker-icon icon-hammer" data-depth="0.05">🔨</div>
+    <div class="sticker-icon icon-globe" data-depth="0.04">🌍</div>
+
+    <div class="stamp">5,000+ estimators<br/>use this ★</div>
+  </div>
+
+</section>
+
+<!-- ============== FOOTER ============== -->
+<footer class="footer">
+  <a href="/pro/">← back to directions</a>
+</footer>
+
+<script>
+  // ---- Parallax on mouse move ----
+  const cluster = document.getElementById('cluster');
+  const icons = cluster.querySelectorAll('.sticker-icon');
+
+  document.addEventListener('mousemove', (e) => {
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const dx = (e.clientX - cx) / cx;
+    const dy = (e.clientY - cy) / cy;
+
+    icons.forEach((icon) => {
+      const depth = parseFloat(icon.dataset.depth || 0.05);
+      const tx = dx * 40 * depth * 20;
+      const ty = dy * 40 * depth * 20;
+      const currentRot = getComputedStyle(icon).getPropertyValue('--base-rot') ||
+                         icon.className.includes('crane') ? '-8deg' :
+                         icon.className.includes('ruler') ? '12deg' :
+                         icon.className.includes('chart') ? '-5deg' :
+                         icon.className.includes('hammer') ? '8deg' :
+                         icon.className.includes('globe') ? '-10deg' : '0deg';
+      icon.style.transform = `translate(${tx}px, ${ty}px) rotate(${currentRot})`;
+    });
+  });
+
+  // ---- Copy install command ----
+  const installBadge = document.getElementById('installBadge');
+  const installCmd = document.getElementById('installCmd');
+  const originalCmd = installCmd.textContent;
+
+  installBadge.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(originalCmd);
+      installCmd.textContent = '✓ copied!';
+      installBadge.style.background = 'var(--mint)';
+      setTimeout(() => {
+        installCmd.textContent = originalCmd;
+        installBadge.style.background = 'var(--white)';
+      }, 1500);
+    } catch (err) {
+      console.warn('Copy failed', err);
+    }
+  });
+
+  // ---- Sticker wiggle on load ----
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      icons.forEach((icon, i) => {
+        icon.animate(
+          [
+            { transform: icon.style.transform || '' },
+            { transform: (icon.style.transform || '') + ' scale(1.08)' },
+            { transform: icon.style.transform || '' }
+          ],
+          { duration: 500, delay: i * 80, easing: 'cubic-bezier(.34, 1.56, .64, 1)' }
+        );
+      });
+    }, 1400);
+  });
+</script>
+
+</body>
+</html>

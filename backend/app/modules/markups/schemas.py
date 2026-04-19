@@ -10,34 +10,40 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+# Bound ints at PostgreSQL INT4 max; a PDF with > ~100k pages is obviously junk.
+_INT32_MAX = 2_147_483_647
+_MAX_PAGE = 100_000
+_MAX_MEASUREMENT = 1e12  # m, m², m³ — no real drawing needs higher
+_MAX_LENGTH = 500
+
 # ── Markup schemas ──────────────────────────────────────────────────────
 
 
 class MarkupCreate(BaseModel):
     """Create a new markup annotation."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     project_id: UUID
-    document_id: str | None = None
-    page: int = Field(default=1, ge=1)
+    document_id: str | None = Field(default=None, max_length=_MAX_LENGTH)
+    page: int = Field(default=1, ge=1, le=_MAX_PAGE)
     type: str = Field(
         ...,
         max_length=50,
         pattern=r"^(cloud|arrow|text|rectangle|highlight|distance|area|count|stamp|polygon)$",
     )
     geometry: dict[str, Any] = Field(default_factory=dict)
-    text: str | None = None
+    text: str | None = Field(default=None, max_length=10_000)
     color: str = Field(default="#3b82f6", max_length=20)
     line_width: int = Field(default=2, ge=1, le=50)
-    opacity: float = Field(default=1.0, ge=0.0, le=1.0)
+    opacity: float = Field(default=1.0, ge=0.0, le=1.0, allow_inf_nan=False)
     author_id: str | None = Field(default=None, max_length=255)
     status: str = Field(
         default="active",
         pattern=r"^(active|resolved|archived)$",
     )
     label: str | None = Field(default=None, max_length=255)
-    measurement_value: float | None = None
+    measurement_value: float | None = Field(default=None, ge=-_MAX_MEASUREMENT, le=_MAX_MEASUREMENT, allow_inf_nan=False)
     measurement_unit: str | None = Field(default=None, max_length=20)
     stamp_template_id: UUID | None = None
     linked_boq_position_id: str | None = Field(default=None, max_length=255)
@@ -48,26 +54,26 @@ class MarkupCreate(BaseModel):
 class MarkupUpdate(BaseModel):
     """Partial update for a markup annotation."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
-    document_id: str | None = None
-    page: int | None = Field(default=None, ge=1)
+    document_id: str | None = Field(default=None, max_length=_MAX_LENGTH)
+    page: int | None = Field(default=None, ge=1, le=_MAX_PAGE)
     type: str | None = Field(
         default=None,
         max_length=50,
         pattern=r"^(cloud|arrow|text|rectangle|highlight|distance|area|count|stamp|polygon)$",
     )
     geometry: dict[str, Any] | None = None
-    text: str | None = None
+    text: str | None = Field(default=None, max_length=10_000)
     color: str | None = Field(default=None, max_length=20)
     line_width: int | None = Field(default=None, ge=1, le=50)
-    opacity: float | None = Field(default=None, ge=0.0, le=1.0)
+    opacity: float | None = Field(default=None, ge=0.0, le=1.0, allow_inf_nan=False)
     status: str | None = Field(
         default=None,
         pattern=r"^(active|resolved|archived)$",
     )
     label: str | None = Field(default=None, max_length=255)
-    measurement_value: float | None = None
+    measurement_value: float | None = Field(default=None, ge=-_MAX_MEASUREMENT, le=_MAX_MEASUREMENT, allow_inf_nan=False)
     measurement_unit: str | None = Field(default=None, max_length=20)
     stamp_template_id: UUID | None = None
     linked_boq_position_id: str | None = Field(default=None, max_length=255)
@@ -130,14 +136,14 @@ class BoqLinkRequest(BaseModel):
 class ScaleConfigCreate(BaseModel):
     """Create or update a scale calibration config."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     document_id: str = Field(..., max_length=255)
-    page: int = Field(default=1, ge=1)
-    pixels_per_unit: float = Field(..., gt=0.0)
+    page: int = Field(default=1, ge=1, le=_MAX_PAGE)
+    pixels_per_unit: float = Field(..., gt=0.0, le=1e9, allow_inf_nan=False)
     unit_label: str = Field(default="m", max_length=20)
     calibration_points: Any = Field(default_factory=dict)
-    real_distance: float = Field(..., gt=0.0)
+    real_distance: float = Field(..., gt=0.0, le=1e9, allow_inf_nan=False)
 
 
 class ScaleConfigResponse(BaseModel):

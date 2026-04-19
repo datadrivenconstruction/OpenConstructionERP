@@ -26,6 +26,10 @@ export interface PhotoItem {
   created_by: string;
   created_at: string;
   updated_at: string;
+  /** True when a server-side thumbnail is available. Grid renders should
+   *  prefer `getPhotoThumbUrl(id)`; fall back to the full file for the
+   *  lightbox view or when this flag is false. */
+  has_thumbnail?: boolean;
 }
 
 export interface PhotoTimelineGroup {
@@ -79,6 +83,12 @@ export async function fetchPhoto(id: string): Promise<PhotoItem> {
 
 export function getPhotoFileUrl(id: string): string {
   return `/api/v1/documents/photos/${id}/file`;
+}
+
+/** Thumbnail endpoint. Falls back to the full file server-side when no
+ *  thumbnail exists, so callers can use this unconditionally. */
+export function getPhotoThumbUrl(id: string): string {
+  return `/api/v1/documents/photos/${id}/thumb/`;
 }
 
 export async function uploadPhoto(

@@ -26,6 +26,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response, StreamingResponse
 
+from app.core.upload_guards import reject_if_xlsx_bomb
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.fieldreports.schemas import (
     FieldReportCreate,
@@ -458,6 +459,9 @@ async def import_field_reports_file(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File too large. Maximum size is 10 MB.",
         )
+
+    # Zip-bomb guard: reject .xlsx whose uncompressed sheets exceed 50 MB.
+    reject_if_xlsx_bomb(content)
 
     try:
         if filename.endswith((".xlsx", ".xls")):

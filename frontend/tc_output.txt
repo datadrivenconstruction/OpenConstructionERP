@@ -1,0 +1,30 @@
+
+> openestimate-frontend@1.9.0 typecheck
+> tsc --noEmit
+
+src/features/bim/BIMRightPanelTabs.tsx(90,15): error TS2339: Property 'cameraPos' does not exist on type 'Viewpoint'.
+src/features/bim/BIMRightPanelTabs.tsx(90,35): error TS2339: Property 'cameraPos' does not exist on type 'Viewpoint'.
+src/features/bim/BIMRightPanelTabs.tsx(90,55): error TS2339: Property 'cameraPos' does not exist on type 'Viewpoint'.
+src/features/bim/BIMRightPanelTabs.tsx(91,12): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{ x: number; y: number; z: number; }'.
+  Property '0' does not exist on type '{ x: number; y: number; z: number; }'.
+src/features/bim/BIMRightPanelTabs.tsx(91,29): error TS7053: Element implicitly has an 'any' type because expression of type '1' can't be used to index type '{ x: number; y: number; z: number; }'.
+  Property '1' does not exist on type '{ x: number; y: number; z: number; }'.
+src/features/bim/BIMRightPanelTabs.tsx(91,46): error TS7053: Element implicitly has an 'any' type because expression of type '2' can't be used to index type '{ x: number; y: number; z: number; }'.
+  Property '2' does not exist on type '{ x: number; y: number; z: number; }'.
+src/features/bim/BIMToolsPanel.tsx(14,3): error TS2305: Module '"@/shared/ui/BIMViewer"' has no exported member 'listViewpoints'.
+src/features/bim/BIMToolsPanel.tsx(15,3): error TS2305: Module '"@/shared/ui/BIMViewer"' has no exported member 'removeViewpoint'.
+src/features/bim/BIMToolsPanel.tsx(16,3): error TS2724: '"@/shared/ui/BIMViewer"' has no exported member named 'addViewpoint'. Did you mean 'Viewpoint'?
+src/features/bim/BIMToolsPanel.tsx(152,22): error TS2339: Property 'id' does not exist on type 'Viewpoint'.
+src/features/bim/BIMToolsPanel.tsx(160,46): error TS2339: Property 'name' does not exist on type 'Viewpoint'.
+src/features/bim/BIMToolsPanel.tsx(161,35): error TS2339: Property 'createdAt' does not exist on type 'Viewpoint'.
+src/features/bim/BIMToolsPanel.tsx(164,47): error TS2339: Property 'name' does not exist on type 'Viewpoint'.
+src/features/bim/BIMToolsPanel.tsx(168,47): error TS2339: Property 'id' does not exist on type 'Viewpoint'.
+src/features/bim/BIMToolsPanel.tsx(171,27): error TS2339: Property 'name' does not exist on type 'Viewpoint'.
+src/features/dwg-takeoff/DwgTakeoffPage.tsx(1028,17): error TS2322: Type '{ entities: DxfEntity[]; annotations: DwgAnnotation[]; visibleLayers: Set<string>; activeTool: DwgTool; activeColor: string; selectedEntityId: string | null; selectedAnnotationId: string | null; onSelectEntity: (id: string | null, event?: EntitySelectEvent | undefined) => void; onSelectAnnotation: Dispatch<...>; onA...' is not assignable to type 'IntrinsicAttributes & Props'.
+  Property 'selectedEntityId' does not exist on type 'IntrinsicAttributes & Props'. Did you mean 'selectedEntityIds'?
+src/features/project-intelligence/__tests__/ParetoHelper.test.ts(18,12): error TS2532: Object is possibly 'undefined'.
+src/features/project-intelligence/__tests__/ParetoHelper.test.ts(19,12): error TS2532: Object is possibly 'undefined'.
+src/features/project-intelligence/__tests__/ParetoHelper.test.ts(30,12): error TS2532: Object is possibly 'undefined'.
+src/features/project-intelligence/__tests__/ParetoHelper.test.ts(31,12): error TS2532: Object is possibly 'undefined'.
+src/features/project-intelligence/__tests__/ParetoHelper.test.ts(59,12): error TS2532: Object is possibly 'undefined'.
+src/features/project-intelligence/__tests__/ParetoHelper.test.ts(60,12): error TS2532: Object is possibly 'undefined'.

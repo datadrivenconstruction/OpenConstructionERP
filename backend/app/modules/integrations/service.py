@@ -17,6 +17,7 @@ import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.url_safety import UnsafeUrlError, resolve_and_validate_external_url
 from app.modules.integrations.models import WebhookDelivery, WebhookEndpoint
 
 logger = logging.getLogger(__name__)
@@ -157,6 +158,11 @@ class WebhookService:
         start = time.monotonic()
 
         try:
+            # DNS-resolve and re-verify the target right before dispatch so a
+            # row that was inserted before the SSRF check existed (or one that
+            # rebinds to a private IP) cannot exfiltrate to the metadata API.
+            await resolve_and_validate_external_url(hook.url)
+
             async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
                 resp = await client.post(hook.url, content=body, headers=headers)
                 status_code = resp.status_code
@@ -170,6 +176,10 @@ class WebhookService:
                     response_body = resp.text[:1000] if resp.text else None
                     duration_ms = int((time.monotonic() - start) * 1000)
 
+        except UnsafeUrlError as exc:
+            duration_ms = int((time.monotonic() - start) * 1000)
+            response_body = f"URL blocked: {exc}"[:1000]
+            logger.warning("Webhook delivery refused for %s: %s", hook.name, exc)
         except Exception as exc:
             duration_ms = int((time.monotonic() - start) * 1000)
             response_body = str(exc)[:1000]

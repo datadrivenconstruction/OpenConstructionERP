@@ -33,6 +33,7 @@ import {
   type AggregateGroup,
 } from './api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { MissingDataPanel } from './MissingDataPanel';
 import {
   useAnalysisStateStore,
   type ChartKind,
@@ -1580,14 +1581,17 @@ function ViewsDrawer({ open, onClose }: ViewsDrawerProps) {
 
 /* ── Describe Tab ──────────────────────────────────────────────────────── */
 
+type DescribeSubTab = 'summary' | 'missing';
+
 function DescribeTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
   const { t } = useTranslation();
   const [selectedCol, setSelectedCol] = useState<string | null>(null);
+  const [subTab, setSubTab] = useState<DescribeSubTab>('summary');
 
   const { data: vcData } = useQuery({
     queryKey: ['cad-value-counts', sessionId, selectedCol],
     queryFn: () => valueCounts(sessionId, selectedCol!, 30),
-    enabled: !!selectedCol,
+    enabled: !!selectedCol && subTab === 'summary',
   });
 
   // Data quality score
@@ -1599,6 +1603,68 @@ function DescribeTab({ sessionId, describe }: { sessionId: string; describe: Des
   const lowCoverageCols = useMemo(() =>
     describe.columns.filter((c) => c.non_null < describe.total_elements * 0.1 && c.non_null > 0).length,
   [describe]);
+
+  const subTabBtn = (id: DescribeSubTab, label: string) => (
+    <button
+      key={id}
+      type="button"
+      onClick={() => setSubTab(id)}
+      data-testid={`describe-subtab-${id}`}
+      className={`px-3 py-1.5 text-xs font-medium rounded-md border transition-colors ${
+        subTab === id
+          ? 'bg-oe-blue text-white border-oe-blue'
+          : 'bg-surface-primary text-content-secondary border-border-light hover:bg-surface-secondary'
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="space-y-4">
+      {/* Sub-tab switch */}
+      <div className="flex items-center gap-2">
+        {subTabBtn('summary', t('explorer.describe_subtab_summary', { defaultValue: 'Summary' }))}
+        {subTabBtn(
+          'missing',
+          t('explorer.describe_subtab_missing', { defaultValue: 'Missing Data' }),
+        )}
+      </div>
+
+      {subTab === 'missing' ? (
+        <MissingDataPanel sessionId={sessionId} />
+      ) : (
+        <DescribeSummary
+          describe={describe}
+          selectedCol={selectedCol}
+          setSelectedCol={setSelectedCol}
+          vcData={vcData}
+          qualityScore={qualityScore}
+          lowCoverageCols={lowCoverageCols}
+        />
+      )}
+    </div>
+  );
+}
+
+interface DescribeSummaryProps {
+  describe: DescribeResponse;
+  selectedCol: string | null;
+  setSelectedCol: (v: string | null) => void;
+  vcData: Awaited<ReturnType<typeof valueCounts>> | undefined;
+  qualityScore: number;
+  lowCoverageCols: number;
+}
+
+function DescribeSummary({
+  describe,
+  selectedCol,
+  setSelectedCol,
+  vcData,
+  qualityScore,
+  lowCoverageCols,
+}: DescribeSummaryProps) {
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-4">
@@ -2653,18 +2719,14 @@ export function CadDataExplorerPage() {
             )}
           </button>
           <button
-            onClick={() => setShowSaveToProjectDialog(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border bg-oe-blue/10 text-oe-blue border-oe-blue/30 hover:bg-oe-blue/20"
-          >
-            <FolderOpen size={13} />
-            {t('explorer.save_to_project_btn', { defaultValue: 'Save to Project' })}
-          </button>
-          <button
             onClick={() => setShowSaveDialog(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+            title={t('explorer.save_filters_hint', {
+              defaultValue: 'Bookmark current filters, slicers, and chart settings so you can reopen this view later from the Views drawer.',
+            })}
           >
             <Save size={13} />
-            {t('explorer.save_analysis', { defaultValue: 'Save' })}
+            {t('explorer.save_filters', { defaultValue: 'Save Filters' })}
           </button>
           <button
             onClick={() => { setSearchParams({}); }}

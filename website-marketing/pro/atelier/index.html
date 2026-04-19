@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>OpenConstructionERP Pro — Atelier edition</title>
+  <meta name="description" content="Open-source construction ERP. AI-powered BOQ. Multi-CAD. Self-host free." />
+  <link rel="icon" type="image/svg+xml" href="/pro/cinematic/assets/favicon.svg" />
+
+  <!-- Fonts: Fraunces (display, italic), Inter Tight (UI), Inter (body), JetBrains Mono (labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..500&family=Inter:wght@400;500&family=Inter+Tight:wght@500;700&family=JetBrains+Mono:wght@400&display=swap" />
+
+  <style>
+    /* ============================================================
+       THEME — Swiss/Bauhaus monochrome + single copper accent
+       ============================================================ */
+    :root {
+      --bg-0: #fafaf6;
+      --bg-1: #f3f1e9;
+      --ink-0: #0a0b0d;
+      --ink-1: #2c2d32;
+      --ink-2: #6b6d74;
+      --ink-3: #a5a7ac;
+      --line-0: rgba(10, 11, 13, 0.06);
+      --line-1: rgba(10, 11, 13, 0.10);
+      --line-2: rgba(10, 11, 13, 0.16);
+      --accent: #0a0b0d;
+      --accent-2: #9c6a42;
+      --three-line: 0x0a0b0d;
+      --three-accent: 0x9c6a42;
+      color-scheme: light;
+    }
+    [data-theme="dark"] {
+      --bg-0: #0b0b0c;
+      --bg-1: #131315;
+      --ink-0: #fafaf6;
+      --ink-1: #d4d4d0;
+      --ink-2: #8c8e94;
+      --ink-3: #5c5e64;
+      --line-0: rgba(255, 255, 255, 0.06);
+      --line-1: rgba(255, 255, 255, 0.10);
+      --line-2: rgba(255, 255, 255, 0.18);
+      --accent: #fafaf6;
+      --accent-2: #d4a574;
+      --three-line: 0xfafaf6;
+      --three-accent: 0xd4a574;
+      color-scheme: dark;
+    }
+
+    /* ============================================================
+       RESET + BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      background: var(--bg-0);
+      color: var(--ink-0);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      overflow-x: hidden;
+      overflow-y: auto;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color 600ms ease, color 600ms ease;
+    }
+
+    /* Cursor-tracked radial tint — barely perceptible */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(
+          900px circle at var(--mx, 50%) var(--my, 40%),
+          color-mix(in srgb, var(--accent-2) 6%, transparent),
+          transparent 70%
+        );
+      transition: background 200ms linear;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    ::selection { background: var(--accent-2); color: var(--bg-0); }
+
+    /* ============================================================
+       LAYOUT — single-screen hero
+       ============================================================ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      display: grid;
+      grid-template-rows: 56px 1fr 56px;
+      z-index: 1;
+    }
+
+    /* ============================================================
+       NAV (top row)
+       ============================================================ */
+    .nav {
+      grid-row: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(20px, 4vw, 48px);
+      border-bottom: 1px solid var(--line-0);
+      position: relative;
+      z-index: 10;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      opacity: 0;
+      animation: fadeIn 1.8s ease 0.2s forwards;
+    }
+    .brand .mark {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.04em;
+      color: var(--ink-0);
+    }
+    .brand .sep {
+      width: 1px;
+      height: 14px;
+      background: var(--line-2);
+    }
+    .brand .edition {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 400;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--ink-2);
+      text-transform: none;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      opacity: 0;
+      animation: fadeIn 1.8s ease 0.3s forwards;
+    }
+    .install-link {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      color: var(--ink-0);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-thickness: 1px;
+      text-decoration-color: var(--line-2);
+      transition: text-decoration-color 300ms ease;
+    }
+    .install-link:hover { text-decoration-color: var(--ink-0); }
+
+    /* Theme toggle — classic divided circle */
+    .theme-toggle {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--line-1);
+      background: transparent;
+      color: var(--ink-0);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: border-color 300ms ease, transform 400ms ease;
+    }
+    .theme-toggle:hover { border-color: var(--line-2); transform: rotate(15deg); }
+    .theme-toggle svg { width: 14px; height: 14px; display: block; }
+    [data-theme="light"] .icon-sun { display: none; }
+    [data-theme="dark"] .icon-moon { display: none; }
+
+    /* ============================================================
+       CORNERS (absolute markers)
+       ============================================================ */
+    .corner {
+      position: fixed;
+      z-index: 6;
+      font-size: 12px;
+      opacity: 0;
+      animation: fadeIn 2s ease 0.6s forwards;
+    }
+    .corner.top-left {
+      top: 72px;
+      left: clamp(20px, 4vw, 48px);
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 14px;
+      color: var(--accent-2);
+      letter-spacing: 0.02em;
+    }
+    .corner.top-right {
+      top: 72px;
+      right: clamp(20px, 4vw, 48px);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--ink-3);
+    }
+
+    /* ============================================================
+       HERO BODY (center stack) — massive whitespace
+       ============================================================ */
+    .hero-body {
+      grid-row: 2;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px clamp(16px, 4vw, 48px);
+      text-align: center;
+    }
+
+    /* 3D canvas — top-center, behind text */
+    .three-wrap {
+      position: absolute;
+      top: calc(50% - 360px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 280px;
+      height: 380px;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      animation: fadeIn 2.4s ease 0.4s forwards;
+    }
+    .three-wrap canvas { display: block; width: 100% !important; height: 100% !important; }
+
+    /* Center stack — on top of 3D */
+    .stack {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(18px, 2.2vh, 34px);
+      max-width: 1200px;
+    }
+
+    .top-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      color: var(--ink-3);
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeIn 1.8s ease 0.5s forwards;
+    }
+
+    /* MASSIVE headline */
+    .headline {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(80px, 14vw, 220px);
+      line-height: 0.9;
+      letter-spacing: -0.04em;
+      color: var(--ink-0);
+      margin: 0;
+      text-align: center;
+    }
+    .headline .l {
+      display: block;
+      opacity: 0;
+      animation: fadeIn 2s ease forwards;
+    }
+    .headline .l1 { animation-delay: 0.7s; }
+    .headline .l2 { animation-delay: 0.95s; }
+    .headline .l3 { animation-delay: 1.2s; font-weight: 400; }
+    .headline em {
+      font-style: italic;
+      position: relative;
+    }
+    /* Replace the period with a copper dot */
+    .headline .dot {
+      display: inline-block;
+      width: 0.16em;
+      height: 0.16em;
+      border-radius: 50%;
+      background: var(--accent-2);
+      vertical-align: baseline;
+      margin-left: 0.04em;
+      transform: translateY(-0.05em);
+    }
+
+    .subhead {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: 18px;
+      line-height: 1.55;
+      color: var(--ink-2);
+      max-width: 48ch;
+      margin: 0 auto;
+      opacity: 0;
+      animation: fadeIn 2s ease 1.5s forwards;
+    }
+
+    .hairline {
+      width: 40px;
+      height: 1px;
+      background: var(--line-2);
+      opacity: 0;
+      animation: fadeIn 2s ease 1.75s forwards;
+    }
+
+    .cta-row {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      opacity: 0;
+      animation: fadeIn 2s ease 2s forwards;
+    }
+    .cta {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--ink-0);
+      text-decoration: underline;
+      text-underline-offset: 5px;
+      text-decoration-thickness: 1px;
+      text-decoration-color: var(--line-2);
+      transition: text-decoration-color 300ms ease, color 300ms ease;
+      white-space: nowrap;
+    }
+    .cta:hover { text-decoration-color: var(--ink-0); }
+    .cta .arrow { display: inline-block; margin-left: 4px; transition: transform 300ms ease; }
+    .cta:hover .arrow { transform: translateX(3px); }
+
+    /* ============================================================
+       BOTTOM ROW
+       ============================================================ */
+    .bottom {
+      grid-row: 3;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      align-items: center;
+      padding: 0 clamp(20px, 4vw, 48px);
+      border-top: 1px solid var(--line-0);
+      gap: 16px;
+      position: relative;
+      z-index: 5;
+    }
+    .bottom > * {
+      opacity: 0;
+      animation: fadeIn 2s ease 2.3s forwards;
+    }
+    .bottom .left {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      justify-self: start;
+    }
+    .bottom .center { justify-self: center; }
+    .bottom .right { justify-self: end; }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--ink-3);
+    }
+    .back-link {
+      color: var(--ink-3);
+      transition: color 300ms ease;
+    }
+    .back-link:hover { color: var(--ink-0); }
+
+    .copy-cmd {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-2);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px 0;
+      position: relative;
+      transition: color 300ms ease;
+    }
+    .copy-cmd:hover { color: var(--ink-0); text-decoration: underline; text-underline-offset: 4px; }
+    .copy-cmd::after {
+      content: attr(data-hint);
+      position: absolute;
+      left: 50%;
+      bottom: 100%;
+      transform: translateX(-50%) translateY(-6px);
+      font-size: 10px;
+      color: var(--accent-2);
+      opacity: 0;
+      transition: opacity 300ms ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .copy-cmd.copied::after { opacity: 1; }
+
+    .scroll-ind {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-3);
+      letter-spacing: 0.16em;
+    }
+
+    /* ============================================================
+       ANIMATIONS
+       ============================================================ */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 900px) {
+      .three-wrap { top: calc(50% - 300px); width: 220px; height: 300px; }
+    }
+    @media (max-width: 720px) {
+      .brand .edition { display: none; }
+      .three-wrap { top: calc(50% - 250px); width: 180px; height: 220px; }
+      .subhead { font-size: 16px; }
+      .corner.top-left, .corner.top-right { top: 64px; font-size: 11px; }
+      .bottom { grid-template-columns: 1fr 1fr; }
+      .bottom .center { grid-column: 1 / -1; justify-self: center; order: 3; padding: 8px 0; }
+      .bottom { padding-top: 4px; padding-bottom: 4px; }
+      .hero { grid-template-rows: 56px 1fr auto; }
+    }
+    @media (max-width: 480px) {
+      .three-wrap { display: none; }
+      .hero-body { padding-top: 60px; }
+      .cta-row { gap: 20px; }
+      .install-link { font-size: 12px; }
+    }
+
+    /* ============================================================
+       REDUCED MOTION
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .brand, .nav-right, .corner, .top-label, .headline .l,
+      .subhead, .hairline, .cta-row, .three-wrap, .bottom > * {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Corner markers (fixed) -->
+  <div class="corner top-left" aria-hidden="true">01 / 05</div>
+  <div class="corner top-right" aria-hidden="true">MMXXVI</div>
+
+  <main class="hero">
+
+    <!-- NAV -->
+    <header class="nav">
+      <a class="brand" href="/pro/" aria-label="OpenConstructionERP — Atelier edition">
+        <span class="mark">OCE</span>
+        <span class="sep" aria-hidden="true"></span>
+        <span class="edition">Atelier edition</span>
+      </a>
+      <div class="nav-right">
+        <a class="install-link" href="#install">Install ↗</a>
+        <button class="theme-toggle" type="button" aria-label="Toggle theme" id="themeToggle">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- HERO BODY (center stack) -->
+    <section class="hero-body">
+
+      <!-- 3D canvas -->
+      <div class="three-wrap" id="threeWrap" aria-hidden="true"></div>
+
+      <div class="stack">
+
+        <div class="top-label">OpenConstructionERP · edition 001</div>
+
+        <h1 class="headline" aria-label="Estimate buildings at the speed of thought">
+          <span class="l l1">Estimate</span>
+          <span class="l l2">buildings at</span>
+          <span class="l l3"><em>the speed of thought</em><span class="dot" aria-hidden="true"></span></span>
+        </h1>
+
+        <p class="subhead">
+          Open-source construction ERP. AI-powered BOQ. Multi-CAD. Self-host free.
+        </p>
+
+        <div class="hairline" aria-hidden="true"></div>
+
+        <div class="cta-row">
+          <a class="cta" href="#install" id="install">Install <span class="arrow">→</span></a>
+          <a class="cta" href="https://github.com/datadrivenconstruction/openconstructionerp" target="_blank" rel="noopener">
+            GitHub <span class="arrow">↗</span>
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- BOTTOM ROW -->
+    <footer class="bottom">
+      <div class="left">
+        <span class="mono">AGPL-3.0</span>
+        <a class="mono back-link" href="/pro/">← back to directions</a>
+      </div>
+      <div class="center">
+        <button class="copy-cmd" type="button" id="copyCmd" data-hint="copied" aria-label="Copy install command">
+          $ docker compose up
+        </button>
+      </div>
+      <div class="right">
+        <span class="scroll-ind">SCROLL ↓</span>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- ============================================================
+       SCRIPT
+       ============================================================ -->
+  <script>
+    // ---- Theme ----
+    const THEME_KEY = 'oce-theme';
+    const root = document.documentElement;
+    const toggle = document.getElementById('themeToggle');
+
+    function applyTheme(t) {
+      root.setAttribute('data-theme', t);
+      try { localStorage.setItem(THEME_KEY, t); } catch (_) {}
+      // notify 3D to rebuild materials
+      window.dispatchEvent(new CustomEvent('oce:theme', { detail: { theme: t } }));
+    }
+    (function initTheme() {
+      let t = null;
+      try { t = localStorage.getItem(THEME_KEY); } catch (_) {}
+      if (!t) {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      applyTheme(t);
+    })();
+    toggle.addEventListener('click', () => {
+      const cur = root.getAttribute('data-theme');
+      applyTheme(cur === 'dark' ? 'light' : 'dark');
+    });
+
+    // ---- Cursor-tracked tint (very gentle) ----
+    let mx = window.innerWidth * 0.5, my = window.innerHeight * 0.4;
+    let tx = mx, ty = my;
+    window.addEventListener('pointermove', (e) => {
+      tx = e.clientX;
+      ty = e.clientY;
+    });
+    function tintLoop() {
+      mx += (tx - mx) * 0.03;
+      my += (ty - my) * 0.03;
+      document.body.style.setProperty('--mx', mx + 'px');
+      document.body.style.setProperty('--my', my + 'px');
+      requestAnimationFrame(tintLoop);
+    }
+    requestAnimationFrame(tintLoop);
+
+    // ---- Copy install command ----
+    const copyBtn = document.getElementById('copyCmd');
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText('docker compose up');
+        copyBtn.classList.add('copied');
+        setTimeout(() => copyBtn.classList.remove('copied'), 1400);
+      } catch (_) {}
+    });
+  </script>
+
+  <!-- Three.js scene -->
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+
+    const wrap = document.getElementById('threeWrap');
+    if (!wrap || window.innerWidth < 480) { /* skip on tiny screens */ }
+    else {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const getThemeColors = () => {
+        const t = document.documentElement.getAttribute('data-theme');
+        return t === 'dark'
+          ? { line: 0xfafaf6, accent: 0xd4a574 }
+          : { line: 0x0a0b0d, accent: 0x9c6a42 };
+      };
+
+      const W = () => wrap.clientWidth;
+      const H = () => wrap.clientHeight;
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(W(), H());
+      renderer.setClearColor(0x000000, 0);
+      wrap.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(28, W() / H(), 0.1, 100);
+      camera.position.set(3.2, 2.4, 5.5);
+      camera.lookAt(0, 0.6, 0);
+
+      // Lights (for the one filled copper box)
+      scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+      const pt = new THREE.PointLight(0xffffff, 0.9, 20);
+      pt.position.set(4, 5, 4);
+      scene.add(pt);
+
+      // Stack of 7 boxes, varying widths. One "accent" box filled in copper.
+      // Geometry is shaped like a refined Brancusi totem.
+      const COL = new THREE.Group();
+
+      // Each entry: [width, height, depth, yCenter, accent?]
+      const stack = [
+        [1.40, 0.20, 1.40, -1.40, false],
+        [1.15, 0.35, 1.15, -1.08, false],
+        [0.95, 0.22, 0.95, -0.78, false],
+        [1.05, 0.55, 1.05, -0.38, true],   // accent — the single color moment
+        [0.80, 0.30, 0.80,  0.08, false],
+        [0.90, 0.45, 0.90,  0.46, false],
+        [0.55, 0.28, 0.55,  0.83, false],
+        [0.70, 0.18, 0.70,  1.06, false],
+      ];
+
+      const lineMaterials = [];
+      const accentMaterials = [];
+
+      function buildColumn() {
+        while (COL.children.length) {
+          const c = COL.children.pop();
+          c.traverse?.((o) => {
+            if (o.geometry) o.geometry.dispose?.();
+            if (o.material) {
+              if (Array.isArray(o.material)) o.material.forEach((m) => m.dispose?.());
+              else o.material.dispose?.();
+            }
+          });
+        }
+        lineMaterials.length = 0;
+        accentMaterials.length = 0;
+
+        const { line, accent } = getThemeColors();
+
+        stack.forEach(([w, h, d, y, isAccent]) => {
+          const geo = new THREE.BoxGeometry(w, h, d);
+          const edges = new THREE.EdgesGeometry(geo);
+          const mat = new THREE.LineBasicMaterial({
+            color: line,
+            transparent: true,
+            opacity: 0.72,
+          });
+          lineMaterials.push(mat);
+          const lines = new THREE.LineSegments(edges, mat);
+          lines.position.y = y;
+          COL.add(lines);
+
+          if (isAccent) {
+            const fillMat = new THREE.MeshStandardMaterial({
+              color: accent,
+              transparent: true,
+              opacity: 0.6,
+              roughness: 0.45,
+              metalness: 0.12,
+            });
+            accentMaterials.push(fillMat);
+            const fill = new THREE.Mesh(geo, fillMat);
+            fill.position.y = y;
+            COL.add(fill);
+          }
+        });
+      }
+      buildColumn();
+      scene.add(COL);
+
+      // rebuild materials on theme change
+      window.addEventListener('oce:theme', () => {
+        const { line, accent } = getThemeColors();
+        lineMaterials.forEach((m) => m.color.setHex(line));
+        accentMaterials.forEach((m) => m.color.setHex(accent));
+      });
+
+      // Mouse parallax — very subtle, strong damping
+      let targetRX = 0, targetRY = 0;
+      let rx = 0, ry = 0;
+      window.addEventListener('pointermove', (e) => {
+        const nx = (e.clientX / window.innerWidth) - 0.5;
+        const ny = (e.clientY / window.innerHeight) - 0.5;
+        targetRY = nx * 0.35;
+        targetRX = ny * 0.20;
+      });
+
+      // Resize
+      function onResize() {
+        renderer.setSize(W(), H());
+        camera.aspect = W() / H();
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener('resize', onResize);
+
+      // Loop
+      const STEP = prefersReduced ? 0 : 0.005;
+      function animate() {
+        rx += (targetRX - rx) * 0.02;
+        ry += (targetRY - ry) * 0.02;
+        COL.rotation.y += STEP;
+        COL.rotation.x = rx * 0.6;
+        // base tilt + parallax Y contribution
+        COL.rotation.z = ry * 0.08;
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      if (prefersReduced) {
+        renderer.render(scene, camera);
+      } else {
+        requestAnimationFrame(animate);
+      }
+    }
+  </script>
+
+</body>
+</html>

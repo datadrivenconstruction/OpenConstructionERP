@@ -1,0 +1,133 @@
+OpenConstructionERP
+Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+Contact: info@datadrivenconstruction.io
+
+This product is licensed under the GNU Affero General Public License v3.0
+or later (AGPL-3.0-or-later). See the LICENSE file for the full license text.
+
+For commercial licensing without AGPL obligations, contact
+info@datadrivenconstruction.io.
+
+------------------------------------------------------------------------
+Third-Party Software
+------------------------------------------------------------------------
+
+This distribution contains or depends on third-party open-source software.
+A full machine-readable license inventory is generated per release via:
+
+    cd frontend && npx license-checker --json > NOTICE.frontend.json
+    cd backend  && pip-licenses --format=json > NOTICE.backend.json
+
+The aggregated inventory for each release is published alongside the
+signed release artefacts on the GitHub releases page.
+
+Primary third-party components (non-exhaustive):
+
+  * FastAPI ............................. MIT
+  * SQLAlchemy .......................... MIT
+  * Pydantic ............................ MIT
+  * Alembic ............................. MIT
+  * Uvicorn ............................. BSD-3-Clause
+  * pandas .............................. BSD-3-Clause
+  * pyarrow ............................. Apache-2.0
+  * openpyxl ............................ MIT
+  * reportlab ........................... BSD-3-Clause
+  * pdfplumber .......................... MIT
+  * httpx ............................... BSD-3-Clause
+  * structlog ........................... Apache-2.0 / MIT
+  * python-jose ......................... MIT
+  * bcrypt .............................. Apache-2.0
+  * ezdxf ............................... MIT
+  * trimesh ............................. MIT
+  * React ............................... MIT
+  * TypeScript .......................... Apache-2.0
+  * Vite ................................ MIT
+  * Tailwind CSS ........................ MIT
+  * AG Grid Community ................... MIT
+  * PDF.js .............................. Apache-2.0
+  * three.js ............................ MIT
+  * Zustand ............................. MIT
+  * TanStack Query ...................... MIT
+  * i18next ............................. MIT
+  * Lucide icons ........................ ISC
+  * Recharts ............................ MIT
+  * Playwright .......................... Apache-2.0
+
+------------------------------------------------------------------------
+Trademarks
+------------------------------------------------------------------------
+
+All product names, logos, and trademarks are property of their respective
+owners. All company, product, and service names used in this software and
+its documentation are for identification purposes only. Use of these
+names, trademarks, and brands does not imply endorsement.
+
+Revit(R), AutoCAD(R), and DWG(TM) are trademarks of Autodesk, Inc.
+MicroStation(R) and DGN are trademarks of Bentley Systems, Inc.
+IFC(R) is a trademark of buildingSMART International.
+DIN is a registered trademark of DIN Deutsches Institut fuer Normung e.V.
+GAEB is a trademark of the Gemeinsamer Ausschuss Elektronik im Bauwesen.
+NRM is a trademark of the Royal Institution of Chartered Surveyors (RICS).
+MasterFormat(R) is a trademark of the Construction Specifications Institute (CSI).
+ISO is a registered trademark of the International Organization for Standardization.
+
+OpenConstructionERP is an independent project and is not affiliated with,
+endorsed by, or sponsored by any of the trademark owners listed above.
+Comparative references to commercial products (e.g., RIB iTWO, Exactal
+CostX, Sage Estimating, Bluebeam) reflect publicly available feature
+information at the time of publication and are used for fair comparative
+purposes under EU Directive 2006/114/EC and US Lanham Act Section 43(a).
+
+------------------------------------------------------------------------
+Data Sources
+------------------------------------------------------------------------
+
+The CWICR cost database aggregated and published with this software was
+compiled by DataDrivenConstruction from public, licensed, and originally
+collected sources. Classification codes (e.g., DIN 276 cost-group numbers,
+CSI MasterFormat division numbers, NRM element codes) are used as factual
+references; no standard's copyrighted descriptive text has been copied
+into the database without permission.
+
+------------------------------------------------------------------------
+Cryptographic Notice
+------------------------------------------------------------------------
+
+This software contains cryptographic functionality for authentication
+(password hashing with bcrypt, JSON Web Token signing). Export is
+classified under US EAR 740.17 (TSU mass-market exemption) and EU
+Regulation 2021/821 (dual-use item classification). The software is not
+authorised for distribution to, or use by, persons or entities located
+in jurisdictions subject to comprehensive US sanctions administered by
+the Office of Foreign Assets Control (OFAC), including but not limited
+to Cuba, Iran, North Korea, Syria, and the Crimea/Donetsk/Luhansk
+regions of Ukraine.
+
+------------------------------------------------------------------------
+AI / Machine Learning Notice
+------------------------------------------------------------------------
+
+This software integrates with third-party Large Language Model APIs
+(Anthropic Claude, OpenAI, Google Gemini, Mistral, Groq, DeepSeek) when
+configured by the user. AI-generated cost estimates, classifications,
+and suggestions are preliminary and must be verified by a qualified
+construction-estimation professional before use in a binding commercial
+context. The authors and contributors of OpenConstructionERP disclaim
+all liability for decisions made on the basis of AI-generated output.
+
+------------------------------------------------------------------------
+Disclaimer of Warranty
+------------------------------------------------------------------------
+
+THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+See the AGPL-3.0 license for the full warranty disclaimer.
+
+------------------------------------------------------------------------
+Contact
+------------------------------------------------------------------------
+
+For legal, licensing, or compliance inquiries:
+    info@datadrivenconstruction.io
+    https://datadrivenconstruction.io

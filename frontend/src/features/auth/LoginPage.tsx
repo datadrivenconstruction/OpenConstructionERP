@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
   Eye, EyeOff, Mail, Lock, Globe, ChevronDown, Info, X,
   ShieldCheck, Zap, Brain,
@@ -9,13 +9,25 @@ import {
 } from 'lucide-react';
 import { Button, Input, Logo, LogoWithText, CountryFlag } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { extractErrorMessageFromBody } from '@/shared/lib/api';
 import { AuthBackground } from './AuthBackground';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 
 export function LoginPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const setTokens = useAuthStore((s) => s.setTokens);
+  // `?next=/path` lets guarded routes send the user back to where they wanted
+  // to go after login. Falls back to `/` for direct visits.
+  const nextPath = (() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const next = params.get('next');
+      if (next && next.startsWith('/') && !next.startsWith('//')) return next;
+    } catch { /* ignore */ }
+    return '/';
+  })();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -60,12 +72,13 @@ export function LoginPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.detail || t('auth.invalid_credentials', 'Invalid email or password'));
+        const parsed = extractErrorMessageFromBody(data);
+        setError(parsed || t('auth.invalid_credentials', 'Invalid email or password'));
         return;
       }
       const data = await res.json();
       setTokens(data.access_token, data.refresh_token, rememberMe, email);
-      navigate('/');
+      navigate(nextPath, { replace: true });
     } catch {
       setError(t('auth.connection_error', 'Unable to connect to server. Please try again.'));
     } finally {
@@ -95,7 +108,8 @@ export function LoginPage() {
       // If user doesn't exist, auto-register then login
       if (!res.ok) {
         const errData = await res.json().catch(() => null);
-        if (errData?.detail?.includes('Invalid') || errData?.detail?.includes('not found') || res.status === 401) {
+        const parsedMsg = extractErrorMessageFromBody(errData) ?? '';
+        if (parsedMsg.includes('Invalid') || parsedMsg.includes('not found') || res.status === 401) {
           // Auto-register demo user
           const regRes = await fetch('/api/v1/users/auth/register/', {
             method: 'POST',
@@ -119,12 +133,13 @@ export function LoginPage() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.detail || t('auth.demo_login_failed', 'Demo login failed. Please try again.'));
+        const parsed = extractErrorMessageFromBody(data);
+        setError(parsed || t('auth.demo_login_failed', 'Demo login failed. Please try again.'));
         return;
       }
       const data = await res.json();
       setTokens(data.access_token, data.refresh_token, false, demoEmail);
-      navigate('/');
+      navigate(nextPath, { replace: true });
     } catch {
       setError(t('auth.connection_error', 'Unable to connect to server. Please try again.'));
     } finally {
@@ -449,7 +464,7 @@ export function LoginPage() {
               </h3>
               <div className="grid grid-cols-2 gap-2.5">
                 {[
-                  { icon: FileSpreadsheet, color: 'text-emerald-500 bg-emerald-500/10', title: t('about.cap.boq', 'Bill of Quantities'), desc: t('about.cap.boq_desc', 'Create detailed BOQ with hierarchical sections, positions, assemblies, markups (overhead, profit, VAT), and automatic totals. Supports DIN 276, NRM 1/2, MasterFormat, and custom classification systems.') },
+                  { icon: FileSpreadsheet, color: 'text-emerald-500 bg-emerald-500/10', title: t('about.cap.boq', 'Bill of Quantities'), desc: t('about.cap.boq_desc', 'Create detailed BOQ with hierarchical sections, positions, assemblies, markups (overhead, profit, VAT), and automatic totals. Works with regional classification systems or your own custom schema.') },
                   { icon: Database, color: 'text-blue-500 bg-blue-500/10', title: t('about.cap.costs', 'Cost Databases'), desc: t('about.cap.costs_desc', '55,000+ cost items across 11 regional databases covering DACH, UK, North America, Middle East, and more. Add your own rates, import from Excel, or build a custom database from scratch.') },
                   { icon: CalendarClock, color: 'text-amber-500 bg-amber-500/10', title: t('about.cap.schedule', '4D Scheduling'), desc: t('about.cap.schedule_desc', 'Create project schedules with CPM critical path calculation, interactive Gantt charts, Monte Carlo risk analysis, resource assignment, and auto-generation of activities from your BOQ.') },
                   { icon: TrendingUp, color: 'text-violet-500 bg-violet-500/10', title: t('about.cap.costmodel', '5D Cost Model'), desc: t('about.cap.costmodel_desc', 'Track budgets over time with Earned Value Management (SPI, CPI), S-curve visualization, cash flow projections, cost snapshots, and what-if scenario modeling for informed decision-making.') },

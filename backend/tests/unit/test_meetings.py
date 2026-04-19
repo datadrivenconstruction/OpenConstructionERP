@@ -85,6 +85,8 @@ class _StubMeetingRepo:
         meeting_type: str | None = None,
         status: str | None = None,
         search: str | None = None,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
     ) -> tuple[list[Any], int]:
         rows = [r for r in self.rows.values() if r.project_id == project_id]
         if meeting_type is not None:

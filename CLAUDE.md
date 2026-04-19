@@ -16,7 +16,7 @@
 
 1. **LIGHTWEIGHT & SIMPLE** — минимум зависимостей, быстрый старт (`docker compose up` или `pip install openestimate`). Никаких тяжёлых фреймворков. Core должен запускаться на VPS с 2GB RAM.
 2. **i18n EVERYWHERE** — 20 языков вшиты в ядро. Все строки UI, validation messages, cost database labels — через i18n. Новый язык = JSON-файл. Zero hardcoded strings.
-3. **CAD-agnostic через конвертацию** — мы НЕ используем IfcOpenShell, BCF, нативный IFC. Все CAD-форматы (DWG, DGN, RVT, IFC) конвертируются в наш canonical формат через ODA SDK + собственный reverse engineering.
+3. **CAD-agnostic через конвертацию** — мы НЕ используем IfcOpenShell, BCF, нативный IFC. Все CAD-форматы (DWG, DGN, RVT, IFC) конвертируются в наш canonical формат через DDC cad2data.
 4. **Data validation as first-class citizen** — каждый импорт проходит validation pipeline с configurable rule sets (DIN, NRM, MasterFormat, custom). Validation НЕ optional — это часть core workflow.
 5. **Modules = plugins** — скачал → положил в папку → перезагрузил → работает. Как npm install. Каждый модуль = zip с manifest. Marketplace для поиска и установки.
 6. **Open data standards** — GAEB XML 3.3, DIN 276, NRM, MasterFormat нативно. Проприетарные форматы — через модули.
@@ -31,7 +31,7 @@
 | Background tasks | **Celery + Redis** (optional: in-process для dev) | Heavy async: CAD conversion, CV processing, AI inference |
 | Frontend | **React 18+ / TypeScript** | AG Grid (BOQ), Three.js (3D viewer), PDF.js (takeoff), Yjs (collab) |
 | Database | **PostgreSQL 16+** | OLTP + pg_duckdb (OLAP) + pgvector (AI) + PostGIS (geo) |
-| CAD conversion | **ODA SDK (C++) + Python bindings** / **Rust** (RVT reverse engineering) | Все форматы → canonical JSON/Parquet |
+| CAD conversion | **DDC cad2data** | Все форматы → canonical JSON/Parquet |
 | CV/OCR | **PaddleOCR 3.0 + YOLOv11** | PDF takeoff, symbol detection |
 | Vector search | **Qdrant** (production) / **pgvector** (simple deploy) | Semantic search по cost database |
 | File storage | **MinIO** (S3-compatible) / local filesystem (dev) | Чертежи, модели |
@@ -148,11 +148,9 @@ openestimate/
 │   └── tests/
 │
 ├── services/                    # Standalone services
-│   ├── cad-converter/           # ODA SDK + Rust RVT converter
+│   ├── cad-converter/           # DDC cad2data CAD/BIM converter
 │   │   ├── CLAUDE.md
-│   │   ├── Cargo.toml           # Rust workspace
-│   │   ├── oda-bridge/          # Python ↔ ODA C++ bridge
-│   │   └── rvt-parser/          # RVT reverse engineering (Rust)
+│   │   └── Cargo.toml           # Rust workspace
 │   │
 │   ├── cv-pipeline/             # Computer Vision for takeoff
 │   │   ├── CLAUDE.md
@@ -270,7 +268,7 @@ class ValidationRule(ABC):
 Validation results visible in UI as traffic-light dashboard: 🟢 Passed / 🟡 Warnings / 🔴 Errors.
 Each result links back to the source element (BOQ position, drawing area, cost item).
 
-### CAD Conversion Pipeline (ODA + Rust, NO IfcOpenShell)
+### CAD Conversion Pipeline (DDC cad2data, NO IfcOpenShell)
 
 ```
 Input (any CAD format)
@@ -278,10 +276,10 @@ Input (any CAD format)
 ┌─────────────────────────────────┐
 │  CAD Converter Service          │
 │                                 │
-│  DWG → ODA SDK → Canonical JSON │
-│  DGN → ODA SDK → Canonical JSON │
-│  RVT → Rust parser → Canon JSON │  ← Собственный reverse engineering
-│  IFC → ODA SDK → Canonical JSON │  ← Через ODA, НЕ через IfcOpenShell
+│  DWG → DDC cad2data → Canon JSON│
+│  DGN → DDC cad2data → Canon JSON│
+│  RVT → DDC cad2data → Canon JSON│
+│  IFC → DDC cad2data → Canon JSON│
 │  PDF → PyMuPDF → Raster/Vector  │
 │  Photos → CV pipeline → Elements│
 │                                 │
@@ -336,7 +334,7 @@ Storage (PostgreSQL + files in MinIO)
    └── Route to appropriate converter
 
 2. CONVERT
-   ├── CAD → Canonical JSON (ODA/Rust)
+   ├── CAD → Canonical JSON (DDC cad2data)
    ├── PDF → Vector extraction + OCR (PyMuPDF + PaddleOCR)
    ├── Photo → CV pipeline (YOLO + OCR)
    └── Output: structured elements with quantities
@@ -429,8 +427,8 @@ Storage (PostgreSQL + files in MinIO)
 ### Фаза 2: CAD Integration (4 недели)
 **Цель**: загрузка DWG/RVT/IFC → автоматические объёмы.
 
-- [ ] Service: `cad-converter` (ODA bridge for DWG/DGN/IFC)
-- [ ] Service: `rvt-parser` (Rust reverse engineering)
+- [ ] Service: `cad-converter` (DDC cad2data bridge for DWG/DGN/IFC)
+- [ ] Service: `rvt-parser` (Rust RVT converter)
 - [ ] Canonical format implementation
 - [ ] Validation rules for CAD data (structure, completeness, classification)
 - [ ] Frontend: 3D viewer (Three.js, load canonical format)
@@ -618,7 +616,7 @@ OPENAI_API_KEY=             # For LLM features
 ANTHROPIC_API_KEY=          # For LLM features
 
 # CAD Converter
-ODA_LICENSE_KEY=            # ODA SDK license
+# CAD converter uses DDC cad2data (no separate license key needed)
 CAD_CONVERTER_URL=http://localhost:8001
 
 # CV Pipeline
@@ -635,7 +633,7 @@ ALLOWED_ORIGINS=http://localhost:5173
 
 ## Важные ограничения
 
-1. **НЕ используем IfcOpenShell** — весь BIM/CAD через ODA SDK + собственный reverse engineering
+1. **НЕ используем IfcOpenShell** — весь BIM/CAD через DDC cad2data pipeline
 2. **НЕ используем BCF** — своя система issues/comments/collaboration
 3. **НЕ используем natively IFC** — IFC это просто ещё один CAD формат для конвертации в canonical
 4. **НЕ монолитная архитектура** — каждая функция = модуль с manifest

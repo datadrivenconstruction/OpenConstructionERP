@@ -4,24 +4,49 @@ Loads from environment variables with .env file fallback.
 All settings are typed and validated via Pydantic.
 """
 
+import re
 from functools import lru_cache
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _pkg_version
+from pathlib import Path
 from typing import Literal
 
 from pydantic import Field, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def _read_pyproject_version() -> str | None:
+    """Best-effort parse of ``version = "..."`` from backend/pyproject.toml.
+
+    Used when the package isn't installed (``pip install -e .`` not run).
+    Walks up from this file so it works whether CWD is repo root, backend/,
+    or a unit-test runner.
+    """
+    here = Path(__file__).resolve()
+    for parent in (here.parent, *here.parents):
+        candidate = parent / "pyproject.toml"
+        if candidate.is_file():
+            try:
+                text = candidate.read_text(encoding="utf-8")
+            except OSError:
+                return None
+            match = re.search(r'^version\s*=\s*"([^"]+)"', text, re.MULTILINE)
+            if match:
+                return match.group(1)
+            return None
+    return None
+
+
 def _detect_version() -> str:
     """Read the installed package version so /api/health stays in sync
-    with pyproject.toml. Falls back to a literal only if the package
-    isn't installed (e.g. running uvicorn directly from a fresh checkout
-    without `pip install -e .`)."""
+    with pyproject.toml. Falls back to parsing pyproject.toml directly
+    when running uvicorn from a fresh checkout; only returns the
+    ``0.0.0+local`` sentinel if even that lookup fails.
+    """
     try:
         return _pkg_version("openconstructionerp")
     except PackageNotFoundError:
-        return "0.0.0+local"
+        return _read_pyproject_version() or "0.0.0+local"
 
 
 class Settings(BaseSettings):
@@ -71,6 +96,12 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60
     jwt_refresh_expire_days: int = 30
+    # Default role handed to users who self-register after the very first
+    # (bootstrap) user. ``viewer`` is the safe default — read-only across
+    # the app. Can be raised to ``editor`` or ``manager`` for trusted
+    # internal deployments via ``OE_DEFAULT_REGISTRATION_ROLE``. ``admin``
+    # is intentionally unreachable through this setting.
+    default_registration_role: Literal["viewer", "editor", "manager"] = "viewer"
 
     # ── AI / Vector ──────────────────────────────────────────────────────
     vector_backend: str = "lancedb"  # "lancedb" (embedded, default) or "qdrant" (server)

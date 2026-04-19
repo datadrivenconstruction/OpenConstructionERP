@@ -10,15 +10,20 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+# Bound ints at PostgreSQL INT4 max.
+_INT32_MAX = 2_147_483_647
+
 # ── Workforce entry ────────────────────────────────────────────────────
 
 
 class WorkforceEntry(BaseModel):
     """A single workforce entry: trade + count + hours."""
 
+    model_config = ConfigDict(extra="ignore")
+
     trade: str = Field(..., min_length=1, max_length=100)
-    count: int = Field(..., ge=0)
-    hours: float = Field(..., ge=0.0)
+    count: int = Field(..., ge=0, le=_INT32_MAX)
+    hours: float = Field(..., ge=0.0, le=1e6, allow_inf_nan=False)
 
 
 # ── Create ─────────────────────────────────────────────────────────────
@@ -27,7 +32,7 @@ class WorkforceEntry(BaseModel):
 class FieldReportCreate(BaseModel):
     """Create a new field report."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     project_id: UUID
     report_date: date
@@ -39,27 +44,27 @@ class FieldReportCreate(BaseModel):
         default="clear",
         pattern=r"^(clear|cloudy|rain|snow|fog|storm)$",
     )
-    temperature_c: float | None = None
+    temperature_c: float | None = Field(default=None, ge=-100.0, le=100.0, allow_inf_nan=False)
     wind_speed: str | None = Field(default=None, max_length=50)
     precipitation: str | None = Field(default=None, max_length=100)
     humidity: int | None = Field(default=None, ge=0, le=100)
-    workforce: list[WorkforceEntry] = Field(default_factory=list)
-    equipment_on_site: list[str] = Field(default_factory=list)
+    workforce: list[WorkforceEntry] = Field(default_factory=list, max_length=1000)
+    equipment_on_site: list[str] = Field(default_factory=list, max_length=1000)
     work_performed: str = Field(default="", max_length=10000)
     delays: str | None = Field(default=None, max_length=5000)
-    delay_hours: float = Field(default=0.0, ge=0.0)
+    delay_hours: float = Field(default=0.0, ge=0.0, le=1e4, allow_inf_nan=False)
     visitors: str | None = Field(default=None, max_length=2000)
     deliveries: str | None = Field(default=None, max_length=5000)
     safety_incidents: str | None = Field(default=None, max_length=5000)
-    materials_used: list[str] = Field(default_factory=list)
-    photos: list[str] = Field(default_factory=list)
+    materials_used: list[str] = Field(default_factory=list, max_length=1000)
+    photos: list[str] = Field(default_factory=list, max_length=1000)
     notes: str | None = Field(default=None, max_length=5000)
     signature_by: str | None = Field(default=None, max_length=255)
     signature_data: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     # Optional coordinates for auto-fetching weather from OpenWeatherMap
-    lat: float | None = Field(default=None, ge=-90, le=90)
-    lon: float | None = Field(default=None, ge=-180, le=180)
+    lat: float | None = Field(default=None, ge=-90, le=90, allow_inf_nan=False)
+    lon: float | None = Field(default=None, ge=-180, le=180, allow_inf_nan=False)
 
 
 # ── Update ─────────────────────────────────────────────────────────────
@@ -68,7 +73,7 @@ class FieldReportCreate(BaseModel):
 class FieldReportUpdate(BaseModel):
     """Partial update for a field report."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     report_date: date | None = None
     report_type: str | None = Field(
@@ -79,20 +84,20 @@ class FieldReportUpdate(BaseModel):
         default=None,
         pattern=r"^(clear|cloudy|rain|snow|fog|storm)$",
     )
-    temperature_c: float | None = None
+    temperature_c: float | None = Field(default=None, ge=-100.0, le=100.0, allow_inf_nan=False)
     wind_speed: str | None = Field(default=None, max_length=50)
     precipitation: str | None = Field(default=None, max_length=100)
     humidity: int | None = Field(default=None, ge=0, le=100)
-    workforce: list[WorkforceEntry] | None = None
-    equipment_on_site: list[str] | None = None
+    workforce: list[WorkforceEntry] | None = Field(default=None, max_length=1000)
+    equipment_on_site: list[str] | None = Field(default=None, max_length=1000)
     work_performed: str | None = Field(default=None, max_length=10000)
     delays: str | None = Field(default=None, max_length=5000)
-    delay_hours: float | None = Field(default=None, ge=0.0)
+    delay_hours: float | None = Field(default=None, ge=0.0, le=1e4, allow_inf_nan=False)
     visitors: str | None = Field(default=None, max_length=2000)
     deliveries: str | None = Field(default=None, max_length=5000)
     safety_incidents: str | None = Field(default=None, max_length=5000)
-    materials_used: list[str] | None = None
-    photos: list[str] | None = None
+    materials_used: list[str] | None = Field(default=None, max_length=1000)
+    photos: list[str] | None = Field(default=None, max_length=1000)
     notes: str | None = Field(default=None, max_length=5000)
     signature_by: str | None = Field(default=None, max_length=255)
     signature_data: str | None = None
@@ -181,12 +186,12 @@ class LinkedDocumentResponse(BaseModel):
 class SiteWorkforceLogCreate(BaseModel):
     """Create a workforce log entry."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     field_report_id: UUID
     worker_type: str = Field(..., min_length=1, max_length=100)
     company: str | None = Field(default=None, max_length=255)
-    headcount: int = Field(default=0, ge=0)
+    headcount: int = Field(default=0, ge=0, le=_INT32_MAX)
     hours_worked: str = Field(default="0", max_length=10)
     overtime_hours: str = Field(default="0", max_length=10)
     wbs_id: str | None = Field(default=None, max_length=36)
@@ -197,11 +202,11 @@ class SiteWorkforceLogCreate(BaseModel):
 class SiteWorkforceLogUpdate(BaseModel):
     """Partial update for a workforce log entry."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
 
     worker_type: str | None = Field(default=None, min_length=1, max_length=100)
     company: str | None = Field(default=None, max_length=255)
-    headcount: int | None = Field(default=None, ge=0)
+    headcount: int | None = Field(default=None, ge=0, le=_INT32_MAX)
     hours_worked: str | None = Field(default=None, max_length=10)
     overtime_hours: str | None = Field(default=None, max_length=10)
     wbs_id: str | None = Field(default=None, max_length=36)

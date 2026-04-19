@@ -56,6 +56,7 @@ from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.rate_limiter import upload_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.schemas import (
@@ -752,6 +753,14 @@ async def upload_bim_data(
         ) from exc
     await _verify_project_access(service.session, project_uuid, user_id or "")
 
+    allowed, _ = upload_limiter.is_allowed(str(user_id or "anon"))
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many uploads. Please wait a moment and try again.",
+            headers={"Retry-After": "60"},
+        )
+
     # --- Validate data file ---
     data_filename = (data_file.filename or "").lower()
     if not data_filename.endswith((".csv", ".xlsx", ".xls")):
@@ -1242,6 +1251,14 @@ async def upload_cad_file(
         ) from exc
     await _verify_project_access(service.session, project_uuid, user_id or "")
 
+    allowed, _ = upload_limiter.is_allowed(str(user_id or "anon"))
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many uploads. Please wait a moment and try again.",
+            headers={"Retry-After": "60"},
+        )
+
     filename = (file.filename or "").strip()
     if not filename:
         raise HTTPException(
@@ -1310,6 +1327,29 @@ async def upload_cad_file(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"File too large. Maximum size is {_CAD_MAX_SIZE // (1024 * 1024)} MB.",
         )
+
+    # Magic-byte validation — filename extensions are attacker-controlled
+    # and we proceed to hand this file to a CAD converter that can be
+    # exploited by unexpected formats. Reject anything that doesn't look
+    # like one of our accepted CAD/BIM containers.
+    from app.core.file_signature import (
+        ALLOWED_CAD_TYPES,
+        FileSignatureMismatch,
+        SIGNATURE_BYTES_REQUIRED,
+        require as _require_sig,
+    )
+
+    try:
+        _require_sig(
+            content[:SIGNATURE_BYTES_REQUIRED],
+            ALLOWED_CAD_TYPES,
+            filename=filename,
+        )
+    except FileSignatureMismatch as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
 
     # Auto-fill model name from filename
     model_name = name or pathlib.Path(filename).stem
@@ -1536,7 +1576,7 @@ async def get_model_geometry(
     # Validate the token (header or query). ColladaLoader can't set headers,
     # so we accept ?token=<jwt> as an alternative auth mechanism.
     from app.config import get_settings
-    from app.dependencies import decode_access_token
+    from app.dependencies import decode_access_token, verify_user_exists_and_active
 
     auth_token: str | None = token
     if not auth_token and authorization and authorization.lower().startswith("bearer "):
@@ -1557,6 +1597,15 @@ async def get_model_geometry(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
         )
+
+    # BUG-323: forged tokens with a fake UUID must not authenticate here
+    # either. Re-hydrate against the DB and replace self-asserted role /
+    # permissions with canonical state before any authorization check.
+    db_user = await verify_user_exists_and_active(payload["sub"])
+    from app.core.permissions import permission_registry
+
+    payload["role"] = db_user.role
+    payload["permissions"] = permission_registry.get_role_permissions(db_user.role)
 
     # Check the token-bearer actually has bim.read before we load data.
     token_role = payload.get("role", "")

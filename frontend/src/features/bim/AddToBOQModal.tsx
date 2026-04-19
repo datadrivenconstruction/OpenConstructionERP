@@ -14,7 +14,7 @@
  * and on submit creates a single BOQ position + a link per element.
  */
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { X, Search, Plus, CheckCircle2, Loader2, Link2, Sparkles } from 'lucide-react';
@@ -149,6 +149,9 @@ export default function AddToBOQModal({
   // list once it loads).  We derive the effective id via useMemo below so
   // the positions query never fires with a stale/dangling id.
   const [userSelectedBOQId, setUserSelectedBOQId] = useState<string | null>(null);
+  // Ref to auto-focus the "Target BOQ" select on modal open — it's the
+  // first decision the user has to make before picking link-vs-create.
+  const targetBoqRef = useRef<HTMLSelectElement>(null);
 
   // ── New position form state ─────────────────────────────────────────
   const defaultQty = useMemo(() => pickDefaultQuantity(elements), [elements]);
@@ -174,6 +177,14 @@ export default function AddToBOQModal({
     setUnitRate('0');
     setUserSelectedBOQId(null);
   }, [elements]);
+
+  // Focus the Target BOQ select as soon as the modal mounts — it's Step 1
+  // of the flow ("which BOQ are we linking into?") and should be the first
+  // thing users interact with.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => targetBoqRef.current?.focus());
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   // ── Cost auto-suggestions (CWICR / cost database) ───────────────────
   //
@@ -415,30 +426,23 @@ export default function AddToBOQModal({
           </button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex px-5 border-b border-border-light shrink-0">
-          <TabButton
-            active={tab === 'existing'}
-            onClick={() => setTab('existing')}
-            label={t('bim.tab_link_existing', { defaultValue: 'Link to existing' })}
-          />
-          <TabButton
-            active={tab === 'new'}
-            onClick={() => setTab('new')}
-            label={t('bim.tab_create_new', { defaultValue: 'Create new position' })}
-          />
-        </div>
-
-        {/* BOQ picker (shared by both tabs) */}
-        <div className="px-5 py-3 border-b border-border-light shrink-0">
-          <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+        {/* Step 1 — Target BOQ picker.  Placed above the tabs because the
+            flow starts here: pick a BOQ first, THEN choose link-vs-create.
+            Highlighted with an oe-blue ring so it reads as the primary
+            active field on modal open. */}
+        <div className="px-5 py-3 border-b border-border-light shrink-0 bg-oe-blue/[0.04]">
+          <label className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-oe-blue mb-1">
+            <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-oe-blue text-[9px] font-bold text-white">
+              1
+            </span>
             {t('bim.target_boq', { defaultValue: 'Target BOQ' })}
           </label>
           <select
+            ref={targetBoqRef}
             value={selectedBOQId ?? ''}
             onChange={(e) => setUserSelectedBOQId(e.target.value || null)}
             disabled={boqs.length === 0}
-            className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            className="w-full px-2 py-1.5 text-sm rounded border border-oe-blue/50 bg-surface-primary ring-2 ring-oe-blue/20 focus:outline-none focus:ring-2 focus:ring-oe-blue"
           >
             {boqs.length === 0 ? (
               <option value="">
@@ -460,6 +464,20 @@ export default function AddToBOQModal({
               })}
             </p>
           )}
+        </div>
+
+        {/* Step 2 — choose link-vs-create. */}
+        <div className="flex px-5 border-b border-border-light shrink-0">
+          <TabButton
+            active={tab === 'existing'}
+            onClick={() => setTab('existing')}
+            label={t('bim.tab_link_existing', { defaultValue: 'Link to existing' })}
+          />
+          <TabButton
+            active={tab === 'new'}
+            onClick={() => setTab('new')}
+            label={t('bim.tab_create_new', { defaultValue: 'Create new position' })}
+          />
         </div>
 
         {/* Body */}

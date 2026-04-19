@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenConstructionERP Pro — Blueprint edition</title>
+  <link rel="icon" type="image/svg+xml" href="/pro/cinematic/assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,wght@0,400;0,500;0,600;1,500;1,600&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --paper: #f5f1e8;
+      --paper-deep: #ede6d3;
+      --ink: #1a2d5a;
+      --ink-soft: #2a3f70;
+      --cad: #2563eb;
+      --rust: #b45309;
+      --muted: #5a6578;
+      --grid: rgba(26, 45, 90, 0.08);
+      --grid-strong: rgba(26, 45, 90, 0.14);
+      --sans: 'Inter', system-ui, sans-serif;
+      --serif: 'Newsreader', Georgia, serif;
+      --mono: 'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* ==================== PAPER BACKGROUND ==================== */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 24px 24px;
+      background-position: -1px -1px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--grid-strong) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-strong) 1px, transparent 1px);
+      background-size: 120px 120px;
+      background-position: -1px -1px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.7;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      mix-blend-mode: multiply;
+      z-index: 1;
+    }
+
+    /* ==================== NAV (Title Block) ==================== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background: rgba(245, 241, 232, 0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--ink);
+    }
+
+    .nav-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      position: relative;
+    }
+
+    .nav-inner::before {
+      content: '';
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      bottom: -1px;
+      height: 3px;
+      background: linear-gradient(
+        to right,
+        var(--ink) 0,
+        var(--ink) 60%,
+        transparent 60%,
+        transparent 62%,
+        var(--ink) 62%,
+        var(--ink) 100%
+      );
+      opacity: 0.25;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border: 1.5px solid var(--ink);
+      position: relative;
+      background: var(--paper);
+    }
+
+    .brand-mark::before,
+    .brand-mark::after {
+      content: '';
+      position: absolute;
+      background: var(--ink);
+    }
+
+    .brand-mark::before {
+      top: 50%;
+      left: -4px;
+      right: -4px;
+      height: 1px;
+    }
+
+    .brand-mark::after {
+      left: 50%;
+      top: -4px;
+      bottom: -4px;
+      width: 1px;
+    }
+
+    .brand-mark svg {
+      position: absolute;
+      inset: 4px;
+      width: calc(100% - 8px);
+      height: calc(100% - 8px);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .brand-name {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 17px;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-sub {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 6px 0;
+      position: relative;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: var(--cad);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s cubic-bezier(0.5, 0, 0, 1);
+    }
+
+    .nav-links a:hover {
+      color: var(--cad);
+    }
+
+    .nav-links a:hover::after {
+      transform: scaleX(1);
+    }
+
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--ink);
+      color: var(--paper);
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1.5px solid var(--ink);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .nav-cta:hover {
+      background: var(--cad);
+      border-color: var(--cad);
+    }
+
+    .nav-cta::before {
+      content: '▸';
+      font-size: 10px;
+    }
+
+    /* ==================== HERO ==================== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      padding: 140px 40px 80px;
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      gap: 60px;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 3;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 14px 7px 10px;
+      border: 1px solid var(--ink);
+      background: var(--paper);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .eyebrow-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--rust);
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .eyebrow-dot::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 1px solid var(--rust);
+      opacity: 0.4;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.4; }
+      50% { transform: scale(1.4); opacity: 0; }
+    }
+
+    .eyebrow-divider {
+      width: 1px;
+      height: 10px;
+      background: var(--ink);
+      opacity: 0.4;
+    }
+
+    h1.title {
+      font-family: var(--serif);
+      font-weight: 500;
+      font-size: clamp(2.2rem, 5vw, 4.2rem);
+      line-height: 1.04;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+      margin-bottom: 28px;
+    }
+
+    h1.title .em {
+      font-style: italic;
+      color: var(--cad);
+      font-weight: 500;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    .subtitle {
+      font-family: var(--sans);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--muted);
+      max-width: 560px;
+      margin-bottom: 40px;
+    }
+
+    .subtitle strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    /* ==================== CTA BUTTONS (rectangular, architectural) ==================== */
+    .cta-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 36px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 26px;
+      text-decoration: none;
+      font-family: var(--sans);
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease,
+        box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .btn-primary {
+      background: var(--ink);
+      color: var(--paper);
+      border: 1.5px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink-soft);
+    }
+
+    .btn-primary:hover {
+      background: var(--cad);
+      border-color: var(--cad);
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0 var(--ink-soft);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--ink);
+      border: 1.5px solid var(--ink);
+    }
+
+    .btn-secondary:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ==================== INSTALL STAMP ==================== */
+    .install-stamp {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      background: var(--paper);
+      border: 2px solid var(--rust);
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--rust);
+      cursor: pointer;
+      user-select: all;
+      transform: rotate(-1.8deg);
+      position: relative;
+      margin-bottom: 28px;
+      transition: transform 0.25s ease;
+      box-shadow: 0 0 0 3px var(--paper), 0 0 0 4px rgba(180, 83, 9, 0.25);
+    }
+
+    .install-stamp::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 1px dashed var(--rust);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .install-stamp:hover {
+      transform: rotate(-0.5deg) scale(1.02);
+    }
+
+    .install-stamp-label {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      padding-right: 10px;
+      border-right: 1px solid var(--rust);
+      margin-right: 4px;
+    }
+
+    .install-stamp-cmd {
+      font-weight: 500;
+    }
+
+    .install-stamp-copy {
+      font-size: 10px;
+      opacity: 0.6;
+      margin-left: 4px;
+    }
+
+    /* ==================== TRUST META ==================== */
+    .trust-meta {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .trust-meta .sep {
+      opacity: 0.5;
+    }
+
+    /* ==================== SVG DRAWING CANVAS ==================== */
+    .drawing-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-width: 680px;
+      margin-left: auto;
+    }
+
+    .drawing-wrap svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .drawing-wrap .ink-path {
+      fill: none;
+      stroke: var(--ink);
+      stroke-width: 1.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .drawing-wrap .cad-path {
+      fill: none;
+      stroke: var(--cad);
+      stroke-width: 1;
+      stroke-linecap: round;
+    }
+
+    .drawing-wrap .hatch {
+      stroke: var(--ink);
+      stroke-width: 0.5;
+      opacity: 0.55;
+    }
+
+    .drawing-wrap .rust-path {
+      fill: none;
+      stroke: var(--rust);
+      stroke-width: 1.2;
+    }
+
+    .drawing-wrap .dim-text {
+      font-family: var(--mono);
+      font-size: 9px;
+      fill: var(--ink);
+      letter-spacing: 0.05em;
+    }
+
+    .drawing-wrap .label-text {
+      font-family: var(--mono);
+      font-size: 8px;
+      fill: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .drawing-wrap .callout-letter {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 13px;
+      fill: var(--cad);
+      font-weight: 500;
+    }
+
+    .drawing-wrap .section-title {
+      font-family: var(--mono);
+      font-size: 9px;
+      fill: var(--ink);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .drawing-wrap .draw-in {
+      stroke-dasharray: var(--len, 1000);
+      stroke-dashoffset: var(--len, 1000);
+      animation: drawIn 2.2s cubic-bezier(0.5, 0, 0, 1) forwards;
+      animation-delay: var(--delay, 0s);
+    }
+
+    .drawing-wrap .fade-in {
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
+      animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes drawIn {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* ==================== REVISION STAMP ==================== */
+    .rev-stamp {
+      position: fixed;
+      top: 92px;
+      right: 40px;
+      z-index: 3;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--ink);
+      padding: 8px 12px;
+      background: var(--paper);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.3;
+      pointer-events: none;
+    }
+
+    .rev-stamp .rev-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .rev-stamp .rev-row + .rev-row {
+      border-top: 1px dashed var(--ink);
+      padding-top: 4px;
+      margin-top: 2px;
+      opacity: 0.7;
+    }
+
+    .rev-stamp .rev-label {
+      opacity: 0.55;
+    }
+
+    /* ==================== COMPASS ROSE ==================== */
+    .compass {
+      position: fixed;
+      bottom: 100px;
+      left: 40px;
+      width: 110px;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .compass svg {
+      width: 100%;
+      height: auto;
+    }
+
+    .compass-caption {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    /* ==================== SCROLL INDICATOR ==================== */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      z-index: 3;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 36px;
+      background: linear-gradient(to bottom, var(--ink) 0%, transparent 100%);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { transform: scaleY(1); opacity: 0.5; }
+      50% { transform: scaleY(1.3); opacity: 1; }
+    }
+
+    /* ==================== FOOTER STRIP ==================== */
+    .footer-strip {
+      position: relative;
+      z-index: 4;
+      height: 64px;
+      border-top: 1px solid var(--ink);
+      background: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .footer-strip a {
+      color: var(--ink);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-strip a:hover {
+      color: var(--cad);
+    }
+
+    .footer-strip a::before {
+      content: '← ';
+      opacity: 0.6;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 960px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 120px 24px 80px;
+        gap: 40px;
+      }
+
+      .drawing-wrap {
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .rev-stamp {
+        top: 76px;
+        right: 16px;
+        font-size: 9px;
+        padding: 6px 10px;
+      }
+
+      .compass {
+        bottom: 80px;
+        left: 16px;
+        width: 80px;
+      }
+
+      .scroll-indicator {
+        display: none;
+      }
+
+      .nav-inner {
+        padding: 14px 20px;
+      }
+
+      .nav-inner::before {
+        left: 20px;
+        right: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1.title {
+        font-size: clamp(1.8rem, 8vw, 2.6rem);
+      }
+
+      .subtitle {
+        font-size: 15px;
+      }
+
+      .cta-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        justify-content: center;
+      }
+
+      .install-stamp {
+        width: 100%;
+        justify-content: flex-start;
+        font-size: 11px;
+      }
+
+      .trust-meta {
+        font-size: 10px;
+        gap: 8px;
+      }
+
+      .compass {
+        width: 60px;
+      }
+
+      .rev-stamp {
+        font-size: 8px;
+      }
+
+      .brand-sub {
+        display: none;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .hero {
+        padding: 100px 16px 60px;
+      }
+    }
+
+    /* ==================== ANIMATION ENTRY ==================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(14px);
+      animation: reveal 0.9s cubic-bezier(0.2, 0.6, 0.1, 1) forwards;
+    }
+
+    @keyframes reveal {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Noise texture overlay -->
+  <svg class="noise" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <filter id="paperNoise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix values="0 0 0 0 0.72
+                             0 0 0 0 0.68
+                             0 0 0 0 0.58
+                             0 0 0 0.08 0"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#paperNoise)"/>
+  </svg>
+
+  <!-- Revision stamp -->
+  <aside class="rev-stamp reveal" style="animation-delay: 0.4s;">
+    <div class="rev-row"><span class="rev-label">Rev.</span><span>A</span></div>
+    <div class="rev-row"><span class="rev-label">Date</span><span>2026-04-17</span></div>
+    <div class="rev-row"><span class="rev-label">Scale</span><span>1:100</span></div>
+  </aside>
+
+  <!-- Compass rose (bottom-left) -->
+  <aside class="compass reveal" style="animation-delay: 0.6s;">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#1a2d5a" stroke-width="1"/>
+      <circle cx="50" cy="50" r="30" fill="none" stroke="#1a2d5a" stroke-width="0.5" stroke-dasharray="2 2"/>
+      <circle cx="50" cy="50" r="3" fill="#1a2d5a"/>
+      <!-- N -->
+      <polygon points="50,10 45,50 50,44 55,50" fill="#1a2d5a"/>
+      <!-- S -->
+      <polygon points="50,90 45,50 50,56 55,50" fill="none" stroke="#1a2d5a" stroke-width="0.8"/>
+      <!-- E -->
+      <polygon points="90,50 50,45 56,50 50,55" fill="none" stroke="#1a2d5a" stroke-width="0.8"/>
+      <!-- W -->
+      <polygon points="10,50 50,45 44,50 50,55" fill="none" stroke="#1a2d5a" stroke-width="0.8"/>
+      <text x="50" y="8" text-anchor="middle" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1a2d5a">N</text>
+      <text x="50" y="99" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#5a6578">S</text>
+      <text x="98" y="53" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#5a6578">E</text>
+      <text x="3" y="53" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#5a6578">W</text>
+      <!-- Scale ticks around -->
+      <g stroke="#1a2d5a" stroke-width="0.5">
+        <line x1="50" y1="12" x2="50" y2="16"/>
+        <line x1="50" y1="84" x2="50" y2="88"/>
+        <line x1="12" y1="50" x2="16" y2="50"/>
+        <line x1="84" y1="50" x2="88" y2="50"/>
+        <line x1="22" y1="22" x2="25" y2="25"/>
+        <line x1="78" y1="22" x2="75" y2="25"/>
+        <line x1="22" y1="78" x2="25" y2="75"/>
+        <line x1="78" y1="78" x2="75" y2="75"/>
+      </g>
+    </svg>
+    <div class="compass-caption">North · True</div>
+  </aside>
+
+  <!-- ==================== NAV ==================== -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="brand">
+        <span class="brand-mark">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 14 L2 6 L8 2 L14 6 L14 14" fill="none" stroke="#1a2d5a" stroke-width="1.2" stroke-linejoin="round"/>
+            <path d="M6 14 L6 9 L10 9 L10 14" fill="none" stroke="#2563eb" stroke-width="1"/>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-name">OpenConstructionERP</span>
+          <span class="brand-sub">Blueprint Edition · Pro</span>
+        </span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#docs">Docs</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#github">GitHub</a></li>
+      </ul>
+      <a href="#install" class="nav-cta">Install</a>
+    </div>
+  </nav>
+
+  <!-- ==================== HERO ==================== -->
+  <main class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow reveal" style="animation-delay: 0.1s;">
+        <span class="eyebrow-dot"></span>
+        <span>v1.7.2</span>
+        <span class="eyebrow-divider"></span>
+        <span>new AI takeoff</span>
+      </div>
+
+      <h1 class="title reveal" style="animation-delay: 0.2s;">
+        Estimate buildings <span class="em">at the speed of thought.</span>
+      </h1>
+
+      <p class="subtitle reveal" style="animation-delay: 0.35s;">
+        Open-source construction ERP with <strong>AI-powered BOQ</strong>,
+        multi-CAD ingest, <strong>55,000+ cost items</strong> across 11 regions.
+        Self-host it today for free — replace $25K/year enterprise tools by the
+        weekend.
+      </p>
+
+      <div class="install-stamp reveal" style="animation-delay: 0.45s;" id="stamp" title="Click to copy">
+        <span class="install-stamp-label">Quickstart</span>
+        <span class="install-stamp-cmd">$ docker compose up</span>
+        <span class="install-stamp-copy" id="stampCopy">⎘ copy</span>
+      </div>
+
+      <div class="cta-row reveal" style="animation-delay: 0.55s;">
+        <a href="#install" class="btn btn-primary">
+          Install now
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <a href="#github" class="btn btn-secondary">
+          <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 .25a7.75 7.75 0 0 0-2.45 15.1c.39.07.53-.17.53-.38v-1.33c-2.16.47-2.61-1.04-2.61-1.04-.35-.89-.86-1.13-.86-1.13-.7-.48.05-.47.05-.47.78.05 1.19.8 1.19.8.7 1.19 1.82.85 2.26.65.07-.5.27-.85.49-1.04-1.72-.2-3.54-.86-3.54-3.84 0-.85.3-1.54.8-2.08-.08-.2-.35-1 .08-2.08 0 0 .65-.21 2.14.8a7.43 7.43 0 0 1 3.9 0c1.48-1.01 2.13-.8 2.13-.8.43 1.08.16 1.88.08 2.08.5.54.8 1.23.8 2.08 0 2.98-1.83 3.64-3.56 3.83.28.24.53.72.53 1.45v2.15c0 .21.14.46.54.38A7.75 7.75 0 0 0 8 .25Z"/>
+          </svg>
+          Star on GitHub
+        </a>
+      </div>
+
+      <div class="trust-meta reveal" style="animation-delay: 0.7s;">
+        <span>AGPL-3.0</span>
+        <span class="sep">·</span>
+        <span>Self-hosted</span>
+        <span class="sep">·</span>
+        <span>Runs on 2 GB RAM</span>
+      </div>
+    </div>
+
+    <!-- ==================== SVG DRAWING ==================== -->
+    <div class="drawing-wrap">
+      <svg viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg" aria-label="Isometric architectural drawing of a tower with cross-section and dimensions">
+        <defs>
+          <!-- Hatch pattern 45° diagonal -->
+          <pattern id="hatch45" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="6" stroke="#1a2d5a" stroke-width="0.6" opacity="0.55"/>
+          </pattern>
+          <pattern id="hatch45light" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="8" stroke="#1a2d5a" stroke-width="0.4" opacity="0.3"/>
+          </pattern>
+          <pattern id="dots" patternUnits="userSpaceOnUse" width="8" height="8">
+            <circle cx="4" cy="4" r="0.6" fill="#1a2d5a" opacity="0.4"/>
+          </pattern>
+          <marker id="arrowEnd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#1a2d5a"/>
+          </marker>
+          <marker id="arrowStart" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M10,0 L0,5 L10,10 z" fill="#1a2d5a"/>
+          </marker>
+          <marker id="tickMark" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <line x1="5" y1="0" x2="5" y2="10" stroke="#1a2d5a" stroke-width="1"/>
+          </marker>
+        </defs>
+
+        <!-- Drawing border / title block frame -->
+        <rect x="20" y="20" width="640" height="640" fill="none" stroke="#1a2d5a" stroke-width="0.8" stroke-dasharray="0" opacity="0.35"/>
+        <rect x="28" y="28" width="624" height="624" fill="none" stroke="#1a2d5a" stroke-width="0.4" opacity="0.25"/>
+
+        <!-- Top-left sheet label -->
+        <g transform="translate(40, 40)">
+          <text class="section-title fade-in" style="--delay: 0.2s;" x="0" y="10">Sheet A-101</text>
+          <text class="label-text fade-in" style="--delay: 0.25s;" x="0" y="26">Isometric · North Elevation</text>
+          <line class="ink-path draw-in" style="--len: 80; --delay: 0.3s;" x1="0" y1="36" x2="80" y2="36" stroke-width="0.8"/>
+        </g>
+
+        <!-- Top-right project number -->
+        <g transform="translate(640, 40)" text-anchor="end">
+          <text class="section-title fade-in" style="--delay: 0.2s;" x="0" y="10">Proj. OE-2026</text>
+          <text class="label-text fade-in" style="--delay: 0.25s;" x="0" y="26">DWG · 01 of 08</text>
+          <line class="ink-path draw-in" style="--len: 80; --delay: 0.3s;" x1="-80" y1="36" x2="0" y2="36" stroke-width="0.8"/>
+        </g>
+
+        <!-- ========== ISOMETRIC TOWER ========== -->
+        <!-- Centered around 340, 360. Axes: x→ right-down, y→ left-down, z→ up -->
+        <!-- Using isometric angles: 30° -->
+        <!-- Ground plane grid (light dots) -->
+        <g opacity="0.35">
+          <line class="ink-path draw-in" style="--len: 280; --delay: 0.4s;" x1="150" y1="520" x2="380" y2="640" stroke-width="0.4"/>
+          <line class="ink-path draw-in" style="--len: 280; --delay: 0.45s;" x1="380" y1="640" x2="610" y2="520" stroke-width="0.4"/>
+          <line class="ink-path draw-in" style="--len: 280; --delay: 0.5s;" x1="150" y1="520" x2="380" y2="400" stroke-width="0.4"/>
+          <line class="ink-path draw-in" style="--len: 280; --delay: 0.55s;" x1="380" y1="400" x2="610" y2="520" stroke-width="0.4"/>
+        </g>
+
+        <!-- Base slab -->
+        <!-- Top face of base (diamond) -->
+        <polygon class="ink-path draw-in" style="--len: 900; --delay: 0.6s;"
+          points="220,520 380,600 540,520 380,440"
+          fill="url(#hatch45light)" stroke="#1a2d5a" stroke-width="1.2"/>
+
+        <!-- Base side faces (thickness) -->
+        <polygon class="ink-path draw-in" style="--len: 400; --delay: 0.75s;"
+          points="220,520 220,545 380,625 380,600" fill="#ede6d3" stroke="#1a2d5a" stroke-width="1"/>
+        <polygon class="ink-path draw-in" style="--len: 400; --delay: 0.8s;"
+          points="380,600 380,625 540,545 540,520" fill="#ede6d3" stroke="#1a2d5a" stroke-width="1"/>
+
+        <!-- TOWER: three stacked volumes, isometric -->
+        <!-- Tower bottom floor -->
+        <!-- Front-left face -->
+        <polygon class="ink-path draw-in" style="--len: 500; --delay: 0.9s;"
+          points="260,495 260,370 380,430 380,555" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="1.3"/>
+        <!-- Front-right face -->
+        <polygon class="ink-path draw-in" style="--len: 500; --delay: 0.95s;"
+          points="380,555 380,430 500,370 500,495" fill="url(#hatch45)" stroke="#1a2d5a" stroke-width="1.3"/>
+        <!-- Top face of floor 1 -->
+        <polygon class="ink-path draw-in" style="--len: 500; --delay: 1.0s;"
+          points="260,370 380,310 500,370 380,430" fill="#ede6d3" stroke="#1a2d5a" stroke-width="1.3"/>
+
+        <!-- Floor 2 (narrower) -->
+        <polygon class="ink-path draw-in" style="--len: 460; --delay: 1.1s;"
+          points="275,362 275,260 380,313 380,415" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="1.3"/>
+        <polygon class="ink-path draw-in" style="--len: 460; --delay: 1.15s;"
+          points="380,415 380,313 485,260 485,362" fill="url(#hatch45)" stroke="#1a2d5a" stroke-width="1.3"/>
+        <polygon class="ink-path draw-in" style="--len: 460; --delay: 1.2s;"
+          points="275,260 380,200 485,260 380,313" fill="#ede6d3" stroke="#1a2d5a" stroke-width="1.3"/>
+
+        <!-- Floor 3 (top, narrower still) -->
+        <polygon class="ink-path draw-in" style="--len: 420; --delay: 1.3s;"
+          points="295,252 295,170 380,212 380,295" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="1.3"/>
+        <polygon class="ink-path draw-in" style="--len: 420; --delay: 1.35s;"
+          points="380,295 380,212 465,170 465,252" fill="url(#hatch45)" stroke="#1a2d5a" stroke-width="1.3"/>
+        <polygon class="ink-path draw-in" style="--len: 420; --delay: 1.4s;"
+          points="295,170 380,122 465,170 380,212" fill="#ede6d3" stroke="#1a2d5a" stroke-width="1.3"/>
+
+        <!-- Rooftop antenna / feature -->
+        <line class="cad-path draw-in" style="--len: 60; --delay: 1.55s;" x1="380" y1="122" x2="380" y2="68" stroke-width="1.2"/>
+        <circle class="fade-in" style="--delay: 1.7s;" cx="380" cy="68" r="3" fill="#b45309"/>
+        <line class="cad-path draw-in" style="--len: 20; --delay: 1.6s;" x1="372" y1="80" x2="388" y2="80"/>
+        <line class="cad-path draw-in" style="--len: 16; --delay: 1.62s;" x1="374" y1="90" x2="386" y2="90"/>
+
+        <!-- Windows on front-left face of floor 1 (grid of rectangles) -->
+        <g stroke="#2563eb" stroke-width="0.8" fill="none" opacity="0.9">
+          <rect class="fade-in" style="--delay: 1.1s;" x="278" y="400" width="22" height="38"/>
+          <rect class="fade-in" style="--delay: 1.12s;" x="308" y="392" width="22" height="38"/>
+          <rect class="fade-in" style="--delay: 1.14s;" x="338" y="384" width="22" height="38"/>
+          <rect class="fade-in" style="--delay: 1.1s;" x="278" y="450" width="22" height="38"/>
+          <rect class="fade-in" style="--delay: 1.12s;" x="308" y="442" width="22" height="38"/>
+          <rect class="fade-in" style="--delay: 1.14s;" x="338" y="434" width="22" height="38"/>
+        </g>
+
+        <!-- Windows on floor 2 -->
+        <g stroke="#2563eb" stroke-width="0.8" fill="none" opacity="0.9">
+          <rect class="fade-in" style="--delay: 1.25s;" x="290" y="296" width="20" height="32"/>
+          <rect class="fade-in" style="--delay: 1.27s;" x="318" y="288" width="20" height="32"/>
+          <rect class="fade-in" style="--delay: 1.29s;" x="346" y="280" width="20" height="32"/>
+        </g>
+
+        <!-- Windows on floor 3 -->
+        <g stroke="#2563eb" stroke-width="0.8" fill="none" opacity="0.9">
+          <rect class="fade-in" style="--delay: 1.42s;" x="305" y="205" width="18" height="26"/>
+          <rect class="fade-in" style="--delay: 1.44s;" x="331" y="197" width="18" height="26"/>
+          <rect class="fade-in" style="--delay: 1.46s;" x="357" y="189" width="18" height="26"/>
+        </g>
+
+        <!-- Entry door on base -->
+        <rect class="fade-in" style="--delay: 1.2s;" x="365" y="550" width="26" height="48" fill="#1a2d5a" opacity="0.8"/>
+        <line class="cad-path draw-in" style="--len: 30; --delay: 1.3s;" x1="378" y1="550" x2="378" y2="598"/>
+
+        <!-- ========== DIMENSION LINES ========== -->
+        <!-- Horizontal width dimension (bottom) -->
+        <g class="fade-in" style="--delay: 1.8s;">
+          <line class="ink-path" x1="220" y1="660" x2="540" y2="660" stroke-width="0.8" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line class="ink-path" x1="220" y1="635" x2="220" y2="668" stroke-width="0.6"/>
+          <line class="ink-path" x1="540" y1="635" x2="540" y2="668" stroke-width="0.6"/>
+          <rect x="355" y="650" width="70" height="16" fill="#f5f1e8"/>
+          <text class="dim-text" x="390" y="662" text-anchor="middle">12 400 mm</text>
+        </g>
+
+        <!-- Vertical height dimension (right) -->
+        <g class="fade-in" style="--delay: 1.9s;">
+          <line class="ink-path" x1="620" y1="122" x2="620" y2="600" stroke-width="0.8" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line class="ink-path" x1="500" y1="122" x2="628" y2="122" stroke-width="0.6"/>
+          <line class="ink-path" x1="540" y1="600" x2="628" y2="600" stroke-width="0.6"/>
+          <rect x="605" y="352" width="30" height="52" fill="#f5f1e8"/>
+          <text class="dim-text" x="620" y="365" text-anchor="middle" transform="rotate(-90 620 375)">8 200 mm</text>
+        </g>
+
+        <!-- Floor-to-floor small dimension (left) -->
+        <g class="fade-in" style="--delay: 2.0s;">
+          <line class="ink-path" x1="180" y1="310" x2="180" y2="430" stroke-width="0.6" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <line class="ink-path" x1="172" y1="310" x2="264" y2="310" stroke-width="0.4" opacity="0.5"/>
+          <line class="ink-path" x1="172" y1="430" x2="264" y2="430" stroke-width="0.4" opacity="0.5"/>
+          <rect x="150" y="362" width="64" height="16" fill="#f5f1e8"/>
+          <text class="dim-text" x="182" y="373" text-anchor="middle">3 200</text>
+        </g>
+
+        <!-- ========== SECTION CUT LINE A-A ========== -->
+        <g class="fade-in" style="--delay: 2.1s;">
+          <line class="rust-path" x1="230" y1="490" x2="540" y2="490" stroke-dasharray="8 3 2 3" stroke-width="1.2"/>
+          <!-- Arrows at ends -->
+          <polygon fill="#b45309" points="228,490 220,485 220,495"/>
+          <polygon fill="#b45309" points="542,490 550,485 550,495"/>
+          <!-- Letter callouts -->
+          <circle cx="215" cy="490" r="10" fill="#f5f1e8" stroke="#b45309" stroke-width="1.2"/>
+          <text class="callout-letter" x="215" y="494" text-anchor="middle">A</text>
+          <circle cx="555" cy="490" r="10" fill="#f5f1e8" stroke="#b45309" stroke-width="1.2"/>
+          <text class="callout-letter" x="555" y="494" text-anchor="middle">A</text>
+        </g>
+
+        <!-- Section cut B-B (vertical) -->
+        <g class="fade-in" style="--delay: 2.15s;">
+          <line class="rust-path" x1="380" y1="580" x2="380" y2="95" stroke-dasharray="8 3 2 3" stroke-width="1"/>
+          <circle cx="380" cy="85" r="10" fill="#f5f1e8" stroke="#b45309" stroke-width="1.2"/>
+          <text class="callout-letter" x="380" y="89" text-anchor="middle">B</text>
+          <circle cx="380" cy="590" r="10" fill="#f5f1e8" stroke="#b45309" stroke-width="1.2"/>
+          <text class="callout-letter" x="380" y="594" text-anchor="middle">B</text>
+        </g>
+
+        <!-- ========== LABELED ELEMENTS (leader lines) ========== -->
+        <!-- concrete label -->
+        <g class="fade-in" style="--delay: 2.25s;">
+          <line class="ink-path" x1="170" y1="580" x2="250" y2="540" stroke-width="0.6"/>
+          <circle cx="250" cy="540" r="2" fill="#1a2d5a"/>
+          <rect x="76" y="570" width="90" height="20" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="0.5"/>
+          <text class="label-text" x="82" y="583" style="font-size: 9px;">concrete · C30/37</text>
+        </g>
+
+        <!-- steel label -->
+        <g class="fade-in" style="--delay: 2.3s;">
+          <line class="ink-path" x1="530" y1="240" x2="460" y2="245" stroke-width="0.6"/>
+          <circle cx="460" cy="245" r="2" fill="#1a2d5a"/>
+          <rect x="530" y="232" width="100" height="20" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="0.5"/>
+          <text class="label-text" x="536" y="245" style="font-size: 9px;">steel · S355 frame</text>
+        </g>
+
+        <!-- load-bearing wall -->
+        <g class="fade-in" style="--delay: 2.35s;">
+          <line class="ink-path" x1="110" y1="350" x2="280" y2="400" stroke-width="0.6"/>
+          <circle cx="280" cy="400" r="2" fill="#1a2d5a"/>
+          <rect x="30" y="340" width="120" height="20" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="0.5"/>
+          <text class="label-text" x="36" y="353" style="font-size: 9px;">load-bearing wall</text>
+        </g>
+
+        <!-- glazed curtain wall -->
+        <g class="fade-in" style="--delay: 2.4s;">
+          <line class="ink-path" x1="560" y1="180" x2="450" y2="200" stroke-width="0.6"/>
+          <circle cx="450" cy="200" r="2" fill="#1a2d5a"/>
+          <rect x="550" y="168" width="110" height="20" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="0.5"/>
+          <text class="label-text" x="556" y="181" style="font-size: 9px;">curtain wall · IGU</text>
+        </g>
+
+        <!-- Grid axes labels around building -->
+        <g>
+          <circle class="fade-in" style="--delay: 1.0s;" cx="220" cy="520" r="8" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="0.8"/>
+          <text class="callout-letter" style="fill: #1a2d5a; font-size: 10px;" x="220" y="523" text-anchor="middle">1</text>
+          <circle class="fade-in" style="--delay: 1.05s;" cx="380" cy="440" r="8" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="0.8"/>
+          <text class="callout-letter" style="fill: #1a2d5a; font-size: 10px;" x="380" y="443" text-anchor="middle">2</text>
+          <circle class="fade-in" style="--delay: 1.1s;" cx="540" cy="520" r="8" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="0.8"/>
+          <text class="callout-letter" style="fill: #1a2d5a; font-size: 10px;" x="540" y="523" text-anchor="middle">3</text>
+          <circle class="fade-in" style="--delay: 1.15s;" cx="380" cy="605" r="8" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="0.8"/>
+          <text class="callout-letter" style="fill: #1a2d5a; font-size: 10px;" x="380" y="608" text-anchor="middle">4</text>
+        </g>
+
+        <!-- Scale bar bottom-left -->
+        <g transform="translate(40, 630)">
+          <text class="label-text fade-in" style="--delay: 2.4s;" x="0" y="0">SCALE BAR</text>
+          <g class="fade-in" style="--delay: 2.45s;">
+            <rect x="0" y="6" width="20" height="6" fill="#1a2d5a"/>
+            <rect x="20" y="6" width="20" height="6" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="0.6"/>
+            <rect x="40" y="6" width="20" height="6" fill="#1a2d5a"/>
+            <rect x="60" y="6" width="20" height="6" fill="#f5f1e8" stroke="#1a2d5a" stroke-width="0.6"/>
+            <text class="dim-text" x="0" y="24" style="font-size: 8px;">0</text>
+            <text class="dim-text" x="38" y="24" style="font-size: 8px;">2m</text>
+            <text class="dim-text" x="76" y="24" style="font-size: 8px;">4m</text>
+          </g>
+        </g>
+
+        <!-- Detail circle D-01 -->
+        <g class="fade-in" style="--delay: 2.5s;">
+          <circle cx="560" cy="370" r="28" fill="none" stroke="#2563eb" stroke-width="1" stroke-dasharray="3 3"/>
+          <line class="cad-path" x1="540" y1="390" x2="520" y2="410" stroke-width="0.8"/>
+          <circle cx="515" cy="415" r="12" fill="#f5f1e8" stroke="#2563eb" stroke-width="1"/>
+          <text class="callout-letter" style="fill: #2563eb; font-size: 10px;" x="515" y="418" text-anchor="middle">D·01</text>
+        </g>
+
+        <!-- Notes block bottom-right -->
+        <g transform="translate(480, 625)" class="fade-in" style="--delay: 2.55s;">
+          <text class="label-text" x="0" y="0" style="font-size: 8px;">NOTES</text>
+          <text class="dim-text" x="0" y="14" style="font-size: 8px; fill: #5a6578;">1. All dims in mm U.N.O.</text>
+          <text class="dim-text" x="0" y="26" style="font-size: 8px; fill: #5a6578;">2. Verify on site.</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator reveal" style="animation-delay: 1s;">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </main>
+
+  <!-- ==================== FOOTER STRIP ==================== -->
+  <footer class="footer-strip">
+    <a href="/pro/">back to choose another direction</a>
+  </footer>
+
+  <!-- ==================== JS ==================== -->
+  <script>
+    // Auto-measure all "draw-in" paths and set --len so the stroke-dasharray
+    // animation uses the actual geometric length of each path/line/polygon.
+    (function measureDrawIns() {
+      const els = document.querySelectorAll('.drawing-wrap .draw-in');
+      els.forEach((el) => {
+        let len = 0;
+        try {
+          if (typeof el.getTotalLength === 'function') {
+            len = el.getTotalLength();
+          }
+        } catch (e) { /* noop */ }
+        if (!len || !isFinite(len)) {
+          // Fallbacks for shapes without getTotalLength support.
+          const tag = el.tagName.toLowerCase();
+          if (tag === 'line') {
+            const x1 = +el.getAttribute('x1') || 0;
+            const y1 = +el.getAttribute('y1') || 0;
+            const x2 = +el.getAttribute('x2') || 0;
+            const y2 = +el.getAttribute('y2') || 0;
+            len = Math.hypot(x2 - x1, y2 - y1);
+          } else if (tag === 'polygon' || tag === 'polyline') {
+            const pts = (el.getAttribute('points') || '')
+              .trim()
+              .split(/\s+/)
+              .map((p) => p.split(',').map(Number));
+            for (let i = 0; i < pts.length - 1; i++) {
+              const [x1, y1] = pts[i];
+              const [x2, y2] = pts[i + 1];
+              len += Math.hypot(x2 - x1, y2 - y1);
+            }
+            if (tag === 'polygon' && pts.length > 1) {
+              const [x1, y1] = pts[pts.length - 1];
+              const [x2, y2] = pts[0];
+              len += Math.hypot(x2 - x1, y2 - y1);
+            }
+          }
+        }
+        if (len && isFinite(len)) {
+          el.style.setProperty('--len', Math.ceil(len));
+        }
+      });
+    })();
+
+    // Copy-to-clipboard for install stamp.
+    (function installStampCopy() {
+      const stamp = document.getElementById('stamp');
+      const copyEl = document.getElementById('stampCopy');
+      if (!stamp || !copyEl) return;
+      const originalText = copyEl.textContent;
+      stamp.addEventListener('click', () => {
+        const text = 'docker compose up';
+        const done = () => {
+          copyEl.textContent = '✓ copied';
+          setTimeout(() => { copyEl.textContent = originalText; }, 1600);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(() => {
+            // Fallback
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); done(); } catch (e) { /* noop */ }
+            document.body.removeChild(ta);
+          });
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); done(); } catch (e) { /* noop */ }
+          document.body.removeChild(ta);
+        }
+      });
+    })();
+
+    // Subtle parallax on compass and revision stamp (mouse-move).
+    (function parallax() {
+      const stamp = document.querySelector('.rev-stamp');
+      const compass = document.querySelector('.compass');
+      if (!stamp || !compass) return;
+      let targetX = 0, targetY = 0, curX = 0, curY = 0;
+      let ticking = false;
+      const loop = () => {
+        curX += (targetX - curX) * 0.08;
+        curY += (targetY - curY) * 0.08;
+        stamp.style.transform = `translate(${curX * 6}px, ${curY * 6}px)`;
+        compass.style.transform = `translate(${curX * -8}px, ${curY * -8}px)`;
+        if (Math.abs(targetX - curX) > 0.01 || Math.abs(targetY - curY) > 0.01) {
+          requestAnimationFrame(loop);
+        } else {
+          ticking = false;
+        }
+      };
+      window.addEventListener('mousemove', (e) => {
+        targetX = (e.clientX / window.innerWidth - 0.5);
+        targetY = (e.clientY / window.innerHeight - 0.5);
+        if (!ticking) { ticking = true; requestAnimationFrame(loop); }
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>

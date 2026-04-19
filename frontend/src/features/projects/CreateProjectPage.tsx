@@ -390,7 +390,7 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
 
         {/* Body — scrollable */}
         <div className="overflow-y-auto px-6 pb-6 flex-1">
-          <InfoHint className="mb-5" text={t('projects.create_hint', { defaultValue: 'Region determines available cost databases and VAT rates. Classification standard defines the cost structure: DIN 276 for DACH countries, NRM for UK, MasterFormat for US/Canada, UniFormat for Oceania. Currency sets all pricing in the BOQ.' })} />
+          <InfoHint className="mb-5" text={t('projects.create_hint', { defaultValue: 'Region determines available cost databases and VAT rates. Classification standard defines the cost-structure schema for your BOQ. Currency sets all pricing in the BOQ.' })} />
 
           <form id="create-project-form" onSubmit={handleSubmit} className="space-y-4">
             <Input

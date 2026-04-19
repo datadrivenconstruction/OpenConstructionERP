@@ -1,15 +1,20 @@
 """IDS XML parser -- buildingSMART Information Delivery Specification.
 
 Parses IDS v1.0 XML files into UniversalRequirement rows.
-Uses only stdlib xml.etree.ElementTree (no lxml dependency).
+Stdlib ``xml.etree.ElementTree`` is kept for types + tree traversal; all
+untrusted-input parsing is routed through ``defusedxml`` so XXE /
+billion-laughs / DTD-fetch attacks are rejected before the document
+reaches the traversal code below.
 
 Spec reference: https://github.com/buildingSMART/IDS
 """
 
 import logging
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # noqa: S405 — types + traversal only; parse calls use defusedxml
 from pathlib import Path
 from typing import Any
+
+import defusedxml.ElementTree as safe_ET
 
 from app.modules.bim_requirements.parsers.base import (
     BaseRequirementParser,
@@ -133,7 +138,7 @@ class IDSParser(BaseRequirementParser):
 
         try:
             xml_content = self._read_source(source)
-            root = ET.fromstring(xml_content)
+            root = safe_ET.fromstring(xml_content)
         except ET.ParseError as exc:
             result.errors.append({"row": 0, "field": "xml", "msg": f"Invalid XML: {exc}"})
             return result

@@ -415,55 +415,57 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
     t('onboarding.step_finish', { defaultValue: 'Finish' }),
   ];
 
+  // Percent of the track filled. Anchors the animated progress line
+  // independent of how the dots themselves are laid out so that the
+  // bar is continuous even on narrow viewports where labels wrap.
+  const pct = total > 1 ? (current / (total - 1)) * 100 : 0;
+
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-3">
-        {Array.from({ length: total }).map((_, i) => (
-          <div key={i} className="flex flex-col items-center gap-1 flex-1">
-            <div className="flex items-center w-full">
-              {i > 0 && (
+      <div className="relative">
+        {/* Track behind everything — continuous line. */}
+        <div className="absolute top-[14px] start-[14px] end-[14px] h-[3px] rounded-full bg-border-light/80 dark:bg-white/10" />
+        {/* Filled portion — animates on step change. */}
+        <div
+          className="absolute top-[14px] start-[14px] h-[3px] rounded-full bg-gradient-to-r from-oe-blue via-blue-500 to-purple-500 transition-[width] duration-500 ease-oe"
+          style={{ width: `calc(${pct}% - ${pct === 0 ? 0 : 14}px)` }}
+          aria-hidden
+        />
+        {/* Step dots + labels */}
+        <div className="relative flex items-start justify-between">
+          {Array.from({ length: total }).map((_, i) => {
+            const done = i < current;
+            const here = i === current;
+            return (
+              <div key={i} className="flex flex-col items-center gap-1.5 min-w-0 flex-1">
                 <div
                   className={clsx(
-                    'h-0.5 flex-1 rounded-full transition-colors duration-500',
-                    i <= current ? 'bg-oe-blue' : 'bg-border-light',
+                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold transition-all duration-500 ease-oe',
+                    done
+                      ? 'bg-oe-blue text-white shadow-sm'
+                      : here
+                        ? 'bg-white dark:bg-surface-elevated text-oe-blue ring-2 ring-oe-blue shadow-[0_0_0_4px_rgba(37,99,235,0.18)] scale-110'
+                        : 'bg-surface-secondary text-content-tertiary border border-border-light',
                   )}
-                />
-              )}
-              <div
-                className={clsx(
-                  'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold transition-all duration-500 ease-oe',
-                  i < current
-                    ? 'bg-oe-blue text-white'
-                    : i === current
-                      ? 'bg-oe-blue text-white ring-4 ring-oe-blue/20 scale-110'
-                      : 'bg-surface-secondary text-content-tertiary border border-border-light',
-                )}
-              >
-                {i < current ? <Check size={12} /> : i + 1}
+                >
+                  {done ? <Check size={13} strokeWidth={3} /> : i + 1}
+                </div>
+                <span
+                  className={clsx(
+                    'text-[10px] font-medium transition-colors whitespace-nowrap hidden sm:block',
+                    here
+                      ? 'text-oe-blue'
+                      : done
+                        ? 'text-content-secondary'
+                        : 'text-content-quaternary',
+                  )}
+                >
+                  {stepLabels[i] ?? ''}
+                </span>
               </div>
-              {i < total - 1 && (
-                <div
-                  className={clsx(
-                    'h-0.5 flex-1 rounded-full transition-colors duration-500',
-                    i < current ? 'bg-oe-blue' : 'bg-border-light',
-                  )}
-                />
-              )}
-            </div>
-            <span
-              className={clsx(
-                'text-2xs font-medium transition-colors whitespace-nowrap',
-                i === current
-                  ? 'text-oe-blue'
-                  : i < current
-                    ? 'text-content-secondary'
-                    : 'text-content-quaternary',
-              )}
-            >
-              {stepLabels[i] ?? ''}
-            </span>
-          </div>
-        ))}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -507,51 +509,76 @@ function StepWelcome({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="flex flex-col items-center justify-center text-center">
-      <div className="mb-8">
-        <Logo size="xl" animate />
+    <div className="flex flex-col items-center text-center">
+      {/* Logo with a soft decorative halo behind it. */}
+      <div className="relative mb-3">
+        <div
+          className="absolute inset-0 -m-6 rounded-full blur-2xl opacity-60"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(37, 99, 235, 0.35), transparent 70%)',
+          }}
+          aria-hidden
+        />
+        <div className="relative">
+          <Logo size="lg" animate />
+        </div>
       </div>
 
-      <h1 className="text-4xl font-bold text-content-primary tracking-tight">
+      <Badge variant="blue" size="sm" className="mb-2">
+        <Sparkles size={11} className="me-1" />
+        {t('onboarding.welcome_eyebrow', { defaultValue: 'Construction estimation, reimagined' })}
+      </Badge>
+
+      <h1 className="text-2xl sm:text-3xl font-bold text-content-primary tracking-tight">
         {t('onboarding.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
       </h1>
 
-      <p className="mt-4 max-w-md text-lg text-content-secondary leading-relaxed">
+      <p className="mt-2 max-w-md text-sm sm:text-base text-content-secondary leading-relaxed">
         {t('onboarding.welcome_subtitle', {
           defaultValue:
-            'The professional construction cost estimation platform.\nSet up your workspace in a few simple steps.',
+            'The professional construction cost estimation platform. Set up your workspace in a few simple steps.',
         })}
       </p>
 
-      {/* Language grid */}
-      <div className="mt-8 w-full max-w-xl grid grid-cols-3 sm:grid-cols-4 gap-2">
-        {SUPPORTED_LANGUAGES.map((lang) => {
-          const isSelected = selected === lang.code;
-          return (
-            <button
-              key={lang.code}
-              onClick={() => handleSelect(lang.code)}
-              className={clsx(
-                'relative flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left',
-                'border transition-all duration-normal ease-oe',
-                isSelected
-                  ? 'border-oe-blue bg-oe-blue-subtle/40 ring-2 ring-oe-blue/20'
-                  : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]',
-              )}
-            >
-              <CountryFlag code={lang.country} size={20} className="shrink-0" />
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-semibold text-content-primary truncate">
-                  {lang.name}
+      {/* Language grid — 21 languages, flag + native name. */}
+      <div className="mt-5 w-full">
+        <div className="mb-2 flex items-center justify-center gap-2 text-xs font-medium text-content-tertiary uppercase tracking-wider">
+          <span className="h-px w-8 bg-border-light" aria-hidden />
+          {t('onboarding.welcome_pick_language', { defaultValue: 'Pick your language' })}
+          <span className="h-px w-8 bg-border-light" aria-hidden />
+        </div>
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          {SUPPORTED_LANGUAGES.map((lang) => {
+            const isSelected = selected === lang.code;
+            return (
+              <button
+                key={lang.code}
+                onClick={() => handleSelect(lang.code)}
+                className={clsx(
+                  'relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-start',
+                  'border transition-all duration-normal ease-oe',
+                  isSelected
+                    ? 'border-oe-blue bg-oe-blue-subtle/50 ring-2 ring-oe-blue/25 shadow-sm'
+                    : 'border-border-light bg-surface-elevated/80 hover:border-oe-blue/60 hover:bg-oe-blue-subtle/20 hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98]',
+                )}
+              >
+                <CountryFlag code={lang.country} size={24} className="shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-content-primary truncate">
+                    {lang.name}
+                  </div>
+                  <div className="text-2xs text-content-tertiary uppercase tracking-wide">
+                    {lang.code}
+                  </div>
                 </div>
-                <div className="text-2xs text-content-tertiary uppercase">{lang.code}</div>
-              </div>
-              {isSelected && (
-                <CheckCircle2 size={14} className="text-oe-blue shrink-0" />
-              )}
-            </button>
-          );
-        })}
+                {isSelected && (
+                  <CheckCircle2 size={14} className="text-oe-blue shrink-0" />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <Button
@@ -560,12 +587,12 @@ function StepWelcome({
         onClick={onNext}
         icon={<ArrowRight size={18} />}
         iconPosition="right"
-        className="mt-10"
+        className="mt-5 shadow-lg shadow-oe-blue/20"
       >
         {t('onboarding.get_started', { defaultValue: 'Get Started' })}
       </Button>
 
-      <p className="mt-6 text-xs text-content-tertiary">
+      <p className="mt-2 text-xs text-content-tertiary">
         {t('onboarding.welcome_hint', {
           defaultValue: 'Free and open source. No credit card required.',
         })}
@@ -598,27 +625,27 @@ function StepStartChoice({
         })}
       </p>
 
-      <div className="mt-8 w-full max-w-lg grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="mt-5 w-full max-w-lg grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* Quick Start card */}
         <button
           onClick={onQuickStart}
           className={clsx(
-            'group relative flex flex-col items-start rounded-2xl p-6 text-left',
+            'group relative flex flex-col items-start rounded-2xl p-4 text-left',
             'border-2 border-border-light bg-surface-elevated',
             'hover:border-oe-blue hover:bg-oe-blue-subtle/20 hover:shadow-lg hover:shadow-oe-blue/5',
             'transition-all duration-300 ease-oe active:scale-[0.98]',
           )}
         >
-          <Badge variant="blue" size="sm" className="mb-4">
+          <Badge variant="blue" size="sm" className="mb-2">
             {t('onboarding.recommended', { defaultValue: 'Recommended' })}
           </Badge>
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue mb-4 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
-            <Sparkles size={24} />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue mb-2 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Sparkles size={20} />
           </div>
-          <h3 className="text-lg font-bold text-content-primary">
+          <h3 className="text-base font-bold text-content-primary">
             {t('onboarding.quick_start', { defaultValue: 'Quick Start' })}
           </h3>
-          <p className="mt-2 text-sm text-content-secondary leading-relaxed">
+          <p className="mt-1 text-xs text-content-secondary leading-relaxed">
             {t('onboarding.quick_start_desc', {
               defaultValue: 'All essential modules pre-activated. Start working immediately.',
             })}
@@ -629,20 +656,20 @@ function StepStartChoice({
         <button
           onClick={onChooseProfile}
           className={clsx(
-            'group relative flex flex-col items-start rounded-2xl p-6 text-left',
+            'group relative flex flex-col items-start rounded-2xl p-4 text-left',
             'border-2 border-border-light bg-surface-elevated',
             'hover:border-oe-blue hover:bg-oe-blue-subtle/20 hover:shadow-lg hover:shadow-oe-blue/5',
             'transition-all duration-300 ease-oe active:scale-[0.98]',
           )}
         >
-          <div className="h-5 mb-4" aria-hidden />
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary mb-4 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
-            <Settings2 size={24} />
+          <div className="h-5 mb-2" aria-hidden />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary mb-2 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Settings2 size={20} />
           </div>
-          <h3 className="text-lg font-bold text-content-primary">
+          <h3 className="text-base font-bold text-content-primary">
             {t('onboarding.choose_profile', { defaultValue: 'Choose Your Profile' })}
           </h3>
-          <p className="mt-2 text-sm text-content-secondary leading-relaxed">
+          <p className="mt-1 text-xs text-content-secondary leading-relaxed">
             {t('onboarding.choose_profile_desc', {
               defaultValue: 'Select your role and customize which modules you need.',
             })}
@@ -650,7 +677,7 @@ function StepStartChoice({
         </button>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-5">
         <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
           {t('common.back', { defaultValue: 'Back' })}
         </Button>
@@ -1094,7 +1121,7 @@ function StepDataSetup({
 
       updateQueueTask(taskId, { progress: 30, message: t('onboarding.db_downloading', { defaultValue: 'Downloading from server...' }) });
 
-      const res = await fetch(`/api/v1/costs/load-cwicr/${selectedRegion}/`, {
+      const res = await fetch(`/api/v1/costs/load-cwicr/${selectedRegion}`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         signal: controller.signal,
@@ -1656,6 +1683,7 @@ function StepFinish({
 // ── Main Wizard ──────────────────────────────────────────────────────────────
 
 export function OnboardingWizard() {
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const [selectedLang, setSelectedLang] = useState(() => i18n.language?.split('-')[0] || 'en');
   const [companyType, setCompanyType] = useState<CompanyTypeKey | null>(null);
@@ -1746,62 +1774,149 @@ export function OnboardingWizard() {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col bg-surface-primary">
-      {/* Top bar with progress */}
-      <div className="px-8 pt-6 pb-4 max-w-3xl mx-auto w-full">
-        <ProgressBar current={step} total={TOTAL_STEPS} />
+    <div className="relative flex min-h-screen flex-col bg-surface-primary overflow-hidden">
+      {/* ── Decorative background: soft mesh + subtle grid ──────────────
+          Pure decoration, no interaction. Respects prefers-reduced-motion
+          because the gradients are static (no keyframe animation beyond
+          the slow `animate-oe-pulse` already bundled). */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        {/* Soft radial mesh — two offset blobs with the brand palette. */}
+        <div
+          className="absolute -top-40 -start-40 h-[520px] w-[520px] rounded-full blur-3xl opacity-[0.35] dark:opacity-[0.22]"
+          style={{
+            background:
+              'radial-gradient(circle at center, rgba(37, 99, 235, 0.55), transparent 70%)',
+          }}
+        />
+        <div
+          className="absolute top-1/3 -end-32 h-[460px] w-[460px] rounded-full blur-3xl opacity-[0.30] dark:opacity-[0.18]"
+          style={{
+            background:
+              'radial-gradient(circle at center, rgba(168, 85, 247, 0.45), transparent 70%)',
+          }}
+        />
+        <div
+          className="absolute bottom-[-160px] start-1/3 h-[420px] w-[420px] rounded-full blur-3xl opacity-[0.25] dark:opacity-[0.15]"
+          style={{
+            background:
+              'radial-gradient(circle at center, rgba(14, 165, 233, 0.40), transparent 70%)',
+          }}
+        />
+        {/* Fine grid overlay — 1px lines every 40px, 4% opacity. Works in
+            both light and dark themes. */}
+        <div
+          className="absolute inset-0 opacity-[0.045] dark:opacity-[0.07]"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+          }}
+        />
       </div>
 
-      {/* Main content area */}
-      <div className="flex flex-1 items-center justify-center px-6 pb-16">
+      {/* ── Sticky glass header with progress + skip ────────────────── */}
+      <div className="sticky top-0 z-10 border-b border-border-light/60 bg-surface-primary/75 backdrop-blur-xl">
+        <div className="max-w-3xl mx-auto w-full px-6 sm:px-8 py-2.5">
+          <div className="flex items-center justify-between gap-4 mb-2">
+            <div className="flex items-center gap-2 shrink-0">
+              <Logo size="sm" />
+              <span className="text-[11px] font-semibold text-content-tertiary uppercase tracking-wider hidden sm:inline">
+                {t('onboarding.setup_label', { defaultValue: 'Setup wizard' })}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs tabular-nums text-content-tertiary hidden sm:inline">
+                {t('onboarding.progress_step_x_of_y', {
+                  defaultValue: 'Step {{current}} of {{total}}',
+                  current: step + 1,
+                  total: TOTAL_STEPS,
+                })}
+              </span>
+              {step > 0 && step < TOTAL_STEPS - 1 && (
+                <button
+                  type="button"
+                  onClick={() => setStep(TOTAL_STEPS - 1)}
+                  className="text-xs font-medium text-content-tertiary hover:text-content-secondary transition-colors"
+                >
+                  {t('onboarding.skip_setup', { defaultValue: 'Skip setup' })}
+                </button>
+              )}
+            </div>
+          </div>
+          <ProgressBar current={step} total={TOTAL_STEPS} />
+        </div>
+      </div>
+
+      {/* ── Main content — sits on the glass card over the mesh ──────
+          Tight vertical padding so a 6-step wizard fits without scroll
+          on ~768-viewport laptops. Previously ``pt-10 pb-24`` + card
+          ``py-8 sm:py-12`` added ~150px of shell chrome alone. */}
+      <div className="relative flex flex-1 items-start justify-center px-4 sm:px-6 pt-4 pb-8">
         <div className="w-full max-w-[720px]">
-          <StepTransition stepKey={step}>
-            {step === 0 && (
-              <StepWelcome onNext={goNext} onLanguageChange={handleLanguageChange} />
+          <div
+            className={clsx(
+              'rounded-2xl border border-border-light/70 bg-surface-elevated/90',
+              'shadow-[0_24px_60px_-20px_rgba(15,23,42,0.18)] dark:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.6)]',
+              'backdrop-blur-md',
+              'px-6 sm:px-8 py-5 sm:py-7',
             )}
-            {step === 1 && (
-              <StepStartChoice
-                onQuickStart={handleQuickStart}
-                onChooseProfile={handleChooseProfile}
-                onBack={goBack}
-              />
-            )}
-            {step === 2 && (
-              <StepCompanyProfile
-                onNext={handleNextFromProfile}
-                onBack={() => setStep(1)}
-                selectedType={companyType}
-                onSelectType={handleSelectCompanyType}
-                onConfigureIndividually={handleConfigureIndividually}
-              />
-            )}
-            {step === 3 && (
-              <StepModuleConfig
-                onNext={() => setStep(4)}
-                onBack={() => setStep(2)}
-                enabledModules={enabledModules}
-                onToggleModule={handleToggleModule}
-              />
-            )}
-            {step === 4 && (
-              <StepDataSetup
-                onNext={() => {
-                  // Move to finish — background loading happens inside StepDataSetup
-                  setStep(5);
-                }}
-                onBack={handleBackFromData}
-                selectedLang={selectedLang}
-                backgroundLoad
-              />
-            )}
-            {step === 5 && (
-              <StepFinish
-                onBack={() => setStep(4)}
-                companyType={companyType}
-                enabledModules={enabledModules}
-              />
-            )}
-          </StepTransition>
+          >
+            <StepTransition stepKey={step}>
+              {step === 0 && (
+                <StepWelcome onNext={goNext} onLanguageChange={handleLanguageChange} />
+              )}
+              {step === 1 && (
+                <StepStartChoice
+                  onQuickStart={handleQuickStart}
+                  onChooseProfile={handleChooseProfile}
+                  onBack={goBack}
+                />
+              )}
+              {step === 2 && (
+                <StepCompanyProfile
+                  onNext={handleNextFromProfile}
+                  onBack={() => setStep(1)}
+                  selectedType={companyType}
+                  onSelectType={handleSelectCompanyType}
+                  onConfigureIndividually={handleConfigureIndividually}
+                />
+              )}
+              {step === 3 && (
+                <StepModuleConfig
+                  onNext={() => setStep(4)}
+                  onBack={() => setStep(2)}
+                  enabledModules={enabledModules}
+                  onToggleModule={handleToggleModule}
+                />
+              )}
+              {step === 4 && (
+                <StepDataSetup
+                  onNext={() => {
+                    // Move to finish — background loading happens inside StepDataSetup
+                    setStep(5);
+                  }}
+                  onBack={handleBackFromData}
+                  selectedLang={selectedLang}
+                  backgroundLoad
+                />
+              )}
+              {step === 5 && (
+                <StepFinish
+                  onBack={() => setStep(4)}
+                  companyType={companyType}
+                  enabledModules={enabledModules}
+                />
+              )}
+            </StepTransition>
+          </div>
+
+          {/* Trust footer — small line directly below the card. */}
+          <p className="mt-3 text-center text-[11px] text-content-tertiary">
+            {t('onboarding.footer_trust', {
+              defaultValue:
+                'Free and open-source · Your data stays on your server · AGPL-3.0',
+            })}
+          </p>
         </div>
       </div>
     </div>

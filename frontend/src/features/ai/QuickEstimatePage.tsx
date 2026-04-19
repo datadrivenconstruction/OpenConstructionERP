@@ -40,7 +40,7 @@ import {
   Plus,
 } from 'lucide-react';
 import clsx from 'clsx';
-import { Card, CardContent, Button, Badge } from '@/shared/ui';
+import { Card, CardContent, Button, Badge, AIDisclaimerBanner } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse, type EnrichResult, type EnrichedItem, type CadColumnsResponse, type CadGroupResponse, type CadDynamicGroup, type CadGroupElementsResponse } from './api';
@@ -1987,6 +1987,8 @@ export function QuickEstimatePage() {
           </div>
         </div>
       </div>
+
+      {!isCadRoute && <AIDisclaimerBanner />}
 
       {/* AI Status Banner */}
       {aiSettings && !isConfigured ? (

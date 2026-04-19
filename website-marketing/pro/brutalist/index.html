@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>OpenConstructionERP Pro — Brutalist edition</title>
+<link rel="icon" type="image/svg+xml" href="/pro/cinematic/assets/favicon.svg" />
+<meta name="description" content="open-source construction erp. ai-powered boq. multi-cad ingest. self-hosted. free." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  /* =========================================================
+     BRUTALIST — terminal/monospace/engineer-core
+     pure black. stark white. one lime accent. sharp corners.
+     ========================================================= */
+
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #000;
+    --ink:       #ffffff;
+    --ink-dim:   #a0a0a0;
+    --lime:      #ccff00;
+    --red:       #ff4444;
+    --line:      #333;
+    --line-hi:   #ffffff;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, Menlo, monospace;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-variant-numeric: tabular-nums;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100vh;
+    position: relative;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  ::selection { background: var(--lime); color: #000; }
+
+  /* ============================================================
+     NAV — thin, mono, white 1px bottom border
+     ============================================================ */
+  .nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 48px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 1000;
+    font-size: 12px;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+  }
+  .nav .logo {
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: -0.02em;
+  }
+  .nav .logo .slash {
+    color: var(--ink-dim);
+    padding: 0 6px;
+  }
+  .nav .logo .pro {
+    color: var(--lime);
+  }
+  .nav .links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .nav .links a {
+    color: var(--ink-dim);
+    transition: color 0s;
+  }
+  .nav .links a:hover { color: var(--ink); }
+  .nav .install {
+    background: var(--lime);
+    color: #000;
+    padding: 6px 14px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    border: 1px solid var(--lime);
+  }
+  .nav .install:hover {
+    background: #000;
+    color: var(--lime);
+  }
+  @media (max-width: 720px) {
+    .nav .links a:not(.install) { display: none; }
+  }
+
+  /* ============================================================
+     HERO SHELL
+     ============================================================ */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    padding: 88px 40px 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+  @media (max-width: 640px) {
+    .hero { padding: 72px 20px 72px; }
+  }
+
+  /* ASCII building watermark */
+  .ascii-bg {
+    position: absolute;
+    top: 64px;
+    left: -20px;
+    width: min(1100px, 88vw);
+    pointer-events: none;
+    user-select: none;
+    white-space: pre;
+    font-family: var(--mono);
+    font-size: clamp(7px, 0.95vw, 12px);
+    line-height: 1.0;
+    color: var(--ink);
+    opacity: 0.08;
+    z-index: 0;
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 45%, transparent 90%);
+            mask-image: linear-gradient(90deg, #000 0%, #000 45%, transparent 90%);
+  }
+  @media (max-width: 720px) {
+    .ascii-bg { opacity: 0.05; font-size: 7px; }
+  }
+  @media (max-width: 480px) {
+    .ascii-bg { display: none; }
+  }
+
+  /* ============================================================
+     BUILD LOG WIDGET (top-right)
+     ============================================================ */
+  .buildlog {
+    position: fixed;
+    top: 64px;
+    right: 24px;
+    width: 340px;
+    max-width: calc(100vw - 48px);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    font-size: 11px;
+    line-height: 1.55;
+    z-index: 500;
+    color: var(--ink-dim);
+  }
+  .buildlog .bl-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 10px;
+  }
+  .buildlog .bl-head .dot {
+    width: 8px; height: 8px;
+    background: var(--lime);
+    display: inline-block;
+    margin-right: 6px;
+    animation: pulse 1.4s steps(2) infinite;
+  }
+  .buildlog .bl-head .label { font-weight: 500; }
+  .buildlog .bl-head .count { color: var(--ink-dim); font-weight: 400; }
+  .buildlog .bl-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-height: calc(5 * 1.55em);
+  }
+  .buildlog .bl-line {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .buildlog .bl-line .ts { color: var(--ink-dim); }
+  .buildlog .bl-line .ok { color: var(--lime); }
+  .buildlog .bl-line .warn { color: var(--red); }
+  .buildlog .bl-line .msg { color: var(--ink); }
+
+  @media (max-width: 900px) {
+    .buildlog { display: none; }
+  }
+
+  /* ============================================================
+     HERO CONTENT
+     ============================================================ */
+  .wrap {
+    position: relative;
+    z-index: 2;
+    max-width: 1240px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* eyebrow */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--ink-dim);
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 28px;
+    border: 1px solid var(--line);
+    padding: 6px 10px;
+  }
+  .eyebrow .live {
+    color: var(--lime);
+    font-weight: 500;
+    animation: blink 1.2s steps(2) infinite;
+  }
+  .eyebrow .sep { color: var(--line); }
+
+  /* headline */
+  .headline {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: clamp(48px, 9vw, 140px);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 32px;
+  }
+  .headline .dot { color: var(--lime); }
+  .headline .uline {
+    position: relative;
+    display: inline-block;
+  }
+  .headline .uline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    height: 4px;
+    width: 0;
+    background: var(--lime);
+    animation: draw 900ms steps(24) 250ms forwards;
+  }
+
+  /* sub */
+  .sub {
+    max-width: 780px;
+    font-size: clamp(13px, 1.1vw, 15px);
+    line-height: 1.65;
+    color: var(--ink-dim);
+    text-transform: lowercase;
+    margin-bottom: 36px;
+  }
+  .sub strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* CTAs */
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 40px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 22px;
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: #000;
+    transition: none; /* INSTANT flip */
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover, .btn:focus-visible {
+    background: #000;
+    color: var(--lime);
+    border-color: var(--lime);
+    outline: none;
+  }
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+  .btn.ghost:hover, .btn.ghost:focus-visible {
+    background: #000;
+    color: var(--lime);
+    border-color: var(--lime);
+  }
+
+  /* terminal install block */
+  .term {
+    position: relative;
+    border: 2px solid var(--ink);
+    background: #000;
+    padding: 18px 20px 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink);
+    max-width: 780px;
+    cursor: pointer;
+    margin-bottom: 28px;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .term:hover { border-color: var(--lime); }
+  .term .prompt { color: var(--ink-dim); }
+  .term .cmd { color: var(--ink); }
+  .term .head { color: var(--ink); }
+  .term .ok { color: var(--lime); }
+  .term .arrow { color: var(--lime); }
+  .term .url { color: var(--ink); text-decoration: underline; text-decoration-color: var(--lime); text-underline-offset: 3px; }
+  .term .cursor {
+    display: inline-block;
+    color: var(--lime);
+    animation: blink 1s steps(2) infinite;
+    margin-left: 2px;
+    transform: translateY(1px);
+  }
+  .term .copied {
+    position: absolute;
+    top: 10px; right: 12px;
+    font-size: 10px;
+    color: #000;
+    background: var(--lime);
+    padding: 3px 7px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .term.copied-flash .copied { opacity: 1; }
+
+  /* trust meta */
+  .trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    font-size: 12px;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .trust span { display: inline-flex; align-items: center; }
+  .trust span::before { content: "> "; color: var(--lime); margin-right: 4px; }
+
+  /* ============================================================
+     MARQUEE TICKER (bottom of hero)
+     ============================================================ */
+  .marquee {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 48px;
+    height: 40px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    background: #000;
+    z-index: 3;
+  }
+  .marquee .track {
+    display: inline-flex;
+    gap: 40px;
+    white-space: nowrap;
+    animation: slide 40s linear infinite;
+    padding-left: 40px;
+    font-size: 12px;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .marquee .track span .k { color: var(--ink-dim); }
+  .marquee .track span .v { color: var(--ink); }
+  .marquee .track span .sep { color: var(--lime); margin-left: 28px; }
+
+  /* ============================================================
+     FOOTER STRIP
+     ============================================================ */
+  .footer {
+    height: 48px;
+    border-top: 1px solid var(--ink);
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    text-transform: lowercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-dim);
+    position: relative;
+    z-index: 10;
+  }
+  .footer a {
+    color: var(--ink-dim);
+    padding: 6px 10px;
+    border: 1px solid transparent;
+  }
+  .footer a:hover {
+    color: var(--lime);
+    border-color: var(--lime);
+  }
+
+  /* ============================================================
+     GLOBAL FOCUS CURSOR
+     ============================================================ */
+  .focus-cursor {
+    color: var(--lime);
+    display: inline-block;
+    margin-left: 6px;
+    animation: blink 0.9s steps(2) infinite;
+    font-weight: 700;
+  }
+
+  /* ============================================================
+     ANIMATIONS
+     ============================================================ */
+  @keyframes blink {
+    0%, 49%  { opacity: 1; }
+    50%,100% { opacity: 0; }
+  }
+  @keyframes pulse {
+    0%, 49%  { opacity: 1; }
+    50%,100% { opacity: 0.2; }
+  }
+  @keyframes draw {
+    from { width: 0; }
+    to   { width: 100%; }
+  }
+  @keyframes slide {
+    from { transform: translate3d(0,0,0); }
+    to   { transform: translate3d(-50%,0,0); }
+  }
+  @keyframes flicker {
+    0%,19%,21%,23%,80%,100% { opacity: 1; }
+    20%,22%,79%             { opacity: 0.85; }
+  }
+  .flicker { animation: flicker 7s steps(8) infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+    }
+    .headline .uline::after { width: 100%; }
+  }
+
+  /* small screens: tuck marquee closer */
+  @media (max-width: 640px) {
+    .marquee { bottom: 48px; height: 36px; }
+    .marquee .track { font-size: 11px; gap: 28px; }
+    .term { font-size: 12px; padding: 14px 14px 12px; }
+    .trust { gap: 14px; font-size: 11px; }
+    .ctas .btn { padding: 12px 16px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <nav class="nav" aria-label="primary">
+    <a class="logo" href="/">OpenConstructionERP<span class="slash">//</span><span class="pro">PRO</span></a>
+    <div class="links">
+      <a href="#product">product</a>
+      <a href="#features">features</a>
+      <a href="#install">install</a>
+      <a href="https://github.com/datadrivenconstruction" target="_blank" rel="noopener">github</a>
+      <a href="#install" class="install">install</a>
+    </div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="product">
+
+    <!-- ASCII background watermark -->
+    <pre class="ascii-bg flicker" aria-hidden="true" id="asciiBg"></pre>
+
+    <!-- Build log widget -->
+    <aside class="buildlog" aria-label="build log" id="buildlog">
+      <div class="bl-head">
+        <span class="label"><span class="dot"></span>BUILD LOG</span>
+        <span class="count" id="blCount">live</span>
+      </div>
+      <div class="bl-lines" id="blLines"></div>
+    </aside>
+
+    <div class="wrap">
+
+      <!-- eyebrow -->
+      <div class="eyebrow">
+        <span class="live">[LIVE]</span>
+        <span>v1.7.2</span>
+        <span class="sep">//</span>
+        <span>ai takeoff, 4d, carbon</span>
+      </div>
+
+      <!-- headline -->
+      <h1 class="headline">
+        ESTIMATE<span class="dot">.</span><br />
+        BUILDINGS<span class="dot">.</span><br />
+        AT THE SPEED<br />
+        OF <span class="uline">THOUGHT</span><span class="dot">.</span>
+      </h1>
+
+      <!-- sub -->
+      <p class="sub">
+        open-source construction erp. ai-powered boq. multi-cad ingest. <strong>55,000+ cost items</strong>. 11 regions. self-hosted. free.<br />
+        replace <strong>$25k/year</strong> enterprise tools by the weekend.
+      </p>
+
+      <!-- CTAs -->
+      <div class="ctas">
+        <a href="#install" class="btn">[ INSTALL NOW ]</a>
+        <a href="https://github.com/datadrivenconstruction" target="_blank" rel="noopener" class="btn ghost">[ STAR ON GITHUB ]</a>
+      </div>
+
+      <!-- terminal install block -->
+      <pre class="term" id="term" role="button" tabindex="0" aria-label="copy install command" id="install"><span class="copied">copied</span><span class="prompt">user@your-machine:~$</span> <span class="cmd">docker compose up</span>
+<span class="head">[+] Running 4/4</span>
+ <span class="ok">✔</span> Container postgres    Started
+ <span class="ok">✔</span> Container redis       Started
+ <span class="ok">✔</span> Container backend     Started
+ <span class="ok">✔</span> Container frontend    Started
+ <span class="arrow">→</span> READY at <span class="url">http://localhost:5173</span> <span class="cursor">█</span></pre>
+
+      <!-- trust -->
+      <div class="trust">
+        <span>AGPL-3.0</span>
+        <span>SELF-HOSTED</span>
+        <span>2GB-RAM</span>
+        <span>NO-TELEMETRY<span class="focus-cursor">▊</span></span>
+      </div>
+
+    </div>
+
+    <!-- Marquee ticker -->
+    <div class="marquee" aria-hidden="true">
+      <div class="track" id="mqTrack"></div>
+    </div>
+
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <a href="/pro/">← /pro · choose another direction</a>
+  </footer>
+
+<script>
+(() => {
+  'use strict';
+
+  // =========================================================
+  // ASCII BUILDING WATERMARK
+  // hand-tuned so it reads as a building silhouette at a glance
+  // =========================================================
+  const ascii = [
+    "                                                              ",
+    "              ╔══════════════════════════════╗              ",
+    "              ║                              ║              ",
+    "              ║  ████████████████████████    ║              ",
+    "              ║  █▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█    ║              ",
+    "       ╔══════╬══█░░░░░░░░░░░░░░░░░░░░░░█════╬══════╗       ",
+    "       ║      ║  █░░╔══╗░░╔══╗░░╔══╗░░░░█    ║      ║       ",
+    "       ║      ║  █░░║▓▓║░░║▓▓║░░║▓▓║░░░░█    ║      ║       ",
+    "       ║  ╔═══╣  █░░╚══╝░░╚══╝░░╚══╝░░░░█    ╠═══╗  ║       ",
+    "       ║  ║   ║  █░░░░░░░░░░░░░░░░░░░░░░█    ║   ║  ║       ",
+    "       ║  ║   ║  █░░╔══╗░░╔══╗░░╔══╗░░░░█    ║   ║  ║       ",
+    "       ║  ║   ║  █░░║▒▒║░░║▒▒║░░║▒▒║░░░░█    ║   ║  ║       ",
+    "       ║  ║   ║  █░░╚══╝░░╚══╝░░╚══╝░░░░█    ║   ║  ║       ",
+    "   ╔═══╩══╩═══╬══█░░░░░░░░░░░░░░░░░░░░░░█════╬═══╩══╩═══╗   ",
+    "   ║          ║  █░░╔══╗░░╔══╗░░╔══╗░░░░█    ║          ║   ",
+    "   ║          ║  █░░║▓▓║░░║▓▓║░░║▓▓║░░░░█    ║          ║   ",
+    "   ║   ╔══╗   ║  █░░╚══╝░░╚══╝░░╚══╝░░░░█    ║   ╔══╗   ║   ",
+    "   ║   ║▒▒║   ║  █░░░░░░░░░░░░░░░░░░░░░░█    ║   ║▒▒║   ║   ",
+    "   ║   ║▒▒║   ║  █░░╔══╗░░╔══╗░░╔══╗░░░░█    ║   ║▒▒║   ║   ",
+    "   ║   ╚══╝   ║  █░░║░░║░░║░░║░░║░░║░░░░█    ║   ╚══╝   ║   ",
+    "   ║          ║  █░░╚══╝░░╚══╝░░╚══╝░░░░█    ║          ║   ",
+    "   ║   ╔══╗   ║  █░░░░░░░░░░░░░░░░░░░░░░█    ║   ╔══╗   ║   ",
+    "   ║   ║▓▓║   ║  █░░╔══╗░░╔══╗░░╔══╗░░░░█    ║   ║▓▓║   ║   ",
+    "   ║   ║▓▓║   ║  █░░║░░║░░║░░║░░║░░║░░░░█    ║   ║▓▓║   ║   ",
+    "   ║   ╚══╝   ║  █░░╚══╝░░╚══╝░░╚══╝░░░░█    ║   ╚══╝   ║   ",
+    "   ║          ║  █░░░░░░░░░░░░░░░░░░░░░░█    ║          ║   ",
+    "   ║   ╔══╗   ║  █░░╔══╗░░╔══╗░░╔══╗░░░░█    ║   ╔══╗   ║   ",
+    "   ║   ║▒▒║   ║  █░░║▒▒║░░║▒▒║░░║▒▒║░░░░█    ║   ║▒▒║   ║   ",
+    "   ║   ╚══╝   ║  █░░╚══╝░░╚══╝░░╚══╝░░░░█    ║   ╚══╝   ║   ",
+    "═══╩══════════╩══█░░░░░░░░░░░░░░░░░░░░░░█════╩══════════╩═══",
+    "█████████████████░░╔══╗░░╔══╗░░╔══╗░░░░█████████████████████",
+    "█████████████████░░║░░║░░║░░║░░║░░║░░░░█████████████████████",
+    "█████████████████░░╚══╝░░╚══╝░░╚══╝░░░░█████████████████████",
+    "█████████████████░░░░░░░░░░░░░░░░░░░░░░█████████████████████",
+    "█████████████████░░░░░░░░░░░░░░░░░░░░░░█████████████████████",
+    "█████████████████████████████████████████████████████████████",
+    "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
+    "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
+    "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
+  ].join("\n");
+  const asciiEl = document.getElementById('asciiBg');
+  if (asciiEl) asciiEl.textContent = ascii;
+
+  // =========================================================
+  // BUILD LOG — fake but believable
+  // =========================================================
+  const modules = [
+    'module.boq loaded',
+    'module.projects loaded',
+    'module.costs loaded',
+    'module.cad.ingest loaded',
+    'module.takeoff.ai loaded',
+    'module.validation (din276) registered',
+    'module.validation (gaeb) registered',
+    'module.tendering loaded',
+    'module.reporting loaded',
+    'cwicr.seed: 55042 rows loaded',
+    'qdrant: vector index ready',
+    'worker.celery: 4 consumers online',
+    'migration: alembic @ head',
+    'pg: connection pool (min=2 max=16)',
+    'redis: cache warm',
+    'minio: bucket "openestimate" ok',
+    'rvt-parser/0.3.0 attached',
+    'cad2data bridge: ready',
+    'paddleocr 3.0: models loaded',
+    'yolov11: weights verified',
+    'i18n: 21 locales compiled',
+    'health: /api/v1/health 200 ok',
+    'auth: jwt rotation scheduled',
+    'cron: nightly backup armed',
+    'module.ai.classify warm-up complete'
+  ];
+  const warns = [
+    'module.cv.yolo: slow inference (gpu off)',
+    'cache.miss on /cost/search (cold)'
+  ];
+
+  const blLines = document.getElementById('blLines');
+  const blCount = document.getElementById('blCount');
+  let total = 0;
+  const MAX = 5;
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function tsNow() {
+    const d = new Date();
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+  }
+
+  function addLine() {
+    const isWarn = Math.random() < 0.12;
+    const msg = isWarn
+      ? warns[Math.floor(Math.random()*warns.length)]
+      : modules[Math.floor(Math.random()*modules.length)];
+    const tag = isWarn ? 'WARN' : 'OK';
+    const tagClass = isWarn ? 'warn' : 'ok';
+
+    const row = document.createElement('div');
+    row.className = 'bl-line';
+    row.innerHTML = `<span class="ts">${tsNow()}</span> <span class="${tagClass}">[${tag}]</span> <span class="msg">${msg}</span>`;
+
+    blLines.appendChild(row);
+    while (blLines.children.length > MAX) blLines.removeChild(blLines.firstChild);
+
+    total++;
+    blCount.textContent = `#${String(total).padStart(4, '0')}`;
+  }
+
+  // prime with a couple lines, then tick
+  addLine(); addLine(); addLine();
+  setInterval(addLine, 2000);
+
+  // =========================================================
+  // MARQUEE TICKER
+  // =========================================================
+  const metrics = [
+    { k: 'SYS',    v: 'HEALTHY' },
+    { k: 'UPTIME', v: '142d' },
+    { k: 'BUILD',  v: '#4821' },
+    { k: 'USERS',  v: '2,847' },
+    { k: 'STARS',  v: '1.2k' },
+    { k: 'LANG',   v: '21' },
+    { k: 'REGIONS',v: '11' },
+    { k: 'CWICR',  v: '55,042' },
+    { k: 'LICENSE',v: 'AGPL-3.0' },
+    { k: 'RAM',    v: '2GB-MIN' }
+  ];
+  function renderMarquee() {
+    const track = document.getElementById('mqTrack');
+    const one = metrics.map(m =>
+      `<span><span class="k">${m.k}:</span> <span class="v">${m.v}</span><span class="sep">·</span></span>`
+    ).join('');
+    // duplicate the set for seamless loop
+    track.innerHTML = one + one;
+  }
+  renderMarquee();
+
+  // =========================================================
+  // TERMINAL COPY-TO-CLIPBOARD
+  // =========================================================
+  const term = document.getElementById('term');
+  const installText = "docker compose up";
+
+  function copyInstall() {
+    const doFlash = () => {
+      term.classList.add('copied-flash');
+      setTimeout(() => term.classList.remove('copied-flash'), 1200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(installText).then(doFlash).catch(() => {
+        legacyCopy(installText); doFlash();
+      });
+    } else {
+      legacyCopy(installText); doFlash();
+    }
+  }
+  function legacyCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+  term.addEventListener('click', copyInstall);
+  term.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); copyInstall(); }
+  });
+
+})();
+</script>
+
+</body>
+</html>

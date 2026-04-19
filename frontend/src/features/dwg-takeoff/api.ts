@@ -8,6 +8,8 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
+export type DwgScaleMode = 'preset' | 'calibrated' | 'per_annotation';
+
 export interface DwgDrawing {
   id: string;
   project_id: string;
@@ -17,6 +19,10 @@ export interface DwgDrawing {
   layer_count: number;
   entity_count: number;
   thumbnail_url: string | null;
+  /** Persisted drawing-level scale. 1 = raw DXF units (metres). */
+  scale_denominator?: number;
+  /** Which scale strategy the user picked last for this drawing. */
+  scale_mode?: DwgScaleMode;
   created_at: string;
   updated_at: string;
 }
@@ -84,18 +90,48 @@ export interface DxfLayer {
 export interface DwgAnnotation {
   id: string;
   drawing_id: string;
-  type: 'text_pin' | 'arrow' | 'rectangle' | 'distance' | 'area';
+  type:
+    | 'text_pin'
+    | 'arrow'
+    | 'rectangle'
+    | 'distance'
+    | 'area'
+    | 'circle'
+    | 'polyline'
+    | 'line';
   points: { x: number; y: number }[];
+  /** Extra geometry (radius for circles, etc.) sent to the backend as the
+   *  `geometry` blob so the canvas can render primitives that aren't
+   *  describable by `points` alone. */
+  radius?: number;
   text: string | null;
   color: string;
+  /** Stroke width in logical pixels. Sent to the backend as both `line_width`
+   *  (legacy int) and `thickness` (new float) so the renderer can pick
+   *  whichever field the backend returns. */
+  thickness?: number;
+  /** Legacy integer stroke width. Kept for backwards-compat with existing
+   *  annotations that were saved before the `thickness` column was added. */
+  line_width?: number;
+  /** Virtual layer used to group user-drawn markups. Defaults to
+   *  `USER_MARKUP`. The LayerPanel toggles visibility by this field for
+   *  annotations (separate from DXF-entity layer toggles). */
+  layer_name?: string;
   measurement_value: number | null;
   measurement_unit: string | null;
+  /** Per-annotation scale denominator that overrides the drawing-level one.
+   *  Used when a detail view on the same sheet has its own scale. */
+  scale_override?: number | null;
   linked_boq_position_id: string | null;
   metadata?: Record<string, unknown>;
   created_by: string;
   created_at: string;
   updated_at: string;
 }
+
+/** Virtual layer name applied to every user-drawn primitive annotation.
+ *  Exported so the page + LayerPanel can check against a single constant. */
+export const USER_MARKUP_LAYER = 'USER_MARKUP';
 
 export interface DwgPin {
   id: string;
@@ -119,8 +155,18 @@ export interface CreateAnnotationPayload {
   text?: string;
   color?: string;
   line_width?: number;
+  /** Fractional stroke width in logical pixels. Defaults to 2.0 on the
+   *  backend when omitted. Coexists with `line_width` for backwards-compat. */
+  thickness?: number;
+  /** Virtual layer name. Defaults to `USER_MARKUP` on the backend when
+   *  omitted, so user-drawn primitives are grouped and can be toggled as
+   *  a single layer in the LayerPanel. */
+  layer_name?: string;
   measurement_value?: number;
   measurement_unit?: string;
+  /** Per-annotation scale that overrides the drawing-level one.
+   *  Sent when the user draws in per-annotation mode on a detail view. */
+  scale_override?: number | null;
   metadata?: Record<string, unknown>;
 }
 
@@ -129,6 +175,7 @@ export interface UpdateAnnotationPayload {
   color?: string;
   measurement_value?: number;
   measurement_unit?: string;
+  scale_override?: number | null;
 }
 
 /* ── Drawings CRUD ─────────────────────────────────────────────────────── */
@@ -187,10 +234,22 @@ export async function updateLayers(drawingId: string, layers: DxfLayer[]): Promi
   return apiPatch(`/v1/dwg_takeoff/drawings/${drawingId}/layers`, { layers });
 }
 
+export async function updateDrawingScale(
+  drawingId: string,
+  payload: { scale_denominator: number; scale_mode: DwgScaleMode },
+): Promise<DwgDrawing> {
+  return apiPatch<DwgDrawing>(
+    `/v1/dwg_takeoff/drawings/${drawingId}/scale/`,
+    payload,
+  );
+}
+
 /* ── Annotations CRUD ──────────────────────────────────────────────────── */
 
 export async function fetchAnnotations(drawingId: string): Promise<DwgAnnotation[]> {
-  return apiGet<DwgAnnotation[]>(`/v1/dwg_takeoff/drawings/${drawingId}/annotations`);
+  return apiGet<DwgAnnotation[]>(
+    `/v1/dwg_takeoff/annotations/?drawing_id=${encodeURIComponent(drawingId)}&limit=500`,
+  );
 }
 
 export async function createAnnotation(data: CreateAnnotationPayload): Promise<DwgAnnotation> {

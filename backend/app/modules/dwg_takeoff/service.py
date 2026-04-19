@@ -472,6 +472,29 @@ class DwgTakeoffService:
             status_filter=status_filter,
         )
 
+    async def update_drawing_scale(
+        self,
+        drawing_id: uuid.UUID,
+        *,
+        scale_denominator: float,
+        scale_mode: str,
+    ) -> DwgDrawing:
+        """Persist a drawing's scale denominator + mode.
+
+        The frontend also mirrors this in localStorage for instant feedback,
+        but the DB value is the source of truth across devices and users —
+        so a takeoff calibrated on a desktop reads correctly when the same
+        drawing is opened on a tablet.
+        """
+        drawing = await self.get_drawing(drawing_id)
+        await self.drawing_repo.update_fields(
+            drawing_id,
+            scale_denominator=scale_denominator,
+            scale_mode=scale_mode,
+        )
+        await self.session.refresh(drawing)
+        return drawing
+
     async def delete_drawing(self, drawing_id: uuid.UUID) -> None:
         """Delete a drawing and all associated files (upload, entities, thumbnails)."""
         drawing = await self.get_drawing(drawing_id)
@@ -625,8 +648,11 @@ class DwgTakeoffService:
             text=data.text,
             color=data.color,
             line_width=data.line_width,
+            thickness=data.thickness,
+            layer_name=data.layer_name,
             measurement_value=data.measurement_value,
             measurement_unit=data.measurement_unit,
+            scale_override=data.scale_override,
             linked_boq_position_id=data.linked_boq_position_id,
             linked_task_id=data.linked_task_id,
             linked_punch_item_id=data.linked_punch_item_id,

@@ -854,6 +854,24 @@ function VectorDatabaseSection() {
   const [loadingRegion, setLoadingRegion] = useState<string | null>(null);
   const [isIndexingAll, setIsIndexingAll] = useState(false);
   const [lastResult, setLastResult] = useState<{ region: string; indexed: number; duration: number } | null>(null);
+  // Elapsed-time tick so the progress panel can show a phased bar instead
+  // of a bare spinner. Local generation runs sentence-transformers and
+  // takes 30–60 s on a cold model — no backend event stream to hook
+  // into, so we estimate progress from time-since-click (same pattern
+  // as the CWICR cost-DB loader above).
+  const [vectorElapsed, setVectorElapsed] = useState(0);
+  useEffect(() => {
+    if (!loadingRegion && !isIndexingAll) {
+      setVectorElapsed(0);
+      return;
+    }
+    const start = Date.now();
+    const interval = setInterval(
+      () => setVectorElapsed(Math.floor((Date.now() - start) / 1000)),
+      500,
+    );
+    return () => clearInterval(interval);
+  }, [loadingRegion, isIndexingAll]);
 
   // Check vector DB status (LanceDB embedded or Qdrant)
   const { data: vectorStatus, refetch: refetchStatus } = useQuery({
@@ -1153,8 +1171,142 @@ function VectorDatabaseSection() {
               </div>
             </div>
 
+            {/* ── Phased vector-load progress panel ────────────────
+                Mirrors the CWICR cost-DB progress panel above so
+                users aren't staring at a lone spinner for the full
+                30-60 s embedding generation. Phases are elapsed-time
+                estimates — the backend runs synchronously and has no
+                SSE channel to report real progress. */}
+            {isLoading && (() => {
+              const loadingDb = loadingRegion
+                ? CWICR_DATABASES.find((d) => d.id === loadingRegion)
+                : null;
+              // Four phases roughly match the backend sequence in
+              // ``load_vector_from_github``:
+              //   0-3 s  : HEAD / download attempt from GitHub
+              //   3-15 s : sentence-transformers model load (first run)
+              //  15-45 s : batched embedding generation
+              //   45+ s  : indexing into LanceDB + region stats refresh
+              const phase =
+                vectorElapsed < 3 ? 0 : vectorElapsed < 15 ? 1 : vectorElapsed < 45 ? 2 : 3;
+              const phaseLabels = [
+                t('costs.vec_phase_checking', {
+                  defaultValue: 'Checking pre-built vectors on GitHub...',
+                }),
+                t('costs.vec_phase_model', {
+                  defaultValue: 'Loading embedding model (first-time only)...',
+                }),
+                t('costs.vec_phase_embedding', {
+                  defaultValue: 'Generating 384d embeddings from cost items...',
+                }),
+                t('costs.vec_phase_indexing', {
+                  defaultValue: 'Indexing into LanceDB and refreshing stats...',
+                }),
+              ];
+              // Never reach 100% on the estimate — only the success
+              // toast flips the bar to done. Asymptote towards 95.
+              const progressPct = Math.min(
+                95,
+                phase === 0
+                  ? vectorElapsed * 6
+                  : phase === 1
+                    ? 18 + (vectorElapsed - 3) * 2
+                    : phase === 2
+                      ? 42 + (vectorElapsed - 15) * 1.2
+                      : 78 + Math.min(17, (vectorElapsed - 45) * 0.4),
+              );
+              return (
+                <div className="mb-4 rounded-xl border border-purple-300/40 bg-purple-50/30 dark:bg-purple-500/5 overflow-hidden">
+                  <div className="px-4 pt-3 pb-3">
+                    <div className="flex items-center gap-2.5 mb-2.5">
+                      <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 text-white">
+                        <Sparkles size={16} />
+                        <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-purple-400 animate-ping" />
+                        <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-purple-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-sm font-semibold text-content-primary truncate">
+                            {isIndexingAll
+                              ? t('costs.vec_indexing_all', {
+                                  defaultValue: 'Generating vectors for all regions...',
+                                })
+                              : t('costs.vec_indexing_region', {
+                                  defaultValue: 'Generating vectors for {{name}}...',
+                                  name: loadingDb?.name ?? 'database',
+                                })}
+                          </h4>
+                          <span className="text-xs text-purple-600 font-mono tabular-nums shrink-0">
+                            {Math.floor(vectorElapsed / 60)}:{String(vectorElapsed % 60).padStart(2, '0')}
+                          </span>
+                        </div>
+                        <p className="text-2xs text-content-tertiary mt-0.5 truncate">
+                          {phaseLabels[phase]}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="mb-1.5">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-2xs font-medium text-content-secondary">
+                          {t('costs.vec_phase_progress', {
+                            defaultValue: 'Step {{step}} of 4',
+                            step: phase + 1,
+                          })}
+                        </span>
+                        <span className="text-2xs font-semibold text-purple-600 tabular-nums">
+                          {Math.round(progressPct)}%
+                        </span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
+                        <div
+                          className="h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 bg-[length:200%_100%] animate-shimmer"
+                          style={{ width: `${progressPct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Phase dots */}
+                    <div className="flex items-center gap-1 text-2xs">
+                      {[
+                        t('costs.vec_step_fetch', { defaultValue: 'Fetch' }),
+                        t('costs.vec_step_model', { defaultValue: 'Model' }),
+                        t('costs.vec_step_embed', { defaultValue: 'Embed' }),
+                        t('costs.vec_step_index', { defaultValue: 'Index' }),
+                      ].map((label, i) => (
+                        <div key={label} className="flex items-center gap-1">
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              i < phase
+                                ? 'bg-semantic-success'
+                                : i === phase
+                                  ? 'bg-purple-500 animate-pulse'
+                                  : 'bg-surface-tertiary'
+                            }`}
+                          />
+                          <span
+                            className={
+                              i <= phase
+                                ? 'text-content-secondary font-medium'
+                                : 'text-content-quaternary'
+                            }
+                          >
+                            {label}
+                          </span>
+                          {i < 3 && (
+                            <span className="text-content-quaternary mx-0.5">&middot;</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Last result */}
-            {lastResult && (
+            {lastResult && !isLoading && (
               <div className="rounded-lg bg-semantic-success-bg/40 border border-semantic-success/20 px-4 py-3 mb-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-semantic-success" />
@@ -1524,7 +1676,7 @@ export function ImportDatabasePage() {
                 <p className="mt-2 text-xs text-content-tertiary">
                   {t('costs.import_columns_hint', {
                     defaultValue:
-                      'Columns are auto-detected. Accepted headers: Code, Description, Unit, Rate/Price/Cost, Currency, DIN 276/Classification.',
+                      'Columns are auto-detected. Accepted headers: Code, Description, Unit, Rate/Price/Cost, Currency, Classification.',
                   })}
                 </p>
               </div>

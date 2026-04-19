@@ -70,6 +70,14 @@ interface Props {
   /** Per-entity hide (RFC 11): hidden entities are not rendered and are not hit-testable. */
   hiddenEntityIds: Set<string>;
   selectedAnnotationId: string | null;
+  /**
+   * Drawing scale denominator (RFC 13 #13). `1` = no scaling (raw DXF
+   * units). `50` = drawing is 1:50, so every measurement shown on the
+   * canvas is multiplied by 50 (length) or 2500 (area). Applies to both
+   * the on-screen labels AND the `measurement_value` persisted with each
+   * annotation, so takeoff totals stay in real-world units.
+   */
+  drawingScale?: number;
   onSelectEntity: (id: string | null, event?: EntitySelectEvent) => void;
   onSelectAnnotation: (id: string | null) => void;
   onEntityContextMenu?: (event: EntityContextMenuEvent) => void;
@@ -135,11 +143,14 @@ export function DxfViewer({
   selectedEntityIds,
   hiddenEntityIds,
   selectedAnnotationId,
+  drawingScale = 1,
   onSelectEntity,
   onSelectAnnotation,
   onEntityContextMenu,
   onAnnotationCreated,
 }: Props) {
+  const drawingScaleRef = useRef(drawingScale);
+  drawingScaleRef.current = drawingScale;
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -319,13 +330,19 @@ export function DxfViewer({
         renderMultiSelectionHalos(ctx, visibleEntities, vp, selectedIds, primarySelId);
       }
 
-      renderAnnotations(ctx, annotations, vp, selectedAnnotationIdRef.current);
+      renderAnnotations(
+        ctx,
+        annotations,
+        vp,
+        selectedAnnotationIdRef.current,
+        drawingScaleRef.current,
+      );
 
       // Draw polyline measurements overlay for the primary selected entity only
       if (primarySelId) {
         const selEnt = entities.find((e) => e.id === primarySelId);
         if (selEnt?.type === 'LWPOLYLINE' && selEnt.vertices && selEnt.vertices.length >= 2) {
-          renderPolylineMeasurements(ctx, selEnt, vp);
+          renderPolylineMeasurements(ctx, selEnt, vp, drawingScaleRef.current);
         }
       }
 
@@ -406,7 +423,7 @@ export function DxfViewer({
           ctx.globalAlpha = 1.0;
 
           // ── Live measurement label near the midpoint of the rubber band ──
-          const dist = calculateDistance(lastPt, mouseWorld);
+          const dist = calculateDistance(lastPt, mouseWorld) * drawingScaleRef.current;
           const label = formatMeasurement(dist, 'm');
           const midX = (lastScreen.x + mouseScreen.x) / 2;
           const midY = (lastScreen.y + mouseScreen.y) / 2;
@@ -530,18 +547,36 @@ export function DxfViewer({
 
       // For two-point tools, finalize on second click
       if (
-        (activeTool === 'distance' || activeTool === 'arrow' || activeTool === 'rectangle') &&
+        (activeTool === 'distance' ||
+          activeTool === 'arrow' ||
+          activeTool === 'rectangle' ||
+          activeTool === 'line' ||
+          activeTool === 'circle') &&
         pts.length === 2
       ) {
-        const annType =
-          activeTool === 'distance' ? 'distance' : activeTool === 'arrow' ? 'arrow' : 'rectangle';
+        const annType: DwgAnnotation['type'] =
+          activeTool === 'distance' ? 'distance'
+          : activeTool === 'arrow' ? 'arrow'
+          : activeTool === 'rectangle' ? 'rectangle'
+          : activeTool === 'line' ? 'line'
+          : 'circle';
         const payload: Parameters<Props['onAnnotationCreated']>[0] = {
           type: annType,
           points: pts,
         };
-        if (activeTool === 'distance') {
+        // Persist the raw DXF measurement. The current drawing scale is
+        // applied on the fly in the render path (AnnotationOverlay +
+        // Properties panel), so changing the Scale tab immediately
+        // reflects on every existing label without a round trip.
+        if (activeTool === 'distance' || activeTool === 'line') {
           payload.measurement_value = calculateDistance(pts[0]!, pts[1]!);
           payload.measurement_unit = 'm';
+        }
+        if (activeTool === 'circle') {
+          // Circle: pts[0] is center, pts[1] is on the circumference.
+          const r = calculateDistance(pts[0]!, pts[1]!);
+          payload.measurement_value = Math.PI * r * r;
+          payload.measurement_unit = 'm\u00B2';
         }
         onAnnotationCreated(payload);
         drawPointsRef.current = [];
@@ -618,15 +653,29 @@ export function DxfViewer({
     [entities, visibleLayers, onEntityContextMenu],
   );
 
-  // Double-click to finish area polygon
+  // Double-click to finish multi-point tools (area polygon and open polyline).
   const handleDoubleClick = useCallback(() => {
-    if (activeTool === 'area' && drawPointsRef.current.length >= 3) {
-      const pts = drawPointsRef.current;
+    const pts = drawPointsRef.current;
+    if (activeTool === 'area' && pts.length >= 3) {
+      // Persist raw area; display path multiplies by drawingScale².
       onAnnotationCreated({
         type: 'area',
         points: pts,
         measurement_value: calculateArea(pts),
         measurement_unit: 'm\u00B2',
+      });
+      drawPointsRef.current = [];
+    } else if (activeTool === 'polyline' && pts.length >= 2) {
+      // Open polyline — sum of segment lengths, no area.
+      let totalLen = 0;
+      for (let i = 0; i < pts.length - 1; i++) {
+        totalLen += calculateDistance(pts[i]!, pts[i + 1]!);
+      }
+      onAnnotationCreated({
+        type: 'polyline',
+        points: pts,
+        measurement_value: totalLen,
+        measurement_unit: 'm',
       });
       drawPointsRef.current = [];
     }
@@ -644,14 +693,16 @@ export function DxfViewer({
     }
   }, []);
 
-  /** Confirm text pin annotation from the floating popup. */
+  /** Confirm text pin annotation from the floating popup. An empty label is
+   *  still accepted — the marker alone is useful as a quick pin — so the
+   *  user sees immediate feedback even if they forget to type. */
   const handleTextPinConfirm = useCallback(
     (label: string, color: string, fontSize: number) => {
-      if (!textPinPopup || !label.trim()) return;
+      if (!textPinPopup) return;
       onAnnotationCreated({
         type: 'text_pin',
         points: [textPinPopup.worldPt],
-        text: label.trim(),
+        text: label.trim() || undefined,
         color,
         fontSize,
       });
@@ -769,7 +820,9 @@ function TextPinPopup({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (label.trim()) onConfirm(label, color, fontSize);
+    // Accept blank label too — the colored marker alone is useful feedback
+    // that a pin was placed. Users can open the annotation later to rename.
+    onConfirm(label, color, fontSize);
   };
 
   return (
@@ -888,7 +941,6 @@ function TextPinPopup({
             </button>
             <button
               type="submit"
-              disabled={!label.trim()}
               className="flex-1 rounded-lg bg-emerald-600 px-3 py-1.5
                          text-xs font-semibold text-white
                          hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed
@@ -909,12 +961,13 @@ function renderPolylineMeasurements(
   ctx: CanvasRenderingContext2D,
   entity: DxfEntity,
   vp: ViewportState,
+  scale = 1,
 ): void {
   const verts = entity.vertices!;
   const closed = !!entity.closed;
-  const segments = getSegmentLengths(verts, closed);
+  const segments = getSegmentLengths(verts, closed).map((s) => s * scale);
   const perimeter = segments.reduce((a, b) => a + b, 0);
-  const area = closed ? calculateArea(verts) : 0;
+  const area = closed ? calculateArea(verts) * scale * scale : 0;
 
   ctx.save();
 

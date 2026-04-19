@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 import { Sparkles, Database, ArrowUp, AlertTriangle, Settings, Globe } from 'lucide-react';
-import { Breadcrumb } from '@/shared/ui';
+import { Breadcrumb, AIDisclaimerBanner } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { Link } from 'react-router-dom';
 import { useToastStore } from '@/stores/useToastStore';
@@ -342,6 +342,8 @@ export function AdvisorPage() {
         ]}
         className="mb-3 shrink-0"
       />
+
+      <AIDisclaimerBanner variant="compact" className="mb-3 shrink-0" />
 
       {/* AI not configured warning */}
       {aiConfigured === false && (

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0066ff"/>
+      <stop offset="100%" stop-color="#5856d6"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="url(#lg)"/>
+  <!-- Bar 1 (short) -->
+  <rect x="102" y="296" width="42" height="114" rx="6" fill="#fff" opacity=".85"/>
+  <!-- Bar 2 (medium) -->
+  <rect x="162" y="233" width="42" height="177" rx="6" fill="#fff" opacity=".95"/>
+  <!-- Bar 3 (tall) -->
+  <rect x="222" y="176" width="42" height="234" rx="6" fill="#fff" opacity=".85"/>
+  <!-- Building body -->
+  <rect x="282" y="150" width="128" height="260" rx="8" fill="#fff" opacity=".9"/>
+</svg>

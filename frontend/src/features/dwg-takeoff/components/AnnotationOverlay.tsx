@@ -11,34 +11,177 @@ import type { ViewportState } from '../lib/viewport';
 import { worldToScreen } from '../lib/viewport';
 import { formatMeasurement } from '../lib/measurement';
 
+/**
+ * Compute the effective stroke thickness for a single annotation.
+ * Prefer the new fractional ``thickness`` field; fall back to legacy
+ * integer ``line_width``; otherwise default to 2 px to match the
+ * renderer's historical behaviour. Selection bumps the width by ~50 %
+ * so active annotations are distinguishable without obscuring geometry.
+ */
+function strokeWidth(ann: DwgAnnotation, isSelected: boolean): number {
+  const base =
+    typeof ann.thickness === 'number' && ann.thickness > 0
+      ? ann.thickness
+      : typeof ann.line_width === 'number' && ann.line_width > 0
+        ? ann.line_width
+        : 2;
+  return isSelected ? Math.max(base + 1, base * 1.5) : base;
+}
+
+/**
+ * Scale a persisted measurement value on the fly so changing the scale
+ * tab visibly updates every annotation label without a round trip.
+ * ``unit`` distinguishes linear (m) from areal (m²) scaling.
+ */
+function scaleMeasurement(
+  value: number,
+  unit: string | null | undefined,
+  scale: number,
+): number {
+  if (!Number.isFinite(scale) || scale <= 0 || scale === 1) return value;
+  const normalised = (unit ?? '').trim();
+  const isArea =
+    normalised === 'm²' ||
+    normalised === 'm2' ||
+    normalised === '\u00B2' ||
+    normalised.includes('²');
+  return isArea ? value * scale * scale : value * scale;
+}
+
 /** Render all annotations onto the provided canvas context. */
 export function renderAnnotations(
   ctx: CanvasRenderingContext2D,
   annotations: DwgAnnotation[],
   vp: ViewportState,
   selectedId?: string | null,
+  drawingScale: number = 1,
 ): void {
   for (const ann of annotations) {
     const isSelected = ann.id === selectedId;
     const color = isSelected ? '#3b82f6' : ann.color;
+    const width = strokeWidth(ann, isSelected);
 
     switch (ann.type) {
       case 'text_pin':
         renderTextPin(ctx, ann, vp, color, isSelected);
         break;
       case 'arrow':
-        renderArrow(ctx, ann, vp, color, isSelected);
+        renderArrow(ctx, ann, vp, color, isSelected, width);
         break;
       case 'rectangle':
-        renderRectangle(ctx, ann, vp, color, isSelected);
+        renderRectangle(ctx, ann, vp, color, isSelected, width);
         break;
       case 'distance':
-        renderDistance(ctx, ann, vp, color, isSelected);
+      case 'line':
+        renderDistance(ctx, ann, vp, color, isSelected, width, drawingScale);
         break;
       case 'area':
-        renderArea(ctx, ann, vp, color, isSelected);
+        renderArea(ctx, ann, vp, color, isSelected, width, drawingScale);
+        break;
+      case 'circle':
+        renderCircle(ctx, ann, vp, color, isSelected, width, drawingScale);
+        break;
+      case 'polyline':
+        renderPolyline(ctx, ann, vp, color, isSelected, width, drawingScale);
         break;
     }
+  }
+}
+
+function renderCircle(
+  ctx: CanvasRenderingContext2D,
+  ann: DwgAnnotation,
+  vp: ViewportState,
+  color: string,
+  _isSelected: boolean,
+  width = 2,
+  drawingScale = 1,
+): void {
+  if (ann.points.length < 2) return;
+  const center = worldToScreen(ann.points[0]!.x, ann.points[0]!.y, vp);
+  const edge = worldToScreen(ann.points[1]!.x, ann.points[1]!.y, vp);
+  const dx = edge.x - center.x;
+  const dy = edge.y - center.y;
+  const radius = Math.sqrt(dx * dx + dy * dy);
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = `${color}1f`;
+  ctx.fill();
+
+  // Area label at centre when measurement is available.
+  if (ann.measurement_value != null) {
+    const scaled = scaleMeasurement(
+      ann.measurement_value,
+      ann.measurement_unit,
+      drawingScale,
+    );
+    const label = formatMeasurement(scaled, ann.measurement_unit ?? 'm\u00B2');
+    ctx.font = '600 11px ui-monospace, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    const tw = ctx.measureText(label).width + 10;
+    const th = 18;
+    ctx.fillRect(center.x - tw / 2, center.y - th / 2, tw, th);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(label, center.x, center.y + 1);
+  }
+}
+
+function renderPolyline(
+  ctx: CanvasRenderingContext2D,
+  ann: DwgAnnotation,
+  vp: ViewportState,
+  color: string,
+  _isSelected: boolean,
+  width = 2,
+  drawingScale = 1,
+): void {
+  if (ann.points.length < 2) return;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  const first = worldToScreen(ann.points[0]!.x, ann.points[0]!.y, vp);
+  ctx.moveTo(first.x, first.y);
+  for (let i = 1; i < ann.points.length; i++) {
+    const p = worldToScreen(ann.points[i]!.x, ann.points[i]!.y, vp);
+    ctx.lineTo(p.x, p.y);
+  }
+  ctx.stroke();
+
+  // Total length label at the midpoint of the last segment.
+  if (ann.measurement_value != null && ann.points.length >= 2) {
+    const pA = worldToScreen(
+      ann.points[ann.points.length - 2]!.x,
+      ann.points[ann.points.length - 2]!.y,
+      vp,
+    );
+    const pB = worldToScreen(
+      ann.points[ann.points.length - 1]!.x,
+      ann.points[ann.points.length - 1]!.y,
+      vp,
+    );
+    const mx = (pA.x + pB.x) / 2;
+    const my = (pA.y + pB.y) / 2;
+    const scaled = scaleMeasurement(
+      ann.measurement_value,
+      ann.measurement_unit,
+      drawingScale,
+    );
+    const label = formatMeasurement(scaled, ann.measurement_unit ?? 'm');
+    ctx.font = '600 11px ui-monospace, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    const tw = ctx.measureText(label).width + 10;
+    const th = 18;
+    ctx.fillRect(mx - tw / 2, my - 20 - th / 2, tw, th);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(label, mx, my - 19);
   }
 }
 
@@ -53,22 +196,34 @@ function renderTextPin(
   const pt0 = ann.points[0]!;
   const pos = worldToScreen(pt0.x, pt0.y, vp);
 
-  // Read custom font size from metadata (default 11px for backwards compatibility)
+  // Read custom font size from metadata (default 14px — bumped so blank
+  // pins show a clearly visible marker).
   const customFontSize =
     ann.metadata && typeof ann.metadata.font_size === 'number'
       ? ann.metadata.font_size
-      : 11;
+      : 14;
 
   // Use the annotation's own color (which the popup sets), falling back to the
   // selection highlight / default color passed in.
   const pinColor = isSelected ? color : ann.color || color;
 
-  // Circle marker — scale proportionally to font size
-  const markerRadius = Math.max(4, customFontSize * 0.45);
+  // Circle marker — min 6px so a blank pin is still obviously visible,
+  // and a white halo so dark-coloured pins read against the dark canvas.
+  const markerRadius = Math.max(6, customFontSize * 0.5);
   ctx.beginPath();
-  ctx.arc(pos.x, pos.y, isSelected ? markerRadius + 2 : markerRadius, 0, Math.PI * 2);
+  ctx.arc(
+    pos.x,
+    pos.y,
+    isSelected ? markerRadius + 3 : markerRadius + 1.5,
+    0,
+    Math.PI * 2,
+  );
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(pos.x, pos.y, isSelected ? markerRadius + 1 : markerRadius, 0, Math.PI * 2);
   ctx.fillStyle = pinColor;
-  ctx.globalAlpha = 0.85;
+  ctx.globalAlpha = 0.95;
   ctx.fill();
   ctx.globalAlpha = 1;
 
@@ -119,7 +274,8 @@ function renderArrow(
   ann: DwgAnnotation,
   vp: ViewportState,
   color: string,
-  isSelected: boolean,
+  _isSelected: boolean,
+  width = 2,
 ): void {
   if (ann.points.length < 2) return;
   const aPt0 = ann.points[0]!;
@@ -128,7 +284,7 @@ function renderArrow(
   const to = worldToScreen(aPt1.x, aPt1.y, vp);
 
   ctx.strokeStyle = color;
-  ctx.lineWidth = isSelected ? 2.5 : 2;
+  ctx.lineWidth = width;
   ctx.beginPath();
   ctx.moveTo(from.x, from.y);
   ctx.lineTo(to.x, to.y);
@@ -152,6 +308,7 @@ function renderRectangle(
   vp: ViewportState,
   color: string,
   isSelected: boolean,
+  width = 1.5,
 ): void {
   if (ann.points.length < 2) return;
   const rPt0 = ann.points[0]!;
@@ -170,7 +327,7 @@ function renderRectangle(
   ctx.globalAlpha = 1;
 
   ctx.strokeStyle = color;
-  ctx.lineWidth = isSelected ? 2.5 : 1.5;
+  ctx.lineWidth = width;
   ctx.strokeRect(x, y, w, h);
 
   // Drag handles when selected
@@ -187,7 +344,9 @@ function renderDistance(
   ann: DwgAnnotation,
   vp: ViewportState,
   color: string,
-  isSelected: boolean,
+  _isSelected: boolean,
+  width = 1.5,
+  drawingScale = 1,
 ): void {
   if (ann.points.length < 2) return;
   const dPt0 = ann.points[0]!;
@@ -196,8 +355,12 @@ function renderDistance(
   const p2 = worldToScreen(dPt1.x, dPt1.y, vp);
 
   ctx.strokeStyle = color;
-  ctx.lineWidth = isSelected ? 2 : 1.5;
-  ctx.setLineDash([6, 4]);
+  ctx.lineWidth = width;
+  // Dashed only for the measurement 'distance' tool so user-drawn 'line'
+  // primitives stroke solid (more natural for markup).
+  if (ann.type === 'distance') {
+    ctx.setLineDash([6, 4]);
+  }
   ctx.beginPath();
   ctx.moveTo(p1.x, p1.y);
   ctx.lineTo(p2.x, p2.y);
@@ -207,7 +370,10 @@ function renderDistance(
   // Dimension text
   const label =
     ann.measurement_value != null
-      ? formatMeasurement(ann.measurement_value, ann.measurement_unit ?? 'm')
+      ? formatMeasurement(
+          scaleMeasurement(ann.measurement_value, ann.measurement_unit, drawingScale),
+          ann.measurement_unit ?? 'm',
+        )
       : ann.text ?? '';
   if (label) {
     const mx = (p1.x + p2.x) / 2;
@@ -234,7 +400,9 @@ function renderArea(
   ann: DwgAnnotation,
   vp: ViewportState,
   color: string,
-  isSelected: boolean,
+  _isSelected: boolean,
+  width = 1.5,
+  drawingScale = 1,
 ): void {
   if (ann.points.length < 3) return;
   const screenPts = ann.points.map((p) => worldToScreen(p.x, p.y, vp));
@@ -254,7 +422,7 @@ function renderArea(
 
   // Outline
   ctx.strokeStyle = color;
-  ctx.lineWidth = isSelected ? 2.5 : 1.5;
+  ctx.lineWidth = width;
   ctx.beginPath();
   ctx.moveTo(first.x, first.y);
   for (let i = 1; i < screenPts.length; i++) {
@@ -268,7 +436,10 @@ function renderArea(
   const cy = screenPts.reduce((s, p) => s + p.y, 0) / screenPts.length;
   const label =
     ann.measurement_value != null
-      ? formatMeasurement(ann.measurement_value, ann.measurement_unit ?? 'm\u00B2')
+      ? formatMeasurement(
+          scaleMeasurement(ann.measurement_value, ann.measurement_unit, drawingScale),
+          ann.measurement_unit ?? 'm\u00B2',
+        )
       : ann.text ?? '';
   if (label) {
     ctx.font = 'bold 11px Inter, system-ui, sans-serif';

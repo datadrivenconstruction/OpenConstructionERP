@@ -46,6 +46,8 @@ import {
   SlidersHorizontal,
   ClipboardList,
   ShieldCheck,
+  LayoutGrid,
+  Maximize2,
 } from 'lucide-react';
 import { Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -70,6 +72,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import { useBIMUploadStore, type BIMUploadJob } from '@/stores/useBIMUploadStore';
+import { apiGet } from '@/shared/lib/api';
 import {
   fetchBIMModels,
   fetchBIMModel,
@@ -1396,7 +1399,17 @@ export function BIMPage() {
   const { projectId: urlProjectId, modelId: urlModelId } = useParams<{ projectId?: string; modelId?: string }>();
   const contextProjectId = useProjectContextStore((s) => s.activeProjectId);
   const contextProjectName = useProjectContextStore((s) => s.activeProjectName);
-  const projectId = urlProjectId || contextProjectId || '';
+  // Server-side fallback: same rationale as /dwg-takeoff. If the user
+  // lands on /bim without a URL project param and localStorage was
+  // purged (stale-project cleanup), every BIM query fires with an empty
+  // projectId and models appear "lost" on reload. Fetch the projects
+  // list and use the first as a last resort.
+  const { data: projectsList = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/'),
+    staleTime: 5 * 60_000,
+  });
+  const projectId = urlProjectId || contextProjectId || projectsList[0]?.id || '';
   const { confirm, ...confirmProps } = useConfirm();
 
   const [activeModelId, setActiveModelId] = useState<string | null>(urlModelId || null);
@@ -1423,6 +1436,10 @@ export function BIMPage() {
   // keyboard shortcut `S` (RFC 19) can open the Tools tab from anywhere.
   const boqPanelOpen = useBIMViewerStore((s) => s.rightPanelOpen);
   const setBoqPanelOpen = useBIMViewerStore((s) => s.setRightPanelOpen);
+  const summaryPanelOpen = useBIMViewerStore((s) => s.summaryPanelOpen);
+  const setSummaryPanelOpen = useBIMViewerStore((s) => s.setSummaryPanelOpen);
+  const dimensionsVisible = useBIMViewerStore((s) => s.dimensionsVisible);
+  const setDimensionsVisible = useBIMViewerStore((s) => s.setDimensionsVisible);
   const [filterPredicate, setFilterPredicate] = useState<
     ((el: BIMElementData) => boolean) | null
   >(null);
@@ -1804,7 +1821,9 @@ export function BIMPage() {
   // happen to share an id), they're silently dropped.
   const handleLinkGroupToBOQ = useCallback(
     (group: BIMElementGroup) => {
-      const memberIds = new Set(group.member_element_ids);
+      const memberIds = new Set(
+        Array.isArray(group.member_element_ids) ? group.member_element_ids : [],
+      );
       const subset = elements.filter((el) => memberIds.has(el.id));
       if (subset.length === 0) {
         addToast({
@@ -1888,7 +1907,8 @@ export function BIMPage() {
   // Isolate a saved group's member elements in the 3D viewport.
   const handleIsolateGroup = useCallback(
     (group: BIMElementGroup) => {
-      setIsolatedIds(group.member_element_ids.length > 0 ? group.member_element_ids : null);
+      const ids = Array.isArray(group.member_element_ids) ? group.member_element_ids : [];
+      setIsolatedIds(ids.length > 0 ? ids : null);
     },
     [],
   );
@@ -1899,7 +1919,9 @@ export function BIMPage() {
   const handleHighlightGroup = useCallback(
     (group: BIMElementGroup | null) => {
       if (group) {
-        setBIMSelection(group.member_element_ids);
+        setBIMSelection(
+          Array.isArray(group.member_element_ids) ? group.member_element_ids : [],
+        );
       } else {
         setBIMSelection([]);
       }
@@ -2048,6 +2070,28 @@ export function BIMPage() {
     ? multiSelectedIds
     : (selectedElementId ? [selectedElementId] : []);
 
+  // Bounding-box dimensions of the current single selection. Union bbox
+  // across the whole multi-selection would be possible, but estimators
+  // reported the "what is this one piece?" view as most useful — keep
+  // the card single-selection-only to avoid confusing aggregates.
+  const selectedDimensions = useMemo(() => {
+    if (!selectedElementId || selectedElementIds.length > 1) return null;
+    const el = elements.find((e) => e.id === selectedElementId);
+    const bb = el?.bounding_box;
+    if (!el || !bb) return null;
+    const L = Math.abs(bb.max_x - bb.min_x);
+    const W = Math.abs(bb.max_y - bb.min_y);
+    const H = Math.abs(bb.max_z - bb.min_z);
+    return {
+      name: el.name || el.element_type || 'Element',
+      type: el.element_type,
+      L,
+      W,
+      H,
+      volume: L * W * H,
+    };
+  }, [selectedElementId, selectedElementIds, elements]);
+
   if (!projectId) {
     return (
       <div className="flex items-center justify-center -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
@@ -2120,6 +2164,50 @@ export function BIMPage() {
                     {visibleElementCount}
                   </span>
                 )}
+              </button>
+
+              <button
+                onClick={() => setSummaryPanelOpen(!summaryPanelOpen)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                  summaryPanelOpen
+                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
+                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
+                }`}
+                title={
+                  summaryPanelOpen
+                    ? t('bim.summary_hide', { defaultValue: 'Hide summary panel' })
+                    : t('bim.summary_show', { defaultValue: 'Show summary panel' })
+                }
+                aria-label={t('bim.summary_toggle', { defaultValue: 'Toggle summary panel' })}
+                aria-pressed={summaryPanelOpen}
+              >
+                <LayoutGrid size={13} />
+                {t('bim.summary_button', { defaultValue: 'Summary' })}
+              </button>
+
+              <button
+                onClick={() => setDimensionsVisible(!dimensionsVisible)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                  dimensionsVisible
+                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
+                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
+                }`}
+                title={
+                  dimensionsVisible
+                    ? t('bim.dimensions_hide', {
+                        defaultValue: 'Hide bounding-box dimensions on selection',
+                      })
+                    : t('bim.dimensions_show', {
+                        defaultValue: 'Show bounding-box dimensions on selection',
+                      })
+                }
+                aria-label={t('bim.dimensions_toggle', {
+                  defaultValue: 'Toggle bounding-box dimensions',
+                })}
+                aria-pressed={dimensionsVisible}
+              >
+                <Maximize2 size={13} />
+                {t('bim.dimensions_button', { defaultValue: 'Dimensions' })}
               </button>
 
               <button
@@ -2259,6 +2347,62 @@ export function BIMPage() {
         )}
 
         <div className="flex-1 min-w-0 relative">
+        {/* Selected-element bounding-box dimensions. Top-right, non-
+            blocking, auto-hides when the toggle is off or nothing is
+            selected. Numbers come from the element's canonical
+            bounding_box in metres. */}
+        {dimensionsVisible && selectedDimensions && (
+          <div
+            className="absolute top-[60px] z-30 pointer-events-none select-none
+                       rounded-lg border border-oe-blue/30 bg-surface-primary/95
+                       backdrop-blur-sm shadow-md px-3 py-2 min-w-[180px]
+                       transition-[inset-inline-start] duration-200"
+            style={{ insetInlineStart: filterPanelOpen && elements.length > 0 ? 332 : 12 }}
+            data-testid="bim-dimensions-card"
+          >
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Maximize2 size={12} className="text-oe-blue shrink-0" />
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+                {t('bim.dimensions_title', { defaultValue: 'BBox dimensions' })}
+              </span>
+            </div>
+            <div className="text-[11px] font-medium text-content-primary truncate mb-1.5" title={selectedDimensions.name}>
+              {selectedDimensions.name}
+              {selectedDimensions.type && (
+                <span className="ml-1 text-content-tertiary text-[10px]">
+                  · {selectedDimensions.type}
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-[11px] tabular-nums">
+              <div>
+                <div className="text-[9px] uppercase text-content-tertiary">L</div>
+                <div className="font-semibold text-content-primary">
+                  {selectedDimensions.L.toFixed(2)}<span className="text-[9px] text-content-tertiary ml-0.5">m</span>
+                </div>
+              </div>
+              <div>
+                <div className="text-[9px] uppercase text-content-tertiary">W</div>
+                <div className="font-semibold text-content-primary">
+                  {selectedDimensions.W.toFixed(2)}<span className="text-[9px] text-content-tertiary ml-0.5">m</span>
+                </div>
+              </div>
+              <div>
+                <div className="text-[9px] uppercase text-content-tertiary">H</div>
+                <div className="font-semibold text-content-primary">
+                  {selectedDimensions.H.toFixed(2)}<span className="text-[9px] text-content-tertiary ml-0.5">m</span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-1.5 pt-1.5 border-t border-border-light text-[10px] text-content-tertiary flex items-center justify-between">
+              <span>{t('bim.bbox_volume', { defaultValue: 'BBox volume' })}</span>
+              <span className="tabular-nums font-medium text-content-secondary">
+                {selectedDimensions.volume.toFixed(2)} m³
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* PDF generation indicator — shown when the upload job for the
             active model has a deferred PDF export running on the backend.
             Pure status bar, never blocks interaction with the viewer. */}

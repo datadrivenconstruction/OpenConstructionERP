@@ -9,10 +9,12 @@ Tables:
 """
 
 import uuid
+from decimal import Decimal
 
 from sqlalchemy import JSON, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.db_types import MoneyType
 from app.database import GUID, Base
 
 
@@ -36,10 +38,20 @@ class Invoice(Base):
     invoice_date: Mapped[str] = mapped_column(String(20), nullable=False)
     due_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="EUR")
-    amount_subtotal: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
-    tax_amount: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
-    retention_amount: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
-    amount_total: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
+    # Phase 2e: money columns back to NUMERIC on PG while staying VARCHAR
+    # on SQLite for dev-DB compatibility. Python always sees ``Decimal``.
+    amount_subtotal: Mapped[Decimal] = mapped_column(
+        MoneyType(), nullable=False, default=Decimal("0")
+    )
+    tax_amount: Mapped[Decimal] = mapped_column(
+        MoneyType(), nullable=False, default=Decimal("0")
+    )
+    retention_amount: Mapped[Decimal] = mapped_column(
+        MoneyType(), nullable=False, default=Decimal("0")
+    )
+    amount_total: Mapped[Decimal] = mapped_column(
+        MoneyType(), nullable=False, default=Decimal("0")
+    )
     tax_config_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     payment_terms_days: Mapped[str | None] = mapped_column(String(10), nullable=True)
@@ -81,10 +93,18 @@ class InvoiceLineItem(Base):
         index=True,
     )
     description: Mapped[str] = mapped_column(String(500), nullable=False)
-    quantity: Mapped[str] = mapped_column(String(50), nullable=False, default="1")
+    # Quantity / rate / amount: wider scale so quantities like 1.234567
+    # don't round-trip as "1.23". The PG type becomes NUMERIC(18, 6).
+    quantity: Mapped[Decimal] = mapped_column(
+        MoneyType(scale=6), nullable=False, default=Decimal("1")
+    )
     unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    unit_rate: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
-    amount: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
+    unit_rate: Mapped[Decimal] = mapped_column(
+        MoneyType(scale=6), nullable=False, default=Decimal("0")
+    )
+    amount: Mapped[Decimal] = mapped_column(
+        MoneyType(), nullable=False, default=Decimal("0")
+    )
     wbs_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     cost_category: Mapped[str | None] = mapped_column(String(100), nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
@@ -108,10 +128,10 @@ class Payment(Base):
         index=True,
     )
     payment_date: Mapped[str] = mapped_column(String(20), nullable=False)
-    amount: Mapped[str] = mapped_column(String(50), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False)
     currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="EUR")
-    exchange_rate_snapshot: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="1"
+    exchange_rate_snapshot: Mapped[Decimal] = mapped_column(
+        MoneyType(scale=6), nullable=False, default=Decimal("1")
     )
     reference: Mapped[str | None] = mapped_column(String(255), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
@@ -144,11 +164,25 @@ class ProjectBudget(Base):
     )
     wbs_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     category: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    original_budget: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
-    revised_budget: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
-    committed: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
-    actual: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
-    forecast_final: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
+    # Phase 2d pilot: money columns now return Decimal in Python.
+    # On PostgreSQL this emits NUMERIC(18, 2); on the existing SQLite
+    # dev DBs the physical column stays VARCHAR(50), so no destructive
+    # migration is required — MoneyType normalises both ends.
+    original_budget: Mapped[Decimal] = mapped_column(
+        MoneyType(), nullable=False, default=Decimal("0")
+    )
+    revised_budget: Mapped[Decimal] = mapped_column(
+        MoneyType(), nullable=False, default=Decimal("0")
+    )
+    committed: Mapped[Decimal] = mapped_column(
+        MoneyType(), nullable=False, default=Decimal("0")
+    )
+    actual: Mapped[Decimal] = mapped_column(
+        MoneyType(), nullable=False, default=Decimal("0")
+    )
+    forecast_final: Mapped[Decimal] = mapped_column(
+        MoneyType(), nullable=False, default=Decimal("0")
+    )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

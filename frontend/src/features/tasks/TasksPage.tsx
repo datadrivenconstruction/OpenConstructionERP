@@ -571,19 +571,31 @@ const TaskCard = React.memo(function TaskCard({
       {/* Bottom row: assignee + due date + actions */}
       <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-border-light/60">
         <div className="flex items-center gap-2 min-w-0">
-          {/* Assignee */}
-          {task.assigned_to_name ? (
-            <div className="flex items-center gap-1 min-w-0">
-              <div className="h-4 w-4 rounded-full bg-oe-blue/10 text-oe-blue flex items-center justify-center text-[8px] font-bold shrink-0">
-                {task.assigned_to_name.charAt(0).toUpperCase()}
+          {/* Assignee — prefer the resolved user name, fall back to the
+              free-text name stored in metadata.assignee_name so typed names
+              like "John Doe" don't vanish after save. */}
+          {(() => {
+            const meta = (task.metadata ?? {}) as Record<string, unknown>;
+            const metaName = typeof meta.assignee_name === 'string' ? meta.assignee_name : '';
+            const display = task.assigned_to_name || metaName;
+            if (!display) {
+              return (
+                <span className="text-[10px] text-content-quaternary flex items-center gap-0.5">
+                  <User size={9} />
+                </span>
+              );
+            }
+            return (
+              <div className="flex items-center gap-1 min-w-0">
+                <div className="h-4 w-4 rounded-full bg-oe-blue/10 text-oe-blue flex items-center justify-center text-[8px] font-bold shrink-0">
+                  {display.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-[10px] text-content-tertiary truncate max-w-[70px]">
+                  {display}
+                </span>
               </div>
-              <span className="text-[10px] text-content-tertiary truncate max-w-[70px]">{task.assigned_to_name}</span>
-            </div>
-          ) : (
-            <span className="text-[10px] text-content-quaternary flex items-center gap-0.5">
-              <User size={9} />
-            </span>
-          )}
+            );
+          })()}
           {/* Due date */}
           {task.due_date && (
             <div
@@ -966,13 +978,16 @@ export function TasksPage() {
         addToast({ type: 'error', title: t('tasks.no_project_error', { defaultValue: 'No project selected' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
         return;
       }
+      const assignee = formData.assigned_to.trim();
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assignee);
       createMut.mutate({
         project_id: projectId,
         title: formData.title,
         description: formData.description || undefined,
         task_type: formData.task_type,
         priority: formData.priority,
-        responsible_id: formData.assigned_to || undefined,
+        responsible_id: isUuid ? assignee : undefined,
+        metadata: assignee && !isUuid ? { assignee_name: assignee } : undefined,
         due_date: formData.due_date || undefined,
       });
     },
@@ -980,15 +995,18 @@ export function TasksPage() {
   );
 
   const editMut = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: TaskFormData }) =>
-      updateTask(id, {
+    mutationFn: ({ id, data }: { id: string; data: TaskFormData }) => {
+      const assignee = data.assigned_to.trim();
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(assignee);
+      return updateTask(id, {
         title: data.title,
         description: data.description || undefined,
         task_type: data.task_type,
         priority: data.priority,
-        assigned_to: data.assigned_to || null,
+        assigned_to: isUuid ? assignee : null,
         due_date: data.due_date || null,
-      }),
+      });
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       setShowAddModal(false);
@@ -1196,7 +1214,7 @@ export function TasksPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           {/* Project selector (if not in route) */}
           {!routeProjectId && projects.length > 0 && (
             <select
@@ -1677,7 +1695,12 @@ export function TasksPage() {
             description: editingTask.description || '',
             task_type: editingTask.task_type,
             priority: editingTask.priority,
-            assigned_to: editingTask.assigned_to_name || '',
+            assigned_to:
+              editingTask.assigned_to_name ||
+              (typeof (editingTask.metadata as Record<string, unknown> | undefined)?.assignee_name === 'string'
+                ? ((editingTask.metadata as Record<string, unknown>).assignee_name as string)
+                : '') ||
+              '',
             due_date: editingTask.due_date || '',
           } : (typeFilter
               // When the create dialog opens while a type tab is active

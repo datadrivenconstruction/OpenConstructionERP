@@ -21,6 +21,7 @@
  * project use.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapPin, Loader2 } from 'lucide-react';
 import L from 'leaflet';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
@@ -156,6 +157,7 @@ export function ProjectMap({
   label,
   onResolved,
 }: ProjectMapProps) {
+  const { t } = useTranslation();
   const hasExplicitCoords =
     typeof lat === 'number' && typeof lng === 'number' && !Number.isNaN(lat) && !Number.isNaN(lng);
 
@@ -230,7 +232,9 @@ export function ProjectMap({
     return shell(
       <div className="absolute inset-0 flex items-center justify-center gap-2 text-content-tertiary">
         <Loader2 size={14} className="animate-spin" />
-        <span className="text-[11px] font-medium">Locating…</span>
+        <span className="text-[11px] font-medium">
+          {t('projects.map_locating', { defaultValue: 'Locating…' })}
+        </span>
       </div>,
     );
   }
@@ -239,7 +243,9 @@ export function ProjectMap({
     return shell(
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-content-quaternary">
         <MapPin size={isCard ? 18 : 24} strokeWidth={1.5} />
-        <span className="text-[10px] font-medium">{query || 'No location set'}</span>
+        <span className="text-[10px] font-medium">
+          {query || t('projects.map_no_location', { defaultValue: 'No location set' })}
+        </span>
       </div>,
     );
   }

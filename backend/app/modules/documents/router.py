@@ -28,6 +28,7 @@ from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query
 from fastapi.responses import FileResponse
 
 from app.core.bulk_ops import BulkDeleteRequest
+from app.core.rate_limiter import upload_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.documents.schemas import (
     DocumentBIMLinkCreate,
@@ -46,6 +47,7 @@ from app.modules.documents.schemas import (
 from app.modules.documents.service import (
     MAX_FILE_SIZE,
     PHOTO_BASE,
+    PHOTO_THUMB_BASE,
     UPLOAD_BASE,
     DocumentBIMLinkService,
     DocumentService,
@@ -121,6 +123,13 @@ async def upload_document(
 ) -> DocumentResponse:
     """Upload a document to a project."""
     await verify_project_access(project_id, user_id, session)
+    allowed, _ = upload_limiter.is_allowed(str(user_id))
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many uploads. Please wait a moment and try again.",
+            headers={"Retry-After": "60"},
+        )
     # Early rejection based on Content-Length header (before reading body)
     if content_length is not None and content_length > MAX_FILE_SIZE:
         raise HTTPException(
@@ -199,6 +208,7 @@ def _photo_to_response(photo: object) -> PhotoResponse:
         created_by=photo.created_by,  # type: ignore[attr-defined]
         created_at=photo.created_at,  # type: ignore[attr-defined]
         updated_at=photo.updated_at,  # type: ignore[attr-defined]
+        has_thumbnail=bool(getattr(photo, "thumbnail_path", None)),
     )
 
 
@@ -398,6 +408,78 @@ async def serve_photo_file(
         path=str(file_path),
         filename=photo.filename,
         media_type=media_type,
+    )
+
+
+# ── Serve photo thumbnail ──────────────────────────────────────────────
+
+
+@router.get("/photos/{photo_id}/thumb/")
+async def serve_photo_thumbnail(
+    photo_id: uuid.UUID,
+    service: PhotoService = Depends(_get_photo_service),
+) -> FileResponse:
+    """Serve the generated thumbnail for a photo.
+
+    Falls back to the full-resolution file when no thumbnail was generated
+    (legacy photos uploaded before the thumbnail pipeline, or images for
+    which Pillow couldn't produce a thumb). The fallback keeps the gallery
+    grid functional rather than showing broken-image tiles.
+    """
+    photo = await service.get_photo(photo_id)
+    thumb_path_str = getattr(photo, "thumbnail_path", None)
+
+    thumb_base = Path(PHOTO_THUMB_BASE).resolve()
+    photo_base = Path(PHOTO_BASE).resolve()
+
+    if thumb_path_str:
+        thumb_path = Path(thumb_path_str).resolve()
+        try:
+            # Only allow paths that sit under the thumb-root — defence against
+            # symlink escape + stored-path tampering.
+            thumb_path.relative_to(thumb_base)
+            if thumb_path.exists() and thumb_path.is_file() and not thumb_path.is_symlink():
+                return FileResponse(
+                    path=str(thumb_path),
+                    media_type="image/jpeg",
+                    headers={"Cache-Control": "public, max-age=86400"},
+                )
+        except ValueError:
+            logger.warning(
+                "Photo %s has thumbnail_path outside thumb base — ignoring",
+                photo_id,
+            )
+
+    # Fallback: serve the full file so the gallery never breaks.
+    file_path = Path(photo.file_path).resolve()
+    try:
+        file_path.relative_to(photo_base)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
+        )
+    if file_path.is_symlink() or not file_path.exists() or not file_path.is_file():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Photo file not found on disk",
+        )
+    ext = file_path.suffix.lower()
+    media_types = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".webp": "image/webp",
+        ".heic": "image/heic",
+        ".heif": "image/heif",
+        ".tiff": "image/tiff",
+        ".tif": "image/tiff",
+    }
+    media_type = media_types.get(ext, "image/jpeg")
+    return FileResponse(
+        path=str(file_path),
+        media_type=media_type,
+        headers={"Cache-Control": "public, max-age=3600"},
     )
 
 

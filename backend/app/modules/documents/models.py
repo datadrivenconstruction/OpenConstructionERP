@@ -116,6 +116,7 @@ class ProjectPhoto(Base):
     document_id: Mapped[str | None] = mapped_column(String(36), nullable=True, default=None)
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
     file_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    thumbnail_path: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
     caption: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
     gps_lat: Mapped[float | None] = mapped_column(Float, nullable=True, default=None)
     gps_lon: Mapped[float | None] = mapped_column(Float, nullable=True, default=None)

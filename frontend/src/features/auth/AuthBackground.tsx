@@ -135,7 +135,7 @@ function DashboardGrid() {
         <div className="oce-dash-cell oce-dash-wide">
           <svg viewBox="0 0 420 140" fill="none">
             <rect x="4" y="4" width="412" height="132" rx="6" fill="none" stroke={c} strokeWidth=".7" />
-            <text x="16" y="22" fontSize="8" fill={c} opacity=".6" fontWeight="700" letterSpacing=".04em">COST PER TRADE (DIN 276)</text>
+            <text x="16" y="22" fontSize="8" fill={c} opacity=".6" fontWeight="700" letterSpacing=".04em">COST PER TRADE</text>
             {/* Bars */}
             <rect x="28"  y="100" width="30" height="28" rx="3" fill={c} opacity=".3" />
             <rect x="68"  y="72"  width="30" height="56" rx="3" fill={c} opacity=".4" />

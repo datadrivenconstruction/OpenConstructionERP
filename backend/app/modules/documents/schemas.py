@@ -133,6 +133,10 @@ class PhotoResponse(BaseModel):
     created_by: str = ""
     created_at: datetime
     updated_at: datetime
+    # True when a server-side thumbnail exists for this photo. Clients should
+    # prefer the thumb endpoint for grid/timeline renders and only fall back
+    # to the full file when this is false or the client needs the original.
+    has_thumbnail: bool = False
 
 
 class PhotoTimelineGroup(BaseModel):

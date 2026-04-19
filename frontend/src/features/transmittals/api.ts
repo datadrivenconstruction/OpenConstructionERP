@@ -4,7 +4,7 @@
  * All endpoints are prefixed with /v1/transmittals/.
  */
 
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiDelete, apiGet, apiPatch, apiPost } from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -78,19 +78,63 @@ export interface CreateTransmittalPayload {
 
 /* ── API Functions ─────────────────────────────────────────────────────── */
 
+// The backend speaks `purpose_code` / `response_due_date` / `is_locked`;
+// the UI shapes expect `purpose` / `response_due` / `locked`. Normalise
+// here so consumers never see untranslated i18n keys like
+// `transmittals.purpose_undefined`.
+type TransmittalWire = Omit<Transmittal, 'purpose' | 'response_due' | 'locked'> & {
+  purpose?: TransmittalPurpose;
+  purpose_code?: TransmittalPurpose;
+  response_due?: string | null;
+  response_due_date?: string | null;
+  locked?: boolean;
+  is_locked?: boolean;
+};
+
+function normaliseTransmittal(t: TransmittalWire): Transmittal {
+  const purpose = (t.purpose ?? t.purpose_code ?? 'for_information') as TransmittalPurpose;
+  const response_due = t.response_due ?? t.response_due_date ?? null;
+  const locked = t.locked ?? t.is_locked ?? false;
+  return { ...t, purpose, response_due, locked } as Transmittal;
+}
+
 export async function fetchTransmittals(filters?: TransmittalFilters): Promise<Transmittal[]> {
   const params = new URLSearchParams();
   if (filters?.project_id) params.set('project_id', filters.project_id);
   if (filters?.status) params.set('status', filters.status);
   const qs = params.toString();
-  const res = await apiGet<Transmittal[] | { items: Transmittal[] }>(`/v1/transmittals/${qs ? `?${qs}` : ''}`);
-  return Array.isArray(res) ? res : res.items ?? [];
+  const res = await apiGet<TransmittalWire[] | { items: TransmittalWire[] }>(
+    `/v1/transmittals/${qs ? `?${qs}` : ''}`,
+  );
+  const items = Array.isArray(res) ? res : res.items ?? [];
+  return items.map(normaliseTransmittal);
 }
 
 export async function createTransmittal(data: CreateTransmittalPayload): Promise<Transmittal> {
-  return apiPost<Transmittal>('/v1/transmittals/', data);
+  const wire = await apiPost<TransmittalWire>('/v1/transmittals/', data);
+  return normaliseTransmittal(wire);
 }
 
 export async function issueTransmittal(id: string): Promise<Transmittal> {
-  return apiPost<Transmittal>(`/v1/transmittals/${id}/issue/`);
+  const wire = await apiPost<TransmittalWire>(`/v1/transmittals/${id}/issue/`);
+  return normaliseTransmittal(wire);
+}
+
+export interface UpdateTransmittalPayload {
+  subject?: string;
+  purpose_code?: TransmittalPurpose;
+  cover_note?: string | null;
+  response_due_date?: string | null;
+}
+
+export async function updateTransmittal(
+  id: string,
+  data: UpdateTransmittalPayload,
+): Promise<Transmittal> {
+  const wire = await apiPatch<TransmittalWire>(`/v1/transmittals/${id}`, data);
+  return normaliseTransmittal(wire);
+}
+
+export async function deleteTransmittal(id: string): Promise<void> {
+  await apiDelete(`/v1/transmittals/${id}`);
 }

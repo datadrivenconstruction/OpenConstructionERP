@@ -185,3 +185,18 @@ async def reject_request(
     notes = data.decision_notes if data else None
     request = await service.reject_request(request_id, user_id=user_id, decision_notes=notes)
     return ApprovalRequestResponse.model_validate(request)
+
+
+@router.post("/requests/{request_id}/cancel/", response_model=ApprovalRequestResponse)
+async def cancel_request(
+    request_id: uuid.UUID,
+    user_id: CurrentUserId = "",  # type: ignore[assignment]
+    service: WorkflowService = Depends(_get_service),
+) -> ApprovalRequestResponse:
+    """Withdraw a pending approval request.
+
+    Only the original requester (or an admin) may cancel — closes the
+    "once submitted, stuck forever" gap surfaced by QA.
+    """
+    request = await service.cancel_request(request_id, user_id=user_id)
+    return ApprovalRequestResponse.model_validate(request)

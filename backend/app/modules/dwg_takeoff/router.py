@@ -39,6 +39,7 @@ from app.modules.dwg_takeoff.schemas import (
     DwgDrawingVersionResponse,
     DwgEntityGroupCreate,
     DwgEntityGroupResponse,
+    DwgDrawingScaleUpdate,
     DwgLayerVisibilityUpdate,
     DwgOfflineReadinessResponse,
 )
@@ -72,6 +73,8 @@ def _drawing_to_response(
         sheet_number=item.sheet_number,  # type: ignore[attr-defined]
         thumbnail_key=item.thumbnail_key,  # type: ignore[attr-defined]
         error_message=item.error_message,  # type: ignore[attr-defined]
+        scale_denominator=float(getattr(item, "scale_denominator", 1.0) or 1.0),
+        scale_mode=str(getattr(item, "scale_mode", "preset") or "preset"),
         metadata=getattr(item, "metadata_", {}),  # type: ignore[attr-defined]
         created_by=item.created_by,  # type: ignore[attr-defined]
         created_at=item.created_at,  # type: ignore[attr-defined]
@@ -112,6 +115,7 @@ def _annotation_to_response(item: object) -> DwgAnnotationResponse:
         line_width=item.line_width,  # type: ignore[attr-defined]
         measurement_value=item.measurement_value,  # type: ignore[attr-defined]
         measurement_unit=item.measurement_unit,  # type: ignore[attr-defined]
+        scale_override=getattr(item, "scale_override", None),
         linked_boq_position_id=item.linked_boq_position_id,  # type: ignore[attr-defined]
         linked_task_id=item.linked_task_id,  # type: ignore[attr-defined]
         linked_punch_item_id=item.linked_punch_item_id,  # type: ignore[attr-defined]
@@ -267,6 +271,24 @@ async def get_thumbnail(
 
 
 # ── Layer Visibility ────────────────────────────────────────────────────────
+
+
+@router.patch("/drawings/{drawing_id}/scale/", response_model=DwgDrawingResponse)
+async def update_drawing_scale(
+    drawing_id: uuid.UUID,
+    data: DwgDrawingScaleUpdate,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("dwg_takeoff.create")),
+    service: DwgTakeoffService = Depends(_get_service),
+) -> DwgDrawingResponse:
+    """Persist the drawing's scale denominator + active scale mode."""
+    drawing = await service.update_drawing_scale(
+        drawing_id,
+        scale_denominator=data.scale_denominator,
+        scale_mode=data.scale_mode,
+    )
+    version = await service.get_latest_version(drawing_id)
+    return _drawing_to_response(drawing, version)
 
 
 @router.patch("/drawings/{drawing_id}/layers", response_model=DwgDrawingVersionResponse)

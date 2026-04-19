@@ -396,36 +396,36 @@ export function ProjectIntelligencePage() {
         <ProjectKPIHero projectId={activeProjectId} />
       </div>
 
-      {/* Section 2 — Gaps + Analytics */}
+      {/* Section 2 — Readiness + Critical gaps (side-by-side, equal height) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pb-4">
-        {/* Left column — Score ring + Gaps */}
-        <div className="lg:col-span-4 space-y-4">
-          <div className="bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-4">
-            <h3 className="text-xs font-semibold text-content-primary mb-2">
-              {t('project_intelligence.readiness_title', {
-                defaultValue: 'Estimation readiness',
-              })}
-            </h3>
-            <div
-              className="flex justify-center"
-              title={t('project_intelligence.score_tooltip_v191', {
-                defaultValue:
-                  'Score weighting (RFC 25): BOQ 40%, Cost Model 30%, Validation 20%, Risk 10%.',
-              })}
-            >
-              <ScoreRing
-                score={score.overall}
-                grade={score.overall_grade}
-                gradeColor={gradeColor}
-                size={140}
-                strokeWidth={9}
-              />
-            </div>
+        {/* Readiness ring card (compact, fixed width) */}
+        <div className="lg:col-span-3 bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-4 flex flex-col">
+          <h3 className="text-xs font-semibold text-content-primary mb-2">
+            {t('project_intelligence.readiness_title', {
+              defaultValue: 'Estimation readiness',
+            })}
+          </h3>
+          <div
+            className="flex-1 flex items-center justify-center"
+            title={t('project_intelligence.score_tooltip_v191', {
+              defaultValue:
+                'Score weighting (RFC 25): BOQ 40%, Cost Model 30%, Validation 20%, Risk 10%.',
+            })}
+          >
+            <ScoreRing
+              score={score.overall}
+              grade={score.overall_grade}
+              gradeColor={gradeColor}
+              size={140}
+              strokeWidth={9}
+            />
           </div>
+        </div>
 
-          {/* Critical gaps card — with $ impact enrichment */}
-          {score.critical_gaps.length > 0 && (
-            <div className="bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-4">
+        {/* Critical gaps card — fills remaining width */}
+        <div className="lg:col-span-9 bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-4 flex flex-col">
+          {score.critical_gaps.length > 0 ? (
+            <>
               <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2 mb-2">
                 <AlertTriangle size={15} className="text-red-400" />
                 {t('project_intelligence.critical_gaps', {
@@ -443,7 +443,7 @@ export function ProjectIntelligencePage() {
                   {dollarImpact}
                 </p>
               )}
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {displayGaps.map((gap) => (
                   <GapCard
                     key={gap.id}
@@ -458,31 +458,29 @@ export function ProjectIntelligencePage() {
                     actionLabel={actions.find((a) => a.id === gap.action_id)?.label}
                   />
                 ))}
-                {hasMoreGaps && (
-                  <button
-                    onClick={() => setShowAllGaps(true)}
-                    className="w-full text-xs text-content-tertiary hover:text-content-secondary py-1.5 flex items-center justify-center gap-1 transition-colors"
-                  >
-                    <ChevronDown size={12} />
-                    {t('project_intelligence.show_more_gaps', {
-                      defaultValue: '{{count}} more',
-                      count: score.critical_gaps.length - 5,
-                    })}
-                  </button>
-                )}
               </div>
-            </div>
-          )}
-
-          {score.critical_gaps.length === 0 && (
-            <div className="bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-4 text-center">
-              <CheckCircle2 size={22} className="mx-auto text-green-400 mb-2" />
+              {hasMoreGaps && (
+                <button
+                  onClick={() => setShowAllGaps(true)}
+                  className="mt-2 w-full text-xs text-content-tertiary hover:text-content-secondary py-1.5 flex items-center justify-center gap-1 transition-colors"
+                >
+                  <ChevronDown size={12} />
+                  {t('project_intelligence.show_more_gaps', {
+                    defaultValue: '{{count}} more',
+                    count: score.critical_gaps.length - 5,
+                  })}
+                </button>
+              )}
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-center">
+              <CheckCircle2 size={28} className="text-green-400 mb-2" />
               <p className="text-sm font-medium text-content-primary">
                 {t('project_intelligence.no_gaps_title', {
                   defaultValue: 'No critical gaps',
                 })}
               </p>
-              <p className="text-2xs text-content-tertiary mt-1">
+              <p className="text-2xs text-content-tertiary mt-1 max-w-md">
                 {t('project_intelligence.no_gaps_desc', {
                   defaultValue:
                     'Your project has no critical issues. Keep refining to tighten variance.',
@@ -491,11 +489,11 @@ export function ProjectIntelligencePage() {
             </div>
           )}
         </div>
+      </div>
 
-        {/* Right column — Analytics grid */}
-        <div className="lg:col-span-8">
-          <ProjectAnalyticsGrid projectId={activeProjectId} />
-        </div>
+      {/* Section 2b — Analytics grid (full width) */}
+      <div className="pb-4">
+        <ProjectAnalyticsGrid projectId={activeProjectId} />
       </div>
 
       {/* Section 3 — Domain detail tabs (reduced to 4) */}

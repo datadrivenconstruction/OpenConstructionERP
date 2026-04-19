@@ -11,7 +11,23 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+def _sanitise_free_text(value: str | None) -> str | None:
+    """Strip XSS-dangerous HTML from free-text BOQ fields (BUG-326/389).
+
+    BOQ names and descriptions are rendered in multiple places in the
+    frontend (BOQ editor, reports, exports), some of which historically
+    used ``dangerouslySetInnerHTML``. Scrubbing at the schema layer means
+    the database never stores a ``<script>`` payload, regardless of
+    which handler accepted the write.
+    """
+    if value is None:
+        return value
+    from app.core.sanitize import strip_dangerous_html
+
+    return strip_dangerous_html(value)
 
 # ── BOQ schemas ───────────────────────────────────────────────────────────────
 
@@ -48,6 +64,11 @@ class BOQCreate(BaseModel):
         examples=["2026-Q2"],
     )
 
+    @field_validator("name", "description", mode="after")
+    @classmethod
+    def _sanitise(cls, v: str) -> str:
+        return _sanitise_free_text(v) or ""
+
 
 class BOQUpdate(BaseModel):
     """Partial update for a BOQ."""
@@ -60,6 +81,11 @@ class BOQUpdate(BaseModel):
     metadata: dict[str, Any] | None = None
     estimate_type: str | None = Field(default=None, max_length=50)
     base_date: str | None = Field(default=None, max_length=20)
+
+    @field_validator("name", "description", mode="after")
+    @classmethod
+    def _sanitise(cls, v: str | None) -> str | None:
+        return _sanitise_free_text(v)
 
 
 class BOQResponse(BaseModel):

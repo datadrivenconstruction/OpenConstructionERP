@@ -165,11 +165,27 @@ class UserService:
                 detail="Email already registered",
             )
 
-        # First user becomes admin; subsequent users are always 'editor'
-        # regardless of what the client sends, to prevent privilege escalation.
-        # Only admins can promote users via the PATCH /{user_id} endpoint.
+        # First user becomes admin (bootstrap path); subsequent self-registered
+        # users default to `viewer` — a near-zero-privilege role. Historically
+        # this defaulted to `editor`, which granted 119 permissions including
+        # `costs.create`, `boq.delete`, `schedule.delete` to anyone who could
+        # hit the public registration endpoint (BUG-327/386). Admins must
+        # explicitly promote via PATCH /{user_id}.
+        #
+        # If the tenant wants open self-onboarding to continue creating
+        # editors (e.g. internal-only deployment behind a VPN), they can
+        # override this via the ``OE_DEFAULT_REGISTRATION_ROLE`` env var.
+        from app.config import get_settings as _get_settings
+
+        _s = _get_settings()
+        default_role = getattr(_s, "default_registration_role", "viewer") or "viewer"
+        if default_role not in {"viewer", "editor", "manager"}:
+            # Admin is intentionally excluded — nobody should self-register
+            # as admin no matter what config says.
+            default_role = "viewer"
+
         user_count = await self.user_repo.count()
-        role = "admin" if user_count == 0 else "editor"
+        role = "admin" if user_count == 0 else default_role
 
         # Build registration metadata from form fields + auto-collected data
         reg_meta: dict[str, object] = {}
@@ -244,15 +260,32 @@ class UserService:
         user_email = user.email
         user_role = user.role
         user_full_name = user.full_name
+        prior_last_login = user.last_login_at
 
-        # Update last login
-        await self.user_repo.update_fields(
-            user_id,
-            last_login_at=datetime.now(UTC),
-        )
+        # Throttle last_login_at writes — if the previous login was <60s ago
+        # we skip the UPDATE. Avoids a race against the UserActivity INSERT
+        # that the session-middleware fires on the same request (BUG-161),
+        # and prevents burst-login from hammering the users table.
+        #
+        # SQLite strips the tzinfo on DateTime(timezone=True) columns so we
+        # coerce both sides to naive UTC before subtracting — otherwise
+        # Python raises ``can't subtract offset-naive and offset-aware``.
+        now = datetime.now(UTC)
+        skip_write = False
+        if prior_last_login is not None:
+            prior = prior_last_login
+            if prior.tzinfo is None:
+                prior = prior.replace(tzinfo=UTC)
+            skip_write = (now - prior).total_seconds() < 60.0
 
-        # Re-fetch user to avoid MissingGreenlet on expired attributes
-        user = await self.user_repo.get_by_id(user_id)
+        if not skip_write:
+            # Update last login
+            await self.user_repo.update_fields(
+                user_id,
+                last_login_at=now,
+            )
+            # Re-fetch user to avoid MissingGreenlet on expired attributes
+            user = await self.user_repo.get_by_id(user_id)
 
         access_token = create_access_token(user, self.settings)
         refresh_token = create_refresh_token(user, self.settings)
@@ -348,7 +381,13 @@ class UserService:
         # TODO: Send token via email service.  The token is never exposed in
         # the HTTP response.  In development the token is logged at DEBUG so
         # developers can complete the reset flow without an email service.
-        if self.settings.debug:
+        #
+        # BUG-345: the Settings field is ``app_debug``, not ``debug`` — the
+        # old reference raised AttributeError only when a real user existed,
+        # which made this endpoint a user-enumeration oracle (200 for
+        # unknown, 500 for known). Keep the attribute spelling in sync with
+        # ``app.config.Settings``.
+        if self.settings.app_debug:
             logger.debug("Reset token for %s (dev-only log): %s", user.email, token)
 
         return ForgotPasswordResponse(message=message)

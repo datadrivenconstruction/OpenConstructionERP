@@ -53,6 +53,54 @@ export interface CreateNCRPayload {
   root_cause?: string;
 }
 
+/* -- Wire <-> UI normaliser ----------------------------------------------- */
+
+type NCRWire = Omit<
+  NCR,
+  | 'location'
+  | 'reported_by'
+  | 'cost_impact'
+  | 'closed_at'
+  | 'linked_inspection_number'
+  | 'ncr_number'
+> & {
+  location?: string;
+  location_description?: string | null;
+  reported_by?: string | null;
+  created_by?: string | null;
+  cost_impact?: number | string | null;
+  closed_at?: string | null;
+  linked_inspection_number?: number | string | null;
+  ncr_number: string | number;
+};
+
+function parseCostImpact(v: unknown): number | null {
+  if (v == null) return null;
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  const n = Number.parseFloat(String(v));
+  return Number.isFinite(n) ? n : null;
+}
+
+function extractNumericSuffix(v: unknown): number | null {
+  if (v == null) return null;
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  const match = String(v).match(/\d+/);
+  return match ? Number.parseInt(match[0], 10) : null;
+}
+
+function normaliseNCR(raw: NCRWire): NCR {
+  const ncr_number_num = extractNumericSuffix(raw.ncr_number) ?? 0;
+  return {
+    ...raw,
+    ncr_number: ncr_number_num,
+    location: raw.location ?? raw.location_description ?? '',
+    reported_by: raw.reported_by ?? raw.created_by ?? null,
+    cost_impact: parseCostImpact(raw.cost_impact),
+    closed_at: raw.closed_at ?? null,
+    linked_inspection_number: extractNumericSuffix(raw.linked_inspection_number),
+  } as NCR;
+}
+
 /* -- API Functions --------------------------------------------------------- */
 
 export async function fetchNCRs(filters?: NCRFilters): Promise<NCR[]> {
@@ -61,13 +109,16 @@ export async function fetchNCRs(filters?: NCRFilters): Promise<NCR[]> {
   if (filters?.status) params.set('status', filters.status);
   if (filters?.severity) params.set('severity', filters.severity);
   const qs = params.toString();
-  return apiGet<NCR[]>(`/v1/ncr/${qs ? `?${qs}` : ''}`);
+  const rows = await apiGet<NCRWire[]>(`/v1/ncr/${qs ? `?${qs}` : ''}`);
+  return rows.map(normaliseNCR);
 }
 
 export async function createNCR(data: CreateNCRPayload): Promise<NCR> {
-  return apiPost<NCR>('/v1/ncr/', data);
+  const row = await apiPost<NCRWire>('/v1/ncr/', data);
+  return normaliseNCR(row);
 }
 
 export async function closeNCR(id: string): Promise<NCR> {
-  return apiPost<NCR>(`/v1/ncr/${id}/close/`);
+  const row = await apiPost<NCRWire>(`/v1/ncr/${id}/close/`);
+  return normaliseNCR(row);
 }

@@ -53,7 +53,7 @@ function buildHeaders(extra?: HeadersInit): Headers {
  * Returns `null` when nothing useful can be extracted — callers should fall
  * back to a status-based message.
  */
-function extractErrorMessageFromBody(body: unknown): string | null {
+export function extractErrorMessageFromBody(body: unknown): string | null {
   if (body === null || body === undefined) return null;
 
   // Plain text body — accept short strings only (HTML error pages can be huge)
