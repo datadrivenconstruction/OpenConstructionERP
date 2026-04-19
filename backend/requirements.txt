@@ -180,8 +180,8 @@ python-multipart==0.0.26
 python-pptx==1.0.2
 pytz==2025.2
 PyWavelets==1.9.0
-pywin32==311
-pywin32-ctypes==0.2.3
+pywin32==311; sys_platform == 'win32'
+pywin32-ctypes==0.2.3; sys_platform == 'win32'
 PyYAML==6.0.3
 qdrant-client==1.17.0
 qrcode==8.2
