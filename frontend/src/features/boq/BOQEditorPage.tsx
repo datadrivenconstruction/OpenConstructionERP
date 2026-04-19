@@ -2842,7 +2842,7 @@ export function BOQEditorPage() {
             <p className="text-xs text-content-secondary leading-relaxed mb-4">
               {t('boq.gaeb_export_desc', {
                 defaultValue:
-                  'This will export your BOQ as GAEB XML 3.3 format, compatible with German tender workflows (DIN 276).',
+                  'This will export your BOQ as GAEB XML 3.3 format, compatible with standard tender workflows.',
               })}
             </p>
 

@@ -125,6 +125,7 @@ class POResponse(BaseModel):
     id: UUID
     project_id: UUID
     vendor_contact_id: str | None = None
+    vendor_name: str | None = None
     po_number: str
     po_type: str = "standard"
     issue_date: str | None = None

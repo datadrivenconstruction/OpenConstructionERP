@@ -97,6 +97,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'costs.title', to: '/costs', icon: Database, tourId: 'costs' },
       { labelKey: 'nav.assemblies', to: '/assemblies', icon: Layers },
       { labelKey: 'catalog.title', to: '/catalog', icon: Boxes },
+      { labelKey: 'nav.quantity_rules', to: '/bim/rules', icon: ClipboardCheck, badge: 'BETA' },
     ],
   },
   {
@@ -108,7 +109,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.dwg_takeoff', to: '/dwg-takeoff', icon: PencilRuler, badge: 'BETA' },
       { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties },
       { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box, badge: 'BETA' },
-      { labelKey: 'nav.bim_rules', to: '/bim/rules', icon: SlidersHorizontal, badge: 'BETA' },
+      { labelKey: 'nav.bim_rules', to: '/bim/rules?mode=requirements', icon: SlidersHorizontal, badge: 'BETA' },
     ],
   },
   {
@@ -369,7 +370,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         <div className="px-3 pb-2 text-center">
           <span className="text-2xs text-content-quaternary/50">v{APP_VERSION}</span>
           <span className="text-2xs text-content-quaternary/30 mx-1">·</span>
-          <a href="/api/source" target="_blank" className="text-2xs text-content-quaternary/40 hover:text-content-quaternary transition-colors">
+          <a href="/api/source" target="_blank" rel="noopener noreferrer" className="text-2xs text-content-quaternary/40 hover:text-content-quaternary transition-colors">
             AGPL-3.0
           </a>
         </div>

@@ -1,0 +1,169 @@
+/* ═══════════════════════════════════════════════════════════════════
+   BASE — reset, typography, utilities
+   ═══════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--ff-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--ink-1);
+  background: var(--bg-0);
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+  /* subtle grain, baked in */
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(59, 130, 246, 0.08), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 20% 100%, rgba(139, 92, 246, 0.06), transparent 55%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+}
+
+img, svg, video, canvas { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+ul, ol { list-style: none; }
+
+::selection { background: var(--accent); color: #fff; }
+
+/* ——————— typography utilities ——————— */
+h1, h2, h3, h4, h5 {
+  font-family: var(--ff-display);
+  font-weight: 600;
+  line-height: var(--lh-heading);
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink-0);
+}
+
+.display-hero  { font-size: var(--fs-hero); font-weight: 500; line-height: var(--lh-tight); letter-spacing: -0.05em; }
+.display-h1    { font-size: var(--fs-h1);   font-weight: 550; line-height: var(--lh-tight); letter-spacing: -0.045em; }
+.display-h2    { font-size: var(--fs-h2);   font-weight: 550; letter-spacing: var(--tracking-tight); }
+.display-h3    { font-size: var(--fs-h3);   font-weight: 600; letter-spacing: var(--tracking-snug); }
+
+.serif { font-family: var(--ff-serif); font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+.mono  { font-family: var(--ff-mono); letter-spacing: 0; }
+
+.lead { font-size: var(--fs-lead); color: var(--ink-2); line-height: 1.5; font-weight: 400; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--ff-mono);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+.eyebrow::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.gt-brand { background: var(--grad-brand); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.gt-cool  { background: var(--grad-cool);  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+
+/* ——————— layout ——————— */
+.ctn        { width: 100%; max-width: var(--mw); margin: 0 auto; padding: 0 var(--gutter); }
+.ctn-narrow { width: 100%; max-width: var(--mw-narrow); margin: 0 auto; padding: 0 var(--gutter); }
+.ctn-wide   { width: 100%; max-width: var(--mw-wide); margin: 0 auto; padding: 0 var(--gutter); }
+
+.section { padding: var(--spy) 0; position: relative; }
+.section-divider {
+  height: 1px; background: linear-gradient(90deg, transparent, var(--line-1), transparent);
+  max-width: var(--mw); margin: 0 auto;
+}
+
+/* ——————— buttons ——————— */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 24px;
+  border-radius: var(--r-full);
+  font-family: var(--ff-body); font-size: 14px; font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  transition: all var(--dur-base) var(--ease-out);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-primary {
+  background: var(--ink-0); color: var(--bg-0);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px rgba(255, 255, 255, 0.12);
+}
+.btn-secondary {
+  background: transparent; color: var(--ink-0);
+  border: 1px solid var(--line-2);
+  backdrop-filter: blur(10px);
+}
+.btn-secondary:hover {
+  border-color: var(--line-hi);
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  background: transparent; color: var(--ink-1);
+  padding: 10px 16px;
+}
+.btn-ghost:hover { color: var(--ink-0); }
+
+.btn svg { width: 16px; height: 16px; }
+.btn-lg { padding: 18px 32px; font-size: 15px; }
+
+/* ——————— cards ——————— */
+.card {
+  background: var(--bg-2);
+  border: 1px solid var(--line-1);
+  border-radius: var(--r-l);
+  padding: 32px;
+  transition: all var(--dur-base) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+.card:hover { border-color: var(--line-2); background: var(--bg-3); }
+
+/* ——————— reveal (base state, GSAP animates) ——————— */
+.rv { opacity: 0; transform: translateY(40px); will-change: transform, opacity; }
+.rv-fade { opacity: 0; }
+.rv-x { opacity: 0; transform: translateX(40px); }
+
+/* ——————— misc ——————— */
+.noise-overlay {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay; opacity: 0.06;
+}
+
+.glow-mesh {
+  position: absolute; inset: -20%;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.14), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.12), transparent 45%);
+  filter: blur(60px);
+  z-index: 0; pointer-events: none;
+}
+
+/* ——————— focus ——————— */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }

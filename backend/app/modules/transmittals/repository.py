@@ -146,3 +146,13 @@ class TransmittalRepository:
         )
         await self.session.execute(stmt)
         await self.session.flush()
+
+    async def delete(self, transmittal_id: uuid.UUID) -> None:
+        """Delete a transmittal and its children (recipients + items)."""
+        from sqlalchemy import delete
+
+        await self.delete_recipients(transmittal_id)
+        await self.delete_items(transmittal_id)
+        stmt = delete(Transmittal).where(Transmittal.id == transmittal_id)
+        await self.session.execute(stmt)
+        await self.session.flush()

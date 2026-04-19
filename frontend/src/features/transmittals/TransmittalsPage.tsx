@@ -15,6 +15,8 @@ import {
   Users,
   FileText,
   Info,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, DateDisplay, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -25,11 +27,14 @@ import {
   fetchTransmittals,
   createTransmittal,
   issueTransmittal,
+  updateTransmittal,
+  deleteTransmittal,
   type Transmittal,
   type TransmittalStatus,
   type TransmittalPurpose,
   type CreateTransmittalPayload,
   type CreateItemPayload,
+  type UpdateTransmittalPayload,
 } from './api';
 import {
   fetchCDEContainers,
@@ -454,9 +459,13 @@ function CreateTransmittalModal({
 const TransmittalRow = React.memo(function TransmittalRow({
   transmittal,
   onIssue,
+  onEdit,
+  onDelete,
 }: {
   transmittal: Transmittal;
   onIssue: (id: string) => void;
+  onEdit: (tr: Transmittal) => void;
+  onDelete: (tr: Transmittal) => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -650,17 +659,44 @@ const TransmittalRow = React.memo(function TransmittalRow({
           {/* Actions */}
           <div className="flex items-center gap-2 pt-1">
             {transmittal.status === 'draft' && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onIssue(transmittal.id);
-                }}
-              >
-                <Send size={13} className="mr-1" />
-                {t('transmittals.action_issue', { defaultValue: 'Issue Transmittal' })}
-              </Button>
+              <>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onIssue(transmittal.id);
+                  }}
+                >
+                  <Send size={13} className="mr-1" />
+                  {t('transmittals.action_issue', { defaultValue: 'Issue Transmittal' })}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  data-testid={`transmittal-edit-${transmittal.id}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(transmittal);
+                  }}
+                >
+                  <Pencil size={13} className="mr-1" />
+                  {t('common.edit', { defaultValue: 'Edit' })}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="text-semantic-error hover:bg-red-50 dark:hover:bg-red-950/30"
+                  data-testid={`transmittal-delete-${transmittal.id}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(transmittal);
+                  }}
+                >
+                  <Trash2 size={13} className="mr-1" />
+                  {t('common.delete', { defaultValue: 'Delete' })}
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -668,6 +704,151 @@ const TransmittalRow = React.memo(function TransmittalRow({
     </div>
   );
 });
+
+/* ── Edit Transmittal Modal ───────────────────────────────────────────── */
+
+function EditTransmittalModal({
+  transmittal,
+  onClose,
+  onSubmit,
+  isPending,
+}: {
+  transmittal: Transmittal;
+  onClose: () => void;
+  onSubmit: (data: UpdateTransmittalPayload) => void;
+  isPending: boolean;
+}) {
+  const { t } = useTranslation();
+  const [subject, setSubject] = useState(transmittal.subject);
+  const [purpose, setPurpose] = useState<TransmittalPurpose>(transmittal.purpose);
+  const [coverNote, setCoverNote] = useState(transmittal.cover_note ?? '');
+  const [responseDue, setResponseDue] = useState(transmittal.response_due ?? '');
+
+  const canSave = subject.trim().length > 0 && !isPending;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canSave) return;
+    // Only send fields that actually changed — keeps the audit trail clean.
+    const data: UpdateTransmittalPayload = {};
+    if (subject.trim() !== transmittal.subject) data.subject = subject.trim();
+    if (purpose !== transmittal.purpose) data.purpose_code = purpose;
+    if ((coverNote || null) !== (transmittal.cover_note ?? null)) {
+      data.cover_note = coverNote.trim() || null;
+    }
+    if ((responseDue || null) !== (transmittal.response_due ?? null)) {
+      data.response_due_date = responseDue || null;
+    }
+    onSubmit(data);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="w-full max-w-xl bg-surface-primary rounded-2xl shadow-xl border border-border"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="edit-transmittal-title"
+      >
+        <form onSubmit={handleSubmit}>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border-light">
+            <h2 id="edit-transmittal-title" className="text-base font-semibold text-content-primary">
+              {t('transmittals.edit_title', {
+                defaultValue: 'Edit {{number}}',
+                number: transmittal.transmittal_number,
+              })}
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1 rounded hover:bg-surface-secondary text-content-tertiary"
+              aria-label={t('common.close', { defaultValue: 'Close' })}
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="px-5 py-4 space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-content-secondary mb-1">
+                {t('transmittals.field_subject', { defaultValue: 'Subject' })}
+                <span className="text-semantic-error ml-0.5">*</span>
+              </label>
+              <input
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                data-testid="edit-transmittal-subject"
+                className="w-full px-3 py-2 text-sm bg-surface-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                required
+                maxLength={500}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-content-secondary mb-1">
+                {t('transmittals.field_purpose', { defaultValue: 'Purpose' })}
+              </label>
+              <select
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value as TransmittalPurpose)}
+                data-testid="edit-transmittal-purpose"
+                className="w-full px-3 py-2 text-sm bg-surface-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              >
+                {(Object.keys(PURPOSE_LABELS) as TransmittalPurpose[]).map((k) => (
+                  <option key={k} value={k}>
+                    {t(`transmittals.purpose_${k}`, { defaultValue: PURPOSE_LABELS[k] })}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-content-secondary mb-1">
+                {t('transmittals.field_response_due', { defaultValue: 'Response due' })}
+              </label>
+              <input
+                type="date"
+                value={responseDue}
+                onChange={(e) => setResponseDue(e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-surface-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-content-secondary mb-1">
+                {t('transmittals.field_cover_note', { defaultValue: 'Cover note' })}
+              </label>
+              <textarea
+                value={coverNote}
+                onChange={(e) => setCoverNote(e.target.value)}
+                rows={4}
+                maxLength={5000}
+                className="w-full px-3 py-2 text-sm bg-surface-secondary border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-oe-blue resize-y"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border-light bg-surface-secondary/30 rounded-b-2xl">
+            <Button type="button" variant="secondary" size="sm" onClick={onClose}>
+              {t('common.cancel', { defaultValue: 'Cancel' })}
+            </Button>
+            <Button type="submit" variant="primary" size="sm" disabled={!canSave}>
+              {isPending
+                ? t('common.saving', { defaultValue: 'Saving…' })
+                : t('common.save', { defaultValue: 'Save' })}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
@@ -686,6 +867,7 @@ export function TransmittalsPage() {
 
   // State
   const [showCreateModal, setShowCreateModal] = useState(autoCreate);
+  const [editTarget, setEditTarget] = useState<Transmittal | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<TransmittalStatus | ''>('');
   const [infoDismissed, setInfoDismissed] = useState(
@@ -788,6 +970,44 @@ export function TransmittalsPage() {
       }),
   });
 
+  const updateMut = useMutation({
+    mutationKey: ['transmittals', 'update'],
+    mutationFn: ({ id, data }: { id: string; data: UpdateTransmittalPayload }) =>
+      updateTransmittal(id, data),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ['transmittals'] });
+      setEditTarget(null);
+      addToast({
+        type: 'success',
+        title: t('transmittals.updated', { defaultValue: 'Transmittal updated' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
+
+  const deleteMut = useMutation({
+    mutationKey: ['transmittals', 'delete'],
+    mutationFn: (id: string) => deleteTransmittal(id),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ['transmittals'] });
+      addToast({
+        type: 'success',
+        title: t('transmittals.deleted', { defaultValue: 'Transmittal deleted' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
+
   const handleCreateSubmit = useCallback(
     (formData: TransmittalFormData) => {
       if (!projectId) {
@@ -825,6 +1045,29 @@ export function TransmittalsPage() {
       if (ok) issueMut.mutate(id);
     },
     [issueMut, confirm, t],
+  );
+
+  const handleEdit = useCallback((tr: Transmittal) => {
+    setEditTarget(tr);
+  }, []);
+
+  const handleDelete = useCallback(
+    async (tr: Transmittal) => {
+      const ok = await confirm({
+        title: t('transmittals.confirm_delete_title', {
+          defaultValue: 'Delete transmittal?',
+        }),
+        message: t('transmittals.confirm_delete_msg', {
+          defaultValue:
+            'This permanently removes the draft "{{subject}}". Issued transmittals cannot be deleted.',
+          subject: tr.subject,
+        }),
+        confirmLabel: t('common.delete', { defaultValue: 'Delete' }),
+        variant: 'danger',
+      });
+      if (ok) deleteMut.mutate(tr.id);
+    },
+    [deleteMut, confirm, t],
   );
 
   return (
@@ -1105,6 +1348,8 @@ export function TransmittalsPage() {
                   key={tr.id}
                   transmittal={tr}
                   onIssue={handleIssue}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
                 />
               ))}
             </Card>
@@ -1121,6 +1366,16 @@ export function TransmittalsPage() {
           initialItems={docIdsParam}
           projectId={projectId}
           initialContainerId={searchParams.get('container_id')}
+        />
+      )}
+
+      {/* Edit Modal */}
+      {editTarget && (
+        <EditTransmittalModal
+          transmittal={editTarget}
+          onClose={() => setEditTarget(null)}
+          onSubmit={(data) => updateMut.mutate({ id: editTarget.id, data })}
+          isPending={updateMut.isPending}
         />
       )}
 

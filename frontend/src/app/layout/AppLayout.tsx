@@ -7,6 +7,7 @@ import { FeedbackDialog, OnboardingTour } from '@/shared/ui';
 import { FloatingQueuePanel } from './FloatingQueuePanel';
 import { GlobalProgress } from '@/shared/ui/GlobalProgress';
 import { GlobalUploadIndicator } from '@/shared/ui/GlobalUploadIndicator';
+import { DwgUploadIndicator } from '@/shared/ui/DwgUploadIndicator';
 import { DemoBanner } from '@/shared/ui/DemoBanner';
 
 import { useSwipeGesture, useEdgeSwipe } from '@/shared/hooks/useSwipeGesture';
@@ -108,6 +109,11 @@ export function AppLayout({ title, children }: AppLayoutProps) {
 
       {/* Global BIM upload indicator — survives route changes */}
       <GlobalUploadIndicator />
+
+      {/* Global DWG upload indicator — same lifecycle as the BIM one, sits
+          in the stack above it. Both ignore the current route so a user
+          can kick off a DWG upload and immediately navigate anywhere. */}
+      <DwgUploadIndicator />
 
       {/* Floating Recent button — bottom-right corner */}
       <FloatingRecentButton />

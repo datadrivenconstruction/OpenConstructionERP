@@ -172,7 +172,25 @@ async def create_container(
     service: CDEService = Depends(_get_service),
 ) -> ContainerResponse:
     """Create a new document container."""
-    container = await service.create_container(data, user_id=user_id)
+    from fastapi import HTTPException, status as _status
+
+    logger.info(
+        "CDE create_container request: project=%s code=%s state=%s user=%s",
+        data.project_id,
+        data.container_code,
+        data.cde_state,
+        user_id,
+    )
+    try:
+        container = await service.create_container(data, user_id=user_id)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("CDE create_container failed for project=%s", data.project_id)
+        raise HTTPException(
+            status_code=_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Create failed: {exc.__class__.__name__}: {exc}",
+        ) from exc
     return _container_to_response(container)
 
 

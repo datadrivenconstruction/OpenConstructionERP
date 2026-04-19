@@ -10,8 +10,8 @@ Usage:
 """
 
 import logging
-from xml.etree import ElementTree
 
+import defusedxml.ElementTree as ElementTree
 import httpx
 
 logger = logging.getLogger(__name__)
@@ -75,7 +75,7 @@ def _parse_ecb_xml(xml_text: str) -> list[dict]:
     Returns:
         List of rate dicts ready for storage.
     """
-    root = ElementTree.fromstring(xml_text)  # noqa: S314
+    root = ElementTree.fromstring(xml_text)
     rates: list[dict] = []
 
     # Find the time-stamped Cube element

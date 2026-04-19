@@ -172,3 +172,151 @@ async def approve_submittal(
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
     submittal = await service.approve_submittal(submittal_id, approver_id=user_id)
     return _to_response(submittal)
+
+
+# ── Attachments (BUG-162) ────────────────────────────────────────────────
+#
+# Lightweight model: attachment = reference to a Document stored in the
+# existing documents module. We keep the list inside the submittal's
+# ``metadata_.attachments`` — no new table, no schema migration.
+
+
+from pydantic import BaseModel, ConfigDict, Field  # noqa: E402
+
+
+class AttachmentLinkRequest(BaseModel):
+    """Request body for linking a document as a submittal attachment."""
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="ignore")
+
+    document_id: uuid.UUID
+    label: str = Field(default="", max_length=255)
+
+
+class AttachmentResponse(BaseModel):
+    """Attachment reference returned from the API."""
+
+    document_id: uuid.UUID
+    label: str = ""
+    added_by: str = ""
+    added_at: str = ""
+
+
+@router.get(
+    "/{submittal_id}/attachments/",
+    response_model=list[AttachmentResponse],
+    dependencies=[Depends(RequirePermission("submittals.read"))],
+)
+async def list_submittal_attachments(
+    submittal_id: uuid.UUID,
+    service: SubmittalService = Depends(_get_service),
+) -> list[AttachmentResponse]:
+    """List attachments linked to a submittal."""
+    submittal = await service.get_submittal(submittal_id)
+    meta = dict(getattr(submittal, "metadata_", {}) or {})
+    attachments_raw = meta.get("attachments", [])
+    if not isinstance(attachments_raw, list):
+        return []
+    out: list[AttachmentResponse] = []
+    for a in attachments_raw:
+        if not isinstance(a, dict):
+            continue
+        try:
+            out.append(
+                AttachmentResponse(
+                    document_id=uuid.UUID(str(a.get("document_id", ""))),
+                    label=str(a.get("label", "")),
+                    added_by=str(a.get("added_by", "")),
+                    added_at=str(a.get("added_at", "")),
+                )
+            )
+        except (ValueError, TypeError):
+            continue
+    return out
+
+
+@router.post(
+    "/{submittal_id}/attachments/",
+    response_model=AttachmentResponse,
+    status_code=201,
+)
+async def add_submittal_attachment(
+    submittal_id: uuid.UUID,
+    data: AttachmentLinkRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("submittals.update")),
+    service: SubmittalService = Depends(_get_service),
+) -> AttachmentResponse:
+    """Link an existing Document to a submittal.
+
+    The Document must already exist (upload via ``POST /api/documents/``);
+    this endpoint creates the association and stores it inside the
+    submittal's metadata — no new table required.
+    """
+    from datetime import UTC, datetime
+
+    from app.modules.documents.repository import DocumentRepository
+
+    # Verify the document exists and is accessible.
+    doc_repo = DocumentRepository(session)
+    document = await doc_repo.get_by_id(data.document_id)
+    if document is None:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    submittal = await service.get_submittal(submittal_id)
+    meta = dict(getattr(submittal, "metadata_", {}) or {})
+    attachments: list[dict] = list(meta.get("attachments", []) or [])
+
+    # Reject duplicates — idempotency for retry-safe clients.
+    if any(str(a.get("document_id")) == str(data.document_id) for a in attachments if isinstance(a, dict)):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Document already attached to this submittal",
+        )
+
+    now = datetime.now(UTC).isoformat()
+    entry = {
+        "document_id": str(data.document_id),
+        "label": data.label or getattr(document, "name", ""),
+        "added_by": str(user_id) if user_id else "",
+        "added_at": now,
+    }
+    attachments.append(entry)
+    meta["attachments"] = attachments
+
+    # Persist through the repository so expire_all / refresh behaviour stays
+    # consistent with the rest of the module (same pattern as BUG-122/123).
+    await service.repo.update_fields(submittal_id, metadata_=meta)
+
+    return AttachmentResponse(**entry)
+
+
+@router.delete(
+    "/{submittal_id}/attachments/{document_id}",
+    status_code=204,
+    dependencies=[Depends(RequirePermission("submittals.update"))],
+)
+async def remove_submittal_attachment(
+    submittal_id: uuid.UUID,
+    document_id: uuid.UUID,
+    service: SubmittalService = Depends(_get_service),
+) -> None:
+    """Remove a document attachment reference from a submittal.
+
+    Does not delete the underlying Document — use
+    ``DELETE /api/documents/{id}`` for that.
+    """
+    submittal = await service.get_submittal(submittal_id)
+    meta = dict(getattr(submittal, "metadata_", {}) or {})
+    attachments: list[dict] = list(meta.get("attachments", []) or [])
+
+    new_list = [
+        a for a in attachments
+        if isinstance(a, dict) and str(a.get("document_id")) != str(document_id)
+    ]
+    if len(new_list) == len(attachments):
+        raise HTTPException(status_code=404, detail="Attachment not found")
+
+    meta["attachments"] = new_list
+    await service.repo.update_fields(submittal_id, metadata_=meta)

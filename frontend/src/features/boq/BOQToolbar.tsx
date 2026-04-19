@@ -309,7 +309,7 @@ export function BOQToolbar({
             icon={<ShieldCheck size={15} className={isValidating ? 'animate-pulse text-oe-blue' : lastValidationScore != null ? (lastValidationScore >= 80 ? 'text-emerald-500' : lastValidationScore >= 50 ? 'text-amber-500' : 'text-red-500') : ''} />}
             onClick={onValidate}
             disabled={isValidating}
-            title={t('boq.validate_info_tooltip', { defaultValue: 'Run 42 automatic quality checks against DIN 276, NRM, MasterFormat, and GAEB standards' })}
+            title={t('boq.validate_info_tooltip', { defaultValue: 'Run 42 automatic quality checks against the project\'s configured classification and quality rules' })}
           >
             <span className="hidden xl:inline">
               {isValidating
@@ -325,7 +325,7 @@ export function BOQToolbar({
           </Button>
           <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-56 rounded-lg bg-gray-900 text-white text-2xs p-2.5 shadow-lg opacity-0 invisible group-hover/validate:opacity-100 group-hover/validate:visible transition-all z-50 pointer-events-none">
             <p className="font-medium mb-1">{t('boq.validate_tip_title', { defaultValue: 'Quality Check' })}</p>
-            <p className="text-gray-300">{t('boq.validate_tip', { defaultValue: 'Checks for missing descriptions, zero quantities, pricing gaps, DIN 276 compliance, and duplicate positions.' })}</p>
+            <p className="text-gray-300">{t('boq.validate_tip', { defaultValue: 'Checks for missing descriptions, zero quantities, pricing gaps, classification compliance, and duplicate positions.' })}</p>
           </div>
         </div>
 

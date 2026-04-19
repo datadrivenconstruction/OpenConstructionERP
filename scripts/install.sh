@@ -1,8 +1,8 @@
 #!/bin/bash
-# OpenEstimate — One-Line Installer for Linux / macOS
+# OpenConstructionERP — One-Line Installer for Linux / macOS
 #
 # Usage:
-#   curl -sSL https://get.openestimate.io | bash
+#   curl -sSL https://get.openconstructionerp.com | bash
 #
 # What it does:
 #   1. If Docker is installed → runs via docker compose
@@ -11,7 +11,7 @@
 #
 # Environment variables:
 #   OE_VERSION     - Version to install (default: latest)
-#   OE_INSTALL_DIR - Installation directory (default: ~/.openestimate)
+#   OE_INSTALL_DIR - Installation directory (default: ~/.openconstructionerp)
 #   OE_METHOD      - Force method: docker, pip, uv (default: auto-detect)
 #   OE_PORT        - Port to run on (default: 8080)
 
@@ -19,7 +19,7 @@ set -euo pipefail
 
 # ── Configuration ────────────────────────────────────────────────────
 OE_VERSION="${OE_VERSION:-latest}"
-OE_INSTALL_DIR="${OE_INSTALL_DIR:-$HOME/.openestimate}"
+OE_INSTALL_DIR="${OE_INSTALL_DIR:-$HOME/.openconstructionerp}"
 OE_METHOD="${OE_METHOD:-auto}"
 OE_PORT="${OE_PORT:-8080}"
 OE_REPO="https://github.com/datadrivenconstruction/OpenConstructionERP"
@@ -42,13 +42,15 @@ has_docker() {
 }
 
 has_python312() {
-    if command -v python3.12 &>/dev/null; then
-        return 0
-    elif command -v python3 &>/dev/null; then
-        local ver
-        ver=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-        [ "$(echo "$ver >= 3.12" | bc -l 2>/dev/null || echo 0)" = "1" ] && return 0
-    fi
+    # Version comparison is done inside Python itself — avoids a hard dep
+    # on ``bc`` (missing from Git Bash on Windows and from minimal base
+    # images). Any modern Python has ``sys.version_info`` so the test
+    # covers every supported install method.
+    local cmd
+    for cmd in python3.12 python3 python; do
+        command -v "$cmd" &>/dev/null || continue
+        "$cmd" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)' &>/dev/null && return 0
+    done
     return 1
 }
 
@@ -91,9 +93,9 @@ install_uv() {
         export PATH="$HOME/.local/bin:$PATH"
     fi
 
-    # Install OpenEstimate
-    uv tool install openestimate
-    ok "OpenEstimate installed!"
+    # Install OpenConstructionERP (PyPI package name — see pyproject.toml).
+    uv tool install openconstructionerp
+    ok "OpenConstructionERP installed!"
 
     # Create systemd service if on Linux
     if [ "$(uname -s)" = "Linux" ] && command -v systemctl &>/dev/null; then
@@ -120,21 +122,21 @@ install_pip() {
 
     # Install
     pip install --upgrade pip
-    pip install openestimate
+    pip install openconstructionerp
 
-    ok "OpenEstimate installed in $OE_INSTALL_DIR/venv"
+    ok "OpenConstructionERP installed in $OE_INSTALL_DIR/venv"
 
     # Create convenience script
     cat > "$OE_INSTALL_DIR/start.sh" << 'SCRIPT'
 #!/bin/bash
 source "$(dirname "$0")/venv/bin/activate"
-openestimate serve "$@"
+openconstructionerp serve "$@"
 SCRIPT
     chmod +x "$OE_INSTALL_DIR/start.sh"
 
     echo ""
     echo "Run: $OE_INSTALL_DIR/start.sh --port $OE_PORT"
-    echo " Or: source $OE_INSTALL_DIR/venv/bin/activate && openestimate serve"
+    echo " Or: source $OE_INSTALL_DIR/venv/bin/activate && openconstructionerp serve"
 }
 
 create_systemd_service() {
@@ -142,11 +144,11 @@ create_systemd_service() {
     mkdir -p "$(dirname "$service_file")"
 
     local oe_bin
-    oe_bin="$(which openestimate 2>/dev/null || echo "$HOME/.local/bin/openestimate")"
+    oe_bin="$(which openconstructionerp 2>/dev/null || echo "$HOME/.local/bin/openconstructionerp")"
 
     cat > "$service_file" << EOF
 [Unit]
-Description=OpenEstimate Server
+Description=OpenConstructionERP Server
 After=network.target
 
 [Service]
@@ -160,14 +162,14 @@ WantedBy=default.target
 EOF
 
     systemctl --user daemon-reload
-    info "Systemd service created. Enable with: systemctl --user enable --now openestimate"
+    info "Systemd service created. Enable with: systemctl --user enable --now openconstructionerp"
 }
 
 # ── Main ─────────────────────────────────────────────────────────────
 main() {
     echo ""
     echo "  ╔═══════════════════════════════════════════════╗"
-    echo "  ║      OpenEstimate Installer                   ║"
+    echo "  ║      OpenConstructionERP Installer            ║"
     echo "  ║      Construction Cost Estimation Platform    ║"
     echo "  ╚═══════════════════════════════════════════════╝"
     echo ""

@@ -10,10 +10,10 @@ No IfcOpenShell. No BCF. No native IFC processing.
 ## Pipeline
 
 ```
-DWG  → ODA SDK (C++) → Python bridge → Canonical JSON
-DGN  → ODA SDK (C++) → Python bridge → Canonical JSON
-RVT  → Rust parser (reverse engineering) → Canonical JSON
-IFC  → ODA SDK (C++) → Python bridge → Canonical JSON
+DWG  → DDC cad2data → Python bridge → Canonical JSON
+DGN  → DDC cad2data → Python bridge → Canonical JSON
+RVT  → Rust parser → Canonical JSON
+IFC  → DDC cad2data → Python bridge → Canonical JSON
 PDF  → PyMuPDF → vector/raster extraction → elements
 ```
 
@@ -26,7 +26,7 @@ Every conversion produces:
 
 ## Rust RVT Parser
 
-Our own reverse-engineered parser for Autodesk Revit files.
+Internal RVT parser for Autodesk Revit files via the DDC cad2data pipeline.
 Currently ~82% accuracy against C# MCP server ground truth.
 Located in `rvt-parser/`.
 

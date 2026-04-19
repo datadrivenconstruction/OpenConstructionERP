@@ -1,0 +1,162 @@
+{
+  "scenarios": [
+    {
+      "format": "excel",
+      "export_ok": true,
+      "target_boq": "72543fbd-a2d2-4318-91ad-bf3809263dd7",
+      "import_status": 200,
+      "import_body_head": "{'imported': 26, 'skipped': 1, 'errors': [], 'total_rows': 27, 'source_format': 'unknown', 'original_columns': ['Pos.', 'Description', 'Unit', 'Quantity', 'Unit Rate', 'Total', 'Classification']}",
+      "import_ok": true,
+      "compare": {
+        "src_count": 13,
+        "tgt_count": 26,
+        "count_match": false,
+        "description_mismatches": [],
+        "quantity_mismatches": [],
+        "rate_mismatches": [],
+        "unit_mismatches": [
+          {
+            "ordinal": "01",
+            "src": "section",
+            "tgt": "pcs"
+          },
+          {
+            "ordinal": "02",
+            "src": "section",
+            "tgt": "pcs"
+          },
+          {
+            "ordinal": "03",
+            "src": "section",
+            "tgt": "pcs"
+          }
+        ],
+        "ordinal_only_in_src": [],
+        "ordinal_only_in_tgt": [
+          "10",
+          "12",
+          "14",
+          "16",
+          "18",
+          "2",
+          "20",
+          "22",
+          "24",
+          "26",
+          "4",
+          "6",
+          "8"
+        ],
+        "src_grand_total": 186722.1078,
+        "tgt_grand_total": 186722.1078,
+        "grand_total_match": true,
+        "lossless": false
+      },
+      "lossless": false
+    },
+    {
+      "format": "csv",
+      "export_ok": true,
+      "target_boq": "ad9eafa1-73d3-416a-8465-b6f9c48adcfa",
+      "import_status": 200,
+      "import_body_head": "{'imported': 18, 'skipped': 1, 'errors': [], 'total_rows': 19, 'source_format': 'unknown', 'original_columns': []}",
+      "import_ok": true,
+      "compare": {
+        "src_count": 13,
+        "tgt_count": 18,
+        "count_match": false,
+        "description_mismatches": [],
+        "quantity_mismatches": [],
+        "rate_mismatches": [
+          {
+            "ordinal": "01.003",
+            "src": 12345.6789,
+            "tgt": 12345.68
+          },
+          {
+            "ordinal": "03.003",
+            "src": 12345.6789,
+            "tgt": 12345.68
+          }
+        ],
+        "unit_mismatches": [
+          {
+            "ordinal": "01",
+            "src": "section",
+            "tgt": "pcs"
+          },
+          {
+            "ordinal": "02",
+            "src": "section",
+            "tgt": "pcs"
+          },
+          {
+            "ordinal": "03",
+            "src": "section",
+            "tgt": "pcs"
+          }
+        ],
+        "ordinal_only_in_src": [],
+        "ordinal_only_in_tgt": [
+          "14",
+          "15",
+          "16",
+          "17",
+          "18"
+        ],
+        "src_grand_total": 186722.1078,
+        "tgt_grand_total": 186722.11,
+        "grand_total_match": true,
+        "lossless": false
+      },
+      "lossless": false
+    },
+    {
+      "format": "gaeb",
+      "export_ok": true,
+      "target_boq": "b5c9ab2a-62f0-4bdf-918d-5504fe7906d7",
+      "import_status": 400,
+      "import_body_head": "{'detail': 'Unsupported file type. Please upload an Excel (.xlsx) or CSV (.csv) file.'}",
+      "smart_import_status": 400,
+      "smart_import_body_head": "{'detail': 'Unsupported file type: .xml. Supported: xlsx, csv, pdf, jpg, png, tiff, rvt, ifc, dwg, dgn.'}",
+      "import_ok": false,
+      "lossless": false,
+      "reason": "import failed: excel={'detail': 'Unsupported file type. Please upload an Excel (.xlsx) or CSV (.csv) file.'}, smart={'detail': 'Unsupported file type: .xml. Supported: xlsx, csv, pdf, jpg, png, tiff, rvt, ifc, dwg, dgn.'}"
+    }
+  ],
+  "gaps": [
+    "GAEB XML import not supported via /import/excel/ or /import/smart/"
+  ],
+  "additional": {
+    "berlin_delete_rows": {
+      "error": "No Berlin project found"
+    },
+    "tamper_unit_rate": {
+      "tamper_info": {
+        "changed_cell": "E12",
+        "original": 12345.6789,
+        "new": 999999.99,
+        "column": "Unit Rate"
+      },
+      "import_status": 200,
+      "tampered_value_accepted_as_rate": true,
+      "target_boq": "21ad8167-0a70-4024-8524-bbe64844cdd5",
+      "import_body_head": "{'imported': 26, 'skipped': 1, 'errors': [], 'total_rows': 27, 'source_format': 'unknown', 'original_columns': ['Pos.', 'Description', 'Unit', 'Quantity', 'Unit Rate', 'Total', 'Classification']}"
+    },
+    "utf8_bom": {
+      "source_had_bom": false,
+      "results": {
+        "with_bom": {
+          "status": 200,
+          "imported_count": 18,
+          "body_head": "{'imported': 18, 'skipped': 1, 'errors': [], 'total_rows': 19, 'source_format': 'unknown', 'original_columns': []}"
+        },
+        "without_bom": {
+          "status": 200,
+          "imported_count": 18,
+          "body_head": "{'imported': 18, 'skipped': 1, 'errors': [], 'total_rows': 19, 'source_format': 'unknown', 'original_columns': []}"
+        }
+      }
+    }
+  }
+}

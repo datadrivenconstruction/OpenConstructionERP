@@ -20,6 +20,12 @@ interface BIMViewerState {
   rightPanelOpen: boolean;
   /** Whether the measure tool is enabled. */
   measureActive: boolean;
+  /** Whether the floating "Model / Filtered / Selection summary" panel
+   *  is visible. Toggled from the top toolbar or the panel's own X. */
+  summaryPanelOpen: boolean;
+  /** Whether the bounding-box dimension card is shown when an element
+   *  is selected. Toggled from the top toolbar. */
+  dimensionsVisible: boolean;
 
   setCategoryOpacity: (category: string, opacity: number) => void;
   setCategoryHidden: (category: string, hidden: boolean) => void;
@@ -27,6 +33,8 @@ interface BIMViewerState {
   setRightPanelTab: (tab: BIMRightPanelTab) => void;
   setRightPanelOpen: (open: boolean) => void;
   setMeasureActive: (active: boolean) => void;
+  setSummaryPanelOpen: (open: boolean) => void;
+  setDimensionsVisible: (visible: boolean) => void;
 }
 
 export const useBIMViewerStore = create<BIMViewerState>((set) => ({
@@ -35,6 +43,8 @@ export const useBIMViewerStore = create<BIMViewerState>((set) => ({
   rightPanelTab: 'properties',
   rightPanelOpen: false,
   measureActive: false,
+  summaryPanelOpen: true,
+  dimensionsVisible: true,
 
   setCategoryOpacity: (category, opacity) =>
     set((state) => ({
@@ -54,4 +64,6 @@ export const useBIMViewerStore = create<BIMViewerState>((set) => ({
   setRightPanelTab: (tab) => set({ rightPanelTab: tab, rightPanelOpen: true }),
   setRightPanelOpen: (open) => set({ rightPanelOpen: open }),
   setMeasureActive: (active) => set({ measureActive: active }),
+  setSummaryPanelOpen: (open) => set({ summaryPanelOpen: open }),
+  setDimensionsVisible: (visible) => set({ dimensionsVisible: visible }),
 }));

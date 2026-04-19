@@ -34,8 +34,12 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from collections.abc import Iterable
+
 from app.core.rate_limiter import approval_limiter
+from app.core.upload_guards import reject_if_xlsx_bomb
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.contacts.models import Contact
 from app.modules.finance.models import EVMSnapshot, Invoice, Payment, ProjectBudget
 from app.modules.finance.schemas import (
     BudgetCreate,
@@ -61,6 +65,37 @@ logger = logging.getLogger(__name__)
 
 def _get_service(session: SessionDep) -> FinanceService:
     return FinanceService(session)
+
+
+# ── Counterparty enrichment ─────────────────────────────────────────────────
+
+
+def _contact_display_name(c: Contact) -> str:
+    """Return the human-readable contact label (company > "first last" > email)."""
+    if c.company_name:
+        return c.company_name
+    full = f"{c.first_name or ''} {c.last_name or ''}".strip()
+    return full or c.email or ""
+
+
+async def _fetch_counterparty_names(
+    session: AsyncSession, contact_ids: Iterable[str | None]
+) -> dict[str, str]:
+    """Resolve Invoice.contact_id → display name in one round trip."""
+    ids = {cid for cid in contact_ids if cid}
+    if not ids:
+        return {}
+    rows = (
+        await session.execute(select(Contact).where(Contact.id.in_(ids)))
+    ).scalars().all()
+    return {str(c.id): _contact_display_name(c) for c in rows}
+
+
+def _invoice_to_response(invoice: Invoice, names: dict[str, str]) -> InvoiceResponse:
+    resp = InvoiceResponse.model_validate(invoice)
+    if invoice.contact_id:
+        resp.counterparty_name = names.get(invoice.contact_id)
+    return resp
 
 
 # ── IDOR protection helpers ─────────────────────────────────────────────────
@@ -221,8 +256,9 @@ async def list_invoices(
         offset=offset,
         limit=limit,
     )
+    names = await _fetch_counterparty_names(session, (i.contact_id for i in items))
     return InvoiceListResponse(
-        items=[InvoiceResponse.model_validate(i) for i in items],
+        items=[_invoice_to_response(i, names) for i in items],
         total=total,
         offset=offset,
         limit=limit,
@@ -247,7 +283,8 @@ async def create_invoice(
     """Create a new invoice."""
     await _require_project_access(session, data.project_id, user_id)
     invoice = await service.create_invoice(data, user_id=user_id)
-    return InvoiceResponse.model_validate(invoice)
+    names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    return _invoice_to_response(invoice, names)
 
 
 # ── Export invoices as Excel ────────────────────────────────────────────────
@@ -300,24 +337,32 @@ async def export_invoices(
         cell = ws.cell(row=1, column=i, value=h)
         cell.font = Font(bold=True)
 
+    from decimal import Decimal, InvalidOperation
+
+    def _safe_decimal(raw: Any) -> Decimal:
+        """Coerce DB string to Decimal preserving precision; NaN/Inf → 0.
+
+        openpyxl accepts Decimal natively and stores as number without the
+        float-precision loss ``float()`` would introduce on large currency
+        values (BUG-069/070).
+        """
+        if raw is None or raw == "":
+            return Decimal("0")
+        try:
+            d = Decimal(str(raw).strip())
+        except (InvalidOperation, ValueError, TypeError):
+            return Decimal("0")
+        return d if d.is_finite() else Decimal("0")
+
     for row_idx, inv in enumerate(items, 2):
         ws.cell(row=row_idx, column=1, value=inv.invoice_number)
         ws.cell(row=row_idx, column=2, value=inv.invoice_direction)
         ws.cell(row=row_idx, column=3, value=inv.invoice_date)
         ws.cell(row=row_idx, column=4, value=inv.due_date)
         ws.cell(row=row_idx, column=5, value=inv.contact_id or "")
-        try:
-            ws.cell(row=row_idx, column=6, value=float(inv.amount_subtotal))
-        except (ValueError, TypeError):
-            ws.cell(row=row_idx, column=6, value=0)
-        try:
-            ws.cell(row=row_idx, column=7, value=float(inv.tax_amount))
-        except (ValueError, TypeError):
-            ws.cell(row=row_idx, column=7, value=0)
-        try:
-            ws.cell(row=row_idx, column=8, value=float(inv.amount_total))
-        except (ValueError, TypeError):
-            ws.cell(row=row_idx, column=8, value=0)
+        ws.cell(row=row_idx, column=6, value=_safe_decimal(inv.amount_subtotal))
+        ws.cell(row=row_idx, column=7, value=_safe_decimal(inv.tax_amount))
+        ws.cell(row=row_idx, column=8, value=_safe_decimal(inv.amount_total))
         ws.cell(row=row_idx, column=9, value=inv.status)
 
     output = io.BytesIO()
@@ -631,6 +676,9 @@ async def import_budgets_file(
             detail="File too large. Maximum size is 10 MB.",
         )
 
+    # Zip-bomb guard: reject .xlsx whose uncompressed sheets exceed 50 MB.
+    reject_if_xlsx_bomb(content)
+
     # Parse rows based on file type
     try:
         if filename.endswith(".xlsx") or filename.endswith(".xls"):
@@ -930,7 +978,8 @@ async def get_invoice(
     """Get a single invoice by ID."""
     await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.get_invoice(invoice_id)
-    return InvoiceResponse.model_validate(invoice)
+    names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    return _invoice_to_response(invoice, names)
 
 
 @router.patch(
@@ -950,7 +999,8 @@ async def update_invoice(
     """Update an invoice."""
     await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.update_invoice(invoice_id, data)
-    return InvoiceResponse.model_validate(invoice)
+    names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    return _invoice_to_response(invoice, names)
 
 
 @router.post(
@@ -973,7 +1023,8 @@ async def approve_invoice(
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
     await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.approve_invoice(invoice_id)
-    return InvoiceResponse.model_validate(invoice)
+    names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    return _invoice_to_response(invoice, names)
 
 
 @router.post(
@@ -995,4 +1046,5 @@ async def pay_invoice(
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
     await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.pay_invoice(invoice_id)
-    return InvoiceResponse.model_validate(invoice)
+    names = await _fetch_counterparty_names(session, [invoice.contact_id])
+    return _invoice_to_response(invoice, names)

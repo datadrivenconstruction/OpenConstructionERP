@@ -20,7 +20,7 @@ import {
   type FormEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -1888,7 +1888,23 @@ export function BIMQuantityRulesPage() {
   /* ── State ─────────────────────────────────────────────────────────── */
 
   const [modelId, setModelId] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<RulesTab>('quantity_rules');
+  // URL param ?mode=requirements locks the page to the Requirements tab so
+  // the sidebar can expose the compliance half as its own entry under
+  // Takeoff, while /bim/rules (no param) remains the Estimation-side
+  // Quantity Rules editor. Keeping a single page component avoids code
+  // duplication; the mode flag just hides the tab switcher + fixes the
+  // active tab.
+  const [searchParams] = useSearchParams();
+  const lockedMode = searchParams.get('mode') === 'requirements' ? 'requirements' : null;
+  const [activeTab, setActiveTab] = useState<RulesTab>(
+    lockedMode === 'requirements' ? 'requirements' : 'quantity_rules',
+  );
+  useEffect(() => {
+    if (lockedMode === 'requirements' && activeTab !== 'requirements') {
+      setActiveTab('requirements');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lockedMode]);
 
   useEffect(() => {
     const items = modelsQuery.data?.items ?? [];
@@ -2120,13 +2136,24 @@ export function BIMQuantityRulesPage() {
             </div>
             <div>
               <h1 className="text-lg font-semibold text-content-primary">
-                {t('bim_rules.page_title_combined', { defaultValue: 'BIM Rules & Requirements' })}
+                {lockedMode === 'requirements'
+                  ? t('bim_rules.page_title_requirements', {
+                      defaultValue: 'BIM Rules (Compliance)',
+                    })
+                  : t('bim_rules.page_title_quantity', {
+                      defaultValue: 'Quantity Rules',
+                    })}
               </h1>
               <p className="text-xs text-content-secondary">
-                {t('bim_rules.page_subtitle_combined', {
-                  defaultValue:
-                    'Quantity mapping rules and BIM requirement checks for your project.',
-                })}
+                {lockedMode === 'requirements'
+                  ? t('bim_rules.page_subtitle_requirements', {
+                      defaultValue:
+                        'Import and check BIM requirements (IDS, COBie, Excel) for your project.',
+                    })
+                  : t('bim_rules.page_subtitle_quantity', {
+                      defaultValue:
+                        'Bulk-link BIM elements to BOQ positions via pattern-based rules.',
+                    })}
                 {activeProjectName && (
                   <>
                     {' — '}
@@ -2151,35 +2178,40 @@ export function BIMQuantityRulesPage() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="mt-4 flex border-b border-border-light -mb-px">
-          <button
-            type="button"
-            onClick={() => setActiveTab('quantity_rules')}
-            className={clsx(
-              'px-4 py-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-1.5',
-              activeTab === 'quantity_rules'
-                ? 'border-oe-blue text-oe-blue'
-                : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border-light',
-            )}
-          >
-            <SlidersHorizontal size={13} />
-            {t('bim_rules.tab_quantity_rules', { defaultValue: 'Quantity Rules' })}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('requirements')}
-            className={clsx(
-              'px-4 py-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-1.5',
-              activeTab === 'requirements'
-                ? 'border-oe-blue text-oe-blue'
-                : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border-light',
-            )}
-          >
-            <ClipboardCheck size={13} />
-            {t('bim_rules.tab_requirements', { defaultValue: 'Requirements' })}
-          </button>
-        </div>
+        {/* Tabs — hidden when the URL locks the page to a single mode so
+            the Takeoff "BIM Rules" and Estimation "Quantity Rules" sidebar
+            entries read as dedicated pages, not as two tabs on the same
+            screen. */}
+        {!lockedMode && (
+          <div className="mt-4 flex border-b border-border-light -mb-px">
+            <button
+              type="button"
+              onClick={() => setActiveTab('quantity_rules')}
+              className={clsx(
+                'px-4 py-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-1.5',
+                activeTab === 'quantity_rules'
+                  ? 'border-oe-blue text-oe-blue'
+                  : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border-light',
+              )}
+            >
+              <SlidersHorizontal size={13} />
+              {t('bim_rules.tab_quantity_rules', { defaultValue: 'Quantity Rules' })}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('requirements')}
+              className={clsx(
+                'px-4 py-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-1.5',
+                activeTab === 'requirements'
+                  ? 'border-oe-blue text-oe-blue'
+                  : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border-light',
+              )}
+            >
+              <ClipboardCheck size={13} />
+              {t('bim_rules.tab_requirements', { defaultValue: 'Requirements' })}
+            </button>
+          </div>
+        )}
 
         {/* Toolbar (quantity rules tab only) */}
         {activeTab === 'quantity_rules' && (
@@ -2424,20 +2456,23 @@ export function BIMQuantityRulesPage() {
         submitting={createMutation.isPending || patchMutation.isPending}
       />
 
-      {/* Preview modal */}
-      {/* BIM Requirements Import */}
-      <div className="border-t border-border-light bg-surface-primary px-6 py-4">
-        <details className="group" open>
-          <summary className="cursor-pointer text-sm font-semibold text-content-primary flex items-center gap-2">
-            <BookOpen size={16} className="text-oe-blue" />
-            {t('bim_rules.requirements_import', { defaultValue: 'BIM Requirements Import/Export' })}
-            <ChevronRight size={14} className="text-content-tertiary transition-transform group-open:rotate-90" />
-          </summary>
-          <div className="mt-4">
-            <BIMRequirementsImport />
-          </div>
-        </details>
-      </div>
+      {/* BIM Requirements Import — only shown on the Requirements tab (or
+          requirements-locked page), since it has no relevance to Quantity
+          Rules. */}
+      {activeTab === 'requirements' && (
+        <div className="border-t border-border-light bg-surface-primary px-6 py-4">
+          <details className="group" open>
+            <summary className="cursor-pointer text-sm font-semibold text-content-primary flex items-center gap-2">
+              <BookOpen size={16} className="text-oe-blue" />
+              {t('bim_rules.requirements_import', { defaultValue: 'BIM Requirements Import/Export' })}
+              <ChevronRight size={14} className="text-content-tertiary transition-transform group-open:rotate-90" />
+            </summary>
+            <div className="mt-4">
+              <BIMRequirementsImport />
+            </div>
+          </details>
+        </div>
+      )}
 
       <PreviewModal
         open={previewOpen}

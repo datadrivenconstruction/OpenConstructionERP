@@ -1,0 +1,1739 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>OpenConstructionERP Pro — Sky edition</title>
+  <meta name="description" content="Open-source construction ERP with AI-powered BOQ, multi-CAD ingest, and 55,000+ cost items across 11 regions. Self-host it today for free." />
+  <meta name="theme-color" content="#f0f9ff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#050c1c" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="/pro/cinematic/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600&family=Inter:wght@400;500&family=Fraunces:ital,opsz,wght@1,9..144,300..500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <script>
+    // Apply persisted theme before paint to avoid flash.
+    (function () {
+      try {
+        var t = localStorage.getItem('oce-theme') || 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+
+  <style>
+    :root {
+      --bg-0: #f0f9ff;
+      --bg-1: #e0f2fe;
+      --bg-2: #dbeafe;
+      --ink-0: #0c1729;
+      --ink-1: #1e293b;
+      --ink-2: #475569;
+      --ink-3: #94a3b8;
+      --line-0: rgba(12, 23, 41, 0.06);
+      --line-1: rgba(12, 23, 41, 0.10);
+      --line-2: rgba(12, 23, 41, 0.16);
+      --accent: #0284c7;
+      --accent-2: #06b6d4;
+      --accent-3: #38bdf8;
+      --glow: #0ea5e9;
+      --three-tower: 0x1e3a5f;
+      --three-edge: 0x0284c7;
+      --three-glow-a: 0x06b6d4;
+      --three-glow-b: 0x38bdf8;
+      --three-particle: 0x0ea5e9;
+      --three-ambient: 0xcbd5e1;
+      --three-key: 0x38bdf8;
+      --three-fill: 0x06b6d4;
+      --three-fog: 0xf0f9ff;
+      color-scheme: light;
+    }
+    [data-theme="dark"] {
+      --bg-0: #050c1c;
+      --bg-1: #0c1729;
+      --bg-2: #1e293b;
+      --ink-0: #f0f9ff;
+      --ink-1: #cbd5e1;
+      --ink-2: #94a3b8;
+      --ink-3: #64748b;
+      --line-0: rgba(255, 255, 255, 0.06);
+      --line-1: rgba(255, 255, 255, 0.10);
+      --line-2: rgba(255, 255, 255, 0.18);
+      --accent: #38bdf8;
+      --accent-2: #22d3ee;
+      --accent-3: #7dd3fc;
+      --glow: #0ea5e9;
+      --three-tower: 0x0f1e36;
+      --three-edge: 0x38bdf8;
+      --three-glow-a: 0x22d3ee;
+      --three-glow-b: 0x7dd3fc;
+      --three-particle: 0x38bdf8;
+      --three-ambient: 0x3f3f46;
+      --three-key: 0x38bdf8;
+      --three-fill: 0x22d3ee;
+      --three-fog: 0x050c1c;
+      color-scheme: dark;
+    }
+
+    *,
+    *::before,
+    *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-0);
+      color: var(--ink-0);
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      min-height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+    /* ================================================================ */
+    /* GLOBAL BACKGROUND                                                 */
+    /* ================================================================ */
+
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .page-bg .noise {
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.04 0 0 0 0 0.06 0 0 0 0 0.12 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+      background-size: 240px 240px;
+      opacity: 0.04;
+      mix-blend-mode: multiply;
+    }
+    [data-theme="dark"] .page-bg .noise {
+      opacity: 0.22;
+      mix-blend-mode: overlay;
+    }
+
+    /* ================================================================ */
+    /* NAV                                                               */
+    /* ================================================================ */
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      padding: 0 clamp(16px, 3vw, 32px);
+      background: color-mix(in oklab, var(--bg-0) 78%, transparent);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border-bottom: 1px solid transparent;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+    .nav.is-scrolled { border-bottom-color: var(--line-1); }
+
+    .nav-inner {
+      width: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Inter Tight', 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+      color: var(--ink-0);
+    }
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 9px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      color: #ffffff;
+      background: var(--accent);
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: inline-flex;
+      align-items: center;
+      gap: clamp(14px, 2.4vw, 28px);
+      font-size: 13.5px;
+      color: var(--ink-1);
+      font-weight: 500;
+    }
+    .nav-links a { transition: color 0.2s ease; }
+    .nav-links a:hover { color: var(--ink-0); }
+
+    .nav-right {
+      justify-self: end;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid var(--line-1);
+      color: var(--ink-0);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+    .theme-toggle:hover {
+      border-color: var(--line-2);
+      background: color-mix(in oklab, var(--ink-0) 5%, transparent);
+    }
+    .theme-toggle svg { width: 16px; height: 16px; display: block; }
+    .theme-toggle .icon-sun { display: inline-block; }
+    .theme-toggle .icon-moon { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: inline-block; }
+
+    .install-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      transition: transform 0.2s ease, background 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 4px 14px -6px color-mix(in oklab, var(--accent) 70%, transparent);
+    }
+    .install-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px -8px color-mix(in oklab, var(--accent) 80%, transparent);
+    }
+    .install-pill .arrow { transition: transform 0.2s ease; }
+    .install-pill:hover .arrow { transform: translateX(2px); }
+
+    /* ================================================================ */
+    /* HERO — TWO COLUMN LAYOUT                                          */
+    /* ================================================================ */
+
+    .hero {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      min-height: 100svh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding-top: 64px; /* nav height */
+    }
+
+    /* ------ LEFT — TEXT COLUMN ------ */
+    .hero-text {
+      position: relative;
+      padding: clamp(32px, 5vw, 80px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 22px;
+      background: var(--bg-0);
+      overflow: hidden;
+    }
+
+    /* Subtle grid on text column only */
+    .hero-text::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--line-0) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line-0) 1px, transparent 1px);
+      background-size: 24px 24px;
+      mask-image: linear-gradient(to bottom, transparent 0%, #000 20%, #000 80%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 20%, #000 80%, transparent 100%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .hero-text-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .page-number {
+      position: absolute;
+      top: clamp(24px, 3vw, 48px);
+      left: clamp(24px, 3vw, 48px);
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(44px, 5vw, 72px);
+      line-height: 1;
+      color: var(--accent-2);
+      opacity: 0.65;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .edition-label {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line-1);
+      background: color-mix(in oklab, var(--bg-1) 55%, transparent);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11.5px;
+      letter-spacing: 0.02em;
+      color: var(--ink-1);
+      align-self: flex-start;
+    }
+    .eyebrow .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-2);
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent-2) 60%, transparent);
+      animation: pulseDot 2.2s ease-in-out infinite;
+    }
+    .eyebrow b { font-weight: 500; color: var(--ink-0); }
+
+    @keyframes pulseDot {
+      0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent-2) 60%, transparent); }
+      50%      { box-shadow: 0 0 0 7px color-mix(in oklab, var(--accent-2) 0%, transparent); }
+    }
+
+    .headline {
+      font-family: 'Inter Tight', 'Inter', sans-serif;
+      font-weight: 500;
+      color: var(--ink-0);
+      font-size: clamp(52px, 7.5vw, 130px);
+      line-height: 0.94;
+      letter-spacing: -0.055em;
+      max-width: 14ch;
+      margin: 0;
+      text-align: left;
+    }
+    .headline .italic {
+      font-family: 'Fraunces', 'Instrument Serif', 'Times New Roman', serif;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--accent);
+      letter-spacing: -0.04em;
+    }
+    .word {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+      padding-bottom: 0.08em;
+    }
+    .word > span {
+      display: inline-block;
+      will-change: transform, opacity;
+    }
+
+    .sub {
+      max-width: 48ch;
+      margin: 0;
+      font-size: clamp(15px, 1.25vw, 18px);
+      line-height: 1.55;
+      color: var(--ink-2);
+      font-weight: 400;
+      letter-spacing: -0.005em;
+    }
+
+    .ctas {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 13px 22px;
+      border-radius: 999px;
+      font-size: 14.5px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      transition: transform 0.2s ease, background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      border: 1px solid transparent;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 6px 18px -8px color-mix(in oklab, var(--accent) 80%, transparent);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px -8px color-mix(in oklab, var(--accent) 90%, transparent);
+    }
+    .btn-primary .arrow { transition: transform 0.2s ease; }
+    .btn-primary:hover .arrow { transform: translateX(3px); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink-0);
+      border-color: var(--line-2);
+    }
+    .btn-ghost:hover {
+      border-color: var(--ink-0);
+      background: color-mix(in oklab, var(--ink-0) 4%, transparent);
+    }
+
+    .btn svg { width: 16px; height: 16px; }
+
+    /* Install block */
+    .install-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 10px 11px 20px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 13.5px;
+      color: var(--ink-0);
+      position: relative;
+      align-self: flex-start;
+      transition: border-color 0.25s ease, background 0.25s ease;
+    }
+    .install-block:hover { border-color: var(--line-2); }
+    .install-block .dollar { color: var(--accent); font-weight: 500; }
+    .install-block .cmd { letter-spacing: 0; }
+    .copy-btn {
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      color: var(--ink-1);
+      border: 1px solid var(--line-1);
+      background: var(--bg-0);
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+    .copy-btn:hover { color: var(--ink-0); border-color: var(--line-2); transform: translateY(-1px); }
+    .copy-btn svg { width: 14px; height: 14px; }
+
+    .copy-toast {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translate(-50%, 4px);
+      background: var(--ink-0);
+      color: var(--bg-0);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      white-space: nowrap;
+    }
+    .copy-toast.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .meta-row {
+      display: inline-flex;
+      align-items: center;
+      gap: clamp(14px, 2.4vw, 28px);
+      flex-wrap: wrap;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11.5px;
+      color: var(--ink-3);
+      letter-spacing: 0.01em;
+    }
+    .meta-row span { display: inline-flex; align-items: center; gap: 7px; }
+    .meta-row svg { width: 13px; height: 13px; color: var(--accent-3); flex: 0 0 13px; }
+
+    /* ------ RIGHT — 3D COLUMN ------ */
+    .hero-stage {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-0) 100%);
+      box-shadow: inset 8px 0 24px -12px rgba(2, 132, 199, 0.12);
+      border-left: 1px solid var(--line-0);
+    }
+    [data-theme="dark"] .hero-stage {
+      box-shadow: inset 8px 0 24px -12px rgba(56, 189, 248, 0.20);
+    }
+
+    /* Glow overlay behind canvas */
+    .stage-glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 55% 55% at 65% 55%, color-mix(in oklab, var(--glow) 15%, transparent) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 30%, color-mix(in oklab, var(--accent-2) 10%, transparent) 0%, transparent 70%);
+      z-index: 1;
+    }
+
+    .three-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      /* Hard fade on LEFT edge so tower doesn't bleed into text */
+      mask-image: linear-gradient(to right, transparent 0%, #000 30%, #000 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 30%, #000 100%);
+      transition: opacity 0.7s ease;
+      opacity: 0;
+      z-index: 2;
+    }
+    .three-canvas.is-ready { opacity: 1; }
+
+    /* Live indicator */
+    .stage-live {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--bg-0) 70%, transparent);
+      border: 1px solid var(--line-1);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-1);
+      z-index: 4;
+    }
+    .stage-live .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 60%, transparent);
+      animation: pulseDot 2s ease-in-out infinite;
+    }
+
+    .stage-caption {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 14px;
+      color: var(--ink-3);
+      z-index: 4;
+      letter-spacing: -0.005em;
+    }
+
+    .stage-indicators {
+      position: absolute;
+      bottom: 28px;
+      right: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 4;
+    }
+    .stage-indicators .ind {
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: var(--accent);
+      opacity: 0.45;
+    }
+    .stage-indicators .ind.on { opacity: 1; box-shadow: 0 0 6px var(--accent); }
+
+    /* Floating labels over 3D buildings */
+    .three-labels {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 4;
+      /* Match canvas left-edge fade so labels don't float over text column */
+      mask-image: linear-gradient(to right, transparent 0%, #000 30%, #000 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 30%, #000 100%);
+    }
+    .three-label {
+      position: absolute;
+      top: 0; left: 0;
+      transform: translate(0, 0);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 12px;
+      background: color-mix(in oklab, var(--bg-0) 88%, transparent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--line-1);
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(2,132,199,0.12), 0 1px 2px rgba(0,0,0,0.06);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px;
+      color: var(--ink-0);
+      max-width: 180px;
+      margin-top: -52px; /* offset above anchor */
+      margin-left: -70px; /* roughly center */
+      transition: opacity .3s ease;
+      will-change: transform;
+      opacity: 0;
+    }
+    [data-theme="dark"] .three-label {
+      box-shadow: 0 4px 14px rgba(56,189,248,0.18), 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .three-label-icon {
+      font-size: 14px;
+      line-height: 1;
+      color: var(--accent);
+      padding: 2px 0;
+    }
+    .three-label[data-accent="accent-2"] .three-label-icon { color: var(--accent-2); }
+    .three-label[data-accent="accent-3"] .three-label-icon { color: var(--accent-3); }
+    .three-label-body {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.2;
+    }
+    .three-label-body b {
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--ink-0);
+      letter-spacing: -0.01em;
+    }
+    .three-label-body span {
+      font-size: 10px;
+      color: var(--ink-2);
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0;
+    }
+    .three-label-stem {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 30px;
+      color: var(--line-2);
+    }
+
+    /* Static SVG fallback */
+    .static-scene {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 3;
+    }
+    .static-scene svg {
+      width: 70%;
+      max-width: 420px;
+      height: auto;
+      opacity: 0.7;
+    }
+
+    /* ================================================================ */
+    /* FOOTER                                                            */
+    /* ================================================================ */
+
+    .footer {
+      position: relative;
+      z-index: 5;
+      height: 48px;
+      border-top: 1px solid var(--line-1);
+      background: var(--bg-1);
+      display: flex;
+      align-items: center;
+      padding: 0 clamp(16px, 3vw, 32px);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11.5px;
+      color: var(--ink-2);
+      letter-spacing: 0.01em;
+    }
+    .footer a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--ink-1);
+      transition: color 0.2s ease;
+    }
+    .footer a:hover { color: var(--ink-0); }
+
+    /* ================================================================ */
+    /* RESPONSIVE                                                        */
+    /* ================================================================ */
+
+    @media (max-width: 1023px) {
+      .hero {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 50vh;
+      }
+      .hero-text { padding: 80px 32px 40px; min-height: 80vh; }
+      .hero-stage { border-left: 0; border-top: 1px solid var(--line-0); min-height: 50vh; }
+      .page-number { font-size: 52px; }
+    }
+
+    @media (max-width: 820px) {
+      .nav-links { display: none; }
+      .nav-inner { grid-template-columns: auto 1fr auto; }
+      .nav-links-slot { display: none; }
+    }
+
+    @media (max-width: 620px) {
+      .hero-text { padding: 96px 22px 36px; gap: 18px; }
+      .install-block { font-size: 12.5px; padding: 9px 10px 9px 16px; gap: 8px; }
+      .install-pill span { display: none; }
+      .install-pill { padding: 9px 10px; }
+    }
+
+    @media (max-width: 768px) {
+      .three-label { display: none; }
+      .three-label.is-mobile-shown { display: flex; }
+    }
+
+    @media (max-width: 559px) {
+      .hero {
+        grid-template-rows: auto auto;
+      }
+      .three-canvas { display: none; }
+      .three-labels { display: none; }
+      .static-scene { display: flex; }
+      .hero-stage { min-height: 40vh; }
+    }
+
+    @media (max-width: 420px) {
+      .meta-row { font-size: 11px; gap: 10px; }
+      .eyebrow { font-size: 10.5px; padding: 6px 11px; }
+      .edition-label { font-size: 10px; letter-spacing: 0.26em; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .eyebrow .dot { animation: none; }
+      .stage-live .dot { animation: none; }
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================ -->
+  <!-- GLOBAL BACKGROUND                                                 -->
+  <!-- ================================================================ -->
+  <div class="page-bg" aria-hidden="true">
+    <div class="noise"></div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- NAV                                                               -->
+  <!-- ================================================================ -->
+  <nav class="nav" id="nav" aria-label="Primary">
+    <div class="nav-inner">
+      <a class="brand" href="/">
+        <span>OpenConstructionERP</span>
+        <span class="brand-pill">Pro</span>
+      </a>
+
+      <div class="nav-links nav-links-slot">
+        <a href="#features">Features</a>
+        <a href="#ai">AI</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#docs">Docs</a>
+      </div>
+
+      <div class="nav-right">
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
+          </svg>
+        </button>
+
+        <a class="install-pill" href="#install">
+          <span>Install now</span>
+          <svg class="arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================================================================ -->
+  <!-- HERO                                                              -->
+  <!-- ================================================================ -->
+  <main class="hero" id="hero">
+
+    <!-- LEFT — Text -->
+    <section class="hero-text">
+      <span class="page-number" aria-hidden="true">01</span>
+
+      <div class="hero-text-inner">
+
+        <div class="edition-label" id="fx-label">01 &middot; 2026 edition &middot; sky</div>
+
+        <div class="eyebrow" id="fx-eyebrow">
+          <span class="dot" aria-hidden="true"></span>
+          <span><b>v1.7.2</b> &middot; AI takeoff, 4D, carbon</span>
+        </div>
+
+        <h1 class="headline" id="headline">
+          <span class="word"><span>Estimate</span></span>
+          <span class="word"><span>buildings</span></span>
+          <span class="word"><span>at</span></span>
+          <span class="word italic"><span>the</span></span>
+          <span class="word italic"><span>speed</span></span>
+          <span class="word italic"><span>of thought.</span></span>
+        </h1>
+
+        <p class="sub" id="fx-sub">
+          Open-source construction ERP with AI-powered BOQ, multi-CAD ingest, 55,000+ cost items across 11 regions.
+          Self-host it today for free &mdash; replace $25K/year enterprise tools by the weekend.
+        </p>
+
+        <div class="ctas" id="fx-ctas">
+          <a class="btn btn-primary" href="#install">
+            <span>Install now</span>
+            <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/datadrivenconstruction" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
+            </svg>
+            <span>Star on GitHub</span>
+          </a>
+        </div>
+
+        <div class="install-block" id="install-block">
+          <div class="copy-toast" id="copy-toast">COPIED</div>
+          <span class="dollar">$</span>
+          <span class="cmd" id="install-cmd">docker compose up</span>
+          <button type="button" class="copy-btn" id="copy-btn" aria-label="Copy install command">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="meta-row" id="fx-meta">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            AGPL-3.0 open source
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Self-hosted &middot; no vendor lock-in
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Runs on 2&thinsp;GB RAM
+          </span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- RIGHT — 3D -->
+    <section class="hero-stage" id="stage">
+      <div class="stage-glow"></div>
+
+      <div class="stage-live" aria-hidden="true">
+        <span class="dot"></span>
+        <span>Live &middot; interactive</span>
+      </div>
+
+      <canvas id="three-canvas" class="three-canvas"></canvas>
+
+      <div class="three-labels" id="three-labels" aria-hidden="true"></div>
+
+      <div class="static-scene" aria-hidden="true">
+        <svg viewBox="0 0 420 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g stroke="var(--accent)" stroke-width="1.2" opacity="0.85">
+            <!-- Tapered tower silhouette -->
+            <rect x="165" y="420" width="90" height="40" />
+            <rect x="170" y="360" width="80" height="60" />
+            <rect x="175" y="290" width="70" height="70" />
+            <rect x="182" y="220" width="56" height="70" />
+            <rect x="190" y="150" width="40" height="70" />
+            <rect x="198" y="90"  width="24" height="60" />
+            <line x1="210" y1="90" x2="210" y2="40" />
+            <circle cx="210" cy="40" r="3" fill="var(--accent-2)" stroke="none"/>
+          </g>
+          <g stroke="var(--accent-3)" stroke-width="1" opacity="0.5">
+            <line x1="40"  y1="460" x2="380" y2="460" />
+            <line x1="60"  y1="470" x2="360" y2="470" />
+          </g>
+          <g stroke="var(--line-2)" stroke-width="1" opacity="0.4">
+            <line x1="80" y1="420" x2="140" y2="420" />
+            <line x1="280" y1="420" x2="340" y2="420" />
+            <rect x="90"  y="380" width="40" height="40" />
+            <rect x="290" y="380" width="40" height="40" />
+          </g>
+        </svg>
+      </div>
+
+      <div class="stage-caption">Project Meridian &middot; Tower 01</div>
+      <div class="stage-indicators" aria-hidden="true">
+        <span class="ind on"></span>
+        <span class="ind"></span>
+        <span class="ind on"></span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================================================================ -->
+  <!-- FOOTER                                                            -->
+  <!-- ================================================================ -->
+  <footer class="footer">
+    <a href="/pro/">&larr; back to directions</a>
+  </footer>
+
+  <!-- ================================================================ -->
+  <!-- SCRIPTS                                                           -->
+  <!-- ================================================================ -->
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+    import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm';
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ================================================================ */
+    /* THEME TOGGLE                                                      */
+    /* ================================================================ */
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeListeners = new Set();
+
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      try { localStorage.setItem('oce-theme', theme); } catch (_) { /* noop */ }
+      themeListeners.forEach((fn) => {
+        try { fn(theme); } catch (e) { console.error(e); }
+      });
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const next = (root.dataset.theme === 'dark') ? 'light' : 'dark';
+      setTheme(next);
+    });
+
+    /* ================================================================ */
+    /* NAV SCROLL STATE                                                  */
+    /* ================================================================ */
+    const nav = document.getElementById('nav');
+    const onScroll = () => {
+      if ((window.scrollY || 0) > 8) nav.classList.add('is-scrolled');
+      else nav.classList.remove('is-scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    /* ================================================================ */
+    /* COPY BLOCK                                                        */
+    /* ================================================================ */
+    const copyBtn = document.getElementById('copy-btn');
+    const installCmd = document.getElementById('install-cmd');
+    const copyToast = document.getElementById('copy-toast');
+    let toastTimer;
+
+    function showToast() {
+      copyToast.classList.add('is-visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => copyToast.classList.remove('is-visible'), 1600);
+    }
+
+    async function copyCmd() {
+      const text = installCmd.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        const r = document.createRange();
+        r.selectNodeContents(installCmd);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+        try { document.execCommand('copy'); } catch (_) {}
+        sel.removeAllRanges();
+      }
+      showToast();
+    }
+    copyBtn.addEventListener('click', copyCmd);
+    document.getElementById('install-block').addEventListener('click', (e) => {
+      if (e.target === copyBtn || copyBtn.contains(e.target)) return;
+      copyCmd();
+    });
+
+    /* ================================================================ */
+    /* ENTRANCE ANIMATION (uses .from — content is visible by default)   */
+    /* ================================================================ */
+    function animateIn() {
+      if (reduceMotion) return;
+
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.from('#fx-label',       { opacity: 0, y: 10, duration: 0.5 }, 0.05);
+      tl.from('#fx-eyebrow',     { opacity: 0, y: 12, duration: 0.55 }, 0.15);
+      tl.from('.word > span',    { yPercent: 110, opacity: 0, duration: 0.9, stagger: 0.075 }, 0.25);
+      tl.from('#fx-sub',         { opacity: 0, y: 14, duration: 0.6 }, 0.9);
+      tl.from('#fx-ctas',        { opacity: 0, y: 14, duration: 0.55 }, 1.0);
+      tl.from('#install-block',  { opacity: 0, y: 14, duration: 0.55 }, 1.12);
+      tl.from('#fx-meta',        { opacity: 0, y: 14, duration: 0.55 }, 1.22);
+    }
+
+    /* ================================================================ */
+    /* THREE.JS SCENE — Tapered Skyscraper                               */
+    /* ================================================================ */
+    const canvas = document.getElementById('three-canvas');
+    const mobileHide = window.matchMedia('(max-width: 559px)');
+
+    function getVarHex(name) {
+      let v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      if (!v) return 0x000000;
+      if (v.startsWith('0x')) return parseInt(v.slice(2), 16);
+      if (v.startsWith('#')) return parseInt(v.slice(1), 16);
+      return parseInt(v, 16);
+    }
+
+    function circleTexture() {
+      const size = 64;
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(0.35, 'rgba(255,255,255,0.8)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+      const tex = new THREE.CanvasTexture(c);
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      return tex;
+    }
+
+    function initThree() {
+      if (mobileHide.matches) {
+        canvas.style.display = 'none';
+        document.querySelector('.static-scene').style.display = 'flex';
+        return;
+      }
+
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        powerPreference: 'low-power',
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setClearColor(0x000000, 0);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 500);
+      const baseCamPos = new THREE.Vector3(28, 18, 30);
+      camera.position.copy(baseCamPos);
+      camera.lookAt(0, 10, 0);
+
+      const sceneRoot = new THREE.Group();
+      scene.add(sceneRoot);
+
+      /* ------ Lights ------ */
+      const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+      scene.add(ambient);
+      const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+      keyLight.position.set(20, 30, 15);
+      scene.add(keyLight);
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.9);
+      fillLight.position.set(-15, 12, -8);
+      scene.add(fillLight);
+
+      /* ------ Groups ------ */
+      const towerGroup = new THREE.Group();
+      sceneRoot.add(towerGroup);
+      const satellitesGroup = new THREE.Group();
+      sceneRoot.add(satellitesGroup);
+      const craneGroup = new THREE.Group();
+      sceneRoot.add(craneGroup);
+      const groundGroup = new THREE.Group();
+      sceneRoot.add(groundGroup);
+      const particleGroup = new THREE.Group();
+      sceneRoot.add(particleGroup);
+
+      // Animation state collected during build
+      const allBoxes = [];     // { mesh, restY } for entrance anim
+      const glowFloors = [];   // { mesh, phase, speed }
+      let spireLight = null;   // { mesh, phase }
+      let particles = null;
+      const particleVelocities = [];
+
+      /* ------ Main Tapered Tower ------ */
+      // Width steps per floor range
+      const tiers = [
+        { from: 0,  to: 4,  w: 6 },
+        { from: 4,  to: 8,  w: 5 },
+        { from: 8,  to: 12, w: 4 },
+        { from: 12, to: 16, w: 3 },
+        { from: 16, to: 19, w: 2 },
+        { from: 19, to: 22, w: 1 },
+      ];
+      const FLOOR_H = 0.85;
+      const FLOOR_GAP = 0.06;
+      const UNIT = 1.1;
+
+      function widthAtFloor(f) {
+        for (const t of tiers) {
+          if (f >= t.from && f < t.to) return t.w;
+        }
+        return 1;
+      }
+
+      function buildTower() {
+        towerGroup.clear();
+
+        const towerColor = getVarHex('--three-tower');
+        const edgeColor = getVarHex('--three-edge');
+        const glowA = getVarHex('--three-glow-a');
+        const glowB = getVarHex('--three-glow-b');
+
+        const fillMat = new THREE.MeshStandardMaterial({
+          color: towerColor,
+          roughness: 0.9,
+          metalness: 0.2,
+          transparent: true,
+          opacity: 0.15,
+        });
+        const edgeMat = new THREE.LineBasicMaterial({
+          color: edgeColor,
+          transparent: true,
+          opacity: 0.85,
+        });
+
+        const TOTAL_FLOORS = 22;
+        for (let f = 0; f < TOTAL_FLOORS; f++) {
+          const w = widthAtFloor(f);
+          const span = w * UNIT;
+          const yCenter = f * FLOOR_H + FLOOR_H / 2;
+
+          // Fill box
+          const fillGeom = new THREE.BoxGeometry(span - 0.05, FLOOR_H - FLOOR_GAP, span - 0.05);
+          const fill = new THREE.Mesh(fillGeom, fillMat);
+          fill.position.set(0, yCenter, 0);
+          fill.userData.restY = yCenter;
+          towerGroup.add(fill);
+          allBoxes.push({ mesh: fill, restY: yCenter });
+
+          // Edge lines
+          const edgeGeom = new THREE.EdgesGeometry(fillGeom);
+          const edges = new THREE.LineSegments(edgeGeom, edgeMat);
+          edges.position.copy(fill.position);
+          edges.userData.restY = yCenter;
+          towerGroup.add(edges);
+          allBoxes.push({ mesh: edges, restY: yCenter });
+
+          // ~40% chance of a glow band atop this floor
+          if (Math.random() < 0.4) {
+            const variant = Math.random() < 0.55 ? glowA : glowB;
+            const mat = new THREE.MeshBasicMaterial({ color: variant, transparent: true, opacity: 0.9 });
+            const gGeom = new THREE.BoxGeometry(span * 1.02, 0.2, span * 1.02);
+            const g = new THREE.Mesh(gGeom, mat);
+            const yG = (f + 1) * FLOOR_H - 0.05;
+            g.position.set(0, yG, 0);
+            g.userData.restY = yG;
+            towerGroup.add(g);
+            allBoxes.push({ mesh: g, restY: yG });
+            glowFloors.push({ mesh: g, phase: Math.random() * Math.PI * 2, speed: 0.7 + Math.random() * 1.4 });
+          }
+        }
+
+        // Spire — thin cone at the top
+        const spireHeight = 4.0;
+        const spireBaseY = TOTAL_FLOORS * FLOOR_H;
+        const spireGeom = new THREE.ConeGeometry(0.18, spireHeight, 8);
+        const spireMat = new THREE.MeshStandardMaterial({
+          color: edgeColor,
+          roughness: 0.4,
+          metalness: 0.6,
+          transparent: true,
+          opacity: 0.9,
+        });
+        const spire = new THREE.Mesh(spireGeom, spireMat);
+        spire.position.set(0, spireBaseY + spireHeight / 2, 0);
+        spire.userData.restY = spire.position.y;
+        towerGroup.add(spire);
+        allBoxes.push({ mesh: spire, restY: spire.position.y });
+
+        // Red beacon at spire tip
+        const beaconGeom = new THREE.SphereGeometry(0.16, 12, 12);
+        const beaconMat = new THREE.MeshBasicMaterial({
+          color: 0xef4444,
+          transparent: true,
+          opacity: 1,
+        });
+        const beacon = new THREE.Mesh(beaconGeom, beaconMat);
+        beacon.position.set(0, spireBaseY + spireHeight + 0.1, 0);
+        beacon.userData.restY = beacon.position.y;
+        towerGroup.add(beacon);
+        allBoxes.push({ mesh: beacon, restY: beacon.position.y });
+        spireLight = { mesh: beacon, phase: 0 };
+      }
+
+      /* ------ Satellite Towers — distributed across the scene ------ */
+      // Configuration kept outside the builder so labels can reference anchor heights
+      const SATS = [
+        { x:  14, z:  10, floors:  9, w: 3, top: 'crane',    wireOnly: false },
+        { x: -12, z:   8, floors: 12, w: 3, top: 'antenna',  wireOnly: false },
+        { x:  10, z: -14, floors:  6, w: 4, top: null,       wireOnly: true  },
+        { x: -15, z: -10, floors: 14, w: 2, top: null,       wireOnly: false },
+        { x:  18, z:  -2, floors:  4, w: 5, top: null,       wireOnly: false },
+        { x:  -6, z: -18, floors:  8, w: 3, top: 'crane',    wireOnly: false },
+        { x:   5, z:  18, floors: 11, w: 2, top: null,       wireOnly: true  },
+      ];
+
+      function buildSatellites() {
+        satellitesGroup.clear();
+
+        const towerColor = getVarHex('--three-tower');
+        const edgeColor = getVarHex('--three-edge');
+        const glowA = getVarHex('--three-glow-a');
+        const glowB = getVarHex('--three-glow-b');
+
+        const fillMat = new THREE.MeshStandardMaterial({
+          color: towerColor,
+          roughness: 0.9,
+          metalness: 0.2,
+          transparent: true,
+          opacity: 0.15,
+        });
+        const edgeMat = new THREE.LineBasicMaterial({
+          color: edgeColor,
+          transparent: true,
+          opacity: 0.85,
+        });
+
+        SATS.forEach((s) => {
+          for (let f = 0; f < s.floors; f++) {
+            const span = s.w * UNIT;
+            const yCenter = f * FLOOR_H + FLOOR_H / 2;
+            const geom = new THREE.BoxGeometry(span - 0.08, FLOOR_H - FLOOR_GAP, span - 0.08);
+
+            // Skip fill for fully-wireframe "under construction" buildings
+            if (!s.wireOnly) {
+              const m = new THREE.Mesh(geom, fillMat);
+              m.position.set(s.x, yCenter, s.z);
+              m.userData.restY = yCenter;
+              satellitesGroup.add(m);
+              allBoxes.push({ mesh: m, restY: yCenter });
+            }
+
+            const eg = new THREE.EdgesGeometry(geom);
+            const el = new THREE.LineSegments(eg, edgeMat);
+            el.position.set(s.x, yCenter, s.z);
+            el.userData.restY = yCenter;
+            satellitesGroup.add(el);
+            allBoxes.push({ mesh: el, restY: yCenter });
+
+            // Glow accent bands on ~30% of floors
+            if (Math.random() < 0.30) {
+              const variant = Math.random() < 0.55 ? glowA : glowB;
+              const mat = new THREE.MeshBasicMaterial({ color: variant, transparent: true, opacity: 0.9 });
+              const gGeom = new THREE.BoxGeometry(span * 1.02, 0.16, span * 1.02);
+              const g = new THREE.Mesh(gGeom, mat);
+              const yG = (f + 1) * FLOOR_H - 0.05;
+              g.position.set(s.x, yG, s.z);
+              g.userData.restY = yG;
+              satellitesGroup.add(g);
+              allBoxes.push({ mesh: g, restY: yG });
+              glowFloors.push({ mesh: g, phase: Math.random() * Math.PI * 2, speed: 0.7 + Math.random() * 1.4 });
+            }
+          }
+        });
+      }
+
+      /* ------ Cranes / antennas on selected satellites ------ */
+      function buildCrane() {
+        craneGroup.clear();
+
+        const color = getVarHex('--three-fill');
+        const edgeColor = getVarHex('--three-edge');
+        const mat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.85 });
+
+        function addLine(points) {
+          const geom = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(...p)));
+          const line = new THREE.Line(geom, mat);
+          craneGroup.add(line);
+          return line;
+        }
+
+        function addCrane(mastX, mastZ, satFloors, jibDir) {
+          const mastBaseY = satFloors * FLOOR_H;
+          const mastTop = mastBaseY + 7;
+
+          // 4 vertical legs
+          const mw = 0.28;
+          const corners = [
+            [mastX - mw, mastZ - mw],
+            [mastX + mw, mastZ - mw],
+            [mastX + mw, mastZ + mw],
+            [mastX - mw, mastZ + mw],
+          ];
+          corners.forEach(([cx, cz]) => addLine([[cx, mastBaseY, cz], [cx, mastTop, cz]]));
+
+          // Cross ties every 1.2m
+          for (let y = mastBaseY; y <= mastTop; y += 1.2) {
+            addLine([
+              [corners[0][0], y, corners[0][1]],
+              [corners[1][0], y, corners[1][1]],
+              [corners[2][0], y, corners[2][1]],
+              [corners[3][0], y, corners[3][1]],
+              [corners[0][0], y, corners[0][1]],
+            ]);
+          }
+
+          // Jib + counter-jib (direction vector)
+          const jibY = mastTop - 0.4;
+          const jibLen = 7;
+          const cjLen = 2.5;
+          const jx = jibDir.x, jz = jibDir.z;
+          const jibEndX = mastX + jx * jibLen;
+          const jibEndZ = mastZ + jz * jibLen;
+          const cjEndX = mastX - jx * cjLen;
+          const cjEndZ = mastZ - jz * cjLen;
+
+          addLine([[mastX, jibY, mastZ], [jibEndX, jibY, jibEndZ]]);
+          addLine([[mastX, jibY, mastZ], [cjEndX, jibY, cjEndZ]]);
+          addLine([[mastX, jibY + 1.4, mastZ], [jibEndX - jx * 0.7, jibY, jibEndZ - jz * 0.7]]);
+          addLine([[mastX, jibY + 1.4, mastZ], [cjEndX + jx * 0.4, jibY, cjEndZ + jz * 0.4]]);
+
+          // Trolley + cable + hook
+          const tx = mastX + jx * (jibLen - 2.5);
+          const tz = mastZ + jz * (jibLen - 2.5);
+          addLine([[tx, jibY, tz], [tx, mastBaseY + 2.5, tz]]);
+
+          const hookGeom = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+          const hookMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 });
+          const hook = new THREE.Mesh(hookGeom, hookMat);
+          hook.position.set(tx, mastBaseY + 2.4, tz);
+          craneGroup.add(hook);
+
+          // Counter weight
+          const cwGeom = new THREE.BoxGeometry(0.8, 0.3, 0.55);
+          const cwMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.8 });
+          const cw = new THREE.Mesh(cwGeom, cwMat);
+          cw.position.set(cjEndX + jx * 0.2, jibY - 0.3, cjEndZ + jz * 0.2);
+          craneGroup.add(cw);
+        }
+
+        function addAntenna(x, z, satFloors) {
+          const baseY = satFloors * FLOOR_H;
+          const topY = baseY + 5.5;
+          addLine([[x, baseY, z], [x, topY, z]]);
+          // Red beacon at tip
+          const beaconMat = new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 1 });
+          const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 10), beaconMat);
+          beacon.position.set(x, topY + 0.15, z);
+          craneGroup.add(beacon);
+        }
+
+        // Walk satellites and add crane/antenna as configured
+        SATS.forEach((s) => {
+          if (s.top === 'crane') {
+            // Point jib toward main tower (origin)
+            const len = Math.hypot(s.x, s.z) || 1;
+            const dir = { x: -s.x / len, z: -s.z / len };
+            addCrane(s.x, s.z, s.floors, dir);
+          } else if (s.top === 'antenna') {
+            addAntenna(s.x, s.z, s.floors);
+          }
+        });
+      }
+
+      /* ------ Ground disc + concentric rings ------ */
+      let groundDisc = null;
+      const gridRings = [];
+
+      function buildGround() {
+        groundGroup.clear();
+        gridRings.length = 0;
+
+        const edgeColor = getVarHex('--three-edge');
+        const ambientColor = getVarHex('--three-ambient');
+
+        // Large circle as footprint — enlarged so all buildings fit
+        const discGeom = new THREE.CircleGeometry(50, 80);
+        const discMat = new THREE.MeshBasicMaterial({
+          color: ambientColor,
+          transparent: true,
+          opacity: 0.15,
+          side: THREE.DoubleSide,
+        });
+        groundDisc = new THREE.Mesh(discGeom, discMat);
+        groundDisc.rotation.x = -Math.PI / 2;
+        groundDisc.position.y = -0.05;
+        groundGroup.add(groundDisc);
+
+        // Concentric grid rings — more rings at larger radii
+        const ringSizes = [10, 18, 26, 34, 42, 52, 64, 78];
+        ringSizes.forEach((size) => {
+          const divisions = Math.floor(size * 1.2);
+          const g = new THREE.GridHelper(size, divisions, edgeColor, edgeColor);
+          g.material.transparent = true;
+          g.material.opacity = 0.12 - (size / 600);
+          g.position.y = 0;
+          groundGroup.add(g);
+          gridRings.push(g);
+        });
+      }
+
+      /* ------ Particles ------ */
+      const PARTICLE_COUNT = 180;
+
+      function buildParticles() {
+        particleGroup.clear();
+        particleVelocities.length = 0;
+
+        const geom = new THREE.BufferGeometry();
+        const positions = new Float32Array(PARTICLE_COUNT * 3);
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const r = 10 + Math.random() * 24;
+          const theta = Math.random() * Math.PI * 2;
+          positions[i * 3]     = Math.cos(theta) * r;
+          positions[i * 3 + 1] = Math.random() * 26;
+          positions[i * 3 + 2] = Math.sin(theta) * r;
+          particleVelocities.push({
+            x: (Math.random() - 0.5) * 0.010,
+            y: (Math.random() - 0.5) * 0.005 + 0.004,
+            z: (Math.random() - 0.5) * 0.010,
+          });
+        }
+        geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const color = getVarHex('--three-particle');
+        const mat = new THREE.PointsMaterial({
+          color,
+          size: 0.22,
+          map: circleTexture(),
+          transparent: true,
+          opacity: 0.85,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          sizeAttenuation: true,
+        });
+        particles = new THREE.Points(geom, mat);
+        particleGroup.add(particles);
+      }
+
+      /* ------ Floating HTML property labels ------ */
+      const labelContainer = document.getElementById('three-labels');
+      const mobileLabels = window.matchMedia('(max-width: 768px)');
+
+      // Anchor Y for main tower top region, satellites approximate heights
+      // Main tower: 22 floors * 0.85 = 18.7 → label at ~18
+      // Satellite label anchors sit roughly at (floors * 0.85) + small bump
+      const labels = [
+        { pos: new THREE.Vector3(  0, 19,   0), title: 'EUR 4.2M',     sub: 'Tower 01 - 22 floors',      icon: 'E', accent: 'accent',   priority: 1 },
+        { pos: new THREE.Vector3( 14, 10,  10), title: 'BOQ: 312',     sub: 'positions - tower 02',      icon: 'B', accent: 'accent-2', priority: 2 },
+        { pos: new THREE.Vector3(-12, 12,   8), title: 'Q3 2026',      sub: 'schedule - 4D - 12 fl',     icon: 'S', accent: 'accent-3', priority: 3 },
+        { pos: new THREE.Vector3( 10,  7, -14), title: '128 t CO2',    sub: 'carbon footprint - 6 fl',   icon: 'C', accent: 'accent-2', priority: 4 },
+        { pos: new THREE.Vector3(-15, 13, -10), title: '94% match',    sub: 'AI takeoff - 14 floors',    icon: 'A', accent: 'accent',   priority: 5 },
+        { pos: new THREE.Vector3( 18,  5,  -2), title: '840 t steel',  sub: 'materials - low-rise',      icon: 'M', accent: 'accent-3', priority: 6 },
+      ];
+      // Human-readable icon glyphs (using safe unicode that renders across fonts)
+      const iconMap = { E: '\u20AC', B: '\u2630', S: '\u25F7', C: '\u25C9', A: '\u2736', M: '\u2692' };
+
+      function buildLabels() {
+        labelContainer.innerHTML = '';
+        labels.forEach((l, i) => {
+          const el = document.createElement('div');
+          el.className = 'three-label';
+          el.dataset.accent = l.accent;
+          if (l.priority <= 3) el.classList.add('is-mobile-shown');
+          el.innerHTML = `
+            <span class="three-label-icon">${iconMap[l.icon] || l.icon}</span>
+            <span class="three-label-body">
+              <b>${l.title}</b>
+              <span>${l.sub}</span>
+            </span>
+            <svg class="three-label-stem" viewBox="0 0 10 30" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+              <line x1="5" y1="0" x2="5" y2="28"/>
+              <circle cx="5" cy="29" r="1.5" fill="currentColor"/>
+            </svg>
+          `;
+          labelContainer.appendChild(el);
+          l.el = el;
+        });
+        // Staggered entrance
+        if (!reduceMotion) {
+          gsap.to(labels.map(l => l.el), {
+            opacity: 1,
+            duration: 0.6,
+            delay: 1.6,
+            stagger: 0.12,
+            ease: 'power2.out',
+          });
+        } else {
+          labels.forEach(l => { l.el.style.opacity = '1'; });
+        }
+      }
+      buildLabels();
+
+      const worldAnchor = new THREE.Vector3();
+      function updateLabels() {
+        const rect = canvas.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+        labels.forEach(l => {
+          if (!l.el) return;
+          // Transform anchor through sceneRoot rotation to stay attached to rotating buildings
+          worldAnchor.copy(l.pos).applyMatrix4(sceneRoot.matrixWorld);
+          const p = worldAnchor.project(camera);
+          const x = (p.x * 0.5 + 0.5) * w;
+          const y = (-p.y * 0.5 + 0.5) * h;
+          const inFront = p.z < 1 && p.z > -1;
+          const inBounds = x > 10 && x < w - 10 && y > 10 && y < h - 10;
+          l.el.style.transform = `translate(${x}px, ${y}px)`;
+          // Hide if behind camera or out of canvas bounds; entrance animation controls reveal opacity
+          l.el.style.visibility = (inFront && inBounds) ? 'visible' : 'hidden';
+        });
+      }
+
+      /* ------ Theme colors ------ */
+      function applyThemeColors() {
+        ambient.color.setHex(getVarHex('--three-ambient'));
+        keyLight.color.setHex(getVarHex('--three-key'));
+        fillLight.color.setHex(getVarHex('--three-fill'));
+        scene.fog = new THREE.FogExp2(getVarHex('--three-fog'), 0.018);
+      }
+
+      function rebuildAll() {
+        // reset
+        allBoxes.length = 0;
+        glowFloors.length = 0;
+        applyThemeColors();
+        buildTower();
+        buildSatellites();
+        buildCrane();
+        buildGround();
+        buildParticles();
+      }
+      rebuildAll();
+
+      /* ------ Entrance animation ------ */
+      function playEntrance() {
+        if (reduceMotion) return;
+        allBoxes.forEach(({ mesh, restY }) => {
+          mesh.position.y = restY - 20;
+          mesh.visible = true;
+        });
+        gsap.to(allBoxes.map(b => b.mesh.position), {
+          y: (i) => allBoxes[i].restY,
+          duration: 2.0,
+          ease: 'power3.out',
+          stagger: { amount: 1.1, from: 'random' },
+        });
+      }
+      playEntrance();
+
+      /* ------ Resize ------ */
+      function resize() {
+        const w = canvas.clientWidth || canvas.parentElement.clientWidth || window.innerWidth / 2;
+        const h = canvas.clientHeight || canvas.parentElement.clientHeight || window.innerHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      resize();
+      window.addEventListener('resize', resize);
+      // Observer for container resize (since our canvas sits inside a grid column)
+      if (typeof ResizeObserver !== 'undefined') {
+        const ro = new ResizeObserver(() => resize());
+        ro.observe(canvas.parentElement);
+      }
+
+      /* ------ Mouse parallax ------ */
+      const targetOffset = { x: 0, y: 0 };
+      const currentOffset = { x: 0, y: 0 };
+      window.addEventListener('pointermove', (e) => {
+        const nx = (e.clientX / window.innerWidth) * 2 - 1;
+        const ny = (e.clientY / window.innerHeight) * 2 - 1;
+        targetOffset.x = nx * 2.5;
+        targetOffset.y = -ny * 1.5;
+      });
+
+      /* ------ Scroll parallax ------ */
+      let scrollY = 0;
+      window.addEventListener('scroll', () => { scrollY = window.scrollY || 0; }, { passive: true });
+
+      /* ------ Animate ------ */
+      const clock = new THREE.Clock();
+
+      function tick() {
+        const t = clock.getElapsedTime();
+        const dt = clock.getDelta() || 0.016;
+
+        // Smooth parallax lerp
+        currentOffset.x += (targetOffset.x - currentOffset.x) * 0.04;
+        currentOffset.y += (targetOffset.y - currentOffset.y) * 0.04;
+
+        // Auto Y rotation
+        sceneRoot.rotation.y += 0.002 * 60 * dt;
+
+        // Camera position w/ parallax + scroll zoom
+        const zoom = Math.min(scrollY * 0.015, 5);
+        camera.position.x = baseCamPos.x + currentOffset.x;
+        camera.position.y = baseCamPos.y + currentOffset.y - zoom * 0.2;
+        camera.position.z = baseCamPos.z - zoom;
+        camera.lookAt(0, 10, 0);
+
+        // Glow pulses
+        glowFloors.forEach(({ mesh, phase, speed }) => {
+          const p = 0.5 + 0.5 * Math.sin(t * speed + phase);
+          mesh.material.opacity = 0.55 + 0.40 * p;
+          mesh.scale.y = 0.85 + 0.25 * p;
+        });
+
+        // Spire beacon blink (1Hz)
+        if (spireLight) {
+          const blink = 0.55 + 0.45 * Math.sin(t * Math.PI * 2);
+          spireLight.mesh.material.opacity = 0.35 + 0.65 * Math.max(0, blink);
+          spireLight.mesh.scale.setScalar(0.85 + 0.35 * Math.max(0, blink));
+        }
+
+        // Particles drift
+        if (particles) {
+          const pos = particles.geometry.attributes.position;
+          for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const v = particleVelocities[i];
+            pos.array[i * 3]     += v.x;
+            pos.array[i * 3 + 1] += v.y;
+            pos.array[i * 3 + 2] += v.z;
+            if (pos.array[i * 3 + 1] > 28) pos.array[i * 3 + 1] = 0;
+            if (pos.array[i * 3]     > 34) pos.array[i * 3]     = -34;
+            if (pos.array[i * 3]     < -34) pos.array[i * 3]    = 34;
+            if (pos.array[i * 3 + 2] > 34) pos.array[i * 3 + 2] = -34;
+            if (pos.array[i * 3 + 2] < -34) pos.array[i * 3 + 2] = 34;
+          }
+          pos.needsUpdate = true;
+        }
+
+        renderer.render(scene, camera);
+
+        // Update floating HTML labels (after render so matrices are current)
+        updateLabels();
+      }
+
+      if (reduceMotion) {
+        tick();
+      } else {
+        renderer.setAnimationLoop(tick);
+      }
+
+      canvas.classList.add('is-ready');
+
+      /* ------ Theme change handling ------ */
+      themeListeners.add(() => {
+        rebuildAll();
+        if (window.scrollY < 120 && !reduceMotion) {
+          playEntrance();
+        }
+      });
+    }
+
+    // Init Three (with fallback)
+    try {
+      initThree();
+    } catch (err) {
+      console.warn('Three.js init failed — falling back to static scene', err);
+      canvas.style.display = 'none';
+      document.querySelector('.static-scene').style.display = 'flex';
+    }
+
+    // Toggle canvas vs static fallback on breakpoint change
+    mobileHide.addEventListener?.('change', (e) => {
+      const staticEl = document.querySelector('.static-scene');
+      if (e.matches) {
+        canvas.style.display = 'none';
+        staticEl.style.display = 'flex';
+      } else {
+        canvas.style.display = 'block';
+        staticEl.style.display = 'none';
+      }
+    });
+
+    /* ================================================================ */
+    /* KICK ENTRANCE AFTER FONTS SETTLE                                  */
+    /* ================================================================ */
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => animateIn());
+    } else {
+      animateIn();
+    }
+  </script>
+
+</body>
+</html>

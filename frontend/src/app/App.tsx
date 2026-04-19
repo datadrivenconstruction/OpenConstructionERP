@@ -1,5 +1,5 @@
 import { Suspense, lazy, useState, useCallback, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppLayout } from './layout';
 import { DashboardPage } from '@/features/dashboard';
 import { LoginPage, RegisterPage, ForgotPasswordPage } from '@/features/auth';
@@ -164,8 +164,14 @@ function LoadingScreen() {
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const location = useLocation();
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    // Preserve intended destination so the user lands where they wanted
+    // after signing in (BUG-047). Avoids the "bookmarked /boq then sent
+    // back to /" UX papercut.
+    const next = `${location.pathname}${location.search}`;
+    const qs = next && next !== '/' ? `?next=${encodeURIComponent(next)}` : '';
+    return <Navigate to={`/login${qs}`} replace />;
   }
   return <>{children}</>;
 }

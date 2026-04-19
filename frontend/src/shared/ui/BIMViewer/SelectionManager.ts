@@ -40,6 +40,10 @@ export class SelectionManager {
 
   private selectedIds = new Set<string>();
   private hoveredId: string | null = null;
+  /** When false, click / hover / right-click handling is skipped so another
+   *  tool (e.g. the measure tool) can own pointer interaction without the
+   *  selection machinery firing alongside it. */
+  private suspended = false;
 
   /** Store original materials so they can be restored after deselection. */
   private originalMaterials = new Map<string, THREE.Material>();
@@ -179,13 +183,28 @@ export class SelectionManager {
     return (hit.object.userData as { elementId?: string }).elementId ?? null;
   }
 
+  /** Turn click / hover / right-click selection handling on or off.
+   *  Used by the measure tool to avoid fighting over pointer clicks. */
+  setSuspended(suspended: boolean): void {
+    this.suspended = suspended;
+    if (suspended) {
+      if (this.hoveredId && !this.selectedIds.has(this.hoveredId)) {
+        this.restoreMaterial(this.hoveredId);
+      }
+      this.hoveredId = null;
+      this.canvas.style.cursor = '';
+    }
+  }
+
   private onPointerDown(e: PointerEvent): void {
+    if (this.suspended) return;
     if (e.button !== 0) return; // only left button
     this.pointerDownPos = { x: e.clientX, y: e.clientY };
     this.pointerDownTime = Date.now();
   }
 
   private onPointerUp(e: PointerEvent): void {
+    if (this.suspended) return;
     if (e.button !== 0 || !this.pointerDownPos) return;
 
     // Check if this was a click (short, stationary) or a drag
@@ -240,6 +259,7 @@ export class SelectionManager {
   }
 
   private onContextMenu(e: MouseEvent): void {
+    if (this.suspended) return;
     e.preventDefault();
     const coords = this.getMouseCoords(e);
     const hit = this.raycast(coords);
@@ -261,6 +281,7 @@ export class SelectionManager {
   }
 
   private onDblClick(e: MouseEvent): void {
+    if (this.suspended) return;
     const coords = this.getMouseCoords(e);
     const hit = this.raycast(coords);
     const elementId = hit
@@ -271,6 +292,7 @@ export class SelectionManager {
   }
 
   private onMouseMove(e: MouseEvent): void {
+    if (this.suspended) return;
     const coords = this.getMouseCoords(e);
     const hit = this.raycast(coords);
     const elementId = hit

@@ -387,10 +387,14 @@ class ScheduleService:
         # Verify schedule exists
         await self.get_schedule(data.schedule_id)
 
-        # Auto-compute duration if not provided
+        # Auto-compute duration only when the client omitted it (sent explicit
+        # null / not provided). An explicit ``duration_days=0`` is respected
+        # so callers can create milestones / zero-duration events.
         duration = data.duration_days
-        if duration == 0 and data.start_date and data.end_date:
+        if duration is None and data.start_date and data.end_date:
             duration = compute_duration(data.start_date, data.end_date)
+        if duration is None:
+            duration = 0
 
         # Determine sort_order
         sort_order = data.sort_order

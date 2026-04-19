@@ -30,6 +30,7 @@ from app.modules.cde.schemas import (
     RevisionCreate,
     StateTransitionRequest,
 )
+from app.modules.cde.suitability import validate_suitability_for_state
 
 logger = logging.getLogger(__name__)
 
@@ -170,6 +171,21 @@ class CDEService:
 
         if not fields:
             return container
+
+        # Re-validate suitability when either the state or the suitability
+        # code changes on update — ContainerCreate has a model_validator,
+        # but ContainerUpdate is a partial schema and can't express the
+        # "state+code consistent" constraint on its own. Without this, an
+        # editor could PATCH ``suitability_code="S1"`` onto a published
+        # container and end up in an invalid ISO 19650 combo.
+        next_code = fields.get("suitability_code", container.suitability_code)
+        next_state = fields.get("cde_state", container.cde_state)
+        ok, reason = validate_suitability_for_state(next_code, next_state)
+        if not ok:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=reason,
+            )
 
         await self.container_repo.update_fields(container_id, **fields)
         await self.session.refresh(container)

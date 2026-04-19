@@ -163,6 +163,58 @@ class WorkflowService:
             offset=offset,
         )
 
+    async def _require_step_role(
+        self,
+        workflow_steps: list[dict] | None,
+        current_step: int,
+        user_id: str,
+    ) -> None:
+        """Enforce that *user_id*'s role matches the current step's ``role``
+        (or ``assignee_id`` if explicitly assigned). Raises 403 otherwise.
+
+        Steps without a role restriction stay open to anyone (legacy
+        behaviour). This guards against BUG-156 — any authenticated user
+        could previously approve a step intended for a specific role.
+        """
+        if not workflow_steps:
+            return
+        idx = max(0, min(len(workflow_steps) - 1, current_step - 1))
+        step = workflow_steps[idx] or {}
+        required_role = (step.get("role") or "").strip()
+        required_assignee = step.get("assignee_id")
+        if not required_role and not required_assignee:
+            return
+
+        from uuid import UUID as _UUID
+
+        from app.core.permissions import ROLE_HIERARCHY, _resolve_role
+        from app.modules.users.models import User as _UserModel
+
+        try:
+            user = await self.session.get(_UserModel, _UUID(user_id))
+        except Exception:
+            user = None
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User not authorised for this approval step",
+            )
+
+        if required_assignee and str(required_assignee) != str(user_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Step is assigned to a different reviewer",
+            )
+
+        if required_role:
+            user_role = _resolve_role(user.role)
+            needed = _resolve_role(required_role)
+            if user_role is None or needed is None or ROLE_HIERARCHY.get(user_role, -1) < ROLE_HIERARCHY.get(needed, 999):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Step requires role '{required_role}'",
+                )
+
     async def approve_request(
         self,
         request_id: uuid.UUID,
@@ -185,6 +237,9 @@ class WorkflowService:
         workflow = await self.get_workflow(request.workflow_id)
         total_steps = len(workflow.steps) if workflow.steps else 1
         current_step = request.current_step
+
+        # Enforce per-step role / assignee before accepting the decision.
+        await self._require_step_role(workflow.steps, current_step, user_id)
 
         if current_step < total_steps:
             # Advance to next step — not fully approved yet
@@ -226,6 +281,9 @@ class WorkflowService:
                 detail=f"Cannot reject request in status '{request.status}'",
             )
 
+        workflow = await self.get_workflow(request.workflow_id)
+        await self._require_step_role(workflow.steps, request.current_step, user_id)
+
         await self.requests.update(
             request_id,
             status="rejected",
@@ -241,4 +299,52 @@ class WorkflowService:
                 detail="Approval request not found",
             )
         logger.info("Approval request rejected: %s", request_id)
+        return updated
+
+    async def cancel_request(
+        self,
+        request_id: uuid.UUID,
+        user_id: str,
+    ) -> ApprovalRequest:
+        """Withdraw a still-pending request.
+
+        Only the original requester (or an admin) may cancel — closes the
+        "once submitted, stuck forever" gap in the workflow engine.
+        """
+        from app.core.permissions import Role, _resolve_role
+        from app.modules.users.models import User as _UserModel
+
+        request = await self.get_request(request_id)
+        if request.status != "pending":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Cannot cancel request in status '{request.status}'",
+            )
+
+        is_owner = str(request.requested_by) == str(user_id)
+        if not is_owner:
+            try:
+                user = await self.session.get(_UserModel, uuid.UUID(user_id))
+            except Exception:
+                user = None
+            if user is None or _resolve_role(user.role) != Role.ADMIN:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Only the requester or an admin can cancel this request",
+                )
+
+        await self.requests.update(
+            request_id,
+            status="cancelled",
+            decided_by=uuid.UUID(user_id),
+            decided_at=datetime.now(UTC).isoformat(),
+        )
+
+        updated = await self.requests.get(request_id)
+        if updated is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Approval request not found",
+            )
+        logger.info("Approval request cancelled: %s by %s", request_id, user_id)
         return updated

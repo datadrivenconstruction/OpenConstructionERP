@@ -1,0 +1,7309 @@
+[
+  {
+    "method": "POST",
+    "path": "/api/v1/modules/{module_name}/enable",
+    "resolved": "/api/v1/modules/x/enable",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/modules/{module_name}/disable",
+    "resolved": "/api/v1/modules/x/disable",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/demo/install/{demo_id}",
+    "resolved": "/api/demo/install/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/demo/uninstall/{demo_id}",
+    "resolved": "/api/demo/uninstall/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/demo/clear-all",
+    "resolved": "/api/demo/clear-all",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/feedback",
+    "resolved": "/api/v1/feedback",
+    "codes": {
+      "none": 200,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "allowed",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/users/auth/register/",
+    "resolved": "/api/v1/users/auth/register/",
+    "codes": {
+      "none": 422,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "passed_auth_validation_fail",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/users/auth/login/",
+    "resolved": "/api/v1/users/auth/login/",
+    "codes": {
+      "none": 422,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "passed_auth_validation_fail",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/users/auth/refresh/",
+    "resolved": "/api/v1/users/auth/refresh/",
+    "codes": {
+      "none": 422,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "passed_auth_validation_fail",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/users/auth/forgot-password/",
+    "resolved": "/api/v1/users/auth/forgot-password/",
+    "codes": {
+      "none": 422,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "passed_auth_validation_fail",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/users/auth/reset-password/",
+    "resolved": "/api/v1/users/auth/reset-password/",
+    "codes": {
+      "none": 422,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "passed_auth_validation_fail",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/users/me/",
+    "resolved": "/api/v1/users/me/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/users/me/change-password/",
+    "resolved": "/api/v1/users/me/change-password/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/users/me/preferences/",
+    "resolved": "/api/v1/users/me/preferences/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/users/me/api-keys/",
+    "resolved": "/api/v1/users/me/api-keys/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/users/me/api-keys/{key_id}",
+    "resolved": "/api/v1/users/me/api-keys/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/users/me/module-preferences/",
+    "resolved": "/api/v1/users/me/module-preferences/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/users/me/onboarding/",
+    "resolved": "/api/v1/users/me/onboarding/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/users/{user_id}",
+    "resolved": "/api/v1/users/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/users/{user_id}/module-access/",
+    "resolved": "/api/v1/users/00000000-0000-0000-0000-000000000000/module-access/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/projects/",
+    "resolved": "/api/v1/projects/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/projects/{project_id}",
+    "resolved": "/api/v1/projects/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/projects/{project_id}/",
+    "resolved": "/api/v1/projects/00000000-0000-0000-0000-000000000000/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/projects/{project_id}/restore/",
+    "resolved": "/api/v1/projects/00000000-0000-0000-0000-000000000000/restore/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/projects/{project_id}/wbs/",
+    "resolved": "/api/v1/projects/00000000-0000-0000-0000-000000000000/wbs/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/projects/{project_id}/wbs/{wbs_id}",
+    "resolved": "/api/v1/projects/00000000-0000-0000-0000-000000000000/wbs/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/projects/{project_id}/wbs/{wbs_id}",
+    "resolved": "/api/v1/projects/00000000-0000-0000-0000-000000000000/wbs/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/projects/{project_id}/milestones/",
+    "resolved": "/api/v1/projects/00000000-0000-0000-0000-000000000000/milestones/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/projects/{project_id}/milestones/{milestone_id}",
+    "resolved": "/api/v1/projects/00000000-0000-0000-0000-000000000000/milestones/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/projects/{project_id}/milestones/{milestone_id}",
+    "resolved": "/api/v1/projects/00000000-0000-0000-0000-000000000000/milestones/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/",
+    "resolved": "/api/v1/boq/boqs/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/from-template/",
+    "resolved": "/api/v1/boq/boqs/from-template/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/classify/",
+    "resolved": "/api/v1/boq/boqs/classify/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/classify-elements/",
+    "resolved": "/api/v1/boq/boqs/classify-elements/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/search-cost-items/",
+    "resolved": "/api/v1/boq/boqs/search-cost-items/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/suggest-rate/",
+    "resolved": "/api/v1/boq/boqs/suggest-rate/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/check-anomalies/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/check-anomalies/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/enhance-description/",
+    "resolved": "/api/v1/boq/boqs/enhance-description/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/suggest-prerequisites/",
+    "resolved": "/api/v1/boq/boqs/suggest-prerequisites/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/check-scope/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/check-scope/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/escalate-rate/",
+    "resolved": "/api/v1/boq/boqs/escalate-rate/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/boq/boqs/{boq_id}",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/boq/boqs/{boq_id}",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/duplicate/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/duplicate/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/positions/{position_id}/duplicate/",
+    "resolved": "/api/v1/boq/positions/00000000-0000-0000-0000-000000000000/duplicate/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/lock/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/lock/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/unlock/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/unlock/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/create-budget/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/create-budget/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/create-revision/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/create-revision/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/positions/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/positions/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/positions/bulk/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/positions/bulk/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 400
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/boq/positions/{position_id}",
+    "resolved": "/api/v1/boq/positions/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/boq/positions/{position_id}",
+    "resolved": "/api/v1/boq/positions/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/positions/reorder/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/positions/reorder/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/sections/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/sections/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/markups/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/markups/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/boq/boqs/{boq_id}/markups/{markup_id}",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/markups/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/boq/boqs/{boq_id}/markups/{markup_id}",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/markups/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/markups/apply-defaults/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/markups/apply-defaults/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/snapshots/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/snapshots/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/restore/{snapshot_id}",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/restore/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/recalculate-rates/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/recalculate-rates/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/validate/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/validate/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/ai-chat/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/ai-chat/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/import/excel/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/import/excel/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/import/smart/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/import/smart/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/enrich-resources/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/enrich-resources/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/enrich-co2/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/enrich-co2/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/boq/positions/{position_id}/co2/",
+    "resolved": "/api/v1/boq/positions/00000000-0000-0000-0000-000000000000/co2/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/columns/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/columns/",
+    "codes": {
+      "none": 401,
+      "estimator": 400,
+      "manager": 400,
+      "admin": 400
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/boq/boqs/{boq_id}/columns/{column_name}",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/columns/x",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/boqs/{boq_id}/renumber/",
+    "resolved": "/api/v1/boq/boqs/00000000-0000-0000-0000-000000000000/renumber/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/boq/vector/reindex/",
+    "resolved": "/api/v1/boq/vector/reindex/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/ai/settings/",
+    "resolved": "/api/v1/ai/settings/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ai/settings/test/",
+    "resolved": "/api/v1/ai/settings/test/",
+    "codes": {
+      "none": 401,
+      "estimator": 400,
+      "manager": 400,
+      "admin": 400
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ai/quick-estimate/",
+    "resolved": "/api/v1/ai/quick-estimate/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ai/photo-estimate/",
+    "resolved": "/api/v1/ai/photo-estimate/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ai/file-estimate/",
+    "resolved": "/api/v1/ai/file-estimate/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ai/estimate/{job_id}/create-boq/",
+    "resolved": "/api/v1/ai/estimate/00000000-0000-0000-0000-000000000000/create-boq/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ai/estimate/{job_id}/enrich/",
+    "resolved": "/api/v1/ai/estimate/00000000-0000-0000-0000-000000000000/enrich/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ai/advisor/chat/",
+    "resolved": "/api/v1/ai/advisor/chat/",
+    "codes": {
+      "none": 401,
+      "estimator": 400,
+      "manager": 400,
+      "admin": 400
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costs/",
+    "resolved": "/api/v1/costs/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/costs/actions/clear-region/{region}",
+    "resolved": "/api/v1/costs/actions/clear-region/x",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costs/vector/index/",
+    "resolved": "/api/v1/costs/vector/index/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costs/vector/load-github/{db_id}",
+    "resolved": "/api/v1/costs/vector/load-github/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costs/vector/restore-snapshot/{db_id}",
+    "resolved": "/api/v1/costs/vector/restore-snapshot/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 400,
+      "manager": 400,
+      "admin": 400
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/costs/{item_id}",
+    "resolved": "/api/v1/costs/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/costs/{item_id}",
+    "resolved": "/api/v1/costs/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costs/bulk/",
+    "resolved": "/api/v1/costs/bulk/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costs/import/file/",
+    "resolved": "/api/v1/costs/import/file/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costs/load-cwicr/{db_id}/",
+    "resolved": "/api/v1/costs/load-cwicr/00000000-0000-0000-0000-000000000000/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/costs/actions/clear-database/",
+    "resolved": "/api/v1/costs/actions/clear-database/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costs/suggest-for-element/",
+    "resolved": "/api/v1/costs/suggest-for-element/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costs/suggest-for-element/{bim_element_id}/",
+    "resolved": "/api/v1/costs/suggest-for-element/00000000-0000-0000-0000-000000000000/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/assemblies/",
+    "resolved": "/api/v1/assemblies/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/assemblies/ai-generate/",
+    "resolved": "/api/v1/assemblies/ai-generate/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/assemblies/{assembly_id}",
+    "resolved": "/api/v1/assemblies/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/assemblies/{assembly_id}",
+    "resolved": "/api/v1/assemblies/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/assemblies/{assembly_id}/components/",
+    "resolved": "/api/v1/assemblies/00000000-0000-0000-0000-000000000000/components/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/assemblies/{assembly_id}/components/{component_id}",
+    "resolved": "/api/v1/assemblies/00000000-0000-0000-0000-000000000000/components/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/assemblies/{assembly_id}/components/{component_id}",
+    "resolved": "/api/v1/assemblies/00000000-0000-0000-0000-000000000000/components/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/assemblies/{assembly_id}/apply-to-boq/",
+    "resolved": "/api/v1/assemblies/00000000-0000-0000-0000-000000000000/apply-to-boq/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/assemblies/{assembly_id}/clone/",
+    "resolved": "/api/v1/assemblies/00000000-0000-0000-0000-000000000000/clone/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/assemblies/{assembly_id}/reorder-components/",
+    "resolved": "/api/v1/assemblies/00000000-0000-0000-0000-000000000000/reorder-components/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/assemblies/import/",
+    "resolved": "/api/v1/assemblies/import/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/assemblies/{assembly_id}/tags/",
+    "resolved": "/api/v1/assemblies/00000000-0000-0000-0000-000000000000/tags/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/backup/export/",
+    "resolved": "/api/v1/backup/export/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/backup/restore/",
+    "resolved": "/api/v1/backup/restore/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/backup/validate/",
+    "resolved": "/api/v1/backup/validate/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/upload/",
+    "resolved": "/api/v1/bim_hub/upload/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/upload-cad/",
+    "resolved": "/api/v1/bim_hub/upload-cad/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/{model_id}/generate-pdf-sheets/",
+    "resolved": "/api/v1/bim_hub/00000000-0000-0000-0000-000000000000/generate-pdf-sheets/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/",
+    "resolved": "/api/v1/bim_hub/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/bim_hub/{model_id}",
+    "resolved": "/api/v1/bim_hub/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/bim_hub/{model_id}",
+    "resolved": "/api/v1/bim_hub/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/cleanup-stale/",
+    "resolved": "/api/v1/bim_hub/cleanup-stale/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/cleanup-orphans/",
+    "resolved": "/api/v1/bim_hub/cleanup-orphans/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/models/{model_id}/elements/",
+    "resolved": "/api/v1/bim_hub/models/00000000-0000-0000-0000-000000000000/elements/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/models/{model_id}/elements/by-ids/",
+    "resolved": "/api/v1/bim_hub/models/00000000-0000-0000-0000-000000000000/elements/by-ids/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/models/{model_id}/ensure-element/",
+    "resolved": "/api/v1/bim_hub/models/00000000-0000-0000-0000-000000000000/ensure-element/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/links/",
+    "resolved": "/api/v1/bim_hub/links/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/bim_hub/links/{link_id}",
+    "resolved": "/api/v1/bim_hub/links/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/quantity-maps/",
+    "resolved": "/api/v1/bim_hub/quantity-maps/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/bim_hub/quantity-maps/{map_id}",
+    "resolved": "/api/v1/bim_hub/quantity-maps/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/quantity-maps/apply/",
+    "resolved": "/api/v1/bim_hub/quantity-maps/apply/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/models/{model_id}/diff/{old_id}",
+    "resolved": "/api/v1/bim_hub/models/00000000-0000-0000-0000-000000000000/diff/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/element-groups/",
+    "resolved": "/api/v1/bim_hub/element-groups/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/bim_hub/element-groups/{group_id}",
+    "resolved": "/api/v1/bim_hub/element-groups/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/bim_hub/element-groups/{group_id}",
+    "resolved": "/api/v1/bim_hub/element-groups/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/vector/reindex/",
+    "resolved": "/api/v1/bim_hub/vector/reindex/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_hub/models/{model_id}/dataframe/query/",
+    "resolved": "/api/v1/bim_hub/models/00000000-0000-0000-0000-000000000000/dataframe/query/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_requirements/import/upload/",
+    "resolved": "/api/v1/bim_requirements/import/upload/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/bim_requirements/sets/{set_id}/",
+    "resolved": "/api/v1/bim_requirements/sets/00000000-0000-0000-0000-000000000000/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_requirements/export/{set_id}/excel/",
+    "resolved": "/api/v1/bim_requirements/export/00000000-0000-0000-0000-000000000000/excel/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_requirements/export/{set_id}/ids/",
+    "resolved": "/api/v1/bim_requirements/export/00000000-0000-0000-0000-000000000000/ids/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bim_requirements/validate/{set_id}/",
+    "resolved": "/api/v1/bim_requirements/validate/00000000-0000-0000-0000-000000000000/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/catalog/import/{region}",
+    "resolved": "/api/v1/catalog/import/x",
+    "codes": {
+      "none": 401,
+      "estimator": 400,
+      "manager": 400,
+      "admin": 400
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/catalog/region/{region}",
+    "resolved": "/api/v1/catalog/region/x",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/catalog/adjust-prices/",
+    "resolved": "/api/v1/catalog/adjust-prices/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/catalog/",
+    "resolved": "/api/v1/catalog/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/catalog/extract/",
+    "resolved": "/api/v1/catalog/extract/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/documents/upload/",
+    "resolved": "/api/v1/documents/upload/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/documents/photos/upload/",
+    "resolved": "/api/v1/documents/photos/upload/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/documents/photos/{photo_id}",
+    "resolved": "/api/v1/documents/photos/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/documents/photos/{photo_id}",
+    "resolved": "/api/v1/documents/photos/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/documents/sheets/split-pdf/",
+    "resolved": "/api/v1/documents/sheets/split-pdf/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/documents/sheets/{sheet_id}",
+    "resolved": "/api/v1/documents/sheets/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/documents/bim-links/",
+    "resolved": "/api/v1/documents/bim-links/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/documents/bim-links/{link_id}",
+    "resolved": "/api/v1/documents/bim-links/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/documents/batch/delete/",
+    "resolved": "/api/v1/documents/batch/delete/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/documents/{document_id}",
+    "resolved": "/api/v1/documents/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/documents/{document_id}",
+    "resolved": "/api/v1/documents/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/documents/vector/reindex/",
+    "resolved": "/api/v1/documents/vector/reindex/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/cde/containers/",
+    "resolved": "/api/v1/cde/containers/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/cde/containers/{container_id}",
+    "resolved": "/api/v1/cde/containers/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/cde/containers/{container_id}/transition/",
+    "resolved": "/api/v1/cde/containers/00000000-0000-0000-0000-000000000000/transition/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/cde/containers/{container_id}/revisions/",
+    "resolved": "/api/v1/cde/containers/00000000-0000-0000-0000-000000000000/revisions/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/changeorders/",
+    "resolved": "/api/v1/changeorders/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/changeorders/{order_id}",
+    "resolved": "/api/v1/changeorders/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/changeorders/{order_id}",
+    "resolved": "/api/v1/changeorders/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/changeorders/{order_id}/items/",
+    "resolved": "/api/v1/changeorders/00000000-0000-0000-0000-000000000000/items/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/changeorders/{order_id}/items/{item_id}",
+    "resolved": "/api/v1/changeorders/00000000-0000-0000-0000-000000000000/items/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/changeorders/{order_id}/items/{item_id}",
+    "resolved": "/api/v1/changeorders/00000000-0000-0000-0000-000000000000/items/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/changeorders/{order_id}/submit/",
+    "resolved": "/api/v1/changeorders/00000000-0000-0000-0000-000000000000/submit/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/changeorders/{order_id}/approve/",
+    "resolved": "/api/v1/changeorders/00000000-0000-0000-0000-000000000000/approve/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/changeorders/{order_id}/reject/",
+    "resolved": "/api/v1/changeorders/00000000-0000-0000-0000-000000000000/reject/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/collaboration/comments/",
+    "resolved": "/api/v1/collaboration/comments/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/collaboration/comments/{comment_id}",
+    "resolved": "/api/v1/collaboration/comments/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/collaboration/comments/{comment_id}",
+    "resolved": "/api/v1/collaboration/comments/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/collaboration/viewpoints/",
+    "resolved": "/api/v1/collaboration/viewpoints/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/collaboration_locks/",
+    "resolved": "/api/v1/collaboration_locks/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/collaboration_locks/{lock_id}/heartbeat/",
+    "resolved": "/api/v1/collaboration_locks/00000000-0000-0000-0000-000000000000/heartbeat/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/collaboration_locks/{lock_id}/",
+    "resolved": "/api/v1/collaboration_locks/00000000-0000-0000-0000-000000000000/",
+    "codes": {
+      "none": 401,
+      "estimator": 204,
+      "manager": 204,
+      "admin": 204
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/contacts/",
+    "resolved": "/api/v1/contacts/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/contacts/import/file/",
+    "resolved": "/api/v1/contacts/import/file/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/contacts/{contact_id}",
+    "resolved": "/api/v1/contacts/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/contacts/{contact_id}",
+    "resolved": "/api/v1/contacts/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/correspondence/",
+    "resolved": "/api/v1/correspondence/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/correspondence/{correspondence_id}",
+    "resolved": "/api/v1/correspondence/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/correspondence/{correspondence_id}",
+    "resolved": "/api/v1/correspondence/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costmodel/projects/{project_id}/5d/budget-lines/",
+    "resolved": "/api/v1/costmodel/projects/00000000-0000-0000-0000-000000000000/5d/budget-lines/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/costmodel/5d/budget-lines/{line_id}",
+    "resolved": "/api/v1/costmodel/5d/budget-lines/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/costmodel/5d/budget-lines/{line_id}",
+    "resolved": "/api/v1/costmodel/5d/budget-lines/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costmodel/projects/{project_id}/5d/generate-budget/",
+    "resolved": "/api/v1/costmodel/projects/00000000-0000-0000-0000-000000000000/5d/generate-budget/",
+    "codes": {
+      "none": 401,
+      "estimator": 400,
+      "manager": 400,
+      "admin": 400
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costmodel/projects/{project_id}/5d/snapshots/",
+    "resolved": "/api/v1/costmodel/projects/00000000-0000-0000-0000-000000000000/5d/snapshots/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/costmodel/5d/snapshots/{snapshot_id}",
+    "resolved": "/api/v1/costmodel/5d/snapshots/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/costmodel/projects/{project_id}/5d/snapshots/{snapshot_id}",
+    "resolved": "/api/v1/costmodel/projects/00000000-0000-0000-0000-000000000000/5d/snapshots/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costmodel/projects/{project_id}/5d/what-if/",
+    "resolved": "/api/v1/costmodel/projects/00000000-0000-0000-0000-000000000000/5d/what-if/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costmodel/projects/{project_id}/5d/generate-cash-flow/",
+    "resolved": "/api/v1/costmodel/projects/00000000-0000-0000-0000-000000000000/5d/generate-cash-flow/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/costmodel/projects/{project_id}/5d/monte-carlo/",
+    "resolved": "/api/v1/costmodel/projects/00000000-0000-0000-0000-000000000000/5d/monte-carlo/",
+    "codes": {
+      "none": 401,
+      "estimator": 400,
+      "manager": 400,
+      "admin": 400
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/dwg_takeoff/drawings/upload/",
+    "resolved": "/api/v1/dwg_takeoff/drawings/upload/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/dwg_takeoff/drawings/{drawing_id}",
+    "resolved": "/api/v1/dwg_takeoff/drawings/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/dwg_takeoff/drawings/{drawing_id}/layers",
+    "resolved": "/api/v1/dwg_takeoff/drawings/00000000-0000-0000-0000-000000000000/layers",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/dwg_takeoff/annotations/",
+    "resolved": "/api/v1/dwg_takeoff/annotations/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/dwg_takeoff/annotations/{annotation_id}",
+    "resolved": "/api/v1/dwg_takeoff/annotations/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/dwg_takeoff/annotations/{annotation_id}",
+    "resolved": "/api/v1/dwg_takeoff/annotations/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/dwg_takeoff/annotations/{annotation_id}/link-boq/",
+    "resolved": "/api/v1/dwg_takeoff/annotations/00000000-0000-0000-0000-000000000000/link-boq/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/enterprise_workflows/",
+    "resolved": "/api/v1/enterprise_workflows/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/enterprise_workflows/{workflow_id}",
+    "resolved": "/api/v1/enterprise_workflows/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/enterprise_workflows/{workflow_id}",
+    "resolved": "/api/v1/enterprise_workflows/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/enterprise_workflows/requests/",
+    "resolved": "/api/v1/enterprise_workflows/requests/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/enterprise_workflows/requests/{request_id}/approve/",
+    "resolved": "/api/v1/enterprise_workflows/requests/00000000-0000-0000-0000-000000000000/approve/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/enterprise_workflows/requests/{request_id}/reject/",
+    "resolved": "/api/v1/enterprise_workflows/requests/00000000-0000-0000-0000-000000000000/reject/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/erp_chat/stream/",
+    "resolved": "/api/v1/erp_chat/stream/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/erp_chat/sessions/",
+    "resolved": "/api/v1/erp_chat/sessions/",
+    "codes": {
+      "none": 401,
+      "estimator": 201,
+      "manager": 201,
+      "admin": 201
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/erp_chat/sessions/{session_id}/",
+    "resolved": "/api/v1/erp_chat/sessions/00000000-0000-0000-0000-000000000000/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/erp_chat/vector/reindex/",
+    "resolved": "/api/v1/erp_chat/vector/reindex/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/fieldreports/reports/import/file/",
+    "resolved": "/api/v1/fieldreports/reports/import/file/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/fieldreports/reports/",
+    "resolved": "/api/v1/fieldreports/reports/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/fieldreports/reports/{report_id}",
+    "resolved": "/api/v1/fieldreports/reports/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/fieldreports/reports/{report_id}",
+    "resolved": "/api/v1/fieldreports/reports/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/fieldreports/reports/{report_id}/submit/",
+    "resolved": "/api/v1/fieldreports/reports/00000000-0000-0000-0000-000000000000/submit/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/fieldreports/reports/{report_id}/approve/",
+    "resolved": "/api/v1/fieldreports/reports/00000000-0000-0000-0000-000000000000/approve/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/fieldreports/reports/{report_id}/link-documents/",
+    "resolved": "/api/v1/fieldreports/reports/00000000-0000-0000-0000-000000000000/link-documents/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/fieldreports/reports/{report_id}/workforce/",
+    "resolved": "/api/v1/fieldreports/reports/00000000-0000-0000-0000-000000000000/workforce/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/fieldreports/workforce/{entry_id}",
+    "resolved": "/api/v1/fieldreports/workforce/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/fieldreports/workforce/{entry_id}",
+    "resolved": "/api/v1/fieldreports/workforce/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/fieldreports/reports/{report_id}/equipment/",
+    "resolved": "/api/v1/fieldreports/reports/00000000-0000-0000-0000-000000000000/equipment/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/fieldreports/equipment/{entry_id}",
+    "resolved": "/api/v1/fieldreports/equipment/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/fieldreports/equipment/{entry_id}",
+    "resolved": "/api/v1/fieldreports/equipment/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/",
+    "resolved": "/api/v1/finance/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/payments/",
+    "resolved": "/api/v1/finance/payments/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/budgets/",
+    "resolved": "/api/v1/finance/budgets/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/budgets/import/file/",
+    "resolved": "/api/v1/finance/budgets/import/file/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/finance/budgets/{budget_id}",
+    "resolved": "/api/v1/finance/budgets/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/evm/snapshot/",
+    "resolved": "/api/v1/finance/evm/snapshot/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/finance/{invoice_id}",
+    "resolved": "/api/v1/finance/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/{invoice_id}/approve/",
+    "resolved": "/api/v1/finance/00000000-0000-0000-0000-000000000000/approve/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/{invoice_id}/pay/",
+    "resolved": "/api/v1/finance/00000000-0000-0000-0000-000000000000/pay/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/full_evm/forecasts/calculate/",
+    "resolved": "/api/v1/full_evm/forecasts/calculate/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/i18n_foundation/exchange-rates/",
+    "resolved": "/api/v1/i18n_foundation/exchange-rates/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/i18n_foundation/exchange-rates/fetch-ecb/",
+    "resolved": "/api/v1/i18n_foundation/exchange-rates/fetch-ecb/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/i18n_foundation/exchange-rates/{rate_id}",
+    "resolved": "/api/v1/i18n_foundation/exchange-rates/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/i18n_foundation/exchange-rates/{rate_id}",
+    "resolved": "/api/v1/i18n_foundation/exchange-rates/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/i18n_foundation/work-calendars/",
+    "resolved": "/api/v1/i18n_foundation/work-calendars/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/i18n_foundation/work-calendars/{calendar_id}",
+    "resolved": "/api/v1/i18n_foundation/work-calendars/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/i18n_foundation/tax-configs/",
+    "resolved": "/api/v1/i18n_foundation/tax-configs/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/i18n_foundation/tax-configs/{config_id}",
+    "resolved": "/api/v1/i18n_foundation/tax-configs/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/inspections/",
+    "resolved": "/api/v1/inspections/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/inspections/{inspection_id}",
+    "resolved": "/api/v1/inspections/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/inspections/{inspection_id}",
+    "resolved": "/api/v1/inspections/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/inspections/{inspection_id}/create-defect/",
+    "resolved": "/api/v1/inspections/00000000-0000-0000-0000-000000000000/create-defect/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/inspections/{inspection_id}/complete/",
+    "resolved": "/api/v1/inspections/00000000-0000-0000-0000-000000000000/complete/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/integrations/configs/",
+    "resolved": "/api/v1/integrations/configs/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/integrations/configs/{config_id}",
+    "resolved": "/api/v1/integrations/configs/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/integrations/configs/{config_id}",
+    "resolved": "/api/v1/integrations/configs/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/integrations/configs/{config_id}/test/",
+    "resolved": "/api/v1/integrations/configs/00000000-0000-0000-0000-000000000000/test/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/integrations/webhooks/",
+    "resolved": "/api/v1/integrations/webhooks/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/integrations/webhooks/{webhook_id}",
+    "resolved": "/api/v1/integrations/webhooks/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/integrations/webhooks/{webhook_id}",
+    "resolved": "/api/v1/integrations/webhooks/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/integrations/webhooks/{webhook_id}/test/",
+    "resolved": "/api/v1/integrations/webhooks/00000000-0000-0000-0000-000000000000/test/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/markups/bulk/",
+    "resolved": "/api/v1/markups/bulk/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/markups/",
+    "resolved": "/api/v1/markups/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/markups/{markup_id}",
+    "resolved": "/api/v1/markups/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/markups/{markup_id}",
+    "resolved": "/api/v1/markups/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/markups/{markup_id}/link-to-boq/",
+    "resolved": "/api/v1/markups/00000000-0000-0000-0000-000000000000/link-to-boq/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/markups/scales/",
+    "resolved": "/api/v1/markups/scales/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/markups/scales/{config_id}",
+    "resolved": "/api/v1/markups/scales/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/markups/stamps/templates/",
+    "resolved": "/api/v1/markups/stamps/templates/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/markups/stamps/templates/{template_id}",
+    "resolved": "/api/v1/markups/stamps/templates/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/markups/stamps/templates/{template_id}",
+    "resolved": "/api/v1/markups/stamps/templates/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/meetings/",
+    "resolved": "/api/v1/meetings/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/meetings/import-summary/",
+    "resolved": "/api/v1/meetings/import-summary/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/meetings/{meeting_id}",
+    "resolved": "/api/v1/meetings/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/meetings/{meeting_id}",
+    "resolved": "/api/v1/meetings/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/meetings/{meeting_id}/complete/",
+    "resolved": "/api/v1/meetings/00000000-0000-0000-0000-000000000000/complete/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ncr/",
+    "resolved": "/api/v1/ncr/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/ncr/{ncr_id}",
+    "resolved": "/api/v1/ncr/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/ncr/{ncr_id}",
+    "resolved": "/api/v1/ncr/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ncr/{ncr_id}/create-variation/",
+    "resolved": "/api/v1/ncr/00000000-0000-0000-0000-000000000000/create-variation/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/ncr/{ncr_id}/close/",
+    "resolved": "/api/v1/ncr/00000000-0000-0000-0000-000000000000/close/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/notifications/{notification_id}/read/",
+    "resolved": "/api/v1/notifications/00000000-0000-0000-0000-000000000000/read/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/notifications/read-all/",
+    "resolved": "/api/v1/notifications/read-all/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/notifications/{notification_id}",
+    "resolved": "/api/v1/notifications/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/opencde_api/bcf/3.0/projects/{project_id}/topics/",
+    "resolved": "/api/v1/opencde_api/bcf/3.0/projects/00000000-0000-0000-0000-000000000000/topics/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/opencde_api/bcf/3.0/projects/{project_id}/topics/{topic_guid}",
+    "resolved": "/api/v1/opencde_api/bcf/3.0/projects/00000000-0000-0000-0000-000000000000/topics/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/opencde_api/bcf/3.0/projects/{project_id}/topics/{topic_guid}/comments/",
+    "resolved": "/api/v1/opencde_api/bcf/3.0/projects/00000000-0000-0000-0000-000000000000/topics/00000000-0000-0000-0000-000000000000/comments/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/opencde_api/bcf/3.0/projects/{project_id}/topics/{topic_guid}/viewpoints/",
+    "resolved": "/api/v1/opencde_api/bcf/3.0/projects/00000000-0000-0000-0000-000000000000/topics/00000000-0000-0000-0000-000000000000/viewpoints/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/procurement/",
+    "resolved": "/api/v1/procurement/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/procurement/goods-receipts/",
+    "resolved": "/api/v1/procurement/goods-receipts/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/procurement/goods-receipts/{gr_id}/confirm/",
+    "resolved": "/api/v1/procurement/goods-receipts/00000000-0000-0000-0000-000000000000/confirm/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/procurement/{po_id}",
+    "resolved": "/api/v1/procurement/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/procurement/{po_id}/create-invoice/",
+    "resolved": "/api/v1/procurement/00000000-0000-0000-0000-000000000000/create-invoice/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/procurement/{po_id}/issue/",
+    "resolved": "/api/v1/procurement/00000000-0000-0000-0000-000000000000/issue/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/project_intelligence/recommendations/",
+    "resolved": "/api/v1/project_intelligence/recommendations/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/project_intelligence/chat/",
+    "resolved": "/api/v1/project_intelligence/chat/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/project_intelligence/explain-gap/",
+    "resolved": "/api/v1/project_intelligence/explain-gap/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/project_intelligence/actions/{action_id}/",
+    "resolved": "/api/v1/project_intelligence/actions/00000000-0000-0000-0000-000000000000/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/punchlist/items/",
+    "resolved": "/api/v1/punchlist/items/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/punchlist/items/{item_id}",
+    "resolved": "/api/v1/punchlist/items/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/punchlist/items/{item_id}",
+    "resolved": "/api/v1/punchlist/items/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/punchlist/items/{item_id}/transition/",
+    "resolved": "/api/v1/punchlist/items/00000000-0000-0000-0000-000000000000/transition/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/punchlist/items/{item_id}/pin-to-sheet/",
+    "resolved": "/api/v1/punchlist/items/00000000-0000-0000-0000-000000000000/pin-to-sheet/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/punchlist/items/{item_id}/photos/",
+    "resolved": "/api/v1/punchlist/items/00000000-0000-0000-0000-000000000000/photos/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/punchlist/items/{item_id}/photos/{index}",
+    "resolved": "/api/v1/punchlist/items/00000000-0000-0000-0000-000000000000/photos/1",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reporting/kpi/snapshot/",
+    "resolved": "/api/v1/reporting/kpi/snapshot/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reporting/kpi/recalculate-all/",
+    "resolved": "/api/v1/reporting/kpi/recalculate-all/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reporting/templates/",
+    "resolved": "/api/v1/reporting/templates/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/reporting/generate/",
+    "resolved": "/api/v1/reporting/generate/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 403,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "forbidden",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/requirements/",
+    "resolved": "/api/v1/requirements/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/requirements/{set_id}",
+    "resolved": "/api/v1/requirements/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/requirements/{set_id}",
+    "resolved": "/api/v1/requirements/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/requirements/{set_id}/requirements/bulk-delete/",
+    "resolved": "/api/v1/requirements/00000000-0000-0000-0000-000000000000/requirements/bulk-delete/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/requirements/{set_id}/requirements/",
+    "resolved": "/api/v1/requirements/00000000-0000-0000-0000-000000000000/requirements/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/requirements/{set_id}/requirements/bulk/",
+    "resolved": "/api/v1/requirements/00000000-0000-0000-0000-000000000000/requirements/bulk/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/requirements/{set_id}/requirements/{req_id}",
+    "resolved": "/api/v1/requirements/00000000-0000-0000-0000-000000000000/requirements/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/requirements/{set_id}/requirements/{req_id}",
+    "resolved": "/api/v1/requirements/00000000-0000-0000-0000-000000000000/requirements/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/requirements/{set_id}/gates/{gate_number}/run/",
+    "resolved": "/api/v1/requirements/00000000-0000-0000-0000-000000000000/gates/1/run/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/requirements/{set_id}/requirements/{req_id}/link/{position_id}",
+    "resolved": "/api/v1/requirements/00000000-0000-0000-0000-000000000000/requirements/00000000-0000-0000-0000-000000000000/link/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/requirements/{set_id}/import/text/",
+    "resolved": "/api/v1/requirements/00000000-0000-0000-0000-000000000000/import/text/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/requirements/{set_id}/requirements/{req_id}/bim-links/",
+    "resolved": "/api/v1/requirements/00000000-0000-0000-0000-000000000000/requirements/00000000-0000-0000-0000-000000000000/bim-links/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/requirements/vector/reindex/",
+    "resolved": "/api/v1/requirements/vector/reindex/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/rfi/",
+    "resolved": "/api/v1/rfi/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/rfi/batch/delete/",
+    "resolved": "/api/v1/rfi/batch/delete/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/rfi/batch/status/",
+    "resolved": "/api/v1/rfi/batch/status/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/rfi/{rfi_id}",
+    "resolved": "/api/v1/rfi/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/rfi/{rfi_id}",
+    "resolved": "/api/v1/rfi/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/rfi/{rfi_id}/respond/",
+    "resolved": "/api/v1/rfi/00000000-0000-0000-0000-000000000000/respond/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/rfi/{rfi_id}/create-variation/",
+    "resolved": "/api/v1/rfi/00000000-0000-0000-0000-000000000000/create-variation/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/rfi/{rfi_id}/close/",
+    "resolved": "/api/v1/rfi/00000000-0000-0000-0000-000000000000/close/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/rfq_bidding/",
+    "resolved": "/api/v1/rfq_bidding/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/rfq_bidding/{rfq_id}",
+    "resolved": "/api/v1/rfq_bidding/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/rfq_bidding/{rfq_id}",
+    "resolved": "/api/v1/rfq_bidding/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/rfq_bidding/{rfq_id}/issue/",
+    "resolved": "/api/v1/rfq_bidding/00000000-0000-0000-0000-000000000000/issue/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/rfq_bidding/bids/",
+    "resolved": "/api/v1/rfq_bidding/bids/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/rfq_bidding/bids/{bid_id}/evaluate/",
+    "resolved": "/api/v1/rfq_bidding/bids/00000000-0000-0000-0000-000000000000/evaluate/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/rfq_bidding/bids/{bid_id}/award/",
+    "resolved": "/api/v1/rfq_bidding/bids/00000000-0000-0000-0000-000000000000/award/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/risk/",
+    "resolved": "/api/v1/risk/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/risk/batch/delete/",
+    "resolved": "/api/v1/risk/batch/delete/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/risk/batch/status/",
+    "resolved": "/api/v1/risk/batch/status/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/risk/{risk_id}",
+    "resolved": "/api/v1/risk/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/risk/{risk_id}",
+    "resolved": "/api/v1/risk/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/risk/vector/reindex/",
+    "resolved": "/api/v1/risk/vector/reindex/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/safety/incidents/",
+    "resolved": "/api/v1/safety/incidents/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/safety/incidents/{incident_id}",
+    "resolved": "/api/v1/safety/incidents/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/safety/incidents/{incident_id}",
+    "resolved": "/api/v1/safety/incidents/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/safety/observations/",
+    "resolved": "/api/v1/safety/observations/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/safety/observations/{observation_id}",
+    "resolved": "/api/v1/safety/observations/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/safety/observations/{observation_id}",
+    "resolved": "/api/v1/safety/observations/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/schedules/",
+    "resolved": "/api/v1/schedule/schedules/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/schedule/schedules/{schedule_id}",
+    "resolved": "/api/v1/schedule/schedules/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/schedule/schedules/{schedule_id}",
+    "resolved": "/api/v1/schedule/schedules/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/schedules/{schedule_id}/activities/",
+    "resolved": "/api/v1/schedule/schedules/00000000-0000-0000-0000-000000000000/activities/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/schedules/{schedule_id}/generate-from-boq/",
+    "resolved": "/api/v1/schedule/schedules/00000000-0000-0000-0000-000000000000/generate-from-boq/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/schedules/{schedule_id}/calculate-cpm/",
+    "resolved": "/api/v1/schedule/schedules/00000000-0000-0000-0000-000000000000/calculate-cpm/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/schedule/activities/{activity_id}",
+    "resolved": "/api/v1/schedule/activities/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/schedule/activities/{activity_id}",
+    "resolved": "/api/v1/schedule/activities/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/activities/{activity_id}/link-position/",
+    "resolved": "/api/v1/schedule/activities/00000000-0000-0000-0000-000000000000/link-position/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/schedule/activities/{activity_id}/progress/",
+    "resolved": "/api/v1/schedule/activities/00000000-0000-0000-0000-000000000000/progress/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/schedule/activities/{activity_id}/bim-links/",
+    "resolved": "/api/v1/schedule/activities/00000000-0000-0000-0000-000000000000/bim-links/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/activities/{activity_id}/work-orders/",
+    "resolved": "/api/v1/schedule/activities/00000000-0000-0000-0000-000000000000/work-orders/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/schedule/work-orders/{work_order_id}",
+    "resolved": "/api/v1/schedule/work-orders/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/schedules/{schedule_id}/relationships/",
+    "resolved": "/api/v1/schedule/schedules/00000000-0000-0000-0000-000000000000/relationships/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/schedule/relationships/{relationship_id}",
+    "resolved": "/api/v1/schedule/relationships/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 204,
+      "manager": 204,
+      "admin": 204
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/schedule/cpm/calculate/",
+    "resolved": "/api/v1/schedule/schedule/cpm/calculate/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/baselines/",
+    "resolved": "/api/v1/schedule/baselines/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/schedule/baselines/{baseline_id}",
+    "resolved": "/api/v1/schedule/baselines/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/schedule/baselines/{baseline_id}",
+    "resolved": "/api/v1/schedule/baselines/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/progress-updates/",
+    "resolved": "/api/v1/schedule/progress-updates/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/schedule/progress-updates/{update_id}",
+    "resolved": "/api/v1/schedule/progress-updates/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/schedule/progress-updates/{update_id}",
+    "resolved": "/api/v1/schedule/progress-updates/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/schedule/import/xer/",
+    "resolved": "/api/v1/schedule/schedule/import/xer/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/schedule/schedule/import/msp-xml/",
+    "resolved": "/api/v1/schedule/schedule/import/msp-xml/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/submittals/",
+    "resolved": "/api/v1/submittals/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/submittals/{submittal_id}",
+    "resolved": "/api/v1/submittals/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/submittals/{submittal_id}",
+    "resolved": "/api/v1/submittals/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/submittals/{submittal_id}/submit/",
+    "resolved": "/api/v1/submittals/00000000-0000-0000-0000-000000000000/submit/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/submittals/{submittal_id}/review/",
+    "resolved": "/api/v1/submittals/00000000-0000-0000-0000-000000000000/review/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/submittals/{submittal_id}/approve/",
+    "resolved": "/api/v1/submittals/00000000-0000-0000-0000-000000000000/approve/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/converters/{converter_id}/install/",
+    "resolved": "/api/v1/takeoff/converters/00000000-0000-0000-0000-000000000000/install/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/converters/{converter_id}/uninstall/",
+    "resolved": "/api/v1/takeoff/converters/00000000-0000-0000-0000-000000000000/uninstall/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/cad-extract/",
+    "resolved": "/api/v1/takeoff/cad-extract/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/cad-columns/",
+    "resolved": "/api/v1/takeoff/cad-columns/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/cad-group/",
+    "resolved": "/api/v1/takeoff/cad-group/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/cad-group/elements/",
+    "resolved": "/api/v1/takeoff/cad-group/elements/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/cad-group/create-boq/",
+    "resolved": "/api/v1/takeoff/cad-group/create-boq/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/cad-data/describe/",
+    "resolved": "/api/v1/takeoff/cad-data/describe/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/cad-data/value-counts/",
+    "resolved": "/api/v1/takeoff/cad-data/value-counts/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/cad-data/aggregate/",
+    "resolved": "/api/v1/takeoff/cad-data/aggregate/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/cad-data/save/",
+    "resolved": "/api/v1/takeoff/cad-data/save/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/takeoff/cad-data/sessions/{session_id}",
+    "resolved": "/api/v1/takeoff/cad-data/sessions/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/sessions/{session_id}/save-to-project/",
+    "resolved": "/api/v1/takeoff/sessions/00000000-0000-0000-0000-000000000000/save-to-project/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/documents/upload/",
+    "resolved": "/api/v1/takeoff/documents/upload/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/takeoff/documents/{doc_id}",
+    "resolved": "/api/v1/takeoff/documents/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/documents/{doc_id}/extract-tables/",
+    "resolved": "/api/v1/takeoff/documents/00000000-0000-0000-0000-000000000000/extract-tables/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/documents/{doc_id}/analyze/",
+    "resolved": "/api/v1/takeoff/documents/00000000-0000-0000-0000-000000000000/analyze/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/measurements/bulk/",
+    "resolved": "/api/v1/takeoff/measurements/bulk/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/measurements/",
+    "resolved": "/api/v1/takeoff/measurements/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/takeoff/measurements/{measurement_id}",
+    "resolved": "/api/v1/takeoff/measurements/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/takeoff/measurements/{measurement_id}",
+    "resolved": "/api/v1/takeoff/measurements/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/takeoff/measurements/{measurement_id}/link-to-boq/",
+    "resolved": "/api/v1/takeoff/measurements/00000000-0000-0000-0000-000000000000/link-to-boq/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/tasks/",
+    "resolved": "/api/v1/tasks/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/tasks/import/file/",
+    "resolved": "/api/v1/tasks/import/file/",
+    "skipped": "multipart"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/tasks/batch/delete/",
+    "resolved": "/api/v1/tasks/batch/delete/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/tasks/batch/status/",
+    "resolved": "/api/v1/tasks/batch/status/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/tasks/batch/assign/",
+    "resolved": "/api/v1/tasks/batch/assign/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/tasks/{task_id}",
+    "resolved": "/api/v1/tasks/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/tasks/{task_id}",
+    "resolved": "/api/v1/tasks/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/tasks/{task_id}/complete/",
+    "resolved": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/complete/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/tasks/{task_id}/bim-links/",
+    "resolved": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/bim-links/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/tasks/vector/reindex/",
+    "resolved": "/api/v1/tasks/vector/reindex/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/teams/",
+    "resolved": "/api/v1/teams/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/teams/{team_id}",
+    "resolved": "/api/v1/teams/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/teams/{team_id}",
+    "resolved": "/api/v1/teams/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/teams/{team_id}/members/",
+    "resolved": "/api/v1/teams/00000000-0000-0000-0000-000000000000/members/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/teams/{team_id}/members/{user_id}",
+    "resolved": "/api/v1/teams/00000000-0000-0000-0000-000000000000/members/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/tendering/packages/",
+    "resolved": "/api/v1/tendering/packages/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/tendering/packages/{package_id}",
+    "resolved": "/api/v1/tendering/packages/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/tendering/packages/{package_id}/bids/",
+    "resolved": "/api/v1/tendering/packages/00000000-0000-0000-0000-000000000000/bids/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/tendering/bids/{bid_id}",
+    "resolved": "/api/v1/tendering/bids/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/transmittals/",
+    "resolved": "/api/v1/transmittals/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/transmittals/{transmittal_id}",
+    "resolved": "/api/v1/transmittals/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/transmittals/{transmittal_id}/issue/",
+    "resolved": "/api/v1/transmittals/00000000-0000-0000-0000-000000000000/issue/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/transmittals/{transmittal_id}/recipients/{recipient_id}/acknowledge/",
+    "resolved": "/api/v1/transmittals/00000000-0000-0000-0000-000000000000/recipients/00000000-0000-0000-0000-000000000000/acknowledge/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/transmittals/{transmittal_id}/recipients/{recipient_id}/respond/",
+    "resolved": "/api/v1/transmittals/00000000-0000-0000-0000-000000000000/recipients/00000000-0000-0000-0000-000000000000/respond/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/validation/run/",
+    "resolved": "/api/v1/validation/run/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/validation/check-bim-model",
+    "resolved": "/api/v1/validation/check-bim-model",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/validation/reports/{report_id}",
+    "resolved": "/api/v1/validation/reports/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/validation/vector/reindex/",
+    "resolved": "/api/v1/validation/vector/reindex/",
+    "codes": {
+      "none": 401,
+      "estimator": 200,
+      "manager": 200,
+      "admin": 200
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "allowed",
+      "manager": "allowed",
+      "admin": "allowed"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/opencde/bcf/3.0/projects/{project_id}/topics/",
+    "resolved": "/api/v1/opencde/bcf/3.0/projects/00000000-0000-0000-0000-000000000000/topics/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/opencde/bcf/3.0/projects/{project_id}/topics/{topic_guid}",
+    "resolved": "/api/v1/opencde/bcf/3.0/projects/00000000-0000-0000-0000-000000000000/topics/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/opencde/bcf/3.0/projects/{project_id}/topics/{topic_guid}/comments/",
+    "resolved": "/api/v1/opencde/bcf/3.0/projects/00000000-0000-0000-0000-000000000000/topics/00000000-0000-0000-0000-000000000000/comments/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/opencde/bcf/3.0/projects/{project_id}/topics/{topic_guid}/viewpoints/",
+    "resolved": "/api/v1/opencde/bcf/3.0/projects/00000000-0000-0000-0000-000000000000/topics/00000000-0000-0000-0000-000000000000/viewpoints/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/variations/",
+    "resolved": "/api/v1/variations/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/variations/{order_id}",
+    "resolved": "/api/v1/variations/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/variations/{order_id}",
+    "resolved": "/api/v1/variations/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/variations/{order_id}/items/",
+    "resolved": "/api/v1/variations/00000000-0000-0000-0000-000000000000/items/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/variations/{order_id}/items/{item_id}",
+    "resolved": "/api/v1/variations/00000000-0000-0000-0000-000000000000/items/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/variations/{order_id}/items/{item_id}",
+    "resolved": "/api/v1/variations/00000000-0000-0000-0000-000000000000/items/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/variations/{order_id}/submit/",
+    "resolved": "/api/v1/variations/00000000-0000-0000-0000-000000000000/submit/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/variations/{order_id}/approve/",
+    "resolved": "/api/v1/variations/00000000-0000-0000-0000-000000000000/approve/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/variations/{order_id}/reject/",
+    "resolved": "/api/v1/variations/00000000-0000-0000-0000-000000000000/reject/",
+    "codes": {
+      "none": 401,
+      "estimator": 403,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "forbidden",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/evm/projects/{project_id}/5d/budget-lines/",
+    "resolved": "/api/v1/finance/evm/projects/00000000-0000-0000-0000-000000000000/5d/budget-lines/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/finance/evm/5d/budget-lines/{line_id}",
+    "resolved": "/api/v1/finance/evm/5d/budget-lines/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/finance/evm/5d/budget-lines/{line_id}",
+    "resolved": "/api/v1/finance/evm/5d/budget-lines/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/evm/projects/{project_id}/5d/generate-budget/",
+    "resolved": "/api/v1/finance/evm/projects/00000000-0000-0000-0000-000000000000/5d/generate-budget/",
+    "codes": {
+      "none": 401,
+      "estimator": 400,
+      "manager": 400,
+      "admin": 400
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/evm/projects/{project_id}/5d/snapshots/",
+    "resolved": "/api/v1/finance/evm/projects/00000000-0000-0000-0000-000000000000/5d/snapshots/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/finance/evm/5d/snapshots/{snapshot_id}",
+    "resolved": "/api/v1/finance/evm/5d/snapshots/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/finance/evm/projects/{project_id}/5d/snapshots/{snapshot_id}",
+    "resolved": "/api/v1/finance/evm/projects/00000000-0000-0000-0000-000000000000/5d/snapshots/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/evm/projects/{project_id}/5d/what-if/",
+    "resolved": "/api/v1/finance/evm/projects/00000000-0000-0000-0000-000000000000/5d/what-if/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/evm/projects/{project_id}/5d/generate-cash-flow/",
+    "resolved": "/api/v1/finance/evm/projects/00000000-0000-0000-0000-000000000000/5d/generate-cash-flow/",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/finance/evm/projects/{project_id}/5d/monte-carlo/",
+    "resolved": "/api/v1/finance/evm/projects/00000000-0000-0000-0000-000000000000/5d/monte-carlo/",
+    "codes": {
+      "none": 401,
+      "estimator": 400,
+      "manager": 400,
+      "admin": 400
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/procurement/tenders/packages/",
+    "resolved": "/api/v1/procurement/tenders/packages/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/procurement/tenders/packages/{package_id}",
+    "resolved": "/api/v1/procurement/tenders/packages/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/procurement/tenders/packages/{package_id}/bids/",
+    "resolved": "/api/v1/procurement/tenders/packages/00000000-0000-0000-0000-000000000000/bids/",
+    "codes": {
+      "none": 401,
+      "estimator": 422,
+      "manager": 422,
+      "admin": 422
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "passed_auth_validation_fail",
+      "manager": "passed_auth_validation_fail",
+      "admin": "passed_auth_validation_fail"
+    }
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/procurement/tenders/bids/{bid_id}",
+    "resolved": "/api/v1/procurement/tenders/bids/00000000-0000-0000-0000-000000000000",
+    "codes": {
+      "none": 401,
+      "estimator": 404,
+      "manager": 404,
+      "admin": 404
+    },
+    "class": {
+      "none": "unauth",
+      "estimator": "not_found",
+      "manager": "not_found",
+      "admin": "not_found"
+    }
+  }
+]

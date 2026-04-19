@@ -112,6 +112,9 @@ def create_engine_from_settings():
             cursor = dbapi_conn.cursor()  # type: ignore[union-attr]
             cursor.execute("PRAGMA journal_mode=WAL")
             cursor.execute("PRAGMA busy_timeout=30000")
+            # Enforce ON DELETE CASCADE / SET NULL declared in models.
+            # Without this pragma SQLite treats every ForeignKey(...) as advisory.
+            cursor.execute("PRAGMA foreign_keys=ON")
             cursor.close()
 
         kwargs["connect_args"] = {"check_same_thread": False}

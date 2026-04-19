@@ -20,6 +20,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
 import clsx from 'clsx';
 import {
   Upload,
@@ -32,7 +33,6 @@ import {
   Info,
   Plus,
   X,
-  ChevronUp,
   ShieldCheck,
   Link2,
   EyeOff,
@@ -46,18 +46,20 @@ import {
   CheckSquare,
   CalendarDays,
   ClipboardCheck,
+  ListChecks,
+  Ruler,
+  FileDown,
 } from 'lucide-react';
 import { Badge, ConfirmDialog, ElementInfoPopover, type DWGElementPayload } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
-import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useDwgUploadStore } from '@/stores/useDwgUploadStore';
 import { apiGet } from '@/shared/lib/api';
 import { boqApi, normalizePositions, type Position } from '@/features/boq/api';
 import { projectsApi } from '@/features/projects/api';
 import {
   fetchDrawings,
-  uploadDrawing,
   deleteDrawing,
   fetchEntities,
   fetchAnnotations,
@@ -66,6 +68,8 @@ import {
   linkAnnotationToBoq,
   createEntityGroup,
   fetchOfflineReadiness,
+  updateDrawingScale,
+  USER_MARKUP_LAYER,
 } from './api';
 import type {
   DxfEntity,
@@ -73,6 +77,7 @@ import type {
   DwgAnnotation,
   CreateAnnotationPayload,
   DwgOfflineReadiness,
+  DwgScaleMode,
 } from './api';
 import {
   DxfViewer,
@@ -80,9 +85,14 @@ import {
   type EntityContextMenuEvent,
 } from './components/DxfViewer';
 import { aggregateEntities } from './lib/group-aggregation';
+import { exportCanvasToPdf } from './lib/pdf-export';
 import { ToolPalette, type DwgTool } from './components/ToolPalette';
 import { LayerPanel } from './components/LayerPanel';
 import { EntityNameFilter, entityDisplayName } from './components/EntityNameFilter';
+import CreateTaskFromDwgModal from './CreateTaskFromDwgModal';
+import LinkDocumentToDwgModal from './LinkDocumentToDwgModal';
+import LinkActivityToDwgModal from './LinkActivityToDwgModal';
+import LinkRequirementToDwgModal from './LinkRequirementToDwgModal';
 // boqApi / Position import removed — BOQ picker now handled via ElementInfoPopover callback
 
 /* ── GridBackground ──────────────────────────────────────────────────── */
@@ -130,7 +140,10 @@ function GridBackground({ className = '' }: { className?: string }) {
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
-function extractLayers(entities: DxfEntity[]): DxfLayer[] {
+function extractLayers(
+  entities: DxfEntity[],
+  annotations: DwgAnnotation[] = [],
+): DxfLayer[] {
   const map = new Map<string, { color: string | number; count: number }>();
   for (const e of entities) {
     const existing = map.get(e.layer);
@@ -140,6 +153,24 @@ function extractLayers(entities: DxfEntity[]): DxfLayer[] {
       map.set(e.layer, { color: e.color, count: 1 });
     }
   }
+  // Virtual layers (USER_MARKUP / ANNOTATIONS) — one entry per distinct
+  // ``layer_name`` found on the annotation list, so estimators can toggle
+  // hand-drawn markups separately from DXF entity layers. Default fallback
+  // is USER_MARKUP for legacy annotations without a layer_name.
+  const annLayerCounts = new Map<string, number>();
+  for (const ann of annotations) {
+    const name = ann.layer_name || USER_MARKUP_LAYER;
+    annLayerCounts.set(name, (annLayerCounts.get(name) ?? 0) + 1);
+  }
+  for (const [name, count] of annLayerCounts.entries()) {
+    if (!map.has(name)) {
+      // Use a neutral accent color that stands out from DXF defaults.
+      map.set(name, { color: '#f59e0b', count });
+    } else {
+      map.get(name)!.count += count;
+    }
+  }
+
   return Array.from(map.entries())
     .map(([name, { color, count }]) => ({
       name,
@@ -419,7 +450,32 @@ export function DwgTakeoffPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
-  const projectId = useProjectContextStore((s) => s.activeProjectId) ?? '';
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
+
+  // Fallback: if no project is currently active (e.g. first load after
+  // ``clearProject`` wiped a stale id from localStorage), use the first
+  // project from the server list. Without this, ``fetchDrawings('')``
+  // short-circuits to ``[]`` and the DWG panel looks empty on every
+  // reload — reported as "при перезагрузке потеряются все документы".
+  // The drawings themselves are always persisted server-side; only the
+  // client-side project context was lost.
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: projectsApi.list,
+    staleTime: 5 * 60_000,
+  });
+  const projectId = activeProjectId || projects[0]?.id || '';
+
+  // Persist the fallback choice so subsequent reloads and sibling
+  // modules (BIM, BOQ, CDE) see the same active project instead of each
+  // picking the "first" independently.
+  useEffect(() => {
+    if (!activeProjectId && projectId) {
+      const picked = projects.find((p) => p.id === projectId);
+      if (picked) setActiveProject(picked.id, picked.name);
+    }
+  }, [activeProjectId, projectId, projects, setActiveProject]);
 
   // Deep-link support: ?drawingId=xxx opens a specific drawing
   // Also supports ?docName=xxx from the Documents page (matches by filename)
@@ -431,6 +487,68 @@ export function DwgTakeoffPage() {
   const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(null);
   const [activeTool, setActiveTool] = useState<DwgTool>('select');
   const [activeColor, setActiveColor] = useState('#ef4444');
+  /**
+   * Drawing scale denominator (RFC 13 #13). `1` = use raw DXF units as
+   * meters. `50` = the drawing is 1:50, so a 0.20-unit segment represents
+   * 10 metres in the real world. Persisted per-drawing in localStorage so
+   * the estimator doesn't have to re-enter it every time they reopen a
+   * site plan.
+   */
+  const [drawingScale, setDrawingScale] = useState<number>(1);
+  const [scaleMode, setScaleMode] = useState<DwgScaleMode>('preset');
+  const [isCalibrating, setIsCalibrating] = useState(false);
+  const [calibrationPixels, setCalibrationPixels] = useState<number | null>(null);
+
+  // Persist the scale per drawing ID — switching drawings restores its scale.
+  useEffect(() => {
+    if (!selectedDrawingId) return;
+    const raw = localStorage.getItem(`dwg:scale:${selectedDrawingId}`);
+    const parsed = raw ? Number(raw) : NaN;
+    setDrawingScale(Number.isFinite(parsed) && parsed > 0 ? parsed : 1);
+    setScaleMode(
+      (localStorage.getItem(`dwg:scale_mode:${selectedDrawingId}`) as DwgScaleMode | null) ?? 'preset',
+    );
+    // Reset transient calibration state when the user switches drawing.
+    setIsCalibrating(false);
+    setCalibrationPixels(null);
+  }, [selectedDrawingId]);
+
+  useEffect(() => {
+    if (!selectedDrawingId) return;
+    localStorage.setItem(`dwg:scale:${selectedDrawingId}`, String(drawingScale));
+    localStorage.setItem(`dwg:scale_mode:${selectedDrawingId}`, scaleMode);
+  }, [selectedDrawingId, drawingScale, scaleMode]);
+
+  /* ── DWG upload store subscription ───────────────────────────────────
+   * When a store-based upload finishes, invalidate the drawings list and
+   * auto-select the new one. Runs outside React so a job that completes
+   * while the user is on another page still refreshes their list on
+   * return. */
+  useEffect(() => {
+    const unsub = useDwgUploadStore.subscribe((state, prevState) => {
+      if (!projectId) return;
+      for (const [id, job] of state.jobs) {
+        const prev = prevState.jobs.get(id);
+        if (prev?.status !== 'ready' && job.status === 'ready' && job.projectId === projectId) {
+          queryClient.invalidateQueries({ queryKey: ['dwg-drawings', projectId] });
+          queryClient.invalidateQueries({ queryKey: ['documents'] });
+          if (job.drawingId) setSelectedDrawingId(job.drawingId);
+          addToast({
+            type: 'success',
+            title: t('dwg_takeoff.upload_success', { defaultValue: 'Drawing uploaded' }),
+          });
+        }
+        if (prev?.status !== 'error' && job.status === 'error' && job.projectId === projectId) {
+          addToast({
+            type: 'error',
+            title: t('dwg_takeoff.upload_error', { defaultValue: 'Upload failed' }),
+            message: job.errorMessage ?? undefined,
+          });
+        }
+      }
+    });
+    return unsub;
+  }, [projectId, queryClient, addToast, t]);
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
   const [visibleNames, setVisibleNames] = useState<Set<string>>(new Set());
   /**
@@ -448,8 +566,32 @@ export function DwgTakeoffPage() {
     { entityId: string; screenX: number; screenY: number } | null
   >(null);
   const [rightTab, setRightTab] = useState<
-    'layers' | 'annotations' | 'properties' | 'summary'
+    'layers' | 'annotations' | 'properties' | 'summary' | 'scale'
   >('layers');
+
+  /** Inline cross-module link modals (mirrors the BIM page pattern).
+   *  Each holds the selected DWG entity + drawing context for the
+   *  corresponding modal — null when the modal is closed. */
+  const [createTaskFor, setCreateTaskFor] = useState<{
+    entityIds: string[];
+    drawingId: string;
+    entityLabel?: string;
+  } | null>(null);
+  const [linkDocumentFor, setLinkDocumentFor] = useState<{
+    entityIds: string[];
+    drawingId: string;
+    entityLabel?: string;
+  } | null>(null);
+  const [linkActivityFor, setLinkActivityFor] = useState<{
+    entityIds: string[];
+    drawingId: string;
+    entityLabel?: string;
+  } | null>(null);
+  const [linkRequirementFor, setLinkRequirementFor] = useState<{
+    entityIds: string[];
+    drawingId: string;
+    entityLabel?: string;
+  } | null>(null);
   const [showUpload, setShowUpload] = useState(false);
   const [uploadName, setUploadName] = useState('');
   const [uploadDiscipline, setUploadDiscipline] = useState('architectural');
@@ -457,7 +599,8 @@ export function DwgTakeoffPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const { confirm: confirmAnnotDelete, ...annotDeleteConfirmProps } = useConfirm();
-  const [filmstripExpanded, setFilmstripExpanded] = useState(true);
+  // filmstripExpanded removed in v1.8.3 — drawings are always visible
+  // per UX feedback. No auto-hide, no collapse toggle.
   /** Screen position for floating entity info popup. */
   const [entityPopup, setEntityPopup] = useState<{ x: number; y: number } | null>(null);
 
@@ -593,8 +736,28 @@ export function DwgTakeoffPage() {
     return annotatedEntities.filter((e) => e.layout === selectedLayout);
   }, [annotatedEntities, selectedLayout, layouts]);
 
-  // Computed layers (from filtered entities)
-  const layers = useMemo(() => extractLayers(filteredEntities), [filteredEntities]);
+  // Computed layers (from filtered entities + annotations so virtual
+  // USER_MARKUP layer gets a LayerPanel row once users start drawing).
+  const layers = useMemo(
+    () => extractLayers(filteredEntities, annotations),
+    [filteredEntities, annotations],
+  );
+
+  /**
+   * Annotations filtered by the virtual layer toggle. If the annotation
+   * carries a `layer_name` and that layer is hidden, drop it from the
+   * viewer. Falls back to USER_MARKUP for legacy records without the
+   * field (migration default already covers future rows).
+   */
+  const visibleAnnotations = useMemo(() => {
+    if (annotations.length === 0) return annotations;
+    return annotations.filter((ann) => {
+      const name = ann.layer_name || USER_MARKUP_LAYER;
+      // If no layers are tracked yet (initial load) — show everything.
+      if (visibleLayers.size === 0 && layers.length === 0) return true;
+      return visibleLayers.has(name);
+    });
+  }, [annotations, visibleLayers, layers]);
 
   // Initialize visible layers when entities/layout change
   useEffect(() => {
@@ -614,45 +777,8 @@ export function DwgTakeoffPage() {
     }
   }, [filteredEntities]);
 
-  // Mutations
-  const uploadMutation = useMutation({
-    mutationFn: () => {
-      if (!uploadFile) throw new Error('No file selected');
-      return uploadDrawing(projectId, uploadFile, uploadName || uploadFile.name, uploadDiscipline);
-    },
-    onSuccess: (drawing) => {
-      queryClient.invalidateQueries({ queryKey: ['dwg-drawings', projectId] });
-      addToast({ type: 'success', title: t('dwg_takeoff.upload_success', 'Drawing uploaded') });
-      // Capture file ref before clearing state
-      const savedFile = uploadFile;
-      closeUploadModal();
-      setSelectedDrawingId(drawing.id);
-
-      // Auto-save to Documents module as well (fire-and-forget)
-      if (savedFile && projectId) {
-        const file = savedFile;
-        const token = useAuthStore.getState().accessToken;
-        const formData = new FormData();
-        formData.append('file', file);
-        const headers: Record<string, string> = { 'X-DDC-Client': 'OE/1.0' };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        fetch(
-          `/api/v1/documents/upload?project_id=${projectId}&category=drawing`,
-          { method: 'POST', headers, body: formData },
-        )
-          .then(() => {
-            queryClient.invalidateQueries({ queryKey: ['documents'] });
-          })
-          .catch(() => {
-            // Silently ignore — the drawing was already saved in the DWG module
-          });
-      }
-    },
-    onError: () => {
-      addToast({ type: 'error', title: t('dwg_takeoff.upload_error', 'Upload failed') });
-    },
-  });
-
+  // Mutations (upload itself is now dispatched via useDwgUploadStore so
+  // it survives navigation — see the subscription above).
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteDrawing(id),
     onSuccess: () => {
@@ -668,7 +794,84 @@ export function DwgTakeoffPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dwg-annotations', selectedDrawingId] });
     },
+    onError: (err: Error) => {
+      // Surface the failure — silent 500s previously left users thinking
+      // nothing happened.
+      addToast({
+        type: 'error',
+        title: t('dwg_takeoff.annotation_failed', {
+          defaultValue: 'Annotation could not be saved',
+        }),
+        message: err.message || String(err),
+      });
+    },
   });
+
+  // Persist drawing scale + mode to the backend so a page reload on another
+  // device restores exactly what the estimator picked. Kept separate from
+  // the localStorage sync above so an offline user still gets instant UI
+  // feedback — the backend call fires when the network comes back.
+  const updateScaleMutation = useMutation({
+    mutationFn: (data: { drawingId: string; denom: number; mode: DwgScaleMode }) =>
+      updateDrawingScale(data.drawingId, {
+        scale_denominator: data.denom,
+        scale_mode: data.mode,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dwg-drawings'] });
+    },
+  });
+
+  // Debounce backend sync so the user can type "1:50" one character at a time
+  // without firing four PATCH requests.
+  useEffect(() => {
+    if (!selectedDrawingId) return;
+    const handle = window.setTimeout(() => {
+      updateScaleMutation.mutate({
+        drawingId: selectedDrawingId,
+        denom: drawingScale,
+        mode: scaleMode,
+      });
+    }, 600);
+    return () => window.clearTimeout(handle);
+    // intentionally excludes updateScaleMutation from deps — it's a stable ref
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDrawingId, drawingScale, scaleMode]);
+
+  // When the drawings list refreshes, hydrate local scale state from the
+  // server-persisted fields (falling back to localStorage / defaults).
+  useEffect(() => {
+    if (!selectedDrawingId) return;
+    const d = drawings.find((x) => x.id === selectedDrawingId);
+    if (!d) return;
+    if (typeof d.scale_denominator === 'number' && d.scale_denominator > 0) {
+      setDrawingScale(d.scale_denominator);
+    }
+    if (d.scale_mode === 'preset' || d.scale_mode === 'calibrated' || d.scale_mode === 'per_annotation') {
+      setScaleMode(d.scale_mode);
+    }
+  }, [selectedDrawingId, drawings]);
+
+  const handleStartCalibration = useCallback(() => {
+    setIsCalibrating(true);
+    setCalibrationPixels(null);
+    // Switch to the distance tool so the canvas captures two-point clicks
+    // using the existing well-tested code path; `handleAnnotationCreated`
+    // intercepts the resulting measurement below.
+    setActiveTool('distance');
+    addToast({
+      type: 'info',
+      title: t('dwg_takeoff.scale_calibrate_started_title', { defaultValue: 'Calibration armed' }),
+      message: t('dwg_takeoff.scale_calibrate_started_msg', {
+        defaultValue: 'Click two points on the drawing whose real-world distance you know.',
+      }),
+    });
+  }, [addToast, t]);
+
+  const handleCancelCalibration = useCallback(() => {
+    setIsCalibrating(false);
+    setActiveTool('select');
+  }, []);
 
   const deleteAnnotationMutation = useMutation({
     mutationFn: (id: string) => deleteAnnotation(id),
@@ -741,20 +944,82 @@ export function DwgTakeoffPage() {
       measurement_value?: number;
       measurement_unit?: string;
     }) => {
-      if (!selectedDrawingId || !projectId) return;
+      if (!selectedDrawingId) return;
+
+      // Calibration interception: if the user armed "Pick two points", the
+      // first distance measurement they draw feeds the calibration widget
+      // instead of becoming a persistent annotation.
+      if (isCalibrating && ann.type === 'distance' && ann.points.length >= 2) {
+        const a = ann.points[0]!;
+        const b = ann.points[1]!;
+        const pixels = Math.hypot(b.x - a.x, b.y - a.y);
+        setCalibrationPixels(pixels);
+        setIsCalibrating(false);
+        setActiveTool('select');
+        return;
+      }
+
+      // Pull project_id from the drawing itself — the global
+      // ProjectContext store is only populated if the user opened a
+      // project first, and deep-linking straight to /dwg-takeoff would
+      // previously make the save silently no-op.
+      const drawing = drawings.find((d) => d.id === selectedDrawingId);
+      const effectiveProjectId = drawing?.project_id || projectId;
+      if (!effectiveProjectId) {
+        addToast({
+          type: 'error',
+          title: t('dwg_takeoff.annotation_failed', {
+            defaultValue: 'Annotation could not be saved',
+          }),
+          message: t('dwg_takeoff.no_project_context', {
+            defaultValue: 'No active project — open this drawing from its project first.',
+          }),
+        });
+        return;
+      }
+      // Primitive tools (line/rectangle/circle/polyline/arrow/text_pin) get
+      // stamped with the virtual USER_MARKUP layer so they can be grouped
+      // and toggled as a single unit in the LayerPanel. The canvas
+      // renderer looks at `thickness` for stroke width; we default to 2 px
+      // so existing backend records (line_width=2) render identically.
+      const isPrimitive =
+        ann.type === 'line' ||
+        ann.type === 'rectangle' ||
+        ann.type === 'circle' ||
+        ann.type === 'polyline' ||
+        ann.type === 'arrow' ||
+        ann.type === 'text_pin';
       createAnnotationMutation.mutate({
-        project_id: projectId,
+        project_id: effectiveProjectId,
         drawing_id: selectedDrawingId,
         annotation_type: ann.type,
         geometry: { points: ann.points },
         text: ann.text,
         color: ann.color ?? activeColor,
+        thickness: 2,
+        line_width: 2,
+        layer_name: isPrimitive ? USER_MARKUP_LAYER : 'ANNOTATIONS',
         measurement_value: ann.measurement_value,
         measurement_unit: ann.measurement_unit,
+        // Per-annotation scale override — carries the detail-view scale on
+        // every annotation drawn while the user is in per_annotation mode,
+        // so mixed-scale sheets compute quantities correctly at read time.
+        scale_override: scaleMode === 'per_annotation' ? drawingScale : null,
         metadata: ann.fontSize ? { font_size: ann.fontSize } : undefined,
       });
     },
-    [selectedDrawingId, projectId, activeColor, createAnnotationMutation],
+    [
+      selectedDrawingId,
+      projectId,
+      drawings,
+      activeColor,
+      createAnnotationMutation,
+      addToast,
+      t,
+      isCalibrating,
+      scaleMode,
+      drawingScale,
+    ],
   );
 
   /**
@@ -1022,6 +1287,56 @@ export function DwgTakeoffPage() {
     t,
   ]);
 
+  /**
+   * Download the current viewport as a single-page A4-landscape PDF.
+   * Snapshots the live canvas (so annotations + grid + selection halos
+   * are all captured) and delegates layout to ``exportCanvasToPdf`` in
+   * ``lib/pdf-export.ts``. Grabs the canvas from the DOM via its
+   * parent container — the DxfViewer does not expose an imperative
+   * handle and we'd rather not restructure it just for this button.
+   */
+  const handleDownloadCanvasPdf = useCallback(() => {
+    const drawing = drawings.find((d) => d.id === selectedDrawingId);
+    if (!drawing) {
+      addToast({
+        type: 'error',
+        title: t('dwg_takeoff.pdf_no_drawing', { defaultValue: 'No drawing selected' }),
+      });
+      return;
+    }
+    // DxfViewer renders exactly one <canvas> inside its own container;
+    // on this page the canvas is the only <canvas> in the viewer region,
+    // so `document.querySelector` is a safe way to reach it without
+    // adding an imperative ref to the viewer component.
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-dwg-viewer-root] canvas, .relative.h-full.w-full.overflow-hidden canvas',
+    );
+    if (!canvas) {
+      addToast({
+        type: 'error',
+        title: t('dwg_takeoff.pdf_no_canvas', { defaultValue: 'Canvas not ready yet' }),
+      });
+      return;
+    }
+    try {
+      exportCanvasToPdf({
+        canvas,
+        filename: drawing.filename || drawing.name,
+        scale: drawingScale,
+      });
+      addToast({
+        type: 'success',
+        title: t('dwg_takeoff.pdf_downloaded', { defaultValue: 'PDF downloaded' }),
+      });
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('dwg_takeoff.pdf_failed', { defaultValue: 'PDF export failed' }),
+        message: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }, [drawings, selectedDrawingId, drawingScale, addToast, t]);
+
   const closeUploadModal = useCallback(() => {
     setShowUpload(false);
     setUploadFile(null);
@@ -1119,7 +1434,10 @@ export function DwgTakeoffPage() {
     entity: DxfEntity,
     measurement: { value: number; unit: string } | null,
   ): Promise<string | null> => {
-    if (!selectedDrawingId || !projectId) return null;
+    if (!selectedDrawingId) return null;
+    const drawing = drawings.find((d) => d.id === selectedDrawingId);
+    const effectiveProjectId = drawing?.project_id || projectId;
+    if (!effectiveProjectId) return null;
 
     // Reuse an existing text_pin annotation anchored to this entity, if any.
     const existing = annotations.find(
@@ -1131,7 +1449,7 @@ export function DwgTakeoffPage() {
     const centroid = computeEntityCentroid(entity);
     try {
       const created = await createAnnotation({
-        project_id: projectId,
+        project_id: effectiveProjectId,
         drawing_id: selectedDrawingId,
         annotation_type: 'text_pin',
         geometry: { points: [centroid] },
@@ -1146,7 +1464,7 @@ export function DwgTakeoffPage() {
     } catch {
       return null;
     }
-  }, [selectedDrawingId, projectId, annotations, activeColor, queryClient]);
+  }, [selectedDrawingId, projectId, drawings, annotations, activeColor, queryClient]);
 
   const handleLinkToPosition = useCallback(async (entityId: string, position: Position) => {
     const entity = entities.find((e) => e.id === entityId);
@@ -1581,7 +1899,13 @@ export function DwgTakeoffPage() {
             </div>
           ) : loadingEntities ? (
             <div className="flex flex-1 items-center justify-center">
-              <Loader2 size={32} className="animate-spin text-muted-foreground" />
+              <div className="flex flex-col items-center gap-4 max-w-sm w-full px-6">
+                <Loader2 size={32} className="animate-spin text-muted-foreground" />
+                <p className="text-xs text-content-tertiary">
+                  {t('dwg_takeoff.loading_drawing', { defaultValue: 'Loading drawing…' })}
+                </p>
+                <UploadProgressInline />
+              </div>
             </div>
           ) : (
             <>
@@ -1603,16 +1927,17 @@ export function DwgTakeoffPage() {
                 ))}
               </div>
             )}
-            <div className="relative flex-1 min-h-0">
+            <div className="relative flex-1 min-h-0" data-dwg-viewer-root>
               <DxfViewer
                 entities={viewerEntities}
-                annotations={annotations}
+                annotations={visibleAnnotations}
                 visibleLayers={visibleLayers}
                 activeTool={activeTool}
                 activeColor={activeColor}
                 selectedEntityIds={selectedEntityIds}
                 hiddenEntityIds={hiddenEntityIds}
                 selectedAnnotationId={selectedAnnotationId}
+                drawingScale={drawingScale}
                 onSelectEntity={handleSelectEntity}
                 onSelectAnnotation={setSelectedAnnotationId}
                 onEntityContextMenu={handleEntityContextMenu}
@@ -1632,10 +1957,32 @@ export function DwgTakeoffPage() {
                 />
               </div>
 
-              {/* Floating Offline Ready badge — top-right corner of viewer
-                  (opposite the ToolPalette). Surfaces the local converter
-                  status without stealing space from the drawing. */}
-              <div className="absolute top-3 right-3 z-10">
+              {/* Floating Offline Ready badge + PDF export — top-right corner
+                  of the viewer (opposite the ToolPalette). Download PDF is
+                  paired with the badge so estimators discover it while
+                  glancing at converter status without stealing real estate
+                  from the drawing. */}
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDownloadCanvasPdf}
+                  disabled={!selectedDrawingId}
+                  className={clsx(
+                    'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold',
+                    'border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md',
+                    'shadow-xl shadow-black/30 ring-1 ring-black/5 transition-colors',
+                    selectedDrawingId
+                      ? 'text-slate-800 hover:bg-white'
+                      : 'text-slate-400 cursor-not-allowed',
+                  )}
+                  title={t('dwg_takeoff.download_pdf', {
+                    defaultValue: 'Download current viewport as PDF',
+                  })}
+                  data-testid="dwg-download-pdf"
+                >
+                  <FileDown size={14} />
+                  <span>{t('dwg_takeoff.download_pdf_short', { defaultValue: 'PDF' })}</span>
+                </button>
                 <OfflineReadyBadge
                   readiness={offlineReadiness}
                   isLoading={loadingOfflineReadiness}
@@ -1681,40 +2028,63 @@ export function DwgTakeoffPage() {
                   onSaveAsGroup={handleSaveSelectionAsGroup}
                   onCreateTask={() => {
                     setContextMenu(null);
-                    const params = new URLSearchParams({
-                      create: '1',
-                      source: 'dwg',
-                      drawing_id: selectedDrawingId ?? '',
-                      entity_ids: Array.from(selectedEntityIds).join(','),
+                    if (!selectedDrawingId) return;
+                    const ids = selectedEntityIds.size > 0
+                      ? Array.from(selectedEntityIds)
+                      : [contextMenu.entityId];
+                    const primary = entities.find((e) => e.id === ids[0]);
+                    setCreateTaskFor({
+                      entityIds: ids,
+                      drawingId: selectedDrawingId,
+                      entityLabel: primary
+                        ? `${primary.type} · ${primary.layer}`
+                        : undefined,
                     });
-                    window.open(`/tasks?${params.toString()}`, '_blank', 'noopener');
                   }}
                   onLinkSchedule={() => {
                     setContextMenu(null);
-                    const params = new URLSearchParams({
-                      link: 'dwg',
-                      drawing_id: selectedDrawingId ?? '',
-                      entity_ids: Array.from(selectedEntityIds).join(','),
+                    if (!selectedDrawingId) return;
+                    const ids = selectedEntityIds.size > 0
+                      ? Array.from(selectedEntityIds)
+                      : [contextMenu.entityId];
+                    const primary = entities.find((e) => e.id === ids[0]);
+                    setLinkActivityFor({
+                      entityIds: ids,
+                      drawingId: selectedDrawingId,
+                      entityLabel: primary
+                        ? `${primary.type} · ${primary.layer}`
+                        : undefined,
                     });
-                    window.open(`/schedule?${params.toString()}`, '_blank', 'noopener');
                   }}
                   onLinkDocument={() => {
                     setContextMenu(null);
-                    const params = new URLSearchParams({
-                      link: 'dwg',
-                      drawing_id: selectedDrawingId ?? '',
-                      entity_ids: Array.from(selectedEntityIds).join(','),
+                    if (!selectedDrawingId) return;
+                    const ids = selectedEntityIds.size > 0
+                      ? Array.from(selectedEntityIds)
+                      : [contextMenu.entityId];
+                    const primary = entities.find((e) => e.id === ids[0]);
+                    setLinkDocumentFor({
+                      entityIds: ids,
+                      drawingId: selectedDrawingId,
+                      entityLabel: primary
+                        ? `${primary.type} · ${primary.layer}`
+                        : undefined,
                     });
-                    window.open(`/documents?${params.toString()}`, '_blank', 'noopener');
                   }}
                   onLinkRequirement={() => {
                     setContextMenu(null);
-                    const params = new URLSearchParams({
-                      link: 'dwg',
-                      drawing_id: selectedDrawingId ?? '',
-                      entity_ids: Array.from(selectedEntityIds).join(','),
+                    if (!selectedDrawingId) return;
+                    const ids = selectedEntityIds.size > 0
+                      ? Array.from(selectedEntityIds)
+                      : [contextMenu.entityId];
+                    const primary = entities.find((e) => e.id === ids[0]);
+                    setLinkRequirementFor({
+                      entityIds: ids,
+                      drawingId: selectedDrawingId,
+                      entityLabel: primary
+                        ? `${primary.type} · ${primary.layer}`
+                        : undefined,
                     });
-                    window.open(`/requirements?${params.toString()}`, '_blank', 'noopener');
                   }}
                   onClose={() => setContextMenu(null)}
                 />
@@ -1960,14 +2330,12 @@ export function DwgTakeoffPage() {
             </>
           )}
 
-          {/* ── Bottom Filmstrip: Drawing List ────────────────────── */}
+          {/* ── Bottom Filmstrip: Drawing List (always visible) ──── */}
           <DrawingFilmstrip
             drawings={drawings}
             isLoading={loadingDrawings}
             activeDrawingId={selectedDrawingId}
             entities={entities}
-            expanded={filmstripExpanded}
-            onToggleExpanded={() => setFilmstripExpanded((v) => !v)}
             onSelectDrawing={handleSelectDrawing}
             onDeleteDrawing={(id) => setConfirmDeleteId(id)}
             onUpload={() => setShowUpload(true)}
@@ -2151,31 +2519,40 @@ export function DwgTakeoffPage() {
               );
             })()}
 
-            {/* Tab bar */}
+            {/* Tab bar — stacked icon + label so five tabs fit cleanly in
+                a narrow side panel without the text overlapping the icon.
+                Short labels + tooltips keep it readable at ~320-360 px. */}
             <div className="flex border-b border-border">
               {(
                 [
-                  { id: 'layers' as const, icon: Layers, labelKey: 'dwg_takeoff.layers', count: layers.length },
-                  { id: 'annotations' as const, icon: MessageSquare, labelKey: 'dwg_takeoff.annotations', count: annotations.length },
-                  { id: 'properties' as const, icon: Info, labelKey: 'dwg_takeoff.properties', count: 0 },
-                  { id: 'summary' as const, icon: BarChart3, labelKey: 'dwg_takeoff.summary', count: 0 },
+                  { id: 'layers' as const, icon: Layers, labelKey: 'dwg_takeoff.tab_layers_short', fallback: 'Layers', titleKey: 'dwg_takeoff.layers', titleFallback: 'Layers', count: layers.length },
+                  { id: 'annotations' as const, icon: MessageSquare, labelKey: 'dwg_takeoff.tab_annotations_short', fallback: 'Notes', titleKey: 'dwg_takeoff.annotations', titleFallback: 'Annotations', count: annotations.length },
+                  { id: 'properties' as const, icon: Info, labelKey: 'dwg_takeoff.tab_properties_short', fallback: 'Props', titleKey: 'dwg_takeoff.properties', titleFallback: 'Properties', count: 0 },
+                  { id: 'scale' as const, icon: Ruler, labelKey: 'dwg_takeoff.tab_scale_short', fallback: 'Scale', titleKey: 'dwg_takeoff.tab_scale', titleFallback: 'Drawing scale', count: 0 },
+                  { id: 'summary' as const, icon: BarChart3, labelKey: 'dwg_takeoff.tab_summary_short', fallback: 'Sum', titleKey: 'dwg_takeoff.summary', titleFallback: 'Summary', count: 0 },
                 ]
-              ).map(({ id, icon: Icon, labelKey, count }) => (
+              ).map(({ id, icon: Icon, labelKey, fallback, titleKey, titleFallback, count }) => (
                 <button
                   key={id}
                   onClick={() => setRightTab(id)}
+                  title={t(titleKey, titleFallback)}
                   className={clsx(
-                    'flex flex-1 items-center justify-center gap-1 py-2 text-xs font-medium transition-colors',
+                    'flex flex-1 min-w-0 flex-col items-center justify-center gap-0.5 py-1.5 px-1 text-[10px] font-medium leading-none transition-colors',
                     rightTab === id
                       ? 'border-b-2 border-oe-blue text-oe-blue'
                       : 'text-muted-foreground hover:text-foreground',
                   )}
+                  data-testid={`dwg-right-tab-${id}`}
                 >
-                  <Icon size={13} />
-                  {t(labelKey, id)}
-                  {count > 0 && (
-                    <span className="text-[9px] tabular-nums opacity-60">({count})</span>
-                  )}
+                  <Icon size={14} />
+                  <span className="flex items-center gap-0.5 truncate">
+                    <span className="truncate">{t(labelKey, fallback)}</span>
+                    {count > 0 && (
+                      <span className="text-[9px] tabular-nums opacity-60">
+                        ({count})
+                      </span>
+                    )}
+                  </span>
                 </button>
               ))}
             </div>
@@ -2287,13 +2664,111 @@ export function DwgTakeoffPage() {
                         <PropertyRow label={t('dwg_takeoff.prop_block', 'Block')} value={selectedEntity.block_name} />
                       )}
 
+                      {/* ── Attach-to: cross-module link actions ────
+                       *  Matches the BIM page's "+ New task / + Link
+                       *  document / ..." affordances.  Lives above the
+                       *  polyline measurements block so the actions are
+                       *  discoverable before the user scrolls through
+                       *  per-segment lengths. */}
+                      {selectedDrawingId && (
+                        <div className="mt-3 space-y-1.5">
+                          <div className="font-semibold text-xs text-foreground border-b border-border pb-1">
+                            {t('dwg_takeoff.attach_to', { defaultValue: 'Attach to' })}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenLinkToBoq(selectedEntity.id)}
+                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-[11px] text-content-primary hover:bg-surface-tertiary transition-colors"
+                            data-testid="dwg-attach-boq"
+                          >
+                            <Link2 size={12} className="text-oe-blue shrink-0" />
+                            <span className="flex-1">
+                              {t('dwg_takeoff.attach_boq', { defaultValue: 'Link to BOQ' })}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCreateTaskFor({
+                                entityIds: [selectedEntity.id],
+                                drawingId: selectedDrawingId,
+                                entityLabel: `${selectedEntity.type} · ${selectedEntity.layer}`,
+                              })
+                            }
+                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-[11px] text-content-primary hover:bg-surface-tertiary transition-colors"
+                            data-testid="dwg-attach-task"
+                          >
+                            <ListChecks size={12} className="text-amber-500 shrink-0" />
+                            <span className="flex-1">
+                              {t('dwg_takeoff.attach_task', { defaultValue: '+ New task' })}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setLinkDocumentFor({
+                                entityIds: [selectedEntity.id],
+                                drawingId: selectedDrawingId,
+                                entityLabel: `${selectedEntity.type} · ${selectedEntity.layer}`,
+                              })
+                            }
+                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-[11px] text-content-primary hover:bg-surface-tertiary transition-colors"
+                            data-testid="dwg-attach-document"
+                          >
+                            <FileText size={12} className="text-violet-500 shrink-0" />
+                            <span className="flex-1">
+                              {t('dwg_takeoff.attach_document', { defaultValue: '+ Link document' })}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setLinkActivityFor({
+                                entityIds: [selectedEntity.id],
+                                drawingId: selectedDrawingId,
+                                entityLabel: `${selectedEntity.type} · ${selectedEntity.layer}`,
+                              })
+                            }
+                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-[11px] text-content-primary hover:bg-surface-tertiary transition-colors"
+                            data-testid="dwg-attach-activity"
+                          >
+                            <CalendarDays size={12} className="text-emerald-500 shrink-0" />
+                            <span className="flex-1">
+                              {t('dwg_takeoff.attach_activity', { defaultValue: '+ Link activity' })}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setLinkRequirementFor({
+                                entityIds: [selectedEntity.id],
+                                drawingId: selectedDrawingId,
+                                entityLabel: `${selectedEntity.type} · ${selectedEntity.layer}`,
+                              })
+                            }
+                            className="w-full flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-2 py-1.5 text-left text-[11px] text-content-primary hover:bg-surface-tertiary transition-colors"
+                            data-testid="dwg-attach-requirement"
+                          >
+                            <ClipboardCheck size={12} className="text-violet-500 shrink-0" />
+                            <span className="flex-1">
+                              {t('dwg_takeoff.attach_requirement', { defaultValue: '+ Link requirement' })}
+                            </span>
+                          </button>
+                        </div>
+                      )}
+
                       {/* ── Polyline measurements ──────────────── */}
                       {selectedEntity.type === 'LWPOLYLINE' && selectedEntity.vertices && selectedEntity.vertices.length >= 2 && (() => {
                         const verts = selectedEntity.vertices!;
                         const closed = !!selectedEntity.closed;
                         const segLengths = getSegmentLengths(verts, closed);
-                        const perimeter = calculatePerimeter(verts, closed);
-                        const area = closed ? calculateArea(verts) : 0;
+                        // Apply current drawing scale on display so the right-panel
+                        // numbers stay in sync with the canvas labels when the user
+                        // picks a different ratio via the Scale tab.
+                        const perimeter = calculatePerimeter(verts, closed) * drawingScale;
+                        const area = closed
+                          ? calculateArea(verts) * drawingScale * drawingScale
+                          : 0;
                         return (
                           <div className="mt-3 space-y-2">
                             <div className="font-semibold text-xs text-foreground border-b border-border pb-1">
@@ -2341,7 +2816,7 @@ export function DwgTakeoffPage() {
                                       #{i + 1}
                                     </span>
                                     <span className="font-mono font-medium text-[11px]">
-                                      {formatMeasurement(len, 'm')}
+                                      {formatMeasurement(len * drawingScale, 'm')}
                                     </span>
                                   </div>
                                 ))}
@@ -2357,6 +2832,19 @@ export function DwgTakeoffPage() {
                     </p>
                   )}
                 </div>
+              )}
+
+              {rightTab === 'scale' && (
+                <ScaleTab
+                  drawingScale={drawingScale}
+                  onDrawingScaleChange={setDrawingScale}
+                  mode={scaleMode}
+                  onModeChange={setScaleMode}
+                  isCalibrating={isCalibrating}
+                  calibrationPixels={calibrationPixels}
+                  onStartCalibration={handleStartCalibration}
+                  onCancelCalibration={handleCancelCalibration}
+                />
               )}
 
               {rightTab === 'summary' && (
@@ -2556,20 +3044,36 @@ export function DwgTakeoffPage() {
               </select>
             </div>
 
-            {/* Upload button */}
+            {/* Upload button — routes through the global DWG upload store so
+                the job survives navigation and progress is shown in the
+                corner dock. */}
             <button
-              disabled={!uploadFile || uploadMutation.isPending}
-              onClick={() => uploadMutation.mutate()}
+              data-testid="dwg-upload-submit"
+              disabled={!uploadFile || !projectId}
+              onClick={() => {
+                if (!uploadFile || !projectId) return;
+                useDwgUploadStore.getState().startUpload({
+                  file: uploadFile,
+                  projectId,
+                  modelName: uploadName || uploadFile.name,
+                  discipline: uploadDiscipline,
+                });
+                addToast({
+                  type: 'info',
+                  title: t('dwg_takeoff.upload_started', {
+                    defaultValue: 'Upload started',
+                  }),
+                  message: t('dwg_takeoff.upload_started_hint', {
+                    defaultValue:
+                      'Progress continues in the dock — you can navigate away.',
+                  }),
+                });
+                closeUploadModal();
+              }}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-md hover:shadow-lg"
             >
-              {uploadMutation.isPending ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Upload size={16} />
-              )}
-              {uploadMutation.isPending
-                ? t('dwg_takeoff.uploading', 'Uploading...')
-                : t('dwg_takeoff.upload_and_process', 'Upload & Process')}
+              <Upload size={16} />
+              {t('dwg_takeoff.upload_and_process', 'Upload & Process')}
             </button>
           </div>
         </div>
@@ -2594,6 +3098,46 @@ export function DwgTakeoffPage() {
 
       {/* Delete annotation confirmation */}
       <ConfirmDialog {...annotDeleteConfirmProps} />
+
+      {/* Inline cross-module link modals — mirror the BIM page pattern.
+          Each one POSTs/PATCHes the relevant module and invalidates
+          downstream queries so new badges appear instantly. */}
+      {createTaskFor && projectId && (
+        <CreateTaskFromDwgModal
+          projectId={projectId}
+          entityIds={createTaskFor.entityIds}
+          drawingId={createTaskFor.drawingId}
+          entityLabel={createTaskFor.entityLabel}
+          onClose={() => setCreateTaskFor(null)}
+        />
+      )}
+      {linkDocumentFor && projectId && (
+        <LinkDocumentToDwgModal
+          projectId={projectId}
+          entityIds={linkDocumentFor.entityIds}
+          drawingId={linkDocumentFor.drawingId}
+          entityLabel={linkDocumentFor.entityLabel}
+          onClose={() => setLinkDocumentFor(null)}
+        />
+      )}
+      {linkActivityFor && projectId && (
+        <LinkActivityToDwgModal
+          projectId={projectId}
+          entityIds={linkActivityFor.entityIds}
+          drawingId={linkActivityFor.drawingId}
+          entityLabel={linkActivityFor.entityLabel}
+          onClose={() => setLinkActivityFor(null)}
+        />
+      )}
+      {linkRequirementFor && projectId && (
+        <LinkRequirementToDwgModal
+          projectId={projectId}
+          entityIds={linkRequirementFor.entityIds}
+          drawingId={linkRequirementFor.drawingId}
+          entityLabel={linkRequirementFor.entityLabel}
+          onClose={() => setLinkRequirementFor(null)}
+        />
+      )}
     </div>
   );
 }
@@ -2604,24 +3148,38 @@ export function DwgTakeoffPage() {
 /* ── Bottom Drawing Filmstrip ────────────────────────────────────────── */
 
 interface DrawingFilmstripProps {
-  drawings: { id: string; name: string; discipline: string; entity_count: number }[];
+  drawings: {
+    id: string;
+    name: string;
+    discipline: string;
+    entity_count: number;
+    created_at?: string;
+  }[];
   isLoading: boolean;
   activeDrawingId: string | null;
   entities: DxfEntity[];
-  expanded: boolean;
-  onToggleExpanded: () => void;
   onSelectDrawing: (id: string) => void;
   onDeleteDrawing: (id: string) => void;
   onUpload: () => void;
 }
 
+/**
+ * Bottom-of-page strip of drawing cards.
+ *
+ * Changes vs. the previous revision:
+ *  - Cards are ~30% smaller in both axes (w-36 × h-[72px] vs. w-52 × h-[108px])
+ *    so a wider set of drawings fits in one row without horizontal scroll.
+ *  - Shows "Uploaded <relative>" using date-fns `formatDistanceToNow` so
+ *    estimators can spot stale vs. fresh drawings at a glance.
+ *  - Always visible — no auto-hide / collapse toggle. All drawings in the
+ *    active project are always on screen. A compact header still shows
+ *    the count.
+ */
 function DrawingFilmstrip({
   drawings,
   isLoading,
   activeDrawingId,
   entities,
-  expanded,
-  onToggleExpanded,
   onSelectDrawing,
   onDeleteDrawing,
   onUpload,
@@ -2629,74 +3187,91 @@ function DrawingFilmstrip({
   const { t } = useTranslation();
 
   return (
-    <div className="shrink-0 border-t border-[#2a2a2a] bg-[#2f2f2f] text-slate-200">
-      {/* Header -- always visible */}
-      <button
-        type="button"
-        onClick={onToggleExpanded}
-        className="flex items-center w-full px-4 py-1.5 cursor-pointer group hover:bg-white/5 transition-colors"
-      >
-        <div className="flex flex-col items-center gap-[2px] mr-3 opacity-60 group-hover:opacity-90 transition-opacity">
-          <div className="w-4 h-[2px] rounded-full bg-slate-400" />
-          <div className="w-4 h-[2px] rounded-full bg-slate-400" />
-        </div>
-        <Layers size={14} className="text-slate-300 mr-2 shrink-0" />
-        <span className="text-xs font-semibold text-slate-100">
+    <div
+      className="shrink-0 border-t border-[#2a2a2a] bg-[#2f2f2f] text-slate-200"
+      data-testid="dwg-filmstrip"
+    >
+      {/* Header -- always visible, no longer acts as a collapse toggle. */}
+      <div className="flex items-center w-full px-3 py-1">
+        <Layers size={12} className="text-slate-300 mr-1.5 shrink-0" />
+        <span className="text-[11px] font-semibold text-slate-100">
           {t('dwg_takeoff.drawings', 'Drawings')}
         </span>
-        <span className="text-[11px] text-slate-400 ml-1.5">({drawings.length})</span>
-        <ChevronUp
-          size={14}
-          className={clsx(
-            'ml-auto text-slate-300 transition-transform duration-200',
-            expanded ? '' : 'rotate-180',
-          )}
-        />
-      </button>
+        <span className="text-[10px] text-slate-400 ml-1">({drawings.length})</span>
+      </div>
 
-      {/* Collapsible drawing cards — taller for clearer thumbnails + metadata */}
-      <div
-        className="overflow-hidden transition-all duration-300 ease-in-out"
-        style={{ maxHeight: expanded ? '150px' : '0px', opacity: expanded ? 1 : 0 }}
-      >
-        <div className="flex items-center gap-2.5 px-4 pb-3 pt-1 overflow-x-auto">
-          {isLoading ? (
-            <Loader2 size={14} className="animate-spin text-slate-400" />
-          ) : drawings.length > 0 ? (
-            drawings.map((d) => (
+      {/* Drawing cards — always visible, horizontally scrolling if needed. */}
+      <div className="flex items-center gap-1.5 px-3 pb-2 pt-0.5 overflow-x-auto">
+        {isLoading ? (
+          <Loader2 size={12} className="animate-spin text-slate-400" />
+        ) : drawings.length > 0 ? (
+          drawings.map((d) => {
+            // Prefer date-fns' formatDistanceToNow for the upload label;
+            // fall back to empty if it's missing or malformed (older rows
+            // in dev DBs without a timestamp).
+            let uploadedLabel = '';
+            if (d.created_at) {
+              try {
+                const dt = new Date(d.created_at);
+                if (!Number.isNaN(dt.getTime())) {
+                  uploadedLabel = t('dwg_takeoff.uploaded_relative', {
+                    defaultValue: 'Uploaded {{when}}',
+                    when: formatDistanceToNow(dt, { addSuffix: true }),
+                  });
+                }
+              } catch {
+                uploadedLabel = '';
+              }
+            }
+
+            return (
               <button
                 key={d.id}
                 onClick={() => onSelectDrawing(d.id)}
                 className={clsx(
-                  'group relative shrink-0 w-52 h-[108px] text-start rounded-lg border transition-all duration-200 overflow-hidden flex flex-col',
+                  'group relative shrink-0 w-36 h-[72px] text-start rounded-md border overflow-hidden flex flex-col',
+                  'transition-all duration-150',
                   activeDrawingId === d.id
-                    ? 'border-blue-500/80 bg-blue-500/10 shadow-md shadow-blue-500/20'
+                    ? 'border-blue-500/80 bg-blue-500/10 shadow shadow-blue-500/20'
                     : 'border-[#3a3a3a] bg-[#363636] hover:bg-[#3d3d3d] hover:border-[#4a4a4a]',
                 )}
+                data-testid="dwg-filmstrip-card"
               >
-                <div className="px-2.5 py-2">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <FileText size={12} className={clsx(
-                      'shrink-0',
-                      activeDrawingId === d.id ? 'text-blue-400' : 'text-slate-400',
-                    )} />
-                    <span className={clsx(
-                      'text-[11px] font-semibold truncate',
-                      activeDrawingId === d.id ? 'text-blue-300' : 'text-slate-100',
-                    )}>
+                <div className="px-2 py-1.5 flex flex-col gap-0.5">
+                  <div className="flex items-center gap-1">
+                    <FileText
+                      size={10}
+                      className={clsx(
+                        'shrink-0',
+                        activeDrawingId === d.id ? 'text-blue-400' : 'text-slate-400',
+                      )}
+                    />
+                    <span
+                      className={clsx(
+                        'text-[10px] font-semibold truncate',
+                        activeDrawingId === d.id ? 'text-blue-300' : 'text-slate-100',
+                      )}
+                    >
                       {d.name}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                    <span className="capitalize">{d.discipline}</span>
+                  <div className="flex items-center gap-1 text-[9px] text-slate-400">
+                    <span className="capitalize truncate">{d.discipline}</span>
                     <span>&middot;</span>
-                    <span>
+                    <span className="tabular-nums">
                       {activeDrawingId === d.id && entities.length > 0
                         ? entities.length
-                        : d.entity_count || '--'}{' '}
-                      {t('dwg_takeoff.entities', 'entities')}
+                        : d.entity_count || '--'}
                     </span>
                   </div>
+                  {uploadedLabel && (
+                    <div
+                      className="text-[9px] text-slate-500 truncate"
+                      title={uploadedLabel}
+                    >
+                      {uploadedLabel}
+                    </div>
+                  )}
                 </div>
                 {/* Delete button */}
                 <button
@@ -2704,29 +3279,29 @@ function DrawingFilmstrip({
                     e.stopPropagation();
                     onDeleteDrawing(d.id);
                   }}
-                  className="absolute top-1 right-1 h-5 w-5 rounded flex items-center justify-center
+                  className="absolute top-0.5 right-0.5 h-4 w-4 rounded flex items-center justify-center
                              text-transparent group-hover:text-slate-400 hover:!text-red-400 hover:bg-red-500/20
                              transition-all"
                 >
-                  <Trash2 size={11} />
+                  <Trash2 size={9} />
                 </button>
               </button>
-            ))
-          ) : (
-            <span className="text-[11px] text-slate-400">
-              {t('dwg_takeoff.no_drawings', 'No drawings uploaded yet')}
-            </span>
-          )}
-          {/* Upload button */}
-          <button
-            onClick={onUpload}
-            className="flex items-center justify-center shrink-0 w-14 h-14 rounded-lg border-2 border-dashed
-                       border-[#4a4a4a] hover:border-blue-400/60 hover:bg-blue-500/10 transition-all group"
-            title={t('dwg_takeoff.upload_drawing', 'Upload drawing')}
-          >
-            <Plus size={18} className="text-slate-400 group-hover:text-blue-300 transition-colors" />
-          </button>
-        </div>
+            );
+          })
+        ) : (
+          <span className="text-[10px] text-slate-400">
+            {t('dwg_takeoff.no_drawings', 'No drawings uploaded yet')}
+          </span>
+        )}
+        {/* Upload button — compact to match the new card dimensions. */}
+        <button
+          onClick={onUpload}
+          className="flex items-center justify-center shrink-0 w-9 h-9 rounded-md border-2 border-dashed
+                     border-[#4a4a4a] hover:border-blue-400/60 hover:bg-blue-500/10 transition-all group"
+          title={t('dwg_takeoff.upload_drawing', 'Upload drawing')}
+        >
+          <Plus size={14} className="text-slate-400 group-hover:text-blue-300 transition-colors" />
+        </button>
       </div>
     </div>
   );
@@ -2776,6 +3351,368 @@ function SummaryKpiCard({ label, value, unit, accent }: SummaryKpiCardProps) {
         {unit && (
           <span className="text-[10px] font-medium ml-1 opacity-70">{unit}</span>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Scale tab ─────────────────────────────────────────────────────────
+ * Drawing scale selector lives here (moved out of a floating canvas
+ * overlay).  Raw DXF units are treated as metres, so picking "1:50"
+ * means every length reported on screen is divided by 50 (the drawing's
+ * native unit is fifty times larger than the real-world one).  Presets
+ * cover the common architectural ratios; a "Custom" slot lets the user
+ * type any positive integer. */
+const SCALE_PRESETS: { value: number; label: string }[] = [
+  { value: 1, label: '1:1' },
+  { value: 50, label: '1:50' },
+  { value: 100, label: '1:100' },
+  { value: 200, label: '1:200' },
+  { value: 500, label: '1:500' },
+];
+
+interface ScaleTabProps {
+  drawingScale: number;
+  onDrawingScaleChange: (n: number) => void;
+  mode: DwgScaleMode;
+  onModeChange: (mode: DwgScaleMode) => void;
+  /** Called when the user starts or cancels the two-point calibration pick.
+   *  While the parent's "calibration arm" flag is set, the canvas captures
+   *  the next two clicks and reports them back via `onCalibrationPicked`. */
+  isCalibrating: boolean;
+  calibrationPixels: number | null;
+  onStartCalibration: () => void;
+  onCancelCalibration: () => void;
+}
+
+function ScaleTab({
+  drawingScale,
+  onDrawingScaleChange,
+  mode,
+  onModeChange,
+  isCalibrating,
+  calibrationPixels,
+  onStartCalibration,
+  onCancelCalibration,
+}: ScaleTabProps) {
+  const { t } = useTranslation();
+  const isPreset = SCALE_PRESETS.some((p) => p.value === drawingScale);
+  const [customMode, setCustomMode] = useState(!isPreset);
+  const [customInput, setCustomInput] = useState<string>(
+    isPreset ? '' : String(drawingScale),
+  );
+  // Real-world distance the user types in during two-point calibration.
+  const [realDistance, setRealDistance] = useState<string>('');
+  const [realUnit, setRealUnit] = useState<'m' | 'cm' | 'mm'>('m');
+
+  useEffect(() => {
+    if (SCALE_PRESETS.some((p) => p.value === drawingScale)) {
+      setCustomMode(false);
+      setCustomInput('');
+    } else {
+      setCustomMode(true);
+      setCustomInput(String(drawingScale));
+    }
+  }, [drawingScale]);
+
+  const handlePickPreset = (value: number) => {
+    setCustomMode(false);
+    onDrawingScaleChange(value);
+  };
+
+  const handlePickCustom = () => {
+    setCustomMode(true);
+    if (!customInput) setCustomInput(String(drawingScale));
+  };
+
+  const handleCustomChange = (raw: string) => {
+    setCustomInput(raw);
+    const n = Number(raw);
+    if (Number.isFinite(n) && n > 0) onDrawingScaleChange(n);
+  };
+
+  const applyCalibration = () => {
+    if (!calibrationPixels) return;
+    const distRaw = Number(realDistance);
+    if (!Number.isFinite(distRaw) || distRaw <= 0) return;
+    const distInMetres =
+      realUnit === 'mm' ? distRaw / 1000 : realUnit === 'cm' ? distRaw / 100 : distRaw;
+    // `drawingScale` is the denominator — raw/real. Ignoring the click
+    // order, two points in raw DXF units measure `calibrationPixels`; the
+    // user says those correspond to `distInMetres` of real-world length.
+    // Denominator = raw / real, so measured-on-screen divided by this
+    // gives the true metric length.
+    const denom = calibrationPixels / distInMetres;
+    if (Number.isFinite(denom) && denom > 0) onDrawingScaleChange(denom);
+  };
+
+  const ModeButton = ({
+    id,
+    label,
+    hint,
+  }: {
+    id: DwgScaleMode;
+    label: string;
+    hint: string;
+  }) => {
+    const active = mode === id;
+    return (
+      <button
+        type="button"
+        onClick={() => onModeChange(id)}
+        className={clsx(
+          'flex-1 flex flex-col items-start gap-0.5 rounded-md border px-2.5 py-1.5 text-left text-[11px] transition-colors',
+          active
+            ? 'border-oe-blue bg-oe-blue/10 text-oe-blue'
+            : 'border-border bg-surface-secondary text-content-primary hover:bg-surface-tertiary',
+        )}
+        data-testid={`dwg-scale-mode-${id}`}
+        aria-pressed={active}
+      >
+        <span className="font-semibold">{label}</span>
+        <span className={clsx('text-[10px] leading-tight', active ? 'text-oe-blue/80' : 'text-content-tertiary')}>
+          {hint}
+        </span>
+      </button>
+    );
+  };
+
+  return (
+    <div className="flex flex-col gap-4" data-testid="dwg-scale-tab">
+      <div className="flex items-center gap-1.5">
+        <Ruler size={14} className="text-oe-blue" />
+        <h3 className="text-sm font-semibold text-foreground">
+          {t('dwg_takeoff.scale_title', { defaultValue: 'Drawing scale' })}
+        </h3>
+      </div>
+
+      {/* Mode picker — 3 strategies */}
+      <div className="flex flex-col gap-1.5">
+        <span className="text-[9px] font-semibold uppercase tracking-wider text-content-tertiary">
+          {t('dwg_takeoff.scale_mode_label', { defaultValue: 'Scale mode' })}
+        </span>
+        <div className="flex gap-1.5">
+          <ModeButton
+            id="preset"
+            label={t('dwg_takeoff.scale_mode_preset', { defaultValue: 'Preset ratio' })}
+            hint={t('dwg_takeoff.scale_mode_preset_hint', { defaultValue: '1:50, 1:100 or custom' })}
+          />
+          <ModeButton
+            id="calibrated"
+            label={t('dwg_takeoff.scale_mode_calibrated', { defaultValue: 'Calibrate' })}
+            hint={t('dwg_takeoff.scale_mode_calibrated_hint', { defaultValue: 'Two points + known distance' })}
+          />
+          <ModeButton
+            id="per_annotation"
+            label={t('dwg_takeoff.scale_mode_per_annotation', { defaultValue: 'Per-annotation' })}
+            hint={t('dwg_takeoff.scale_mode_per_annotation_hint', { defaultValue: 'Detail views on same sheet' })}
+          />
+        </div>
+      </div>
+
+      {/* ── Mode: Preset ──────────────────────────────────────────────── */}
+      {mode === 'preset' && (
+        <>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            {t('dwg_takeoff.scale_explainer', {
+              defaultValue:
+                'Raw DXF units are treated as metres. A scale of 1:50 divides displayed measurements so a 50-metre raw span reads as 1 metre.',
+            })}
+          </p>
+
+          <div className="flex flex-col gap-1.5">
+            {SCALE_PRESETS.map((p) => {
+              const checked = !customMode && drawingScale === p.value;
+              return (
+                <label
+                  key={p.value}
+                  className={clsx(
+                    'flex items-center gap-2 rounded-md border px-2.5 py-1.5 cursor-pointer text-xs transition-colors',
+                    checked
+                      ? 'border-oe-blue bg-oe-blue/10 text-oe-blue'
+                      : 'border-border bg-surface-secondary text-content-primary hover:bg-surface-tertiary',
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="dwg-scale-preset"
+                    value={p.value}
+                    checked={checked}
+                    onChange={() => handlePickPreset(p.value)}
+                    className="accent-oe-blue"
+                    data-testid={`dwg-scale-preset-${p.value}`}
+                  />
+                  <span className="font-mono font-semibold">{p.label}</span>
+                </label>
+              );
+            })}
+
+            <label
+              className={clsx(
+                'flex items-center gap-2 rounded-md border px-2.5 py-1.5 cursor-pointer text-xs transition-colors',
+                customMode
+                  ? 'border-oe-blue bg-oe-blue/10 text-oe-blue'
+                  : 'border-border bg-surface-secondary text-content-primary hover:bg-surface-tertiary',
+              )}
+            >
+              <input
+                type="radio"
+                name="dwg-scale-preset"
+                checked={customMode}
+                onChange={handlePickCustom}
+                className="accent-oe-blue"
+                data-testid="dwg-scale-preset-custom"
+              />
+              <span className="font-mono font-semibold shrink-0">
+                {t('dwg_takeoff.scale_custom', { defaultValue: 'Custom 1:' })}
+              </span>
+              {customMode && (
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={customInput}
+                  onChange={(e) => handleCustomChange(e.target.value)}
+                  className="w-20 ml-auto px-1.5 py-0.5 text-xs font-mono rounded border border-border bg-surface-primary text-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                  data-testid="dwg-scale-custom-input"
+                  aria-label={t('dwg_takeoff.scale_input_aria', {
+                    defaultValue: 'Drawing scale denominator',
+                  })}
+                />
+              )}
+            </label>
+          </div>
+
+          <div className="rounded-md border border-border bg-surface-secondary px-2.5 py-2 text-[11px] text-muted-foreground leading-relaxed">
+            {t('dwg_takeoff.scale_example', {
+              defaultValue:
+                'Example: if the drawing shows a 10 m wall at 1:100, set scale to 1:100 and the wall will report as 10 m on the canvas.',
+            })}
+          </div>
+        </>
+      )}
+
+      {/* ── Mode: Calibrate ───────────────────────────────────────────── */}
+      {mode === 'calibrated' && (
+        <div className="flex flex-col gap-3">
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            {t('dwg_takeoff.scale_calibrate_explainer', {
+              defaultValue:
+                'Click a Distance measurement on the drawing between two points whose real length you know. Type the real length below, then press Apply — the scale is computed automatically.',
+            })}
+          </p>
+
+          <div className="rounded-md border border-border bg-surface-secondary px-3 py-2.5 text-[11px] flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-content-tertiary uppercase tracking-wider text-[9px] font-semibold">
+                {t('dwg_takeoff.scale_calibrate_measured', { defaultValue: 'Measured (raw)' })}
+              </span>
+              <span className="font-mono font-semibold text-content-primary tabular-nums">
+                {calibrationPixels !== null
+                  ? calibrationPixels.toFixed(3)
+                  : t('dwg_takeoff.scale_calibrate_none', { defaultValue: '—' })}
+              </span>
+            </div>
+            {!isCalibrating ? (
+              <button
+                type="button"
+                onClick={onStartCalibration}
+                className="inline-flex items-center justify-center gap-1.5 h-7 rounded-md text-[11px] font-semibold text-white bg-oe-blue hover:bg-oe-blue-dark transition-colors"
+              >
+                <Ruler size={11} />
+                {calibrationPixels !== null
+                  ? t('dwg_takeoff.scale_calibrate_repick', { defaultValue: 'Pick two points again' })
+                  : t('dwg_takeoff.scale_calibrate_pick', { defaultValue: 'Pick two points on drawing' })}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onCancelCalibration}
+                className="inline-flex items-center justify-center gap-1.5 h-7 rounded-md text-[11px] font-semibold text-content-primary bg-surface-tertiary hover:bg-surface-primary transition-colors"
+              >
+                {t('dwg_takeoff.scale_calibrate_cancel', { defaultValue: 'Cancel — click two points on the drawing' })}
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[9px] font-semibold uppercase tracking-wider text-content-tertiary">
+              {t('dwg_takeoff.scale_calibrate_real_label', { defaultValue: 'Real-world distance' })}
+            </span>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={0}
+                step="any"
+                value={realDistance}
+                onChange={(e) => setRealDistance(e.target.value)}
+                placeholder="5.00"
+                className="flex-1 px-2 py-1 text-xs font-mono rounded border border-border bg-surface-primary text-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                data-testid="dwg-scale-calibrate-distance"
+              />
+              <select
+                value={realUnit}
+                onChange={(e) => setRealUnit(e.target.value as typeof realUnit)}
+                className="px-2 py-1 text-xs rounded border border-border bg-surface-primary text-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                data-testid="dwg-scale-calibrate-unit"
+              >
+                <option value="m">m</option>
+                <option value="cm">cm</option>
+                <option value="mm">mm</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={applyCalibration}
+              disabled={!calibrationPixels || !Number(realDistance)}
+              className="mt-1 inline-flex items-center justify-center gap-1.5 h-8 rounded-md text-[11px] font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              data-testid="dwg-scale-calibrate-apply"
+            >
+              {t('dwg_takeoff.scale_calibrate_apply', { defaultValue: 'Apply calibration' })}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Mode: Per-annotation ──────────────────────────────────────── */}
+      {mode === 'per_annotation' && (
+        <div className="flex flex-col gap-3">
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            {t('dwg_takeoff.scale_per_annotation_explainer', {
+              defaultValue:
+                'Use when one sheet mixes scales (e.g. a 1:100 plan with a 1:20 detail window). Every new annotation you draw carries the scale below until you change it — older annotations keep their own stored scale.',
+            })}
+          </p>
+
+          <label className="flex items-center gap-2 rounded-md border border-oe-blue/40 bg-oe-blue/5 px-3 py-2 text-[11px]">
+            <span className="font-mono font-semibold shrink-0 text-oe-blue">
+              {t('dwg_takeoff.scale_active_override', { defaultValue: 'New annotation scale 1:' })}
+            </span>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={customInput || String(drawingScale)}
+              onChange={(e) => handleCustomChange(e.target.value)}
+              className="w-24 ml-auto px-1.5 py-0.5 text-xs font-mono rounded border border-border bg-surface-primary text-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              data-testid="dwg-scale-per-annotation-input"
+            />
+          </label>
+
+          <div className="rounded-md border border-border bg-surface-secondary px-2.5 py-2 text-[11px] text-muted-foreground leading-relaxed">
+            {t('dwg_takeoff.scale_per_annotation_note', {
+              defaultValue:
+                'Tip: switch back to Preset mode once the detail takeoff is done so the default scale applies to the rest of the sheet again.',
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="text-[10px] text-content-tertiary tabular-nums">
+        {t('dwg_takeoff.scale_current', {
+          defaultValue: 'Current: 1:{{n}}',
+          n: drawingScale,
+        })}
       </div>
     </div>
   );
@@ -3094,5 +4031,51 @@ function MenuItem({
       {icon}
       <span>{label}</span>
     </button>
+  );
+}
+
+/**
+ * Inline upload progress pill — surfaces the first active DWG upload from
+ * the global store under the entities loader, so users get a parallel
+ * signal that processing is running (not only the corner dock).
+ */
+function UploadProgressInline() {
+  const { t } = useTranslation();
+  const jobs = useDwgUploadStore((s) => s.jobs);
+  const active = useMemo(() => {
+    for (const job of jobs.values()) {
+      if (job.status === 'uploading' || job.status === 'converting') return job;
+    }
+    return null;
+  }, [jobs]);
+
+  if (!active) return null;
+
+  return (
+    <div
+      data-testid="dwg-loader-upload-progress"
+      className="w-full rounded-xl border border-oe-blue/25 bg-oe-blue/5 px-4 py-3 space-y-2"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <Upload size={12} className="text-oe-blue shrink-0" />
+          <span className="text-[11px] font-semibold text-content-primary truncate">
+            {active.fileName}
+          </span>
+        </div>
+        <span className="text-[11px] font-semibold text-oe-blue tabular-nums shrink-0">
+          {active.progress}%
+        </span>
+      </div>
+      <div className="h-1.5 rounded-full bg-surface-tertiary overflow-hidden">
+        <div
+          className="h-full rounded-full bg-oe-blue transition-all duration-300"
+          style={{ width: `${active.progress}%` }}
+        />
+      </div>
+      <p className="text-[10px] text-content-tertiary">
+        {t(active.stage, { defaultValue: 'Processing upload…' })}
+      </p>
+    </div>
   );
 }

@@ -25,9 +25,11 @@ import csv
 import io
 import logging
 import uuid
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # noqa: S405 — types + output tree building only; parsing routed through defusedxml below
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+import defusedxml.ElementTree as safe_ET
+
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 
 logger = logging.getLogger(__name__)
@@ -727,11 +729,30 @@ async def list_relationships(
 async def delete_relationship(
     relationship_id: uuid.UUID,
     session: SessionDep,
+    user_id: CurrentUserId,
 ) -> None:
-    """Delete a schedule relationship."""
-    from sqlalchemy import delete
+    """Delete a schedule relationship.
 
-    from app.modules.schedule.models import ScheduleRelationship
+    Guard against cross-project sabotage: non-admin users must own the
+    parent project or the request is rejected with 404 (404 instead of
+    403 so we don't leak existence of unknown relationship ids).
+    """
+    from sqlalchemy import delete, select
+
+    from app.dependencies import verify_project_access
+    from app.modules.schedule.models import Schedule, ScheduleRelationship
+
+    rel = await session.get(ScheduleRelationship, relationship_id)
+    if rel is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Relationship not found")
+
+    sched = (
+        await session.execute(select(Schedule).where(Schedule.id == rel.schedule_id))
+    ).scalar_one_or_none()
+    if sched is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Relationship not found")
+
+    await verify_project_access(sched.project_id, user_id, session)
 
     stmt = delete(ScheduleRelationship).where(
         ScheduleRelationship.id == relationship_id
@@ -980,7 +1001,7 @@ async def get_baseline(
 @router.patch(
     "/baselines/{baseline_id}",
     response_model=BaselineResponse,
-    summary="Update baseline",
+    summary="Toggle baseline active flag",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def update_baseline(
@@ -988,7 +1009,15 @@ async def update_baseline(
     data: BaselineUpdate,
     session: SessionDep,
 ) -> BaselineResponse:
-    """Update a baseline (name, is_active, metadata)."""
+    """Toggle a baseline's ``is_active`` flag.
+
+    Baselines are snapshot-in-time records and must stay immutable
+    (``name``, ``baseline_date``, ``snapshot_data``, ``metadata``) so that
+    EVM / planned-vs-actual comparisons and contractual forensics remain
+    trustworthy months later. Only the active-flag workflow toggle is
+    exposed here. Any other field in the request body is rejected by the
+    schema (``BaselineUpdate`` deliberately omits them).
+    """
     from sqlalchemy import update
 
     from app.modules.schedule.models import ScheduleBaseline
@@ -998,8 +1027,6 @@ async def update_baseline(
         raise HTTPException(status_code=404, detail="Baseline not found")
 
     updates = data.model_dump(exclude_unset=True)
-    if "metadata" in updates:
-        updates["metadata_"] = updates.pop("metadata")
     if updates:
         stmt = (
             update(ScheduleBaseline)
@@ -1016,14 +1043,14 @@ async def update_baseline(
 @router.delete(
     "/baselines/{baseline_id}",
     status_code=204,
-    summary="Delete baseline",
-    dependencies=[Depends(RequirePermission("schedule.delete"))],
+    summary="Delete baseline (admin only)",
+    dependencies=[Depends(RequirePermission("schedule.baselines.delete"))],
 )
 async def delete_baseline(
     baseline_id: uuid.UUID,
     session: SessionDep,
 ) -> None:
-    """Delete a baseline."""
+    """Delete a baseline. Admin-only: see ``schedule.baselines.delete``."""
     from app.modules.schedule.models import ScheduleBaseline
 
     baseline = await session.get(ScheduleBaseline, baseline_id)
@@ -1477,7 +1504,7 @@ async def import_msp_xml(
         content = raw.decode("latin-1")
 
     try:
-        root = ET.fromstring(content)
+        root = safe_ET.fromstring(content)
     except ET.ParseError as e:
         raise HTTPException(status_code=400, detail=f"Invalid XML: {e}") from e
 

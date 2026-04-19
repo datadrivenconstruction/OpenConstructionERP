@@ -185,7 +185,15 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
     let lastPhaseIdx = -1;
 
     const masterTimer = setInterval(() => {
-      if (phaseIdx >= phases.length) return;
+      // Phases exhausted → self-terminate instead of polling the empty
+      // phase list every 100ms forever. Prior versions only returned
+      // early, leaving a zombie interval that kept firing long after the
+      // upload completed (visible in DevTools and — per Artem's report —
+      // presenting as "conversion keeps happening in the background").
+      if (phaseIdx >= phases.length) {
+        clearStageTimer(jobId);
+        return;
+      }
       if (phaseIdx !== lastPhaseIdx) {
         lastPhaseIdx = phaseIdx;
         if (activeInterval) clearInterval(activeInterval);
@@ -520,3 +528,52 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
     },
   };
 });
+
+
+// ── Zombie-job janitor ─────────────────────────────────────────────────────
+//
+// Background context: a BIM conversion can legitimately run for 10–15
+// minutes on a large model, so we can't auto-kill short-lived jobs.
+// But the store has no persistence layer and no way to reconcile with
+// the backend, so a network-dropped upload or an early-returning browser
+// leaves a job forever stuck in ``uploading`` / ``converting`` state
+// — visible in ``GlobalUploadIndicator`` as a spinner that never clears.
+// (Reported by Artem as "конвертация проходит постоянно".)
+//
+// Once at module load and then every 2 minutes, flip anything older than
+// 45 minutes to ``error`` with an explanation so the indicator drops.
+
+if (typeof window !== 'undefined') {
+  const MAX_ACTIVE_MS = 45 * 60 * 1000;
+  const PATROL_MS = 2 * 60 * 1000;
+
+  const sweep = () => {
+    const state = useBIMUploadStore.getState();
+    const now = Date.now();
+    let dirty = false;
+    const nextJobs = new Map(state.jobs);
+    for (const [id, job] of nextJobs) {
+      const active = job.status === 'uploading' || job.status === 'converting';
+      if (!active) continue;
+      if (now - job.startedAt < MAX_ACTIVE_MS) continue;
+      nextJobs.set(id, {
+        ...job,
+        status: 'error',
+        progress: 0,
+        stage: 'bim_upload.stage_stalled',
+        errorMessage:
+          job.errorMessage ??
+          'Upload abandoned after 45 min — reload to retry if the file is still needed.',
+        completedAt: now,
+      });
+      dirty = true;
+    }
+    if (dirty) {
+      useBIMUploadStore.setState({ jobs: nextJobs });
+    }
+  };
+
+  // Initial sweep catches jobs revived by Vite HMR state preservation.
+  sweep();
+  setInterval(sweep, PATROL_MS);
+}

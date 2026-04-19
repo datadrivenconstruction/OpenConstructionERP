@@ -7,6 +7,13 @@
  * Mirrors the pattern used in ../bim-advanced.spec.ts.
  */
 import { type Page, expect } from '@playwright/test';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// ESM-safe equivalent of __dirname (package.json has "type": "module").
+const __dirname_esm = path.dirname(fileURLToPath(import.meta.url));
+const TOKEN_PATH = path.resolve(__dirname_esm, '.auth-token.txt');
 
 export const V19_USER = {
   email: process.env.V19_E2E_EMAIL ?? 'v19-e2e@openestimate.com',
@@ -23,49 +30,81 @@ function authHeaders(): Record<string, string> {
   return lastAccessToken ? { Authorization: `Bearer ${lastAccessToken}` } : {};
 }
 
-export async function loginV19(page: Page): Promise<void> {
-  let accessToken: string | undefined;
-  let refreshToken: string | undefined;
+// Module-level token cache shared across loginV19 calls in the same worker.
+// Avoids hitting the /login/ endpoint repeatedly when many tests in one
+// worker call loginV19 sequentially (the backend rate-limits at ~5/min).
+let cachedAccessToken: string | undefined;
+let cachedRefreshToken: string | undefined;
 
-  const tryLogin = async (): Promise<boolean> => {
+async function obtainTokens(page: Page): Promise<{ access: string; refresh: string }> {
+  if (cachedAccessToken && cachedRefreshToken) {
+    return { access: cachedAccessToken, refresh: cachedRefreshToken };
+  }
+  // Try reading the token cached by globalSetup before hitting /login/.
+  // Shared across all parallel workers through the file system.
+  try {
+    if (fs.existsSync(TOKEN_PATH)) {
+      const cached = fs.readFileSync(TOKEN_PATH, 'utf-8').trim();
+      if (cached) {
+        cachedAccessToken = cached;
+        cachedRefreshToken = cached;
+        return { access: cached, refresh: cached };
+      }
+    }
+  } catch {
+    /* fall through to network login */
+  }
+  const tryLogin = async () => {
     const res = await page.request.post('http://localhost:8000/api/v1/users/auth/login/', {
       data: { email: V19_USER.email, password: V19_USER.password },
       failOnStatusCode: false,
     });
-    if (!res.ok()) return false;
-    const body = await res.json();
-    accessToken = body.access_token;
-    refreshToken = body.refresh_token ?? body.access_token;
-    return true;
+    return res;
   };
 
-  if (!(await tryLogin())) {
+  let res = await tryLogin();
+  if (!res.ok() && res.status() !== 429) {
+    // User may not exist yet — register then retry.
     await page.request.post('http://localhost:8000/api/v1/users/auth/register/', {
       data: V19_USER,
       failOnStatusCode: false,
     });
-    const ok = await tryLogin();
-    if (!ok) throw new Error('v1.9 E2E: could not log in or register test user');
+    res = await tryLogin();
   }
+  if (!res.ok() && res.status() === 429) {
+    // Rate-limited — back off once and retry.
+    await new Promise((r) => setTimeout(r, 65_000));
+    res = await tryLogin();
+  }
+  if (!res.ok()) {
+    throw new Error(`v1.9 E2E: login failed with status ${res.status()}`);
+  }
+  const body = await res.json();
+  cachedAccessToken = body.access_token as string;
+  cachedRefreshToken = (body.refresh_token ?? cachedAccessToken) as string;
+  return { access: cachedAccessToken!, refresh: cachedRefreshToken! };
+}
+
+export async function loginV19(page: Page): Promise<void> {
+  const tokens = await obtainTokens(page);
 
   await page.addInitScript(
-    (tokens: { access: string; refresh: string; email: string }) => {
-      localStorage.setItem('oe_access_token', tokens.access);
-      localStorage.setItem('oe_refresh_token', tokens.refresh);
+    (t: { access: string; refresh: string; email: string }) => {
+      localStorage.setItem('oe_access_token', t.access);
+      localStorage.setItem('oe_refresh_token', t.refresh);
       localStorage.setItem('oe_remember', '1');
-      localStorage.setItem('oe_user_email', tokens.email);
+      localStorage.setItem('oe_user_email', t.email);
       localStorage.setItem('oe_onboarding_completed', 'true');
       localStorage.setItem('oe_welcome_dismissed', 'true');
       localStorage.setItem('oe_tour_completed', 'true');
-      sessionStorage.setItem('oe_access_token', tokens.access);
-      sessionStorage.setItem('oe_refresh_token', tokens.refresh);
+      sessionStorage.setItem('oe_access_token', t.access);
+      sessionStorage.setItem('oe_refresh_token', t.refresh);
     },
-    { access: accessToken!, refresh: refreshToken!, email: V19_USER.email },
+    { access: tokens.access, refresh: tokens.refresh, email: V19_USER.email },
   );
 
-  lastAccessToken = accessToken;
+  lastAccessToken = tokens.access;
 
-  // Hydrate the init script by hitting a cheap page that doesn't redirect.
   await page.goto('/about');
   await page.waitForLoadState('load');
 }

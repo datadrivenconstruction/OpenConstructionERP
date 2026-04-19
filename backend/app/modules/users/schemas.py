@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
 
 def _sanitize_name(name: str) -> str:
@@ -76,6 +76,8 @@ class LoginRequest(BaseModel):
     check would reveal the password policy to unauthenticated users.
     """
 
+    model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
+
     email: EmailStr
     password: str = Field(..., min_length=1, max_length=128)
 
@@ -92,7 +94,9 @@ class TokenResponse(BaseModel):
 class RefreshRequest(BaseModel):
     """Refresh token request."""
 
-    refresh_token: str
+    model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
+
+    refresh_token: str = Field(..., min_length=1, max_length=2048)
 
 
 # ── User CRUD ──────────────────────────────────────────────────────────────
@@ -259,9 +263,17 @@ class ChangePasswordRequest(BaseModel):
     def _check_new_password_strength(cls, v: str) -> str:
         return _validate_strong_password(v)
 
+    @model_validator(mode="after")
+    def _reject_same_password(self) -> "ChangePasswordRequest":
+        if self.new_password == self.current_password:
+            raise ValueError("New password must differ from the current one")
+        return self
+
 
 class ForgotPasswordRequest(BaseModel):
     """Forgot password request — triggers reset token generation."""
+
+    model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
 
     email: EmailStr
 
@@ -280,7 +292,9 @@ class ForgotPasswordResponse(BaseModel):
 class ResetPasswordRequest(BaseModel):
     """Reset password using a previously issued reset token."""
 
-    token: str
+    model_config = ConfigDict(extra="ignore", str_strip_whitespace=True)
+
+    token: str = Field(..., min_length=1, max_length=512)
     new_password: str = Field(..., min_length=8, max_length=128)
 
     @field_validator("new_password")

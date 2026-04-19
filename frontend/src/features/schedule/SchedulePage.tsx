@@ -1201,7 +1201,7 @@ function ScheduleDetail({
           )}
           <div className="mt-3 flex items-center gap-2">
             <Badge variant="blue" size="sm">
-              {t(`schedule.status_${schedule.status}`, schedule.status)}
+              {t(`schedule.status_${schedule.status}`, { defaultValue: schedule.status })}
             </Badge>
             {schedule.start_date && (
               <Badge variant="neutral" size="sm">
@@ -1267,7 +1267,7 @@ function ScheduleDetail({
                         : 'text-content-secondary hover:bg-surface-secondary'
                     }`}
                   >
-                    {t(`schedule.zoom_${level}`, level.charAt(0).toUpperCase() + level.slice(1))}
+                    {t(`schedule.zoom_${level}`, { defaultValue: level.charAt(0).toUpperCase() + level.slice(1) })}
                   </button>
                 ))}
               </div>
@@ -1601,7 +1601,7 @@ function ScheduleDetail({
                       : 'border-border bg-surface-primary text-content-secondary hover:bg-surface-secondary'
                   }`}
                 >
-                  {t(`schedule.type_${type}`, type)}
+                  {t(`schedule.type_${type}`, { defaultValue: type })}
                 </button>
               ))}
             </div>
@@ -1675,7 +1675,7 @@ function ScheduleDetail({
                     size="sm"
                     className="mt-1"
                   >
-                    {t(`boq.${boq.status}`, boq.status)}
+                    {t(`boq.${boq.status}`, { defaultValue: boq.status })}
                   </Badge>
                 </button>
               ))}
@@ -1905,7 +1905,7 @@ function ProjectSchedules({
                   </p>
                 </div>
                 <Badge variant={schedule.status === 'active' ? 'blue' : 'neutral'} size="sm">
-                  {t(`schedule.status_${schedule.status}`, schedule.status)}
+                  {t(`schedule.status_${schedule.status}`, { defaultValue: schedule.status })}
                 </Badge>
                 <ChevronRight size={16} className="shrink-0 text-content-tertiary" />
               </div>

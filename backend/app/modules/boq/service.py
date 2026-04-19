@@ -703,27 +703,75 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
 }
 
 
-def _compute_total(quantity: float, unit_rate: float) -> str:
-    """Compute total as string from quantity and unit_rate.
+def _to_decimal(
+    value: str | int | float | Decimal | None,
+    default: Decimal = Decimal("0"),
+) -> Decimal:
+    """Safely coerce a numeric-ish value to Decimal (precision-preserving).
 
-    Uses Decimal for precision, returns string for SQLite-safe storage.
+    - Strings are parsed verbatim (so "12.345" stays exact).
+    - Floats go through ``repr`` to preserve their true representation
+      rather than the display-truncated ``str(float)`` that drops digits.
+    - NaN / ±Infinity are rejected — money never uses those — and the
+      default is returned instead so downstream arithmetic stays well-defined.
     """
+    if value is None:
+        return default
     try:
-        q = Decimal(str(quantity))
-        r = Decimal(str(unit_rate))
-        return str(q * r)
-    except (InvalidOperation, ValueError):
-        return "0"
+        if isinstance(value, Decimal):
+            d = value
+        elif isinstance(value, bool):
+            # bool is a subclass of int — reject so we don't quietly
+            # accept True/False where a number is expected.
+            return default
+        elif isinstance(value, int):
+            d = Decimal(value)
+        elif isinstance(value, float):
+            d = Decimal(repr(value))
+        elif isinstance(value, str):
+            stripped = value.strip()
+            if not stripped:
+                return default
+            d = Decimal(stripped)
+        else:
+            return default
+    except (InvalidOperation, ValueError, TypeError):
+        return default
+    if not d.is_finite():
+        return default
+    return d
+
+
+def _compute_total(
+    quantity: str | int | float | Decimal | None,
+    unit_rate: str | int | float | Decimal | None,
+) -> str:
+    """Compute ``quantity * unit_rate`` preserving exact decimal precision.
+
+    Returns a canonical string representation safe for SQLite storage.
+    """
+    q = _to_decimal(quantity)
+    r = _to_decimal(unit_rate)
+    return str(q * r)
 
 
 def _str_to_float(value: str | None) -> float:
-    """Convert a string-stored numeric value to float, defaulting to 0.0."""
+    """Convert a string-stored numeric value to float, defaulting to 0.0.
+
+    Used only in section-detection comparisons where exact precision is not
+    required. For money arithmetic, use ``_to_decimal`` instead.
+    """
     if value is None:
         return 0.0
     try:
-        return float(value)
+        f = float(value)
     except (ValueError, TypeError):
         return 0.0
+    # Reject NaN/Infinity — section detection compares against 0.0 and a
+    # non-finite value there would make ``_is_section`` misbehave.
+    if f != f or f in (float("inf"), float("-inf")):
+        return 0.0
+    return f
 
 
 def _is_section(position: Position) -> bool:
@@ -1008,14 +1056,39 @@ class BOQService:
         )
         boq = await self.boq_repo.create(boq)
 
-        # Auto-apply default markups based on project region
+        # Auto-apply default markups only when the project's classification
+        # standard and region point to the same market. A project with
+        # ``classification_standard=masterformat`` (US) must never inherit
+        # German BGK/AGK/Wagnis/Gewinn/MwSt labels, even if the region field
+        # was left at its legacy "DACH" default. Mixed or unknown
+        # combinations fall through to the generic DEFAULT template so the
+        # defaults stay market-neutral per the global-copy policy.
         try:
             from app.modules.projects.models import Project
 
-            result = await self.session.execute(select(Project.region).where(Project.id == data.project_id))
-            region = result.scalar_one_or_none() or "DEFAULT"
-            await self.apply_default_markups(boq.id, region)
-            logger.info("Auto-applied %s markups to new BOQ %s", region, boq.id)
+            proj = await self.session.execute(
+                select(Project.region, Project.classification_standard).where(
+                    Project.id == data.project_id,
+                )
+            )
+            row = proj.first()
+            region = (row[0] if row else None) or ""
+            standard = (row[1] if row else None) or ""
+            aligned = {
+                ("din276", "DACH"): "DACH",
+                ("gaeb", "DACH"): "DACH",
+                ("nrm", "UK"): "UK",
+                ("masterformat", "US"): "US",
+            }
+            template_key = aligned.get((standard.lower(), region), "DEFAULT")
+            await self.apply_default_markups(boq.id, template_key)
+            logger.info(
+                "Auto-applied %s markups to new BOQ %s (standard=%s region=%s)",
+                template_key,
+                boq.id,
+                standard,
+                region,
+            )
         except Exception:
             logger.warning("Could not auto-apply markups for BOQ %s", boq.id, exc_info=True)
 
@@ -1331,7 +1404,10 @@ class BOQService:
         # A pure metadata patch (e.g. setting a custom column value) leaves the
         # existing total intact.
         if "quantity" in fields or "unit_rate" in fields or triggered_by_resources:
-            fields["total"] = _compute_total(_str_to_float(new_quantity), _str_to_float(new_unit_rate))
+            # Pass raw string values straight through — ``_compute_total`` now
+            # uses Decimal and handles strings directly, so we avoid the
+            # str → float → str roundtrip that was losing precision.
+            fields["total"] = _compute_total(new_quantity, new_unit_rate)
 
         # Manual quantity override: drop BIM/PDF link artifacts and reset validation.
         # When the user hand-edits the quantity, any previously-linked BIM or PDF

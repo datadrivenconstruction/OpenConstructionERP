@@ -107,6 +107,19 @@ async def update_transmittal(
     return TransmittalResponse.model_validate(transmittal)
 
 
+# ── Delete ──────────────────────────────────────────────────────────────────
+
+
+@router.delete("/{transmittal_id}", status_code=204)
+async def delete_transmittal(
+    transmittal_id: uuid.UUID,
+    user_id: CurrentUserId,
+    service: TransmittalService = Depends(_get_service),
+) -> None:
+    """Delete a draft transmittal. Issued ones return 409."""
+    await service.delete_transmittal(transmittal_id)
+
+
 # ── Issue ───────────────────────────────────────────────────────────────────
 
 

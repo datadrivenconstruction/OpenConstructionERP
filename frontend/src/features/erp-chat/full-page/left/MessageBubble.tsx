@@ -41,10 +41,14 @@ function renderMarkdown(text: string): string {
   html = html.replace(
     /\[([^\]]+)\]\(([^)\s]+)\)/g,
     (_m, label: string, href: string) => {
+      // Allow-list URL schemes to prevent javascript:, data:, vbscript: injection.
       const isExternal = /^https?:\/\//i.test(href);
-      const attrs = isExternal
-        ? ' target="_blank" rel="noopener noreferrer"'
-        : '';
+      const isInternal = href.startsWith('/') || href.startsWith('#');
+      const isMailto = /^mailto:/i.test(href);
+      if (!isExternal && !isInternal && !isMailto) {
+        return `<span style="color:var(--chat-accent,#3b82f6)">${label}</span>`;
+      }
+      const attrs = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
       return `<a href="${href}"${attrs} style="color:var(--chat-accent,#3b82f6);text-decoration:underline;font-weight:500">${label}</a>`;
     },
   );

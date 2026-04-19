@@ -28,6 +28,7 @@ from app.modules.punchlist.schemas import (
     PunchListSummary,
     PunchStatusTransition,
 )
+from app.modules.documents.service import MAX_PHOTO_SIZE
 from app.modules.punchlist.service import PunchListService
 
 router = APIRouter()
@@ -278,9 +279,23 @@ async def upload_photo(
     filename = f"{item_id}_{uuid.uuid4().hex[:8]}{ext}"
     filepath = PHOTOS_DIR / filename
 
-    # Write file
+    # Read into memory, enforce size cap before writing.
     try:
         content = await file.read()
+    except Exception:
+        logger.exception("Unable to read photo upload for punch item %s", item_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to read uploaded photo",
+        )
+
+    if len(content) > MAX_PHOTO_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Photo too large. Maximum size is {MAX_PHOTO_SIZE // (1024 * 1024)}MB.",
+        )
+
+    try:
         filepath.write_bytes(content)
     except Exception:
         logger.exception("Unable to save photo for punch item %s", item_id)

@@ -124,10 +124,12 @@ function CreateCDEModal({
   onClose,
   onSubmit,
   isPending,
+  errorMessage,
 }: {
   onClose: () => void;
   onSubmit: (data: CDEFormData) => void;
   isPending: boolean;
+  errorMessage?: string | null;
 }) {
   const { t } = useTranslation();
   const [form, setForm] = useState<CDEFormData>(EMPTY_FORM);
@@ -192,6 +194,20 @@ function CreateCDEModal({
 
         {/* Form */}
         <div className="px-6 py-4 space-y-4">
+          {errorMessage && (
+            <div
+              className="flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error/5 px-3 py-2 text-sm text-semantic-error"
+              data-testid="cde-create-error"
+              role="alert"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="mt-0.5 shrink-0" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                <path d="M12 8v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="12" cy="16" r="1" fill="currentColor" />
+              </svg>
+              <span className="leading-snug">{errorMessage}</span>
+            </div>
+          )}
           {/* Two-column: Code + Discipline */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -1016,34 +1032,71 @@ export function CDEPage() {
   const createMut = useMutation({
     mutationKey: ['cde-containers', 'create'],
     mutationFn: (data: CreateCDEContainerPayload) => createCDEContainer(data),
-    onSuccess: async () => {
-      // Await invalidation so the new container is present in the list by
-      // the time the modal closes — avoids the "I clicked create but nothing
-      // happened" perception that the user reported.
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: ['cde-containers'] }),
-        qc.invalidateQueries({ queryKey: ['cde-revisions'] }),
-      ]);
+    onSuccess: (created) => {
+      // Close + notify FIRST so user always sees feedback even if the
+      // background list refetch later fails. Previously the success handler
+      // awaited invalidateQueries — a refetch rejection (stale JWT, transient
+      // network) left the modal open with no new row and no error toast,
+      // producing the "nothing happens" symptom.
       setShowCreateModal(false);
+
+      // Flip the active state-filter tab to the created container's own
+      // state so it's always visible post-create. Previous fix only
+      // flipped when ``stateFilter`` was non-empty — but a stale
+      // in-flight fetch plus the backend's 15-18 s create latency could
+      // leave the list showing the pre-create snapshot for a beat, and
+      // the user reads that as "ничего не создаётся". Reset to empty
+      // ("All") so the new row is visible regardless of which tab the
+      // user was on.
+      setStateFilter('');
+
       addToast({
         type: 'success',
         title: t('cde.created', { defaultValue: 'Container created' }),
+        message: created?.container_code
+          ? t('cde.created_msg', {
+              defaultValue: '{{code}} — {{title}}',
+              code: created.container_code,
+              title: created.title,
+            })
+          : undefined,
       });
+
+      // Optimistically inject the new container into every cached
+      // containers list for this project so the row appears instantly —
+      // invalidateQueries below still triggers the authoritative refetch,
+      // but on a slow CDE create (18 s backend) the user was staring at
+      // an unchanged list long enough to assume nothing happened.
+      if (created && projectId) {
+        qc.setQueriesData<CDEContainer[]>(
+          { queryKey: ['cde-containers', projectId] },
+          (prev) => {
+            if (!prev) return prev;
+            if (prev.some((c) => c.id === created.id)) return prev;
+            return [created, ...prev];
+          },
+        );
+      }
+
+      // Fire-and-forget invalidation. A failing refetch cannot hide the
+      // successful write — the optimistic insert above keeps the row
+      // visible until the refetch completes.
+      qc.invalidateQueries({ queryKey: ['cde-containers'] }).catch(() => {});
+      qc.invalidateQueries({ queryKey: ['cde-revisions'] }).catch(() => {});
+      qc.invalidateQueries({ queryKey: ['cde-stats'] }).catch(() => {});
     },
     onError: (e: Error) => {
       // Surface the actual server/client error rather than a generic "Error"
-      // with an empty message — item #33 reported "New Container doesn't
-      // work" because a silent 4xx/5xx gave no feedback.
+      // with an empty message. Always console.error so users reporting the
+      // problem can share the payload without a DEV rebuild.
+      // eslint-disable-next-line no-console
+      console.error('[CDE] Create container failed:', e, (e as { body?: unknown }).body);
       const detail =
         e.message?.trim() ||
         t('cde.create_failed_generic', {
           defaultValue:
             'Container could not be created. Check that a project is selected and the code/title are unique.',
         });
-      if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
-        console.error('[CDE] Create container failed:', e);
-      }
       addToast({
         type: 'error',
         title: t('cde.create_failed', { defaultValue: 'Failed to create container' }),
@@ -1236,9 +1289,29 @@ export function CDEPage() {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => setShowCreateModal(true)}
-            disabled={!projectId}
-            title={!projectId ? t('cde.select_project_first', { defaultValue: 'Please select a project first' }) : undefined}
+            onClick={() => {
+              if (!projectId) {
+                addToast({
+                  type: 'info',
+                  title: t('cde.select_project_first_title', {
+                    defaultValue: 'Select a project first',
+                  }),
+                  message: t('cde.select_project_first', {
+                    defaultValue:
+                      'Pick a project from the header dropdown, then click New Container.',
+                  }),
+                });
+                return;
+              }
+              setShowCreateModal(true);
+            }}
+            title={
+              !projectId
+                ? t('cde.select_project_first', {
+                    defaultValue: 'Please select a project first',
+                  })
+                : undefined
+            }
             className="shrink-0 whitespace-nowrap"
           >
             <Plus size={14} className="mr-1 shrink-0" />
@@ -1391,9 +1464,13 @@ export function CDEPage() {
       {/* Create Modal */}
       {showCreateModal && (
         <CreateCDEModal
-          onClose={() => setShowCreateModal(false)}
+          onClose={() => {
+            createMut.reset();
+            setShowCreateModal(false);
+          }}
           onSubmit={handleCreateSubmit}
           isPending={createMut.isPending}
+          errorMessage={createMut.error?.message ?? null}
         />
       )}
 

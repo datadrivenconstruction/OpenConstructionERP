@@ -23,6 +23,7 @@ import {
   Settings,
 } from 'lucide-react';
 import clsx from 'clsx';
+import { AIDisclaimerBanner } from '@/shared/ui';
 import { renderTaggedText } from './renderTaggedText';
 
 interface AIAdvisorPanelProps {
@@ -162,6 +163,8 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
           </button>
         </div>
       </div>
+
+      <AIDisclaimerBanner variant="compact" className="mx-4 mt-3" />
 
       {/* AI not configured banner */}
       {!loadingRec && !aiConfigured && (

@@ -1,0 +1,145 @@
+{
+  "cpm_cases": {
+    "10_activity_diamond": {
+      "status": "PASS",
+      "project_duration": 14,
+      "critical": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ]
+    },
+    "serial_5": {
+      "status": "PASS"
+    },
+    "diamond_c_critical": {
+      "status": "PASS"
+    }
+  },
+  "dependency_types": {
+    "FS_with_lag": {
+      "status": "PASS"
+    },
+    "FF": {
+      "status": "PASS"
+    },
+    "SS_with_lag": {
+      "status": "PASS"
+    },
+    "SF_with_lag": {
+      "status": "PASS (see behavior)",
+      "behavior": "B.ES=0, B.EF=3 (theoretical: ES=-2, EF=1)"
+    }
+  },
+  "circular_detection": {
+    "status": "PASS",
+    "reject_on_create": true,
+    "reject_code": 400
+  },
+  "progress_propagation": {
+    "status": "PASS",
+    "patched": 50.0,
+    "persisted": 50.0,
+    "status_auto": "in_progress"
+  },
+  "baseline_comparison": {
+    "status": "PASS",
+    "diff": {
+      "baseline": 5,
+      "current": 10,
+      "delta": 5
+    }
+  },
+  "monte_carlo": {
+    "status": "PASS",
+    "deterministic": 15,
+    "p50": 15,
+    "p80": 16,
+    "p95": 17,
+    "std_dev": 1.3,
+    "activities_scored": 3
+  },
+  "imports": {
+    "xer": {
+      "status": "PASS",
+      "activities": 3,
+      "relationships": 2,
+      "warnings": []
+    },
+    "msp_xml": {
+      "status": "PASS",
+      "activities": 2,
+      "relationships": 1,
+      "warnings": []
+    }
+  },
+  "gantt": {
+    "status": "PASS",
+    "shape": [
+      "activity_type",
+      "boq_position_ids",
+      "color",
+      "dependencies",
+      "duration_days",
+      "end_date",
+      "id",
+      "name",
+      "parent_id",
+      "progress_pct",
+      "start_date",
+      "status",
+      "wbs_code"
+    ],
+    "summary_keys": [
+      "completed",
+      "delayed",
+      "in_progress",
+      "not_started",
+      "total_activities"
+    ]
+  },
+  "edge_cases": {
+    "duration_zero": {
+      "status": "PARTIAL",
+      "requested": 0,
+      "persisted": 1,
+      "bug": "BUG-K-01: explicit duration_days=0 silently overridden to 1 for same-day milestone"
+    },
+    "inverted_dates": {
+      "status": "PASS",
+      "reject_code": 422
+    },
+    "duplicate_names": {
+      "status": "PASS",
+      "created_two": true
+    },
+    "performance": {
+      "status": "PASS",
+      "activities": 200,
+      "create_seconds": 142.79,
+      "link_seconds": 38.26,
+      "cpm_seconds": 0.32,
+      "transient_500_create_retries": 1
+    }
+  },
+  "bugs": [
+    {
+      "id": "BUG-K-01",
+      "severity": "medium",
+      "summary": "create_activity overrides explicit duration_days=0 when start_date == end_date (compute_duration returns 1 inclusive). Milestones cannot be created with zero duration via API.",
+      "repro": "POST /schedules/{id}/activities/ with {\"duration_days\":0,\"start_date\":\"2026-05-01\",\"end_date\":\"2026-05-01\",\"activity_type\":\"milestone\"} \u2192 persisted duration_days=1",
+      "location": "backend/app/modules/schedule/service.py:391-393",
+      "fix": "Change `if duration == 0 and data.start_date and data.end_date:` to `if duration is None and ...` OR skip recompute when activity_type == 'milestone'."
+    },
+    {
+      "id": "BUG-K-02",
+      "severity": "medium",
+      "summary": "Sporadic 500 `sqlite3.OperationalError: database is locked` on rapid sequential POST /schedule/schedules/{id}/activities/ \u2014 auth-middleware last_login_at UPDATE races with activity INSERT on the same aiosqlite connection.",
+      "repro": "Rapidly POST ~50+ activities with the same admin token to /api/v1/schedule/schedules/{sid}/activities/ \u2014 observed 1 transient 500s in 200 posts.",
+      "location": "demo SQLite deploy; seen in pca-v4-serve.log \u2014 UPDATE oe_users_user SET last_login_at collides with INSERT.",
+      "fix": "Either (a) suppress last_login_at refresh when the user has been seen in the last N seconds, (b) run login-tracking in a separate connection/transaction, or (c) enable WAL mode on SQLite."
+    }
+  ]
+}

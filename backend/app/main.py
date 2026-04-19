@@ -45,12 +45,12 @@ _BUILD_HASH = _hashlib.sha256(f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()).hexdigest
 from datetime import UTC
 
 import structlog
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import Settings, get_settings
 from app.core.module_loader import module_loader
-from app.dependencies import get_current_user_id
+from app.dependencies import RequireRole, get_current_user_id
 
 logger = logging.getLogger(__name__)
 
@@ -474,7 +474,11 @@ def create_app() -> FastAPI:
         description="Open-source modular platform for construction cost estimation",
         docs_url="/api/docs" if not settings.is_production else None,
         redoc_url="/api/redoc" if not settings.is_production else None,
-        openapi_url="/api/openapi.json",
+        # BUG-394: don't expose the full OpenAPI schema in production — it
+        # hands attackers a route/parameter enumeration map of every endpoint,
+        # including rarely-exercised admin surfaces. Dev still gets it for
+        # the Swagger/ReDoc UI and for openapi-typescript client generation.
+        openapi_url="/api/openapi.json" if not settings.is_production else None,
         swagger_ui_oauth2_redirect_url=("/api/docs/oauth2-redirect" if not settings.is_production else None),
         redirect_slashes=False,
     )
@@ -513,6 +517,84 @@ def create_app() -> FastAPI:
 
     app.add_middleware(APIVersionMiddleware)
 
+    # ── Reject non-finite floats in JSON request bodies ─────────────────
+    # Python's ``json`` decoder accepts the non-standard ``NaN`` / ``Infinity``
+    # literals by default. Several handlers use those values in Decimal
+    # arithmetic downstream and raise ``decimal.InvalidOperation`` → 500.
+    # We refuse them up-front with 422 so clients get a deterministic error
+    # and Pydantic validators still see finite numbers.
+    import re as _re
+
+    import orjson as _orjson
+    from starlette.types import ASGIApp, Message, Receive, Scope, Send
+
+    _NONFINITE_TOKEN_RE = _re.compile(rb"\b(NaN|-?Infinity)\b")
+
+    class _RejectNonFiniteJSONMiddleware:
+        """Pure-ASGI middleware so we can rewrite the receive() stream."""
+
+        def __init__(self, app: ASGIApp) -> None:
+            self.inner = app
+
+        async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+            if scope.get("type") != "http":
+                await self.inner(scope, receive, send)
+                return
+            method = scope.get("method", "").upper()
+            if method not in ("POST", "PUT", "PATCH"):
+                await self.inner(scope, receive, send)
+                return
+            headers = dict(scope.get("headers") or [])
+            content_type = headers.get(b"content-type", b"").decode("latin-1", "ignore")
+            if "application/json" not in content_type.lower():
+                await self.inner(scope, receive, send)
+                return
+
+            # Drain body up-front so we can scan it AND replay it to the app.
+            body = bytearray()
+            more = True
+            while more:
+                message = await receive()
+                if message["type"] != "http.request":
+                    await self.inner(scope, receive, send)
+                    return
+                body.extend(message.get("body") or b"")
+                more = message.get("more_body", False)
+
+            if _NONFINITE_TOKEN_RE.search(bytes(body)):
+                # Extra safety: confirm the tokens occur outside a string literal
+                # before rejecting. ``orjson`` rejects non-finite floats by
+                # default, so parsing failure with the token present = real
+                # non-finite number.
+                try:
+                    _orjson.loads(bytes(body))
+                except _orjson.JSONDecodeError:
+                    from starlette.responses import JSONResponse as _JR
+
+                    resp = _JR(
+                        status_code=422,
+                        content={
+                            "detail": (
+                                "NaN and Infinity are not accepted in numeric fields"
+                            )
+                        },
+                    )
+                    await resp(scope, receive, send)
+                    return
+
+            sent = False
+
+            async def replay() -> Message:
+                nonlocal sent
+                if not sent:
+                    sent = True
+                    return {"type": "http.request", "body": bytes(body), "more_body": False}
+                return {"type": "http.disconnect"}
+
+            await self.inner(scope, replay, send)
+
+    app.add_middleware(_RejectNonFiniteJSONMiddleware)
+
     # ── DDC Fingerprint ──────────────────────────────────────────────────
     from app.middleware.fingerprint import DDCFingerprintMiddleware
 
@@ -527,6 +609,15 @@ def create_app() -> FastAPI:
     from app.middleware.slow_request_logger import SlowRequestLoggerMiddleware
 
     app.add_middleware(SlowRequestLoggerMiddleware)
+
+    # ── SQLite lock retry (transient "database is locked" → retry) ─────────
+    # Only retries on sqlite-specific lock errors — PostgreSQL paths pass
+    # through untouched. Smooths over Part 5 BUG-118/119 on single-file
+    # SQLite deployments without masking real write failures.
+    if "sqlite" in settings.database_url.lower():
+        from app.middleware.sqlite_retry import SQLiteLockRetryMiddleware
+
+        app.add_middleware(SQLiteLockRetryMiddleware)
 
     # ── Accept-Language (sets i18n context locale per request) ────────────
     from app.middleware.accept_language import AcceptLanguageMiddleware
@@ -624,6 +715,14 @@ def create_app() -> FastAPI:
                 result["memory_mb"] = round(proc.memory_info().rss / (1024 * 1024), 1)
             except Exception:
                 pass  # Memory reporting is best-effort
+
+        # Active thread count — best-effort
+        try:
+            import threading as _threading
+
+            result["threads"] = _threading.active_count()
+        except Exception:
+            pass
 
         return result
 
@@ -809,7 +908,9 @@ def create_app() -> FastAPI:
         return result
 
     @app.get("/api/system/modules", tags=["System"])
-    async def list_modules() -> dict[str, Any]:
+    async def list_modules(
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict[str, Any]:
         return {"modules": module_loader.list_modules()}
 
     @app.get("/api/marketplace", tags=["System"])
@@ -870,7 +971,9 @@ def create_app() -> FastAPI:
         return result
 
     @app.get("/api/demo/status", tags=["System"])
-    async def demo_status() -> dict[str, bool]:
+    async def demo_status(
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict[str, bool]:
         """Check which demo projects are currently installed."""
         from sqlalchemy import select
 
@@ -886,7 +989,11 @@ def create_app() -> FastAPI:
                 installed[meta["demo_id"]] = True
         return installed
 
-    @app.delete("/api/demo/uninstall/{demo_id}", tags=["System"])
+    @app.delete(
+        "/api/demo/uninstall/{demo_id}",
+        tags=["System"],
+        dependencies=[Depends(RequireRole("admin"))],
+    )
     async def uninstall_demo(
         demo_id: str,
         _user_id: str = Depends(get_current_user_id),
@@ -914,7 +1021,11 @@ def create_app() -> FastAPI:
 
         return {"deleted_projects": len(targets), "demo_id": demo_id}
 
-    @app.delete("/api/demo/clear-all", tags=["System"])
+    @app.delete(
+        "/api/demo/clear-all",
+        tags=["System"],
+        dependencies=[Depends(RequireRole("admin"))],
+    )
     async def clear_all_demos(
         _user_id: str = Depends(get_current_user_id),
     ) -> dict[str, Any]:
@@ -935,7 +1046,9 @@ def create_app() -> FastAPI:
         return {"deleted_projects": len(targets)}
 
     @app.get("/api/system/validation-rules", tags=["System"])
-    async def list_validation_rules() -> dict[str, Any]:
+    async def list_validation_rules(
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict[str, Any]:
         from app.core.validation.engine import rule_registry
 
         return {
@@ -944,7 +1057,9 @@ def create_app() -> FastAPI:
         }
 
     @app.get("/api/system/hooks", tags=["System"])
-    async def list_hooks() -> dict[str, Any]:
+    async def list_hooks(
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict[str, Any]:
         from app.core.hooks import hooks
 
         return {
@@ -953,19 +1068,54 @@ def create_app() -> FastAPI:
         }
 
     @app.post("/api/v1/feedback", tags=["System"])
-    async def submit_feedback(payload: dict[str, Any]) -> dict[str, Any]:
-        """Store user feedback (bug reports, ideas, general comments)."""
+    async def submit_feedback(payload: dict[str, Any], request: Request) -> dict[str, Any]:
+        """Store user feedback (bug reports, ideas, general comments).
+
+        Public endpoint (no auth) with per-IP rate limit and body-size cap —
+        same posture as ``POST /api/v1/users/register`` so the shared SQLite
+        ``oe_feedback`` table cannot be flooded by anonymous clients.
+        """
         from datetime import datetime
 
         from sqlalchemy import text
 
+        from app.core.rate_limiter import client_identifier, login_limiter
         from app.database import engine
 
-        category = str(payload.get("category", "general"))[:20]
-        subject = str(payload.get("subject", ""))[:200]
-        description = str(payload.get("description", ""))[:2000]
+        client_ip = client_identifier(request)
+        allowed, _remaining = login_limiter.is_allowed(f"fb_{client_ip}")
+        if not allowed:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many feedback submissions. Please wait a minute and try again.",
+                headers={"Retry-After": "60"},
+            )
+
+        # Sanitise first — anonymous endpoint, must strip XSS payloads
+        # before they reach the DB (BUG-330/389). Keep plain angle brackets
+        # ("beam <200mm") by using the targeted sanitizer, not blanket
+        # HTML-escape.
+        from app.core.sanitize import strip_dangerous_html as _strip_xss
+
+        category = _strip_xss(str(payload.get("category", "general")))[:20]
+        subject = _strip_xss(str(payload.get("subject", ""))).strip()[:200]
+        description = _strip_xss(str(payload.get("description", ""))).strip()[:2000]
         email = str(payload.get("email") or "")[:100] or None
-        page_path = str(payload.get("page_path", ""))[:200]
+        page_path = _strip_xss(str(payload.get("page_path", "")))[:200]
+
+        # Reject empty submissions — prior behaviour wrote blank rows to the
+        # feedback table, which made it useful for nothing except spamming.
+        # Rate-limit (above) gates volume; this gates content (BUG-159).
+        if not subject or not description:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Both 'subject' and 'description' are required.",
+            )
+        if len(subject) < 3 or len(description) < 10:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="'subject' must be ≥3 chars and 'description' ≥10 chars.",
+            )
 
         # Auto-create table if needed (SQLite dev mode)
         async with engine.begin() as conn:
@@ -1019,16 +1169,50 @@ def create_app() -> FastAPI:
             settings.app_env,
         )
 
-        # Validate secrets and configuration for production
+        # Validate secrets and configuration outside local development.
+        # HS256 requires at least 32 bytes of entropy (RFC 7518 §3.2).
         _insecure_secrets = {"change-me-in-production", "openestimate-local-dev-key", ""}
-        if settings.jwt_secret in _insecure_secrets:
-            if settings.is_production:
+        _jwt_too_short = len(settings.jwt_secret.encode("utf-8")) < 32
+        _jwt_is_default = settings.jwt_secret in _insecure_secrets
+        # Any non-development environment must have a real secret. We treat
+        # ``staging`` exactly like ``production`` here — not blocking it
+        # would defeat the point of staging being a real deployment.
+        if settings.app_env != "development":
+            if _jwt_is_default:
                 raise RuntimeError(
-                    "FATAL: JWT_SECRET is set to an insecure default value in production! "
+                    "FATAL: JWT_SECRET is set to an insecure default value outside development! "
                     "Set JWT_SECRET to a secure random string (min 32 chars). "
                     'Example: python -c "import secrets; print(secrets.token_urlsafe(48))"'
                 )
-            logger.warning("JWT_SECRET is using default dev key — set JWT_SECRET env var for production.")
+            if _jwt_too_short:
+                raise RuntimeError(
+                    "FATAL: JWT_SECRET is shorter than 32 bytes (HS256 minimum). "
+                    'Example: python -c "import secrets; print(secrets.token_urlsafe(48))"'
+                )
+        elif _jwt_is_default or _jwt_too_short:
+            # BUG-320: even in development, the hardcoded default secret is
+            # published in the AGPL repo — any attacker with network access
+            # to a dev box could forge tokens. Rotate to an ephemeral random
+            # secret for this process so forged "open-source-secret" tokens
+            # stop working. Persisted tokens from the old secret get
+            # invalidated, which is exactly what we want.
+            import secrets as _secrets
+
+            ephemeral = _secrets.token_urlsafe(48)
+            try:
+                # pydantic-settings blocks direct assignment when frozen,
+                # but the default Settings class is mutable. If the field
+                # is frozen in a future refactor, falling back to
+                # ``object.__setattr__`` keeps us safe.
+                settings.jwt_secret = ephemeral
+            except Exception:
+                object.__setattr__(settings, "jwt_secret", ephemeral)
+            logger.warning(
+                "JWT_SECRET was default/short — rotated to a random per-process "
+                "secret for this dev session. Existing tokens from prior runs "
+                "are now invalid. Set JWT_SECRET env var (>=32 bytes) to keep "
+                "sessions alive across restarts."
+            )
 
         if settings.is_production:
             if "minioadmin" in (settings.s3_access_key + settings.s3_secret_key):
@@ -1182,6 +1366,19 @@ def create_app() -> FastAPI:
         # Seed demo account + 3 demo projects (idempotent)
         _section("Demo data")
         await _seed_demo_account()
+
+        # Seed ISO 3166-1 countries + tax configs + work calendars if empty.
+        # Required for the region-picker, tax-config lookups and work-calendar
+        # endpoints to return data on a fresh install.
+        try:
+            from app.database import async_session_factory as _i18n_session_factory
+            from app.modules.i18n_foundation.seed import seed_i18n_data
+
+            async with _i18n_session_factory() as _seed_session:
+                await seed_i18n_data(_seed_session)
+                await _seed_session.commit()
+        except Exception:
+            logger.exception("i18n seed failed — countries/taxes/calendars may be empty")
 
         # Initialize vector database (LanceDB embedded, no Docker)
         _section("Vector DB")

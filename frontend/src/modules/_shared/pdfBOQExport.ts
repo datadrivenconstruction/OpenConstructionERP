@@ -7,6 +7,14 @@
 
 import type { ExchangePosition, CountryTemplate } from './templateTypes';
 
+const htmlEscape = (value: string | number): string =>
+  String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
 /** Generate a printable HTML string for a BOQ report. */
 export function generateBOQPrintHTML(
   positions: ExchangePosition[],
@@ -24,17 +32,17 @@ export function generateBOQPrintHTML(
   const posCount = positions.filter((p) => !p.isSection).length;
 
   const formatCurrency = (val: number) =>
-    `${template.currencySymbol}${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    `${htmlEscape(template.currencySymbol)}${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const rows = positions
     .map((pos) => {
       if (pos.isSection) {
-        return `<tr class="section"><td colspan="${includePrices ? 6 : 4}"><strong>${pos.ordinal} ${pos.description}</strong></td></tr>`;
+        return `<tr class="section"><td colspan="${includePrices ? 6 : 4}"><strong>${htmlEscape(pos.ordinal)} ${htmlEscape(pos.description)}</strong></td></tr>`;
       }
       return `<tr>
-        <td>${pos.ordinal}</td>
-        <td>${pos.description}</td>
-        <td class="center">${pos.unit}</td>
+        <td>${htmlEscape(pos.ordinal)}</td>
+        <td>${htmlEscape(pos.description)}</td>
+        <td class="center">${htmlEscape(pos.unit)}</td>
         <td class="right">${pos.quantity.toFixed(3)}</td>
         ${includePrices ? `<td class="right">${formatCurrency(pos.unitRate)}</td><td class="right">${formatCurrency(pos.total)}</td>` : ''}
       </tr>`;
@@ -42,7 +50,7 @@ export function generateBOQPrintHTML(
     .join('\n');
 
   return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>${boqName}</title>
+<html><head><meta charset="utf-8"><title>${htmlEscape(boqName)}</title>
 <style>
   body { font-family: Arial, sans-serif; font-size: 10pt; margin: 20mm; color: #222; }
   h1 { font-size: 16pt; margin-bottom: 4px; }
@@ -58,9 +66,9 @@ export function generateBOQPrintHTML(
   @media print { body { margin: 10mm; } }
 </style>
 </head><body>
-  <h1>${projectName}</h1>
-  <h2>${boqName} — ${template.name} (${template.country})</h2>
-  <div class="meta">${date} | ${posCount} positions | Standard: ${template.classification} | Currency: ${template.currency}</div>
+  <h1>${htmlEscape(projectName)}</h1>
+  <h2>${htmlEscape(boqName)} — ${htmlEscape(template.name)} (${htmlEscape(template.country)})</h2>
+  <div class="meta">${htmlEscape(date)} | ${posCount} positions | Standard: ${htmlEscape(template.classification)} | Currency: ${htmlEscape(template.currency)}</div>
   <table>
     <thead>
       <tr>

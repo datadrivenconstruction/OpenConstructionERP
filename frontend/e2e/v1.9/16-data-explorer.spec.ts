@@ -16,7 +16,11 @@
 import { test, expect, type Page } from '@playwright/test';
 import path from 'node:path';
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { loginV19 } from './helpers-v19';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Pick the first RVT / IFC fixture the repo ships. If nothing is available
 // we skip the whole spec — RFC 16 is purely a front-end concern and we

@@ -1,6 +1,8 @@
 export { Button } from './Button';
 export type { ButtonProps } from './Button';
 
+export { AIDisclaimerBanner } from './AIDisclaimerBanner';
+
 export { Input } from './Input';
 export type { InputProps } from './Input';
 

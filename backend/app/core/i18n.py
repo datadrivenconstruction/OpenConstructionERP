@@ -153,6 +153,11 @@ def get_all_translations(locale: str) -> dict[str, str]:
     return _translations.get(locale, _translations.get("en", {}))
 
 
+def is_locale_loaded(locale: str) -> bool:
+    """Return True if a translation bundle for ``locale`` is actually in memory."""
+    return locale in _translations
+
+
 def get_available_locales() -> list[dict[str, object]]:
     """List available locales with their display names."""
     return [
