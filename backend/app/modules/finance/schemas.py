@@ -38,6 +38,21 @@ def _validate_positive_decimal(v: str, field_name: str = "value") -> str:
         raise ValueError(f"{field_name} must be positive, got {v!r}")
     return v
 
+
+def _decimal_to_str(v: object) -> object:
+    """Response-side coercion: turn ORM ``Decimal`` values into canonical strings.
+
+    Phase 2e: models that previously stored numerics as ``VARCHAR`` now
+    use :class:`MoneyType` and surface :class:`Decimal` on the ORM
+    attribute. The API contract still ships strings on the wire, so we
+    normalise in a ``mode="before"`` validator. Non-Decimal inputs
+    pass through untouched so hand-built payloads (tests, internal
+    dict conversions) keep working.
+    """
+    if isinstance(v, Decimal):
+        return format(v, "f")
+    return v
+
 # ── Invoice ──────────────────────────────────────────────────────────────────
 
 
@@ -149,6 +164,10 @@ class InvoiceLineItemResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    _coerce_decimal = field_validator(
+        "quantity", "unit_rate", "amount", mode="before"
+    )(lambda cls, v: _decimal_to_str(v))
+
 
 class InvoiceResponse(BaseModel):
     """Invoice returned from the API."""
@@ -158,6 +177,7 @@ class InvoiceResponse(BaseModel):
     id: UUID
     project_id: UUID
     contact_id: str | None = None
+    counterparty_name: str | None = None
     invoice_direction: str
     invoice_number: str
     invoice_date: str
@@ -176,6 +196,11 @@ class InvoiceResponse(BaseModel):
     line_items: list[InvoiceLineItemResponse] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
+
+    _coerce_decimal = field_validator(
+        "amount_subtotal", "tax_amount", "retention_amount", "amount_total",
+        mode="before",
+    )(lambda cls, v: _decimal_to_str(v))
 
 
 class InvoiceListResponse(BaseModel):
@@ -229,6 +254,10 @@ class PaymentResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+    _coerce_decimal = field_validator(
+        "amount", "exchange_rate_snapshot", mode="before"
+    )(lambda cls, v: _decimal_to_str(v))
 
 
 class PaymentListResponse(BaseModel):
@@ -297,6 +326,10 @@ class BudgetResponse(BaseModel):
     project_id: UUID
     wbs_id: str | None = None
     category: str | None = None
+    # Phase 2d: the ORM now hands us ``Decimal`` values (see MoneyType
+    # on ``ProjectBudget``). We still emit strings on the wire so the
+    # API contract is unchanged. ``mode="before"`` runs the coercion
+    # during ``model_validate`` so ``from_attributes`` picks it up.
     original_budget: str = "0"
     revised_budget: str = "0"
     committed: str = "0"
@@ -308,6 +341,23 @@ class BudgetResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+    @field_validator(
+        "original_budget",
+        "revised_budget",
+        "committed",
+        "actual",
+        "forecast_final",
+        "variance",
+        mode="before",
+    )
+    @classmethod
+    def _decimal_to_str(cls, v: object) -> object:
+        # ORM path (MoneyType → Decimal) and legacy string path both
+        # normalise to the canonical string form.
+        if isinstance(v, Decimal):
+            return format(v, "f")
+        return v
 
     def model_post_init(self, __context: Any) -> None:
         """Compute variance, consumed_pct, and warning_level after deserialization."""

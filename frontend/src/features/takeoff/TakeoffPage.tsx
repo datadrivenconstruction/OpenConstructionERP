@@ -903,8 +903,15 @@ export function TakeoffPage() {
   useEffect(() => {
     const docId = searchParams.get('doc');
     const docName = searchParams.get('name');
-    if (docId) {
-      // Create a placeholder document entry for the deep-linked document
+    const tab = searchParams.get('tab');
+    if (!docId) return;
+    // Track the doc as active regardless of which tab the user landed on.
+    setActiveDocId(docId);
+    // On Measurements tab, rely on filmstripDocuments (hydrated from the
+    // server) — inserting a placeholder here would duplicate the entry until
+    // refetch and confuses the filmstrip. On Documents tab we need a
+    // placeholder so the user sees a card immediately.
+    if (tab !== 'measurements') {
       setDocuments((prev) => {
         if (prev.some((d) => d.id === docId)) return prev;
         return [
@@ -921,7 +928,6 @@ export function TakeoffPage() {
           },
         ];
       });
-      setActiveDocId(docId);
       setActiveTab('documents');
     }
   }, [searchParams]);
@@ -978,6 +984,23 @@ export function TakeoffPage() {
     setSearchParams(next, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, serverDocuments]);
+
+  /* ── Restore viewer on reload when ?doc=X&tab=measurements ────────── */
+  useEffect(() => {
+    const docId = searchParams.get('doc');
+    const tab = searchParams.get('tab');
+    if (!docId || tab !== 'measurements') return;
+    if (viewerDoc) return; // already open
+    if (!serverDocuments || serverDocuments.length === 0) return;
+    const match = serverDocuments.find((d) => d.id === docId);
+    if (!match) return;
+    setViewerDoc({
+      url: `/api/v1/takeoff/documents/${docId}/download/`,
+      name: match.filename,
+    });
+    setActiveTab('measurements');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverDocuments, searchParams]);
 
   /* ── Mutations ──────────────────────────────────────────────────────── */
 
@@ -1301,6 +1324,8 @@ export function TakeoffPage() {
         setTimeout(() => setUploadErrorToast(null), 5000);
         return;
       }
+      // Analysis state lives only on the local `documents` list — server
+      // docs are plain metadata until the user clicks Analyze.
       const doc = documents.find((d) => d.id === docId);
       if (!doc?.analysis) return;
 
@@ -1616,14 +1641,15 @@ export function TakeoffPage() {
             <DropZone onFilesSelected={handleFilesSelected} disabled={false} />
           </div>
 
-          {/* Uploaded Documents */}
-          {documents.length > 0 && (
+          {/* Uploaded Documents — merged list (server + local) so uploads
+              survive page reload. */}
+          {filmstripDocuments.length > 0 && (
             <div className="mb-8">
               <h2 className="mb-4 text-lg font-semibold text-content-primary">
                 {t('takeoff.uploaded_documents', 'Uploaded Documents')}
               </h2>
               <div className="space-y-4">
-                {documents.map((doc) => (
+                {filmstripDocuments.map((doc) => (
                   <DocumentCard
                     key={doc.id}
                     doc={doc}
@@ -1642,7 +1668,7 @@ export function TakeoffPage() {
           )}
 
           {/* Empty state when no documents */}
-          {documents.length === 0 && (
+          {filmstripDocuments.length === 0 && !serverDocumentsLoading && (
             <div className="mb-8 rounded-xl border border-border-light/60 bg-surface-secondary/20 px-6 py-8 text-center">
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-oe-blue-subtle">
                 <FileSearch size={24} strokeWidth={1.5} className="text-oe-blue" />

@@ -36,6 +36,19 @@ class DwgDrawing(Base):
     sheet_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
     thumbnail_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Scale denominator for this drawing. 1.0 = raw DXF units (treated as
+    # metres). 50.0 = 1:50 architectural scale. Calibrated values from the
+    # two-point tool land here too, so the server has a single source of
+    # truth instead of scattering ratios across client localStorage.
+    scale_denominator: Mapped[float] = mapped_column(
+        Float, nullable=False, default=1.0, server_default="1.0",
+    )
+    # Which scale mode the user last used. Kept so the UI returns to
+    # the same tab on reload instead of defaulting back to presets.
+    # Values: "preset" | "calibrated" | "per_annotation".
+    scale_mode: Mapped[str] = mapped_column(
+        String(30), nullable=False, default="preset", server_default="preset",
+    )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -117,8 +130,25 @@ class DwgAnnotation(Base):
     text: Mapped[str | None] = mapped_column(Text, nullable=True)
     color: Mapped[str] = mapped_column(String(20), nullable=False, default="#3b82f6")
     line_width: Mapped[int] = mapped_column(Integer, nullable=False, default=2)
+    # Stroke thickness in logical pixels. Separate from line_width so the
+    # frontend can send fractional values (e.g. 1.5) without coercing to int.
+    thickness: Mapped[float] = mapped_column(Float, nullable=False, default=2.0, server_default="2.0")
+    # Virtual layer name used to group user-drawn markups. Defaults to
+    # ``USER_MARKUP`` for primitive tools so estimators can toggle all
+    # hand-drawn shapes on/off via the LayerPanel.
+    layer_name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        default="USER_MARKUP",
+        server_default="USER_MARKUP",
+    )
     measurement_value: Mapped[float | None] = mapped_column(Float, nullable=True)
     measurement_unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    # Optional scale override for this annotation. When set, the frontend
+    # divides raw measurements by this instead of the drawing-level scale
+    # — used when one legend/detail view on the same sheet has a different
+    # scale than the rest of the drawing (e.g. 1:100 plan + 1:20 detail).
+    scale_override: Mapped[float | None] = mapped_column(Float, nullable=True)
     linked_boq_position_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     linked_task_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     linked_punch_item_id: Mapped[str | None] = mapped_column(String(255), nullable=True)

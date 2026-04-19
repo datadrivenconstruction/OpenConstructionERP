@@ -317,7 +317,7 @@ function AttachmentDropzone({
               <a
                 href={getMeetingDocumentDownloadUrl(att.id)}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:text-oe-blue hover:bg-surface-primary transition-colors shrink-0"
                 aria-label={t('common.download', { defaultValue: 'Download' })}
@@ -1813,7 +1813,7 @@ const MeetingRow = React.memo(function MeetingRow({
                     key={docId}
                     href={getMeetingDocumentDownloadUrl(docId)}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
                     className="inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary hover:border-oe-blue hover:text-oe-blue transition-colors"
                     data-testid="meeting-row-attachment-chip"

@@ -4,7 +4,9 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from app.core.url_safety import UnsafeUrlError, validate_external_url
 
 # ---------------------------------------------------------------------------
 # IntegrationConfig schemas (Teams, Slack, Telegram, etc.)
@@ -88,6 +90,15 @@ class TestNotificationResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+def _validate_webhook_url(value: str) -> str:
+    """Shared webhook-URL validator. Rejects non-http(s) schemes, literal
+    private IPs and cloud-metadata hosts before the row ever hits the DB."""
+    try:
+        return validate_external_url(value)
+    except UnsafeUrlError as exc:
+        raise ValueError(str(exc)) from exc
+
+
 class WebhookCreate(BaseModel):
     """Create a new webhook endpoint."""
 
@@ -105,6 +116,11 @@ class WebhookCreate(BaseModel):
     is_active: bool = True
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("url")
+    @classmethod
+    def _check_url(cls, v: str) -> str:
+        return _validate_webhook_url(v)
+
 
 class WebhookUpdate(BaseModel):
     """Partial update for a webhook endpoint."""
@@ -117,6 +133,11 @@ class WebhookUpdate(BaseModel):
     events: list[str] | None = None
     is_active: bool | None = None
     metadata: dict[str, Any] | None = None
+
+    @field_validator("url")
+    @classmethod
+    def _check_url(cls, v: str | None) -> str | None:
+        return _validate_webhook_url(v) if v is not None else v
 
 
 class WebhookResponse(BaseModel):

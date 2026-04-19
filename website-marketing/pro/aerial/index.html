@@ -1,0 +1,2110 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>OpenConstructionERP Pro — Aerial edition</title>
+  <meta name="description" content="Open-source construction ERP with AI-powered BOQ, multi-CAD ingest, 55,000+ cost items. See what we compute: live cost, carbon, schedule — floating over your buildings." />
+  <meta name="theme-color" content="#ecfeff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#042f2e" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="/pro/cinematic/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600&family=Inter:wght@400;500&family=Fraunces:ital,opsz,wght@1,9..144,300..500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <script>
+    // Apply persisted theme before paint to avoid flash.
+    (function () {
+      try {
+        var t = localStorage.getItem('oce-theme') || 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+
+  <style>
+    /* ================================================================ */
+    /* THEME TOKENS — ICY CYAN (FROST AESTHETIC)                          */
+    /* ================================================================ */
+    :root {
+      --bg-0: #ecfeff;              /* cyan-50 ice */
+      --bg-1: #cffafe;              /* cyan-100 */
+      --bg-2: #a5f3fc;              /* cyan-200 */
+      --ink-0: #083344;             /* cyan-950 deep */
+      --ink-1: #164e63;             /* cyan-900 */
+      --ink-2: #0e7490;             /* cyan-700 */
+      --ink-3: #67e8f9;             /* cyan-300 for faint */
+      --line-0: rgba(8, 51, 68, 0.06);
+      --line-1: rgba(8, 51, 68, 0.10);
+      --line-2: rgba(8, 51, 68, 0.16);
+      --accent: #0891b2;            /* cyan-600 */
+      --accent-2: #06b6d4;          /* cyan-500 */
+      --accent-3: #22d3ee;          /* cyan-400 bright */
+      --accent-warm: #f59e0b;       /* amber for contrast labels */
+
+      /* Three.js palette (hex numbers consumed by parseInt) */
+      --three-bldg-a: 0x155e75;
+      --three-bldg-b: 0x0e7490;
+      --three-bldg-c: 0x0c4a6e;
+      --three-edge: 0x22d3ee;
+      --three-glow: 0x67e8f9;
+      --three-road: 0x075985;
+      --three-label: 0xf59e0b;
+      --three-particle: 0x67e8f9;
+      --three-ambient: 0x94a3b8;
+      --three-key: 0x67e8f9;
+      --three-fill: 0x22d3ee;
+      --three-fog: 0xecfeff;
+      --three-ground: 0xbae6fd;
+      --three-tree: 0x14b8a6;
+      --three-car: 0xf59e0b;
+
+      /* HTML label card */
+      --label-bg: rgba(255, 255, 255, 0.88);
+      --label-border: rgba(8, 51, 68, 0.12);
+      --label-shadow: 0 8px 28px -14px rgba(8, 51, 68, 0.35);
+
+      color-scheme: light;
+    }
+    [data-theme="dark"] {
+      --bg-0: #042f2e;
+      --bg-1: #083344;
+      --bg-2: #164e63;
+      --ink-0: #ecfeff;
+      --ink-1: #a5f3fc;
+      --ink-2: #67e8f9;
+      --ink-3: #0891b2;
+      --line-0: rgba(255, 255, 255, 0.06);
+      --line-1: rgba(255, 255, 255, 0.10);
+      --line-2: rgba(255, 255, 255, 0.18);
+      --accent: #22d3ee;
+      --accent-2: #67e8f9;
+      --accent-3: #a5f3fc;
+      --accent-warm: #fbbf24;
+
+      --three-bldg-a: 0x083344;
+      --three-bldg-b: 0x155e75;
+      --three-bldg-c: 0x0c4a6e;
+      --three-edge: 0x67e8f9;
+      --three-glow: 0xa5f3fc;
+      --three-road: 0x083344;
+      --three-label: 0xfbbf24;
+      --three-particle: 0xa5f3fc;
+      --three-ambient: 0x64748b;
+      --three-key: 0xa5f3fc;
+      --three-fill: 0x67e8f9;
+      --three-fog: 0x042f2e;
+      --three-ground: 0x083344;
+      --three-tree: 0x2dd4bf;
+      --three-car: 0xfbbf24;
+
+      --label-bg: rgba(8, 51, 68, 0.78);
+      --label-border: rgba(165, 243, 252, 0.20);
+      --label-shadow: 0 10px 30px -14px rgba(0, 0, 0, 0.55);
+
+      color-scheme: dark;
+    }
+
+    *,
+    *::before,
+    *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-0);
+      color: var(--ink-0);
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      min-height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+    /* ================================================================ */
+    /* BACKGROUND LAYERS                                                 */
+    /* ================================================================ */
+
+    .bg-wrap {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    /* Vignette — soft icy gradient from centre → edges */
+    .bg-vignette {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 110% 90% at 65% 60%, transparent 40%, var(--bg-1) 95%);
+      transition: background 0.5s ease;
+    }
+
+    /* Faint grid — whisper of structure */
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--line-0) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line-0) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, #000 10%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, #000 10%, transparent 80%);
+      opacity: 0.65;
+    }
+
+    /* Frost mesh — icy highlights */
+    .bg-mesh {
+      position: absolute;
+      inset: -20%;
+      background:
+        radial-gradient(closest-side at 75% 65%, color-mix(in oklab, var(--accent-3) 22%, transparent) 0%, transparent 65%),
+        radial-gradient(closest-side at 20% 80%, color-mix(in oklab, var(--accent) 14%, transparent) 0%, transparent 70%),
+        radial-gradient(closest-side at 55% 30%, color-mix(in oklab, var(--accent-2) 10%, transparent) 0%, transparent 55%);
+      filter: blur(70px) saturate(115%);
+      opacity: 0.75;
+      transition: opacity 0.5s ease;
+    }
+    [data-theme="dark"] .bg-mesh { opacity: 0.55; }
+
+    /* Top-left gradient veil — ensures text legibility over 3D */
+    .text-veil {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(135deg,
+        color-mix(in oklab, var(--bg-0) 92%, transparent) 0%,
+        color-mix(in oklab, var(--bg-0) 70%, transparent) 24%,
+        color-mix(in oklab, var(--bg-0) 40%, transparent) 42%,
+        transparent 58%);
+      transition: background 0.5s ease;
+    }
+
+    /* Faint noise layer */
+    .bg-noise {
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.05 0 0 0 0 0.32 0 0 0 0 0.40 0 0 0 0.35 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+      background-size: 240px 240px;
+      opacity: 0.22;
+      mix-blend-mode: multiply;
+    }
+    [data-theme="dark"] .bg-noise {
+      opacity: 0.20;
+      mix-blend-mode: overlay;
+    }
+
+    .three-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      mask-image: radial-gradient(ellipse 100% 95% at 65% 60%, #000 45%, transparent 92%);
+      -webkit-mask-image: radial-gradient(ellipse 100% 95% at 65% 60%, #000 45%, transparent 92%);
+      transition: opacity 0.6s ease;
+      opacity: 0;
+    }
+    .three-canvas.is-ready { opacity: 1; }
+
+    /* Static SVG fallback */
+    .static-scene {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .static-scene svg {
+      width: 80%;
+      max-width: 520px;
+      height: auto;
+      opacity: 0.55;
+    }
+
+    /* ================================================================ */
+    /* FLOATING COST LABELS (HTML OVERLAYS, projected from 3D)           */
+    /* ================================================================ */
+    .label-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .cost-label {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: translate3d(0, 0, 0);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px 7px 10px;
+      border-radius: 10px;
+      background: var(--label-bg);
+      border: 1px solid var(--label-border);
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11.5px;
+      letter-spacing: 0.01em;
+      color: var(--ink-0);
+      box-shadow: var(--label-shadow);
+      white-space: nowrap;
+      opacity: 0;
+      will-change: transform, opacity;
+      transition: opacity 0.4s ease, background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+    }
+    .cost-label.is-visible { opacity: 1; }
+    .cost-label .bullet {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent-warm);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-warm) 22%, transparent);
+      flex: 0 0 7px;
+    }
+    .cost-label b {
+      font-weight: 500;
+      color: var(--accent-warm);
+    }
+    .cost-label .sep { color: var(--ink-3); margin: 0 2px; }
+    .cost-label .tail {
+      color: var(--ink-2);
+    }
+    .cost-label::before {
+      content: '';
+      position: absolute;
+      left: 14px;
+      top: 100%;
+      width: 1px;
+      height: var(--leader, 32px);
+      background: linear-gradient(to bottom, color-mix(in oklab, var(--accent-warm) 70%, transparent), transparent);
+    }
+    .cost-label::after {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: calc(100% + var(--leader, 32px) - 4px);
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: var(--accent-warm);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-warm) 18%, transparent);
+    }
+
+    /* ================================================================ */
+    /* COMPASS INDICATOR (top-right)                                     */
+    /* ================================================================ */
+    .compass {
+      position: fixed;
+      top: 88px;
+      right: clamp(20px, 3vw, 36px);
+      z-index: 4;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--bg-0) 72%, transparent);
+      border: 1px solid var(--line-1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+    }
+    .compass .n {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: 10px;
+    }
+    .compass .arrow-up {
+      width: 12px;
+      height: 12px;
+      color: var(--accent);
+    }
+    .compass .sep { color: var(--line-2); }
+
+    /* ================================================================ */
+    /* NAV                                                               */
+    /* ================================================================ */
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      padding: 0 clamp(16px, 3vw, 32px);
+      background: color-mix(in oklab, var(--bg-0) 72%, transparent);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border-bottom: 1px solid var(--line-0);
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+    .nav.is-scrolled {
+      background: color-mix(in oklab, var(--bg-0) 90%, transparent);
+      border-bottom-color: var(--line-1);
+    }
+
+    .nav-inner {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Inter Tight', 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+      color: var(--ink-0);
+    }
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+    [data-theme="dark"] .brand-pill { color: var(--ink-0); }
+
+    .nav-links {
+      display: inline-flex;
+      align-items: center;
+      gap: clamp(14px, 2.4vw, 28px);
+      font-size: 13.5px;
+      color: var(--ink-1);
+      font-weight: 500;
+    }
+    .nav-links a { transition: color 0.2s ease; }
+    .nav-links a:hover { color: var(--accent); }
+
+    .nav-right {
+      justify-self: end;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid var(--line-1);
+      color: var(--ink-0);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+    .theme-toggle:hover {
+      border-color: var(--line-2);
+      background: color-mix(in oklab, var(--ink-0) 5%, transparent);
+    }
+    .theme-toggle svg { width: 16px; height: 16px; display: block; }
+    .theme-toggle .icon-sun { display: inline-block; }
+    .theme-toggle .icon-moon { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: inline-block; }
+
+    .install-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      transition: transform 0.2s ease, background 0.25s ease;
+    }
+    [data-theme="dark"] .install-pill { color: var(--ink-0); }
+    .install-pill:hover { transform: translateY(-1px); background: var(--accent-2); }
+    .install-pill .arrow { transition: transform 0.2s ease; }
+    .install-pill:hover .arrow { transform: translateX(2px); }
+
+    /* ================================================================ */
+    /* HERO                                                              */
+    /* ================================================================ */
+
+    .hero {
+      position: relative;
+      z-index: 4;
+      flex: 1;
+      min-height: 100svh;
+      padding: 128px clamp(20px, 4vw, 48px) 96px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      pointer-events: none;          /* 3D canvas gets mouse events through */
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto 0 clamp(12px, 4vw, 60px);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      gap: 22px;
+      pointer-events: auto;
+    }
+
+    .editorial-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+    }
+    .editorial-label .bar {
+      display: inline-block;
+      width: 18px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line-1);
+      background: color-mix(in oklab, var(--bg-1) 65%, transparent);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11.5px;
+      letter-spacing: 0.02em;
+      color: var(--ink-1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .eyebrow .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-warm);
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent-warm) 60%, transparent);
+      animation: pulseDot 2.2s ease-in-out infinite;
+    }
+    .eyebrow b { font-weight: 500; color: var(--ink-0); }
+
+    @keyframes pulseDot {
+      0%, 100% {
+        box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent-warm) 60%, transparent);
+      }
+      50% {
+        box-shadow: 0 0 0 7px color-mix(in oklab, var(--accent-warm) 0%, transparent);
+      }
+    }
+
+    .headline {
+      font-family: 'Inter Tight', 'Inter', sans-serif;
+      font-weight: 500;
+      color: var(--ink-0);
+      font-size: clamp(42px, 5.5vw, 84px);
+      line-height: 0.98;
+      letter-spacing: -0.045em;
+      max-width: 12ch;
+      margin: 0;
+      text-align: left;
+    }
+    .headline .italic {
+      font-family: 'Fraunces', 'Instrument Serif', 'Times New Roman', serif;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--accent);
+      letter-spacing: -0.03em;
+    }
+    .word {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+      padding-bottom: 0.08em;
+    }
+    .word > span {
+      display: inline-block;
+      will-change: transform, opacity;
+    }
+
+    .sub {
+      max-width: 36ch;
+      margin: 0;
+      font-size: clamp(14px, 1.1vw, 16.5px);
+      line-height: 1.58;
+      color: var(--ink-2);
+      font-weight: 400;
+      letter-spacing: -0.005em;
+    }
+
+    .ctas {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      transition: transform 0.2s ease, background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+      border: 1px solid transparent;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    [data-theme="dark"] .btn-primary { color: var(--ink-0); }
+    .btn-primary:hover { transform: translateY(-1px); background: var(--accent-2); }
+    .btn-primary .arrow { transition: transform 0.2s ease; }
+    .btn-primary:hover .arrow { transform: translateX(3px); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink-0);
+      border-color: var(--line-2);
+    }
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: color-mix(in oklab, var(--accent) 5%, transparent);
+    }
+
+    .btn svg { width: 15px; height: 15px; }
+
+    /* Install block */
+    .install-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 10px 10px 18px;
+      background: color-mix(in oklab, var(--bg-1) 80%, transparent);
+      border: 1px solid var(--line-1);
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 13px;
+      color: var(--ink-0);
+      position: relative;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: border-color 0.25s ease, background 0.25s ease;
+    }
+    .install-block:hover { border-color: var(--line-2); }
+    .install-block .dollar { color: var(--accent); font-weight: 500; }
+    .install-block .cmd { letter-spacing: 0; }
+    .copy-btn {
+      width: 30px;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      color: var(--ink-1);
+      border: 1px solid var(--line-1);
+      background: var(--bg-0);
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+    .copy-btn:hover { color: var(--accent); border-color: var(--accent); transform: translateY(-1px); }
+    .copy-btn svg { width: 13px; height: 13px; }
+
+    .copy-toast {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translate(-50%, 4px);
+      background: var(--accent);
+      color: #fff;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      white-space: nowrap;
+    }
+    [data-theme="dark"] .copy-toast { color: var(--ink-0); }
+    .copy-toast.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .meta-row {
+      display: inline-flex;
+      align-items: center;
+      gap: clamp(12px, 1.6vw, 20px);
+      flex-wrap: wrap;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px;
+      color: var(--ink-3);
+      letter-spacing: 0.01em;
+    }
+    [data-theme="light"] .meta-row { color: var(--ink-2); }
+    .meta-row span { display: inline-flex; align-items: center; gap: 6px; }
+    .meta-row svg { width: 13px; height: 13px; color: var(--accent); flex: 0 0 13px; }
+
+    /* ================================================================ */
+    /* LEGEND (bottom-left micro card describing the scene)              */
+    /* ================================================================ */
+    .scene-legend {
+      position: fixed;
+      bottom: 72px;
+      left: clamp(20px, 4vw, 60px);
+      z-index: 4;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--bg-0) 78%, transparent);
+      border: 1px solid var(--line-1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10.5px;
+      color: var(--ink-2);
+      letter-spacing: 0.04em;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .scene-legend.is-visible { opacity: 1; }
+    .scene-legend .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .scene-legend .swatch {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+    }
+    .scene-legend .sw-bldg { background: var(--accent); }
+    .scene-legend .sw-wire { background: transparent; border: 1px solid var(--accent-3); }
+    .scene-legend .sw-label { background: var(--accent-warm); }
+    .scene-legend .sep { width: 1px; height: 10px; background: var(--line-2); }
+
+    /* ================================================================ */
+    /* FOOTER                                                            */
+    /* ================================================================ */
+
+    .footer {
+      position: relative;
+      z-index: 5;
+      height: 48px;
+      border-top: 1px solid var(--line-1);
+      background: color-mix(in oklab, var(--bg-1) 88%, transparent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 clamp(16px, 3vw, 32px);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11.5px;
+      color: var(--ink-2);
+      letter-spacing: 0.01em;
+    }
+    .footer a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--ink-1);
+      transition: color 0.2s ease;
+    }
+    .footer a:hover { color: var(--accent); }
+
+    /* ================================================================ */
+    /* RESPONSIVE                                                        */
+    /* ================================================================ */
+
+    @media (max-width: 1100px) {
+      .compass { top: 80px; }
+      .scene-legend { display: none; }
+    }
+
+    @media (max-width: 820px) {
+      .nav-links { display: none; }
+      .nav-inner { grid-template-columns: auto 1fr auto; }
+      .nav-links-slot { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        align-items: flex-start;
+        padding: 96px 20px 420px;
+      }
+      .hero-inner {
+        margin: 0;
+        max-width: 100%;
+      }
+      .three-canvas {
+        mask-image: none;
+        -webkit-mask-image: none;
+        clip-path: inset(60% 0 0 0);
+      }
+      .text-veil {
+        background: linear-gradient(180deg,
+          var(--bg-0) 0%,
+          color-mix(in oklab, var(--bg-0) 80%, transparent) 50%,
+          transparent 58%);
+      }
+      .compass { top: 76px; right: 16px; }
+      .cost-label { font-size: 10.5px; padding: 6px 10px 6px 8px; }
+    }
+
+    @media (max-width: 620px) {
+      .hero { padding: 88px 18px 360px; gap: 18px; }
+      .hero-inner { gap: 18px; }
+      .install-block { font-size: 12.5px; padding: 9px 10px 9px 16px; gap: 8px; }
+      .install-pill span { display: none; }
+      .install-pill { padding: 9px 10px; }
+      .editorial-label { font-size: 10px; letter-spacing: 0.22em; }
+    }
+
+    @media (max-width: 520px) {
+      .three-canvas { display: none; }
+      .static-scene { display: flex; }
+      .hero { padding-bottom: 64px; }
+      .label-layer { display: none; }
+      .compass { display: none; }
+    }
+
+    @media (max-width: 420px) {
+      .meta-row { font-size: 10.5px; gap: 10px; }
+      .eyebrow { font-size: 10.5px; padding: 6px 11px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .eyebrow .dot { animation: none; }
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Utility */
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================ -->
+  <!-- BACKGROUND                                                        -->
+  <!-- ================================================================ -->
+  <div class="bg-wrap" aria-hidden="true">
+    <div class="bg-mesh"></div>
+    <div class="bg-grid"></div>
+
+    <canvas id="three-canvas" class="three-canvas"></canvas>
+
+    <div class="static-scene" aria-hidden="true">
+      <svg viewBox="0 0 520 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="var(--accent)" stroke-width="1" opacity="0.85">
+          <rect x="80" y="200" width="50" height="70" />
+          <rect x="140" y="170" width="50" height="100" />
+          <rect x="200" y="140" width="60" height="130" />
+          <rect x="270" y="110" width="50" height="160" />
+          <rect x="330" y="170" width="60" height="100" />
+          <rect x="400" y="190" width="50" height="80" />
+        </g>
+        <g stroke="var(--accent-3)" stroke-width="1" opacity="0.6">
+          <line x1="0" y1="280" x2="520" y2="280" />
+          <line x1="0" y1="300" x2="520" y2="300" />
+          <line x1="250" y1="80" x2="250" y2="340" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="bg-noise"></div>
+    <div class="bg-vignette"></div>
+  </div>
+
+  <!-- Text legibility veil -->
+  <div class="text-veil" aria-hidden="true"></div>
+
+  <!-- Floating cost labels (HTML overlays, positioned by projection) -->
+  <div class="label-layer" id="label-layer" aria-hidden="true">
+    <div class="cost-label" data-tower="0">
+      <span class="bullet"></span>
+      <b>&euro; 4.2M</b><span class="sep">&middot;</span><span class="tail">tower 01</span>
+    </div>
+    <div class="cost-label" data-tower="1">
+      <span class="bullet"></span>
+      <b>BOQ 312</b><span class="sep">&middot;</span><span class="tail">tower 02</span>
+    </div>
+    <div class="cost-label" data-tower="2">
+      <span class="bullet"></span>
+      <b>4D Q3 2026</b><span class="sep">&middot;</span><span class="tail">tower 03</span>
+    </div>
+    <div class="cost-label" data-tower="3">
+      <span class="bullet"></span>
+      <b>128 t CO&#8322;</b><span class="sep">&middot;</span><span class="tail">tower 04</span>
+    </div>
+    <div class="cost-label" data-tower="4">
+      <span class="bullet"></span>
+      <b>AI 94%</b><span class="sep">&middot;</span><span class="tail">tower 05</span>
+    </div>
+  </div>
+
+  <!-- Compass -->
+  <div class="compass" aria-hidden="true">
+    <span class="n">N</span>
+    <svg class="arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="19" x2="12" y2="5"></line>
+      <polyline points="5 12 12 5 19 12"></polyline>
+    </svg>
+    <span class="sep">&middot;</span>
+    <span>Isometric view</span>
+  </div>
+
+  <!-- Scene legend -->
+  <div class="scene-legend" id="scene-legend" aria-hidden="true">
+    <span class="chip"><span class="swatch sw-bldg"></span>built</span>
+    <span class="chip"><span class="swatch sw-wire"></span>under construction</span>
+    <span class="sep"></span>
+    <span class="chip"><span class="swatch sw-label"></span>live cost data</span>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- NAV                                                               -->
+  <!-- ================================================================ -->
+  <nav class="nav" id="nav" aria-label="Primary">
+    <div class="nav-inner">
+      <a class="brand" href="/">
+        <span>OpenConstructionERP</span>
+        <span class="brand-pill">Pro</span>
+      </a>
+
+      <div class="nav-links nav-links-slot">
+        <a href="#features">Features</a>
+        <a href="#ai">AI</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#docs">Docs</a>
+      </div>
+
+      <div class="nav-right">
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
+          </svg>
+        </button>
+
+        <a class="install-pill" href="#install">
+          <span>Install now</span>
+          <svg class="arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================================================================ -->
+  <!-- HERO                                                              -->
+  <!-- ================================================================ -->
+  <main class="hero" id="hero">
+    <div class="hero-inner">
+
+      <div class="editorial-label" id="fx-editorial">
+        <span class="bar"></span>
+        <span>01 &middot; 2026 edition &middot; aerial view</span>
+      </div>
+
+      <div class="eyebrow" id="fx-eyebrow">
+        <span class="dot" aria-hidden="true"></span>
+        <span><b>v1.7.2</b> &middot; new AI takeoff</span>
+      </div>
+
+      <h1 class="headline" id="headline">
+        <span class="word"><span>Estimate</span></span>
+        <span class="word"><span>buildings</span></span>
+        <span class="word"><span>at</span></span>
+        <span class="word italic"><span>the</span></span>
+        <span class="word italic"><span>speed</span></span>
+        <span class="word italic"><span>of thought.</span></span>
+      </h1>
+
+      <p class="sub" id="fx-sub">
+        Open-source construction ERP with AI-powered BOQ, multi-CAD ingest, and 55,000+ cost items.
+        See cost, carbon and schedule hover over every tower &mdash; live.
+      </p>
+
+      <div class="ctas" id="fx-ctas">
+        <a class="btn btn-primary" href="#install">
+          <span>Install now</span>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/datadrivenconstruction" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
+          </svg>
+          <span>Star on GitHub</span>
+        </a>
+      </div>
+
+      <div class="install-block" id="install-block">
+        <div class="copy-toast" id="copy-toast">COPIED</div>
+        <span class="dollar">$</span>
+        <span class="cmd" id="install-cmd">docker compose up</span>
+        <button type="button" class="copy-btn" id="copy-btn" aria-label="Copy install command">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="meta-row" id="fx-meta">
+        <span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          AGPL-3.0
+        </span>
+        <span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Self-hosted
+        </span>
+        <span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          2&thinsp;GB RAM
+        </span>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================================================================ -->
+  <!-- FOOTER                                                            -->
+  <!-- ================================================================ -->
+  <footer class="footer">
+    <a href="/pro/">&larr; back to directions</a>
+  </footer>
+
+  <!-- ================================================================ -->
+  <!-- SCRIPTS                                                           -->
+  <!-- ================================================================ -->
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+    import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm';
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ================================================================ */
+    /* THEME TOGGLE                                                      */
+    /* ================================================================ */
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeListeners = new Set();
+
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      try { localStorage.setItem('oce-theme', theme); } catch (_) { /* noop */ }
+      themeListeners.forEach((fn) => {
+        try { fn(theme); } catch (e) { console.error(e); }
+      });
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const next = (root.dataset.theme === 'dark') ? 'light' : 'dark';
+      setTheme(next);
+    });
+
+    /* ================================================================ */
+    /* NAV SCROLL STATE                                                  */
+    /* ================================================================ */
+    const navEl = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      if ((window.scrollY || 0) > 8) navEl.classList.add('is-scrolled');
+      else navEl.classList.remove('is-scrolled');
+    }, { passive: true });
+
+    /* ================================================================ */
+    /* COPY BLOCK                                                        */
+    /* ================================================================ */
+    const copyBtn = document.getElementById('copy-btn');
+    const installCmd = document.getElementById('install-cmd');
+    const copyToast = document.getElementById('copy-toast');
+    let toastTimer;
+
+    function showToast() {
+      copyToast.classList.add('is-visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => copyToast.classList.remove('is-visible'), 1600);
+    }
+
+    async function copyCmd() {
+      const text = installCmd.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        const r = document.createRange();
+        r.selectNodeContents(installCmd);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+        try { document.execCommand('copy'); } catch (_) {}
+        sel.removeAllRanges();
+      }
+      showToast();
+    }
+    copyBtn.addEventListener('click', copyCmd);
+    document.getElementById('install-block').addEventListener('click', (e) => {
+      if (e.target === copyBtn || copyBtn.contains(e.target)) return;
+      copyCmd();
+    });
+
+    /* ================================================================ */
+    /* ENTRANCE ANIMATION                                                */
+    /* ================================================================ */
+    function animateIn() {
+      const items = ['fx-editorial','fx-eyebrow','fx-sub','fx-ctas','install-block','fx-meta'];
+      if (reduceMotion) {
+        document.querySelectorAll('.word > span').forEach((el) => {
+          el.style.transform = 'translateY(0)';
+          el.style.opacity = '1';
+        });
+        document.getElementById('scene-legend').classList.add('is-visible');
+        return;
+      }
+
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.from('#fx-editorial', { opacity: 0, y: 14, duration: 0.55 }, 0.05);
+      tl.from('#fx-eyebrow', { opacity: 0, y: 14, duration: 0.55 }, 0.18);
+      tl.from('.word > span', {
+        yPercent: 110,
+        opacity: 0,
+        duration: 0.9,
+        stagger: 0.08,
+      }, 0.28);
+      tl.from('#fx-sub', { opacity: 0, y: 14, duration: 0.6 }, 0.95);
+      tl.from('#fx-ctas', { opacity: 0, y: 14, duration: 0.55 }, 1.08);
+      tl.from('#install-block', { opacity: 0, y: 14, duration: 0.55 }, 1.18);
+      tl.from('#fx-meta', { opacity: 0, y: 14, duration: 0.55 }, 1.28);
+      tl.call(() => document.getElementById('scene-legend').classList.add('is-visible'), [], 1.45);
+    }
+
+    /* ================================================================ */
+    /* THREE.JS AERIAL CITY SCENE                                        */
+    /* ================================================================ */
+    const canvas = document.getElementById('three-canvas');
+    const labelLayer = document.getElementById('label-layer');
+    const costLabels = Array.from(document.querySelectorAll('.cost-label'));
+    const mobileHide = window.matchMedia('(max-width: 520px)');
+    const narrowRespond = window.matchMedia('(max-width: 768px)');
+
+    function getVarHex(name) {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      if (!v) return 0x000000;
+      if (v.startsWith('0x')) return parseInt(v.slice(2), 16);
+      if (v.startsWith('#')) return parseInt(v.slice(1), 16);
+      return parseInt(v, 16);
+    }
+
+    let threeState = null;
+
+    function snowflakeTexture() {
+      const size = 64;
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      const g = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+      g.addColorStop(0, 'rgba(255,255,255,1)');
+      g.addColorStop(0.35, 'rgba(255,255,255,0.75)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, size, size);
+      const t = new THREE.CanvasTexture(c);
+      t.minFilter = THREE.LinearFilter;
+      t.magFilter = THREE.LinearFilter;
+      return t;
+    }
+
+    function initThree() {
+      if (mobileHide.matches) {
+        canvas.style.display = 'none';
+        return;
+      }
+
+      const isNarrow = narrowRespond.matches;
+
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        powerPreference: 'low-power',
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setClearColor(0x000000, 0);
+
+      const scene = new THREE.Scene();
+
+      /* Camera: high-altitude, low FOV → near-isometric. Framed toward
+         bottom-right quadrant so top-left stays empty sky for text. */
+      const camera = new THREE.PerspectiveCamera(25, 1, 0.1, 500);
+      camera.position.set(50, 42, 50);
+      const camTarget = new THREE.Vector3(10, 0, 10);
+      camera.lookAt(camTarget);
+
+      const sceneRoot = new THREE.Group();
+      scene.add(sceneRoot);
+
+      /* ============== GROUND ============== */
+      const groundGroup = new THREE.Group();
+      sceneRoot.add(groundGroup);
+
+      /* ============== BUILDINGS ============== */
+      const cityGroup = new THREE.Group();
+      sceneRoot.add(cityGroup);
+
+      const towerGroup = new THREE.Group();   // prominent labelled towers (5)
+      sceneRoot.add(towerGroup);
+
+      /* ============== ROADS ============== */
+      const roadGroup = new THREE.Group();
+      sceneRoot.add(roadGroup);
+
+      /* ============== VEGETATION ============== */
+      const treeGroup = new THREE.Group();
+      sceneRoot.add(treeGroup);
+
+      /* ============== CARS ============== */
+      const carGroup = new THREE.Group();
+      sceneRoot.add(carGroup);
+
+      /* ============== CRANES ============== */
+      const craneGroup = new THREE.Group();
+      sceneRoot.add(craneGroup);
+
+      /* ============== PARTICLES / FROST ============== */
+      const particleGroup = new THREE.Group();
+      sceneRoot.add(particleGroup);
+
+      /* ================================================================ */
+      /* CITY GRID                                                        */
+      /* ================================================================ */
+      // City is offset so that its centre sits around (10, 0, 10) — bottom-right
+      // of camera frame. Grid uses wider spacing with intentional empty plots.
+      const CITY_ORIGIN_X = 10;
+      const CITY_ORIGIN_Z = 10;
+      const GRID = isNarrow ? 4 : 5;
+      const PLOT = 4.8;
+      const BUILD_W = 2.4;
+
+      // Plot layout — 1 = building, 0 = empty/park, 2 = labelled tall, 3 = wireframe under-construction
+      // Designed so labelled towers (marked 2) are in key positions spread around.
+      const RAW_LAYOUT = [
+        [2, 1, 0, 1, 3],
+        [1, 1, 1, 2, 1],
+        [0, 1, 3, 1, 1],
+        [1, 2, 1, 1, 0],
+        [3, 1, 1, 0, 2],
+      ];
+      // If narrow, take top-left 4x4
+      const LAYOUT = RAW_LAYOUT.slice(0, GRID).map(row => row.slice(0, GRID));
+
+      // Height seeds per cell (deterministic floors count) — varies 2..18
+      function cellHeight(i, j, kind) {
+        // pseudo-noise that's deterministic
+        const n = Math.abs(Math.sin(i * 12.9898 + j * 78.233) * 43758.5453);
+        const frac = n - Math.floor(n);
+        const base = kind === 2 ? 12 + frac * 8 : kind === 3 ? 4 + frac * 6 : 2 + frac * 12;
+        return Math.max(2, Math.round(base));
+      }
+
+      // Stores for scene refs
+      let citySolids = [];      // {mesh, edges, kind, plotCenter}
+      let labelTargets = [];    // THREE.Vector3 top of labelled towers (5)
+      let carPaths = [];        // {mesh, axis, min, max, speed, z}
+      let treeMeshes = [];
+      let cranePivots = [];
+      let glowTopMeshes = [];   // top floor glow — pulse
+      let groundMesh = null, gridHelper = null;
+
+      const FLOOR_H = 0.75;
+
+      /* ================================================================ */
+      /* BUILDERS (called on theme rebuild too)                            */
+      /* ================================================================ */
+      function disposeObject(obj) {
+        if (!obj) return;
+        obj.traverse?.((c) => {
+          if (c.geometry) c.geometry.dispose?.();
+          if (c.material) {
+            if (Array.isArray(c.material)) c.material.forEach(m => m.dispose?.());
+            else c.material.dispose?.();
+          }
+        });
+      }
+
+      function clearGroup(g) {
+        while (g.children.length) {
+          const c = g.children[0];
+          g.remove(c);
+          disposeObject(c);
+        }
+      }
+
+      function buildGround() {
+        clearGroup(groundGroup);
+
+        const groundColor = getVarHex('--three-ground');
+        const edgeColor = getVarHex('--three-road');
+
+        const planeGeom = new THREE.CircleGeometry(60, 64);
+        const planeMat = new THREE.MeshStandardMaterial({
+          color: groundColor,
+          roughness: 0.92,
+          metalness: 0.04,
+          transparent: true,
+          opacity: 0.7,
+        });
+        groundMesh = new THREE.Mesh(planeGeom, planeMat);
+        groundMesh.rotation.x = -Math.PI / 2;
+        groundMesh.position.y = -0.02;
+        groundGroup.add(groundMesh);
+
+        // Grid hint
+        gridHelper = new THREE.GridHelper(120, 40, edgeColor, edgeColor);
+        gridHelper.material.transparent = true;
+        gridHelper.material.opacity = 0.18;
+        gridHelper.position.y = 0.0;
+        groundGroup.add(gridHelper);
+      }
+
+      function buildRoads() {
+        clearGroup(roadGroup);
+
+        const color = getVarHex('--three-road');
+        const mat = new THREE.MeshStandardMaterial({
+          color,
+          roughness: 0.95,
+          metalness: 0,
+          transparent: true,
+          opacity: 0.55,
+        });
+
+        // Compute plot positions
+        const startI = -(GRID - 1) / 2;
+        const startJ = -(GRID - 1) / 2;
+
+        // Horizontal roads between rows (GRID+1 roads)
+        for (let ri = 0; ri <= GRID; ri++) {
+          const zLocal = (startJ + ri - 0.5) * PLOT;
+          const z = CITY_ORIGIN_Z + zLocal;
+          const geom = new THREE.BoxGeometry(PLOT * GRID + 1.5, 0.05, 0.7);
+          const m = new THREE.Mesh(geom, mat);
+          m.position.set(CITY_ORIGIN_X, 0.02, z);
+          roadGroup.add(m);
+        }
+        // Vertical roads
+        for (let ci = 0; ci <= GRID; ci++) {
+          const xLocal = (startI + ci - 0.5) * PLOT;
+          const x = CITY_ORIGIN_X + xLocal;
+          const geom = new THREE.BoxGeometry(0.7, 0.05, PLOT * GRID + 1.5);
+          const m = new THREE.Mesh(geom, mat);
+          m.position.set(x, 0.02, CITY_ORIGIN_Z);
+          roadGroup.add(m);
+        }
+
+        // Build car paths along road centrelines
+        carPaths = [];
+        // Vehicle factory — cars, vans, and construction trucks with chassis + roof,
+        // headlights, brake-lights so they read from the isometric height.
+        const carColor = getVarHex('--three-car');
+        const edgeCol = getVarHex('--three-edge');
+        const roadCol = getVarHex('--three-road');
+
+        // Varied vehicle palette — construction-friendly colors
+        const palette = [
+          carColor,     // amber (existing)
+          0xf43f5e,     // rose — delivery van
+          0xffffff,     // white work truck
+          0x14b8a6,     // teal city car
+          0x3b82f6,     // blue compact
+          0xffffff,     // white (again, common)
+          0xef4444,     // red fire/emergency
+          0x8b5cf6,     // violet van
+        ];
+
+        const headlightMat = new THREE.MeshBasicMaterial({ color: 0xfff4c2, transparent: true, opacity: 0.9 });
+        const brakeMat = new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.8 });
+        const windowMat = new THREE.MeshBasicMaterial({ color: 0x1a2030, transparent: true, opacity: 0.85 });
+
+        // Build a small vehicle (Group). Size depends on type: 'car' | 'van' | 'truck'.
+        function buildVehicle(type, color) {
+          const g = new THREE.Group();
+          const bodyMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.98 });
+
+          if (type === 'car') {
+            // chassis — wider + longer for isometric visibility
+            const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.24, 0.48), bodyMat);
+            chassis.position.y = 0.12;
+            g.add(chassis);
+            // cabin/roof
+            const roof = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.22, 0.44), bodyMat);
+            roof.position.set(-0.05, 0.34, 0);
+            g.add(roof);
+            // tinted window band
+            const windows = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.16, 0.46), windowMat);
+            windows.position.set(-0.05, 0.36, 0);
+            g.add(windows);
+            // headlights
+            const hl = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, 0.12), headlightMat);
+            hl.position.set(0.48, 0.16, 0.15); g.add(hl);
+            const hr = hl.clone(); hr.position.z = -0.15; g.add(hr);
+            // brake lights
+            const bl = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, 0.12), brakeMat);
+            bl.position.set(-0.48, 0.16, 0.15); g.add(bl);
+            const br = bl.clone(); br.position.z = -0.15; g.add(br);
+          } else if (type === 'van') {
+            // slightly longer box
+            const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.28, 0.5), bodyMat);
+            chassis.position.y = 0.14;
+            g.add(chassis);
+            // cargo box taller than cabin
+            const cargo = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.42, 0.48), bodyMat);
+            cargo.position.set(-0.2, 0.44, 0);
+            g.add(cargo);
+            // cabin window
+            const cab = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.22, 0.46), windowMat);
+            cab.position.set(0.38, 0.38, 0);
+            g.add(cab);
+            const hl = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, 0.12), headlightMat);
+            hl.position.set(0.58, 0.18, 0.16); g.add(hl);
+            const hr = hl.clone(); hr.position.z = -0.16; g.add(hr);
+          } else { // truck — construction-themed cargo truck
+            const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.3, 0.55), bodyMat);
+            chassis.position.y = 0.15;
+            g.add(chassis);
+            // cabin
+            const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.4, 0.52), bodyMat);
+            cabin.position.set(0.52, 0.5, 0);
+            g.add(cabin);
+            // cabin window
+            const cabWin = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.22, 0.48), windowMat);
+            cabWin.position.set(0.52, 0.56, 0);
+            g.add(cabWin);
+            // cargo bed (open, darker)
+            const bedMat = new THREE.MeshBasicMaterial({ color: 0x4a4f5a, transparent: true, opacity: 0.9 });
+            const bed = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.5, 0.52), bedMat);
+            bed.position.set(-0.3, 0.55, 0);
+            g.add(bed);
+            // optional cargo: stack of boxes on bed
+            const cargoMat = new THREE.MeshBasicMaterial({ color: 0xd4a574, transparent: true, opacity: 0.95 });
+            const crate1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.22, 0.34), cargoMat);
+            crate1.position.set(-0.1, 0.92, 0);
+            g.add(crate1);
+            const crate2 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.22, 0.3), cargoMat);
+            crate2.position.set(-0.52, 0.92, 0.02);
+            g.add(crate2);
+            const hl = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.14), headlightMat);
+            hl.position.set(0.78, 0.22, 0.19); g.add(hl);
+            const hr = hl.clone(); hr.position.z = -0.19; g.add(hr);
+          }
+          return g;
+        }
+
+        // Vehicle specs — type + speed per lane. Scaled up from 5 → 12 vehicles
+        // so roads feel alive. Mix of horizontal and vertical lanes.
+        const vehicleSpecsWide = [
+          { type: 'car',   axis: 'x', laneJ: 1, speed: 0.55 },
+          { type: 'van',   axis: 'x', laneJ: 2, speed: 0.38, dir: -1 },
+          { type: 'car',   axis: 'x', laneJ: 3, speed: 0.62 },
+          { type: 'truck', axis: 'x', laneJ: 4, speed: 0.28 },
+          { type: 'car',   axis: 'x', laneJ: 0, speed: 0.48, dir: -1 },
+          { type: 'car',   axis: 'z', laneI: 1, speed: 0.50 },
+          { type: 'truck', axis: 'z', laneI: 2, speed: 0.30, dir: -1 },
+          { type: 'van',   axis: 'z', laneI: 3, speed: 0.42 },
+          { type: 'car',   axis: 'z', laneI: 4, speed: 0.58, dir: -1 },
+          { type: 'car',   axis: 'z', laneI: 0, speed: 0.36 },
+          { type: 'van',   axis: 'x', laneJ: 2, speed: 0.45, phaseOffset: 0.5 },
+          { type: 'car',   axis: 'z', laneI: 2, speed: 0.52, phaseOffset: 0.5 },
+        ];
+        const vehicleSpecsNarrow = vehicleSpecsWide.slice(0, 6);
+        const vehicleSpecs = isNarrow ? vehicleSpecsNarrow : vehicleSpecsWide;
+
+        vehicleSpecs.forEach((spec, idx) => {
+          const color = palette[idx % palette.length];
+          const v = buildVehicle(spec.type, color);
+
+          if (spec.axis === 'x') {
+            const z = CITY_ORIGIN_Z + (startJ + spec.laneJ - 0.5) * PLOT;
+            v.position.set(CITY_ORIGIN_X + startI * PLOT, 0.0, z);
+          } else {
+            const x = CITY_ORIGIN_X + (startI + spec.laneI - 0.5) * PLOT;
+            v.position.set(x, 0.0, CITY_ORIGIN_Z + startJ * PLOT);
+            v.rotation.y = Math.PI / 2;
+          }
+
+          carGroup.add(v);
+          carPaths.push({
+            mesh: v,
+            axis: spec.axis,
+            fixedOther: spec.axis === 'x'
+              ? CITY_ORIGIN_Z + (startJ + spec.laneJ - 0.5) * PLOT
+              : CITY_ORIGIN_X + (startI + spec.laneI - 0.5) * PLOT,
+            speed: spec.speed,
+            phase: ((spec.phaseOffset ?? 0) + idx * 0.17) % 1,
+            dir: spec.dir ?? (idx % 2 === 0 ? 1 : -1),
+          });
+        });
+      }
+
+      function buildCity() {
+        clearGroup(cityGroup);
+        clearGroup(towerGroup);
+        citySolids = [];
+        labelTargets = [];
+        glowTopMeshes = [];
+
+        const bldgA = getVarHex('--three-bldg-a');
+        const bldgB = getVarHex('--three-bldg-b');
+        const bldgC = getVarHex('--three-bldg-c');
+        const edgeColor = getVarHex('--three-edge');
+        const glowColor = getVarHex('--three-glow');
+        const labelColor = getVarHex('--three-label');
+
+        const matA = new THREE.MeshStandardMaterial({
+          color: bldgA, roughness: 0.72, metalness: 0.12,
+          transparent: true, opacity: 0.88,
+        });
+        const matB = new THREE.MeshStandardMaterial({
+          color: bldgB, roughness: 0.72, metalness: 0.16,
+          transparent: true, opacity: 0.88,
+        });
+        const matC = new THREE.MeshStandardMaterial({
+          color: bldgC, roughness: 0.78, metalness: 0.10,
+          transparent: true, opacity: 0.92,
+        });
+        const edgeMat = new THREE.LineBasicMaterial({
+          color: edgeColor, transparent: true, opacity: 0.55,
+        });
+        const wireMat = new THREE.LineBasicMaterial({
+          color: edgeColor, transparent: true, opacity: 0.82,
+        });
+        const glowMat = new THREE.MeshBasicMaterial({
+          color: glowColor, transparent: true, opacity: 0.65,
+        });
+        const labelGlowMat = new THREE.MeshBasicMaterial({
+          color: labelColor, transparent: true, opacity: 0.85,
+        });
+
+        const startI = -(GRID - 1) / 2;
+        const startJ = -(GRID - 1) / 2;
+
+        let labelIdx = 0;
+
+        for (let i = 0; i < GRID; i++) {
+          for (let j = 0; j < GRID; j++) {
+            const kind = LAYOUT[i][j];
+            if (kind === 0) continue;   // empty plot (park)
+
+            const floors = cellHeight(i, j, kind);
+            const totalH = floors * FLOOR_H;
+            const x = CITY_ORIGIN_X + (startI + i) * PLOT;
+            const z = CITY_ORIGIN_Z + (startJ + j) * PLOT;
+
+            // Jitter building footprint slightly for visual variety
+            const noise = Math.abs(Math.sin(i * 11.1 + j * 7.7));
+            const w = BUILD_W * (0.85 + noise * 0.3);
+            const d = BUILD_W * (0.85 + (1 - noise) * 0.3);
+
+            const group = new THREE.Group();
+            group.position.set(x, 0, z);
+
+            if (kind === 3) {
+              // Wireframe (under construction): just floor outlines + vertical beams
+              for (let f = 0; f < floors; f++) {
+                const fy = f * FLOOR_H + FLOOR_H * 0.5;
+                const rectPoints = [
+                  new THREE.Vector3(-w/2, fy, -d/2),
+                  new THREE.Vector3( w/2, fy, -d/2),
+                  new THREE.Vector3( w/2, fy,  d/2),
+                  new THREE.Vector3(-w/2, fy,  d/2),
+                  new THREE.Vector3(-w/2, fy, -d/2),
+                ];
+                const g = new THREE.BufferGeometry().setFromPoints(rectPoints);
+                group.add(new THREE.Line(g, wireMat));
+              }
+              // Vertical beams at corners
+              const corners = [[-w/2,-d/2], [w/2,-d/2], [w/2,d/2], [-w/2,d/2]];
+              corners.forEach(([cx, cz]) => {
+                const g = new THREE.BufferGeometry().setFromPoints([
+                  new THREE.Vector3(cx, 0, cz),
+                  new THREE.Vector3(cx, totalH, cz),
+                ]);
+                group.add(new THREE.Line(g, wireMat));
+              });
+            } else {
+              // Solid building: stack of floor boxes with small gaps
+              const floorGeom = new THREE.BoxGeometry(w, FLOOR_H * 0.86, d);
+              const matPick = (i + j) % 3 === 0 ? matA : ((i + j) % 3 === 1 ? matB : matC);
+              for (let f = 0; f < floors; f++) {
+                const fy = f * FLOOR_H + FLOOR_H * 0.5;
+                const m = new THREE.Mesh(floorGeom, matPick);
+                m.position.y = fy;
+                group.add(m);
+              }
+              // Edge outline whole massing
+              const outerGeom = new THREE.BoxGeometry(w, totalH, d);
+              const edges = new THREE.EdgesGeometry(outerGeom);
+              const line = new THREE.LineSegments(edges, edgeMat);
+              line.position.y = totalH / 2;
+              group.add(line);
+              outerGeom.dispose();
+
+              // Top glow cap on non-labelled solids sometimes
+              if (kind === 1 && ((i * 3 + j) % 4 === 0)) {
+                const capGeom = new THREE.BoxGeometry(w * 1.05, 0.12, d * 1.05);
+                const cap = new THREE.Mesh(capGeom, glowMat.clone());
+                cap.position.y = totalH + 0.06;
+                cap.userData.baseOpacity = 0.55;
+                cap.userData.phase = Math.random() * Math.PI * 2;
+                cap.userData.speed = 0.7 + Math.random() * 0.8;
+                group.add(cap);
+                glowTopMeshes.push(cap);
+              }
+
+              // Labelled towers (kind 2): amber glowing top + visual crown
+              if (kind === 2) {
+                const crownGeom = new THREE.BoxGeometry(w * 1.12, 0.22, d * 1.12);
+                const crown = new THREE.Mesh(crownGeom, labelGlowMat.clone());
+                crown.position.y = totalH + 0.14;
+                crown.userData.baseOpacity = 0.85;
+                crown.userData.phase = labelIdx * 0.9;
+                crown.userData.speed = 1.0;
+                group.add(crown);
+                glowTopMeshes.push(crown);
+
+                // Track top point for HTML label projection
+                labelTargets.push(new THREE.Vector3(x, totalH + 0.8, z));
+                labelIdx++;
+
+                // Antenna pin
+                const pinGeom = new THREE.CylinderGeometry(0.03, 0.03, 1.2, 6);
+                const pin = new THREE.Mesh(pinGeom, labelGlowMat.clone());
+                pin.position.y = totalH + 0.9;
+                group.add(pin);
+
+                // Base plinth emphasis
+                const plinthGeom = new THREE.BoxGeometry(w * 1.08, 0.12, d * 1.08);
+                const plinthMat = new THREE.MeshStandardMaterial({
+                  color: bldgC, roughness: 0.6, metalness: 0.2,
+                  transparent: true, opacity: 0.9,
+                });
+                const plinth = new THREE.Mesh(plinthGeom, plinthMat);
+                plinth.position.y = 0.06;
+                group.add(plinth);
+
+                towerGroup.add(group);
+                citySolids.push({ group, kind });
+                continue;
+              }
+            }
+
+            cityGroup.add(group);
+            citySolids.push({ group, kind });
+          }
+        }
+
+        // Safety: if for any reason labelTargets.length !== 5, synthesise fallbacks
+        while (labelTargets.length < 5) {
+          const x = CITY_ORIGIN_X + (Math.random() - 0.5) * PLOT * GRID * 0.7;
+          const z = CITY_ORIGIN_Z + (Math.random() - 0.5) * PLOT * GRID * 0.7;
+          labelTargets.push(new THREE.Vector3(x, 8, z));
+        }
+      }
+
+      function buildTrees() {
+        clearGroup(treeGroup);
+        treeMeshes = [];
+
+        const treeColor = getVarHex('--three-tree');
+        const trunkGeom = new THREE.CylinderGeometry(0.06, 0.08, 0.35, 6);
+        const trunkMat = new THREE.MeshStandardMaterial({
+          color: 0x4a2c12, roughness: 0.92,
+          transparent: true, opacity: 0.85,
+        });
+        const crownGeom = new THREE.ConeGeometry(0.35, 0.9, 8);
+        const crownMat = new THREE.MeshStandardMaterial({
+          color: treeColor, roughness: 0.85, metalness: 0.05,
+          transparent: true, opacity: 0.9,
+        });
+
+        const startI = -(GRID - 1) / 2;
+        const startJ = -(GRID - 1) / 2;
+
+        const treeCount = isNarrow ? 22 : 38;
+        for (let k = 0; k < treeCount; k++) {
+          // Pick random spot near roads / empty plots
+          const i = Math.floor(Math.random() * GRID);
+          const j = Math.floor(Math.random() * GRID);
+          const ox = (Math.random() - 0.5) * (PLOT * 0.85);
+          const oz = (Math.random() - 0.5) * (PLOT * 0.85);
+          const x = CITY_ORIGIN_X + (startI + i) * PLOT + ox;
+          const z = CITY_ORIGIN_Z + (startJ + j) * PLOT + oz;
+
+          // Push trees away from building footprints (rough test)
+          const absOX = Math.abs(ox), absOZ = Math.abs(oz);
+          if (absOX < BUILD_W * 0.7 && absOZ < BUILD_W * 0.7 && LAYOUT[i][j] !== 0) continue;
+
+          const group = new THREE.Group();
+          const trunk = new THREE.Mesh(trunkGeom, trunkMat);
+          trunk.position.y = 0.18;
+          group.add(trunk);
+          const crown = new THREE.Mesh(crownGeom, crownMat);
+          crown.position.y = 0.82;
+          crown.scale.setScalar(0.7 + Math.random() * 0.6);
+          group.add(crown);
+          group.position.set(x, 0, z);
+          group.rotation.y = Math.random() * Math.PI * 2;
+          treeGroup.add(group);
+          treeMeshes.push(group);
+        }
+      }
+
+      function buildCranes() {
+        clearGroup(craneGroup);
+        cranePivots = [];
+
+        const color = getVarHex('--three-edge');
+        const mat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.85 });
+
+        const startI = -(GRID - 1) / 2;
+        const startJ = -(GRID - 1) / 2;
+
+        // Find wireframe cells — put cranes on 2-3 of them
+        const wireCells = [];
+        for (let i = 0; i < GRID; i++)
+          for (let j = 0; j < GRID; j++)
+            if (LAYOUT[i][j] === 3) wireCells.push([i, j]);
+
+        const maxCranes = isNarrow ? 2 : 3;
+        wireCells.slice(0, maxCranes).forEach(([i, j]) => {
+          const floors = cellHeight(i, j, 3);
+          const totalH = floors * FLOOR_H;
+          const x = CITY_ORIGIN_X + (startI + i) * PLOT;
+          const z = CITY_ORIGIN_Z + (startJ + j) * PLOT;
+
+          const mastTop = totalH + 2.4;
+          const mastW = 0.18;
+          const g = new THREE.Group();
+          g.position.set(x + BUILD_W * 0.4, 0, z);
+
+          // Mast corners
+          const corners = [
+            [-mastW, -mastW], [mastW, -mastW], [mastW, mastW], [-mastW, mastW],
+          ];
+          corners.forEach(([cx, cz]) => {
+            const geom = new THREE.BufferGeometry().setFromPoints([
+              new THREE.Vector3(cx, 0, cz),
+              new THREE.Vector3(cx, mastTop, cz),
+            ]);
+            g.add(new THREE.Line(geom, mat));
+          });
+          // Horizontal bracing
+          for (let y = 0.4; y < mastTop; y += 0.8) {
+            const geom = new THREE.BufferGeometry().setFromPoints([
+              new THREE.Vector3(corners[0][0], y, corners[0][1]),
+              new THREE.Vector3(corners[1][0], y, corners[1][1]),
+              new THREE.Vector3(corners[2][0], y, corners[2][1]),
+              new THREE.Vector3(corners[3][0], y, corners[3][1]),
+              new THREE.Vector3(corners[0][0], y, corners[0][1]),
+            ]);
+            g.add(new THREE.Line(geom, mat));
+          }
+
+          // Jib pivot (rotating). Create a group that we rotate each frame.
+          const jibPivot = new THREE.Group();
+          jibPivot.position.y = mastTop - 0.2;
+          const jibLen = 2.8;
+          const cjLen = 0.9;
+          const jibPts = [
+            new THREE.Vector3(-cjLen, 0, 0),
+            new THREE.Vector3(jibLen, 0, 0),
+          ];
+          const jibGeom = new THREE.BufferGeometry().setFromPoints(jibPts);
+          jibPivot.add(new THREE.Line(jibGeom, mat));
+          // Triangle brace
+          const topY = 0.9;
+          const braceGeom = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(0, topY, 0),
+            new THREE.Vector3(jibLen * 0.5, 0, 0),
+            new THREE.Vector3(0, topY, 0),
+            new THREE.Vector3(-cjLen * 0.6, 0, 0),
+          ]);
+          jibPivot.add(new THREE.Line(braceGeom, mat));
+          // Counter weight
+          const cwMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.75 });
+          const cw = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.18, 0.25), cwMat);
+          cw.position.set(-cjLen + 0.1, -0.1, 0);
+          jibPivot.add(cw);
+          // Trolley + hook
+          const trolleyX = jibLen * 0.7;
+          const cableGeom = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(trolleyX, 0, 0),
+            new THREE.Vector3(trolleyX, -(totalH * 0.5), 0),
+          ]);
+          jibPivot.add(new THREE.Line(cableGeom, mat));
+
+          g.add(jibPivot);
+          craneGroup.add(g);
+          cranePivots.push({ pivot: jibPivot, speed: 0.18 + Math.random() * 0.18, phase: Math.random() * Math.PI * 2 });
+        });
+      }
+
+      /* ============== PARTICLES ============== */
+      const PARTICLE_COUNT = isNarrow ? 80 : 150;
+      let particles = null;
+      const particleVelocities = [];
+
+      function buildParticles() {
+        clearGroup(particleGroup);
+        particleVelocities.length = 0;
+
+        const geom = new THREE.BufferGeometry();
+        const positions = new Float32Array(PARTICLE_COUNT * 3);
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          positions[i * 3] = (Math.random() - 0.5) * 70 + CITY_ORIGIN_X * 0.3;
+          positions[i * 3 + 1] = Math.random() * 18 + 2;
+          positions[i * 3 + 2] = (Math.random() - 0.5) * 70 + CITY_ORIGIN_Z * 0.3;
+          particleVelocities.push({
+            x: (Math.random() - 0.5) * 0.006,
+            y: -0.006 - Math.random() * 0.006,   // drifting DOWN like snow
+            z: (Math.random() - 0.5) * 0.006,
+          });
+        }
+        geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const color = getVarHex('--three-particle');
+        const mat = new THREE.PointsMaterial({
+          color,
+          size: 0.22,
+          map: snowflakeTexture(),
+          transparent: true,
+          opacity: 0.8,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          sizeAttenuation: true,
+        });
+        particles = new THREE.Points(geom, mat);
+        particleGroup.add(particles);
+      }
+
+      /* ============== LIGHTS ============== */
+      const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+      scene.add(ambient);
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+      keyLight.position.set(30, 40, 20);
+      scene.add(keyLight);
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.55);
+      fillLight.position.set(-20, 25, -10);
+      scene.add(fillLight);
+
+      function applyThemeColors() {
+        ambient.color.setHex(getVarHex('--three-ambient'));
+        keyLight.color.setHex(getVarHex('--three-key'));
+        fillLight.color.setHex(getVarHex('--three-fill'));
+        scene.fog = new THREE.FogExp2(getVarHex('--three-fog'), 0.008);
+      }
+
+      function rebuildAll() {
+        applyThemeColors();
+        buildGround();
+        buildRoads();
+        buildCity();
+        buildTrees();
+        buildCranes();
+        buildParticles();
+      }
+      rebuildAll();
+
+      /* ============== ENTRANCE ============== */
+      function playEntrance() {
+        if (reduceMotion) return;
+        // Buildings grow up from ground
+        const allBuildings = citySolids.map(s => s.group);
+        allBuildings.forEach((g) => { g.scale.y = 0.01; });
+        gsap.to(allBuildings.map(g => g.scale), {
+          y: 1,
+          duration: 1.6,
+          ease: 'power4.out',
+          stagger: { amount: 0.9, from: 'random' },
+        });
+        // Trees fade in
+        treeMeshes.forEach(g => { g.scale.set(0.01, 0.01, 0.01); });
+        gsap.to(treeMeshes.map(g => g.scale), {
+          x: 1, y: 1, z: 1,
+          duration: 1.0,
+          ease: 'back.out(1.2)',
+          stagger: { amount: 0.6, from: 'random' },
+          delay: 0.5,
+        });
+        // Cars start hidden
+        carPaths.forEach(cp => { cp.mesh.visible = false; });
+        gsap.delayedCall(1.6, () => carPaths.forEach(cp => cp.mesh.visible = true));
+        // Labels fade in
+        gsap.delayedCall(2.1, () => {
+          costLabels.forEach((el, idx) => {
+            gsap.delayedCall(idx * 0.08, () => el.classList.add('is-visible'));
+          });
+        });
+      }
+      playEntrance();
+
+      /* ============== RESIZE ============== */
+      function resize() {
+        const w = canvas.clientWidth || window.innerWidth;
+        const h = canvas.clientHeight || window.innerHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      /* ============== MOUSE PARALLAX ============== */
+      const targetTilt = { x: 0, y: 0 };
+      const currentTilt = { x: 0, y: 0 };
+      window.addEventListener('pointermove', (e) => {
+        const nx = (e.clientX / window.innerWidth) * 2 - 1;
+        const ny = (e.clientY / window.innerHeight) * 2 - 1;
+        targetTilt.y = nx * 0.6;
+        targetTilt.x = -ny * 0.4;
+      });
+
+      /* ============== ANIMATE ============== */
+      const clock = new THREE.Clock();
+      const baseCamPos = camera.position.clone();
+      const tempVec = new THREE.Vector3();
+
+      function updateLabelPositions() {
+        const w = canvas.clientWidth || window.innerWidth;
+        const h = canvas.clientHeight || window.innerHeight;
+        labelTargets.forEach((v, i) => {
+          if (i >= costLabels.length) return;
+          const label = costLabels[i];
+          tempVec.copy(v);
+          tempVec.project(camera);
+          // Check behind camera
+          const onScreen = tempVec.z > -1 && tempVec.z < 1;
+          const screenX = (tempVec.x * 0.5 + 0.5) * w;
+          const screenY = (-tempVec.y * 0.5 + 0.5) * h;
+
+          // Clamp leader line length per-label to vary lookup
+          const leader = 28 + (i * 6) % 26;
+
+          // Offset label slightly above its anchor
+          const offsetY = -42;
+          const offsetX = -40 + ((i % 3) * 12);
+
+          label.style.setProperty('--leader', leader + 'px');
+          label.style.transform = `translate3d(${Math.round(screenX + offsetX)}px, ${Math.round(screenY + offsetY - leader)}px, 0)`;
+
+          const tooCloseToText = screenX < 300 && screenY < 360;   // top-left text zone
+          if (!onScreen || tooCloseToText) {
+            label.style.opacity = '0';
+          } else if (label.classList.contains('is-visible')) {
+            label.style.opacity = '';  // let CSS handle it (=1)
+          }
+        });
+      }
+
+      function tick() {
+        const t = clock.getElapsedTime();
+        const dt = Math.min(clock.getDelta(), 0.05);
+
+        // Lerp tilt
+        currentTilt.x += (targetTilt.x - currentTilt.x) * 0.03;
+        currentTilt.y += (targetTilt.y - currentTilt.y) * 0.03;
+
+        // Breathing camera drift (~20s cycle)
+        const driftAngle = reduceMotion ? 0 : t * (Math.PI * 2 / 20);
+        const driftR = reduceMotion ? 0 : 2.2;
+        const driftX = Math.cos(driftAngle) * driftR;
+        const driftZ = Math.sin(driftAngle) * driftR;
+
+        camera.position.x = baseCamPos.x + driftX + currentTilt.y * 1.4;
+        camera.position.z = baseCamPos.z + driftZ + currentTilt.x * 0.9;
+        camera.position.y = baseCamPos.y + currentTilt.x * 0.8;
+        camera.lookAt(camTarget);
+
+        // Glow pulses
+        glowTopMeshes.forEach((m) => {
+          const base = m.userData.baseOpacity || 0.6;
+          const p = 0.5 + 0.5 * Math.sin(t * (m.userData.speed || 1) + (m.userData.phase || 0));
+          m.material.opacity = base * (0.55 + 0.55 * p);
+        });
+
+        // Crane jibs rotate
+        if (!reduceMotion) {
+          cranePivots.forEach(({ pivot, speed, phase }) => {
+            pivot.rotation.y = t * speed + phase;
+          });
+        }
+
+        // Cars drift along their fixed road lanes
+        if (!reduceMotion) {
+          const startI = -(GRID - 1) / 2;
+          const startJ = -(GRID - 1) / 2;
+          carPaths.forEach((cp) => {
+            cp.phase += dt * cp.speed * 0.15 * cp.dir;
+            if (cp.phase > 1) cp.phase -= 1;
+            if (cp.phase < 0) cp.phase += 1;
+            if (cp.axis === 'x') {
+              const absMin = CITY_ORIGIN_X + startI * PLOT - 1;
+              const absMax = CITY_ORIGIN_X + (startI + GRID) * PLOT + 1;
+              cp.mesh.position.x = absMin + (absMax - absMin) * cp.phase;
+              cp.mesh.position.z = cp.fixedOther;
+              cp.mesh.rotation.y = cp.dir > 0 ? 0 : Math.PI;
+            } else {
+              const absMin = CITY_ORIGIN_Z + startJ * PLOT - 1;
+              const absMax = CITY_ORIGIN_Z + (startJ + GRID) * PLOT + 1;
+              cp.mesh.position.z = absMin + (absMax - absMin) * cp.phase;
+              cp.mesh.position.x = cp.fixedOther;
+              cp.mesh.rotation.y = Math.PI / 2 + (cp.dir > 0 ? 0 : Math.PI);
+            }
+          });
+        }
+
+        // Particles
+        if (!reduceMotion && particles) {
+          const pos = particles.geometry.attributes.position;
+          for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const v = particleVelocities[i];
+            pos.array[i * 3] += v.x;
+            pos.array[i * 3 + 1] += v.y;
+            pos.array[i * 3 + 2] += v.z;
+            if (pos.array[i * 3 + 1] < 0.2) {
+              pos.array[i * 3] = (Math.random() - 0.5) * 70 + CITY_ORIGIN_X * 0.3;
+              pos.array[i * 3 + 1] = 18 + Math.random() * 4;
+              pos.array[i * 3 + 2] = (Math.random() - 0.5) * 70 + CITY_ORIGIN_Z * 0.3;
+            }
+            if (Math.abs(pos.array[i * 3]) > 50) pos.array[i * 3] *= 0.92;
+            if (Math.abs(pos.array[i * 3 + 2]) > 50) pos.array[i * 3 + 2] *= 0.92;
+          }
+          pos.needsUpdate = true;
+        }
+
+        // Update HTML label positions
+        updateLabelPositions();
+
+        renderer.render(scene, camera);
+      }
+
+      if (reduceMotion) {
+        // Still render once, then update labels once
+        tick();
+        // Make labels visible despite reduced motion
+        costLabels.forEach(el => el.classList.add('is-visible'));
+      } else {
+        renderer.setAnimationLoop(tick);
+      }
+
+      canvas.classList.add('is-ready');
+
+      // Theme change hook
+      themeListeners.add(() => {
+        rebuildAll();
+      });
+
+      threeState = { renderer, scene, camera };
+    }
+
+    /* ================================================================ */
+    /* INIT                                                              */
+    /* ================================================================ */
+    try {
+      initThree();
+    } catch (err) {
+      console.warn('Three.js init failed — falling back to static scene', err);
+      canvas.style.display = 'none';
+      document.querySelector('.static-scene').style.display = 'flex';
+      costLabels.forEach(el => el.style.display = 'none');
+    }
+
+    // Hide/show three on breakpoint changes
+    mobileHide.addEventListener?.('change', (e) => {
+      if (e.matches) {
+        canvas.style.display = 'none';
+        labelLayer.style.display = 'none';
+      } else {
+        canvas.style.display = 'block';
+        labelLayer.style.display = '';
+      }
+    });
+
+    // Kick entrance after fonts settle
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => animateIn());
+    } else {
+      animateIn();
+    }
+  </script>
+
+</body>
+</html>

@@ -53,6 +53,34 @@ intellectual property you create, you represent that you have received
 permission to make Contributions on behalf of that employer, or that your
 employer has waived such rights.
 
+### 5a. Waiver of Moral Rights
+
+To the extent permitted by applicable law, you waive — and agree not to
+assert against the Project Owner or downstream licensees — any moral
+rights you hold in the Contribution (including the right of attribution
+and the right to object to modification). For jurisdictions in which such
+rights cannot be waived, you grant the Project Owner a perpetual,
+irrevocable consent to exercise them on your behalf. Nothing in this
+section reduces your credit in release notes or changelogs where
+attribution is voluntarily given.
+
+### 5b. Patent Retaliation
+
+If you or any entity you control initiates a patent claim against the
+Project Owner, the Software, or any contributor alleging that the
+Software infringes a patent, the licences granted to you under this CLA
+(and under any dual commercial licence for the Software) terminate as of
+the date the claim is filed. This clause mirrors the patent-retaliation
+terms of Apache-2.0 §3 and exists to protect the commons from
+infringement litigation initiated by contributors.
+
+### 5c. Export Control
+
+You represent that you are not located in, and not a resident or national
+of, a jurisdiction subject to comprehensive US or EU sanctions (OFAC
+list), and that your Contribution does not include cryptographic code
+requiring an export licence you do not hold.
+
 ### 6. No Obligation
 
 You understand that the decision to include your Contribution in the project

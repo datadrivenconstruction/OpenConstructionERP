@@ -22,6 +22,7 @@ import {
   FileText,
   FileBox,
   CheckCircle2,
+  ExternalLink,
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useQuery, useQueries } from '@tanstack/react-query';
@@ -417,8 +418,14 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
   const hasDwgLink = !!dwgAnnotationId || !!dwgDrawingId || !!dwgSource;
 
   const [showPreview, setShowPreview] = useState(false);
+  const [showPdfPopover, setShowPdfPopover] = useState(false);
+  const [showDwgPopover, setShowDwgPopover] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
+  const pdfBtnRef = useRef<HTMLButtonElement>(null);
+  const dwgBtnRef = useRef<HTMLButtonElement>(null);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  const [pdfAnchor, setPdfAnchor] = useState<DOMRect | null>(null);
+  const [dwgAnchor, setDwgAnchor] = useState<DOMRect | null>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
 
   const handleOpen = useCallback(() => {
@@ -433,25 +440,34 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
 
   const handleOpenPdf = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    const params = new URLSearchParams();
-    params.set('tab', 'measurements');
-    if (pdfMeasurementId) params.set('focus', pdfMeasurementId);
-    // pdf_document_id in metadata is the *filename* (not a UUID), so we
-    // pass it as `name` and let TakeoffPage resolve it against the
-    // server documents list.
-    if (pdfDocumentId) params.set('name', pdfDocumentId);
-    if (pdfPage) params.set('page', String(pdfPage));
-    navigate(`/takeoff?${params.toString()}`);
-  }, [pdfMeasurementId, pdfDocumentId, pdfPage, navigate]);
+    if (pdfBtnRef.current) setPdfAnchor(pdfBtnRef.current.getBoundingClientRect());
+    setShowPdfPopover(true);
+  }, []);
 
   const handleOpenDwg = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    if (dwgBtnRef.current) setDwgAnchor(dwgBtnRef.current.getBoundingClientRect());
+    setShowDwgPopover(true);
+  }, []);
+
+  /** Build the deep-link URL for the PDF takeoff viewer, focused on the
+   *  linked measurement so the user lands on the exact annotation. */
+  const pdfDeepLink = useMemo(() => {
     const params = new URLSearchParams();
-    // DwgTakeoffPage reads `drawingId` (not `drawing`) — see DwgTakeoffPage.tsx:275.
+    params.set('tab', 'measurements');
+    if (pdfMeasurementId) params.set('focus', pdfMeasurementId);
+    if (pdfDocumentId) params.set('name', pdfDocumentId);
+    if (pdfPage) params.set('page', String(pdfPage));
+    return `/takeoff?${params.toString()}`;
+  }, [pdfMeasurementId, pdfDocumentId, pdfPage]);
+
+  /** Same for DWG. */
+  const dwgDeepLink = useMemo(() => {
+    const params = new URLSearchParams();
     if (dwgDrawingId) params.set('drawingId', dwgDrawingId);
     if (dwgAnnotationId) params.set('focus', dwgAnnotationId);
-    navigate(`/dwg-takeoff?${params.toString()}`);
-  }, [dwgDrawingId, dwgAnnotationId, navigate]);
+    return `/dwg-takeoff?${params.toString()}`;
+  }, [dwgDrawingId, dwgAnnotationId]);
 
   if (!hasBimLink && !hasPdfLink && !hasDwgLink) return null;
 
@@ -486,34 +502,90 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
       )}
       {hasPdfLink && (
         <button
+          ref={pdfBtnRef}
           onClick={handleOpenPdf}
           onMouseDown={(e) => e.stopPropagation()}
           className="h-6 w-6 inline-flex items-center justify-center rounded
                      bg-rose-500/10 text-rose-600 dark:text-rose-400
                      hover:bg-rose-500/25 transition-colors cursor-pointer"
           title={pdfSource
-            ? `${t('boq.pdf_link_tooltip', { defaultValue: 'Open linked PDF takeoff' })} — ${pdfSource}`
-            : t('boq.pdf_link_tooltip', { defaultValue: 'Open linked PDF takeoff' })}
-          aria-label={t('boq.pdf_link_tooltip', { defaultValue: 'Open linked PDF takeoff' })}
+            ? `${t('boq.pdf_link_tooltip_v2', { defaultValue: 'PDF takeoff — click for details & navigation' })} — ${pdfSource}`
+            : t('boq.pdf_link_tooltip_v2', { defaultValue: 'PDF takeoff — click for details & navigation' })}
+          aria-label={t('boq.pdf_link_tooltip_v2', { defaultValue: 'PDF takeoff — click for details & navigation' })}
         >
           <FileText size={12} />
         </button>
       )}
       {hasDwgLink && (
         <button
+          ref={dwgBtnRef}
           onClick={handleOpenDwg}
           onMouseDown={(e) => e.stopPropagation()}
           className="h-6 w-6 inline-flex items-center justify-center rounded
                      bg-amber-500/10 text-amber-600 dark:text-amber-400
                      hover:bg-amber-500/25 transition-colors cursor-pointer"
           title={dwgSource
-            ? `${t('boq.dwg_link_tooltip', { defaultValue: 'Open linked DWG drawing' })} — ${dwgSource}`
-            : t('boq.dwg_link_tooltip', { defaultValue: 'Open linked DWG drawing' })}
-          aria-label={t('boq.dwg_link_tooltip', { defaultValue: 'Open linked DWG drawing' })}
+            ? `${t('boq.dwg_link_tooltip_v2', { defaultValue: 'DWG drawing — click for details & navigation' })} — ${dwgSource}`
+            : t('boq.dwg_link_tooltip_v2', { defaultValue: 'DWG drawing — click for details & navigation' })}
+          aria-label={t('boq.dwg_link_tooltip_v2', { defaultValue: 'DWG drawing — click for details & navigation' })}
         >
           <FileBox size={12} />
         </button>
       )}
+
+      {/* PDF source info popover */}
+      {showPdfPopover && pdfAnchor &&
+        createPortal(
+          <>
+            <div
+              className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[9998] animate-fade-in"
+              onClick={() => setShowPdfPopover(false)}
+            />
+            <PdfDwgSourcePopover
+              kind="pdf"
+              anchor={pdfAnchor}
+              sourceName={pdfSource || pdfDocumentId || null}
+              page={pdfPage ?? null}
+              measurementId={pdfMeasurementId ?? null}
+              positionData={data as Record<string, unknown>}
+              deepLink={pdfDeepLink}
+              onClose={() => setShowPdfPopover(false)}
+              onNavigate={() => {
+                setShowPdfPopover(false);
+                navigate(pdfDeepLink);
+              }}
+              onApplyQuantity={ctx?.onUpdatePosition}
+            />
+          </>,
+          document.body,
+        )}
+
+      {/* DWG source info popover */}
+      {showDwgPopover && dwgAnchor &&
+        createPortal(
+          <>
+            <div
+              className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[9998] animate-fade-in"
+              onClick={() => setShowDwgPopover(false)}
+            />
+            <PdfDwgSourcePopover
+              kind="dwg"
+              anchor={dwgAnchor}
+              sourceName={dwgSource || null}
+              drawingId={dwgDrawingId ?? null}
+              annotationId={dwgAnnotationId ?? null}
+              positionData={data as Record<string, unknown>}
+              deepLink={dwgDeepLink}
+              onClose={() => setShowDwgPopover(false)}
+              onNavigate={() => {
+                setShowDwgPopover(false);
+                navigate(dwgDeepLink);
+              }}
+              onApplyQuantity={ctx?.onUpdatePosition}
+            />
+          </>,
+          document.body,
+        )}
       {showPreview && anchorRect && ctx?.bimModelId &&
         createPortal(
           <>
@@ -552,6 +624,7 @@ const BimLinkPopover = forwardRef<
   }
 >(function BimLinkPopover({ modelId, elementIds, style, onClose, positionData, onUpdatePosition }, ref) {
   const { t } = useTranslation();
+  const popoverNavigate = useNavigate();
   const innerRef = useRef<HTMLDivElement>(null);
   const combinedRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -840,13 +913,32 @@ const BimLinkPopover = forwardRef<
             ({t('boq.element_count', { defaultValue: '{{count}} element(s)', count: elementIds.length })})
           </span>
         </div>
-        <button
-          onClick={onClose}
-          className="h-6 w-6 flex items-center justify-center rounded text-content-tertiary
-                     hover:text-content-primary hover:bg-surface-tertiary transition-colors"
-        >
-          <X size={14} />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const params = new URLSearchParams();
+              if (elementIds[0]) params.set('focus', elementIds[0]);
+              if (elementIds.length > 1) params.set('select', elementIds.join(','));
+              popoverNavigate(`/bim/${modelId}?${params.toString()}`);
+              onClose();
+            }}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold
+                       text-oe-blue hover:bg-oe-blue/10 transition-colors"
+            title={t('boq.open_in_bim_title', { defaultValue: 'Open in 3D viewer with the linked element pre-selected' })}
+          >
+            <ExternalLink size={11} />
+            {t('boq.open_in_bim', { defaultValue: 'Open in BIM' })}
+          </button>
+          <button
+            onClick={onClose}
+            className="h-6 w-6 flex items-center justify-center rounded text-content-tertiary
+                       hover:text-content-primary hover:bg-surface-tertiary transition-colors"
+          >
+            <X size={14} />
+          </button>
+        </div>
       </div>
 
       <div className={canApply ? 'flex flex-1 min-h-0 overflow-hidden' : ''}>
@@ -1202,6 +1294,236 @@ const BimLinkPopover = forwardRef<
     </div>
   );
 });
+
+/* ── PDF / DWG source info popover ───────────────────────────────── */
+/* Compact popover for non-BIM source links. Shows what the linked
+ * measurement / annotation is worth (area / length / volume) and gives
+ * the user a single click to jump into the source viewer with the
+ * exact item pre-focused. Picks the quantity apply action when the
+ * cell grid context exposes an update callback, so the same popover
+ * doubles as a "set quantity from source" affordance. */
+interface PdfDwgSourcePopoverProps {
+  kind: 'pdf' | 'dwg';
+  anchor: DOMRect;
+  sourceName: string | null;
+  page?: number | null;
+  measurementId?: string | null;
+  drawingId?: string | null;
+  annotationId?: string | null;
+  positionData: Record<string, unknown> | null;
+  deepLink: string;
+  onClose: () => void;
+  onNavigate: () => void;
+  onApplyQuantity?: (id: string, data: Record<string, unknown>, oldData: Record<string, unknown>) => void;
+}
+
+function PdfDwgSourcePopover(props: PdfDwgSourcePopoverProps) {
+  const {
+    kind,
+    anchor,
+    sourceName,
+    page,
+    measurementId,
+    drawingId,
+    annotationId,
+    positionData,
+    onClose,
+    onNavigate,
+    onApplyQuantity,
+  } = props;
+  const { t } = useTranslation();
+  const popRef = useRef<HTMLDivElement>(null);
+
+  // Pull numeric quantities out of the position metadata. Both the PDF
+  // takeoff editor and the DWG annotation editor write the computed
+  // measurement back to position.metadata at link time, so we don't need
+  // an API round-trip here — the data is already local.
+  const meta = (positionData?.metadata ?? {}) as Record<string, unknown>;
+  const numericFromMeta = (keys: string[]): number | null => {
+    for (const k of keys) {
+      const raw = meta[k];
+      const num = typeof raw === 'number' ? raw : parseFloat(String(raw));
+      if (Number.isFinite(num) && num !== 0) return num;
+    }
+    return null;
+  };
+  const measurementValue =
+    kind === 'pdf'
+      ? numericFromMeta(['pdf_measurement_value', 'pdf_area', 'pdf_length'])
+      : numericFromMeta(['dwg_measurement_value', 'dwg_area', 'dwg_length']);
+  const measurementUnit = (meta[kind === 'pdf' ? 'pdf_measurement_unit' : 'dwg_measurement_unit'] as string | undefined)
+    ?? (meta[kind === 'pdf' ? 'pdf_unit' : 'dwg_unit'] as string | undefined)
+    ?? '';
+  const measurementType = (meta[kind === 'pdf' ? 'pdf_measurement_type' : 'dwg_annotation_type'] as string | undefined) ?? null;
+
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      if (popRef.current && !popRef.current.contains(e.target as Node)) onClose();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
+
+  const width = 320;
+  const left = Math.min(anchor.right + 8, window.innerWidth - width - 8);
+  const top = Math.max(8, Math.min(anchor.top, window.innerHeight - 240));
+
+  const canApply =
+    !!positionData?.id && !!onApplyQuantity && measurementValue !== null;
+
+  const applyQuantity = () => {
+    if (!canApply || measurementValue === null) return;
+    const id = positionData!.id as string;
+    const oldMeta = meta;
+    onApplyQuantity!(
+      id,
+      {
+        quantity: measurementValue,
+        metadata: {
+          ...oldMeta,
+          qty_source: kind === 'pdf' ? 'pdf_takeoff' : 'dwg_annotation',
+        },
+      },
+      { ...positionData, quantity: positionData?.quantity },
+    );
+    onClose();
+  };
+
+  const accent = kind === 'pdf'
+    ? 'from-rose-500 to-rose-600 ring-rose-500/20'
+    : 'from-amber-500 to-amber-600 ring-amber-500/20';
+  const accentBg = kind === 'pdf'
+    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+
+  return (
+    <div
+      ref={popRef}
+      style={{ position: 'fixed', left, top, width, zIndex: 9999 }}
+      className="rounded-xl shadow-2xl border border-border-light dark:border-border-dark
+                 bg-white dark:bg-surface-elevated overflow-hidden animate-card-in"
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      role="dialog"
+      aria-label={kind === 'pdf' ? 'PDF takeoff source' : 'DWG drawing source'}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-3.5 py-2 border-b border-border-light dark:border-border-dark bg-surface-secondary/30">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className={`h-5 w-5 inline-flex items-center justify-center rounded ${accentBg}`}>
+            {kind === 'pdf' ? <FileText size={12} /> : <FileBox size={12} />}
+          </span>
+          <span className="text-[11px] font-semibold text-content-primary uppercase tracking-wide">
+            {kind === 'pdf'
+              ? t('boq.source_pdf', { defaultValue: 'PDF takeoff' })
+              : t('boq.source_dwg', { defaultValue: 'DWG drawing' })}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="h-5 w-5 flex items-center justify-center rounded text-content-tertiary
+                     hover:text-content-primary hover:bg-surface-tertiary transition-colors"
+          aria-label={t('common.close', { defaultValue: 'Close' })}
+        >
+          <X size={12} />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="px-3.5 py-3 space-y-2.5">
+        {/* Source document name */}
+        <div>
+          <div className="text-[9px] font-semibold uppercase tracking-wider text-content-tertiary mb-0.5">
+            {t('boq.source_doc_label', { defaultValue: 'Source document' })}
+          </div>
+          <div className="text-[12px] font-medium text-content-primary truncate" title={sourceName || ''}>
+            {sourceName || t('boq.source_doc_unknown', { defaultValue: 'Unknown document' })}
+          </div>
+          {kind === 'pdf' && page && (
+            <div className="text-[10px] text-content-tertiary mt-0.5">
+              {t('boq.source_pdf_page', { defaultValue: 'Page {{page}}', page })}
+            </div>
+          )}
+          {kind === 'dwg' && drawingId && (
+            <div className="text-[10px] text-content-tertiary font-mono mt-0.5 truncate">
+              {drawingId.slice(0, 8)}…
+            </div>
+          )}
+        </div>
+
+        {/* Measurement value(s) */}
+        <div>
+          <div className="text-[9px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+            {t('boq.source_measurement_label', { defaultValue: 'Measurement' })}
+          </div>
+          {measurementValue !== null ? (
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[20px] font-semibold tabular-nums text-content-primary leading-none">
+                {measurementValue.toLocaleString(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+              </span>
+              {measurementUnit && (
+                <span className="text-[11px] text-content-secondary font-medium">{measurementUnit}</span>
+              )}
+              {measurementType && (
+                <span className="ml-auto text-[9px] uppercase tracking-wide text-content-tertiary bg-surface-secondary/60 px-1.5 py-0.5 rounded">
+                  {measurementType}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="text-[11px] text-content-tertiary italic">
+              {t('boq.source_no_measurement', { defaultValue: 'Measurement data not stored locally — open the source to view details.' })}
+            </div>
+          )}
+        </div>
+
+        {/* Identifier (debug-friendly but readable) */}
+        {(measurementId || annotationId) && (
+          <div>
+            <div className="text-[9px] font-semibold uppercase tracking-wider text-content-tertiary mb-0.5">
+              {t('boq.source_id_label', { defaultValue: 'Item id' })}
+            </div>
+            <div className="text-[10px] font-mono text-content-tertiary truncate">
+              {(measurementId || annotationId || '').slice(0, 12)}…
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer actions */}
+      <div className="px-3.5 py-2.5 border-t border-border-light dark:border-border-dark bg-surface-secondary/20 flex items-center gap-2">
+        {canApply && (
+          <button
+            type="button"
+            onClick={applyQuantity}
+            className={`flex-1 h-8 flex items-center justify-center gap-1.5 rounded-md text-[11px] font-semibold text-white bg-gradient-to-r ${accent} ring-1 shadow-sm hover:shadow-md active:scale-[0.98] transition-all`}
+            title={t('boq.source_apply_qty_title', { defaultValue: 'Set this value as the BOQ position quantity' })}
+          >
+            <ArrowRight size={12} />
+            {t('boq.source_apply_qty', { defaultValue: 'Set as quantity' })}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={onNavigate}
+          className={`${canApply ? 'h-8 px-3' : 'flex-1 h-8'} flex items-center justify-center gap-1.5 rounded-md text-[11px] font-semibold text-oe-blue bg-oe-blue/10 hover:bg-oe-blue/20 transition-colors`}
+          title={t('boq.source_open_title', { defaultValue: 'Open the source document in its viewer, focused on this item' })}
+        >
+          <ExternalLink size={12} />
+          {t('boq.source_open', { defaultValue: 'Open source' })}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /* ── Inline Number Input ──────────────────────────────────────────── */
 

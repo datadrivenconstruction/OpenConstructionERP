@@ -1,0 +1,113 @@
+/* ═══════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — OpenConstructionERP /pro
+   Editorial + Heavy Motion. Off-black, huge typography, cinematic.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* —————————————————— surfaces —————————————————— */
+  --bg-0: #0a0a0b;            /* page background */
+  --bg-1: #0f0f11;            /* elevated surface */
+  --bg-2: #16161a;            /* card */
+  --bg-3: #1d1d22;            /* card-hover */
+  --bg-glass: rgba(22, 22, 26, 0.7);
+
+  /* —————————————————— ink —————————————————— */
+  --ink-0: #fafafa;           /* primary text */
+  --ink-1: #d4d4d8;           /* body text */
+  --ink-2: #a1a1aa;           /* muted */
+  --ink-3: #71717a;           /* faint */
+  --ink-4: #3f3f46;           /* very faint / dividers */
+
+  /* —————————————————— accents —————————————————— */
+  --accent: #3b82f6;          /* electric blue */
+  --accent-2: #8b5cf6;        /* violet */
+  --accent-3: #ec4899;        /* pink */
+  --amber: #f59e0b;           /* warm highlight */
+  --mint: #10b981;            /* success / live */
+  --rose: #f43f5e;            /* warning */
+
+  --grad-brand: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 55%, #ec4899 100%);
+  --grad-cool:  linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  --grad-warm:  linear-gradient(135deg, #f59e0b 0%, #ec4899 100%);
+  --grad-mono:  linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0));
+
+  /* —————————————————— borders —————————————————— */
+  --line-0: rgba(255, 255, 255, 0.06);
+  --line-1: rgba(255, 255, 255, 0.10);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --line-hi: rgba(255, 255, 255, 0.22);
+
+  /* —————————————————— shadow —————————————————— */
+  --sh-s:  0 1px 2px rgba(0,0,0,0.5);
+  --sh-m:  0 8px 24px rgba(0,0,0,0.32), 0 2px 6px rgba(0,0,0,0.4);
+  --sh-l:  0 24px 60px rgba(0,0,0,0.44), 0 8px 16px rgba(0,0,0,0.32);
+  --sh-xl: 0 40px 120px rgba(0,0,0,0.5),  0 16px 32px rgba(0,0,0,0.36);
+  --sh-glow: 0 0 80px rgba(59, 130, 246, 0.28);
+
+  /* —————————————————— radii —————————————————— */
+  --r-xs: 6px;
+  --r-s:  10px;
+  --r-m:  16px;
+  --r-l:  24px;
+  --r-xl: 32px;
+  --r-full: 999px;
+
+  /* —————————————————— layout —————————————————— */
+  --mw: 1280px;
+  --mw-narrow: 960px;
+  --mw-wide: 1440px;
+  --gutter: clamp(20px, 4vw, 40px);
+  --nav-h: 64px;
+  --spy: clamp(96px, 14vw, 200px);   /* vertical section padding */
+
+  /* —————————————————— type —————————————————— */
+  --ff-display: 'Inter Tight', system-ui, sans-serif;
+  --ff-serif:   'Instrument Serif', Georgia, serif;
+  --ff-body:    'Inter', system-ui, sans-serif;
+  --ff-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  /* fluid type scale — editorial, big */
+  --fs-hero:  clamp(56px, 10.5vw, 172px);
+  --fs-h1:    clamp(44px, 7vw, 96px);
+  --fs-h2:    clamp(36px, 5vw, 72px);
+  --fs-h3:    clamp(24px, 3vw, 40px);
+  --fs-h4:    clamp(18px, 2vw, 24px);
+  --fs-lead:  clamp(17px, 1.6vw, 22px);
+  --fs-body:  16px;
+  --fs-small: 13px;
+  --fs-xs:    11px;
+
+  --lh-tight: 0.92;
+  --lh-heading: 1.04;
+  --lh-body: 1.6;
+
+  --tracking-tight: -0.04em;
+  --tracking-snug:  -0.025em;
+  --tracking-wide:  0.08em;
+
+  /* —————————————————— motion —————————————————— */
+  --ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io:   cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in:   cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --dur-quick: 180ms;
+  --dur-base:  320ms;
+  --dur-slow:  640ms;
+  --dur-cine:  1200ms;
+
+  /* —————————————————— z-index —————————————————— */
+  --z-nav: 100;
+  --z-overlay: 200;
+  --z-modal: 300;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

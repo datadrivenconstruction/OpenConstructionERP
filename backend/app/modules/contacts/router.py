@@ -24,6 +24,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.upload_guards import reject_if_xlsx_bomb
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.contacts.models import Contact
 from app.modules.contacts.schemas import (
@@ -124,7 +125,11 @@ async def list_contacts(
     country_code: str | None = Query(default=None),
     is_active: bool = Query(default=True),
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=50, ge=1, le=100),
+    # Raised cap from 100 → 500 so the shared ``ContactSearchInput``
+    # "Select from contacts" browse dropdown (which requests
+    # ``?limit=200``) doesn't 422 and render an empty list. Mirrors the
+    # identical cap raise on ``/projects/`` for the Header switcher.
+    limit: int = Query(default=50, ge=1, le=500),
     sort_by: str | None = Query(default=None, description="Sort field: name, email, created_at"),
     sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     _perm: None = Depends(RequirePermission("contacts.read")),
@@ -486,6 +491,9 @@ async def import_contacts_file(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File too large. Maximum size is 10 MB.",
         )
+
+    # Zip-bomb guard: reject .xlsx whose uncompressed sheets exceed 50 MB.
+    reject_if_xlsx_bomb(content)
 
     # Parse rows based on file type
     try:

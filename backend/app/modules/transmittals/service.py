@@ -166,6 +166,21 @@ class TransmittalService:
         logger.info("Transmittal updated: %s", transmittal_id)
         return updated  # type: ignore[return-value]
 
+    # ── Delete ────────────────────────────────────────────────────────────
+
+    async def delete_transmittal(self, transmittal_id: uuid.UUID) -> None:
+        """Delete a transmittal. Only allowed while the transmittal is in
+        draft (unlocked); issued transmittals are an audit record and must
+        stay for compliance."""
+        transmittal = await self.get_transmittal(transmittal_id)
+        if transmittal.is_locked:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Issued transmittals cannot be deleted — they are part of the audit trail",
+            )
+        await self.repo.delete(transmittal_id)
+        logger.info("Transmittal deleted: %s", transmittal.transmittal_number)
+
     # ── Issue (lock) ──────────────────────────────────────────────────────
 
     async def issue_transmittal(self, transmittal_id: uuid.UUID) -> Transmittal:

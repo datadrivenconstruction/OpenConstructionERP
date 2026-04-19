@@ -34,7 +34,7 @@ def _entry_to_dict(entry: AuditEntry) -> dict[str, Any]:
 @router.get("", response_model=list[dict[str, Any]])
 async def list_audit_entries(
     session: SessionDep,
-    _user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("audit.view")),
     entity_type: str | None = Query(default=None),
     entity_id: str | None = Query(default=None),
@@ -61,7 +61,7 @@ async def entity_audit_trail(
     entity_type: str,
     entity_id: str,
     session: SessionDep,
-    _user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("audit.view")),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),

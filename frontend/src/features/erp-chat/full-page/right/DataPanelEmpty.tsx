@@ -60,11 +60,11 @@ export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
       title: t('chat.cat_validation_title', { defaultValue: 'Validation & Quality' }),
       desc: t('chat.cat_validation_desc', {
         defaultValue:
-          'Run DIN 276 / NRM / MasterFormat validation, find compliance issues, get fix suggestions.',
+          'Run classification and quality-rule validation, find compliance issues, get fix suggestions.',
       }),
       examples: [
         t('chat.ex_validate', { defaultValue: 'Run validation on my BOQ' }),
-        t('chat.ex_din276', { defaultValue: 'Check DIN 276 compliance' }),
+        t('chat.ex_compliance', { defaultValue: 'Check classification compliance' }),
         t('chat.ex_errors', { defaultValue: 'Show all validation errors' }),
       ],
     },

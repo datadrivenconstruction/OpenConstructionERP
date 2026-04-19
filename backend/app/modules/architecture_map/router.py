@@ -17,11 +17,16 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from app.dependencies import get_current_user_id
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(tags=["Architecture Map"])
+router = APIRouter(
+    tags=["Architecture Map"],
+    dependencies=[Depends(get_current_user_id)],
+)
 
 # ── Manifest cache ───────────────────────────────────────────────────────
 

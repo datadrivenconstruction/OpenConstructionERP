@@ -27,7 +27,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
 
-from app.core.rate_limiter import login_limiter
+from app.core.rate_limiter import client_identifier, login_limiter
 from app.dependencies import (
     CurrentUserId,
     RequirePermission,
@@ -83,7 +83,7 @@ async def register(
     service: UserService = Depends(_get_service),
 ) -> UserResponse:
     """Register a new user account. Rate-limited per IP."""
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = client_identifier(request)
     allowed, _remaining = login_limiter.is_allowed(f"reg_{client_ip}")
     if not allowed:
         raise HTTPException(
@@ -119,7 +119,7 @@ async def login(
 
     Rate-limited per source IP to slow down credential stuffing attacks.
     """
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = client_identifier(request)
     allowed, _remaining = login_limiter.is_allowed(client_ip)
     if not allowed:
         raise HTTPException(
@@ -151,7 +151,7 @@ async def forgot_password(
     Always returns a success message to prevent email enumeration.
     The token is never included in the HTTP response.
     """
-    client_ip = request.client.host if request.client else "unknown"
+    client_ip = client_identifier(request)
     allowed, _remaining = login_limiter.is_allowed(f"pwd_{client_ip}")
     if not allowed:
         raise HTTPException(

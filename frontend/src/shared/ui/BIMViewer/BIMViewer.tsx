@@ -48,11 +48,11 @@ import type { BIMElementData } from './ElementManager';
 import { aggregateBIMQuantities, type AggResult } from './aggregation';
 import { SelectionManager } from './SelectionManager';
 import { MeasureManager } from './MeasureManager';
-import { addViewpoint } from './SavedViewsStore';
 import { BIMContextMenu } from './BIMContextMenu';
 import type { BIMContextMenuState } from './BIMContextMenu';
 import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
+import { useToastStore } from '@/stores/useToastStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -178,8 +178,6 @@ export interface BIMViewerProps {
   /** Width (in px) of the left filter panel — used to offset the toolbar
    *  when `leftPanelOpen` is true. Defaults to 320 to match BIMFilterPanel. */
   leftPanelWidth?: number;
-  /** Fired when the user saves a viewpoint from the toolbar. */
-  onViewpointSaved?: (viewpointId: string, quotaExceeded: boolean) => void;
 }
 
 /* ── Properties Table ──────────────────────────────────────────────────── */
@@ -407,7 +405,6 @@ export function BIMViewer({
   onSmartFilter,
   leftPanelOpen = false,
   leftPanelWidth = 320,
-  onViewpointSaved,
 }: BIMViewerProps) {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -419,6 +416,8 @@ export function BIMViewer({
   const hiddenCategories = useBIMViewerStore((s) => s.hiddenCategories);
   const measureActive = useBIMViewerStore((s) => s.measureActive);
   const setMeasureActive = useBIMViewerStore((s) => s.setMeasureActive);
+  const summaryPanelOpen = useBIMViewerStore((s) => s.summaryPanelOpen);
+  const setSummaryPanelOpen = useBIMViewerStore((s) => s.setSummaryPanelOpen);
   const [measureCount, setMeasureCount] = useState(0);
   // Latest onIsolationChange callback — needed because the
   // SelectionManager init effect runs only on mount and would
@@ -614,6 +613,15 @@ export function BIMViewer({
 
     const measureMgr = new MeasureManager(scene, elementMgr, {
       onMeasurementsChanged: (count) => setMeasureCount(count),
+      onMiss: () => {
+        useToastStore.getState().addToast({
+          type: 'info',
+          title: t('bim.measure_miss_title', { defaultValue: 'Click missed the model' }),
+          message: t('bim.measure_miss_msg', {
+            defaultValue: 'Click directly on an element to place a measurement point.',
+          }),
+        });
+      },
     });
     measureMgrRef.current = measureMgr;
 
@@ -867,9 +875,12 @@ export function BIMViewer({
     sceneRef.current?.requestRender();
   }, [hiddenCategories, elements]);
 
-  // Toggle the measure tool in response to the Zustand flag.
+  // Toggle the measure tool in response to the Zustand flag. Selection is
+  // suspended while measure is active so clicks land only on the ruler and
+  // don't drag selection state around with each point placement.
   useEffect(() => {
     measureMgrRef.current?.setActive(measureActive);
+    selectionMgrRef.current?.setSuspended(measureActive);
   }, [measureActive]);
 
   // Expose a tiny camera bridge on `window.__oeBim` so sibling right-panel
@@ -1212,28 +1223,6 @@ export function BIMViewer({
     setSelectionCount(0);
     onElementSelect?.(null);
   }, [hiddenIds, onElementSelect]);
-
-  /** Save the current camera pose as a named viewpoint (RFC 19 §4.1). */
-  const handleSaveViewpoint = useCallback(() => {
-    const scene = sceneRef.current;
-    if (!scene || !modelId) return;
-    const fallback = new Date().toLocaleString();
-    const name =
-      typeof window !== 'undefined' && typeof window.prompt === 'function'
-        ? window.prompt(
-            t('bim.save_view_prompt', { defaultValue: 'Name this view:' }),
-            fallback,
-          )
-        : fallback;
-    if (name == null) return;
-    const vp = scene.getViewpoint();
-    const result = addViewpoint(modelId, {
-      name: name.trim() || fallback,
-      cameraPos: [vp.position.x, vp.position.y, vp.position.z],
-      target: [vp.target.x, vp.target.y, vp.target.z],
-    });
-    onViewpointSaved?.(result.viewpoint.id, result.quotaExceeded);
-  }, [modelId, onViewpointSaved, t]);
 
   // ── Keyboard shortcuts ──────────────────────────────────────────────
   //   F     — zoom to fit all
@@ -1632,24 +1621,32 @@ export function BIMViewer({
           active={measureActive}
           variant="group"
         />
-        <ToolbarButton
-          icon={Tag}
-          label={t('bim.save_view_toggle', { defaultValue: 'Save current view' })}
-          onClick={handleSaveViewpoint}
-          variant="group"
-        />
       </div>
-      {/* Measure hint shown while the tool is active (RFC 19 §4.4). */}
+      {/* Measure hint shown while the tool is active. Includes a Clear
+          affordance so users don't have to hunt for the right-panel Tools
+          tab to drop stale measurements. */}
       {measureActive && (
         <div
-          className="absolute top-14 start-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-md bg-surface-primary border border-oe-blue/40 shadow-sm text-[11px] text-content-secondary"
+          className="absolute top-14 start-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-md bg-surface-primary border border-oe-blue/40 shadow-sm text-[11px] text-content-secondary"
           data-testid="bim-measure-hint"
         >
-          {t('bim.measure_hint', {
-            defaultValue:
-              'Click two points to measure. Esc to cancel. {{count}} saved.',
-            count: measureCount,
-          })}
+          <Ruler size={12} className="text-oe-blue shrink-0" />
+          <span>
+            {t('bim.measure_hint', {
+              defaultValue:
+                'Click two points to measure. Esc to cancel. {{count}} saved.',
+              count: measureCount,
+            })}
+          </span>
+          {measureCount > 0 && (
+            <button
+              type="button"
+              onClick={() => measureMgrRef.current?.clearAll()}
+              className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-oe-blue hover:bg-oe-blue/10 transition-colors"
+            >
+              {t('bim.measure_clear', { defaultValue: 'Clear' })}
+            </button>
+          )}
         </div>
       )}
 
@@ -1915,7 +1912,7 @@ export function BIMViewer({
             * 2+ elements selected     → selection summary
           A single selected element still shows the Properties panel
           (handled above). */}
-      {(!selectedElement || (selectedElementIds && selectedElementIds.length > 1)) && modelSummary && elementCount > 0 && (
+      {summaryPanelOpen && (!selectedElement || (selectedElementIds && selectedElementIds.length > 1)) && modelSummary && elementCount > 0 && (
         <div className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur-sm border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] overflow-y-auto">
           <div className="px-4 py-3 border-b border-border-light">
             <div className="flex items-center gap-2">
@@ -1926,13 +1923,23 @@ export function BIMViewer({
               ) : (
                 <LayoutGrid size={16} className="text-oe-blue shrink-0" />
               )}
-              <h3 className="text-sm font-bold text-content-primary">
+              <h3 className="text-sm font-bold text-content-primary flex-1">
                 {modelSummary.scope === 'selection'
                   ? t('bim.selection_summary', { defaultValue: 'Selection summary' })
                   : modelSummary.scope === 'filtered'
                     ? t('bim.filtered_summary', { defaultValue: 'Filtered summary' })
                     : t('bim.model_summary', { defaultValue: 'Model summary' })}
               </h3>
+              <button
+                type="button"
+                onClick={() => setSummaryPanelOpen(false)}
+                aria-label={t('bim.summary_close', { defaultValue: 'Hide summary' })}
+                title={t('bim.summary_close', { defaultValue: 'Hide summary' })}
+                className="shrink-0 p-1 rounded-md text-content-tertiary hover:text-content-primary hover:bg-surface-secondary"
+                data-testid="bim-summary-close"
+              >
+                <X size={14} />
+              </button>
             </div>
             <div className="mt-1.5 flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center rounded-md bg-oe-blue/10 px-2 py-0.5 text-xs font-semibold text-oe-blue tabular-nums">

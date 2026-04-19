@@ -42,15 +42,27 @@ class ProjectCreate(BaseModel):
         ...,
         min_length=1,
         max_length=255,
-        description="Project name (must be at least 1 character, HTML tags are stripped)",
-        examples=["Residential Berlin Mitte"],
+        description="Project name (must be at least 1 character, HTML tags are rejected)",
+        examples=["Residential Mitte"],
     )
 
     @field_validator("name", mode="after")
     @classmethod
-    def strip_html_tags(cls, v: str) -> str:
-        """Remove HTML tags to prevent XSS in project names."""
-        return _HTML_TAG_RE.sub("", v).strip()
+    def reject_html_tags(cls, v: str) -> str:
+        """Reject HTML tags so callers see a clear 422 instead of silent mutation.
+
+        The previous revision silently stripped ``<...>`` sequences to prevent
+        XSS. That kept the server safe but left the caller with a surprising
+        delta between what they sent and what was persisted. Rejecting
+        loudly preserves the XSS guarantee and stops the data from being
+        quietly rewritten.
+        """
+        trimmed = v.strip()
+        if _HTML_TAG_RE.search(trimmed):
+            raise ValueError(
+                "Project name contains HTML tags. Use plain text only."
+            )
+        return trimmed
 
     description: str = Field(
         default="",
@@ -58,6 +70,17 @@ class ProjectCreate(BaseModel):
         description="Project scope description (max 5000 characters)",
         examples=["5-story residential building, 48 units, underground parking"],
     )
+
+    @field_validator("description", mode="after")
+    @classmethod
+    def _strip_xss_from_description(cls, v: str) -> str:
+        # BUG-326: long-form description field previously stored ``<script>``
+        # and ``onerror=`` payloads verbatim. Silently stripping dangerous
+        # HTML preserves legitimate text (``"beam <200mm"``) while killing
+        # XSS vectors that target frontends using dangerouslySetInnerHTML.
+        from app.core.sanitize import strip_dangerous_html
+
+        return strip_dangerous_html(v)
     region: str = Field(
         default="",
         max_length=100,
@@ -112,6 +135,25 @@ class ProjectUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=5000)
+
+    @field_validator("name", mode="after")
+    @classmethod
+    def _reject_html_in_name(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        trimmed = v.strip()
+        if _HTML_TAG_RE.search(trimmed):
+            raise ValueError("Project name contains HTML tags. Use plain text only.")
+        return trimmed
+
+    @field_validator("description", mode="after")
+    @classmethod
+    def _strip_xss_from_description(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        from app.core.sanitize import strip_dangerous_html
+
+        return strip_dangerous_html(v)
     region: str | None = Field(default=None, max_length=100)
     classification_standard: str | None = Field(default=None, max_length=100)
     currency: str | None = Field(default=None, max_length=10)
@@ -141,6 +183,18 @@ class ProjectUpdate(BaseModel):
     @classmethod
     def _validate_dates(cls, v: str | None, info: Any) -> str | None:
         return _validate_date_string(v, info.field_name)
+
+    @field_validator("name", mode="after")
+    @classmethod
+    def reject_html_tags(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        trimmed = v.strip()
+        if _HTML_TAG_RE.search(trimmed):
+            raise ValueError(
+                "Project name contains HTML tags. Use plain text only."
+            )
+        return trimmed
 
 
 # ── Response ──────────────────────────────────────────────────────────────

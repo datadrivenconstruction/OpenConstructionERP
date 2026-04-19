@@ -29,9 +29,11 @@ Routes:
     POST   /cad-data/value-counts               — value counts for a single column
     GET    /cad-data/elements                    — paginated element table with sort/filter
     POST   /cad-data/aggregate                   — group-by aggregation on CAD elements
+    GET    /cad-data/missingness                 — per-column fill-rate + row completeness
 """
 
 import logging
+import random as _random
 import time as _time
 import uuid as _uuid
 from datetime import UTC, datetime, timedelta
@@ -44,6 +46,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, select
 
+from app.core.rate_limiter import upload_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.takeoff.models import CadExtractionSession
 from app.modules.takeoff.schemas import (
@@ -1517,6 +1520,189 @@ async def cad_data_describe(
     }
 
 
+# ── CAD Data Explorer: missingno-style column fill-rate ───────────────────
+
+
+_MISSINGNESS_SAMPLE_CAP = 1000
+_MISSINGNESS_SAMPLE_SEED = 42
+
+
+def _resolve_filter_column(all_columns: list[str], candidates: list[str]) -> str | None:
+    """Return the first column from *all_columns* whose lowercased name is in *candidates*.
+
+    Makes filter resolution case-insensitive and tolerant of naming variants
+    (e.g. "Category" vs "category", "type name" vs "Type").
+    """
+    if not candidates:
+        return None
+    lower_map = {c.lower(): c for c in all_columns}
+    for cand in candidates:
+        hit = lower_map.get(cand.lower())
+        if hit is not None:
+            return hit
+    return None
+
+
+def _infer_dtype(values: list[Any]) -> str:
+    """Infer a coarse dtype label from a list of non-null values."""
+    if not values:
+        return "object"
+    numeric = 0
+    bool_like = 0
+    for v in values:
+        if isinstance(v, bool):
+            bool_like += 1
+        elif _is_numeric(v):
+            numeric += 1
+    total = len(values)
+    if bool_like / total > 0.9:
+        return "bool"
+    if numeric / total > 0.5:
+        return "number"
+    if all(isinstance(v, str) for v in values):
+        return "string"
+    return "object"
+
+
+@router.get(
+    "/cad-data/missingness/",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def cad_data_missingness(
+    session_id: str = Query(..., description="Session ID returned by /cad-columns"),
+    category_filter: str | None = Query(
+        default=None,
+        description="Value to match against the 'category' column (case-insensitive). Omit for all.",
+    ),
+    element_type_filter: str | None = Query(
+        default=None,
+        description=(
+            "Value to match against the element-type column (tries 'type name', 'type', 'family')."
+        ),
+    ),
+    sort: str = Query(
+        default="fill_desc",
+        pattern="^(fill_desc|fill_asc|alpha_asc|alpha_desc)$",
+        description="Column ordering for the client",
+    ),
+    db_session: SessionDep = None,  # type: ignore[assignment]
+) -> dict[str, Any]:
+    """Return per-column fill-rate and per-row completeness for a missingno-style visualisation.
+
+    The row-level snapshot is capped at 1000 rows (random-sampled with a fixed
+    seed for determinism) so the frontend never has to render more than that.
+    Per-column fill-rates are always computed on the full (filtered) set.
+    """
+    _cleanup_memory_sessions()
+
+    cad_session = await _get_cad_session(db_session, session_id)
+    if not cad_session:
+        raise HTTPException(
+            status_code=404,
+            detail=("Session not found or expired. Please re-upload the CAD file via POST /cad-columns."),
+        )
+
+    elements: list[dict] = cad_session["elements"]
+    all_columns = _collect_column_names(elements)
+
+    # --- Apply filters ----------------------------------------------------
+    applied_filters: dict[str, str] = {}
+
+    category_col = _resolve_filter_column(all_columns, ["category"])
+    if category_filter and category_col:
+        needle = category_filter.strip().lower()
+        elements = [el for el in elements if str(el.get(category_col, "")).strip().lower() == needle]
+        applied_filters[category_col] = category_filter
+
+    type_col = _resolve_filter_column(all_columns, ["type name", "type", "family"])
+    if element_type_filter and type_col:
+        needle = element_type_filter.strip().lower()
+        elements = [el for el in elements if str(el.get(type_col, "")).strip().lower() == needle]
+        applied_filters[type_col] = element_type_filter
+
+    total_rows = len(elements)
+
+    # --- Per-column fill-rate on full (filtered) set ----------------------
+    columns_info: list[dict[str, Any]] = []
+    for col in all_columns:
+        non_null_values: list[Any] = []
+        for el in elements:
+            v = el.get(col)
+            # Treat empty strings as missing too — consistent with missingno.
+            if v is None:
+                continue
+            if isinstance(v, str) and v.strip() == "":
+                continue
+            non_null_values.append(v)
+        non_null_count = len(non_null_values)
+        fill_rate = (non_null_count / total_rows) if total_rows else 0.0
+        columns_info.append(
+            {
+                "name": col,
+                "non_null_count": non_null_count,
+                "fill_rate": round(fill_rate, 6),
+                "dtype": _infer_dtype(non_null_values),
+            }
+        )
+
+    # --- Column ordering --------------------------------------------------
+    if sort == "fill_desc":
+        columns_info.sort(key=lambda c: (-c["fill_rate"], c["name"].lower()))
+    elif sort == "fill_asc":
+        columns_info.sort(key=lambda c: (c["fill_rate"], c["name"].lower()))
+    elif sort == "alpha_asc":
+        columns_info.sort(key=lambda c: c["name"].lower())
+    elif sort == "alpha_desc":
+        columns_info.sort(key=lambda c: c["name"].lower(), reverse=True)
+
+    # --- Row-sample + per-row completeness (capped at 1000) ---------------
+    sampled = total_rows > _MISSINGNESS_SAMPLE_CAP
+    if sampled:
+        rng = _random.Random(_MISSINGNESS_SAMPLE_SEED)
+        sample_indices = sorted(rng.sample(range(total_rows), _MISSINGNESS_SAMPLE_CAP))
+        sample = [elements[i] for i in sample_indices]
+    else:
+        sample = elements
+
+    col_count = len(all_columns) or 1
+    row_completeness: list[float] = []
+    for el in sample:
+        filled = 0
+        for col in all_columns:
+            v = el.get(col)
+            if v is None:
+                continue
+            if isinstance(v, str) and v.strip() == "":
+                continue
+            filled += 1
+        row_completeness.append(round(filled / col_count, 6))
+
+    # --- Matrix presence bitmap (ordered to match `columns_info`) ---------
+    # 1 = present, 0 = missing. Keeping this compact (int list) keeps the
+    # response small — 1000 rows × ~50 columns ≈ 50k ints ≈ ~150kB JSON.
+    ordered_col_names = [c["name"] for c in columns_info]
+    presence_matrix: list[list[int]] = []
+    for el in sample:
+        row_bits: list[int] = []
+        for col in ordered_col_names:
+            v = el.get(col)
+            if v is None or (isinstance(v, str) and v.strip() == ""):
+                row_bits.append(0)
+            else:
+                row_bits.append(1)
+        presence_matrix.append(row_bits)
+
+    return {
+        "total_rows": total_rows,
+        "sampled_rows": len(sample),
+        "sampled": sampled,
+        "columns": columns_info,
+        "row_completeness": row_completeness,
+        "presence_matrix": presence_matrix,
+        "applied_filters": applied_filters,
+    }
+
+
 @router.post(
     "/cad-data/value-counts/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
@@ -2029,6 +2215,13 @@ async def upload_document(
     service: TakeoffService = Depends(_get_service),
 ) -> dict[str, Any]:
     """Upload a PDF document for quantity takeoff."""
+    allowed, _ = upload_limiter.is_allowed(str(user_id))
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many uploads. Please wait a moment and try again.",
+            headers={"Retry-After": "60"},
+        )
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
 

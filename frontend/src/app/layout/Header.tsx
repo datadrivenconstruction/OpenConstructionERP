@@ -86,7 +86,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           </button>
         )}
         {translatedTitle && (
-          <h1 className="text-base font-semibold text-content-primary truncate sm:text-lg">{translatedTitle}</h1>
+          <h1 className="hidden lg:block text-base font-semibold text-content-primary truncate sm:text-lg">{translatedTitle}</h1>
         )}
 
         {/* Active project switcher */}
@@ -101,7 +101,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           target="_blank"
           rel="noopener noreferrer"
           className={clsx(
-            'hidden sm:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
+            'hidden lg:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
             'text-xs font-medium',
             'text-content-tertiary border border-border-light',
             'transition-all duration-fast ease-oe',
@@ -155,7 +155,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             }).catch(() => {});
           }}
           className={clsx(
-            'hidden sm:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
+            'hidden lg:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
             'text-xs font-medium',
             'text-content-tertiary border border-border-light',
             'transition-all duration-fast ease-oe',
@@ -177,7 +177,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             'text-sm text-content-tertiary',
             'transition-all duration-fast ease-oe',
             'hover:border-content-tertiary hover:text-content-secondary',
-            'w-48 lg:w-56',
+            'w-40 md:w-44 lg:w-56',
           )}
         >
           <Search size={15} strokeWidth={1.75} />
@@ -514,8 +514,12 @@ function ProjectSwitcher() {
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
   const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
+  const clearProject = useProjectContextStore((s) => s.clearProject);
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  // "Show all" toggle — collapsed by default to keep the dropdown tidy
+  // when the user has dozens of projects; explicit opt-in to expand.
+  const [expanded, setExpanded] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -524,7 +528,7 @@ function ProjectSwitcher() {
   // "No projects yet" for half a second).
   const { data: projects, isLoading, isError, refetch } = useQuery({
     queryKey: ['projects-switcher'],
-    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/?limit=100'),
+    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/?limit=500'),
     staleTime: 60_000,
     // Enabled as soon as the component mounts — the Header is always on
     // screen after login, so the list is warm by the time the user clicks.
@@ -535,12 +539,19 @@ function ProjectSwitcher() {
   const filteredProjects = (projects ?? []).filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
-  const visibleProjects = filteredProjects.slice(0, MAX_VISIBLE);
+  // When the user is actively searching, show every hit — typing is an
+  // implicit "show all that match". The collapse/expand affordance only
+  // applies to the default, unfiltered listing.
+  const showEverything = expanded || searchQuery.trim().length > 0;
+  const visibleProjects = showEverything
+    ? filteredProjects
+    : filteredProjects.slice(0, MAX_VISIBLE);
   const remainingCount = filteredProjects.length - visibleProjects.length;
 
   useEffect(() => {
     if (!open) {
       setSearchQuery('');
+      setExpanded(false);
       return;
     }
     const handler = (e: MouseEvent) => {
@@ -564,6 +575,24 @@ function ProjectSwitcher() {
       searchRef.current.focus();
     }
   }, [open, projects]);
+
+  // Auto-clear a stale ``activeProjectId`` whose project no longer exists
+  // on the server (hard-deleted by another session / admin cleanup). A
+  // stale id kept pinging 404 on every module that accepts a project
+  // context — the most visible one being BIM upload, which failed with
+  // "Project not found" because the persisted id in localStorage had
+  // been wiped from the DB. We only run the purge once the list has
+  // actually loaded (``projects`` defined, even if empty) to avoid
+  // blowing away the selection during the first render before data
+  // arrives.
+  useEffect(() => {
+    if (!projects) return;
+    if (!activeProjectId) return;
+    const stillExists = projects.some((p) => p.id === activeProjectId);
+    if (!stillExists) {
+      clearProject();
+    }
+  }, [projects, activeProjectId, clearProject]);
 
   return (
     <div className="relative hidden sm:block" ref={ref}>
@@ -666,10 +695,26 @@ function ProjectSwitcher() {
                 )}
               </button>
             ))}
-            {remainingCount > 0 && (
-              <p className="px-4 py-2 text-xs text-content-tertiary text-center">
-                {t('common.n_more', { count: remainingCount, defaultValue: '{{count}} more...' })}
-              </p>
+            {remainingCount > 0 && !showEverything && (
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                className="w-full px-4 py-2 text-xs font-medium text-oe-blue hover:bg-surface-secondary transition-colors text-center"
+              >
+                {t('projects.show_all', {
+                  defaultValue: 'Show all ({{count}})',
+                  count: filteredProjects.length,
+                })}
+              </button>
+            )}
+            {expanded && !searchQuery && filteredProjects.length > MAX_VISIBLE && (
+              <button
+                type="button"
+                onClick={() => setExpanded(false)}
+                className="w-full px-4 py-2 text-xs font-medium text-content-tertiary hover:bg-surface-secondary transition-colors text-center"
+              >
+                {t('projects.collapse_list', { defaultValue: 'Collapse' })}
+              </button>
             )}
           </div>
           {activeProjectId && (

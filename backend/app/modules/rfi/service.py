@@ -196,9 +196,13 @@ class RFIService:
         # Detect reassignment so we can fire rfi.assigned
         old_assigned = str(rfi.assigned_to) if rfi.assigned_to else None
         new_assigned = fields.get("assigned_to")
+        # Snapshot attrs before update_fields detaches them from the session.
+        project_id_s = str(rfi.project_id)
+        rfi_number_s = rfi.rfi_number
+        subject_s = rfi.subject
 
         await self.repo.update_fields(rfi_id, **fields)
-        await self.session.refresh(rfi)
+        fresh = await self.repo.get_by_id(rfi_id)
         logger.info("RFI updated: %s (fields=%s)", rfi_id, list(fields.keys()))
 
         # Fire rfi.assigned when assigned_to changes to a new user
@@ -209,16 +213,16 @@ class RFIService:
             await _safe_publish(
                 "rfi.assigned",
                 {
-                    "project_id": str(rfi.project_id),
+                    "project_id": project_id_s,
                     "rfi_id": str(rfi_id),
-                    "rfi_number": rfi.rfi_number,
-                    "subject": rfi.subject,
+                    "rfi_number": rfi_number_s,
+                    "subject": subject_s,
                     "assigned_to": str(new_assigned),
                 },
                 source_module="oe_rfi",
             )
 
-        return rfi
+        return fresh or rfi
 
     async def delete_rfi(self, rfi_id: uuid.UUID) -> None:
         await self.get_rfi(rfi_id)
@@ -244,6 +248,12 @@ class RFIService:
                 detail=f"Cannot respond to an RFI with status '{rfi.status}'",
             )
 
+        # Snapshot attrs before update_fields.
+        project_id_s = str(rfi.project_id)
+        rfi_number_s = rfi.rfi_number
+        subject_s = rfi.subject
+        raised_by_s = str(rfi.raised_by) if rfi.raised_by else None
+
         await self.repo.update_fields(
             rfi_id,
             official_response=official_response,
@@ -252,24 +262,24 @@ class RFIService:
             status="answered",
             ball_in_court=str(rfi.raised_by),
         )
-        await self.session.refresh(rfi)
+        fresh = await self.repo.get_by_id(rfi_id)
 
         await _safe_publish(
             "rfi.responded",
             {
-                "project_id": str(rfi.project_id),
+                "project_id": project_id_s,
                 "rfi_id": str(rfi_id),
-                "rfi_number": rfi.rfi_number,
-                "subject": rfi.subject,
+                "rfi_number": rfi_number_s,
+                "subject": subject_s,
                 "responded_by": responded_by,
-                "raised_by": str(rfi.raised_by) if rfi.raised_by else None,
-                "ball_in_court": str(rfi.raised_by) if rfi.raised_by else None,
+                "raised_by": raised_by_s,
+                "ball_in_court": raised_by_s,
             },
             source_module="oe_rfi",
         )
 
         logger.info("RFI responded: %s by %s", rfi_id, responded_by)
-        return rfi
+        return fresh or rfi
 
     async def close_rfi(self, rfi_id: uuid.UUID, *, closed_by: str | None = None) -> RFI:
         """Close an RFI.
@@ -289,23 +299,27 @@ class RFIService:
                 detail="Cannot close an RFI without an official response",
             )
 
+        project_id_s = str(rfi.project_id)
+        rfi_number_s = rfi.rfi_number
+        subject_s = rfi.subject
+
         await self.repo.update_fields(rfi_id, status="closed", ball_in_court=None)
-        await self.session.refresh(rfi)
+        fresh = await self.repo.get_by_id(rfi_id)
 
         await _safe_publish(
             "rfi.closed",
             {
-                "project_id": str(rfi.project_id),
+                "project_id": project_id_s,
                 "rfi_id": str(rfi_id),
-                "rfi_number": rfi.rfi_number,
-                "subject": rfi.subject,
+                "rfi_number": rfi_number_s,
+                "subject": subject_s,
                 "closed_by": closed_by,
             },
             source_module="oe_rfi",
         )
 
         logger.info("RFI closed: %s by %s", rfi_id, closed_by)
-        return rfi
+        return fresh or rfi
 
     async def get_stats(self, project_id: uuid.UUID) -> RFIStatsResponse:
         """Compute summary statistics for all RFIs in a project.

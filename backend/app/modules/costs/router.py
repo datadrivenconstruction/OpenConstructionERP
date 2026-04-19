@@ -27,7 +27,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, 
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, RequireRole, SessionDep
 from app.modules.costs.schemas import (
     CostAutocompleteItem,
     CostItemCreate,
@@ -276,7 +276,10 @@ async def region_stats(
 
 @router.delete(
     "/actions/clear-region/{region}",
-    dependencies=[Depends(RequirePermission("costs.delete"))],
+    # Wholesale region wipe — admin only. ``costs.delete`` alone would let
+    # any editor nuke a whole regional cost database. Keeps parity with
+    # ``/actions/clear-database/`` which already requires admin.
+    dependencies=[Depends(RequireRole("admin"))],
 )
 async def clear_region_database(
     region: str,
@@ -1462,7 +1465,11 @@ async def _find_cwicr_file(db_id: str) -> Path | None:
 
 
 @router.post(
-    "/load-cwicr/{db_id}/",
+    # No trailing slash — sibling endpoints (``/vector/load-github/{db_id}``,
+    # ``/vector/restore-snapshot/{db_id}``) are also slash-less, and the
+    # frontend calls this one without a slash too. Prior version had a stray
+    # trailing slash that caused 404 Not Found on every region click.
+    "/load-cwicr/{db_id}",
     # Any authenticated user can load a CWICR regional database. The data
     # is public reference content (no confidentiality), and gating it to
     # editor+ would block viewers from completing onboarding. Permission
@@ -2094,7 +2101,7 @@ async def _bulk_insert_costs(session: AsyncSession, items: list[dict]) -> int:
 
 @router.delete(
     "/actions/clear-database/",
-    dependencies=[Depends(RequirePermission("costs.update"))],
+    dependencies=[Depends(RequireRole("admin"))],
 )
 async def clear_cost_database(
     session: SessionDep,

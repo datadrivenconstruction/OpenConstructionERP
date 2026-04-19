@@ -1,7 +1,13 @@
 """Global search API router.
 
 Endpoint:
-    GET /api/v1/search?q=...&project_id=...&limit=20
+    GET /api/v1/global-search?q=...&project_id=...&limit=20
+
+The prefix used to be /api/v1/search, but the module-loader auto-mounts
+``app.modules.search`` at the same /api/v1/search prefix. Both routers
+work today because their child paths don't overlap, but adding a route
+in one that collides with the other would silently shadow. The prefixes
+are now distinct so that class of bug can't slip past code review.
 """
 
 import logging
@@ -12,7 +18,7 @@ from fastapi import APIRouter, Query
 from app.core.global_search import global_search
 from app.dependencies import CurrentUserId, SessionDep
 
-router = APIRouter(prefix="/api/v1/search", tags=["Search"])
+router = APIRouter(prefix="/api/v1/global-search", tags=["Search"])
 logger = logging.getLogger(__name__)
 
 

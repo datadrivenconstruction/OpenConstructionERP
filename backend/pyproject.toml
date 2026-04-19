@@ -1,6 +1,6 @@
 [project]
 name = "openconstructionerp"
-version = "1.9.3"
+version = "1.9.7"
 description = "The #1 open-source platform for construction cost estimation — BOQ, 4D/5D, AI, CAD/BIM takeoff"
 license = "AGPL-3.0-or-later"
 requires-python = ">=3.12"
@@ -34,7 +34,7 @@ dependencies = [
     # Web framework
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
-    "python-multipart>=0.0.12",
+    "python-multipart>=0.0.26",  # CVE-2026-40347: request smuggling via malformed multipart
     # Database (SQLite — works out of the box, no external DB needed)
     "sqlalchemy[asyncio]>=2.0.36",
     "aiosqlite>=0.20.0",
@@ -55,7 +55,10 @@ dependencies = [
     "orjson>=3.10.0",
     "python-dateutil>=2.9.0",
     "structlog>=24.4.0",
-    "tenacity>=9.0.0",
+    # Hardened XML parsing for all user-supplied inputs (XER/MSP schedules,
+    # IDS rule packs, Collada geometry, ECB FX feed). defusedxml disables
+    # XXE / billion-laughs / DTD-remote-fetch classes of attacks by default.
+    "defusedxml>=0.7.1",
     # Tabular data — needed by the CWICR cost-database loader and the
     # BIM Excel parser, both of which are core onboarding paths. Used to
     # be optional via the `[vector]` extra; promoted to base in v1.3.13

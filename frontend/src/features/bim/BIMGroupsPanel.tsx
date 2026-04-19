@@ -121,14 +121,17 @@ export default function BIMGroupsPanel({
     return map;
   }, [elements]);
 
-  // Aggregate quantities per group
+  // Aggregate quantities per group. Guarded against null/missing
+  // member_element_ids — older cached rows or a drifted backend response
+  // would otherwise crash the whole page here.
   const groupQuantities = useMemo(() => {
     const result = new Map<string, GroupQuantities>();
     for (const group of savedGroups) {
       let vol = 0;
       let area = 0;
       let len = 0;
-      for (const elId of group.member_element_ids) {
+      const memberIds = Array.isArray(group.member_element_ids) ? group.member_element_ids : [];
+      for (const elId of memberIds) {
         const el = elementMap.get(elId);
         if (el?.quantities) {
           const q = el.quantities as Record<string, number>;
@@ -148,7 +151,8 @@ export default function BIMGroupsPanel({
     for (const group of savedGroups) {
       const links: GroupBOQLink[] = [];
       const seen = new Set<string>();
-      for (const elId of group.member_element_ids) {
+      const memberIds = Array.isArray(group.member_element_ids) ? group.member_element_ids : [];
+      for (const elId of memberIds) {
         const el = elementMap.get(elId);
         if (el?.boq_links?.length) {
           for (const link of el.boq_links) {
@@ -252,7 +256,8 @@ export default function BIMGroupsPanel({
   const handleExportCSV = useCallback(
     (group: BIMElementGroup) => {
       const rows: string[] = ['id,name,element_type,storey'];
-      for (const elId of group.member_element_ids) {
+      const memberIds = Array.isArray(group.member_element_ids) ? group.member_element_ids : [];
+      for (const elId of memberIds) {
         const el = elementMap.get(elId);
         if (el) {
           const name = (el.name || '').replace(/,/g, ';');

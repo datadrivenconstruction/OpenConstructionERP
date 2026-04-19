@@ -977,7 +977,7 @@ export function ReportsPage() {
       </div>
 
       {/* Report guide */}
-      <InfoHint text={t('reports.guide_desc', { defaultValue: 'BOQ Report = detailed bill of quantities with totals. Cost Report = cost breakdown by category. GAEB XML = German tendering format (.x83) for subcontractor exchange. Validation = compliance check results. Schedule = Gantt activities summary. 5D = budget vs. actual cost curves.' })} />
+      <InfoHint text={t('reports.guide_desc', { defaultValue: 'BOQ Report = detailed bill of quantities with totals. Cost Report = cost breakdown by category. GAEB XML = structured tender exchange format (.x83). Validation = compliance check results. Schedule = Gantt activities summary. 5D = budget vs. actual cost curves.' })} />
 
       {/* Project + BOQ selectors */}
       <div className="flex flex-wrap items-center gap-4">

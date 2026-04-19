@@ -111,6 +111,43 @@ export async function aggregate(
   });
 }
 
+/* ── Missingness (missingno-style) ────────────────────────────────────── */
+
+export type MissingnessSortKey = 'fill_desc' | 'fill_asc' | 'alpha_asc' | 'alpha_desc';
+
+export interface ColumnMissingness {
+  name: string;
+  non_null_count: number;
+  fill_rate: number; // 0..1
+  dtype: 'string' | 'number' | 'bool' | 'object';
+}
+
+export interface MissingnessResponse {
+  total_rows: number;
+  sampled_rows: number;
+  sampled: boolean;
+  columns: ColumnMissingness[];
+  row_completeness: number[];
+  /** Parallel to `columns`; 1=present, 0=missing. */
+  presence_matrix: number[][];
+  applied_filters: Record<string, string>;
+}
+
+export async function fetchMissingness(
+  sessionId: string,
+  params: {
+    categoryFilter?: string;
+    elementTypeFilter?: string;
+    sort?: MissingnessSortKey;
+  } = {},
+): Promise<MissingnessResponse> {
+  const qs = new URLSearchParams({ session_id: sessionId });
+  if (params.categoryFilter) qs.set('category_filter', params.categoryFilter);
+  if (params.elementTypeFilter) qs.set('element_type_filter', params.elementTypeFilter);
+  if (params.sort) qs.set('sort', params.sort);
+  return apiGet<MissingnessResponse>(`/v1/takeoff/cad-data/missingness/?${qs.toString()}`);
+}
+
 /* ── Session Management ────────────────────────────────────────────────── */
 
 export interface SavedSession {

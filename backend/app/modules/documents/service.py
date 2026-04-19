@@ -42,6 +42,14 @@ UPLOAD_BASE = Path.home() / ".openestimator" / "uploads"
 
 # Base directory for photo uploads
 PHOTO_BASE = Path.home() / ".openestimator" / "photos"
+# Base directory for photo thumbnails — stored next to originals under a sibling
+# ``thumbs/`` subfolder so the gallery grid can ask for a small, cheap image
+# instead of re-streaming the 50 MB original on every render.
+PHOTO_THUMB_BASE = Path.home() / ".openestimator" / "photos" / "thumbs"
+# Longest side (in px) of a generated photo thumbnail. 512 is plenty for the
+# grid view and keeps the thumbnail under ~60 kB for typical JPEGs.
+PHOTO_THUMB_MAX_SIDE = 512
+PHOTO_THUMB_QUALITY = 82
 
 # Security constants
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
@@ -70,6 +78,52 @@ def _sanitize_filename(name: str) -> str:
     if not name or name.startswith("."):
         name = "untitled"
     return name
+
+
+def _generate_photo_thumbnail(
+    source_bytes: bytes,
+    dest_path: Path,
+) -> bool:
+    """Write a JPEG thumbnail of ``source_bytes`` to ``dest_path``.
+
+    Returns ``True`` on success, ``False`` if anything went wrong (missing
+    Pillow, corrupt image, unsupported mode). Thumbnail generation is a
+    best-effort optimisation — a failure must never block the upload.
+    """
+    try:
+        from io import BytesIO
+
+        from PIL import Image, ImageOps
+    except Exception:
+        logger.warning("Pillow not available — skipping photo thumbnail")
+        return False
+
+    try:
+        with Image.open(BytesIO(source_bytes)) as img:
+            # Respect EXIF orientation so the thumbnail matches what the user
+            # will see in the full viewer.
+            img = ImageOps.exif_transpose(img)
+            # Pillow's thumbnail() is in-place and preserves aspect ratio.
+            img.thumbnail(
+                (PHOTO_THUMB_MAX_SIDE, PHOTO_THUMB_MAX_SIDE),
+                Image.Resampling.LANCZOS,
+            )
+            # Normalise to RGB so we can always write JPEG regardless of the
+            # original mode (RGBA, P, CMYK, etc.).
+            if img.mode not in ("RGB", "L"):
+                img = img.convert("RGB")
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
+            img.save(
+                str(dest_path),
+                format="JPEG",
+                quality=PHOTO_THUMB_QUALITY,
+                optimize=True,
+                progressive=True,
+            )
+        return True
+    except Exception:
+        logger.exception("Failed to generate photo thumbnail for %s", dest_path)
+        return False
 
 
 class DocumentService:
@@ -119,6 +173,32 @@ class DocumentService:
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                 detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024 * 1024)}MB.",
+            )
+
+        # Magic-byte validation — BLOCKED_EXTENSIONS only rejects known-bad
+        # names; this catches an attacker who renames evil.exe → evil.pdf.
+        # ``xml`` / ``ole`` types included because DDC converters and many
+        # legitimate design files use those containers. Unknown binary
+        # blobs (detected == None) are tolerated so plain-text uploads
+        # (CSV, JSON, TXT) still work — the extension gate above still
+        # filters executables by name.
+        from app.core.file_signature import (
+            ALLOWED_CAD_TYPES,
+            ALLOWED_DOCUMENT_TYPES,
+            SIGNATURE_BYTES_REQUIRED,
+            detect as _sig_detect,
+        )
+
+        allowed_signatures = ALLOWED_DOCUMENT_TYPES | ALLOWED_CAD_TYPES
+        detected_type = _sig_detect(content[:SIGNATURE_BYTES_REQUIRED])
+        if detected_type is not None and detected_type not in allowed_signatures:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Uploaded file content does not match an allowed format. "
+                    f"Detected: {detected_type}. "
+                    f"Allowed: {', '.join(sorted(allowed_signatures))}"
+                ),
             )
 
         # Build storage path with UUID prefix to avoid collisions
@@ -437,12 +517,18 @@ class PhotoService:
         upload_dir = PHOTO_BASE / str(project_id)
         upload_dir.mkdir(parents=True, exist_ok=True)
         file_path = upload_dir / storage_name
+        # Thumbnail sits in a sibling directory with a stable .jpg extension
+        # so the serve endpoint never has to guess the format.
+        thumb_dir = PHOTO_THUMB_BASE / str(project_id)
+        thumb_name = f"{file_uuid}_thumb.jpg"
+        thumb_path = thumb_dir / thumb_name
 
         # Create DB record FIRST
         photo = ProjectPhoto(
             project_id=project_id,
             filename=safe_name,
             file_path=str(file_path),
+            thumbnail_path=None,
             caption=caption,
             gps_lat=gps_lat,
             gps_lon=gps_lon,
@@ -463,10 +549,18 @@ class PhotoService:
                 detail="Failed to save photo to disk.",
             )
 
+        # Generate thumbnail from the in-memory bytes — failure is non-fatal;
+        # the serve endpoint falls back to the original on miss.
+        thumb_generated = _generate_photo_thumbnail(content, thumb_path)
+        if thumb_generated:
+            await self.repo.update_fields(photo.id, thumbnail_path=str(thumb_path))
+            await self.session.refresh(photo)
+
         logger.info(
-            "Photo uploaded: %s (%d bytes) for project %s",
+            "Photo uploaded: %s (%d bytes, thumb=%s) for project %s",
             safe_name,
             len(content),
+            "yes" if thumb_generated else "no",
             project_id,
         )
 
@@ -585,6 +679,7 @@ class PhotoService:
         """Delete a photo and its file."""
         photo = await self.get_photo(photo_id)
         file_path_str = photo.file_path
+        thumb_path_str = getattr(photo, "thumbnail_path", None)
 
         # Delete DB record FIRST
         await self.repo.delete(photo_id)
@@ -598,6 +693,17 @@ class PhotoService:
                 logger.info("Photo file removed: %s", file_path)
         except Exception:
             logger.warning("Failed to remove photo file: %s", file_path_str)
+
+        # Remove thumbnail too — orphan .jpg files in the thumbs directory
+        # accumulate quickly and they share the same storage budget as the
+        # originals.
+        if thumb_path_str:
+            try:
+                thumb_path = Path(thumb_path_str)
+                if thumb_path.exists():
+                    thumb_path.unlink()
+            except Exception:
+                logger.warning("Failed to remove photo thumbnail: %s", thumb_path_str)
 
 
 # ── Discipline prefix mapping ────────────────────────────────────────────

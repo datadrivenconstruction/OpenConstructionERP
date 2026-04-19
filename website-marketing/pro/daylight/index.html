@@ -1,0 +1,1346 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>OpenConstructionERP Pro — Daylight edition</title>
+  <meta name="description" content="Open-source construction ERP with AI-powered BOQ, multi-CAD ingest, and 55,000+ cost items across 11 regions. Self-host it today for free." />
+  <meta name="theme-color" content="#faf8f3" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="/pro/cinematic/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600&family=Inter:wght@400;500&family=Fraunces:ital,opsz,wght@1,9..144,300..500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <script>
+    // Apply persisted theme before paint to avoid flash.
+    (function () {
+      try {
+        var t = localStorage.getItem('oce-theme') || 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+
+  <style>
+    :root {
+      --bg-0: #faf8f3;
+      --bg-1: #f0ece3;
+      --bg-2: #e8e3d7;
+      --ink-0: #14161a;
+      --ink-1: #3e4047;
+      --ink-2: #787a82;
+      --ink-3: #a8a69e;
+      --line-0: rgba(20, 22, 26, 0.08);
+      --line-1: rgba(20, 22, 26, 0.12);
+      --line-2: rgba(20, 22, 26, 0.20);
+      --accent: #1e4a8a;
+      --accent-2: #a8724e;
+      --accent-3: #3b82f6;
+      --three-fog-color: 0xf0ece3;
+      --three-tower-color: 0x1e4a8a;
+      --three-edge-color: 0x1e4a8a;
+      --three-glow-a: 0x3b82f6;
+      --three-glow-b: 0xa8724e;
+      --three-particle-color: 0x1e4a8a;
+      --three-ambient: 0x6b7280;
+      --three-key: 0x3b82f6;
+      --three-fill: 0xa8724e;
+      color-scheme: light;
+    }
+    [data-theme="dark"] {
+      --bg-0: #0a0a0b;
+      --bg-1: #16161a;
+      --bg-2: #1d1d22;
+      --ink-0: #fafafa;
+      --ink-1: #d4d4d8;
+      --ink-2: #a1a1aa;
+      --ink-3: #71717a;
+      --line-0: rgba(255, 255, 255, 0.06);
+      --line-1: rgba(255, 255, 255, 0.10);
+      --line-2: rgba(255, 255, 255, 0.18);
+      --accent: #60a5fa;
+      --accent-2: #f59e0b;
+      --accent-3: #ec4899;
+      --three-fog-color: 0x0a0a0b;
+      --three-tower-color: 0x1a1a20;
+      --three-edge-color: 0x6b7aff;
+      --three-glow-a: 0x3b82f6;
+      --three-glow-b: 0x8b5cf6;
+      --three-particle-color: 0x6b7aff;
+      --three-ambient: 0x3f3f46;
+      --three-key: 0x3b82f6;
+      --three-fill: 0x8b5cf6;
+      color-scheme: dark;
+    }
+
+    *,
+    *::before,
+    *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-0);
+      color: var(--ink-0);
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      min-height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+    /* ================================================================ */
+    /* BACKGROUND LAYERS                                                 */
+    /* ================================================================ */
+
+    .bg-wrap {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--line-0) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line-0) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 10%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 10%, transparent 75%);
+      opacity: 0.9;
+    }
+
+    .bg-mesh {
+      position: absolute;
+      inset: -20%;
+      background:
+        radial-gradient(closest-side at 20% 30%, color-mix(in oklab, var(--accent) 18%, transparent) 0%, transparent 70%),
+        radial-gradient(closest-side at 80% 70%, color-mix(in oklab, var(--accent-2) 14%, transparent) 0%, transparent 70%),
+        radial-gradient(closest-side at 50% 80%, color-mix(in oklab, var(--accent-3) 10%, transparent) 0%, transparent 60%);
+      filter: blur(60px) saturate(110%);
+      opacity: 0.7;
+      transition: opacity 0.5s ease;
+    }
+    [data-theme="dark"] .bg-mesh { opacity: 0.55; }
+
+    .bg-noise {
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.08 0 0 0 0 0.1 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+      background-size: 240px 240px;
+      opacity: 0.35;
+      mix-blend-mode: multiply;
+    }
+    [data-theme="dark"] .bg-noise {
+      opacity: 0.28;
+      mix-blend-mode: overlay;
+    }
+
+    .three-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, #000 30%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 50%, #000 30%, transparent 80%);
+      transition: opacity 0.6s ease;
+      opacity: 0;
+    }
+    .three-canvas.is-ready { opacity: 1; }
+
+    .static-scene {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .static-scene svg {
+      width: 82%;
+      max-width: 520px;
+      height: auto;
+      opacity: 0.55;
+    }
+
+    .bg-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 70% at 50% 50%, transparent 40%, var(--bg-0) 95%);
+      z-index: 1;
+    }
+
+    /* ================================================================ */
+    /* NAV                                                               */
+    /* ================================================================ */
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      padding: 0 clamp(16px, 3vw, 32px);
+      background: color-mix(in oklab, var(--bg-0) 72%, transparent);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border-bottom: 1px solid var(--line-0);
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    .nav-inner {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Inter Tight', 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+      color: var(--ink-0);
+    }
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      color: var(--bg-0);
+      background: var(--accent-2);
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: inline-flex;
+      align-items: center;
+      gap: clamp(14px, 2.4vw, 28px);
+      font-size: 13.5px;
+      color: var(--ink-1);
+      font-weight: 500;
+    }
+    .nav-links a { transition: color 0.2s ease; }
+    .nav-links a:hover { color: var(--ink-0); }
+
+    .nav-right {
+      justify-self: end;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid var(--line-1);
+      color: var(--ink-0);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+    .theme-toggle:hover {
+      border-color: var(--line-2);
+      background: color-mix(in oklab, var(--ink-0) 5%, transparent);
+    }
+    .theme-toggle svg { width: 16px; height: 16px; display: block; }
+    .theme-toggle .icon-sun { display: inline-block; }
+    .theme-toggle .icon-moon { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: inline-block; }
+
+    .install-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 999px;
+      background: var(--ink-0);
+      color: var(--bg-0);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      transition: transform 0.2s ease, background 0.25s ease;
+    }
+    .install-pill:hover { transform: translateY(-1px); }
+    .install-pill .arrow { transition: transform 0.2s ease; }
+    .install-pill:hover .arrow { transform: translateX(2px); }
+
+    /* ================================================================ */
+    /* HERO                                                              */
+    /* ================================================================ */
+
+    .hero {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      min-height: 100svh;
+      padding: 128px clamp(20px, 4vw, 48px) 112px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      max-width: 1180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line-1);
+      background: color-mix(in oklab, var(--bg-1) 65%, transparent);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11.5px;
+      letter-spacing: 0.02em;
+      color: var(--ink-1);
+    }
+    [data-theme="dark"] .eyebrow {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .eyebrow .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-2);
+      box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent-2) 60%, transparent);
+      animation: pulseDot 2.2s ease-in-out infinite;
+    }
+    .eyebrow b { font-weight: 500; color: var(--ink-0); }
+
+    @keyframes pulseDot {
+      0%, 100% {
+        box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent-2) 60%, transparent);
+      }
+      50% {
+        box-shadow: 0 0 0 7px color-mix(in oklab, var(--accent-2) 0%, transparent);
+      }
+    }
+
+    .headline {
+      font-family: 'Inter Tight', 'Inter', sans-serif;
+      font-weight: 500;
+      color: var(--ink-0);
+      font-size: clamp(56px, 10.5vw, 172px);
+      line-height: 0.94;
+      letter-spacing: -0.055em;
+      max-width: 14ch;
+      margin: 0;
+    }
+    .headline .italic {
+      font-family: 'Fraunces', 'Instrument Serif', 'Times New Roman', serif;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--accent);
+      letter-spacing: -0.04em;
+    }
+    .word {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+      padding-bottom: 0.08em;
+    }
+    .word > span {
+      display: inline-block;
+      will-change: transform, opacity;
+    }
+
+    .sub {
+      max-width: 58ch;
+      margin: 0;
+      font-size: clamp(15px, 1.45vw, 19px);
+      line-height: 1.55;
+      color: var(--ink-2);
+      font-weight: 400;
+      letter-spacing: -0.005em;
+    }
+
+    .ctas {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 13px 22px;
+      border-radius: 999px;
+      font-size: 14.5px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      transition: transform 0.2s ease, background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+      border: 1px solid transparent;
+    }
+    .btn-primary {
+      background: var(--ink-0);
+      color: var(--bg-0);
+    }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-primary .arrow { transition: transform 0.2s ease; }
+    .btn-primary:hover .arrow { transform: translateX(3px); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink-0);
+      border-color: var(--line-2);
+    }
+    .btn-ghost:hover {
+      border-color: var(--ink-0);
+      background: color-mix(in oklab, var(--ink-0) 4%, transparent);
+    }
+
+    .btn svg { width: 16px; height: 16px; }
+
+    /* Install block */
+    .install-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 10px 11px 20px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 13.5px;
+      color: var(--ink-0);
+      position: relative;
+      transition: border-color 0.25s ease, background 0.25s ease;
+    }
+    .install-block:hover { border-color: var(--line-2); }
+    .install-block .dollar { color: var(--accent); font-weight: 500; }
+    .install-block .cmd { letter-spacing: 0; }
+    .copy-btn {
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      color: var(--ink-1);
+      border: 1px solid var(--line-1);
+      background: var(--bg-0);
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+    .copy-btn:hover { color: var(--ink-0); border-color: var(--line-2); transform: translateY(-1px); }
+    .copy-btn svg { width: 14px; height: 14px; }
+
+    .copy-toast {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translate(-50%, 4px);
+      background: var(--ink-0);
+      color: var(--bg-0);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      white-space: nowrap;
+    }
+    .copy-toast.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .meta-row {
+      display: inline-flex;
+      align-items: center;
+      gap: clamp(14px, 2.4vw, 28px);
+      flex-wrap: wrap;
+      justify-content: center;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11.5px;
+      color: var(--ink-3);
+      letter-spacing: 0.01em;
+    }
+    .meta-row span { display: inline-flex; align-items: center; gap: 7px; }
+    .meta-row svg { width: 13px; height: 13px; color: var(--accent-3); flex: 0 0 13px; }
+
+    /* ================================================================ */
+    /* SCROLL INDICATOR                                                  */
+    /* ================================================================ */
+
+    .scroll-indicator {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 88px;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 3;
+    }
+    .scroll-indicator .label {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      color: var(--ink-3);
+    }
+    .scroll-track {
+      width: 1px;
+      height: 48px;
+      background: var(--line-1);
+      position: relative;
+      overflow: hidden;
+    }
+    .scroll-track::after {
+      content: '';
+      position: absolute;
+      top: -60%;
+      left: 0;
+      width: 100%;
+      height: 60%;
+      background: linear-gradient(to bottom, transparent 0%, var(--ink-0) 100%);
+      animation: scrollDrop 2.2s ease-in-out infinite;
+    }
+    @keyframes scrollDrop {
+      0% { top: -60%; }
+      100% { top: 100%; }
+    }
+
+    /* ================================================================ */
+    /* FOOTER                                                            */
+    /* ================================================================ */
+
+    .footer {
+      position: relative;
+      z-index: 5;
+      height: 48px;
+      border-top: 1px solid var(--line-1);
+      background: color-mix(in oklab, var(--bg-0) 90%, transparent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      padding: 0 clamp(16px, 3vw, 32px);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11.5px;
+      color: var(--ink-2);
+      letter-spacing: 0.01em;
+    }
+    .footer a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--ink-1);
+      transition: color 0.2s ease;
+    }
+    .footer a:hover { color: var(--ink-0); }
+
+    /* ================================================================ */
+    /* RESPONSIVE                                                        */
+    /* ================================================================ */
+
+    @media (max-width: 820px) {
+      .nav-links { display: none; }
+      .nav-inner { grid-template-columns: auto 1fr auto; }
+      .nav-links-slot { display: none; }
+    }
+
+    @media (max-width: 620px) {
+      .hero { padding: 104px 18px 96px; gap: 22px; }
+      .hero-inner { gap: 22px; }
+      .install-block { font-size: 12.5px; padding: 9px 10px 9px 16px; gap: 8px; }
+      .install-pill span { display: none; }
+      .install-pill { padding: 9px 10px; }
+      .scroll-indicator { bottom: 64px; }
+    }
+
+    @media (max-width: 560px) {
+      .three-canvas { display: none; }
+      .static-scene { display: flex; }
+    }
+
+    @media (max-width: 420px) {
+      .meta-row { font-size: 11px; gap: 10px; }
+      .eyebrow { font-size: 10.5px; padding: 6px 11px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .scroll-track::after { animation: none; }
+      .eyebrow .dot { animation: none; }
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Utility for JS-set inline display */
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================ -->
+  <!-- BACKGROUND                                                        -->
+  <!-- ================================================================ -->
+  <div class="bg-wrap" aria-hidden="true">
+    <div class="bg-mesh"></div>
+    <div class="bg-grid"></div>
+
+    <canvas id="three-canvas" class="three-canvas"></canvas>
+
+    <div class="static-scene" aria-hidden="true">
+      <svg viewBox="0 0 520 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="var(--accent)" stroke-width="1" opacity="0.85">
+          <rect x="120" y="140" width="40" height="180" />
+          <rect x="170" y="100" width="40" height="220" />
+          <rect x="220" y="70" width="40" height="250" />
+          <rect x="270" y="90" width="40" height="230" />
+          <rect x="320" y="130" width="40" height="190" />
+          <rect x="370" y="170" width="40" height="150" />
+        </g>
+        <g stroke="var(--accent-2)" stroke-width="1">
+          <line x1="80" y1="60" x2="80" y2="320" />
+          <line x1="80" y1="60" x2="160" y2="60" />
+          <line x1="80" y1="60" x2="40" y2="60" />
+          <line x1="80" y1="80" x2="150" y2="140" />
+        </g>
+        <g stroke="var(--line-2)" stroke-width="1" opacity="0.6">
+          <line x1="0" y1="320" x2="520" y2="320" />
+          <line x1="0" y1="330" x2="520" y2="330" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="bg-noise"></div>
+    <div class="bg-vignette"></div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- NAV                                                               -->
+  <!-- ================================================================ -->
+  <nav class="nav" aria-label="Primary">
+    <div class="nav-inner">
+      <a class="brand" href="/">
+        <span>OpenConstructionERP</span>
+        <span class="brand-pill">Pro</span>
+      </a>
+
+      <div class="nav-links nav-links-slot">
+        <a href="#features">Features</a>
+        <a href="#ai">AI</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#docs">Docs</a>
+      </div>
+
+      <div class="nav-right">
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
+          </svg>
+        </button>
+
+        <a class="install-pill" href="#install">
+          <span>Install now</span>
+          <svg class="arrow" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================================================================ -->
+  <!-- HERO                                                              -->
+  <!-- ================================================================ -->
+  <main class="hero" id="hero">
+    <div class="hero-inner">
+
+      <div class="eyebrow" id="fx-eyebrow">
+        <span class="dot" aria-hidden="true"></span>
+        <span><b>v1.7.2</b> &middot; new AI takeoff</span>
+      </div>
+
+      <h1 class="headline" id="headline">
+        <span class="word"><span>Estimate</span></span>
+        <span class="word"><span>buildings</span></span>
+        <span class="word"><span>at</span></span>
+        <span class="word italic"><span>the</span></span>
+        <span class="word italic"><span>speed</span></span>
+        <span class="word italic"><span>of thought.</span></span>
+      </h1>
+
+      <p class="sub" id="fx-sub">
+        Open-source construction ERP with AI-powered BOQ, multi-CAD ingest, 55,000+ cost items across 11 regions.
+        Self-host it today for free &mdash; replace $25K/year enterprise tools by the weekend.
+      </p>
+
+      <div class="ctas" id="fx-ctas">
+        <a class="btn btn-primary" href="#install">
+          <span>Install now</span>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/datadrivenconstruction" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
+          </svg>
+          <span>Star on GitHub</span>
+        </a>
+      </div>
+
+      <div class="install-block" id="install-block">
+        <div class="copy-toast" id="copy-toast">COPIED</div>
+        <span class="dollar">$</span>
+        <span class="cmd" id="install-cmd">docker compose up</span>
+        <button type="button" class="copy-btn" id="copy-btn" aria-label="Copy install command">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="meta-row" id="fx-meta">
+        <span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          AGPL-3.0 open source
+        </span>
+        <span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Self-hosted &middot; no vendor lock-in
+        </span>
+        <span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Runs on 2&thinsp;GB RAM
+        </span>
+      </div>
+    </div>
+
+    <div class="scroll-indicator" id="fx-scroll" aria-hidden="true">
+      <span class="label">SCROLL</span>
+      <span class="scroll-track"></span>
+    </div>
+  </main>
+
+  <!-- ================================================================ -->
+  <!-- FOOTER                                                            -->
+  <!-- ================================================================ -->
+  <footer class="footer">
+    <a href="/pro/">&larr; back to directions</a>
+  </footer>
+
+  <!-- ================================================================ -->
+  <!-- SCRIPTS                                                           -->
+  <!-- ================================================================ -->
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+    import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm';
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ================================================================ */
+    /* THEME TOGGLE                                                      */
+    /* ================================================================ */
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeListeners = new Set();
+
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      try { localStorage.setItem('oce-theme', theme); } catch (_) { /* noop */ }
+      themeListeners.forEach((fn) => {
+        try { fn(theme); } catch (e) { console.error(e); }
+      });
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const next = (root.dataset.theme === 'dark') ? 'light' : 'dark';
+      setTheme(next);
+    });
+
+    /* ================================================================ */
+    /* COPY BLOCK                                                        */
+    /* ================================================================ */
+    const copyBtn = document.getElementById('copy-btn');
+    const installCmd = document.getElementById('install-cmd');
+    const copyToast = document.getElementById('copy-toast');
+    let toastTimer;
+
+    function showToast() {
+      copyToast.classList.add('is-visible');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => copyToast.classList.remove('is-visible'), 1600);
+    }
+
+    async function copyCmd() {
+      const text = installCmd.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        const r = document.createRange();
+        r.selectNodeContents(installCmd);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+        try { document.execCommand('copy'); } catch (_) {}
+        sel.removeAllRanges();
+      }
+      showToast();
+    }
+    copyBtn.addEventListener('click', copyCmd);
+    document.getElementById('install-block').addEventListener('click', (e) => {
+      if (e.target === copyBtn || copyBtn.contains(e.target)) return;
+      copyCmd();
+    });
+
+    /* ================================================================ */
+    /* ENTRANCE ANIMATION                                                */
+    /* ================================================================ */
+    function animateIn() {
+      if (reduceMotion) {
+        document.querySelectorAll('.word > span').forEach((el) => {
+          el.style.transform = 'translateY(0)';
+          el.style.opacity = '1';
+        });
+        ['fx-eyebrow','fx-sub','fx-ctas','install-block','fx-meta','fx-scroll'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }
+        });
+        return;
+      }
+
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.to('#fx-eyebrow', { opacity: 1, y: 0, duration: 0.55 }, 0.15);
+      tl.to('.word > span', {
+        y: '0%',
+        opacity: 1,
+        duration: 0.9,
+        stagger: 0.08,
+      }, 0.25);
+      tl.to('#fx-sub', { opacity: 1, y: 0, duration: 0.6 }, 0.9);
+      tl.to('#fx-ctas', { opacity: 1, y: 0, duration: 0.55 }, 1.0);
+      tl.to('#install-block', { opacity: 1, y: 0, duration: 0.55 }, 1.12);
+      tl.to('#fx-meta', { opacity: 1, y: 0, duration: 0.55 }, 1.22);
+      tl.to('#fx-scroll', { opacity: 1, duration: 0.7 }, 1.4);
+    }
+
+    /* ================================================================ */
+    /* THREE.JS SCENE                                                    */
+    /* ================================================================ */
+    const canvas = document.getElementById('three-canvas');
+    const mobileHide = window.matchMedia('(max-width: 560px)');
+
+    function getVarHex(name) {
+      let v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      if (!v) return 0x000000;
+      if (v.startsWith('0x')) return parseInt(v.slice(2), 16);
+      if (v.startsWith('#')) return parseInt(v.slice(1), 16);
+      return parseInt(v, 16);
+    }
+
+    let threeState = null;
+
+    function circleTexture() {
+      const size = 64;
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(0.35, 'rgba(255,255,255,0.8)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+      const tex = new THREE.CanvasTexture(c);
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      return tex;
+    }
+
+    function initThree() {
+      if (mobileHide.matches) {
+        canvas.style.display = 'none';
+        return;
+      }
+
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        powerPreference: 'low-power',
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setClearColor(0x000000, 0);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 400);
+      camera.position.set(18, 14, 22);
+      camera.lookAt(0, 4, 0);
+
+      const sceneRoot = new THREE.Group();
+      scene.add(sceneRoot);
+
+      // Tower
+      const towerGroup = new THREE.Group();
+      sceneRoot.add(towerGroup);
+
+      const GRID = 6;
+      const MAX_FLOORS = 14;
+      const FLOOR_H = 0.9;
+      const FLOOR_GAP = 0.08;
+      const UNIT = 1.1;
+      const COL_W = 0.92;
+
+      const floorMeshes = []; // flat meshes for entrance anim + theme rebuild
+      const edgeLines = [];
+      const glowFloors = []; // { mesh, phase, speed, variant }
+      const dataMarkers = [];
+
+      function radialHeight(i, j) {
+        const cx = (GRID - 1) / 2;
+        const cy = (GRID - 1) / 2;
+        const d = Math.sqrt((i - cx) ** 2 + (j - cy) ** 2);
+        const norm = d / (Math.sqrt(2) * cx);
+        const falloff = 1 - Math.pow(norm, 1.8);
+        const noise = (Math.sin(i * 3.3) + Math.cos(j * 2.1)) * 0.12 + 0.88;
+        const h = Math.max(1, Math.round(MAX_FLOORS * falloff * noise));
+        return h;
+      }
+
+      function buildTower() {
+        // dispose old
+        towerGroup.clear();
+        floorMeshes.length = 0;
+        edgeLines.length = 0;
+        glowFloors.length = 0;
+
+        const towerColor = getVarHex('--three-tower-color');
+        const edgeColor = getVarHex('--three-edge-color');
+        const glowA = getVarHex('--three-glow-a');
+        const glowB = getVarHex('--three-glow-b');
+
+        const floorGeom = new THREE.BoxGeometry(COL_W, FLOOR_H - FLOOR_GAP, COL_W);
+        const edgeGeom = new THREE.EdgesGeometry(floorGeom);
+
+        const floorMat = new THREE.MeshStandardMaterial({
+          color: towerColor,
+          roughness: 0.75,
+          metalness: 0.18,
+          transparent: true,
+          opacity: 0.78,
+        });
+        const edgeMat = new THREE.LineBasicMaterial({
+          color: edgeColor,
+          transparent: true,
+          opacity: 0.55,
+        });
+
+        const glowMatA = new THREE.MeshBasicMaterial({ color: glowA, transparent: true, opacity: 0.9 });
+        const glowMatB = new THREE.MeshBasicMaterial({ color: glowB, transparent: true, opacity: 0.9 });
+
+        const offset = (GRID - 1) * UNIT / 2;
+
+        for (let i = 0; i < GRID; i++) {
+          for (let j = 0; j < GRID; j++) {
+            const h = radialHeight(i, j);
+            const x = i * UNIT - offset;
+            const z = j * UNIT - offset;
+
+            for (let f = 0; f < h; f++) {
+              const y = f * FLOOR_H + FLOOR_H / 2;
+              const mesh = new THREE.Mesh(floorGeom, floorMat);
+              mesh.position.set(x, y, z);
+              mesh.userData.restY = y;
+              towerGroup.add(mesh);
+              floorMeshes.push(mesh);
+
+              const line = new THREE.LineSegments(edgeGeom, edgeMat);
+              line.position.copy(mesh.position);
+              line.userData.restY = y;
+              towerGroup.add(line);
+              edgeLines.push(line);
+            }
+
+            // glowing top floor chance
+            if (Math.random() < 0.35) {
+              const variant = Math.random() < 0.55 ? 'a' : 'b';
+              const mat = variant === 'a' ? glowMatA.clone() : glowMatB.clone();
+              const glowGeom = new THREE.BoxGeometry(COL_W * 1.04, (FLOOR_H - FLOOR_GAP) * 0.6, COL_W * 1.04);
+              const glow = new THREE.Mesh(glowGeom, mat);
+              const topY = h * FLOOR_H + 0.1;
+              glow.position.set(x, topY, z);
+              glow.userData.restY = topY;
+              towerGroup.add(glow);
+              floorMeshes.push(glow);
+              glowFloors.push({ mesh: glow, phase: Math.random() * Math.PI * 2, speed: 0.8 + Math.random() * 1.4, variant });
+            }
+          }
+        }
+      }
+
+      // Crane (simple line segments)
+      const craneGroup = new THREE.Group();
+      sceneRoot.add(craneGroup);
+
+      function buildCrane() {
+        craneGroup.clear();
+        const color = getVarHex('--three-fill'); // copper-ish in light, violet in dark
+        const mat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.85 });
+        const mastX = 8.5;
+        const mastZ = -4.5;
+        const mastTop = 20;
+
+        function addLine(points) {
+          const geom = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(...p)));
+          craneGroup.add(new THREE.Line(geom, mat));
+        }
+
+        // Mast (4 verticals + cross braces)
+        const mastW = 0.45;
+        const corners = [
+          [mastX - mastW, mastZ - mastW],
+          [mastX + mastW, mastZ - mastW],
+          [mastX + mastW, mastZ + mastW],
+          [mastX - mastW, mastZ + mastW],
+        ];
+        corners.forEach(([cx, cz]) => addLine([[cx, 0, cz], [cx, mastTop, cz]]));
+        for (let y = 0; y <= mastTop; y += 1.4) {
+          addLine([
+            [corners[0][0], y, corners[0][1]],
+            [corners[1][0], y, corners[1][1]],
+            [corners[2][0], y, corners[2][1]],
+            [corners[3][0], y, corners[3][1]],
+            [corners[0][0], y, corners[0][1]],
+          ]);
+        }
+
+        // Jib (long arm) + counter-jib
+        const jibY = mastTop - 0.6;
+        const jibEnd = mastX - 14;
+        const cjEnd = mastX + 4;
+        addLine([[mastX, jibY, mastZ], [jibEnd, jibY, mastZ]]);
+        addLine([[mastX, jibY, mastZ], [cjEnd, jibY, mastZ]]);
+        addLine([[mastX, jibY + 2.2, mastZ], [jibEnd + 1, jibY, mastZ]]);
+        addLine([[mastX, jibY + 2.2, mastZ], [cjEnd - 0.5, jibY, mastZ]]);
+        // trolley + cable + hook
+        const trolleyX = jibEnd + 4;
+        addLine([[trolleyX, jibY, mastZ], [trolleyX, 4.5, mastZ]]);
+        // Hook box
+        const hookGeom = new THREE.BoxGeometry(0.35, 0.35, 0.35);
+        const hookMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 });
+        const hook = new THREE.Mesh(hookGeom, hookMat);
+        hook.position.set(trolleyX, 4.3, mastZ);
+        craneGroup.add(hook);
+        // Counter weight
+        const cwGeom = new THREE.BoxGeometry(1.2, 0.5, 0.9);
+        const cwMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.75 });
+        const cw = new THREE.Mesh(cwGeom, cwMat);
+        cw.position.set(cjEnd - 0.4, jibY - 0.4, mastZ);
+        craneGroup.add(cw);
+      }
+
+      // Particles
+      const particleGroup = new THREE.Group();
+      sceneRoot.add(particleGroup);
+      const PARTICLE_COUNT = 280;
+      let particles;
+      const particleVelocities = [];
+
+      function buildParticles() {
+        particleGroup.clear();
+        particleVelocities.length = 0;
+
+        const geom = new THREE.BufferGeometry();
+        const positions = new Float32Array(PARTICLE_COUNT * 3);
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const r = 20 + Math.random() * 20;
+          const theta = Math.random() * Math.PI * 2;
+          positions[i * 3] = Math.cos(theta) * r * (0.4 + Math.random() * 0.6);
+          positions[i * 3 + 1] = Math.random() * 20;
+          positions[i * 3 + 2] = Math.sin(theta) * r * (0.4 + Math.random() * 0.6);
+          particleVelocities.push({
+            x: (Math.random() - 0.5) * 0.012,
+            y: (Math.random() - 0.5) * 0.006 + 0.004,
+            z: (Math.random() - 0.5) * 0.012,
+          });
+        }
+        geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const color = getVarHex('--three-particle-color');
+        const mat = new THREE.PointsMaterial({
+          color,
+          size: 0.18,
+          map: circleTexture(),
+          transparent: true,
+          opacity: 0.85,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          sizeAttenuation: true,
+        });
+        particles = new THREE.Points(geom, mat);
+        particleGroup.add(particles);
+      }
+
+      // Data markers
+      const markerGroup = new THREE.Group();
+      sceneRoot.add(markerGroup);
+      function buildMarkers() {
+        markerGroup.clear();
+        dataMarkers.length = 0;
+        const color = getVarHex('--three-glow-a');
+        const mat = new THREE.MeshBasicMaterial({
+          color,
+          transparent: true,
+          opacity: 0.95,
+        });
+        const geom = new THREE.SphereGeometry(0.22, 16, 16);
+        for (let i = 0; i < 6; i++) {
+          const m = new THREE.Mesh(geom, mat.clone());
+          const angle = (i / 6) * Math.PI * 2;
+          const r = 4 + Math.random() * 3;
+          m.position.set(Math.cos(angle) * r, 3 + Math.random() * 9, Math.sin(angle) * r);
+          markerGroup.add(m);
+          dataMarkers.push({ mesh: m, phase: Math.random() * Math.PI * 2, speed: 1.2 + Math.random() * 1.2 });
+        }
+      }
+
+      // Ground grid
+      let gridHelper;
+      function buildGrid() {
+        if (gridHelper) { sceneRoot.remove(gridHelper); gridHelper.geometry.dispose(); gridHelper.material.dispose(); }
+        const color = getVarHex('--three-edge-color');
+        gridHelper = new THREE.GridHelper(100, 50, color, color);
+        gridHelper.material.transparent = true;
+        gridHelper.material.opacity = 0.18;
+        gridHelper.position.y = -0.02;
+        sceneRoot.add(gridHelper);
+      }
+
+      // Lights
+      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambient);
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
+      keyLight.position.set(12, 20, 10);
+      scene.add(keyLight);
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      fillLight.position.set(-14, 10, -6);
+      scene.add(fillLight);
+
+      function applyThemeColors() {
+        ambient.color.setHex(getVarHex('--three-ambient'));
+        keyLight.color.setHex(getVarHex('--three-key'));
+        fillLight.color.setHex(getVarHex('--three-fill'));
+        scene.fog = new THREE.FogExp2(getVarHex('--three-fog-color'), 0.024);
+      }
+
+      function rebuildAll() {
+        applyThemeColors();
+        buildTower();
+        buildCrane();
+        buildParticles();
+        buildMarkers();
+        buildGrid();
+      }
+      rebuildAll();
+
+      // Entrance anim on floor meshes
+      function playTowerEntrance() {
+        if (reduceMotion) return;
+        const all = [...floorMeshes, ...edgeLines];
+        all.forEach((m) => {
+          m.position.y = (m.userData.restY || 0) - 14;
+          m.visible = true;
+        });
+        gsap.to(all.map(m => m.position), {
+          y: (i) => all[i].userData.restY || 0,
+          duration: 1.8,
+          ease: 'power4.out',
+          stagger: { amount: 0.9, from: 'random' },
+        });
+      }
+      playTowerEntrance();
+
+      // Resize
+      function resize() {
+        const w = canvas.clientWidth || window.innerWidth;
+        const h = canvas.clientHeight || window.innerHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      // Mouse parallax
+      const targetRot = { x: 0, y: 0 };
+      const currentRot = { x: 0, y: 0 };
+      window.addEventListener('pointermove', (e) => {
+        const nx = (e.clientX / window.innerWidth) * 2 - 1;
+        const ny = (e.clientY / window.innerHeight) * 2 - 1;
+        targetRot.y = nx * 0.22;
+        targetRot.x = -ny * 0.12;
+      });
+
+      // Scroll parallax
+      let scrollY = 0;
+      window.addEventListener('scroll', () => { scrollY = window.scrollY || 0; }, { passive: true });
+
+      const baseCamY = camera.position.y;
+      const baseCamZ = camera.position.z;
+
+      // Animate
+      const clock = new THREE.Clock();
+      let frame = 0;
+
+      function tick() {
+        const t = clock.getElapsedTime();
+
+        currentRot.x += (targetRot.x - currentRot.x) * 0.05;
+        currentRot.y += (targetRot.y - currentRot.y) * 0.05;
+
+        sceneRoot.rotation.y += 0.04 * (clock.getDelta() || 0.016);
+        // Additional rotation from mouse — smoother
+        sceneRoot.rotation.x = currentRot.x * 0.4;
+
+        camera.position.y = baseCamY + currentRot.x * 1.8 + Math.min(scrollY * 0.01, 6);
+        camera.position.z = baseCamZ - Math.min(scrollY * 0.008, 4);
+        camera.position.x = 18 + currentRot.y * 2.2;
+        camera.lookAt(0, 4, 0);
+
+        // Pulsing glow floors
+        glowFloors.forEach(({ mesh, phase, speed }) => {
+          const p = 0.7 + 0.3 * Math.sin(t * speed + phase);
+          mesh.material.opacity = 0.55 + 0.45 * p;
+          mesh.scale.y = 0.85 + 0.2 * p;
+        });
+
+        // Markers pulse
+        dataMarkers.forEach(({ mesh, phase, speed }) => {
+          const p = 0.5 + 0.5 * Math.sin(t * speed + phase);
+          mesh.material.opacity = 0.55 + 0.45 * p;
+          mesh.scale.setScalar(0.8 + 0.5 * p);
+        });
+
+        // Particles drift
+        if (particles) {
+          const pos = particles.geometry.attributes.position;
+          for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const v = particleVelocities[i];
+            pos.array[i * 3] += v.x;
+            pos.array[i * 3 + 1] += v.y;
+            pos.array[i * 3 + 2] += v.z;
+            // wrap
+            if (pos.array[i * 3 + 1] > 22) pos.array[i * 3 + 1] = 0;
+            if (pos.array[i * 3] > 30) pos.array[i * 3] = -30;
+            if (pos.array[i * 3] < -30) pos.array[i * 3] = 30;
+            if (pos.array[i * 3 + 2] > 30) pos.array[i * 3 + 2] = -30;
+            if (pos.array[i * 3 + 2] < -30) pos.array[i * 3 + 2] = 30;
+          }
+          pos.needsUpdate = true;
+        }
+
+        renderer.render(scene, camera);
+        frame++;
+      }
+
+      if (reduceMotion) {
+        tick(); // one frame
+      } else {
+        renderer.setAnimationLoop(tick);
+      }
+
+      canvas.classList.add('is-ready');
+
+      // Theme change hook
+      themeListeners.add(() => {
+        rebuildAll();
+        // Re-run entrance only if user hasn't scrolled much
+        if (window.scrollY < 120 && !reduceMotion) {
+          playTowerEntrance();
+        }
+      });
+
+      threeState = { renderer, scene };
+    }
+
+    // Init Three
+    try {
+      initThree();
+    } catch (err) {
+      console.warn('Three.js init failed — falling back to static scene', err);
+      canvas.style.display = 'none';
+      document.querySelector('.static-scene').style.display = 'flex';
+    }
+
+    // Hide/show three on breakpoint changes
+    mobileHide.addEventListener?.('change', (e) => {
+      if (e.matches) {
+        canvas.style.display = 'none';
+      } else {
+        canvas.style.display = 'block';
+      }
+    });
+
+    // Kick entrance after fonts settle
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => animateIn());
+    } else {
+      animateIn();
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+/* ═══════════════════════════════════════════════════════════════════
+   HERO — editorial + WebGL 3D building
+   ═══════════════════════════════════════════════════════════════════ */
+
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  padding: calc(var(--nav-h) + 40px) var(--gutter) 80px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero-canvas-wrap {
+  position: absolute; inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.hero-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+}
+
+.hero-gradient-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(59, 130, 246, 0.16), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 20%, rgba(139, 92, 246, 0.12), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 15% 80%, rgba(236, 72, 153, 0.08), transparent 50%);
+  z-index: -1; pointer-events: none;
+}
+
+.hero-vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 100% 80% at 50% 50%, transparent 50%, rgba(10,10,11,0.75) 100%);
+  pointer-events: none; z-index: 1;
+}
+
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--line-0) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-0) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 50% at 50% 50%, #000 0%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 50%, #000 0%, transparent 80%);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.hero-inner {
+  position: relative; z-index: 3;
+  max-width: var(--mw); margin: 0 auto;
+  width: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  gap: clamp(24px, 3vw, 40px);
+}
+
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 6px 14px 6px 8px;
+  background: rgba(22,22,26,0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--line-1);
+  border-radius: var(--r-full);
+  font-size: 12px; font-weight: 500;
+  color: var(--ink-1);
+}
+.hero-pill-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 8px;
+  border-radius: var(--r-full);
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--mint);
+  font-family: var(--ff-mono);
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.hero-pill-tag::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--mint); box-shadow: 0 0 6px var(--mint);
+  animation: hero-pulse 2s ease-in-out infinite;
+}
+@keyframes hero-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.hero-title {
+  font-family: var(--ff-display);
+  font-weight: 500;
+  font-size: var(--fs-hero);
+  line-height: 0.94;
+  letter-spacing: -0.055em;
+  color: var(--ink-0);
+  max-width: 14ch;
+}
+.hero-title .word {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+.hero-title em {
+  font-family: var(--ff-serif);
+  font-style: italic;
+  font-weight: 400;
+  background: var(--grad-brand);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+}
+
+.hero-sub {
+  max-width: 58ch;
+  font-size: clamp(16px, 1.4vw, 20px);
+  color: var(--ink-2);
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+.hero-cta-row {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  margin-top: 8px;
+}
+
+.hero-cta-meta {
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  justify-content: center;
+  color: var(--ink-3);
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  margin-top: 8px;
+}
+.hero-cta-meta-item {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.hero-cta-meta-item svg { width: 12px; height: 12px; color: var(--mint); }
+
+/* ——————— install code block ——————— */
+.hero-install {
+  margin-top: 20px;
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 10px 16px 10px 20px;
+  background: rgba(22,22,26,0.72);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--line-1);
+  border-radius: var(--r-full);
+  font-family: var(--ff-mono);
+  font-size: 13px;
+  color: var(--ink-1);
+  cursor: pointer;
+  transition: all var(--dur-quick) var(--ease-out);
+  position: relative;
+}
+.hero-install:hover { border-color: var(--line-2); background: rgba(22,22,26,0.9); }
+.hero-install-prompt { color: var(--accent); user-select: none; }
+.hero-install-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  color: var(--ink-2);
+  transition: all var(--dur-quick) var(--ease-out);
+}
+.hero-install-btn:hover { background: var(--ink-0); color: var(--bg-0); }
+.hero-install-btn svg { width: 13px; height: 13px; }
+.hero-install-copied {
+  position: absolute; top: -32px; left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  padding: 4px 10px;
+  background: var(--mint); color: var(--bg-0);
+  border-radius: var(--r-xs);
+  font-size: 11px; font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--dur-base) var(--ease-spring);
+}
+.hero-install.is-copied .hero-install-copied {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ——————— scroll indicator ——————— */
+.hero-scroll {
+  position: absolute; bottom: 32px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  color: var(--ink-3);
+  font-family: var(--ff-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  z-index: 3;
+  pointer-events: none;
+}
+.hero-scroll-line {
+  width: 1px; height: 40px;
+  background: linear-gradient(180deg, var(--line-2), transparent);
+  position: relative;
+  overflow: hidden;
+}
+.hero-scroll-line::after {
+  content: ''; position: absolute; inset-inline: 0;
+  top: -20px; height: 20px;
+  background: linear-gradient(180deg, transparent, var(--ink-0));
+  animation: hero-scroll-drop 1.8s ease-in-out infinite;
+}
+@keyframes hero-scroll-drop {
+  0%   { top: -20px; }
+  100% { top: 40px; }
+}

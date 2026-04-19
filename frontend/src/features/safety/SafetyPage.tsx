@@ -56,6 +56,27 @@ interface Incident {
   updated_at: string;
 }
 
+type IncidentWire = Omit<Incident, 'date' | 'type' | 'treatment' | 'reported_by'> & {
+  date?: string;
+  incident_date?: string;
+  type?: string;
+  incident_type?: string;
+  treatment?: string;
+  treatment_type?: string | null;
+  reported_by?: string;
+  created_by?: string | null;
+};
+
+function normaliseIncident(i: IncidentWire): Incident {
+  return {
+    ...i,
+    date: i.date ?? i.incident_date ?? '',
+    type: i.type ?? i.incident_type ?? '',
+    treatment: i.treatment ?? i.treatment_type ?? '',
+    reported_by: i.reported_by ?? i.created_by ?? '',
+  } as Incident;
+}
+
 interface Observation {
   id: string;
   project_id: string;
@@ -71,6 +92,23 @@ interface Observation {
   corrective_action: string;
   created_at: string;
   updated_at: string;
+}
+
+type ObservationWire = Omit<Observation, 'date' | 'type' | 'reported_by'> & {
+  date?: string;
+  type?: string;
+  observation_type?: string;
+  reported_by?: string;
+  created_by?: string | null;
+};
+
+function normaliseObservation(o: ObservationWire): Observation {
+  return {
+    ...o,
+    date: o.date ?? o.created_at ?? '',
+    type: o.type ?? o.observation_type ?? '',
+    reported_by: o.reported_by ?? o.created_by ?? '',
+  } as Observation;
 }
 
 /* ── Constants ────────────────────────────────────────────────────────── */
@@ -610,10 +648,11 @@ function IncidentsTab({ projectId }: { projectId: string }) {
   const { data: incidents, isLoading } = useQuery({
     queryKey: ['safety-incidents', projectId],
     queryFn: () =>
-      apiGet<Incident[]>(
+      apiGet<IncidentWire[]>(
         `/v1/safety/incidents?project_id=${projectId}`,
       ),
-    select: (d): Incident[] => normalizeListResponse(d),
+    select: (d): Incident[] =>
+      normalizeListResponse<IncidentWire>(d).map(normaliseIncident),
   });
 
   const filtered = useMemo(() => {
@@ -1111,10 +1150,11 @@ function ObservationsTab({ projectId }: { projectId: string }) {
   const { data: observations, isLoading } = useQuery({
     queryKey: ['safety-observations', projectId],
     queryFn: () =>
-      apiGet<Observation[]>(
+      apiGet<ObservationWire[]>(
         `/v1/safety/observations?project_id=${projectId}`,
       ),
-    select: (d): Observation[] => normalizeListResponse(d),
+    select: (d): Observation[] =>
+      normalizeListResponse<ObservationWire>(d).map(normaliseObservation),
   });
 
   const filtered = useMemo(() => {

@@ -91,6 +91,18 @@ interface Invoice {
   updated_at: string;
 }
 
+type InvoiceWire = Omit<Invoice, 'counterparty_name'> & {
+  counterparty_name?: string | null;
+  contact_id?: string | null;
+};
+
+function normaliseInvoice(i: InvoiceWire): Invoice {
+  return {
+    ...i,
+    counterparty_name: i.counterparty_name ?? i.contact_id ?? '',
+  } as Invoice;
+}
+
 interface Payment {
   id: string;
   invoice_id: string;
@@ -221,15 +233,17 @@ function FinanceSummaryCards({ projectId }: { projectId: string }) {
   const { data: invoicesPayable } = useQuery({
     queryKey: ['finance-invoices', projectId, 'payable'],
     queryFn: () =>
-      apiGet<Invoice[]>(`/v1/finance/?project_id=${projectId}&direction=payable`),
-    select: (d): Invoice[] => normalizeListResponse(d),
+      apiGet<InvoiceWire[]>(`/v1/finance/?project_id=${projectId}&direction=payable`),
+    select: (d): Invoice[] =>
+      normalizeListResponse<InvoiceWire>(d).map(normaliseInvoice),
   });
 
   const { data: invoicesReceivable } = useQuery({
     queryKey: ['finance-invoices', projectId, 'receivable'],
     queryFn: () =>
-      apiGet<Invoice[]>(`/v1/finance/?project_id=${projectId}&direction=receivable`),
-    select: (d): Invoice[] => normalizeListResponse(d),
+      apiGet<InvoiceWire[]>(`/v1/finance/?project_id=${projectId}&direction=receivable`),
+    select: (d): Invoice[] =>
+      normalizeListResponse<InvoiceWire>(d).map(normaliseInvoice),
   });
 
   const totalBudget = useMemo(
@@ -1298,10 +1312,11 @@ function InvoicesTab({ projectId }: { projectId: string }) {
   const { data: invoices, isLoading } = useQuery({
     queryKey: ['finance-invoices', projectId, subTab],
     queryFn: () =>
-      apiGet<Invoice[]>(
+      apiGet<InvoiceWire[]>(
         `/v1/finance/?project_id=${projectId}&direction=${subTab}`,
       ),
-    select: (d): Invoice[] => normalizeListResponse(d),
+    select: (d): Invoice[] =>
+      normalizeListResponse<InvoiceWire>(d).map(normaliseInvoice),
   });
 
   const filtered = useMemo(() => {
@@ -1314,8 +1329,8 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       const q = search.toLowerCase();
       result = result.filter(
         (inv) =>
-          inv.invoice_number.toLowerCase().includes(q) ||
-          inv.counterparty_name.toLowerCase().includes(q),
+          (inv.invoice_number ?? '').toLowerCase().includes(q) ||
+          (inv.counterparty_name ?? '').toLowerCase().includes(q),
       );
     }
     return result;

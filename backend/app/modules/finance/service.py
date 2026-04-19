@@ -301,38 +301,85 @@ class FinanceService:
             )
         logger.info("Invoice paid: %s", invoice.invoice_number)
 
-        # Recalculate budget actuals in the same session (avoids SQLite lock
-        # contention that occurs with event_bus handlers in separate sessions)
+        # BUG-346: distribute actuals across budget rows by
+        # ``(wbs_id, cost_category)`` instead of writing the whole project
+        # total onto every row. The old behaviour made every budget line
+        # look like it had consumed the full project spend, so the variance
+        # dashboard flagged every category as 500% over-run after a single
+        # paid invoice.
+        #
+        # Strategy:
+        #   1. Walk all paid invoices of the project.
+        #   2. For invoices with line items, bucket each line's ``amount``
+        #      by ``(wbs_id, cost_category)``.
+        #   3. For invoices without line items, attribute the full
+        #      ``amount_total`` to the ``(None, None)`` bucket.
+        #   4. For each ``ProjectBudget`` row, look up its matching bucket
+        #      and set ``actual`` to the summed Decimal; unmatched rows are
+        #      zeroed so a later cost-category removal doesn't leave stale
+        #      actuals hanging.
         try:
+            from collections import defaultdict
+
             from sqlalchemy import select
+            from sqlalchemy.orm import selectinload
 
             paid_result = await self.session.execute(
-                select(Invoice).where(
+                select(Invoice)
+                .options(selectinload(Invoice.line_items))
+                .where(
                     Invoice.project_id == invoice.project_id,
                     Invoice.status == "paid",
                 )
             )
             paid_invoices = paid_result.scalars().all()
+
+            # key = (wbs_id, cost_category); both None means "uncategorized"
+            bucketed: dict[tuple[str | None, str | None], Decimal] = defaultdict(
+                lambda: Decimal("0")
+            )
             total_actual = Decimal("0")
+
             for inv in paid_invoices:
-                try:
-                    total_actual += Decimal(str(inv.amount_total))
-                except (InvalidOperation, ValueError):
-                    continue
+                items = list(inv.line_items or [])
+                if items:
+                    for item in items:
+                        try:
+                            amt = Decimal(str(item.amount))
+                        except (InvalidOperation, ValueError):
+                            continue
+                        bucketed[(item.wbs_id, item.cost_category)] += amt
+                        total_actual += amt
+                else:
+                    # No breakdown — attribute the full invoice total to the
+                    # catch-all bucket.
+                    try:
+                        amt = Decimal(str(inv.amount_total))
+                    except (InvalidOperation, ValueError):
+                        continue
+                    bucketed[(None, None)] += amt
+                    total_actual += amt
 
             budget_result = await self.session.execute(
                 select(ProjectBudget).where(
                     ProjectBudget.project_id == invoice.project_id
                 )
             )
-            budgets = budget_result.scalars().all()
+            budgets = list(budget_result.scalars().all())
+
+            # Reset every budget row before assignment so removing a
+            # cost_category from future invoices drains the actual back to 0.
             for budget in budgets:
-                budget.actual = str(total_actual)
+                key = (budget.wbs_id, budget.category)
+                budget.actual = str(bucketed.get(key, Decimal("0")))
 
             logger.info(
-                "Updated budget actuals for project %s: total_actual=%s",
+                "Updated budget actuals for project %s: total_actual=%s "
+                "across %d budget row(s), %d bucket(s)",
                 invoice.project_id,
                 total_actual,
+                len(budgets),
+                len(bucketed),
             )
         except Exception:
             logger.exception(

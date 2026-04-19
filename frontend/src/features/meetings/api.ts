@@ -95,6 +95,50 @@ export interface UpdateMeetingPayload {
   status?: MeetingStatus;
 }
 
+/* -- Wire <-> UI normaliser ----------------------------------------------- */
+
+type AttendeeWire = {
+  id?: string;
+  user_id?: string;
+  name?: string;
+  role?: string;
+  company?: string;
+  status?: AttendeeStatus;
+};
+
+type MeetingWire = Omit<Meeting, 'date' | 'chairperson' | 'attendees' | 'meeting_number'> & {
+  date?: string;
+  meeting_date?: string;
+  chairperson?: string;
+  chairperson_id?: string | null;
+  attendees?: AttendeeWire[];
+  meeting_number?: string | number;
+  notes?: string;
+};
+
+function normaliseMeeting(m: MeetingWire): Meeting {
+  const date = m.date ?? m.meeting_date ?? '';
+  const chairperson = m.chairperson ?? m.chairperson_id ?? '';
+  const attendees: Attendee[] = (m.attendees ?? []).map((a, i) => ({
+    id: a.id ?? a.user_id ?? `att-${i}`,
+    name: a.name ?? '',
+    role: a.role ?? a.company ?? '',
+    status: (a.status ?? 'present') as AttendeeStatus,
+  }));
+  const meeting_number =
+    typeof m.meeting_number === 'number'
+      ? m.meeting_number
+      : Number.parseInt(String(m.meeting_number ?? '').replace(/\D+/g, ''), 10) || 0;
+  return {
+    ...m,
+    date,
+    chairperson,
+    attendees,
+    meeting_number,
+    notes: m.notes ?? '',
+  } as Meeting;
+}
+
 /* -- API Functions --------------------------------------------------------- */
 
 export async function fetchMeetings(filters?: MeetingFilters): Promise<Meeting[]> {
@@ -103,18 +147,21 @@ export async function fetchMeetings(filters?: MeetingFilters): Promise<Meeting[]
   if (filters?.meeting_type) params.set('meeting_type', filters.meeting_type);
   if (filters?.status) params.set('status', filters.status);
   const qs = params.toString();
-  return apiGet<Meeting[]>(`/v1/meetings/${qs ? `?${qs}` : ''}`);
+  const rows = await apiGet<MeetingWire[]>(`/v1/meetings/${qs ? `?${qs}` : ''}`);
+  return rows.map(normaliseMeeting);
 }
 
 export async function createMeeting(data: CreateMeetingPayload): Promise<Meeting> {
-  return apiPost<Meeting>('/v1/meetings/', data);
+  const row = await apiPost<MeetingWire>('/v1/meetings/', data);
+  return normaliseMeeting(row);
 }
 
 export async function updateMeeting(
   id: string,
   data: UpdateMeetingPayload,
 ): Promise<Meeting> {
-  return apiPatch<Meeting>(`/v1/meetings/${id}`, data);
+  const row = await apiPatch<MeetingWire>(`/v1/meetings/${id}`, data);
+  return normaliseMeeting(row);
 }
 
 export async function deleteMeeting(id: string): Promise<void> {
@@ -122,7 +169,8 @@ export async function deleteMeeting(id: string): Promise<void> {
 }
 
 export async function completeMeeting(id: string): Promise<Meeting> {
-  return apiPost<Meeting>(`/v1/meetings/${id}/complete/`);
+  const row = await apiPost<MeetingWire>(`/v1/meetings/${id}/complete/`);
+  return normaliseMeeting(row);
 }
 
 /* -- Meeting attachment upload (delegates to DocumentService) ------------- */

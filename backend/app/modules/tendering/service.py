@@ -308,6 +308,91 @@ class TenderingService:
             bid_totals=bid_totals,
         )
 
+    async def apply_winner(
+        self,
+        package_id: uuid.UUID,
+        bid_id: uuid.UUID,
+    ) -> dict:
+        """Apply a winning bid's unit rates back to the BOQ.
+
+        Iterates the bid's ``line_items`` and updates the matching BOQ
+        position ``unit_rate`` (recomputing ``total`` via quantity * new rate).
+        The package is transitioned to ``awarded`` and the bid to ``awarded``
+        status. An event is published for downstream budget / EVM modules.
+        """
+        package = await self.get_package(package_id)
+        bid = await self.get_bid(bid_id)
+
+        if bid.package_id != package_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Bid does not belong to this package",
+            )
+        if package.boq_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Package has no linked BOQ to write back to",
+            )
+
+        from decimal import Decimal, InvalidOperation
+
+        from sqlalchemy import update
+
+        from app.modules.boq.models import BOQPosition
+
+        updated = 0
+        for item in bid.line_items or []:
+            pos_id = item.get("position_id")
+            if not pos_id:
+                continue
+            try:
+                rate = Decimal(str(item.get("unit_rate", "0")))
+            except (InvalidOperation, ValueError):
+                continue
+            pos = await self.session.get(BOQPosition, uuid.UUID(str(pos_id)))
+            if pos is None:
+                continue
+            try:
+                qty = Decimal(str(pos.quantity or "0"))
+            except (InvalidOperation, ValueError):
+                qty = Decimal("0")
+            new_total = qty * rate
+            await self.session.execute(
+                update(BOQPosition)
+                .where(BOQPosition.id == pos.id)
+                .values(unit_rate=str(rate), total=str(new_total))
+            )
+            updated += 1
+
+        # Flip statuses — package: awarded, bid: awarded
+        await self.repo.update_package_fields(package_id, status="awarded")
+        await self.repo.update_bid_fields(bid_id, status="awarded")
+
+        await _safe_publish(
+            "tendering.package.awarded",
+            {
+                "package_id": str(package_id),
+                "bid_id": str(bid_id),
+                "company_name": bid.company_name,
+                "positions_updated": updated,
+                "boq_id": str(package.boq_id),
+            },
+            source_module="oe_tendering",
+        )
+
+        logger.info(
+            "Tender winner applied: package=%s bid=%s positions_updated=%s",
+            package_id,
+            bid_id,
+            updated,
+        )
+        return {
+            "package_id": str(package_id),
+            "bid_id": str(bid_id),
+            "positions_updated": updated,
+            "boq_id": str(package.boq_id),
+        }
+
     # ── Project Intelligence (RFC 25) ──────────────────────────────────────
 
     async def get_bid_analysis(self, project_id: uuid.UUID):

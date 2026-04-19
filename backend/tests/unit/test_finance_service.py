@@ -361,3 +361,215 @@ async def test_get_dashboard_returns_invoices_and_budgets() -> None:
     assert dashboard["total_budget_revised"] == 110_000.0
     assert dashboard["invoices_paid"] == 3
     assert dashboard["budget_warning_level"] == "normal"  # 30/110 ~ 27%
+
+
+# ── BUG-346: pay_invoice distributes actuals by (wbs_id, cost_category) ──
+
+
+class _ExecuteStubSession:
+    """Session stub that satisfies the two ``self.session.execute`` calls
+    in :meth:`FinanceService.pay_invoice`'s recalculation block.
+
+    The first execute fetches paid invoices; the second fetches project
+    budgets. We dispatch by the target entity name in the compiled SQL so
+    the stub stays decoupled from SQLAlchemy internals.
+    """
+
+    def __init__(self, paid_invoices: list[Any], budgets: list[Any]) -> None:
+        self.paid_invoices = paid_invoices
+        self.budgets = budgets
+
+    async def execute(self, stmt: Any) -> Any:
+        target = str(stmt).lower()
+
+        class _Result:
+            def __init__(self, value: list[Any]) -> None:
+                self._value = value
+
+            def scalars(self) -> Any:
+                class _Scalars:
+                    def __init__(self, v: list[Any]) -> None:
+                        self._v = v
+
+                    def all(self) -> list[Any]:
+                        return self._v
+
+                return _Scalars(self._value)
+
+        if "oe_finance_invoice" in target and "oe_finance_budget" not in target:
+            return _Result(self.paid_invoices)
+        return _Result(self.budgets)
+
+
+def _make_service_with_session(
+    paid_invoices: list[Any], budgets: list[Any]
+) -> FinanceService:
+    service = _make_service()
+    service.session = _ExecuteStubSession(paid_invoices, budgets)  # type: ignore[assignment]
+    return service
+
+
+def _make_line_item(
+    *, amount: str, wbs_id: str | None = None, cost_category: str | None = None
+) -> SimpleNamespace:
+    return SimpleNamespace(
+        id=uuid.uuid4(),
+        amount=amount,
+        wbs_id=wbs_id,
+        cost_category=cost_category,
+    )
+
+
+def _make_paid_invoice(
+    *, project_id: uuid.UUID, amount_total: str, items: list[Any] | None = None
+) -> SimpleNamespace:
+    return SimpleNamespace(
+        id=uuid.uuid4(),
+        project_id=project_id,
+        status="paid",
+        amount_total=amount_total,
+        invoice_number="INV-TEST",
+        line_items=list(items or []),
+    )
+
+
+def _make_budget_row(
+    *, project_id: uuid.UUID, wbs_id: str | None = None, category: str | None = None
+) -> SimpleNamespace:
+    return SimpleNamespace(
+        id=uuid.uuid4(),
+        project_id=project_id,
+        wbs_id=wbs_id,
+        category=category,
+        actual="0",
+    )
+
+
+@pytest.mark.asyncio
+async def test_pay_invoice_distributes_actuals_by_category() -> None:
+    """Two budget rows ('material' and 'labor') must receive DIFFERENT
+    actuals pulled from matching invoice-line items — not the combined total."""
+    pid = uuid.uuid4()
+
+    paid_invoice = _make_paid_invoice(
+        project_id=pid,
+        amount_total="1000",
+        items=[
+            _make_line_item(amount="700", cost_category="material"),
+            _make_line_item(amount="300", cost_category="labor"),
+        ],
+    )
+    budget_material = _make_budget_row(project_id=pid, category="material")
+    budget_labor = _make_budget_row(project_id=pid, category="labor")
+
+    service = _make_service_with_session([paid_invoice], [budget_material, budget_labor])
+
+    # Seed an approved invoice and its lookup so pay_invoice can run.
+    approved_invoice = SimpleNamespace(
+        id=uuid.uuid4(),
+        project_id=pid,
+        status="approved",
+        amount_total="1000",
+        invoice_number="INV-SEED",
+        currency_code="EUR",
+    )
+    service.invoices.rows[approved_invoice.id] = approved_invoice  # type: ignore[attr-defined]
+
+    await service.pay_invoice(approved_invoice.id)
+
+    assert budget_material.actual == "700"
+    assert budget_labor.actual == "300"
+
+
+@pytest.mark.asyncio
+async def test_pay_invoice_unmatched_category_lands_in_catch_all() -> None:
+    """Line items with a cost_category that has NO matching budget row
+    fall through to the ``(None, None)`` bucket if one exists — otherwise
+    they are dropped (logged elsewhere)."""
+    pid = uuid.uuid4()
+
+    paid_invoice = _make_paid_invoice(
+        project_id=pid,
+        amount_total="500",
+        items=[_make_line_item(amount="500", cost_category="material")],
+    )
+    uncategorized_budget = _make_budget_row(project_id=pid, category=None)
+    # No matching budget row for "material".
+
+    service = _make_service_with_session([paid_invoice], [uncategorized_budget])
+
+    approved_invoice = SimpleNamespace(
+        id=uuid.uuid4(),
+        project_id=pid,
+        status="approved",
+        amount_total="500",
+        invoice_number="INV-UNMATCHED",
+        currency_code="EUR",
+    )
+    service.invoices.rows[approved_invoice.id] = approved_invoice  # type: ignore[attr-defined]
+
+    await service.pay_invoice(approved_invoice.id)
+
+    # 500 went to the 'material' bucket that has no matching budget; the
+    # catch-all budget (category=None) stays at 0.
+    assert uncategorized_budget.actual == "0"
+
+
+@pytest.mark.asyncio
+async def test_pay_invoice_no_line_items_falls_to_catch_all() -> None:
+    """Invoice without line items — entire amount_total → ``(None, None)`` bucket."""
+    pid = uuid.uuid4()
+
+    paid_invoice = _make_paid_invoice(
+        project_id=pid,
+        amount_total="2500",
+        items=[],  # no breakdown
+    )
+    catch_all_budget = _make_budget_row(project_id=pid, wbs_id=None, category=None)
+
+    service = _make_service_with_session([paid_invoice], [catch_all_budget])
+
+    approved_invoice = SimpleNamespace(
+        id=uuid.uuid4(),
+        project_id=pid,
+        status="approved",
+        amount_total="2500",
+        invoice_number="INV-LUMP",
+        currency_code="EUR",
+    )
+    service.invoices.rows[approved_invoice.id] = approved_invoice  # type: ignore[attr-defined]
+
+    await service.pay_invoice(approved_invoice.id)
+    assert catch_all_budget.actual == "2500"
+
+
+@pytest.mark.asyncio
+async def test_pay_invoice_does_not_write_total_to_every_budget_row() -> None:
+    """BUG-346 regression guard: two unrelated budget rows must NOT both
+    receive the project grand-total."""
+    pid = uuid.uuid4()
+
+    paid_invoice = _make_paid_invoice(
+        project_id=pid,
+        amount_total="1000",
+        items=[_make_line_item(amount="1000", cost_category="material")],
+    )
+    budget_material = _make_budget_row(project_id=pid, category="material")
+    budget_labor = _make_budget_row(project_id=pid, category="labor")
+
+    service = _make_service_with_session([paid_invoice], [budget_material, budget_labor])
+
+    approved_invoice = SimpleNamespace(
+        id=uuid.uuid4(),
+        project_id=pid,
+        status="approved",
+        amount_total="1000",
+        invoice_number="INV-REGRESSION",
+        currency_code="EUR",
+    )
+    service.invoices.rows[approved_invoice.id] = approved_invoice  # type: ignore[attr-defined]
+
+    await service.pay_invoice(approved_invoice.id)
+
+    assert budget_material.actual == "1000"
+    assert budget_labor.actual == "0"  # stays zero — the bug would have written 1000 here

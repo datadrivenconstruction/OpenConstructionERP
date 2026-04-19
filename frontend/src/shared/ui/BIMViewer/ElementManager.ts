@@ -479,7 +479,9 @@ export class ElementManager {
           }
         },
         (error) => {
-          console.warn('Failed to load DAE geometry:', error);
+          if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
+            console.warn('Failed to load DAE geometry:', error);
+          }
           reject(error);
         },
       );
