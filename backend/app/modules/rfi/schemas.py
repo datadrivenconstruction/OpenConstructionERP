@@ -4,7 +4,22 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+def _sanitise_rfi_text(value: str | None) -> str | None:
+    """Strip XSS payloads from RFI free-text fields (BUG-389).
+
+    RFIs are often rendered in email digests (raw HTML) and PDF reports,
+    so a ``<script>`` / event-handler payload smuggled into a subject
+    would turn into a real XSS vector. Sanitise at the schema layer so
+    the DB never stores the payload.
+    """
+    if value is None:
+        return value
+    from app.core.sanitize import strip_dangerous_html
+
+    return strip_dangerous_html(value)
 
 
 class RFICreate(BaseModel):
@@ -15,6 +30,11 @@ class RFICreate(BaseModel):
     project_id: UUID
     subject: str = Field(..., min_length=1, max_length=500)
     question: str = Field(..., min_length=1, max_length=10000)
+
+    @field_validator("subject", "question", mode="after")
+    @classmethod
+    def _sanitise(cls, v: str) -> str:
+        return _sanitise_rfi_text(v) or ""
     raised_by: UUID | None = None  # Auto-filled from authenticated user if not provided
     assigned_to: str | None = Field(default=None, max_length=36)
     status: str = Field(
@@ -40,6 +60,12 @@ class RFIUpdate(BaseModel):
 
     subject: str | None = Field(default=None, min_length=1, max_length=500)
     question: str | None = Field(default=None, min_length=1, max_length=10000)
+
+    @field_validator("subject", "question", mode="after")
+    @classmethod
+    def _sanitise(cls, v: str | None) -> str | None:
+        return _sanitise_rfi_text(v)
+
     assigned_to: str | None = Field(default=None, max_length=36)
     status: str | None = Field(
         default=None,
@@ -61,6 +87,11 @@ class RFIRespondRequest(BaseModel):
     """Request body for responding to an RFI."""
 
     official_response: str = Field(..., min_length=1, max_length=10000)
+
+    @field_validator("official_response", mode="after")
+    @classmethod
+    def _sanitise(cls, v: str) -> str:
+        return _sanitise_rfi_text(v) or ""
 
 
 class RFIResponse(BaseModel):

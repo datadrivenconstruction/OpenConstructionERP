@@ -288,7 +288,17 @@ def _lancedb_status() -> dict[str, Any]:
         # LAZY checks — never instantiate heavy torch/qdrant during status.
         # Loading torch during startup on Windows + Anaconda can trigger
         # a silent MKL/OMP DLL conflict that terminates the process.
-        info["can_restore_snapshots"] = _has_module("qdrant_client")
+        #
+        # ``can_restore_snapshots`` is False on LanceDB by design: the
+        # Qdrant snapshot endpoint (3072-d embeddings, ~1.1 GB per region)
+        # requires a running Qdrant server. Having ``qdrant_client``
+        # pip-installed doesn't imply Qdrant is reachable — and the UI
+        # used the flag to route clicks into the Qdrant path, which
+        # raised "Qdrant not available" from /vector/restore-snapshot on
+        # every region click. The LanceDB path (/vector/load-github)
+        # already covers all regions with 384-d embeddings; snapshots
+        # are a Qdrant-only feature.
+        info["can_restore_snapshots"] = False
         info["can_generate_locally"] = _has_module("sentence_transformers")
         info["embedding_dim"] = EMBEDDING_DIM
         info["backend"] = "lancedb"

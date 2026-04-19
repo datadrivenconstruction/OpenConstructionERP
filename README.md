@@ -473,13 +473,53 @@ OpenConstructionERP includes security hardening for production deployments:
 
 Report vulnerabilities via [GitHub Issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues) (private reports supported).
 
+## AI disclaimer
+
+AI suggestions produced by this software are preliminary estimates. A
+qualified construction-estimation professional must verify all
+quantities, classifications, and costs before any contractual or
+tender-submission use. See [NOTICE](NOTICE) and [TERMS.md](TERMS.md) §4.
+
+## Trademarks
+
+All product names, logos, and trademarks referenced in this repository
+are property of their respective owners. Comparative references to
+commercial products (e.g., RIB iTWO, Exactal CostX, Sage Estimating,
+Bluebeam) reflect publicly available feature information at the time of
+publication and are used for fair comparative purposes. OpenConstructionERP
+is an independent project and is not affiliated with, endorsed by, or
+sponsored by any of the trademark owners named. Full attributions in
+[NOTICE](NOTICE).
+
+## Export control
+
+This software contains cryptographic functionality (bcrypt password
+hashing, JWT signing). Export is classified under **US EAR 740.17** (TSU
+mass-market exemption) and **EU Regulation 2021/821** (dual-use). The
+Software is **not authorised** for download, use, or re-export to
+jurisdictions subject to comprehensive OFAC sanctions (currently Cuba,
+Iran, North Korea, Syria, and the Crimea / Donetsk / Luhansk regions of
+Ukraine). See [NOTICE](NOTICE) for the full notice.
+
 ## License
 
-**AGPL-3.0** — see [LICENSE](LICENSE).
+**AGPL-3.0** — see [LICENSE](LICENSE). Third-party attributions in
+[NOTICE](NOTICE).
 
-You can freely use, modify, and distribute this software. If you modify and deploy it as a service, you must make your source code available under the same license.
+You can freely use, modify, and distribute this software. If you modify
+and deploy it as a service, AGPL §13 requires you to make the
+corresponding source code available under the same licence.
 
-For commercial licensing without AGPL obligations, contact [info@datadrivenconstruction.io](mailto:info@datadrivenconstruction.io).
+For **commercial licensing** without AGPL obligations, see
+[COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md) or contact
+[info@datadrivenconstruction.io](mailto:info@datadrivenconstruction.io).
+
+## Privacy and terms
+
+- [PRIVACY.md](PRIVACY.md) — GDPR / UK DPA / CCPA / LGPD baseline
+- [TERMS.md](TERMS.md) — terms of use for the hosted instance
+- [COOKIES.md](COOKIES.md) — browser storage inventory
+- [SECURITY.md](SECURITY.md) — responsible disclosure
 
 ---
 
@@ -489,6 +529,6 @@ For commercial licensing without AGPL obligations, contact [info@datadrivenconst
 
 [Website](https://datadrivenconstruction.io) · [YouTube](https://www.youtube.com/@datadrivenconstruction) · [GitHub](https://github.com/datadrivenconstruction) · [Telegram](https://t.me/datadrivenconstruction)
 
-<sub>OpenConstructionERP v1.7.0 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
+<sub>OpenConstructionERP v1.9.5 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
 
 </div>

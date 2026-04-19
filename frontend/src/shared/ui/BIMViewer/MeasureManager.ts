@@ -29,6 +29,10 @@ export interface MeasureManagerCallbacks {
   onStateChange?: (state: MeasureState) => void;
   onMeasurementAdded?: (measurement: Measurement) => void;
   onMeasurementsChanged?: (count: number) => void;
+  /** Fired when a click while the tool is active missed the model geometry.
+   *  The viewer surfaces this as a toast so users know their click registered
+   *  but did not land on a raycastable surface. */
+  onMiss?: () => void;
 }
 
 const DASH_COLOR = 0xffd400;
@@ -44,7 +48,6 @@ function randomId(): string {
 
 export class MeasureManager {
   private sceneManager: SceneManager;
-  private elementManager: ElementManager;
   private callbacks: MeasureManagerCallbacks;
   private raycaster = new THREE.Raycaster();
 
@@ -68,11 +71,13 @@ export class MeasureManager {
 
   constructor(
     sceneManager: SceneManager,
-    elementManager: ElementManager,
+    // Kept for call-site compatibility; the ruler now raycasts against the
+    // full scene graph so BatchedMesh hits register without touching the
+    // ElementManager registry.
+    _elementManager: ElementManager,
     callbacks: MeasureManagerCallbacks = {},
   ) {
     this.sceneManager = sceneManager;
-    this.elementManager = elementManager;
     this.callbacks = callbacks;
     this.canvas = sceneManager.renderer.domElement;
 
@@ -238,7 +243,10 @@ export class MeasureManager {
     if (dist > this.CLICK_THRESHOLD || elapsed > this.CLICK_TIME_LIMIT) return;
 
     const hitPoint = this.raycastPoint(e);
-    if (!hitPoint) return;
+    if (!hitPoint) {
+      this.callbacks.onMiss?.();
+      return;
+    }
 
     if (!this._pendingPoint) {
       this._pendingPoint = hitPoint.clone();
@@ -271,17 +279,17 @@ export class MeasureManager {
       -((e.clientY - rect.top) / rect.height) * 2 + 1,
     );
     this.raycaster.setFromCamera(ndc, this.sceneManager.camera);
-    const targets = this.elementManager.getAllMeshes();
-    // Fall back to the whole scene — raycasts picked up BatchedMesh objects.
-    const baseTargets =
-      targets.length > 0
-        ? targets.filter((m) => m.visible)
-        : this.sceneManager.scene.children;
-    const hits = this.raycaster.intersectObjects(baseTargets, true);
+    // Recurse through the whole scene so BatchedMesh hits register — the
+    // individual per-element meshes returned by ElementManager.getAllMeshes()
+    // are removed from the scene graph after batching and have no valid
+    // world matrix, so raycasting directly against them returns nothing.
+    const hits = this.raycaster.intersectObjects(
+      this.sceneManager.scene.children,
+      true,
+    );
     for (const h of hits) {
-      if (!(h.object instanceof THREE.Line)) {
-        return h.point.clone();
-      }
+      if (!(h.object instanceof THREE.Mesh)) continue;
+      return h.point.clone();
     }
     return null;
   }

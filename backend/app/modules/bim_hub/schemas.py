@@ -520,6 +520,7 @@ class BIMElementGroupResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+    member_element_ids: list[UUID] = Field(default_factory=list)
 
 
 # ── Model schema introspection (RFC 24 — Quantity Rules editor) ──────────────

@@ -25,16 +25,21 @@ import { apiPost } from '@/shared/lib/api';
 import { fetchSearchStatus, type SearchStatusCollection } from '@/features/search/api';
 import { useToastStore } from '@/stores/useToastStore';
 
-/** Map of collection name → backend reindex endpoint path. */
+/** Map of collection name → backend reindex endpoint path.
+ *
+ * Paths are passed to ``apiPost`` which already prepends the ``/api``
+ * base URL, so they must start at ``/v1/...`` — not ``/api/v1/...``.
+ * A stray ``/api`` prefix here turned every reindex click into a 404
+ * hitting ``/api/api/v1/...`` ("Not Found" in the Settings toast). */
 const REINDEX_PATH: Record<string, string> = {
-  oe_boq_positions: '/api/v1/boq/vector/reindex/',
-  oe_documents: '/api/v1/documents/vector/reindex/',
-  oe_tasks: '/api/v1/tasks/vector/reindex/',
-  oe_risks: '/api/v1/risk/vector/reindex/',
-  oe_bim_elements: '/api/v1/bim_hub/vector/reindex/',
-  oe_requirements: '/api/v1/requirements/vector/reindex/',
-  oe_validation: '/api/v1/validation/vector/reindex/',
-  oe_chat: '/api/v1/erp_chat/vector/reindex/',
+  oe_boq_positions: '/v1/boq/vector/reindex/',
+  oe_documents: '/v1/documents/vector/reindex/',
+  oe_tasks: '/v1/tasks/vector/reindex/',
+  oe_risks: '/v1/risk/vector/reindex/',
+  oe_bim_elements: '/v1/bim_hub/vector/reindex/',
+  oe_requirements: '/v1/requirements/vector/reindex/',
+  oe_validation: '/v1/validation/vector/reindex/',
+  oe_chat: '/v1/erp_chat/vector/reindex/',
 };
 
 interface ReindexResult {

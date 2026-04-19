@@ -12,18 +12,34 @@ import {
   Type,
   ArrowRight,
   Square,
+  Circle,
+  Spline,
+  Minus,
 } from 'lucide-react';
 
-export type DwgTool = 'select' | 'pan' | 'distance' | 'area' | 'text_pin' | 'arrow' | 'rectangle';
+export type DwgTool =
+  | 'select'
+  | 'pan'
+  | 'distance'
+  | 'area'
+  | 'text_pin'
+  | 'arrow'
+  | 'rectangle'
+  | 'circle'
+  | 'polyline'
+  | 'line';
 
 const TOOLS: { id: DwgTool; icon: React.ElementType; labelKey: string; shortcut?: string }[] = [
   { id: 'select', icon: MousePointer2, labelKey: 'dwg_takeoff.tool_select', shortcut: 'V' },
   { id: 'pan', icon: Hand, labelKey: 'dwg_takeoff.tool_pan', shortcut: 'H' },
   { id: 'distance', icon: Ruler, labelKey: 'dwg_takeoff.tool_distance', shortcut: 'D' },
+  { id: 'line', icon: Minus, labelKey: 'dwg_takeoff.tool_line', shortcut: 'L' },
+  { id: 'polyline', icon: Spline, labelKey: 'dwg_takeoff.tool_polyline', shortcut: 'P' },
   { id: 'area', icon: PenTool, labelKey: 'dwg_takeoff.tool_area', shortcut: 'A' },
-  { id: 'text_pin', icon: Type, labelKey: 'dwg_takeoff.tool_text_pin', shortcut: 'T' },
+  { id: 'rectangle', icon: Square, labelKey: 'dwg_takeoff.tool_rectangle', shortcut: 'R' },
+  { id: 'circle', icon: Circle, labelKey: 'dwg_takeoff.tool_circle', shortcut: 'C' },
   { id: 'arrow', icon: ArrowRight, labelKey: 'dwg_takeoff.tool_arrow' },
-  { id: 'rectangle', icon: Square, labelKey: 'dwg_takeoff.tool_rectangle' },
+  { id: 'text_pin', icon: Type, labelKey: 'dwg_takeoff.tool_text_pin', shortcut: 'T' },
 ];
 
 const PRESET_COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899'];

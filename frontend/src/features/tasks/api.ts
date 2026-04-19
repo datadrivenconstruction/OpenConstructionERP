@@ -63,6 +63,10 @@ export interface CreateTaskPayload {
    *  added this column in v1.3.30; passing the field on create avoids the
    *  follow-up PATCH /tasks/{id}/bim-links round-trip. */
   bim_element_ids?: string[];
+  /** Free-form metadata stored alongside the task row. Used by the DWG
+   *  takeoff page to pin a task to `dwg_drawing_id` + `dwg_entity_ids`
+   *  without a dedicated backend column. */
+  metadata?: Record<string, unknown>;
 }
 
 export interface UpdateTaskPayload {

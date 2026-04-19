@@ -359,9 +359,14 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
   const { data: orders, isLoading } = useQuery({
     queryKey: ['procurement-po', projectId],
     queryFn: () =>
-      apiGet<{ items: PurchaseOrder[]; total: number }>(
+      apiGet<{ items: Array<PurchaseOrder & { vendor_contact_id?: string | null }>; total: number }>(
         `/v1/procurement/?project_id=${projectId}`,
-      ).then((res) => res.items),
+      ).then((res) =>
+        res.items.map((po) => ({
+          ...po,
+          vendor_name: po.vendor_name ?? po.vendor_contact_id ?? '',
+        })),
+      ),
   });
 
   const filtered = useMemo(() => {
@@ -370,8 +375,8 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
     const q = search.toLowerCase();
     return orders.filter(
       (po) =>
-        po.po_number.toLowerCase().includes(q) ||
-        po.vendor_name.toLowerCase().includes(q),
+        (po.po_number ?? '').toLowerCase().includes(q) ||
+        (po.vendor_name ?? '').toLowerCase().includes(q),
     );
   }, [orders, search]);
 

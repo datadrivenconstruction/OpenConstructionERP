@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Choose a direction — OpenConstructionERP /pro</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/pro/cinematic/assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500&family=Instrument+Serif:ital@1&family=Fraunces:ital,wght@1,300..500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg-0:#0a0a0b;--bg-1:#111114;--bg-2:#17171b;--bg-3:#1f1f24;
+    --ink-0:#fafafa;--ink-1:#d4d4d8;--ink-2:#a1a1aa;--ink-3:#71717a;
+    --line-0:rgba(255,255,255,.06);--line-1:rgba(255,255,255,.10);--line-2:rgba(255,255,255,.16);
+    --accent:#3b82f6;--grad:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899);
+    --ff-d:'Inter Tight',system-ui,sans-serif;--ff-b:'Inter',system-ui,sans-serif;
+    --ff-s:'Fraunces',Georgia,serif;--ff-m:'JetBrains Mono',monospace;
+  }
+  html{color-scheme:dark;-webkit-font-smoothing:antialiased}
+  body{
+    font-family:var(--ff-b);color:var(--ink-1);background:var(--bg-0);
+    min-height:100vh;overflow-x:hidden;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% 0%,rgba(59,130,246,.10),transparent 60%),
+      radial-gradient(ellipse 60% 50% at 20% 100%,rgba(139,92,246,.08),transparent 55%);
+  }
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity:.5;mix-blend-mode:overlay;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1440px;margin:0 auto;padding:clamp(60px,8vw,120px) clamp(24px,4vw,48px);position:relative;z-index:1}
+  .head{text-align:center;margin-bottom:56px}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--ff-m);font-size:11px;font-weight:500;
+    color:var(--ink-2);text-transform:uppercase;letter-spacing:.12em;
+    padding:6px 14px;border:1px solid var(--line-1);border-radius:999px;
+    background:rgba(22,22,26,.6);backdrop-filter:blur(8px);margin-bottom:24px;
+  }
+  .eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981}
+  h1{
+    font-family:var(--ff-d);font-weight:500;
+    font-size:clamp(36px,6vw,72px);line-height:.96;letter-spacing:-.045em;
+    color:var(--ink-0);max-width:22ch;margin:0 auto 20px;
+  }
+  h1 em{font-family:var(--ff-s);font-style:italic;font-weight:400;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.02em}
+  .lead{font-size:clamp(15px,1.3vw,18px);color:var(--ink-2);max-width:60ch;margin:0 auto;line-height:1.55}
+
+  .group-label{
+    display:flex;align-items:center;gap:14px;margin:72px auto 24px;max-width:1440px;
+  }
+  .group-label::before,.group-label::after{
+    content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--line-1),transparent);
+  }
+  .group-label span{
+    font-family:var(--ff-m);font-size:11px;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.14em;
+    padding:0 8px;
+  }
+
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:18px;
+  }
+  .card{
+    position:relative;display:flex;flex-direction:column;
+    border:1px solid var(--line-1);border-radius:18px;
+    background:var(--bg-2);overflow:hidden;
+    transition:all .4s cubic-bezier(.16,1,.3,1);
+    min-height:320px;
+    text-decoration:none;color:inherit;isolation:isolate;
+  }
+  .card:hover{border-color:var(--line-2);transform:translateY(-4px);box-shadow:0 24px 60px rgba(0,0,0,.4),0 0 0 1px var(--line-2)}
+  .card-preview{
+    flex:1;position:relative;overflow:hidden;
+    min-height:180px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .card-meta{
+    padding:16px 20px 20px;border-top:1px solid var(--line-0);
+    background:var(--bg-1);
+  }
+  .card-tag{
+    font-family:var(--ff-m);font-size:10px;color:var(--ink-3);
+    text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .card-tag::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.6}
+  .card-title{
+    font-family:var(--ff-d);font-weight:600;font-size:18px;
+    letter-spacing:-.02em;color:var(--ink-0);margin-bottom:4px;
+  }
+  .card-desc{font-size:12px;color:var(--ink-2);line-height:1.5;min-height:3.9em}
+  .card-cta{
+    margin-top:10px;display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--ff-m);font-size:10px;color:var(--ink-1);
+    text-transform:uppercase;letter-spacing:.12em;
+    border-bottom:1px dashed var(--line-2);padding-bottom:2px;
+    width:fit-content;
+  }
+  .card:hover .card-cta{color:var(--ink-0);border-color:var(--ink-1)}
+  .card-cta svg{width:10px;height:10px;transition:transform .3s}
+  .card:hover .card-cta svg{transform:translateX(3px)}
+  .card-badge{
+    position:absolute;top:10px;right:10px;z-index:3;
+    font-family:var(--ff-m);font-size:9px;font-weight:500;
+    padding:3px 8px;border-radius:999px;
+    background:rgba(0,0,0,.55);color:#fff;
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.18);
+    letter-spacing:.08em;text-transform:uppercase;
+  }
+  .card-badge.themed{background:rgba(251,191,36,.2);color:#fbbf24;border-color:rgba(251,191,36,.35)}
+
+  /* ——————— variant previews ——————— */
+
+  /* 1. CINEMATIC */
+  .pv-cinematic{
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 50%,rgba(59,130,246,.22),transparent 60%),
+      radial-gradient(ellipse 50% 40% at 70% 30%,rgba(139,92,246,.18),transparent 55%),
+      #0a0a0b;
+  }
+  .pv-cinematic::before{
+    content:'';position:absolute;inset:0;
+    background:
+      linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px) 0 0/32px 32px,
+      linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px) 0 0/32px 32px;
+    mask-image:radial-gradient(ellipse 70% 60% at 50% 50%,#000,transparent 80%);
+  }
+  .pv-cinematic-stack{position:relative;display:flex;align-items:flex-end;gap:4px;perspective:600px;transform:rotateX(14deg)}
+  .pv-cinematic-stack span{display:block;width:22px;background:linear-gradient(180deg,#3b82f6,#8b5cf6);border:1px solid rgba(255,255,255,.14);border-radius:2px;box-shadow:0 0 14px rgba(59,130,246,.4)}
+
+  /* 2. BLUEPRINT */
+  .pv-blueprint{background:#f5f1e8;color:#1a2d5a;position:relative}
+  .pv-blueprint::before{content:'';position:absolute;inset:0;background:linear-gradient(rgba(26,45,90,.08) 1px,transparent 1px) 0 0/20px 20px,linear-gradient(90deg,rgba(26,45,90,.08) 1px,transparent 1px) 0 0/20px 20px}
+  .pv-blueprint svg{position:relative;z-index:1;width:70%;max-width:180px}
+
+  /* 3. BRUTALIST */
+  .pv-brutalist{background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--ff-m);font-size:9px;line-height:1.1;padding:16px;position:relative}
+  .pv-brutalist::after{content:'';position:absolute;top:12px;right:12px;width:8px;height:8px;background:#ccff00;border-radius:50%;box-shadow:0 0 12px #ccff00;animation:brblink 1.4s step-end infinite}
+  @keyframes brblink{50%{opacity:0}}
+  .pv-brutalist pre{font-family:inherit;white-space:pre;font-weight:500;letter-spacing:.02em}
+
+  /* 4. EDITORIAL */
+  .pv-editorial{background:linear-gradient(180deg,#fafaf7 0%,#f0ece4 100%);color:#0f1114;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .pv-editorial-title{font-family:var(--ff-s);font-style:italic;font-weight:400;font-size:44px;line-height:.9;letter-spacing:-.02em;color:#0f1114;text-align:center}
+  .pv-editorial-title span{font-family:var(--ff-d);font-style:normal;font-weight:550;color:#3b6db7}
+  .pv-editorial::after{content:'';position:absolute;bottom:-20%;right:-10%;width:60%;height:60%;border-radius:50%;background:radial-gradient(circle,rgba(59,109,183,.14),transparent 70%);filter:blur(30px)}
+
+  /* 5. VIBRANT */
+  .pv-vibrant{background:#fbbf24;color:#0a0a0b;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .pv-vibrant::before{content:'';position:absolute;top:-30%;left:-10%;width:60%;height:140%;background:#ec4899;border-radius:50%;transform:rotate(-18deg)}
+  .pv-vibrant::after{content:'';position:absolute;bottom:-40%;right:-20%;width:70%;height:80%;background:#4338ca;border-radius:50%}
+  .pv-vibrant-text{position:relative;z-index:1;font-family:var(--ff-d);font-weight:800;font-size:40px;line-height:.85;letter-spacing:-.04em;color:#fff;text-align:center;mix-blend-mode:difference}
+
+  /* 6. DAYLIGHT — light cinematic */
+  .pv-daylight{background:linear-gradient(180deg,#faf8f3,#f0ece3);color:#14161a;position:relative;display:flex;align-items:center;justify-content:center}
+  .pv-daylight::before{content:'';position:absolute;inset:0;background:linear-gradient(rgba(20,22,26,.05) 1px,transparent 1px) 0 0/24px 24px,linear-gradient(90deg,rgba(20,22,26,.05) 1px,transparent 1px) 0 0/24px 24px;mask-image:radial-gradient(ellipse 70% 60% at 50% 50%,#000,transparent 80%)}
+  .pv-daylight-stack{position:relative;display:flex;align-items:flex-end;gap:4px;perspective:600px;transform:rotateX(14deg);z-index:1}
+  .pv-daylight-stack span{display:block;width:22px;background:linear-gradient(180deg,#1e4a8a,#a8724e);border:1px solid rgba(20,22,26,.2);border-radius:2px;box-shadow:0 0 14px rgba(30,74,138,.3)}
+
+  /* 7. SPLIT — two-column */
+  .pv-split{display:grid;grid-template-columns:1fr 1fr;background:#faf8f3;color:#14161a;position:relative;overflow:hidden}
+  .pv-split-l{display:flex;align-items:center;justify-content:center;padding:16px;background:#faf8f3}
+  .pv-split-r{background:#f0ece3;border-left:1px solid rgba(20,22,26,.1);display:flex;align-items:center;justify-content:center;position:relative}
+  .pv-split-title{font-family:var(--ff-s);font-style:italic;font-size:28px;line-height:.9;color:#1e4a8a;text-align:left;font-weight:400}
+  .pv-split-3d{position:relative;display:flex;align-items:flex-end;gap:2px;transform:rotateX(18deg);perspective:400px}
+  .pv-split-3d span{display:block;width:12px;background:transparent;border:1px solid #1e4a8a;border-radius:1px}
+
+  /* 8. FOCUS — screenshot-first */
+  .pv-focus{background:#faf8f3;color:#14161a;position:relative;display:flex;align-items:flex-end;justify-content:center;padding:16px 16px 0;overflow:hidden}
+  .pv-focus-label{position:absolute;top:14px;left:14px;font-family:var(--ff-m);font-size:9px;color:#787a82;letter-spacing:.12em;text-transform:uppercase}
+  .pv-focus-label::before{content:'';width:5px;height:5px;background:#a8724e;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}
+  .pv-focus-screen{
+    width:78%;aspect-ratio:16/10;background:#fff;border:1px solid rgba(20,22,26,.12);border-radius:8px 8px 0 0;
+    box-shadow:0 8px 24px rgba(20,22,26,.12);
+    background-image:
+      linear-gradient(180deg,rgba(59,109,183,.08) 0%,transparent 30%),
+      repeating-linear-gradient(90deg,transparent 0 30%,rgba(20,22,26,.04) 30% 30.5%,transparent 30.5% 100%);
+    position:relative;transform:perspective(800px) rotateX(4deg);transform-origin:bottom
+  }
+  .pv-focus-screen::before{content:'';position:absolute;top:0;left:0;right:0;height:16px;background:linear-gradient(180deg,#e8e3d7,transparent);border-radius:8px 8px 0 0}
+  .pv-focus-screen::after{content:'•  •  •';position:absolute;top:2px;left:6px;font-size:8px;color:#787a82;letter-spacing:2px}
+
+  /* 9. ATELIER — minimal */
+  .pv-atelier{background:#fafaf6;color:#0a0b0d;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;gap:8px}
+  .pv-atelier-num{position:absolute;top:12px;left:14px;font-family:var(--ff-s);font-style:italic;font-size:14px;color:#9c6a42}
+  .pv-atelier-mark{position:relative;display:flex;flex-direction:column-reverse;align-items:center;gap:2px}
+  .pv-atelier-mark span{display:block;background:transparent;border:1px solid #0a0b0d;height:7px}
+  .pv-atelier-mark span:nth-child(1){width:42px}
+  .pv-atelier-mark span:nth-child(2){width:30px}
+  .pv-atelier-mark span:nth-child(3){width:38px;background:#9c6a42;border-color:#9c6a42;opacity:.6}
+  .pv-atelier-mark span:nth-child(4){width:24px}
+  .pv-atelier-mark span:nth-child(5){width:18px}
+  .pv-atelier-txt{font-family:var(--ff-s);font-style:italic;font-size:20px;color:#0a0b0d;letter-spacing:-.02em}
+
+  .foot{
+    text-align:center;margin-top:80px;
+    color:var(--ink-3);font-size:13px;font-family:var(--ff-m);
+    display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap
+  }
+  .foot a{color:var(--ink-2);border-bottom:1px dashed var(--line-2);padding-bottom:2px;transition:color .2s}
+  .foot a:hover{color:var(--ink-0)}
+
+  @media(max-width:640px){
+    h1{font-size:38px}
+    .grid{grid-template-columns:1fr}
+    .card{min-height:280px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <span class="eyebrow">15 directions · pick one</span>
+    <h1>Choose <em>how it looks</em>.</h1>
+    <p class="lead">
+      Fifteen visual directions: five originals, four Cinematic×Editorial hybrids,
+      four modern-blue Daylight evolutions, two airy Aerial evolutions with
+      17-category data labels. All hybrids have light default + dark toggle.
+    </p>
+  </div>
+
+  <!-- ═════════ AERIAL EVOLUTIONS (airy pastel/gradient, 17 data categories) ═════════ -->
+  <div class="group-label"><span>Aerial evolutions — airy palettes · rich data (17 categories)</span></div>
+  <div class="grid">
+
+    <a class="card" href="/pro/cloud/">
+      <span class="card-badge themed">LIGHT + DARK</span>
+      <div class="card-preview" style="background:linear-gradient(135deg,#fdfcf9 0%,#f8f5ee 50%,#ede9fe 100%);color:#1f1d28;position:relative;overflow:hidden;display:flex;align-items:center">
+        <div style="position:absolute;top:-20%;right:-20%;width:60%;height:80%;background:radial-gradient(circle,rgba(167,139,250,.25),transparent 70%);filter:blur(20px)"></div>
+        <div style="position:absolute;bottom:-20%;left:-10%;width:50%;height:60%;background:radial-gradient(circle,rgba(251,146,60,.15),transparent 70%);filter:blur(20px)"></div>
+        <div style="font-family:var(--ff-s);font-style:italic;font-size:20px;color:#1f1d28;padding-left:16px;z-index:2;letter-spacing:-.02em">Estimate at<br><span style="color:#a78bfa">the speed</span>.</div>
+        <div style="position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;align-items:flex-end;gap:2px;opacity:.45">
+          <span style="display:block;width:7px;height:18px;border:1px solid #6b6874;background:rgba(240,228,214,.5)"></span>
+          <span style="display:block;width:7px;height:34px;border:1px solid #6b6874;background:rgba(228,223,232,.5)"></span>
+          <span style="display:block;width:7px;height:52px;border:1px solid #6b6874;background:rgba(229,224,212,.5)"></span>
+          <span style="display:block;width:7px;height:38px;border:1px solid #6b6874;background:rgba(240,228,214,.5)"></span>
+          <span style="display:block;width:7px;height:22px;border:1px solid #6b6874;background:rgba(228,223,232,.5)"></span>
+        </div>
+        <div style="position:absolute;right:10px;top:20px;font-family:var(--ff-m);font-size:7px;padding:3px 6px;background:#fff;border-left:3px solid #fb923c;border-radius:3px;color:#1f1d28">€ 4.28M</div>
+        <div style="position:absolute;right:90px;top:60px;font-family:var(--ff-m);font-size:7px;padding:3px 6px;background:#fff;border-left:3px solid #a78bfa;border-radius:3px;color:#1f1d28">12,840 m²</div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#a78bfa">14 · Cloud</div>
+        <div class="card-title">Airy pastels · centered text</div>
+        <div class="card-desc">Cream + lavender + peach + mint. Text on left-center, city floats right. 14 labels in 14 pastel tints.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+    <a class="card" href="/pro/breeze/">
+      <span class="card-badge themed">LIGHT + DARK · 17 LAYERS</span>
+      <div class="card-preview" style="background:linear-gradient(135deg,#fef8f3 0%,#fff2e6 30%,#fdf5e8 60%,#e8f5f1 100%);color:#1c1e26;position:relative;overflow:hidden;display:grid;grid-template-columns:1.1fr 1fr">
+        <div style="display:flex;align-items:center;padding:14px;font-family:var(--ff-d);font-weight:500;font-size:16px;color:#1c1e26;letter-spacing:-.02em;line-height:1.05">the<br><em style="font-family:var(--ff-s);font-style:italic;color:#fb7185">speed</em><br>of thought.</div>
+        <div style="background:#fff;border-radius:16px;margin:12px;box-shadow:0 12px 32px -8px rgba(251,113,133,.2),0 4px 12px rgba(20,184,166,.1);position:relative;overflow:hidden;border:1px solid rgba(28,30,38,.08)">
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:flex-end;gap:1px;opacity:.5">
+            <span style="display:block;width:5px;height:22px;border:1px solid #1c1e26;background:rgba(240,229,216,.4)"></span>
+            <span style="display:block;width:5px;height:42px;border:1px solid #1c1e26;background:rgba(232,235,230,.4)"></span>
+            <span style="display:block;width:5px;height:58px;border:1px solid #1c1e26;background:rgba(245,226,221,.4)"></span>
+            <span style="display:block;width:5px;height:36px;border:1px solid #1c1e26;background:rgba(240,229,216,.4)"></span>
+            <span style="display:block;width:5px;height:22px;border:1px solid #1c1e26;background:rgba(232,235,230,.4)"></span>
+          </div>
+          <div style="position:absolute;top:6px;left:6px;font-family:var(--ff-m);font-size:6px;padding:2px 5px;background:#fff;border-left:2px solid #fb7185;border-radius:2px">€4.28M</div>
+          <div style="position:absolute;top:24px;right:6px;font-family:var(--ff-m);font-size:6px;padding:2px 5px;background:#fff;border-left:2px solid #14b8a6;border-radius:2px">520 m³</div>
+          <div style="position:absolute;bottom:24px;left:6px;font-family:var(--ff-m);font-size:6px;padding:2px 5px;background:#fff;border-left:2px solid #f59e0b;border-radius:2px">A++ 24</div>
+          <div style="position:absolute;bottom:6px;right:6px;font-family:var(--ff-m);font-size:6px;padding:2px 5px;background:#fff;border-left:2px solid #8b5cf6;border-radius:2px">62% built</div>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#fb7185">15 · Breeze</div>
+        <div class="card-title">Warm→cool gradient · 17 data layers</div>
+        <div class="card-desc">Peach→mint gradient. Floating white panel with 17 labels: cost, area, volume, BOQ, carbon, AI, DIN, energy, tender, permit, region…</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ═════════ DAYLIGHT EVOLUTIONS (modern blue, distributed 3D + labels) ═════════ -->
+  <div class="group-label"><span>Daylight evolutions — modern blue · distributed 3D · cost labels</span></div>
+  <div class="grid">
+
+    <a class="card" href="/pro/sky/">
+      <span class="card-badge themed">LIGHT + DARK</span>
+      <div class="card-preview" style="background:linear-gradient(180deg,#f0f9ff,#e0f2fe);color:#0c1729;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:flex-end;padding:16px">
+        <div style="font-family:var(--ff-s);font-style:italic;font-size:22px;color:#0284c7;position:absolute;left:14px;top:18px;letter-spacing:-.02em">the<br>speed.</div>
+        <div style="position:relative;display:flex;align-items:flex-end;gap:1px;transform:perspective(400px) rotateX(12deg);opacity:.85">
+          <span style="display:block;width:8px;height:16px;border:1px solid #0284c7;background:rgba(2,132,199,.08)"></span>
+          <span style="display:block;width:8px;height:28px;border:1px solid #0284c7;background:rgba(2,132,199,.08)"></span>
+          <span style="display:block;width:8px;height:56px;border:1px solid #0284c7;background:rgba(2,132,199,.08)"></span>
+          <span style="display:block;width:8px;height:84px;border:1px solid #0284c7;background:rgba(2,132,199,.08)"></span>
+          <span style="display:block;width:8px;height:56px;border:1px solid #0284c7;background:rgba(2,132,199,.08)"></span>
+          <span style="display:block;width:8px;height:28px;border:1px solid #0284c7;background:rgba(2,132,199,.08)"></span>
+          <span style="display:block;width:8px;height:12px;border:1px solid #0284c7;background:rgba(2,132,199,.08)"></span>
+        </div>
+        <div style="position:absolute;bottom:14px;left:14px;font-family:var(--ff-m);font-size:8px;padding:3px 6px;background:rgba(255,255,255,.85);border:1px solid rgba(2,132,199,.25);border-radius:4px;color:#0284c7">€ 4.2M · 22 fl</div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#0284c7">10 · Sky</div>
+        <div class="card-title">Sky blue · split + labels</div>
+        <div class="card-desc">Tapered skyscraper + 7 satellite buildings on sky-blue palette. Text left, 3D right, floating cost labels.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+    <a class="card" href="/pro/cobalt/">
+      <span class="card-badge themed">LIGHT + DARK</span>
+      <div class="card-preview" style="background:linear-gradient(180deg,#f8fafc,#eff6ff);color:#020617;position:relative;overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:0 0 40%;display:flex;align-items:center;justify-content:center;font-family:var(--ff-d);font-weight:500;font-size:18px;color:#020617;letter-spacing:-.02em">the <em style="font-family:var(--ff-s);font-style:italic;color:#2563eb">speed.</em></div>
+        <div style="flex:1;margin:0 14px 14px;border-radius:10px;background:#0a1628;position:relative;overflow:hidden;border:1px solid rgba(37,99,235,.3)">
+          <div style="position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:flex;align-items:flex-end;gap:1px">
+            <span style="display:block;width:6px;height:22px;border:1px solid #60a5fa;background:rgba(96,165,250,.1)"></span>
+            <span style="display:block;width:6px;height:42px;border:1px solid #60a5fa;background:rgba(96,165,250,.1)"></span>
+            <span style="display:block;width:6px;height:56px;border:1px solid #60a5fa;background:rgba(96,165,250,.1)"></span>
+            <span style="display:block;width:6px;height:38px;border:1px solid #60a5fa;background:rgba(96,165,250,.1)"></span>
+            <span style="display:block;width:6px;height:24px;border:1px solid #60a5fa;background:rgba(96,165,250,.1)"></span>
+          </div>
+          <div style="position:absolute;top:6px;left:8px;font-family:var(--ff-m);font-size:7px;color:#60a5fa;letter-spacing:.1em">● LIVE · BUILDING</div>
+          <div style="position:absolute;top:22px;right:8px;font-family:var(--ff-m);font-size:7px;padding:2px 5px;background:rgba(10,22,40,.85);border:1px solid rgba(96,165,250,.3);border-radius:3px;color:#f8fafc">312 BOQ</div>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#2563eb">11 · Cobalt</div>
+        <div class="card-title">Cobalt · stacked cinema panel</div>
+        <div class="card-desc">Text above, dark framed 3D panel below with construction simulation. Electric blue. Live progress fill.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+    <a class="card" href="/pro/studio/">
+      <span class="card-badge themed">LIGHT + DARK</span>
+      <div class="card-preview" style="background:#fff;color:#0f172a;position:relative;overflow:hidden;display:grid;grid-template-columns:55fr 45fr">
+        <div style="display:flex;align-items:center;padding:14px;font-family:var(--ff-d);font-weight:500;font-size:16px;color:#0f172a;letter-spacing:-.02em;line-height:1.1">the <em style="font-family:var(--ff-s);font-style:italic;color:#2563eb">speed</em><br>of thought.</div>
+        <div style="background:linear-gradient(135deg,#0c1e3e,#142e5c,#0a1628);border-top-left-radius:12px;border-bottom-left-radius:12px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+          <div style="display:flex;align-items:flex-end;gap:1px">
+            <span style="display:block;width:7px;height:32px;border:1px solid #38bdf8;background:rgba(56,189,248,.15)"></span>
+            <span style="display:block;width:7px;height:56px;border:1px solid #38bdf8;background:rgba(56,189,248,.15)"></span>
+            <span style="display:block;width:7px;height:72px;border:1px solid #38bdf8;background:rgba(6,182,212,.2)"></span>
+            <span style="display:block;width:7px;height:44px;border:1px solid #38bdf8;background:rgba(139,92,246,.2)"></span>
+          </div>
+          <div style="position:absolute;top:6px;left:8px;font-family:var(--ff-m);font-size:6px;color:#38bdf8;letter-spacing:.1em">● STUDIO · LIVE</div>
+          <div style="position:absolute;bottom:6px;right:8px;font-family:var(--ff-m);font-size:6px;color:rgba(203,213,225,.6)">60.0 fps</div>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#2563eb">12 · Studio</div>
+        <div class="card-title">Studio · electric + violet rim</div>
+        <div class="card-desc">60/40 split. Cinematic navy monitor with asymmetric tower, violet rim light, orbiting drones. AEC-studio feel.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+    <a class="card" href="/pro/aerial/">
+      <span class="card-badge themed">LIGHT + DARK</span>
+      <div class="card-preview" style="background:linear-gradient(135deg,#ecfeff,#cffafe);color:#083344;position:relative;overflow:hidden">
+        <div style="position:absolute;top:10px;left:12px;font-family:var(--ff-s);font-style:italic;font-size:13px;color:#083344;letter-spacing:-.02em;z-index:2">Aerial<br>view.</div>
+        <div style="position:absolute;bottom:0;right:0;width:75%;height:80%;transform:rotate(-8deg) translate(10%,10%)">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%;height:100%">
+            <div style="background:#155e75;border:1px solid #22d3ee;border-radius:2px;align-self:end;height:60%"></div>
+            <div style="background:rgba(21,94,117,.25);border:1px solid #22d3ee;border-radius:2px;align-self:end;height:90%"></div>
+            <div></div>
+            <div style="background:#0e7490;border:1px solid #22d3ee;border-radius:2px;align-self:end;height:45%"></div>
+            <div></div>
+            <div style="background:#155e75;border:1px solid #22d3ee;border-radius:2px;align-self:end;height:70%"></div>
+            <div style="background:rgba(21,94,117,.25);border:1px solid #22d3ee;border-radius:2px;align-self:end;height:80%"></div>
+            <div style="background:#0e7490;border:1px solid #22d3ee;border-radius:2px;align-self:end;height:35%"></div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:12px;left:14px;font-family:var(--ff-m);font-size:7px;padding:3px 6px;background:rgba(255,255,255,.9);border:1px solid rgba(8,51,68,.2);border-radius:3px;color:#f59e0b;font-weight:600">€ 4.2M · tower 01</div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#0891b2">13 · Aerial</div>
+        <div class="card-title">Aerial · isometric city</div>
+        <div class="card-desc">Top-down icy-cyan city district. 5×5 block of buildings with amber cost labels. L-shaped composition protects text.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ═════════ HYBRIDS (light default + dark toggle) ═════════ -->
+  <div class="group-label"><span>Hybrids — light default · dark toggle</span></div>
+  <div class="grid">
+
+    <a class="card" href="/pro/daylight/">
+      <span class="card-badge themed">LIGHT + DARK</span>
+      <div class="card-preview pv-daylight">
+        <div class="pv-daylight-stack">
+          <span style="height:48px"></span>
+          <span style="height:74px"></span>
+          <span style="height:100px"></span>
+          <span style="height:64px"></span>
+          <span style="height:84px"></span>
+          <span style="height:52px"></span>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#1e4a8a">06 · Daylight</div>
+        <div class="card-title">Cinematic in light</div>
+        <div class="card-desc">Three.js 3D tower rendered in architect ink on warm cream. Full-bleed cinematic structure, daylight palette.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+    <a class="card" href="/pro/split/">
+      <span class="card-badge themed">LIGHT + DARK</span>
+      <div class="card-preview pv-split">
+        <div class="pv-split-l"><div class="pv-split-title">at the<br><em>speed</em>.</div></div>
+        <div class="pv-split-r">
+          <div class="pv-split-3d">
+            <span style="height:30px"></span>
+            <span style="height:50px"></span>
+            <span style="height:72px"></span>
+            <span style="height:56px"></span>
+            <span style="height:40px"></span>
+          </div>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#1e4a8a">07 · Split</div>
+        <div class="card-title">Editorial type + live 3D</div>
+        <div class="card-desc">Magazine two-column: huge italic Fraunces on left, interactive Three.js architectural scene on right.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+    <a class="card" href="/pro/focus/">
+      <span class="card-badge themed">LIGHT + DARK</span>
+      <div class="card-preview pv-focus">
+        <div class="pv-focus-label">01 · 2026 edition</div>
+        <div class="pv-focus-screen"></div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#a8724e">08 · Focus</div>
+        <div class="card-title">Product-first Apple-style</div>
+        <div class="card-desc">Massive dashboard screenshot dominates. Small editorial title above. Subtle rotating 3D mark in corner.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+    <a class="card" href="/pro/atelier/">
+      <span class="card-badge themed">LIGHT + DARK</span>
+      <div class="card-preview pv-atelier">
+        <div class="pv-atelier-num">01 / 05</div>
+        <div class="pv-atelier-mark">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="pv-atelier-txt">the speed<br>of thought.</div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#9c6a42">09 · Atelier</div>
+        <div class="card-title">Bauhaus minimal</div>
+        <div class="card-desc">Swiss restraint. Gigantic italic typography, a single refined wireframe sculpture, extreme whitespace.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ═════════ ORIGINALS ═════════ -->
+  <div class="group-label"><span>Originals — fixed theme</span></div>
+  <div class="grid">
+
+    <a class="card" href="/pro/cinematic/">
+      <span class="card-badge">DARK</span>
+      <div class="card-preview pv-cinematic">
+        <div class="pv-cinematic-stack">
+          <span style="height:48px"></span><span style="height:74px"></span><span style="height:100px"></span><span style="height:64px"></span><span style="height:84px"></span><span style="height:52px"></span>
+        </div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#60a5fa">01 · Cinematic</div>
+        <div class="card-title">Dark editorial + WebGL</div>
+        <div class="card-desc">Three.js architectural tower, massive typography, italic serif accent, neon glow. Stripe × Framer.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+    <a class="card" href="/pro/blueprint/">
+      <span class="card-badge">LIGHT</span>
+      <div class="card-preview pv-blueprint">
+        <svg viewBox="0 0 200 140" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="20" y="20" width="160" height="100"/>
+          <line x1="20" y1="50" x2="180" y2="50"/><line x1="20" y1="90" x2="180" y2="90"/>
+          <line x1="60" y1="20" x2="60" y2="120"/><line x1="120" y1="20" x2="120" y2="120"/>
+          <circle cx="100" cy="70" r="18" stroke-dasharray="3 2"/>
+          <text x="100" y="132" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#1a2d5a">12,400 mm</text>
+        </svg>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#93c5fd">02 · Blueprint</div>
+        <div class="card-title">Architectural paper + CAD</div>
+        <div class="card-desc">Warm paper, draftsman blue, dimension arrows, hatching, SVG ink-draw reveals. Industry-authentic.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+    <a class="card" href="/pro/brutalist/">
+      <span class="card-badge">DARK</span>
+      <div class="card-preview pv-brutalist">
+<pre>┌──────────────────┐
+│ $ docker compose │
+│ ▓▓▓▓▓▓▓▓▓░░░ 64% │
+│                  │
+│ → READY          │
+└──────────────────┘</pre>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#ccff00">03 · Brutalist</div>
+        <div class="card-title">Monospace terminal</div>
+        <div class="card-desc">Pure black, stark white, electric lime. JetBrains Mono. ASCII-forward, uncompromising. Engineer-core.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+    <a class="card" href="/pro/editorial/">
+      <span class="card-badge">LIGHT</span>
+      <div class="card-preview pv-editorial">
+        <div class="pv-editorial-title">The way<br>estimating<br><span>should feel.</span></div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#d4d4d8">04 · Editorial</div>
+        <div class="card-title">Light premium, Apple-style</div>
+        <div class="card-desc">Warm off-white, big serif italic, product photography, slow parallax. Refined. Luxury-product feel.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+    <a class="card" href="/pro/vibrant/">
+      <span class="card-badge">LIGHT</span>
+      <div class="card-preview pv-vibrant">
+        <div class="pv-vibrant-text">Build<br>fearless</div>
+      </div>
+      <div class="card-meta">
+        <div class="card-tag" style="color:#fbbf24">05 · Vibrant</div>
+        <div class="card-title">Bold color + playful</div>
+        <div class="card-desc">Yellow + pink + indigo, huge flat shapes, chunky display type, sticker-like elements. YC energy.</div>
+        <div class="card-cta">Open variant <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="foot">
+    <span>main site →</span>
+    <a href="/">openconstructionerp.com</a>
+    <span>·</span>
+    <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</div>
+</body>
+</html>

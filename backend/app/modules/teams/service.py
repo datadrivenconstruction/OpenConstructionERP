@@ -31,7 +31,15 @@ class TeamService:
     # ── Teams ────────────────────────────────────────────────────────────
 
     async def create_team(self, data: TeamCreate) -> Team:
-        """Create a new team within a project."""
+        """Create a new team within a project.
+
+        After insert we *re-fetch via ``get()``* instead of returning the
+        ``session.add``-ed instance directly. ``get()`` uses
+        ``selectinload(memberships)`` so Pydantic's ``model_validate`` can
+        access ``team.memberships`` (an empty list at this point) without
+        triggering a lazy load on the detached / expired ORM object, which
+        is what caused :bug:`247` (``MissingGreenlet`` under async).
+        """
         team = Team(
             project_id=data.project_id,
             name=data.name,
@@ -41,8 +49,10 @@ class TeamService:
             metadata_=data.metadata,
         )
         team = await self.team_repo.create(team)
+        # Re-fetch with memberships eager-loaded so serialization is safe.
+        fresh = await self.team_repo.get(team.id)
         logger.info("Team created: %s in project %s", data.name, data.project_id)
-        return team
+        return fresh or team
 
     async def get_team(self, team_id: uuid.UUID) -> Team:
         """Get team by ID. Raises 404 if not found."""

@@ -57,6 +57,7 @@ from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Upload
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+from app.core.upload_guards import reject_if_xlsx_bomb
 from app.dependencies import (
     CurrentUserId,
     CurrentUserPayload,
@@ -2046,6 +2047,39 @@ def _get_classification_code(classification: dict[str, Any]) -> str:
     return ""
 
 
+def _fmt_number(value: Any) -> str:
+    """Format a numeric value for CSV/GAEB export without lossy truncation.
+
+    Preserves full precision when the input is already a numeric string —
+    the prior implementation went through ``float`` first, which dropped
+    digits beyond ~15 significant figures on large currency values.
+    NaN / Infinity return ``""`` so they never leak into export rows.
+    """
+    if value is None or value == "":
+        return ""
+    # Try Decimal first — keeps full precision for string / Decimal / int inputs.
+    from decimal import Decimal, InvalidOperation
+
+    try:
+        if isinstance(value, Decimal):
+            d = value
+        elif isinstance(value, (int, str)):
+            d = Decimal(str(value).strip())
+        elif isinstance(value, float):
+            # Repr round-trips float exactly; str() would quietly truncate.
+            d = Decimal(repr(value))
+        else:
+            return str(value)
+    except (InvalidOperation, ValueError):
+        return str(value)
+    if not d.is_finite():
+        return ""
+    # Canonical string, strip trailing zeros / trailing "." while keeping
+    # the integer part intact (so "100" stays "100", not "1E+2").
+    text = format(d, "f").rstrip("0").rstrip(".") if "." in format(d, "f") else format(d, "f")
+    return text if text else "0"
+
+
 @router.get(
     "/boqs/{boq_id}/export/csv/",
     summary="Export BOQ as CSV",
@@ -2055,14 +2089,22 @@ async def export_boq_csv(
     boq_id: uuid.UUID,
     service: BOQService = Depends(_get_service),
 ) -> StreamingResponse:
-    """Export BOQ positions as a CSV file."""
+    """Export BOQ positions as a CSV file.
+
+    Emits full-precision numeric values (BUG-150/151/152 — prior 2-decimal
+    truncation was a lossy roundtrip) and preserves secondary metadata
+    (source, confidence, classification blob, cad_element_ids, wbs_id)
+    so the CSV can be re-imported without silent data loss (BUG-163-175).
+    """
+    import json as _json
+
     # Use structured data to include markups in the grand total
     structured = await service.get_boq_structured(boq_id)
 
     output = io.StringIO()
     writer = csv.writer(output)
 
-    # Header row
+    # Header row — extended columns for lossless roundtrip
     writer.writerow(
         [
             "Pos.",
@@ -2072,8 +2114,36 @@ async def export_boq_csv(
             "Unit Rate",
             "Total",
             "Classification",
+            "Classification JSON",
+            "Source",
+            "Confidence",
+            "WBS",
+            "CAD Element IDs",
+            "Metadata JSON",
         ]
     )
+
+    def _pos_row(pos: Any) -> list[str]:
+        classification = getattr(pos, "classification", {}) or {}
+        metadata_ = getattr(pos, "metadata", None) or getattr(pos, "metadata_", None) or {}
+        cad_ids = getattr(pos, "cad_element_ids", []) or []
+        return [
+            pos.ordinal,
+            pos.description,
+            pos.unit,
+            _fmt_number(getattr(pos, "quantity", 0.0)),
+            _fmt_number(getattr(pos, "unit_rate", 0.0)),
+            _fmt_number(getattr(pos, "total", 0.0)),
+            _get_classification_code(classification),
+            _json.dumps(classification, ensure_ascii=False) if classification else "",
+            getattr(pos, "source", "") or "",
+            _fmt_number(getattr(pos, "confidence", None))
+            if getattr(pos, "confidence", None) is not None
+            else "",
+            getattr(pos, "wbs_code", "") or getattr(pos, "wbs_id", "") or "",
+            ",".join(str(x) for x in cad_ids) if isinstance(cad_ids, list) else "",
+            _json.dumps(metadata_, ensure_ascii=False) if metadata_ else "",
+        ]
 
     # Section positions
     for section in structured.sections:
@@ -2087,41 +2157,31 @@ async def export_boq_csv(
                 "",
                 "",
                 "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
             ]
         )
         for pos in section.positions:
-            writer.writerow(
-                [
-                    pos.ordinal,
-                    pos.description,
-                    pos.unit,
-                    f"{pos.quantity:.2f}",
-                    f"{pos.unit_rate:.2f}",
-                    f"{pos.total:.2f}",
-                    _get_classification_code(pos.classification),
-                ]
-            )
+            writer.writerow(_pos_row(pos))
 
     # Ungrouped positions
     for pos in structured.positions:
-        writer.writerow(
-            [
-                pos.ordinal,
-                pos.description,
-                pos.unit,
-                f"{pos.quantity:.2f}",
-                f"{pos.unit_rate:.2f}",
-                f"{pos.total:.2f}",
-                _get_classification_code(pos.classification),
-            ]
-        )
+        writer.writerow(_pos_row(pos))
 
     # Direct cost subtotal
-    writer.writerow(["", "Direct Cost", "", "", "", f"{structured.direct_cost:.2f}", ""])
+    writer.writerow(
+        ["", "Direct Cost", "", "", "", _fmt_number(structured.direct_cost), "", "", "", "", "", "", ""]
+    )
 
     # Markup rows
     for markup in structured.markups:
-        writer.writerow(["", f"  {markup.name}", "", "", "", f"{markup.amount:.2f}", ""])
+        writer.writerow(
+            ["", f"  {markup.name}", "", "", "", _fmt_number(markup.amount), "", "", "", "", "", "", ""]
+        )
 
     # Grand total row (includes markups)
     writer.writerow(
@@ -2131,7 +2191,13 @@ async def export_boq_csv(
             "",
             "",
             "",
-            f"{structured.grand_total:.2f}",
+            _fmt_number(structured.grand_total),
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
             "",
         ]
     )
@@ -2189,6 +2255,8 @@ async def export_boq_excel(
     ws.title = "BOQ"
 
     # ── Header row: standard + custom ────────────────────────────────────
+    # Extended set preserves roundtrip data (BUG-163-175) while keeping
+    # the classic first-seven columns stable for backwards compatibility.
     standard_headers = [
         "Pos.",
         "Description",
@@ -2197,6 +2265,12 @@ async def export_boq_excel(
         "Unit Rate",
         "Total",
         "Classification",
+        "Classification JSON",
+        "Source",
+        "Confidence",
+        "WBS",
+        "CAD Element IDs",
+        "Metadata JSON",
     ]
     custom_headers = [c.get("display_name", c.get("name", "")) for c in custom_columns]
     headers = standard_headers + custom_headers
@@ -2234,7 +2308,14 @@ async def export_boq_excel(
         """Write a section subtotal row with bold + gray fill. Returns next row."""
         for c in range(1, len(headers) + 1):
             ws.cell(row=row, column=c).fill = light_gray_fill
-        label_cell = ws.cell(row=row, column=2, value=f"Subtotal: {sec_ordinal} {sec_desc}")
+        # Subtotal label uses the section's original ordinal + description so
+        # the roundtrip preserves the hierarchy key (BUG-150 — the prior
+        # version sometimes wrote an empty-ordinal "Subtotal:  " row when the
+        # section object was missing).
+        full_label = f"Subtotal: {sec_ordinal} {sec_desc}".strip().rstrip(":")
+        if full_label == "Subtotal":
+            full_label = "Subtotal"
+        label_cell = ws.cell(row=row, column=2, value=full_label)
         label_cell.font = subtotal_font
         label_cell.fill = light_gray_fill
         total_cell = ws.cell(row=row, column=6, value=subtotal)
@@ -2270,24 +2351,67 @@ async def export_boq_excel(
         ws.cell(row=current_row, column=2, value=pos.description)
         ws.cell(row=current_row, column=3, value=pos.unit)
 
-        qty_cell = ws.cell(row=current_row, column=4, value=pos.quantity)
+        # Pass Decimal to openpyxl so Excel stores as number (enables SUM,
+        # sorting, and avoids the 'Number stored as text' warning triangle).
+        # ``_fmt_number`` returns a precision-preserving string which we
+        # wrap in Decimal — finite-only, so NaN/Inf never leak.
+        from decimal import Decimal as _Dec, InvalidOperation as _InvOp
+
+        def _num_cell(raw: Any) -> _Dec:
+            if raw is None or raw == "":
+                return _Dec("0")
+            try:
+                d = _Dec(str(raw).strip())
+            except (_InvOp, ValueError, TypeError):
+                return _Dec("0")
+            return d if d.is_finite() else _Dec("0")
+
+        qty_cell = ws.cell(row=current_row, column=4, value=_num_cell(pos.quantity))
         qty_cell.number_format = number_format
 
-        rate_cell = ws.cell(row=current_row, column=5, value=pos.unit_rate)
+        rate_cell = ws.cell(row=current_row, column=5, value=_num_cell(pos.unit_rate))
         rate_cell.number_format = number_format
 
-        total_cell = ws.cell(row=current_row, column=6, value=pos.total)
+        total_cell = ws.cell(row=current_row, column=6, value=_num_cell(pos.total))
         total_cell.number_format = number_format
+
+        import json as _json
+
+        classification_ = pos.classification or {}
+        pos_meta_raw = getattr(pos, "metadata", None) or getattr(pos, "metadata_", None) or {}
+        cad_ids = getattr(pos, "cad_element_ids", []) or []
 
         ws.cell(
             row=current_row,
             column=7,
-            value=_get_classification_code(pos.classification),
+            value=_get_classification_code(classification_),
+        )
+        ws.cell(
+            row=current_row,
+            column=8,
+            value=_json.dumps(classification_, ensure_ascii=False) if classification_ else "",
+        )
+        ws.cell(row=current_row, column=9, value=getattr(pos, "source", "") or "")
+        conf = getattr(pos, "confidence", None)
+        ws.cell(row=current_row, column=10, value=float(conf) if conf is not None else None)
+        ws.cell(
+            row=current_row,
+            column=11,
+            value=getattr(pos, "wbs_code", "") or getattr(pos, "wbs_id", "") or "",
+        )
+        ws.cell(
+            row=current_row,
+            column=12,
+            value=",".join(str(x) for x in cad_ids) if isinstance(cad_ids, list) else "",
+        )
+        ws.cell(
+            row=current_row,
+            column=13,
+            value=_json.dumps(pos_meta_raw, ensure_ascii=False) if pos_meta_raw else "",
         )
 
         # ── Custom column values ─────────────────────────────────────────
         if custom_columns:
-            pos_meta_raw = getattr(pos, "metadata", None) or getattr(pos, "metadata_", None) or {}
             custom_fields = pos_meta_raw.get("custom_fields", {}) if isinstance(pos_meta_raw, dict) else {}
             for offset, col_def in enumerate(custom_columns):
                 col_name = col_def.get("name", "")
@@ -2478,6 +2602,9 @@ async def export_boq_gaeb(
     - Positions mapped to Item elements with quantities, units, rates, and totals
     - Grand total in the trailing BoQInfo block
     """
+    # Export path constructs XML from our own trusted data, but we use
+    # defusedxml-compatible stdlib-only construction. Import uses defusedxml
+    # for parsing untrusted input.
     import xml.etree.ElementTree as ET
     from datetime import date
 
@@ -2531,26 +2658,117 @@ async def export_boq_gaeb(
     # BoQBody (root level)
     boq_body = ET.SubElement(boq_el, "BoQBody")
 
-    def _fmt(value: float) -> str:
-        """Format a numeric value with 2 decimal places for GAEB XML."""
-        return f"{value:.2f}"
+    def _fmt_price(value: Any) -> str:
+        """Format a monetary value for GAEB XML (always 2 decimals).
 
-    # Map GAEB-compatible unit codes
+        Uses Decimal throughout so string inputs like "12.345" keep their
+        exact representation before rounding, avoiding the float-precision
+        drift that ``f"{float(value):.2f}"`` introduces on large totals.
+        """
+        from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+
+        if value is None or value == "":
+            return "0.00"
+        try:
+            if isinstance(value, Decimal):
+                d = value
+            else:
+                d = Decimal(str(value).strip())
+        except (InvalidOperation, ValueError):
+            return "0.00"
+        if not d.is_finite():
+            return "0.00"
+        return str(d.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+    def _fmt_qty(value: Any) -> str:
+        """Format a quantity for GAEB XML — preserves full precision.
+
+        Prior implementations truncated to 2 decimals, which quietly
+        dropped mm-level precision on concrete pours / rebar cutting
+        lists. Now operates on Decimal, strips trailing zeros, keeps
+        the integer part verbatim, and rejects NaN/Inf.
+        """
+        from decimal import Decimal, InvalidOperation
+
+        if value is None or value == "":
+            return "0"
+        try:
+            if isinstance(value, Decimal):
+                d = value
+            else:
+                d = Decimal(str(value).strip())
+        except (InvalidOperation, ValueError):
+            return "0"
+        if not d.is_finite():
+            return "0"
+        text = format(d, "f")
+        if "." in text:
+            text = text.rstrip("0").rstrip(".")
+        return text if text else "0"
+
+    # Map internal unit tokens → GAEB/DIN 276-compatible unit codes.
+    # Lexicon follows GAEB 3.3 Appendix B (standard short forms, German
+    # market conventions) — normalized entries prevent silent swapping
+    # during roundtrip (BUG-175).
     _UNIT_MAP: dict[str, str] = {
+        # Length
         "m": "m",
+        "cm": "cm",
+        "mm": "mm",
+        "km": "km",
+        # Area
         "m2": "m2",
+        "m²": "m2",
+        "sqm": "m2",
+        # Volume
         "m3": "m3",
+        "m³": "m3",
+        "cbm": "m3",
+        "l": "l",
+        "liter": "l",
+        # Mass
         "kg": "kg",
         "t": "t",
+        "g": "g",
+        "ton": "t",
+        # Count
         "pcs": "Stk",
+        "piece": "Stk",
+        "stk": "Stk",
+        "stck": "Stk",
+        "st": "Stk",
+        "ea": "Stk",
+        # Lump sum
         "lsum": "psch",
+        "psch": "psch",
+        "lump": "psch",
+        "ls": "psch",
+        # Time
         "h": "h",
-        "l": "l",
+        "hour": "h",
+        "d": "d",
+        "day": "d",
+        "month": "Mo",
+        "mo": "Mo",
+        "year": "Jahr",
+        "a": "Jahr",
+        # Volume flow
+        "m3/h": "m3/h",
     }
 
     def _gaeb_unit(unit: str) -> str:
-        """Convert internal unit to GAEB-compatible unit code."""
-        return _UNIT_MAP.get(unit.lower().strip(), unit)
+        """Convert internal unit to GAEB-compatible unit code.
+
+        Falls back to the raw input when no mapping exists — preserves
+        user-custom units instead of silently dropping them.
+        """
+        if not unit:
+            return ""
+        key = unit.strip().lower()
+        mapped = _UNIT_MAP.get(key)
+        if mapped is not None:
+            return mapped
+        return unit.strip()
 
     # ── Sections → BoQCtgy ────────────────────────────────────────────────
     for section in boq_data.sections:
@@ -2572,7 +2790,7 @@ async def export_boq_gaeb(
                 RNoPart="2",
                 ID=str(pos.ordinal),
             )
-            ET.SubElement(item, "Qty").text = _fmt(pos.quantity)
+            ET.SubElement(item, "Qty").text = _fmt_qty(pos.quantity)
             ET.SubElement(item, "QU").text = _gaeb_unit(pos.unit)
 
             desc = ET.SubElement(item, "Description")
@@ -2580,30 +2798,25 @@ async def export_boq_gaeb(
             detail_txt = ET.SubElement(complete_text, "DetailTxt")
             ET.SubElement(detail_txt, "Text").text = pos.description
 
-            ET.SubElement(item, "UP").text = _fmt(pos.unit_rate)
-            ET.SubElement(item, "IT").text = _fmt(pos.total)
+            ET.SubElement(item, "UP").text = _fmt_price(pos.unit_rate)
+            ET.SubElement(item, "IT").text = _fmt_price(pos.total)
 
-    # ── Ungrouped positions → separate BoQCtgy ────────────────────────────
+    # ── Ungrouped positions → directly in root BoQBody (ENH-097) ──────────
+    # GAEB 3.3 permits an ``Itemlist`` directly beneath the root ``BoQBody``
+    # when positions have no section parent. Prior implementation wrapped
+    # them in a synthetic ``BoQCtgy ID="00" LblTx="Ungrouped Positions"``
+    # which polluted the outline tree and made roundtrips lossy — every
+    # re-import created a phantom section. Now we write them flat.
     if boq_data.positions:
-        ctgy = ET.SubElement(
-            boq_body,
-            "BoQCtgy",
-            RNoPart="1",
-            ID="00",
-        )
-        ET.SubElement(ctgy, "LblTx").text = "Ungrouped Positions"
-
-        ctgy_body = ET.SubElement(ctgy, "BoQBody")
-        itemlist = ET.SubElement(ctgy_body, "Itemlist")
-
+        root_itemlist = ET.SubElement(boq_body, "Itemlist")
         for pos in boq_data.positions:
             item = ET.SubElement(
-                itemlist,
+                root_itemlist,
                 "Item",
                 RNoPart="2",
                 ID=str(pos.ordinal),
             )
-            ET.SubElement(item, "Qty").text = _fmt(pos.quantity)
+            ET.SubElement(item, "Qty").text = _fmt_qty(pos.quantity)
             ET.SubElement(item, "QU").text = _gaeb_unit(pos.unit)
 
             desc = ET.SubElement(item, "Description")
@@ -2611,12 +2824,12 @@ async def export_boq_gaeb(
             detail_txt = ET.SubElement(complete_text, "DetailTxt")
             ET.SubElement(detail_txt, "Text").text = pos.description
 
-            ET.SubElement(item, "UP").text = _fmt(pos.unit_rate)
-            ET.SubElement(item, "IT").text = _fmt(pos.total)
+            ET.SubElement(item, "UP").text = _fmt_price(pos.unit_rate)
+            ET.SubElement(item, "IT").text = _fmt_price(pos.total)
 
     # ── Trailing BoQInfo with grand total ─────────────────────────────────
     boq_info_total = ET.SubElement(boq_el, "BoQInfo")
-    ET.SubElement(boq_info_total, "TotPr").text = _fmt(boq_data.grand_total)
+    ET.SubElement(boq_info_total, "TotPr").text = _fmt_price(boq_data.grand_total)
 
     # ── Serialize to XML string ───────────────────────────────────────────
     xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -2883,6 +3096,9 @@ async def import_boq_excel(
             detail="File too large. Maximum size is 10 MB.",
         )
 
+    # Zip-bomb guard: reject .xlsx whose uncompressed sheets exceed 50 MB.
+    reject_if_xlsx_bomb(content)
+
     # Parse rows based on file type
     import_meta: dict[str, Any] = {}
     try:
@@ -2912,7 +3128,24 @@ async def import_boq_excel(
     imported = 0
     skipped = 0
     errors: list[dict[str, Any]] = []
+    warnings_list: list[dict[str, Any]] = []
     auto_ordinal = 1
+
+    # Pre-compute a robust median unit-rate across the import set so we can
+    # emit a "far above benchmark" warning on outliers (ENH-090). Absent a
+    # reference catalog we use the imported file itself as its own baseline.
+    _rate_samples: list[float] = []
+    for _r in rows:
+        try:
+            v = _safe_float(_r.get("unit_rate"), default=0.0)
+            if v > 0:
+                _rate_samples.append(v)
+        except Exception:
+            pass
+    _rate_samples.sort()
+    _median_rate = (
+        _rate_samples[len(_rate_samples) // 2] if _rate_samples else 0.0
+    )
 
     for row_idx, row in enumerate(rows, start=2):  # start=2 because row 1 is header
         try:
@@ -2937,6 +3170,11 @@ async def import_boq_excel(
                 skipped += 1
                 continue
 
+            # Skip pure subtotal rows (exported with "Subtotal: <ord> <desc>")
+            if desc_lower.startswith("subtotal:") or desc_lower.startswith("zwischensumme:"):
+                skipped += 1
+                continue
+
             # Build ordinal: use from file or auto-generate
             ordinal = str(row.get("ordinal", "")).strip()
             if not ordinal:
@@ -2944,13 +3182,103 @@ async def import_boq_excel(
             auto_ordinal += 1
 
             # Parse unit
-            unit = str(row.get("unit", "pcs")).strip()
-            if not unit:
-                unit = "pcs"
-
+            unit_raw = str(row.get("unit", "")).strip()
             # Parse numeric fields
-            quantity = _safe_float(row.get("quantity"), default=0.0)
-            unit_rate = _safe_float(row.get("unit_rate"), default=0.0)
+            quantity_raw = row.get("quantity")
+            unit_rate_raw = row.get("unit_rate")
+            quantity = _safe_float(quantity_raw, default=0.0)
+            unit_rate = _safe_float(unit_rate_raw, default=0.0)
+
+            # Section detection (ENH-087): a row with a description but no
+            # unit, no quantity, no unit_rate is very likely a section header
+            # emitted by our own CSV/Excel exporter. Preserve it as a
+            # section-type position so re-import restores the hierarchy.
+            is_section_row = (
+                not unit_raw
+                and (quantity_raw in (None, "", 0, 0.0))
+                and (unit_rate_raw in (None, "", 0, 0.0))
+            )
+            if is_section_row:
+                section_meta: dict[str, Any] = {
+                    "import_source": file.filename or "excel",
+                    "import_row_index": row_idx,
+                    "section_header": True,
+                }
+                position_data = PositionCreate(
+                    boq_id=boq_id,
+                    ordinal=ordinal,
+                    description=description,
+                    unit="section",
+                    quantity=0.0,
+                    unit_rate=0.0,
+                    classification={},
+                    source="excel_import",
+                    metadata=section_meta,
+                )
+                await service.add_position(position_data)
+                imported += 1
+                continue
+
+            unit = unit_raw or "pcs"
+
+            # Sanity caps: reject obvious tampering / typo errors before the
+            # position reaches the DB. Numbers outside these bands are either
+            # fat-fingered by the client or — per QA fuzz — a deliberate
+            # attempt to inflate the BOQ through an edited export file.
+            _IMPORT_MAX_QUANTITY = 1e9
+            _IMPORT_MAX_UNIT_RATE = 1e8  # EUR/USD per unit — a steel beam is ~10k
+            if not (0 <= quantity <= _IMPORT_MAX_QUANTITY):
+                errors.append(
+                    {
+                        "row": row_idx,
+                        "error": f"Quantity out of range: {quantity}",
+                        "data": {k: str(v)[:100] for k, v in row.items()},
+                    }
+                )
+                continue
+            if not (0 <= unit_rate <= _IMPORT_MAX_UNIT_RATE):
+                errors.append(
+                    {
+                        "row": row_idx,
+                        "error": f"Unit rate out of range: {unit_rate}",
+                        "data": {k: str(v)[:100] for k, v in row.items()},
+                    }
+                )
+                continue
+
+            # Soft checks — imported, but surfaced in the UI so the user
+            # can spot tampered-export attacks (ENH-090 / BUG-154) and
+            # data-quality issues.
+            if _median_rate > 0 and unit_rate > _median_rate * 10:
+                warnings_list.append(
+                    {
+                        "row": row_idx,
+                        "ordinal": ordinal,
+                        "severity": "warning",
+                        "message": (
+                            f"Unit rate {unit_rate:.2f} is >10× the file median "
+                            f"({_median_rate:.2f}) — possible typo or tampered export."
+                        ),
+                    }
+                )
+            if quantity == 0:
+                warnings_list.append(
+                    {
+                        "row": row_idx,
+                        "ordinal": ordinal,
+                        "severity": "info",
+                        "message": "Quantity is zero — position imported but contributes no cost.",
+                    }
+                )
+            if unit_rate == 0:
+                warnings_list.append(
+                    {
+                        "row": row_idx,
+                        "ordinal": ordinal,
+                        "severity": "info",
+                        "message": "Unit rate is zero — position imported without a rate.",
+                    }
+                )
 
             # Build classification from the classification column
             classification: dict[str, Any] = {}
@@ -3020,9 +3348,358 @@ async def import_boq_excel(
         "imported": imported,
         "skipped": skipped,
         "errors": errors,
+        "warnings": warnings_list,
         "total_rows": len(rows),
         "source_format": import_meta.get("source_format", "unknown") if import_meta else "unknown",
         "original_columns": import_meta.get("original_columns", []) if import_meta else [],
+    }
+
+
+# ── GAEB XML import ──────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/boqs/{boq_id}/import/gaeb/",
+    summary="Import positions from GAEB XML 3.3 (X83/X84)",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def import_boq_gaeb(
+    boq_id: uuid.UUID,
+    file: UploadFile = File(..., description="GAEB XML file (.x83, .x84, .xml)"),
+    service: BOQService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Import BOQ positions from a GAEB XML 3.3 file (BUG-153).
+
+    Supports the GAEB DA XML formats used across DACH tendering:
+      - **X83 / DP 83** — Angebotsabgabe (bid submission)
+      - **X84 / DP 84** — Nebenangebote (alternative bids)
+      - **X81** — Leistungsverzeichnis (BOQ skeleton)
+
+    Namespace-agnostic parser — falls back to tag-local-name matching so
+    files from different GAEB toolchains (iTWO, California.pro, Nevaris,
+    etc.) all import without pre-normalization.
+
+    Security: uses ``defusedxml`` to harden against XXE, billion-laughs,
+    and other XML-parser-level attacks on user-uploaded files.
+    """
+    import xml.etree.ElementTree as ET
+
+    from defusedxml.ElementTree import fromstring as _safe_fromstring
+
+    # Verify BOQ exists (raises 404 if not found)
+    await service.get_boq(boq_id)
+
+    filename = (file.filename or "").lower()
+    if not filename.endswith((".x81", ".x83", ".x84", ".xml")):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Unsupported file type. Please upload a GAEB XML file "
+                "(.x81, .x83, .x84, or .xml)."
+            ),
+        )
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty.",
+        )
+    # Cap at 50 MB — GAEB files rarely exceed a few MB even for mega-projects.
+    if len(content) > 50 * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File too large. Maximum size for GAEB XML is 50 MB.",
+        )
+
+    # Parse XML defensively via defusedxml — blocks XXE, external-entity
+    # expansion, billion-laughs, and DTD-based attacks on user input.
+    try:
+        root = _safe_fromstring(content)
+    except ET.ParseError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to parse GAEB XML: {exc}",
+        ) from exc
+    except Exception as exc:  # defusedxml raises its own subclasses for attacks
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"GAEB XML rejected by security parser: {exc}",
+        ) from exc
+
+    def _local(tag: str) -> str:
+        """Strip namespace from an element tag."""
+        return tag.split("}", 1)[1] if "}" in tag else tag
+
+    def _find_child(parent: ET.Element, name: str) -> ET.Element | None:
+        """Namespace-agnostic single-child lookup by local name."""
+        for child in parent:
+            if _local(child.tag) == name:
+                return child
+        return None
+
+    def _find_all_descendants(parent: ET.Element, name: str) -> list[ET.Element]:
+        """Walk the entire subtree, collect elements whose local name matches."""
+        found: list[ET.Element] = []
+        for el in parent.iter():
+            if _local(el.tag) == name:
+                found.append(el)
+        return found
+
+    def _text_of(parent: ET.Element, name: str) -> str:
+        child = _find_child(parent, name)
+        return (child.text or "").strip() if child is not None else ""
+
+    def _extract_description(item: ET.Element) -> str:
+        """Pull human-readable text out of GAEB's nested Description/CompleteText/DetailTxt/Text."""
+        # Take the first non-empty <Text> we find anywhere in the item's
+        # subtree — description structures vary wildly between exporters.
+        for text_el in _find_all_descendants(item, "Text"):
+            if text_el.text and text_el.text.strip():
+                return text_el.text.strip()
+        # Fall back to OutlineText / Outline / LblTx
+        for name in ("OutlineText", "OutlTxt", "LblTx"):
+            val = _text_of(item, name)
+            if val:
+                return val
+        return ""
+
+    # Build reverse map from the export lexicon so GAEB unit codes round-trip
+    # back to our internal tokens (BUG-175 — "Stk" → "pcs", "psch" → "lsum").
+    _GAEB_TO_INTERNAL: dict[str, str] = {
+        "stk": "pcs",
+        "st": "pcs",
+        "psch": "lsum",
+        "jahr": "year",
+        "mo": "month",
+    }
+
+    def _normalize_unit(unit: str) -> str:
+        key = (unit or "").strip().lower()
+        return _GAEB_TO_INTERNAL.get(key, unit.strip()) if key else ""
+
+    # Locate the *top-level* BoQBody — the one directly inside <BoQ>.
+    # A GAEB tree nests BoQBody recursively under each BoQCtgy, so
+    # traversing ``_find_all_descendants`` would double-visit every Item.
+    top_body: ET.Element | None = None
+    for el in root.iter():
+        if _local(el.tag) == "BoQ":
+            top_body = _find_child(el, "BoQBody")
+            if top_body is not None:
+                break
+    if top_body is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No <BoQBody> element found. Is this a valid GAEB DA XML?",
+        )
+    boq_bodies = [top_body]
+
+    imported = 0
+    skipped = 0
+    errors: list[dict[str, Any]] = []
+    sections_seen: list[dict[str, str]] = []
+
+    # Capture currency for round-trip metadata.
+    award = None
+    for el in root.iter():
+        if _local(el.tag) == "Award":
+            award = el
+            break
+    currency = (_text_of(award, "Cur") if award is not None else "") or "EUR"
+
+    def _process_category(ctgy: ET.Element, parent_ordinal: str = "") -> None:
+        nonlocal imported, skipped
+        ord_ = (ctgy.get("ID") or "").strip() or parent_ordinal
+        label = _text_of(ctgy, "LblTx") or "Section"
+        sections_seen.append({"ordinal": ord_, "label": label})
+
+        # Each BoQCtgy has its own BoQBody containing Itemlist/Item.
+        inner_body = _find_child(ctgy, "BoQBody")
+        if inner_body is not None:
+            # Nested categories (recursion for multi-level hierarchies).
+            for child in inner_body:
+                local = _local(child.tag)
+                if local == "BoQCtgy":
+                    _process_category(child, parent_ordinal=ord_)
+                elif local == "Itemlist":
+                    for item in child:
+                        if _local(item.tag) == "Item":
+                            _import_item(item, section_ordinal=ord_)
+
+    def _import_item(item: ET.Element, *, section_ordinal: str = "") -> None:
+        nonlocal imported, skipped
+        try:
+            pos_ordinal = (item.get("ID") or "").strip() or str(imported + 1)
+            description = _extract_description(item)
+            if not description:
+                skipped += 1
+                return
+
+            unit_raw = _text_of(item, "QU")
+            unit = _normalize_unit(unit_raw) or "pcs"
+            quantity = _safe_float(_text_of(item, "Qty"), default=0.0)
+            unit_rate = _safe_float(_text_of(item, "UP"), default=0.0)
+
+            if not (0 <= quantity <= 1e9):
+                errors.append(
+                    {
+                        "ordinal": pos_ordinal,
+                        "error": f"Quantity out of range: {quantity}",
+                    }
+                )
+                return
+            if not (0 <= unit_rate <= 1e8):
+                errors.append(
+                    {
+                        "ordinal": pos_ordinal,
+                        "error": f"Unit rate out of range: {unit_rate}",
+                    }
+                )
+                return
+
+            position_data = PositionCreate(
+                boq_id=boq_id,
+                ordinal=pos_ordinal,
+                description=description,
+                unit=unit,
+                quantity=quantity,
+                unit_rate=unit_rate,
+                classification={"gaeb_section": section_ordinal} if section_ordinal else {},
+                source="gaeb_import",
+                metadata={
+                    "import_source": file.filename or "gaeb",
+                    "gaeb_ordinal": pos_ordinal,
+                    "gaeb_section": section_ordinal,
+                    "gaeb_unit_original": unit_raw,
+                    "gaeb_currency": currency,
+                },
+            )
+            # add_position is async — run it via await below.
+            return position_data
+        except Exception as exc:  # noqa: BLE001 — narrow at caller
+            errors.append({"error": str(exc), "ordinal": ""})
+            return None
+
+    # Walk the top-level BoQBody: may contain direct Item elements OR BoQCtgy.
+    for body in boq_bodies:
+        for child in body:
+            local = _local(child.tag)
+            if local == "BoQCtgy":
+                # The original _process_category helper builds positions but
+                # can't await — so refactor: collect items, then insert.
+                pass
+
+    # Second, simpler pass: collect every Item anywhere in the tree, attribute
+    # it to the nearest ancestor BoQCtgy's ID for section ordinal.
+    def _ancestor_ctgy_id(el: ET.Element, ancestors: list[ET.Element]) -> str:
+        for anc in reversed(ancestors):
+            if _local(anc.tag) == "BoQCtgy":
+                return (anc.get("ID") or "").strip()
+        return ""
+
+    def _walk_and_collect(el: ET.Element, ancestors: list[ET.Element]) -> list[tuple[ET.Element, str]]:
+        found: list[tuple[ET.Element, str]] = []
+        for child in el:
+            if _local(child.tag) == "Item":
+                found.append((child, _ancestor_ctgy_id(child, ancestors + [el])))
+            else:
+                found.extend(_walk_and_collect(child, ancestors + [el]))
+        return found
+
+    collected: list[tuple[ET.Element, str]] = []
+    for body in boq_bodies:
+        collected.extend(_walk_and_collect(body, []))
+
+    auto_counter = 0
+    for item, section_ordinal in collected:
+        auto_counter += 1
+        try:
+            pos_ordinal = (item.get("ID") or "").strip() or str(auto_counter)
+            description = _extract_description(item)
+            if not description:
+                skipped += 1
+                continue
+
+            unit_raw = _text_of(item, "QU")
+            unit = _normalize_unit(unit_raw) or "pcs"
+            quantity = _safe_float(_text_of(item, "Qty"), default=0.0)
+            unit_rate = _safe_float(_text_of(item, "UP"), default=0.0)
+
+            if not (0 <= quantity <= 1e9):
+                errors.append(
+                    {"ordinal": pos_ordinal, "error": f"Quantity out of range: {quantity}"}
+                )
+                continue
+            if not (0 <= unit_rate <= 1e8):
+                errors.append(
+                    {"ordinal": pos_ordinal, "error": f"Unit rate out of range: {unit_rate}"}
+                )
+                continue
+
+            classification: dict[str, Any] = {}
+            if section_ordinal:
+                classification["gaeb_section"] = section_ordinal
+
+            position_data = PositionCreate(
+                boq_id=boq_id,
+                ordinal=pos_ordinal,
+                description=description,
+                unit=unit,
+                quantity=quantity,
+                unit_rate=unit_rate,
+                classification=classification,
+                source="gaeb_import",
+                metadata={
+                    "import_source": file.filename or "gaeb",
+                    "gaeb_ordinal": pos_ordinal,
+                    "gaeb_section": section_ordinal,
+                    "gaeb_unit_original": unit_raw,
+                    "gaeb_currency": currency,
+                },
+            )
+            await service.add_position(position_data)
+            imported += 1
+        except Exception as exc:
+            errors.append({"ordinal": item.get("ID") or "", "error": str(exc)})
+            logger.warning("GAEB import error for BOQ %s: %s", boq_id, exc)
+
+    # Persist lightweight import metadata at the BOQ level.
+    if imported > 0:
+        try:
+            boq_obj = await service.get_boq(boq_id)
+            meta = dict(boq_obj.metadata_) if isinstance(boq_obj.metadata_, dict) else {}
+            meta["last_import"] = {
+                "source_filename": file.filename,
+                "source_format": "gaeb",
+                "gaeb_currency": currency,
+                "total_imported": imported,
+                "total_sections": len(sections_seen),
+                "import_date": datetime.now(UTC).isoformat(),
+            }
+            boq_obj.metadata_ = meta
+            await service.session.flush()
+            await service.session.commit()
+        except Exception:
+            logger.warning(
+                "Failed to persist GAEB import metadata for BOQ %s", boq_id, exc_info=True
+            )
+
+    logger.info(
+        "GAEB import complete for %s: imported=%d, skipped=%d, errors=%d, sections=%d",
+        boq_id,
+        imported,
+        skipped,
+        len(errors),
+        len(sections_seen),
+    )
+
+    return {
+        "imported": imported,
+        "skipped": skipped,
+        "errors": errors,
+        "sections": sections_seen,
+        "source_format": "gaeb",
+        "currency": currency,
     }
 
 

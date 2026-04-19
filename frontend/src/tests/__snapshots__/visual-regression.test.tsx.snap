@@ -36,7 +36,7 @@ exports[`Visual Regression — Badge > neutral badge 1`] = `
 exports[`Visual Regression — Badge > success badge 1`] = `
 <div>
   <span
-    class="inline-flex items-center rounded-full font-medium whitespace-nowrap animate-scale-in transition-colors duration-fast ease-oe bg-semantic-success-bg text-[#15803d] h-6 px-2 text-xs gap-1.5"
+    class="inline-flex items-center rounded-full font-medium whitespace-nowrap animate-scale-in transition-colors duration-fast ease-oe bg-semantic-success-bg text-semantic-success h-6 px-2 text-xs gap-1.5"
   >
     Completed
   </span>
@@ -725,11 +725,10 @@ exports[`Visual Regression — ConfirmDialog > renders warning variant (open) 1`
 exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`] = `
 <div>
   <div
-    class="max-w-content mx-auto space-y-6"
+    class="space-y-5 animate-fade-in pt-4"
   >
     <div
-      class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-card-in"
-      style="animation-delay: 0ms;"
+      class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between animate-card-in"
     >
       <div>
         <h1
@@ -737,61 +736,37 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
         >
           dashboard.welcome
         </h1>
-        <p
-          class="mt-2 text-base text-content-secondary animate-stagger-in"
-          style="animation-delay: 100ms;"
-        >
-          dashboard.subtitle
-        </p>
         <a
-          class="mt-3 flex items-center gap-3 rounded-xl bg-gradient-to-r from-oe-blue/8 via-violet-500/8 to-emerald-500/8 border border-oe-blue/15 px-4 py-2.5 hover:shadow-md hover:border-oe-blue/30 transition-all animate-stagger-in"
-          href="https://github.com/datadrivenconstruction/OpenConstructionERP"
+          class="flex items-center gap-3 mt-2.5 animate-stagger-in group/ddc"
+          href="https://datadrivenconstruction.io/?utm_source=erp"
           rel="noopener noreferrer"
-          style="animation-delay: 150ms;"
+          style="animation-delay: 100ms;"
           target="_blank"
         >
-          <span
-            class="relative flex h-2.5 w-2.5 shrink-0"
+          <img
+            alt="DataDrivenConstruction"
+            class="h-[34px] w-auto opacity-75 group-hover/ddc:opacity-100 transition-opacity shrink-0"
+            src="/brand/ddc-logo.webp"
+          />
+          <div
+            class="flex flex-col leading-tight"
           >
             <span
-              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
-            />
+              class="text-xs font-semibold text-content-secondary"
+            >
+              dashboard.subtitle
+            </span>
             <span
-              class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"
-            />
-          </span>
-          <span
-            class="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent"
-          >
-            The #1 open-source construction ERP
-          </span>
-          <svg
-            class="lucide lucide-external-link text-oe-blue opacity-50 shrink-0"
-            fill="none"
-            height="13"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="13"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M15 3h6v6"
-            />
-            <path
-              d="M10 14 21 3"
-            />
-            <path
-              d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-            />
-          </svg>
+              class="text-[11px] text-content-tertiary"
+            >
+              Smart resource planning for your construction projects
+            </span>
+          </div>
         </a>
       </div>
       <div
         class="flex items-center gap-2 animate-stagger-in"
-        style="animation-delay: 200ms;"
+        style="animation-delay: 150ms;"
       >
         <button
           class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-10 px-5 text-sm gap-2 rounded-xl btn-shimmer"
@@ -828,273 +803,303 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
             projects.new_project
           </span>
         </button>
+        <button
+          class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-10 px-5 text-sm gap-2 rounded-xl"
+        >
+          <span
+            class="shrink-0"
+          >
+            <svg
+              class="lucide lucide-sparkles"
+              fill="none"
+              height="14"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="14"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+              />
+              <path
+                d="M20 3v4"
+              />
+              <path
+                d="M22 5h-4"
+              />
+              <path
+                d="M4 17v2"
+              />
+              <path
+                d="M5 18H3"
+              />
+            </svg>
+          </span>
+          <span
+            class="inline-flex items-center"
+          >
+            Quick Start
+          </span>
+        </button>
       </div>
     </div>
     <div
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
+      class="flex flex-col sm:flex-row sm:items-center gap-3"
     >
+      <a
+        class="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-oe-blue/8 via-violet-500/8 to-emerald-500/8 border border-oe-blue/15 py-1.5 px-3 hover:shadow-md hover:border-oe-blue/30 transition-all animate-stagger-in shrink-0"
+        href="https://github.com/datadrivenconstruction/OpenConstructionERP"
+        rel="noopener noreferrer"
+        style="animation-delay: 200ms;"
+        target="_blank"
+      >
+        <span
+          class="relative flex h-2.5 w-2.5 shrink-0"
+        >
+          <span
+            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+          />
+          <span
+            class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"
+          />
+        </span>
+        <span
+          class="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent"
+        >
+          Erste Open-Source Bau-ERP
+        </span>
+        <svg
+          class="lucide lucide-external-link text-oe-blue opacity-50 shrink-0"
+          fill="none"
+          height="12"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="12"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M15 3h6v6"
+          />
+          <path
+            d="M10 14 21 3"
+          />
+          <path
+            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+          />
+        </svg>
+      </a>
       <div
-        class="absolute inset-0 bg-black/40 backdrop-blur-sm"
-      />
-      <div
-        class="relative w-full max-w-lg rounded-2xl border border-border-light bg-surface-elevated shadow-2xl overflow-hidden"
+        class="flex flex-wrap items-center gap-2 animate-card-in"
+        style="animation-delay: 40ms;"
       >
         <div
-          class="bg-gradient-to-r from-oe-blue to-violet-600 px-6 py-5 text-white text-center"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue-subtle px-2.5 py-1.5 transition-colors"
         >
-          <h2
-            class="text-lg font-bold"
+          <span
+            class="text-oe-blue"
           >
-            Welcome to OpenConstructionERP
-          </h2>
-          <p
-            class="mt-1 text-sm text-white/80"
+            <svg
+              class="lucide lucide-layers"
+              fill="none"
+              height="12"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"
+              />
+              <path
+                d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"
+              />
+              <path
+                d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"
+              />
+            </svg>
+          </span>
+          <span
+            class="text-xs font-bold tabular-nums text-oe-blue"
           >
-            Free & open-source construction cost estimation
-          </p>
+            0
+          </span>
+          <span
+            class="text-2xs text-content-tertiary"
+          >
+            Projects
+          </span>
         </div>
         <div
-          class="px-6 py-5"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-[#7c3aed]/10 px-2.5 py-1.5 transition-colors"
         >
-          <p
-            class="text-sm text-content-secondary text-center mb-5 leading-relaxed"
+          <span
+            class="text-[#7c3aed]"
           >
-            This project is built and maintained by the community. Your support helps us add new features, regional databases, and keep it free for everyone.
-          </p>
-          <div
-            class="space-y-2.5"
+            <svg
+              class="lucide lucide-file-spreadsheet"
+              fill="none"
+              height="12"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"
+              />
+              <path
+                d="M14 2v4a2 2 0 0 0 2 2h4"
+              />
+              <path
+                d="M8 13h2"
+              />
+              <path
+                d="M14 13h2"
+              />
+              <path
+                d="M8 17h2"
+              />
+              <path
+                d="M14 17h2"
+              />
+            </svg>
+          </span>
+          <span
+            class="text-xs font-bold tabular-nums text-[#7c3aed]"
           >
-            <a
-              class="flex items-center gap-3 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10 px-4 py-3 hover:shadow-md transition-all group"
-              href="https://github.com/datadrivenconstruction/OpenConstructionERP"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <svg
-                class="lucide lucide-star text-amber-500 shrink-0 group-hover:scale-110 transition-transform"
-                fill="none"
-                height="22"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="22"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
-                />
-              </svg>
-              <div
-                class="flex-1 min-w-0"
-              >
-                <div
-                  class="text-sm font-semibold text-content-primary"
-                >
-                  Star on GitHub
-                </div>
-                <div
-                  class="text-2xs text-content-tertiary"
-                >
-                  Help others discover the project — takes 2 seconds
-                </div>
-              </div>
-              <svg
-                class="lucide lucide-external-link text-content-quaternary shrink-0"
-                fill="none"
-                height="14"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="14"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M15 3h6v6"
-                />
-                <path
-                  d="M10 14 21 3"
-                />
-                <path
-                  d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                />
-              </svg>
-            </a>
-            <a
-              class="flex items-center gap-3 rounded-xl border border-rose-200 dark:border-rose-800/40 bg-rose-50/50 dark:bg-rose-900/10 px-4 py-3 hover:shadow-md transition-all group"
-              href="https://github.com/sponsors/datadrivenconstruction"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <svg
-                class="lucide lucide-sparkles text-rose-500 shrink-0 group-hover:scale-110 transition-transform"
-                fill="none"
-                height="22"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="22"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
-                />
-                <path
-                  d="M20 3v4"
-                />
-                <path
-                  d="M22 5h-4"
-                />
-                <path
-                  d="M4 17v2"
-                />
-                <path
-                  d="M5 18H3"
-                />
-              </svg>
-              <div
-                class="flex-1 min-w-0"
-              >
-                <div
-                  class="text-sm font-semibold text-content-primary"
-                >
-                  Become a Sponsor
-                </div>
-                <div
-                  class="text-2xs text-content-tertiary"
-                >
-                  Fund new features and keep the project free for everyone
-                </div>
-              </div>
-              <svg
-                class="lucide lucide-external-link text-content-quaternary shrink-0"
-                fill="none"
-                height="14"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="14"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M15 3h6v6"
-                />
-                <path
-                  d="M10 14 21 3"
-                />
-                <path
-                  d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                />
-              </svg>
-            </a>
-            <a
-              class="flex items-center gap-3 rounded-xl border border-oe-blue/20 dark:border-blue-800/40 bg-oe-blue/[0.03] dark:bg-blue-900/10 px-4 py-3 hover:shadow-md transition-all group"
-              href="https://datadrivenconstruction.io/contact-support/"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <svg
-                class="lucide lucide-building2 text-oe-blue shrink-0 group-hover:scale-110 transition-transform"
-                fill="none"
-                height="22"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="22"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"
-                />
-                <path
-                  d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"
-                />
-                <path
-                  d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"
-                />
-                <path
-                  d="M10 6h4"
-                />
-                <path
-                  d="M10 10h4"
-                />
-                <path
-                  d="M10 14h4"
-                />
-                <path
-                  d="M10 18h4"
-                />
-              </svg>
-              <div
-                class="flex-1 min-w-0"
-              >
-                <div
-                  class="text-sm font-semibold text-content-primary"
-                >
-                  Professional Consulting
-                </div>
-                <div
-                  class="text-2xs text-content-tertiary"
-                >
-                  Custom deployment, training, and enterprise solutions worldwide
-                </div>
-              </div>
-              <svg
-                class="lucide lucide-external-link text-content-quaternary shrink-0"
-                fill="none"
-                height="14"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="14"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M15 3h6v6"
-                />
-                <path
-                  d="M10 14 21 3"
-                />
-                <path
-                  d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                />
-              </svg>
-            </a>
-          </div>
+            0
+          </span>
+          <span
+            class="text-2xs text-content-tertiary"
+          >
+            BOQs
+          </span>
         </div>
         <div
-          class="px-6 py-3 border-t border-border-light bg-surface-secondary/30 flex items-center justify-between"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-[#0891b2]/10 px-2.5 py-1.5 transition-colors"
         >
-          <div
-            class="flex items-center gap-3"
+          <span
+            class="text-[#0891b2]"
           >
-            <span
-              class="text-2xs text-content-quaternary"
+            <svg
+              class="lucide lucide-cpu"
+              fill="none"
+              height="12"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              datadrivenconstruction.io
-            </span>
-            <button
-              class="text-2xs text-oe-blue hover:text-oe-blue/80 transition-colors underline"
-            >
-              Run Setup Wizard
-            </button>
-          </div>
-          <button
-            class="rounded-lg bg-oe-blue px-4 py-1.5 text-sm font-medium text-white hover:bg-oe-blue/90 transition-colors"
+              <rect
+                height="16"
+                rx="2"
+                width="16"
+                x="4"
+                y="4"
+              />
+              <rect
+                height="6"
+                rx="1"
+                width="6"
+                x="9"
+                y="9"
+              />
+              <path
+                d="M15 2v2"
+              />
+              <path
+                d="M15 20v2"
+              />
+              <path
+                d="M2 15h2"
+              />
+              <path
+                d="M2 9h2"
+              />
+              <path
+                d="M20 15h2"
+              />
+              <path
+                d="M20 9h2"
+              />
+              <path
+                d="M9 2v2"
+              />
+              <path
+                d="M9 20v2"
+              />
+            </svg>
+          </span>
+          <span
+            class="text-xs font-bold tabular-nums text-[#0891b2]"
           >
-            Get Started
-          </button>
+            0
+          </span>
+          <span
+            class="text-2xs text-content-tertiary"
+          >
+            Modules
+          </span>
+        </div>
+        <div
+          class="inline-flex items-center gap-1.5 rounded-lg bg-[#16a34a]/10 px-2.5 py-1.5 transition-colors"
+        >
+          <span
+            class="text-[#16a34a]"
+          >
+            <svg
+              class="lucide lucide-users"
+              fill="none"
+              height="12"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+              />
+              <circle
+                cx="9"
+                cy="7"
+                r="4"
+              />
+              <path
+                d="M22 21v-2a4 4 0 0 0-3-3.87"
+              />
+              <path
+                d="M16 3.13a4 4 0 0 1 0 7.75"
+              />
+            </svg>
+          </span>
+          <span
+            class="text-xs font-bold tabular-nums text-[#16a34a]"
+          >
+            0
+          </span>
+          <span
+            class="text-2xs text-content-tertiary"
+          >
+            Users
+          </span>
         </div>
       </div>
     </div>
@@ -1364,202 +1369,440 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
       </div>
     </div>
     <div
-      class="flex flex-wrap sm:flex-nowrap sm:overflow-x-auto sm:scrollbar-none items-center gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2 animate-card-in"
-      style="animation-delay: 80ms;"
+      class="animate-card-in"
+      style="animation-delay: 130ms;"
     >
-      <span
-        class="text-xs font-medium text-content-tertiary mr-1"
+      <div
+        class="flex items-center justify-between mb-4"
       >
-        Quick Actions
-        :
-      </span>
-      <button
-        class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md"
-      >
-        <span
-          class="shrink-0"
+        <div
+          class="flex items-center gap-2"
         >
           <svg
-            class="lucide lucide-sparkles"
+            class="lucide lucide-layers text-content-tertiary"
             fill="none"
-            height="14"
+            height="16"
             stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
-            stroke-width="2"
+            stroke-width="1.75"
             viewBox="0 0 24 24"
-            width="14"
+            width="16"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+              d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"
             />
             <path
-              d="M20 3v4"
+              d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"
             />
             <path
-              d="M22 5h-4"
-            />
-            <path
-              d="M4 17v2"
-            />
-            <path
-              d="M5 18H3"
+              d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"
             />
           </svg>
-        </span>
-        <span
-          class="inline-flex items-center"
-        >
-          Quick Start Estimate
-        </span>
-      </button>
-      <button
-        class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md"
+          <h3
+            class="text-sm font-semibold text-content-primary"
+          >
+            Projects
+          </h3>
+        </div>
+      </div>
+      <div
+        class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
       >
-        <span
-          class="shrink-0"
-        >
-          <svg
-            class="lucide lucide-folder-plus"
-            fill="none"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 10v6"
-            />
-            <path
-              d="M9 13h6"
-            />
-            <path
-              d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
-            />
-          </svg>
-        </span>
-        <span
-          class="inline-flex items-center"
-        >
-          New Project
-        </span>
-      </button>
-      <button
-        class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md"
+        <div
+          aria-hidden="true"
+          class="animate-shimmer bg-gradient-to-r from-surface-secondary via-surface-tertiary to-surface-secondary bg-[length:200%_100%] rounded-xl w-full"
+          style="height: 160px;"
+        />
+        <div
+          aria-hidden="true"
+          class="animate-shimmer bg-gradient-to-r from-surface-secondary via-surface-tertiary to-surface-secondary bg-[length:200%_100%] rounded-xl w-full"
+          style="height: 160px;"
+        />
+        <div
+          aria-hidden="true"
+          class="animate-shimmer bg-gradient-to-r from-surface-secondary via-surface-tertiary to-surface-secondary bg-[length:200%_100%] rounded-xl w-full"
+          style="height: 160px;"
+        />
+      </div>
+    </div>
+    <div
+      class="animate-card-in"
+      style="animation-delay: 150ms;"
+    >
+      <div
+        class="rounded-xl border border-border-light bg-surface-elevated shadow-xs transition-all duration-normal ease-oe transform-gpu"
       >
-        <span
-          class="shrink-0"
+        <div
+          class="p-6 pb-0"
         >
-          <svg
-            class="lucide lucide-file-text"
-            fill="none"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          <div
+            class="flex items-start justify-between gap-4"
           >
-            <path
-              d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"
-            />
-            <path
-              d="M14 2v4a2 2 0 0 0 2 2h4"
-            />
-            <path
-              d="M10 9H8"
-            />
-            <path
-              d="M16 13H8"
-            />
-            <path
-              d="M16 17H8"
-            />
-          </svg>
-        </span>
-        <span
-          class="inline-flex items-center"
+            <div
+              class="min-w-0"
+            >
+              <h3
+                class="text-lg font-semibold text-content-primary truncate"
+              >
+                dashboard.recent_projects
+              </h3>
+            </div>
+            <div
+              class="shrink-0"
+            >
+              <button
+                class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-transparent text-content-secondary hover:bg-surface-secondary active:bg-surface-tertiary border border-transparent active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md"
+              >
+                <span
+                  class="inline-flex items-center"
+                >
+                  projects.title
+                </span>
+                <span
+                  class="shrink-0"
+                >
+                  <svg
+                    class="lucide lucide-arrow-right"
+                    fill="none"
+                    height="14"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="14"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5 12h14"
+                    />
+                    <path
+                      d="m12 5 7 7-7 7"
+                    />
+                  </svg>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          class="mt-4 !mt-0"
         >
-          New BOQ
-        </span>
-      </button>
-      <button
-        class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md"
+          <div
+            class="px-6 py-8"
+          >
+            <div
+              class="text-center mb-6"
+            >
+              <p
+                class="text-sm font-semibold text-content-primary"
+              >
+                Welcome to OpenConstructionERP
+              </p>
+              <p
+                class="mt-1 text-xs text-content-tertiary"
+              >
+                Start by installing a demo project or creating your own.
+              </p>
+            </div>
+            <div
+              class="grid grid-cols-1 gap-3 sm:grid-cols-3"
+            >
+              <button
+                class="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30 disabled:opacity-60"
+              >
+                <span
+                  class="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold"
+                >
+                  1
+                </span>
+                <div
+                  class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
+                >
+                  <svg
+                    class="lucide lucide-download"
+                    fill="none"
+                    height="20"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    viewBox="0 0 24 24"
+                    width="20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                    />
+                    <polyline
+                      points="7 10 12 15 17 10"
+                    />
+                    <line
+                      x1="12"
+                      x2="12"
+                      y1="15"
+                      y2="3"
+                    />
+                  </svg>
+                </div>
+                <span
+                  class="text-sm font-medium text-content-primary"
+                >
+                  Install Demo Project
+                </span>
+                <span
+                  class="text-[11px] leading-snug text-content-tertiary"
+                >
+                  Pre-built residential project with realistic data
+                </span>
+              </button>
+              <button
+                class="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
+              >
+                <span
+                  class="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold"
+                >
+                  2
+                </span>
+                <div
+                  class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
+                >
+                  <svg
+                    class="lucide lucide-folder-plus"
+                    fill="none"
+                    height="20"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    viewBox="0 0 24 24"
+                    width="20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 10v6"
+                    />
+                    <path
+                      d="M9 13h6"
+                    />
+                    <path
+                      d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+                    />
+                  </svg>
+                </div>
+                <span
+                  class="text-sm font-medium text-content-primary"
+                >
+                  Create First Project
+                </span>
+                <span
+                  class="text-[11px] leading-snug text-content-tertiary"
+                >
+                  Set up a new estimation from scratch
+                </span>
+              </button>
+              <button
+                class="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
+              >
+                <span
+                  class="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold"
+                >
+                  3
+                </span>
+                <div
+                  class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
+                >
+                  <svg
+                    class="lucide lucide-upload"
+                    fill="none"
+                    height="20"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    viewBox="0 0 24 24"
+                    width="20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                    />
+                    <polyline
+                      points="17 8 12 3 7 8"
+                    />
+                    <line
+                      x1="12"
+                      x2="12"
+                      y1="3"
+                      y2="15"
+                    />
+                  </svg>
+                </div>
+                <span
+                  class="text-sm font-medium text-content-primary"
+                >
+                  Import Existing BOQ
+                </span>
+                <span
+                  class="text-[11px] leading-snug text-content-tertiary"
+                >
+                  Use AI to estimate from an existing document
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="animate-card-in"
+      style="animation-delay: 120ms;"
+    >
+      <div
+        class="rounded-xl border border-border-light bg-surface-elevated shadow-xs transition-all duration-normal ease-oe transform-gpu"
       >
-        <span
-          class="shrink-0"
+        <div
+          aria-label="File upload area"
+          class="relative flex items-center gap-4 rounded-xl border-2 border-dashed px-5 py-5 transition-all border-border-light bg-surface-secondary/30 hover:border-oe-blue/40 opacity-60"
+          role="region"
+          style="min-height: 160px;"
         >
-          <svg
-            class="lucide lucide-shield-check"
-            fill="none"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+          <input
+            class="hidden"
+            multiple=""
+            type="file"
+          />
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue"
           >
-            <path
-              d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
-            />
-            <path
-              d="m9 12 2 2 4-4"
-            />
-          </svg>
-        </span>
-        <span
-          class="inline-flex items-center"
-        >
-          Validate
-        </span>
-      </button>
-      <button
-        class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md"
-      >
-        <span
-          class="shrink-0"
-        >
-          <svg
-            class="lucide lucide-download"
-            fill="none"
-            height="14"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="14"
-            xmlns="http://www.w3.org/2000/svg"
+            <svg
+              class="lucide lucide-upload"
+              fill="none"
+              height="22"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.75"
+              viewBox="0 0 24 24"
+              width="22"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+              />
+              <polyline
+                points="17 8 12 3 7 8"
+              />
+              <line
+                x1="12"
+                x2="12"
+                y1="3"
+                y2="15"
+              />
+            </svg>
+          </div>
+          <div
+            class="min-w-0 flex-1"
           >
-            <path
-              d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
-            />
-            <polyline
-              points="7 10 12 15 17 10"
-            />
-            <line
-              x1="12"
-              x2="12"
-              y1="15"
-              y2="3"
-            />
-          </svg>
-        </span>
-        <span
-          class="inline-flex items-center"
-        >
-          Import Database
-        </span>
-      </button>
+            <div
+              class="text-sm font-semibold text-content-primary"
+            >
+              Drop files here
+            </div>
+            <p
+              class="mt-0.5 text-xs text-content-tertiary line-clamp-1"
+            >
+              Select an active project to upload files.
+            </p>
+            <div
+              class="mt-2 flex items-center gap-3 text-2xs text-content-tertiary"
+            >
+              <button
+                class="inline-flex items-center gap-1 text-oe-blue hover:text-oe-blue-dark transition-colors"
+                disabled=""
+                type="button"
+              >
+                <svg
+                  class="lucide lucide-file-text"
+                  fill="none"
+                  height="11"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="11"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"
+                  />
+                  <path
+                    d="M14 2v4a2 2 0 0 0 2 2h4"
+                  />
+                  <path
+                    d="M10 9H8"
+                  />
+                  <path
+                    d="M16 13H8"
+                  />
+                  <path
+                    d="M16 17H8"
+                  />
+                </svg>
+                <span>
+                  {{count}} documents · open in Documents →
+                </span>
+              </button>
+            </div>
+          </div>
+          <div
+            class="flex shrink-0 items-center gap-2"
+          >
+            <button
+              class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md opacity-40 pointer-events-none"
+              disabled=""
+            >
+              <span
+                class="shrink-0"
+              >
+                <svg
+                  class="lucide lucide-upload"
+                  fill="none"
+                  height="13"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="13"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                  />
+                  <polyline
+                    points="17 8 12 3 7 8"
+                  />
+                  <line
+                    x1="12"
+                    x2="12"
+                    y1="3"
+                    y2="15"
+                  />
+                </svg>
+              </span>
+              <span
+                class="inline-flex items-center"
+              >
+                Upload Files
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     <div>
       <div
@@ -2306,243 +2549,126 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
       </div>
     </div>
     <div
-      class="grid grid-cols-1 gap-6 lg:grid-cols-3"
+      class="animate-card-in"
+      style="animation-delay: 90ms;"
     >
       <div
-        class="lg:col-span-2 animate-card-in"
-        style="animation-delay: 150ms;"
+        class="flex items-center gap-2 mb-3"
       >
-        <div
-          class="rounded-xl border border-border-light bg-surface-elevated shadow-xs transition-all duration-normal ease-oe transform-gpu"
+        <svg
+          class="lucide lucide-lightbulb text-amber-500"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.75"
+          viewBox="0 0 24 24"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <div
-            class="p-6 pb-0"
-          >
-            <div
-              class="flex items-start justify-between gap-4"
-            >
-              <div
-                class="min-w-0"
-              >
-                <h3
-                  class="text-lg font-semibold text-content-primary truncate"
-                >
-                  dashboard.recent_projects
-                </h3>
-              </div>
-              <div
-                class="shrink-0"
-              >
-                <button
-                  class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-transparent text-content-secondary hover:bg-surface-secondary active:bg-surface-tertiary border border-transparent active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md"
-                >
-                  <span
-                    class="inline-flex items-center"
-                  >
-                    projects.title
-                  </span>
-                  <span
-                    class="shrink-0"
-                  >
-                    <svg
-                      class="lucide lucide-arrow-right"
-                      fill="none"
-                      height="14"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                      width="14"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M5 12h14"
-                      />
-                      <path
-                        d="m12 5 7 7-7 7"
-                      />
-                    </svg>
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div
-            class="mt-4 !mt-0"
-          >
-            <div
-              class="px-6 py-8"
-            >
-              <div
-                class="text-center mb-6"
-              >
-                <p
-                  class="text-sm font-semibold text-content-primary"
-                >
-                  Welcome to OpenConstructionERP
-                </p>
-                <p
-                  class="mt-1 text-xs text-content-tertiary"
-                >
-                  Start by installing a demo project or creating your own.
-                </p>
-              </div>
-              <div
-                class="grid grid-cols-1 gap-3 sm:grid-cols-3"
-              >
-                <button
-                  class="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30 disabled:opacity-60"
-                >
-                  <span
-                    class="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold"
-                  >
-                    1
-                  </span>
-                  <div
-                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
-                  >
-                    <svg
-                      class="lucide lucide-download"
-                      fill="none"
-                      height="20"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="1.5"
-                      viewBox="0 0 24 24"
-                      width="20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
-                      />
-                      <polyline
-                        points="7 10 12 15 17 10"
-                      />
-                      <line
-                        x1="12"
-                        x2="12"
-                        y1="15"
-                        y2="3"
-                      />
-                    </svg>
-                  </div>
-                  <span
-                    class="text-sm font-medium text-content-primary"
-                  >
-                    Install Demo Project
-                  </span>
-                  <span
-                    class="text-[11px] leading-snug text-content-tertiary"
-                  >
-                    Pre-built residential project with realistic data
-                  </span>
-                </button>
-                <button
-                  class="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
-                >
-                  <span
-                    class="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold"
-                  >
-                    2
-                  </span>
-                  <div
-                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
-                  >
-                    <svg
-                      class="lucide lucide-folder-plus"
-                      fill="none"
-                      height="20"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="1.5"
-                      viewBox="0 0 24 24"
-                      width="20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 10v6"
-                      />
-                      <path
-                        d="M9 13h6"
-                      />
-                      <path
-                        d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
-                      />
-                    </svg>
-                  </div>
-                  <span
-                    class="text-sm font-medium text-content-primary"
-                  >
-                    Create First Project
-                  </span>
-                  <span
-                    class="text-[11px] leading-snug text-content-tertiary"
-                  >
-                    Set up a new estimation from scratch
-                  </span>
-                </button>
-                <button
-                  class="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
-                >
-                  <span
-                    class="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold"
-                  >
-                    3
-                  </span>
-                  <div
-                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
-                  >
-                    <svg
-                      class="lucide lucide-upload"
-                      fill="none"
-                      height="20"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="1.5"
-                      viewBox="0 0 24 24"
-                      width="20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
-                      />
-                      <polyline
-                        points="17 8 12 3 7 8"
-                      />
-                      <line
-                        x1="12"
-                        x2="12"
-                        y1="3"
-                        y2="15"
-                      />
-                    </svg>
-                  </div>
-                  <span
-                    class="text-sm font-medium text-content-primary"
-                  >
-                    Import Existing BOQ
-                  </span>
-                  <span
-                    class="text-[11px] leading-snug text-content-tertiary"
-                  >
-                    Use AI to estimate from an existing document
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+          <path
+            d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"
+          />
+          <path
+            d="M9 18h6"
+          />
+          <path
+            d="M10 22h4"
+          />
+        </svg>
+        <h3
+          class="text-sm font-semibold text-content-primary"
+        >
+          Suggested Next Steps
+        </h3>
       </div>
       <div
-        class="space-y-6 animate-card-in"
-        style="animation-delay: 300ms;"
+        class="grid grid-cols-1 gap-3 sm:grid-cols-3"
+      >
+        <button
+          class="group flex flex-col items-start gap-2 rounded-xl border border-border-light bg-surface-primary p-4 text-left transition-all duration-normal ease-oe hover:border-oe-blue/30 hover:bg-oe-blue-subtle/20 hover:shadow-sm animate-stagger-in"
+          style="animation-delay: 100ms;"
+        >
+          <div
+            class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 transition-transform group-hover:scale-110"
+          >
+            <svg
+              class="lucide lucide-users"
+              fill="none"
+              height="18"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.75"
+              viewBox="0 0 24 24"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+              />
+              <circle
+                cx="9"
+                cy="7"
+                r="4"
+              />
+              <path
+                d="M22 21v-2a4 4 0 0 0-3-3.87"
+              />
+              <path
+                d="M16 3.13a4 4 0 0 1 0 7.75"
+              />
+            </svg>
+          </div>
+          <div>
+            <h4
+              class="text-sm font-semibold text-content-primary leading-snug"
+            >
+              Add your team contacts
+            </h4>
+            <p
+              class="mt-1 text-xs leading-relaxed text-content-tertiary line-clamp-2"
+            >
+              Store clients, subcontractors, and suppliers in your contacts directory. Import from CSV or add manually.
+            </p>
+          </div>
+          <span
+            class="mt-auto flex items-center gap-1 text-xs font-medium text-oe-blue"
+          >
+            Add Contacts
+            <svg
+              class="lucide lucide-arrow-right"
+              fill="none"
+              height="12"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="12"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12h14"
+              />
+              <path
+                d="m12 5 7 7-7 7"
+              />
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="grid grid-cols-1 lg:grid-cols-3 gap-6"
+    >
+      <div
+        class=" animate-card-in"
+        style="animation-delay: 450ms;"
       >
         <div
-          class="rounded-xl border border-border-light bg-surface-elevated shadow-xs transition-all duration-normal ease-oe transform-gpu p-6"
+          class="rounded-xl border border-border-light bg-surface-elevated shadow-xs transition-all duration-normal ease-oe transform-gpu p-6 h-full"
         >
           <div
             class="flex items-start justify-between gap-4"

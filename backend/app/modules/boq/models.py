@@ -93,6 +93,10 @@ class Position(Base):
     ordinal: Mapped[str] = mapped_column(String(50), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     unit: Mapped[str] = mapped_column(String(20), nullable=False)
+    # Money/quantity stored as String by design — SQLite's native Numeric
+    # degrades to REAL with precision loss, and JS JSON consumers lose
+    # digits on large currency values via Number. Service layer coerces to
+    # Decimal via ``_to_decimal`` for all arithmetic.
     quantity: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     unit_rate: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     total: Mapped[str] = mapped_column(String(50), nullable=False, default="0")

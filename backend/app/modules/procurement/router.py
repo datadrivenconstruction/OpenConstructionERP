@@ -15,10 +15,15 @@ NOTE: Fixed-path routes (/goods-receipts) are registered BEFORE the parametric
 """
 
 import uuid
+from collections.abc import Iterable
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.contacts.models import Contact
+from app.modules.procurement.models import PurchaseOrder
 from app.modules.procurement.schemas import (
     GRCreate,
     GRListResponse,
@@ -36,6 +41,39 @@ router = APIRouter()
 
 def _get_service(session: SessionDep) -> ProcurementService:
     return ProcurementService(session)
+
+
+def _contact_display_name(c: Contact) -> str:
+    """Return the human-readable contact label (company > "first last" > email)."""
+    if c.company_name:
+        return c.company_name
+    full = f"{c.first_name or ''} {c.last_name or ''}".strip()
+    return full or c.email or ""
+
+
+async def _fetch_vendor_names(
+    session: AsyncSession, vendor_ids: Iterable[str | None]
+) -> dict[str, str]:
+    """Resolve ``vendor_contact_id`` → display name in one round trip.
+
+    Returns a dict keyed by the string form of the contact UUID. Unknown IDs
+    (contact deleted, typo in the string, etc.) just don't appear in the map,
+    so the caller falls back to showing the raw UUID.
+    """
+    ids = {vid for vid in vendor_ids if vid}
+    if not ids:
+        return {}
+    rows = (
+        await session.execute(select(Contact).where(Contact.id.in_(ids)))
+    ).scalars().all()
+    return {str(c.id): _contact_display_name(c) for c in rows}
+
+
+def _po_to_response(po: PurchaseOrder, vendor_names: dict[str, str]) -> POResponse:
+    resp = POResponse.model_validate(po)
+    if po.vendor_contact_id:
+        resp.vendor_name = vendor_names.get(po.vendor_contact_id)
+    return resp
 
 
 # ── Purchase Orders (list / create) ─────────────────────────────────────────
@@ -63,8 +101,11 @@ async def list_purchase_orders(
         offset=offset,
         limit=limit,
     )
+    vendor_names = await _fetch_vendor_names(
+        service.session, (po.vendor_contact_id for po in items)
+    )
     return POListResponse(
-        items=[POResponse.model_validate(po) for po in items],
+        items=[_po_to_response(po, vendor_names) for po in items],
         total=total,
         offset=offset,
         limit=limit,
@@ -84,7 +125,8 @@ async def create_purchase_order(
 ) -> POResponse:
     """Create a new purchase order."""
     po = await service.create_po(data, user_id=user_id)
-    return POResponse.model_validate(po)
+    vendor_names = await _fetch_vendor_names(service.session, [po.vendor_contact_id])
+    return _po_to_response(po, vendor_names)
 
 
 # ── Stats ────────────────────────────────────────────────────────────────────
@@ -180,7 +222,8 @@ async def get_purchase_order(
 ) -> POResponse:
     """Get a single purchase order by ID."""
     po = await service.get_po(po_id)
-    return POResponse.model_validate(po)
+    vendor_names = await _fetch_vendor_names(service.session, [po.vendor_contact_id])
+    return _po_to_response(po, vendor_names)
 
 
 @router.patch(
@@ -196,7 +239,8 @@ async def update_purchase_order(
 ) -> POResponse:
     """Update a purchase order."""
     po = await service.update_po(po_id, data)
-    return POResponse.model_validate(po)
+    vendor_names = await _fetch_vendor_names(service.session, [po.vendor_contact_id])
+    return _po_to_response(po, vendor_names)
 
 
 @router.post(
@@ -311,4 +355,5 @@ async def issue_purchase_order(
 ) -> POResponse:
     """Issue a purchase order."""
     po = await service.issue_po(po_id)
-    return POResponse.model_validate(po)
+    vendor_names = await _fetch_vendor_names(service.session, [po.vendor_contact_id])
+    return _po_to_response(po, vendor_names)

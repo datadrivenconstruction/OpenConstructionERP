@@ -1275,7 +1275,7 @@ function SystemStatusSummary({
 
   const { data: modules } = useQuery({
     queryKey: ['modules'],
-    queryFn: () => fetch('/api/system/modules').then((r) => r.json()),
+    queryFn: () => apiGet<{ modules: unknown[] }>('/system/modules').catch(() => ({ modules: [] })),
     retry: false,
     staleTime: 60_000,
   });
@@ -2319,13 +2319,17 @@ function SystemStatus() {
 
   const { data: modules } = useQuery({
     queryKey: ['modules'],
-    queryFn: () => fetch('/api/system/modules').then((r) => r.json()),
+    queryFn: () => apiGet<{ modules: unknown[] }>('/system/modules').catch(() => ({ modules: [] })),
     retry: false,
   });
 
   const { data: rules } = useQuery({
     queryKey: ['validation-rules'],
-    queryFn: () => fetch('/api/system/validation-rules').then((r) => r.json()),
+    queryFn: () =>
+      apiGet<{ rule_sets: unknown[]; rules: unknown[] }>('/system/validation-rules').catch(() => ({
+        rule_sets: [],
+        rules: [],
+      })),
     retry: false,
   });
 

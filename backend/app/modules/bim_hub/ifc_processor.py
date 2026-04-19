@@ -18,9 +18,11 @@ Identity mapping (DDC RvtExporter):
 import hashlib
 import logging
 import re
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # noqa: S405 — tree building + types; all parsing goes through defusedxml
 from pathlib import Path
 from typing import Any
+
+import defusedxml.ElementTree as safe_ET
 
 _COLLADA_NS = "http://www.collada.org/2005/11/COLLADASchema"
 
@@ -599,6 +601,27 @@ def _excel_elements_to_bim_result(
                 if sval and sval.lower() not in ("none", "0", ""):
                     properties[prop_key] = sval[:500]
 
+        # Cap properties at 30 entries to keep per-element payloads small —
+        # Revit/IFC exports often expose 100+ parameters, most irrelevant.
+        # Priority order: critical DDC/hierarchy keys win, then remaining
+        # properties by insertion order (stable output across runs).
+        _PRIORITY_KEYS = (
+            "category", "family", "type_name", "level",
+            "material", "fire_rating", "phase",
+            "assembly_code", "assembly_description", "mark", "type_mark",
+        )
+        if len(properties) > 30:
+            priority = {k: properties[k] for k in _PRIORITY_KEYS if k in properties}
+            remaining_budget = 30 - len(priority)
+            extras: dict[str, str] = {}
+            for k, v in properties.items():
+                if k in priority:
+                    continue
+                if len(extras) >= remaining_budget:
+                    break
+                extras[k] = v
+            properties = {**priority, **extras}
+
         elements.append({
             "stable_id": stable_id,
             "element_type": etype,
@@ -675,7 +698,7 @@ def _dae_element_bboxes(
     element_bboxes: dict[str, tuple[float, float, float, float, float, float]] = {}
     element_to_shape: dict[str, str] = {}
     try:
-        tree = ET.parse(str(dae_path))
+        tree = safe_ET.parse(str(dae_path))
     except ET.ParseError as exc:
         logger.debug("DAE bbox extraction: XML parse error: %s", exc)
         return element_bboxes, element_to_shape
@@ -1516,7 +1539,7 @@ def _extract_dae_bboxes_by_node_id(dae_path: Path) -> dict[int, dict[str, float]
 
     Coordinates are returned in the DAE's own units (DDC emits metres).
     """
-    tree = ET.parse(str(dae_path))
+    tree = safe_ET.parse(str(dae_path))
     root = tree.getroot()
     ns = {"c": _COLLADA_NS}
 
@@ -1625,7 +1648,7 @@ def _patch_collada_node_names(dae_path: Path) -> int:
     Returns the number of nodes patched.
     """
     try:
-        tree = ET.parse(str(dae_path))
+        tree = safe_ET.parse(str(dae_path))
     except ET.ParseError as exc:
         logger.warning("Cannot patch COLLADA node names: XML parse error: %s", exc)
         return 0

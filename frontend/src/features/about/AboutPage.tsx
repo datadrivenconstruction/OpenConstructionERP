@@ -70,7 +70,7 @@ export function AboutPage() {
               { value: '55K+', label: t('about.stat_costs', { defaultValue: 'Cost Items (CWICR)' }) },
               { value: '20+', label: t('about.stat_langs', { defaultValue: 'Languages' }) },
               { value: '11', label: t('about.stat_regions', { defaultValue: 'Regional Databases' }) },
-              { value: '4', label: t('about.stat_cad_formats', { defaultValue: 'Reverse engineering of CAD/BIM formats' }) },
+              { value: '4', label: t('about.stat_cad_formats', { defaultValue: 'CAD/BIM formats supported' }) },
             ].map((s, i) => (
               <div key={i} className="text-center rounded-xl bg-surface-secondary/50 p-4">
                 <div className="text-2xl font-bold text-content-primary">{s.value}</div>
@@ -79,7 +79,7 @@ export function AboutPage() {
             ))}
           </div>
           <p className="mt-4 text-sm text-content-secondary leading-relaxed">
-            {t('about.platform_desc', { defaultValue: 'OpenConstructionERP covers the full construction estimation workflow — BOQ editing, 4D scheduling, 5D cost modeling, AI-powered estimation, CAD/BIM quantity takeoff (RVT, IFC, DWG, DGN), tendering, and reporting. Supports DIN 276, NRM 1/2, MasterFormat, GAEB, and custom standards.' })}
+            {t('about.platform_desc', { defaultValue: 'OpenConstructionERP covers the full construction estimation workflow — BOQ editing, 4D scheduling, 5D cost modeling, AI-powered estimation, CAD/BIM quantity takeoff (RVT, IFC, DWG, DGN), tendering, and reporting. Supports regional classification standards and custom schemas.' })}
           </p>
         </div>
       </Card>

@@ -74,6 +74,29 @@ export interface ApproveSubmittalPayload {
   comments?: string;
 }
 
+/* ── Wire <-> UI normaliser ────────────────────────────────────────────── */
+
+type SubmittalWire = Omit<Submittal, 'type' | 'revision'> & {
+  type?: SubmittalType;
+  submittal_type?: SubmittalType;
+  revision?: number;
+  current_revision?: number;
+  description?: string | null;
+  ball_in_court_name?: string | null;
+};
+
+function normaliseSubmittal(s: SubmittalWire): Submittal {
+  const type = (s.type ?? s.submittal_type ?? 'shop_drawing') as SubmittalType;
+  const revision = (s.revision ?? s.current_revision ?? 1) as number;
+  return {
+    ...s,
+    type,
+    revision,
+    description: s.description ?? null,
+    ball_in_court_name: s.ball_in_court_name ?? null,
+  } as Submittal;
+}
+
 /* ── API Functions ─────────────────────────────────────────────────────── */
 
 export async function fetchSubmittals(filters?: SubmittalFilters): Promise<Submittal[]> {
@@ -81,25 +104,31 @@ export async function fetchSubmittals(filters?: SubmittalFilters): Promise<Submi
   if (filters?.project_id) params.set('project_id', filters.project_id);
   if (filters?.status) params.set('status', filters.status);
   const qs = params.toString();
-  return apiGet<Submittal[]>(`/v1/submittals/${qs ? `?${qs}` : ''}`);
+  const rows = await apiGet<SubmittalWire[]>(`/v1/submittals/${qs ? `?${qs}` : ''}`);
+  return rows.map(normaliseSubmittal);
 }
 
 export async function createSubmittal(data: CreateSubmittalPayload): Promise<Submittal> {
-  return apiPost<Submittal>('/v1/submittals/', data);
+  const row = await apiPost<SubmittalWire>('/v1/submittals/', data);
+  return normaliseSubmittal(row);
 }
 
 export async function updateSubmittal(id: string, data: UpdateSubmittalPayload): Promise<Submittal> {
-  return apiPatch<Submittal, UpdateSubmittalPayload>(`/v1/submittals/${id}`, data);
+  const row = await apiPatch<SubmittalWire, UpdateSubmittalPayload>(`/v1/submittals/${id}`, data);
+  return normaliseSubmittal(row);
 }
 
 export async function submitSubmittal(id: string): Promise<Submittal> {
-  return apiPost<Submittal>(`/v1/submittals/${id}/submit/`);
+  const row = await apiPost<SubmittalWire>(`/v1/submittals/${id}/submit/`);
+  return normaliseSubmittal(row);
 }
 
 export async function reviewSubmittal(id: string, data: ReviewSubmittalPayload): Promise<Submittal> {
-  return apiPost<Submittal>(`/v1/submittals/${id}/review/`, data);
+  const row = await apiPost<SubmittalWire>(`/v1/submittals/${id}/review/`, data);
+  return normaliseSubmittal(row);
 }
 
 export async function approveSubmittal(id: string, data: ApproveSubmittalPayload): Promise<Submittal> {
-  return apiPost<Submittal>(`/v1/submittals/${id}/approve/`, data);
+  const row = await apiPost<SubmittalWire>(`/v1/submittals/${id}/approve/`, data);
+  return normaliseSubmittal(row);
 }

@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpenConstructionERP Pro — Split edition</title>
+  <meta name="description" content="Open-source construction ERP with AI-powered BOQ, multi-CAD ingest, 55,000+ cost items. Split edition: editorial meets architectural." />
+  <link rel="icon" type="image/svg+xml" href="/pro/cinematic/assets/favicon.svg" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Inter+Tight:wght@500;600&family=Fraunces:ital,opsz,wght@1,14..144,300..500&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ===== Theme tokens ===== */
+    :root {
+      --bg-0: #faf8f3;
+      --bg-1: #f0ece3;
+      --bg-2: #e8e3d7;
+      --ink-0: #14161a;
+      --ink-1: #3e4047;
+      --ink-2: #787a82;
+      --ink-3: #a8a69e;
+      --line-0: rgba(20, 22, 26, 0.08);
+      --line-1: rgba(20, 22, 26, 0.12);
+      --line-2: rgba(20, 22, 26, 0.20);
+      --accent: #1e4a8a;
+      --accent-2: #a8724e;
+      --three-bg: 0xf0ece3;
+      --three-ink: 0x1e4a8a;
+      --three-glow: 0xa8724e;
+      color-scheme: light;
+    }
+    [data-theme="dark"] {
+      --bg-0: #0a0a0b;
+      --bg-1: #16161a;
+      --bg-2: #1d1d22;
+      --ink-0: #fafafa;
+      --ink-1: #d4d4d8;
+      --ink-2: #a1a1aa;
+      --ink-3: #71717a;
+      --line-0: rgba(255,255,255,0.06);
+      --line-1: rgba(255,255,255,0.10);
+      --line-2: rgba(255,255,255,0.18);
+      --accent: #60a5fa;
+      --accent-2: #f59e0b;
+      --three-bg: 0x16161a;
+      --three-ink: 0x60a5fa;
+      --three-glow: 0xf59e0b;
+      color-scheme: dark;
+    }
+
+    /* ===== Reset & base ===== */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg-0);
+      color: var(--ink-0);
+      font-size: 16px;
+      line-height: 1.55;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 480ms ease, color 480ms ease;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+    .mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .italic-serif { font-family: 'Fraunces', Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; }
+
+    ::selection { background: var(--accent); color: #fff; }
+
+    /* ===== Nav ===== */
+    .nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 64px;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(20px, 3.2vw, 44px);
+      background: color-mix(in srgb, var(--bg-0) 78%, transparent);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border-bottom: 1px solid transparent;
+      transition: border-color 280ms ease, background-color 280ms ease;
+    }
+    .nav.is-scrolled { border-bottom-color: var(--line-1); }
+
+    .nav__brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--ink-0);
+      font-size: 15px;
+    }
+    .nav__brand-mark {
+      width: 22px; height: 22px;
+      border-radius: 5px;
+      background: var(--ink-0);
+      display: grid; place-items: center;
+      color: var(--bg-0);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      font-size: 11px;
+    }
+    .nav__pill-pro {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--accent-2);
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 500;
+      transform: translateY(-1px);
+    }
+
+    .nav__links {
+      display: flex;
+      gap: 28px;
+      font-size: 13.5px;
+      color: var(--ink-1);
+    }
+    .nav__links a {
+      position: relative;
+      padding: 4px 0;
+      transition: color 200ms ease;
+    }
+    .nav__links a:hover { color: var(--ink-0); }
+    .nav__links a::after {
+      content: "";
+      position: absolute; left: 0; right: 100%; bottom: 0;
+      height: 1px;
+      background: var(--ink-0);
+      transition: right 280ms ease;
+    }
+    .nav__links a:hover::after { right: 0; }
+
+    .nav__right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle {
+      width: 36px; height: 36px;
+      border-radius: 999px;
+      border: 1px solid var(--line-1);
+      display: grid;
+      place-items: center;
+      background: transparent;
+      color: var(--ink-1);
+      transition: border-color 200ms ease, color 200ms ease, background-color 200ms ease, transform 200ms ease;
+    }
+    .theme-toggle:hover {
+      border-color: var(--line-2);
+      color: var(--ink-0);
+      transform: translateY(-1px);
+    }
+    .theme-toggle svg { width: 16px; height: 16px; display: block; }
+    [data-theme="light"] .theme-toggle .ic-sun { display: none; }
+    [data-theme="light"] .theme-toggle .ic-moon { display: block; }
+    [data-theme="dark"] .theme-toggle .ic-sun { display: block; }
+    [data-theme="dark"] .theme-toggle .ic-moon { display: none; }
+
+    .btn-install {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 999px;
+      background: var(--ink-0);
+      color: var(--bg-0);
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 500;
+      font-size: 13.5px;
+      letter-spacing: -0.005em;
+      transition: transform 220ms ease, background-color 220ms ease, color 220ms ease;
+    }
+    .btn-install:hover { transform: translateY(-1px); }
+    .btn-install .arrow { transition: transform 220ms ease; display: inline-block; }
+    .btn-install:hover .arrow { transform: translate(3px, -3px); }
+
+    /* ===== Main hero grid ===== */
+    main { padding-top: 64px; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100vh - 64px);
+      position: relative;
+    }
+
+    /* ===== LEFT column ===== */
+    .panel-left {
+      background: var(--bg-0);
+      padding: clamp(48px, 6vw, 96px) clamp(32px, 5vw, 80px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      transition: background-color 480ms ease;
+    }
+
+    .edition-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent-2);
+      margin: 0 0 clamp(28px, 4vw, 44px);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .edition-label::before {
+      content: "";
+      width: 22px; height: 1px;
+      background: var(--accent-2);
+      display: inline-block;
+    }
+
+    .headline {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 500;
+      color: var(--ink-0);
+      font-size: clamp(48px, 6.5vw, 120px);
+      line-height: 0.94;
+      letter-spacing: -0.055em;
+      margin: 0;
+      max-width: 14ch;
+      text-wrap: balance;
+    }
+    .headline__line { display: block; }
+    .headline__em {
+      font-family: 'Fraunces', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+      letter-spacing: -0.04em;
+    }
+    .headline__dot {
+      display: inline-block;
+      width: 0.18em; height: 0.18em;
+      border-radius: 50%;
+      background: var(--accent-2);
+      transform: translateY(-0.06em);
+      margin-left: 0.02em;
+    }
+
+    .hero-sub {
+      max-width: 44ch;
+      margin: clamp(24px, 3vw, 36px) 0 clamp(28px, 3.2vw, 40px);
+      color: var(--ink-1);
+      font-size: clamp(15px, 1.1vw, 17px);
+      line-height: 1.55;
+      font-weight: 400;
+    }
+
+    .hero-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px 28px;
+      align-items: center;
+      margin-bottom: clamp(26px, 3vw, 36px);
+    }
+
+    .cta-solid {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 26px;
+      border-radius: 999px;
+      background: var(--ink-0);
+      color: var(--bg-0);
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+      transition: transform 220ms ease, box-shadow 220ms ease;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    }
+    .cta-solid:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(0,0,0,0.35); }
+    .cta-solid .arrow { transition: transform 240ms ease; }
+    .cta-solid:hover .arrow { transform: translate(4px, -4px); }
+
+    .cta-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 2px 0;
+      color: var(--ink-0);
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      letter-spacing: -0.005em;
+      border-bottom: 1px solid var(--line-2);
+      transition: border-color 220ms ease, color 220ms ease;
+    }
+    .cta-link:hover { border-bottom-color: var(--ink-0); }
+    .cta-link svg { width: 15px; height: 15px; }
+
+    /* Install command card */
+    .cmd-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 14px 14px 18px;
+      border-radius: 14px;
+      background: var(--bg-0);
+      border: 1px solid var(--line-1);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.6) inset,
+        0 1px 2px rgba(20,22,26,0.04);
+      max-width: 420px;
+      margin-bottom: clamp(22px, 2.6vw, 30px);
+      transition: border-color 240ms ease, background-color 240ms ease;
+    }
+    [data-theme="dark"] .cmd-card {
+      background: var(--bg-2);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.03) inset,
+        0 2px 6px rgba(0,0,0,0.25);
+    }
+    .cmd-card:hover { border-color: var(--line-2); }
+    .cmd-card__prompt {
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .cmd-card__text {
+      flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--ink-0);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cmd-card__copy {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line-1);
+      color: var(--ink-1);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: all 200ms ease;
+      flex-shrink: 0;
+    }
+    .cmd-card__copy:hover { border-color: var(--ink-0); color: var(--ink-0); }
+    .cmd-card__copy.is-copied {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .cmd-card__copy svg { width: 12px; height: 12px; }
+
+    .trust-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--ink-3);
+      letter-spacing: 0.04em;
+      margin: 0;
+    }
+    .trust-meta span { margin: 0 0.35em; color: var(--ink-3); opacity: 0.5; }
+
+    /* LEFT corner decoration */
+    .panel-left__corner {
+      position: absolute;
+      top: 28px;
+      left: clamp(32px, 5vw, 80px);
+      display: flex;
+      gap: 6px;
+    }
+    .panel-left__corner i {
+      display: block;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--line-2);
+    }
+
+    /* ===== RIGHT column (3D panel) ===== */
+    .panel-right {
+      background: var(--bg-1);
+      position: relative;
+      border-left: 1px solid var(--line-1);
+      overflow: hidden;
+      cursor: crosshair;
+      transition: background-color 480ms ease, border-color 480ms ease;
+      box-shadow:
+        inset 1px 0 0 rgba(255,255,255,0.4),
+        inset 0 0 120px rgba(20,22,26,0.06);
+    }
+    [data-theme="dark"] .panel-right {
+      box-shadow:
+        inset 1px 0 0 rgba(255,255,255,0.02),
+        inset 0 0 160px rgba(0,0,0,0.5);
+    }
+
+    .panel-right__canvas {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* LIVE label top right */
+    .live-label {
+      position: absolute;
+      top: 22px;
+      right: 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px 7px 10px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--bg-0) 70%, transparent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--line-1);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-1);
+      z-index: 3;
+      user-select: none;
+    }
+    .live-label__dot {
+      position: relative;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 0 0 0 rgba(168,114,78,0.45);
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+    [data-theme="dark"] .live-label__dot {
+      background: var(--accent-2);
+      box-shadow: 0 0 0 0 rgba(245,158,11,0.45);
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 currentColor; opacity: 0.95; transform: scale(1); }
+      70% { box-shadow: 0 0 0 10px rgba(0,0,0,0); opacity: 1; transform: scale(1.1); }
+      100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); opacity: 0.95; transform: scale(1); }
+    }
+
+    /* Cosmetic dots bottom right */
+    .panel-right__indicators {
+      position: absolute;
+      right: 22px;
+      bottom: 22px;
+      display: flex;
+      gap: 7px;
+      z-index: 3;
+    }
+    .panel-right__indicators i {
+      display: block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--line-2);
+      opacity: 0.8;
+    }
+    .panel-right__indicators i:last-child { background: var(--accent); opacity: 0.9; }
+
+    /* Small caption bottom left of panel */
+    .panel-right__caption {
+      position: absolute;
+      left: 22px;
+      bottom: 22px;
+      z-index: 3;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      opacity: 0.85;
+    }
+    .panel-right__caption em {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--accent);
+      font-size: 12.5px;
+      padding-left: 4px;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      height: 48px;
+      background: var(--bg-1);
+      border-top: 1px solid var(--line-1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-2);
+      letter-spacing: 0.04em;
+      transition: background-color 480ms ease, border-color 480ms ease;
+    }
+    .footer a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 200ms ease;
+    }
+    .footer a:hover { color: var(--ink-0); }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 1023.98px) {
+      .hero {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        min-height: auto;
+      }
+      .panel-left {
+        padding: clamp(64px, 10vw, 96px) clamp(24px, 5vw, 48px) clamp(40px, 6vw, 64px);
+      }
+      .panel-right {
+        border-left: 0;
+        border-top: 1px solid var(--line-1);
+        height: 60vh;
+        min-height: 460px;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .nav__links { display: none; }
+    }
+
+    @media (max-width: 560px) {
+      .panel-right {
+        height: 40vh;
+        min-height: 360px;
+      }
+      .hero-ctas {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+      .cta-solid, .cta-link { width: 100%; justify-content: center; }
+      .cmd-card { max-width: 100%; }
+      .trust-meta { font-size: 10.5px; }
+      .nav__brand { font-size: 14px; }
+      .nav { padding: 0 18px; }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .live-label__dot { animation: none; }
+    }
+
+    /* Prevent FOUC while theme loads */
+    html.theme-ready body { opacity: 1; }
+  </style>
+</head>
+<body>
+  <!-- ===== NAV ===== -->
+  <nav class="nav" id="nav">
+    <a href="/" class="nav__brand" aria-label="OpenConstructionERP home">
+      <span class="nav__brand-mark">O</span>
+      <span>OpenConstructionERP</span>
+      <span class="nav__pill-pro">PRO</span>
+    </a>
+
+    <div class="nav__links" aria-label="Primary">
+      <a href="#product">Product</a>
+      <a href="#modules">Modules</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#docs">Docs</a>
+      <a href="/pro/">Editions</a>
+    </div>
+
+    <div class="nav__right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle color theme" type="button">
+        <!-- moon (shown in light mode) -->
+        <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+        </svg>
+        <!-- sun (shown in dark mode) -->
+        <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>
+        </svg>
+      </button>
+      <a href="#install" class="btn-install">
+        <span>Install</span>
+        <span class="arrow" aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <main>
+    <section class="hero" id="product">
+      <!-- LEFT: editorial typography -->
+      <div class="panel-left">
+        <div class="panel-left__corner" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </div>
+
+        <p class="edition-label">01 · 2026 edition</p>
+
+        <h1 class="headline">
+          <span class="headline__line">Estimate</span>
+          <span class="headline__line">buildings</span>
+          <span class="headline__line">at <span class="headline__em">the speed</span></span>
+          <span class="headline__line">of thought<span class="headline__dot" aria-hidden="true"></span></span>
+        </h1>
+
+        <p class="hero-sub">
+          Open-source construction ERP with AI-powered BOQ, multi-CAD ingest,
+          55,000+ cost items across 11 regions. Self-host today, replace
+          $25K/year tools by the weekend.
+        </p>
+
+        <div class="hero-ctas">
+          <a href="#install" class="cta-solid">
+            <span>Install now</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+          <a href="https://github.com/DataDrivenConstruction" class="cta-link" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.57.11.78-.25.78-.55v-1.92c-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.04-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.3-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.2-3.1-.12-.3-.52-1.48.1-3.08 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.6.24 2.78.12 3.08.75.81 1.2 1.84 1.2 3.1 0 4.44-2.7 5.4-5.27 5.68.41.36.78 1.06.78 2.14v3.17c0 .3.2.67.79.55A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/>
+            </svg>
+            <span>Star on GitHub</span>
+          </a>
+        </div>
+
+        <div class="cmd-card" id="cmdCard" role="group" aria-label="Install command">
+          <span class="cmd-card__prompt" aria-hidden="true">$</span>
+          <span class="cmd-card__text" id="cmdText">docker compose up</span>
+          <button class="cmd-card__copy" id="cmdCopy" type="button" aria-label="Copy install command">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="9" width="11" height="11" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            <span id="cmdCopyLabel">Copy</span>
+          </button>
+        </div>
+
+        <p class="trust-meta">
+          AGPL-3.0<span>·</span>Self-hosted<span>·</span>Runs on 2 GB RAM
+        </p>
+      </div>
+
+      <!-- RIGHT: live 3D scene -->
+      <div class="panel-right" id="panelRight" aria-label="Live 3D architectural scene">
+        <canvas class="panel-right__canvas" id="three-canvas" aria-hidden="true"></canvas>
+
+        <div class="live-label">
+          <span class="live-label__dot" aria-hidden="true"></span>
+          <span>Live · interactive</span>
+        </div>
+
+        <p class="panel-right__caption">
+          Tower <em>No. 01</em>
+        </p>
+
+        <div class="panel-right__indicators" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <a href="/pro/">
+      <span aria-hidden="true">←</span>
+      <span>back to directions</span>
+    </a>
+  </footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script>
+    // ===== Theme bootstrap (runs before module script) =====
+    (function () {
+      try {
+        var saved = localStorage.getItem('oce-theme');
+        if (saved === 'dark' || saved === 'light') {
+          document.documentElement.dataset.theme = saved;
+        }
+      } catch (e) {}
+      document.documentElement.classList.add('theme-ready');
+    })();
+  </script>
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+
+    /* ----------------------------------------------------------
+       Helpers
+    ---------------------------------------------------------- */
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function getVarHex(name) {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      if (!v) return 0x000000;
+      if (v.startsWith('0x')) return parseInt(v.slice(2), 16);
+      if (v.startsWith('#')) return parseInt(v.slice(1), 16);
+      return parseInt(v.replace('0x','').replace('#',''), 16);
+    }
+
+    /* ----------------------------------------------------------
+       NAV scroll border
+    ---------------------------------------------------------- */
+    const nav = document.getElementById('nav');
+    const updateNav = () => {
+      if (window.scrollY > 8) nav.classList.add('is-scrolled');
+      else nav.classList.remove('is-scrolled');
+    };
+    updateNav();
+    window.addEventListener('scroll', updateNav, { passive: true });
+
+    /* ----------------------------------------------------------
+       COPY command button
+    ---------------------------------------------------------- */
+    const copyBtn = document.getElementById('cmdCopy');
+    const copyLabel = document.getElementById('cmdCopyLabel');
+    const cmdText = document.getElementById('cmdText');
+    let copyTimeout = null;
+    copyBtn.addEventListener('click', async () => {
+      const text = cmdText.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch (_) {}
+        document.body.removeChild(ta);
+      }
+      copyBtn.classList.add('is-copied');
+      copyLabel.textContent = 'Copied';
+      clearTimeout(copyTimeout);
+      copyTimeout = setTimeout(() => {
+        copyBtn.classList.remove('is-copied');
+        copyLabel.textContent = 'Copy';
+      }, 1800);
+    });
+
+    /* ==========================================================
+       THREE.JS — architectural tower scene
+    ========================================================== */
+    const canvas = document.getElementById('three-canvas');
+    const panel = document.getElementById('panelRight');
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 400);
+    camera.position.set(22, 16, 28);
+    camera.lookAt(0, 6, 0);
+
+    // root group for parallax & rotation
+    const sceneRoot = new THREE.Group();
+    scene.add(sceneRoot);
+
+    // ---- Materials (mutable so we can rebuild on theme change) ----
+    const mat = {
+      inkLine: new THREE.LineBasicMaterial({ color: 0x1e4a8a, transparent: true, opacity: 0.68 }),
+      inkLineDim: new THREE.LineBasicMaterial({ color: 0x1e4a8a, transparent: true, opacity: 0.34 }),
+      glowLine: new THREE.LineBasicMaterial({ color: 0xa8724e, transparent: true, opacity: 0.85 }),
+      fill: new THREE.MeshBasicMaterial({ color: 0x1e4a8a, transparent: true, opacity: 0.04, side: THREE.DoubleSide }),
+      glowFill: new THREE.MeshBasicMaterial({ color: 0xa8724e, transparent: true, opacity: 0.14, side: THREE.DoubleSide }),
+      particles: null,
+      grid: null,
+    };
+
+    /* ---- Build: tower of 5x5 columns with radial falloff heights ---- */
+    const tower = new THREE.Group();
+    sceneRoot.add(tower);
+
+    const floorsMeta = []; // store meta for pulsing
+
+    (function buildTower() {
+      const cols = 5, rows = 5;
+      const spacing = 2.4;
+      const floorH = 0.9;
+      const maxFloors = 12;
+
+      const half = ((cols - 1) * spacing) / 2;
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          // radial falloff height
+          const dx = (i - (cols - 1) / 2);
+          const dy = (j - (rows - 1) / 2);
+          const r = Math.sqrt(dx * dx + dy * dy);
+          const maxR = Math.sqrt(2) * ((cols - 1) / 2);
+          const h = Math.max(2, Math.round(maxFloors * (1 - r / (maxR + 0.8))));
+
+          const x = i * spacing - half;
+          const z = j * spacing - half;
+
+          for (let f = 0; f < h; f++) {
+            const y = f * floorH + floorH / 2;
+            // Box wireframe per floor
+            const boxGeo = new THREE.BoxGeometry(spacing * 0.88, floorH * 0.92, spacing * 0.88);
+            const edges = new THREE.EdgesGeometry(boxGeo);
+
+            const isGlow = (f === h - 1) || ((i + j + f) % 7 === 0 && f > 0 && f < h - 1);
+            const lineMat = isGlow ? mat.glowLine : (f % 3 === 0 ? mat.inkLine : mat.inkLineDim);
+
+            const wire = new THREE.LineSegments(edges, lineMat);
+            wire.position.set(x, y, z);
+            tower.add(wire);
+
+            // faint fill
+            const fillMesh = new THREE.Mesh(boxGeo, isGlow ? mat.glowFill : mat.fill);
+            fillMesh.position.set(x, y, z);
+            tower.add(fillMesh);
+
+            if (isGlow) {
+              floorsMeta.push({
+                mesh: fillMesh,
+                wire: wire,
+                basePhase: (i * 0.7 + j * 0.3 + f * 0.5),
+              });
+            }
+          }
+        }
+      }
+
+      // Antenna spire at center top
+      const spireGeo = new THREE.BufferGeometry();
+      spireGeo.setAttribute('position', new THREE.Float32BufferAttribute([
+        0, 10.5, 0,
+        0, 14.5, 0,
+      ], 3));
+      const spire = new THREE.Line(spireGeo, mat.glowLine);
+      tower.add(spire);
+
+      // Spire tip — small ring
+      const ringGeo = new THREE.RingGeometry(0.18, 0.22, 16);
+      const ring = new THREE.Mesh(ringGeo, mat.glowFill);
+      ring.position.set(0, 14.6, 0);
+      ring.rotation.x = Math.PI / 2;
+      tower.add(ring);
+    })();
+
+    /* ---- Crane (mast + jib + hook) ---- */
+    const crane = new THREE.Group();
+    sceneRoot.add(crane);
+
+    (function buildCrane() {
+      const mastX = -9;
+      const mastZ = -9;
+      const mastH = 16;
+
+      const pts = [];
+      // Mast (vertical)
+      pts.push(new THREE.Vector3(mastX, 0, mastZ), new THREE.Vector3(mastX, mastH, mastZ));
+      // Mast cross braces
+      for (let i = 0; i < 8; i++) {
+        const y = (i + 0.5) * (mastH / 8);
+        pts.push(new THREE.Vector3(mastX - 0.4, y, mastZ - 0.4), new THREE.Vector3(mastX + 0.4, y, mastZ + 0.4));
+        pts.push(new THREE.Vector3(mastX - 0.4, y, mastZ + 0.4), new THREE.Vector3(mastX + 0.4, y, mastZ - 0.4));
+      }
+      // Jib (horizontal arm)
+      pts.push(new THREE.Vector3(mastX, mastH, mastZ), new THREE.Vector3(mastX + 11, mastH, mastZ));
+      // Counter-jib
+      pts.push(new THREE.Vector3(mastX, mastH, mastZ), new THREE.Vector3(mastX - 3.5, mastH, mastZ));
+      // Jib top chord (triangulation)
+      pts.push(new THREE.Vector3(mastX, mastH + 1.8, mastZ), new THREE.Vector3(mastX + 5, mastH, mastZ));
+      pts.push(new THREE.Vector3(mastX, mastH + 1.8, mastZ), new THREE.Vector3(mastX - 2, mastH, mastZ));
+      pts.push(new THREE.Vector3(mastX, mastH, mastZ), new THREE.Vector3(mastX, mastH + 1.8, mastZ));
+      // Trolley cable (hook)
+      pts.push(new THREE.Vector3(mastX + 8, mastH, mastZ), new THREE.Vector3(mastX + 8, mastH - 6, mastZ));
+      // Hook detail
+      pts.push(new THREE.Vector3(mastX + 7.7, mastH - 6, mastZ), new THREE.Vector3(mastX + 8.3, mastH - 6, mastZ));
+      pts.push(new THREE.Vector3(mastX + 7.7, mastH - 6, mastZ), new THREE.Vector3(mastX + 7.7, mastH - 6.4, mastZ));
+      pts.push(new THREE.Vector3(mastX + 8.3, mastH - 6, mastZ), new THREE.Vector3(mastX + 8.3, mastH - 6.4, mastZ));
+      pts.push(new THREE.Vector3(mastX + 7.7, mastH - 6.4, mastZ), new THREE.Vector3(mastX + 8.3, mastH - 6.4, mastZ));
+
+      const craneGeo = new THREE.BufferGeometry().setFromPoints(pts);
+      const craneLines = new THREE.LineSegments(craneGeo, mat.glowLine);
+      crane.add(craneLines);
+    })();
+
+    /* ---- Ground grid ---- */
+    let grid = new THREE.GridHelper(60, 30, 0x1e4a8a, 0x1e4a8a);
+    grid.material.transparent = true;
+    grid.material.opacity = 0.12;
+    grid.position.y = 0;
+    sceneRoot.add(grid);
+    mat.grid = grid;
+
+    /* ---- Particles ---- */
+    let particlesMesh;
+    (function buildParticles() {
+      const count = 180;
+      const positions = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const r = 10 + Math.random() * 26;
+        const theta = Math.random() * Math.PI * 2;
+        const yy = Math.random() * 22;
+        positions[i * 3]     = Math.cos(theta) * r * (0.4 + Math.random() * 0.6);
+        positions[i * 3 + 1] = yy;
+        positions[i * 3 + 2] = Math.sin(theta) * r * (0.4 + Math.random() * 0.6);
+      }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+      mat.particles = new THREE.PointsMaterial({
+        color: 0x1e4a8a,
+        size: 0.09,
+        transparent: true,
+        opacity: 0.7,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+
+      particlesMesh = new THREE.Points(g, mat.particles);
+      sceneRoot.add(particlesMesh);
+    })();
+
+    /* ---- Fog ---- */
+    scene.fog = new THREE.FogExp2(0xf0ece3, 0.02);
+
+    /* ----------------------------------------------------------
+       THEME SYNC — apply CSS vars to Three.js materials
+    ---------------------------------------------------------- */
+    function applyThemeToThree() {
+      const bg      = getVarHex('--three-bg');
+      const ink     = getVarHex('--three-ink');
+      const glow    = getVarHex('--three-glow');
+      const isDark  = document.documentElement.dataset.theme === 'dark';
+
+      // Fog
+      scene.fog.color.setHex(bg);
+
+      // Renderer clear — keep transparent so panel bg shows
+      renderer.setClearColor(bg, 0);
+
+      // Line / fill materials
+      mat.inkLine.color.setHex(ink);
+      mat.inkLineDim.color.setHex(ink);
+      mat.glowLine.color.setHex(glow);
+      mat.fill.color.setHex(ink);
+      mat.glowFill.color.setHex(glow);
+
+      mat.inkLine.opacity    = isDark ? 0.80 : 0.68;
+      mat.inkLineDim.opacity = isDark ? 0.40 : 0.32;
+      mat.glowLine.opacity   = isDark ? 0.95 : 0.85;
+      mat.fill.opacity       = isDark ? 0.05 : 0.04;
+      mat.glowFill.opacity   = isDark ? 0.22 : 0.14;
+
+      // Grid
+      if (mat.grid) {
+        mat.grid.material.color.setHex(ink);
+        mat.grid.material.opacity = isDark ? 0.10 : 0.12;
+      }
+
+      // Particles
+      if (mat.particles) {
+        mat.particles.color.setHex(ink);
+        mat.particles.opacity = isDark ? 0.82 : 0.7;
+      }
+    }
+    applyThemeToThree();
+
+    /* ----------------------------------------------------------
+       RESIZE
+    ---------------------------------------------------------- */
+    function resize() {
+      const rect = panel.getBoundingClientRect();
+      const w = Math.max(1, rect.width);
+      const h = Math.max(1, rect.height);
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+    // Observe panel (handles layout shifts / stacking breakpoints)
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(resize).observe(panel);
+    }
+
+    /* ----------------------------------------------------------
+       POINTER parallax
+    ---------------------------------------------------------- */
+    const pointer = { tx: 0, ty: 0, x: 0, y: 0 };
+    panel.addEventListener('pointermove', (e) => {
+      const rect = panel.getBoundingClientRect();
+      pointer.tx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.ty = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+    });
+    panel.addEventListener('pointerleave', () => {
+      pointer.tx = 0; pointer.ty = 0;
+    });
+
+    /* ----------------------------------------------------------
+       ANIMATE
+    ---------------------------------------------------------- */
+    const clock = new THREE.Clock();
+
+    function tick() {
+      const t = clock.getElapsedTime();
+
+      // Lerp pointer
+      pointer.x += (pointer.tx - pointer.x) * 0.06;
+      pointer.y += (pointer.ty - pointer.y) * 0.06;
+
+      // Rotate sceneRoot slowly + parallax offset
+      if (!prefersReducedMotion) {
+        sceneRoot.rotation.y += 0.003;
+      }
+      sceneRoot.rotation.y += pointer.x * 0.0006;
+      sceneRoot.rotation.x = pointer.y * 0.12;
+
+      // Pulsing glow floors
+      for (let i = 0; i < floorsMeta.length; i++) {
+        const f = floorsMeta[i];
+        const p = 0.5 + 0.5 * Math.sin(t * 1.4 + f.basePhase);
+        f.mesh.material.opacity; // keep ref
+        // Cannot modify shared material per-instance safely; instead scale slightly
+        f.wire.scale.setScalar(1 + p * 0.008);
+      }
+
+      // Particles drift
+      if (particlesMesh && !prefersReducedMotion) {
+        particlesMesh.rotation.y += 0.0008;
+        const pos = particlesMesh.geometry.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const y = pos.array[i * 3 + 1] + 0.004 * (1 + Math.sin(t + i) * 0.3);
+          pos.array[i * 3 + 1] = y > 24 ? 0 : y;
+        }
+        pos.needsUpdate = true;
+      }
+
+      // Camera breathing
+      if (!prefersReducedMotion) {
+        camera.position.y = 16 + Math.sin(t * 0.3) * 0.4;
+      }
+      camera.lookAt(0, 6, 0);
+
+      renderer.render(scene, camera);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    let rafId;
+    if (prefersReducedMotion) {
+      // single render
+      renderer.render(scene, camera);
+    } else {
+      rafId = requestAnimationFrame(tick);
+    }
+
+    /* ----------------------------------------------------------
+       THEME TOGGLE
+    ---------------------------------------------------------- */
+    const themeBtn = document.getElementById('themeToggle');
+    function setTheme(next, persist = true) {
+      document.documentElement.dataset.theme = next;
+      if (persist) {
+        try { localStorage.setItem('oce-theme', next); } catch (e) {}
+      }
+      // small delay so CSS vars have applied
+      requestAnimationFrame(() => {
+        applyThemeToThree();
+        renderer.render(scene, camera);
+      });
+    }
+    // Ensure attr exists (bootstrap may have set it)
+    if (!document.documentElement.dataset.theme) {
+      setTheme('light', false);
+    }
+    themeBtn.addEventListener('click', () => {
+      const cur = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      setTheme(cur);
+    });
+
+    /* ----------------------------------------------------------
+       Visibility — pause when tab hidden
+    ---------------------------------------------------------- */
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+      } else if (!rafId && !prefersReducedMotion) {
+        clock.getDelta(); // reset
+        rafId = requestAnimationFrame(tick);
+      }
+    });
+  </script>
+</body>
+</html>

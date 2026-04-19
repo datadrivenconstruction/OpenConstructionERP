@@ -38,6 +38,7 @@ import {
   updatePhoto,
   deletePhoto,
   getPhotoFileUrl,
+  getPhotoThumbUrl,
   type PhotoItem,
   type PhotoCategory,
   type PhotoFilters,
@@ -383,7 +384,7 @@ function EditPhotoModal({
           {/* Thumbnail */}
           <div className="flex justify-center">
             <img
-              src={getPhotoFileUrl(photo.id)}
+              src={getPhotoThumbUrl(photo.id)}
               alt={photo.filename}
               className="h-32 w-auto rounded-lg object-cover"
             />
@@ -499,7 +500,7 @@ function PhotoCard({
       aria-label={photo.caption || photo.filename}
     >
       <img
-        src={getPhotoFileUrl(photo.id)}
+        src={getPhotoThumbUrl(photo.id)}
         alt={photo.caption || photo.filename}
         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         loading="lazy"

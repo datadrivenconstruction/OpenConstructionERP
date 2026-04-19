@@ -225,15 +225,31 @@ async def _authenticate_ws(token: str | None) -> dict[str, Any] | None:
 
     Returns the payload on success; returns ``None`` on any failure —
     the caller is responsible for closing the socket with 1008.
+    BUG-323: payload is re-hydrated against the DB so a forged token
+    with a fake UUID cannot open a socket.
     """
     if not token:
         return None
     try:
-        return decode_access_token(token, get_settings())
+        payload = decode_access_token(token, get_settings())
     except HTTPException:
         return None
     except Exception:  # noqa: BLE001 — never crash the WS on auth
         logger.exception("WebSocket token decode failed")
+        return None
+
+    try:
+        from app.core.permissions import permission_registry
+        from app.dependencies import verify_user_exists_and_active
+
+        user = await verify_user_exists_and_active(payload["sub"])
+        payload["role"] = user.role
+        payload["permissions"] = permission_registry.get_role_permissions(user.role)
+        return payload
+    except HTTPException:
+        return None
+    except Exception:  # noqa: BLE001
+        logger.exception("WebSocket user re-hydration failed")
         return None
 
 

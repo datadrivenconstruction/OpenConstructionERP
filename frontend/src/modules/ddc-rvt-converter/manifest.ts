@@ -5,7 +5,7 @@ export const manifest: ModuleManifest = {
   id: 'ddc-rvt-converter',
   name: 'DDC cad2data — Revit Converter',
   description:
-    'Converts Autodesk Revit (.rvt) files into element data (DataFrame) and 3D geometry (COLLADA). Extracts families, types, parameters, quantities, and spatial structure using proprietary reverse-engineering technology — no Revit installation required.',
+    'Converts Autodesk Revit (.rvt) files into element data (DataFrame) and 3D geometry (COLLADA). Extracts families, types, parameters, quantities, and spatial structure via the DDC cad2data pipeline — no Revit installation required.',
   version: '1.0.0',
   icon: Box,
   category: 'converter',

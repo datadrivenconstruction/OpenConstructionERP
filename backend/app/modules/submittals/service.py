@@ -153,9 +153,13 @@ class SubmittalService:
             return submittal
 
         await self.repo.update_fields(submittal_id, **fields)
-        await self.session.refresh(submittal)
+        # ``update_fields`` calls ``session.expire_all`` — any subsequent lazy
+        # attribute access on the stale ORM object triggers MissingGreenlet
+        # under async context. Re-fetch a fresh row instead of calling
+        # ``session.refresh`` so downstream callers see loaded columns.
+        fresh = await self.repo.get_by_id(submittal_id)
         logger.info("Submittal updated: %s (fields=%s)", submittal_id, list(fields.keys()))
-        return submittal
+        return fresh or submittal
 
     async def delete_submittal(self, submittal_id: uuid.UUID) -> None:
         await self.get_submittal(submittal_id)
@@ -201,24 +205,36 @@ class SubmittalService:
         if submittal.reviewer_id:
             fields["ball_in_court"] = str(submittal.reviewer_id)
 
+        # Snapshot attributes BEFORE update_fields (expire_all detaches lazy
+        # columns). Re-fetch after so returned object has fresh values.
+        project_id_s = str(submittal.project_id)
+        title_s = submittal.title
+        reviewer_id_s = str(submittal.reviewer_id) if submittal.reviewer_id else None
+        created_by_s = str(submittal.created_by) if submittal.created_by else None
+        submittal_number_s = getattr(submittal, "submittal_number", None)
+
         await self.repo.update_fields(submittal_id, **fields)
-        await self.session.refresh(submittal)
+        fresh = await self.repo.get_by_id(submittal_id)
 
         await _safe_publish(
             "submittal.submitted",
             {
-                "project_id": str(submittal.project_id),
+                "project_id": project_id_s,
                 "submittal_id": str(submittal_id),
-                "submittal_number": getattr(submittal, "submittal_number", None),
-                "title": submittal.title,
+                "submittal_number": submittal_number_s,
+                "title": title_s,
                 "current_revision": fields.get("current_revision", current_rev),
-                "reviewer_id": str(submittal.reviewer_id) if submittal.reviewer_id else None,
-                "submitted_by": str(submittal.created_by) if submittal.created_by else None,
+                "reviewer_id": reviewer_id_s,
+                "submitted_by": created_by_s,
             },
         )
 
-        logger.info("Submittal submitted: %s (rev %s)", submittal_id, submittal.current_revision)
-        return submittal
+        logger.info(
+            "Submittal submitted: %s (rev %s)",
+            submittal_id,
+            fresh.current_revision if fresh else fields.get("current_revision", current_rev),
+        )
+        return fresh or submittal
 
     async def review_submittal(
         self,
@@ -254,24 +270,28 @@ class SubmittalService:
             "date_returned": datetime.now(UTC).strftime("%Y-%m-%d"),
             "ball_in_court": ball,
         }
+        project_id_s = str(submittal.project_id)
+        title_s = submittal.title
+        created_by_s = str(submittal.created_by) if submittal.created_by else None
+
         await self.repo.update_fields(submittal_id, **fields)
-        await self.session.refresh(submittal)
+        fresh = await self.repo.get_by_id(submittal_id)
 
         await _safe_publish(
             "submittal.reviewed",
             {
-                "project_id": str(submittal.project_id),
+                "project_id": project_id_s,
                 "submittal_id": str(submittal_id),
-                "title": submittal.title,
+                "title": title_s,
                 "decision": new_status,
                 "reviewer_id": reviewer_id,
                 "ball_in_court": str(ball) if ball else None,
-                "submitted_by": str(submittal.created_by) if submittal.created_by else None,
+                "submitted_by": created_by_s,
             },
         )
 
         logger.info("Submittal reviewed: %s -> %s by %s", submittal_id, new_status, reviewer_id)
-        return submittal
+        return fresh or submittal
 
     async def approve_submittal(
         self,
@@ -285,6 +305,17 @@ class SubmittalService:
         Publishes ``submittal.approved`` event.
         """
         submittal = await self.get_submittal(submittal_id)
+
+        # Idempotent: approving an already-approved submittal is a no-op,
+        # not a 400 (ENH-095). Clients retrying an approval after a network
+        # timeout should see success instead of a confusing error.
+        if submittal.status == "approved":
+            logger.info(
+                "Submittal %s already approved — returning existing state (idempotent)",
+                submittal_id,
+            )
+            return submittal
+
         allowed = ("submitted", "under_review")
         if submittal.status not in allowed:
             raise HTTPException(
@@ -303,19 +334,23 @@ class SubmittalService:
             "date_returned": datetime.now(UTC).strftime("%Y-%m-%d"),
             "ball_in_court": None,
         }
+        project_id_s = str(submittal.project_id)
+        title_s = submittal.title
+        created_by_s = str(submittal.created_by) if submittal.created_by else None
+
         await self.repo.update_fields(submittal_id, **fields)
-        await self.session.refresh(submittal)
+        fresh = await self.repo.get_by_id(submittal_id)
 
         await _safe_publish(
             "submittal.approved",
             {
-                "project_id": str(submittal.project_id),
+                "project_id": project_id_s,
                 "submittal_id": str(submittal_id),
-                "title": submittal.title,
+                "title": title_s,
                 "approver_id": approver_id,
-                "submitted_by": str(submittal.created_by) if submittal.created_by else None,
+                "submitted_by": created_by_s,
             },
         )
 
         logger.info("Submittal approved: %s by %s", submittal_id, approver_id)
-        return submittal
+        return fresh or submittal

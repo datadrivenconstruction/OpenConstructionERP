@@ -103,7 +103,10 @@ async def list_projects(
     payload: CurrentUserPayload,
     service: ProjectService = Depends(_get_service),
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=50, ge=1, le=100),
+    # Raised cap from 100 → 500 so the Header project switcher can fetch
+    # the full list in one call (it calls ``limit=500``). Prior cap caused
+    # a 422 that silently wiped the projects dropdown across every page.
+    limit: int = Query(default=50, ge=1, le=500),
     status: str | None = Query(default=None, pattern=r"^(active|archived|template)$"),
 ) -> list[ProjectResponse]:
     """List projects. Admins see all, others see only own projects."""

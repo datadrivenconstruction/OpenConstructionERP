@@ -316,7 +316,7 @@ function computeProjectHealth(
     nextStep = {
       label: t('projects.health_action_run_validation', { defaultValue: 'Run validation' }),
       description: t('projects.health_next_run_validation', {
-        defaultValue: 'Check your BOQ against DIN 276, GAEB, and quality rules to catch issues early.',
+        defaultValue: 'Check your BOQ against classification and quality rules to catch issues early.',
       }),
       to: '/validation',
       variant: 'primary',

@@ -1,16 +1,24 @@
-# OpenEstimate — Quickstart Docker Compose
+# OpenConstructionERP — Quickstart Docker Compose
+#
+# ⚠️  EVALUATION / LOCAL-DEMO ONLY — NOT FOR PRODUCTION
+#
+# This file bakes in demo credentials (``oe-quickstart-2024``) and a
+# throw-away JWT secret so newcomers can ``docker compose up`` without
+# editing anything. Any real deployment MUST use docker-compose.prod.yml
+# which requires POSTGRES_PASSWORD and JWT_SECRET to be supplied via
+# environment variables.
 #
 # Zero-config, all-in-one deployment. Just run:
 #   docker compose -f docker-compose.quickstart.yml up --build
 #
 # This starts:
-#   - PostgreSQL 16 (data persisted in Docker volume)
+#   - PostgreSQL 16 (data persisted in Docker volume, not exposed to host)
 #   - Backend (FastAPI, serves API + frontend)
 #   - Accessible at http://localhost:8080
 #
 # For evaluation with SQLite (no PostgreSQL):
-#   docker run -d -p 8080:8080 -v oe_data:/data openestimate
-#   (Build first: docker build -t openestimate -f deploy/docker/Dockerfile.unified .)
+#   docker run -d -p 8080:8080 -v oe_data:/data openconstructionerp
+#   (Build first: docker build -t openconstructionerp -f deploy/docker/Dockerfile.unified .)
 
 services:
   postgres:

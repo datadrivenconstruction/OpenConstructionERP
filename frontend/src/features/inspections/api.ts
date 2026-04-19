@@ -66,6 +66,54 @@ export interface CreateInspectionPayload {
   location?: string;
 }
 
+/* -- Wire <-> UI normaliser ----------------------------------------------- */
+
+type ChecklistEntryWire = {
+  id?: string;
+  category?: string | null;
+  question?: string;
+  response_type?: string;
+  response?: string | null;
+  critical?: boolean;
+  description?: string;
+  passed?: boolean;
+  notes?: string | null;
+};
+
+type InspectionWire = Omit<Inspection, 'inspector' | 'date' | 'checklist'> & {
+  inspector?: string;
+  inspector_id?: string | null;
+  date?: string;
+  inspection_date?: string | null;
+  checklist?: ChecklistEntryWire[];
+  checklist_data?: ChecklistEntryWire[];
+};
+
+function normaliseChecklistItem(e: ChecklistEntryWire, i: number): ChecklistItem {
+  const passed =
+    typeof e.passed === 'boolean'
+      ? e.passed
+      : e.response === 'pass' || e.response === 'yes' || e.response === 'true';
+  return {
+    id: e.id ?? `item-${i}`,
+    description: e.description ?? e.question ?? '',
+    passed,
+    critical: Boolean(e.critical),
+    notes: e.notes ?? '',
+  };
+}
+
+function normaliseInspection(raw: InspectionWire): Inspection {
+  const checklistSrc = raw.checklist ?? raw.checklist_data ?? [];
+  return {
+    ...raw,
+    inspector: raw.inspector ?? raw.inspector_id ?? '',
+    date: raw.date ?? raw.inspection_date ?? '',
+    checklist: checklistSrc.map(normaliseChecklistItem),
+    notes: raw.notes ?? '',
+  } as Inspection;
+}
+
 /* -- API Functions --------------------------------------------------------- */
 
 export async function fetchInspections(filters?: InspectionFilters): Promise<Inspection[]> {
@@ -74,13 +122,16 @@ export async function fetchInspections(filters?: InspectionFilters): Promise<Ins
   if (filters?.status) params.set('status', filters.status);
   if (filters?.result) params.set('result', filters.result);
   const qs = params.toString();
-  return apiGet<Inspection[]>(`/v1/inspections/${qs ? `?${qs}` : ''}`);
+  const rows = await apiGet<InspectionWire[]>(`/v1/inspections/${qs ? `?${qs}` : ''}`);
+  return rows.map(normaliseInspection);
 }
 
 export async function createInspection(data: CreateInspectionPayload): Promise<Inspection> {
-  return apiPost<Inspection>('/v1/inspections/', data);
+  const row = await apiPost<InspectionWire>('/v1/inspections/', data);
+  return normaliseInspection(row);
 }
 
 export async function completeInspection(id: string): Promise<Inspection> {
-  return apiPost<Inspection>(`/v1/inspections/${id}/complete/`);
+  const row = await apiPost<InspectionWire>(`/v1/inspections/${id}/complete/`);
+  return normaliseInspection(row);
 }

@@ -1,0 +1,35 @@
+/* ═══════════════════════════════════════════════════════════════════
+   SECTIONS — shared helpers + section skeletons
+   (section-specific styles will be added as sections are built)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.section {
+  position: relative;
+  padding: var(--spy) 0;
+}
+
+/* section anchor offset for fixed nav */
+.section[id] {
+  scroll-margin-top: calc(var(--nav-h) + 20px);
+}
+
+/* visible debug labels while sections are empty — will be removed */
+.section:not(#hero):empty::before,
+.section[data-section]:not(#hero):empty::before {
+  content: attr(data-section);
+  display: block;
+  padding: 40px;
+  text-align: center;
+  color: var(--ink-3);
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.35;
+}
+
+.section-credibility {
+  padding: clamp(64px, 8vw, 96px) 0;
+  border-top: 1px solid var(--line-0);
+  border-bottom: 1px solid var(--line-0);
+}

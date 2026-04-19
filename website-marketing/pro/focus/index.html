@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <title>OpenConstructionERP Pro — Focus edition</title>
+  <meta name="description" content="Estimate buildings at the speed of thought. Open-source construction ERP with AI-powered BOQ and multi-CAD ingest." />
+  <link rel="icon" type="image/svg+xml" href="/pro/cinematic/assets/favicon.svg" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ===================== THEME ===================== */
+    :root {
+      --bg-0: #faf8f3;
+      --bg-1: #f0ece3;
+      --bg-2: #e8e3d7;
+      --ink-0: #14161a;
+      --ink-1: #3e4047;
+      --ink-2: #787a82;
+      --ink-3: #a8a69e;
+      --line-0: rgba(20, 22, 26, 0.08);
+      --line-1: rgba(20, 22, 26, 0.12);
+      --line-2: rgba(20, 22, 26, 0.20);
+      --accent: #1e4a8a;
+      --accent-2: #a8724e;
+      --shadow-card: 0 40px 80px rgba(20,22,26,0.12),
+                     0 12px 32px rgba(20,22,26,0.08),
+                     0 0 0 1px rgba(20,22,26,0.04);
+      --three-mark: 0x1e4a8a;
+      --three-glow: 0xa8724e;
+      color-scheme: light;
+    }
+    [data-theme="dark"] {
+      --bg-0: #0a0a0b;
+      --bg-1: #16161a;
+      --bg-2: #1d1d22;
+      --ink-0: #fafafa;
+      --ink-1: #d4d4d8;
+      --ink-2: #a1a1aa;
+      --ink-3: #71717a;
+      --line-0: rgba(255,255,255,0.06);
+      --line-1: rgba(255,255,255,0.10);
+      --line-2: rgba(255,255,255,0.18);
+      --accent: #60a5fa;
+      --accent-2: #f59e0b;
+      --shadow-card: 0 40px 80px rgba(0,0,0,0.5),
+                     0 12px 32px rgba(0,0,0,0.4),
+                     0 0 0 1px rgba(255,255,255,0.08);
+      --three-mark: 0x60a5fa;
+      --three-glow: 0xf59e0b;
+      color-scheme: dark;
+    }
+
+    /* ===================== RESET / BASE ===================== */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-0);
+      color: var(--ink-0);
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background 400ms ease, color 400ms ease;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+    /* ===================== PAGE GRAIN + GRADIENT ===================== */
+    .page-grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.9;
+      mix-blend-mode: multiply;
+    }
+    [data-theme="dark"] .page-grain { mix-blend-mode: screen; opacity: 0.4; }
+
+    .cursor-glow {
+      position: fixed;
+      top: 0; left: 0;
+      width: 900px; height: 900px;
+      pointer-events: none;
+      z-index: 0;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle at center,
+        color-mix(in srgb, var(--accent) 14%, transparent) 0%,
+        color-mix(in srgb, var(--accent) 6%, transparent) 35%,
+        transparent 70%);
+      filter: blur(40px);
+      will-change: transform;
+      transition: opacity 600ms ease;
+    }
+
+    /* ===================== NAV ===================== */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 64px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      background: color-mix(in srgb, var(--bg-0) 70%, transparent);
+      backdrop-filter: blur(14px) saturate(1.3);
+      -webkit-backdrop-filter: blur(14px) saturate(1.3);
+      border-bottom: 1px solid transparent;
+      transition: border-color 300ms ease, background 300ms ease;
+    }
+    .nav.scrolled {
+      background: color-mix(in srgb, var(--bg-0) 88%, transparent);
+      border-bottom-color: var(--line-0);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+      color: var(--ink-0);
+    }
+    .nav-brand-mark {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      background: var(--ink-0);
+      display: grid; place-items: center;
+      color: var(--bg-0);
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 1;
+    }
+    .nav-pro-pill {
+      margin-left: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: #fff;
+      background: var(--accent-2);
+    }
+    [data-theme="dark"] .nav-pro-pill { color: #1a1208; }
+
+    .nav-links {
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    .nav-links a {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--ink-1);
+      transition: color 200ms ease;
+    }
+    .nav-links a:hover { color: var(--ink-0); }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+
+    .theme-toggle {
+      width: 36px; height: 36px;
+      border-radius: 999px;
+      border: 1px solid var(--line-1);
+      display: grid; place-items: center;
+      transition: background 200ms ease, border-color 200ms ease, transform 300ms cubic-bezier(0.16,1,0.3,1);
+      color: var(--ink-1);
+    }
+    .theme-toggle:hover { background: var(--bg-1); border-color: var(--line-2); color: var(--ink-0); }
+    .theme-toggle svg { width: 16px; height: 16px; }
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+    .btn-install {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: var(--ink-0);
+      color: var(--bg-0);
+      font-size: 13.5px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .btn-install:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(20,22,26,0.18); }
+    [data-theme="dark"] .btn-install:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+
+    /* ===================== HERO LAYOUT ===================== */
+    .hero {
+      position: relative;
+      z-index: 2;
+      padding: 120px 32px 64px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .page-num {
+      position: absolute;
+      top: 92px;
+      left: 40px;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 20px;
+      color: var(--accent-2);
+      letter-spacing: -0.01em;
+      z-index: 3;
+    }
+
+    /* Tiny 3D mark corner */
+    .three-mark {
+      position: absolute;
+      top: 96px;
+      right: 40px;
+      width: 120px;
+      height: 140px;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .three-mark canvas { width: 120px !important; height: 120px !important; display: block; }
+    .three-mark-label {
+      margin-top: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+    }
+    .three-mark-dot {
+      width: 6px; height: 6px;
+      border-radius: 999px;
+      background: var(--accent-2);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-2) 60%, transparent);
+      animation: dotPulse 1.8s ease-out infinite;
+    }
+    @keyframes dotPulse {
+      0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-2) 55%, transparent); }
+      100% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent-2) 0%, transparent); }
+    }
+
+    /* ===================== TOP EDITORIAL STACK ===================== */
+    .hairline-top {
+      width: 72px;
+      height: 1px;
+      background: var(--line-2);
+      margin: 0 auto 20px;
+      opacity: 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      margin: 0 auto;
+      opacity: 0;
+    }
+    .eyebrow-dot {
+      width: 7px; height: 7px;
+      border-radius: 999px;
+      background: var(--accent-2);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-2) 60%, transparent);
+      animation: dotPulse 2s ease-out infinite;
+    }
+
+    .title {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 500;
+      font-size: clamp(40px, 5.5vw, 80px);
+      line-height: 1.04;
+      letter-spacing: -0.04em;
+      color: var(--ink-0);
+      text-align: center;
+      max-width: 16ch;
+      margin: 22px auto 0;
+    }
+    .title .italic {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+    .title .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .sub {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-size: clamp(16px, 1.3vw, 20px);
+      line-height: 1.5;
+      color: var(--ink-2);
+      text-align: center;
+      max-width: 56ch;
+      margin: 24px auto 0;
+      opacity: 0;
+    }
+
+    .ctas {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 28px;
+      flex-wrap: wrap;
+      opacity: 0;
+    }
+    .cta-solid {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 22px;
+      height: 48px;
+      border-radius: 999px;
+      background: var(--ink-0);
+      color: var(--bg-0);
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      letter-spacing: -0.005em;
+      transition: transform 200ms cubic-bezier(0.16,1,0.3,1), box-shadow 220ms ease;
+    }
+    .cta-solid:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(20,22,26,0.22); }
+    [data-theme="dark"] .cta-solid:hover { box-shadow: 0 14px 36px rgba(0,0,0,0.6); }
+
+    .cta-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 22px;
+      height: 48px;
+      border-radius: 999px;
+      border: 1px solid var(--line-2);
+      color: var(--ink-0);
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      transition: background 200ms ease, border-color 200ms ease, transform 200ms cubic-bezier(0.16,1,0.3,1);
+      background: transparent;
+    }
+    .cta-outline:hover { background: var(--bg-1); border-color: var(--ink-2); transform: translateY(-2px); }
+    .cta-outline svg { width: 16px; height: 16px; }
+
+    .install-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 18px auto 0;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-0);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      color: var(--ink-1);
+      cursor: pointer;
+      transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
+      opacity: 0;
+    }
+    .install-pill:hover { background: var(--bg-2); border-color: var(--line-1); transform: translateY(-1px); }
+    .install-pill .prompt { color: var(--ink-3); }
+    .install-pill .copy-ico { width: 12px; height: 12px; opacity: 0.5; }
+    .install-pill.copied { background: color-mix(in srgb, var(--accent) 12%, var(--bg-1)); border-color: var(--accent); color: var(--accent); }
+
+    /* ===================== THE SCREENSHOT ===================== */
+    .shot-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 1400px;
+      margin: 80px auto 0;
+      aspect-ratio: 16 / 10;
+    }
+    .shot-glow {
+      position: absolute;
+      inset: -8%;
+      background: radial-gradient(ellipse at center,
+        color-mix(in srgb, var(--accent) 18%, transparent) 0%,
+        color-mix(in srgb, var(--accent) 6%, transparent) 40%,
+        transparent 70%);
+      filter: blur(60px);
+      z-index: 0;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .shot {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transform: perspective(1800px) rotateX(3deg) rotateY(-2deg) translateY(60px);
+      opacity: 0;
+      transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s ease;
+      background: var(--bg-1);
+      will-change: transform, opacity;
+    }
+    .shot::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      box-shadow: inset 0 0 0 1px var(--line-1);
+      pointer-events: none;
+    }
+    .shot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+    .shot:hover {
+      transform: perspective(1800px) rotateX(0deg) rotateY(0deg) translateY(0);
+    }
+
+    /* Corner callout cards */
+    .callout {
+      position: absolute;
+      z-index: 3;
+      background: var(--bg-0);
+      border: 1px solid var(--line-1);
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 16px 40px rgba(20,22,26,0.12), 0 4px 12px rgba(20,22,26,0.06);
+      width: 210px;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    [data-theme="dark"] .callout { box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.4); }
+    .callout-tl { top: 48px; left: -24px; }
+    .callout-tr { top: 48px; right: -24px; }
+    .callout-bl { bottom: 48px; left: -24px; }
+    .callout-br { bottom: 48px; right: -24px; }
+
+    .callout-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      margin-bottom: 4px;
+    }
+    .callout-value {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--ink-0);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .callout-foot {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Sparkline */
+    .spark {
+      width: 100%;
+      height: 22px;
+    }
+    .spark path.line { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .spark path.fill { fill: color-mix(in srgb, var(--accent) 14%, transparent); stroke: none; }
+
+    /* Pulsing dot for TR */
+    .pulse-dot {
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 0 rgba(34,197,94,0.6);
+      animation: dotPulse 1.8s ease-out infinite;
+      flex: none;
+    }
+
+    /* Progress ring */
+    .ring-wrap {
+      position: relative;
+      width: 34px; height: 34px;
+      flex: none;
+    }
+    .ring-wrap svg { transform: rotate(-90deg); width: 34px; height: 34px; }
+    .ring-wrap .track { stroke: var(--line-1); fill: none; stroke-width: 3; }
+    .ring-wrap .value { stroke: var(--accent); fill: none; stroke-width: 3; stroke-linecap: round;
+      stroke-dasharray: 94.25; stroke-dashoffset: 5.4; }
+    .ring-wrap .pct {
+      position: absolute; inset: 0;
+      display: grid; place-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--ink-1);
+    }
+
+    /* Mini bars */
+    .mini-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 22px;
+    }
+    .mini-bars span {
+      display: block;
+      width: 5px;
+      background: var(--accent);
+      border-radius: 2px 2px 0 0;
+      opacity: 0.5;
+    }
+    .mini-bars span:nth-child(1){ height:30%; }
+    .mini-bars span:nth-child(2){ height:55%; }
+    .mini-bars span:nth-child(3){ height:42%; }
+    .mini-bars span:nth-child(4){ height:72%; }
+    .mini-bars span:nth-child(5){ height:60%; }
+    .mini-bars span:nth-child(6){ height:88%; opacity: 1; }
+    .mini-bars span:nth-child(7){ height:70%; }
+
+    /* ===================== FOOTER ===================== */
+    .footer {
+      position: relative;
+      z-index: 2;
+      height: 48px;
+      background: var(--bg-1);
+      border-top: 1px solid var(--line-1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--ink-2);
+    }
+    .footer a {
+      color: var(--ink-1);
+      transition: color 200ms ease;
+    }
+    .footer a:hover { color: var(--ink-0); }
+
+    /* ===================== RESPONSIVE ===================== */
+    @media (max-width: 1180px) {
+      .callout { width: 180px; padding: 10px 12px; }
+      .callout-tl { left: -12px; }
+      .callout-tr { right: -12px; }
+      .callout-bl { left: -12px; }
+      .callout-br { right: -12px; }
+    }
+    @media (max-width: 880px) {
+      .nav-links { display: none; }
+      .page-num { left: 20px; top: 84px; }
+    }
+    @media (max-width: 720px) {
+      .three-mark { display: none; }
+      .page-num { display: none; }
+      .hero { padding: 104px 18px 48px; }
+      .title { font-size: clamp(34px, 9vw, 52px); }
+      .shot-wrap { margin-top: 56px; border-radius: 16px; }
+      .shot { border-radius: 14px; transform: none; opacity: 0; }
+      .shot::after { border-radius: 14px; }
+      .callout-tl, .callout-tr, .callout-bl, .callout-br {
+        display: none;
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+      }
+      .shot { transform: none; opacity: 1; }
+      .title .word { opacity: 1; transform: none; }
+      .eyebrow, .sub, .ctas, .install-pill, .hairline-top, .callout { opacity: 1; transform: none; }
+    }
+
+    /* Selection */
+    ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--ink-0); }
+  </style>
+</head>
+<body>
+
+  <!-- SVG grain (feTurbulence) -->
+  <svg class="page-grain" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <filter id="grainy">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix values="0 0 0 0 0.08
+                              0 0 0 0 0.09
+                              0 0 0 0 0.10
+                              0 0 0 0.03 0"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#grainy)"/>
+  </svg>
+
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <!-- ===================== NAV ===================== -->
+  <nav class="nav" id="nav">
+    <a class="nav-brand" href="/">
+      <span class="nav-brand-mark">O</span>
+      <span>OpenConstructionERP</span>
+      <span class="nav-pro-pill">PRO</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#docs">Docs</a>
+      <a href="https://github.com/datadrivenconstruction/openestimate" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <a class="btn-install" href="#install">Install</a>
+    </div>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <span class="page-num">01</span>
+
+    <!-- Tiny 3D architectural mark corner -->
+    <div class="three-mark" id="threeMark" aria-hidden="true">
+      <!-- canvas injected by JS -->
+      <div class="three-mark-label">
+        <span class="three-mark-dot"></span>
+        <span>live</span>
+      </div>
+    </div>
+
+    <div class="hairline-top" id="hairlineTop"></div>
+
+    <div class="eyebrow" id="eyebrow">
+      <span class="eyebrow-dot"></span>
+      <span>v1.7.2 · new AI takeoff</span>
+    </div>
+
+    <h1 class="title" id="title">
+      <span class="word">Estimate</span>
+      <span class="word">buildings</span>
+      <span class="word">at</span>
+      <span class="word italic">the</span>
+      <span class="word italic">speed</span>
+      <span class="word italic">of</span>
+      <span class="word italic">thought.</span>
+    </h1>
+
+    <p class="sub" id="sub">
+      An open-source construction ERP with AI-powered BOQ and multi-CAD ingest.
+      Self-host for free &mdash; replace $25K/year enterprise tools.
+    </p>
+
+    <div class="ctas" id="ctas">
+      <a class="cta-solid" href="#install">
+        Install now
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="cta-outline" href="https://github.com/datadrivenconstruction/openestimate" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.79 23.38c.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.41-4.04-1.41-.55-1.4-1.34-1.77-1.34-1.77-1.1-.75.08-.74.08-.74 1.21.09 1.85 1.25 1.85 1.25 1.07 1.84 2.81 1.3 3.5 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.95 0-1.32.47-2.4 1.24-3.24-.13-.3-.54-1.54.12-3.2 0 0 1-.32 3.3 1.24a11.4 11.4 0 0 1 6 0c2.3-1.56 3.3-1.24 3.3-1.24.66 1.66.25 2.9.12 3.2.77.84 1.24 1.92 1.24 3.24 0 4.63-2.8 5.65-5.48 5.95.43.38.82 1.11.82 2.24v3.33c0 .32.22.7.83.58A12 12 0 0 0 12 .5Z"/></svg>
+        Star on GitHub
+      </a>
+    </div>
+
+    <button class="install-pill" id="installPill" type="button" aria-label="Copy install command">
+      <span class="prompt">$</span>
+      <span id="installCmd">docker compose up</span>
+      <svg class="copy-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="9" width="13" height="13" rx="2"/>
+        <path d="M5 15V5a2 2 0 0 1 2-2h10"/>
+      </svg>
+    </button>
+
+    <!-- THE SCREENSHOT -->
+    <div class="shot-wrap" id="shotWrap">
+      <div class="shot-glow"></div>
+
+      <div class="shot" id="shot">
+        <img src="/pro/shared/img/02-dashboard.png"
+             alt="OpenConstructionERP dashboard"
+             onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='/pro/shared/img/hero-overview.jpg';}else if(this.dataset.fb==='1'){this.dataset.fb='2';this.src='/pro/shared/img/07-ai-estimate.png';}"/>
+      </div>
+
+      <!-- Callouts -->
+      <div class="callout callout-tl" id="calloutTL">
+        <div class="callout-label">Rolled up · Q2 2026</div>
+        <div class="callout-value">&euro;4.28M</div>
+        <div class="callout-foot">
+          <svg class="spark" viewBox="0 0 100 22" preserveAspectRatio="none" aria-hidden="true">
+            <path class="fill" d="M0,17 L10,15 L20,18 L30,12 L40,14 L50,9 L60,11 L70,7 L80,8 L90,5 L100,3 L100,22 L0,22 Z"/>
+            <path class="line" d="M0,17 L10,15 L20,18 L30,12 L40,14 L50,9 L60,11 L70,7 L80,8 L90,5 L100,3"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="callout callout-tr" id="calloutTR">
+        <div class="callout-label">Estimators online</div>
+        <div class="callout-value">
+          <span class="pulse-dot"></span>
+          <span>2,847</span>
+        </div>
+        <div class="callout-foot" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-2);letter-spacing:0.02em;">
+          Across 41 countries
+        </div>
+      </div>
+
+      <div class="callout callout-bl" id="calloutBL">
+        <div class="callout-label">Cost accuracy</div>
+        <div class="callout-value">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 34 34">
+              <circle class="track" cx="17" cy="17" r="15"/>
+              <circle class="value" cx="17" cy="17" r="15"/>
+            </svg>
+            <span class="pct">94%</span>
+          </div>
+          <span>94.2%</span>
+        </div>
+        <div class="callout-foot" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-2);letter-spacing:0.02em;">
+          vs historic benchmark
+        </div>
+      </div>
+
+      <div class="callout callout-br" id="calloutBR">
+        <div class="callout-label">Cost database</div>
+        <div class="callout-value">
+          <div class="mini-bars" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <span>55,000+</span>
+        </div>
+        <div class="callout-foot" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-2);letter-spacing:0.02em;">
+          CWICR · 9 languages
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="footer">
+    <a href="/pro/">&larr; back to directions</a>
+  </footer>
+
+  <!-- ===================== SCRIPT ===================== -->
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+    import gsap from 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm';
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ===================== THEME ===================== */
+    const root = document.documentElement;
+    const saved = localStorage.getItem('oce-theme') || 'light';
+    root.dataset.theme = saved;
+
+    const themeBtn = document.getElementById('themeToggle');
+    themeBtn?.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      localStorage.setItem('oce-theme', next);
+      updateThreeMaterialsForTheme();
+    });
+
+    /* ===================== NAV scroll state ===================== */
+    const nav = document.getElementById('nav');
+    const onScroll = () => {
+      if (window.scrollY > 12) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    /* ===================== INSTALL PILL copy ===================== */
+    const installPill = document.getElementById('installPill');
+    const installCmd = document.getElementById('installCmd');
+    installPill?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(installCmd.textContent.trim());
+        installPill.classList.add('copied');
+        const prev = installCmd.textContent;
+        installCmd.textContent = 'copied!';
+        setTimeout(() => {
+          installPill.classList.remove('copied');
+          installCmd.textContent = prev;
+        }, 1400);
+      } catch (e) {
+        /* ignore */
+      }
+    });
+
+    /* ===================== CURSOR GLOW (lerp) ===================== */
+    const glow = document.getElementById('cursorGlow');
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 3;
+    let currX = targetX;
+    let currY = targetY;
+    window.addEventListener('mousemove', (e) => {
+      targetX = e.clientX;
+      targetY = e.clientY;
+    });
+    const lerpGlow = () => {
+      currX += (targetX - currX) * 0.06;
+      currY += (targetY - currY) * 0.06;
+      glow.style.transform = `translate(${currX}px, ${currY}px) translate(-50%, -50%)`;
+      requestAnimationFrame(lerpGlow);
+    };
+    if (!prefersReducedMotion) requestAnimationFrame(lerpGlow);
+    else glow.style.opacity = '0.4';
+
+    /* ===================== ENTRANCE CHOREOGRAPHY ===================== */
+    if (!prefersReducedMotion) {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.to('#hairlineTop', { opacity: 1, duration: 0.5, delay: 0.05 }, 0)
+        .to('#eyebrow',     { opacity: 1, duration: 0.5 }, 0.1)
+        .to('#title .word', { opacity: 1, y: 0, duration: 0.7, stagger: 0.08 }, 0.2)
+        .to('#sub',         { opacity: 1, duration: 0.6 }, 0.9)
+        .to('#ctas',        { opacity: 1, duration: 0.5 }, 1.0)
+        .to('#installPill', { opacity: 1, duration: 0.5 }, 1.1)
+        .to('#shot',        { opacity: 1, y: 0, duration: 1.2, ease: 'expo.out',
+                              onStart: () => {
+                                const s = document.getElementById('shot');
+                                // compute current rotation vs initial; gsap treats transform unit — so use set + to
+                                s.style.transform = 'perspective(1800px) rotateX(3deg) rotateY(-2deg) translateY(0)';
+                              }
+                            }, 1.2)
+        .to('#calloutTL',   { opacity: 1, y: 0, duration: 0.6 }, 1.8)
+        .to('#calloutTR',   { opacity: 1, y: 0, duration: 0.6 }, 2.0)
+        .to('#calloutBL',   { opacity: 1, y: 0, duration: 0.6 }, 2.2)
+        .to('#calloutBR',   { opacity: 1, y: 0, duration: 0.6 }, 2.4)
+        .fromTo('#threeMark', { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.7 }, 2.5);
+    } else {
+      // reduced motion — show everything
+      document.querySelectorAll('.title .word, .eyebrow, .sub, .ctas, .install-pill, .hairline-top, .callout, .three-mark')
+        .forEach((el) => { el.style.opacity = 1; el.style.transform = 'none'; });
+      document.getElementById('shot').style.opacity = 1;
+    }
+
+    /* ===================== TINY 3D MARK (wireframe tower) ===================== */
+    let renderer, scene, camera, tower, wireMaterial, rafId;
+    function initThreeMark() {
+      const container = document.getElementById('threeMark');
+      if (!container || window.matchMedia('(max-width: 720px)').matches) return;
+
+      const size = 120;
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(size, size);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      container.insertBefore(renderer.domElement, container.firstChild);
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+      camera.position.set(3.2, 2.6, 3.6);
+      camera.lookAt(0, 0.6, 0);
+
+      const themeDark = root.dataset.theme === 'dark';
+      const markColor = themeDark ? 0x60a5fa : 0x1e4a8a;
+
+      wireMaterial = new THREE.LineBasicMaterial({
+        color: markColor,
+        transparent: true,
+        opacity: 0.88
+      });
+
+      tower = new THREE.Group();
+
+      // stacked wireframe cubes — low-poly building mark
+      const layers = [
+        { y: 0.0,  size: [1.8, 0.7, 1.8] },
+        { y: 0.9,  size: [1.5, 0.7, 1.5] },
+        { y: 1.75, size: [1.15, 0.6, 1.15] },
+        { y: 2.45, size: [0.7, 0.45, 0.7] }
+      ];
+      for (const l of layers) {
+        const geom = new THREE.BoxGeometry(l.size[0], l.size[1], l.size[2]);
+        const edges = new THREE.EdgesGeometry(geom);
+        const line = new THREE.LineSegments(edges, wireMaterial);
+        line.position.y = l.y;
+        tower.add(line);
+      }
+      // thin spire
+      const spireGeom = new THREE.CylinderGeometry(0.02, 0.02, 0.6, 6);
+      const spireEdges = new THREE.EdgesGeometry(spireGeom);
+      const spire = new THREE.LineSegments(spireEdges, wireMaterial);
+      spire.position.y = 3.0;
+      tower.add(spire);
+
+      // center
+      tower.position.y = -0.9;
+      scene.add(tower);
+
+      const animate = () => {
+        tower.rotation.y += 0.006;
+        tower.rotation.x = Math.sin(Date.now() * 0.0004) * 0.06;
+        renderer.render(scene, camera);
+        rafId = requestAnimationFrame(animate);
+      };
+      animate();
+    }
+    function updateThreeMaterialsForTheme() {
+      if (!wireMaterial) return;
+      const themeDark = root.dataset.theme === 'dark';
+      wireMaterial.color.setHex(themeDark ? 0x60a5fa : 0x1e4a8a);
+    }
+    function destroyThreeMark() {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (renderer) {
+        renderer.dispose();
+        renderer.domElement?.remove();
+        renderer = null;
+      }
+    }
+
+    if (!window.matchMedia('(max-width: 720px)').matches) {
+      initThreeMark();
+    }
+
+    // Re-init on resize crossing threshold
+    let narrow = window.matchMedia('(max-width: 720px)').matches;
+    window.addEventListener('resize', () => {
+      const nowNarrow = window.matchMedia('(max-width: 720px)').matches;
+      if (nowNarrow !== narrow) {
+        narrow = nowNarrow;
+        if (nowNarrow) destroyThreeMark();
+        else initThreeMark();
+      }
+    });
+
+    /* ===================== SUBTLE SHOT TILT on mousemove over shot ===================== */
+    if (!prefersReducedMotion) {
+      const shot = document.getElementById('shot');
+      const wrap = document.getElementById('shotWrap');
+      let hovering = false;
+      wrap.addEventListener('mouseenter', () => { hovering = true; });
+      wrap.addEventListener('mouseleave', () => {
+        hovering = false;
+        shot.style.transform = 'perspective(1800px) rotateX(3deg) rotateY(-2deg) translateY(0)';
+      });
+      wrap.addEventListener('mousemove', (e) => {
+        if (!hovering) return;
+        const r = wrap.getBoundingClientRect();
+        const mx = (e.clientX - r.left) / r.width - 0.5;   // -0.5 .. 0.5
+        const my = (e.clientY - r.top) / r.height - 0.5;
+        const rY = mx * 6;    // deg
+        const rX = -my * 4;   // deg
+        shot.style.transform = `perspective(1800px) rotateX(${rX}deg) rotateY(${rY}deg) translateY(0)`;
+      });
+    }
+  </script>
+</body>
+</html>

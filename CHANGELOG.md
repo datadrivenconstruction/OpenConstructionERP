@@ -5,6 +5,92 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.7] — 2026-04-19
+
+### Workflow polish — reload persistence, onboarding, vector UX, BIM labels
+
+- **DWG / BIM reload persistence** — both `DwgTakeoffPage` and `BIMPage` only read `projectId` from `useProjectContextStore.activeProjectId`. When the Header's stale-project cleanup wiped the store on reload, queries fired with an empty `projectId` and the pages rendered as "no documents". Both pages now fall back to `projects[0]?.id` and write the pick back to the context store so the state survives a full reload.
+- **CWICR Vector Database progress UX** — `/costs/import` Vector DB loader was a bare spinner for 45+ s while the embedding model downloaded. New 4-phase progress panel in `ImportDatabasePage`: Fetch (0–3 s) → Model (3–15 s) → Embed (15–45 s) → Index (45+ s) with a purple-blue gradient shimmer bar, elapsed timer, and phase dots so users don't assume it froze.
+- **BIM "BBox dimensions" label** — the right-panel block title read "Dimensions" which collided with element real-world dimensions. Renamed to "BBox dimensions" (axis-aligned bounding box) so users can tell apart the model frame from the selected element's size. `bim.dimensions_title` i18n key lands with the new default.
+- **CDE optimistic container insert** — creating a container was silently succeeding (container appeared 15 s later after refetch) because `stateFilter` often did not match the new container's state. `CDEPage` onSuccess now (1) resets the state filter to "All" and (2) writes the created container into the React-Query cache so it shows up instantly.
+- **Header stale-project cleanup** — `activeProjectId` persisted through localStorage outlived the project it pointed at (deleted / demo reset). Header now auto-clears `activeProjectId` when the server's project list does not contain it, so switchers never show a ghost "Project [deleted]" entry.
+- **DWG upload store janitor** — `useDwgUploadStore` entries could hang in `uploading` / `converting` forever if the tab was closed mid-upload. Module-level patrol flips any job stuck >45 min to `error`, so the dock no longer shows a perpetual spinner on reopen.
+- **Onboarding language cards bigger + compact shell** — welcome step cards were fighting for visibility against a padded shell. Cards resized to `grid-cols-3 sm:grid-cols-4 gap-2.5` with `size={24}` flags + `text-sm`, while the shell trimmed to `pt-4 pb-8` / `py-5 sm:py-7` so everything fits on a 13" laptop without scrolling.
+
+### Quality gates
+
+- `tsc --noEmit`: 0 errors
+
+## [1.9.6] — 2026-04-19
+
+### Reliability hotfixes — import pipeline, validators, reindex
+
+- **CWICR region load 404** — `POST /api/v1/costs/load-cwicr/{db_id}/` had a trailing slash on the backend route; frontend called without it and got 404 on every region (France, Germany, US, etc.). Sibling routes `/vector/load-github/{db_id}` and `/import/{db_id}` use no trailing slash — `load-cwicr` now matches the pattern (`backend/app/modules/costs/router.py:1472`). Onboarding "Load database" step now works end-to-end.
+- **LanceDB Qdrant false positive** — `GET /v1/vector/status` reported `can_restore_snapshots: true` whenever the `qdrant_client` pip package was importable, even on the LanceDB backend where snapshot restore requires a running Qdrant server. Settings page then tried to use the Qdrant restore path on a LanceDB deploy and showed "Qdrant not available". Now hardcoded to `False` on LanceDB (`backend/app/core/vector.py:301`) — Qdrant restore path is only surfaced when the Qdrant backend is actually selected.
+- **Projects `/v1/projects/?limit=500` 422** — Header bulk-fetches the full project list to drive the Switch Project dropdown (`?limit=500`) but the backend `limit` Query had `le=100` so the request 422'd and the dropdown returned empty. Raised to `le=500` (`backend/app/modules/projects/router.py:109`). Resolves the "Could not load projects" banner in the switcher.
+- **Contacts `/v1/contacts/?limit=200` 422** — same root cause: `ContactSearchInput` (Procurement, Transmittals, RFQ, etc.) fetched `?limit=200` for browse; backend was capped at 100. Raised to `le=500` (`backend/app/modules/contacts/router.py:128`). Resolves the "Select from contacts" empty state in Procurement.
+- **Settings reindex double-prefix 404** — `VectorStatusCard.tsx` REINDEX_PATH map included `/api/` at the start of every entry, but `apiPost` also prepends `/api`, producing `/api/api/v1/...` — every reindex call 404'd. All 8 entries now use `/v1/...`; reindex works for every backend module.
+- **DWG `/dwg-takeoff` upload dock persistence** — backend `dwg_takeoff/service.py` already created `Document` rows on every DWG upload (verified at `service.py:240-267`); the missing piece was the frontend fallback that surfaced them on reload — shipped in v1.9.7 above. Together they close the "documents disappear on reload" bug the user reported.
+
+### Quality gates
+
+- `tsc --noEmit`: 0 errors
+- Fast smoke against local backend: projects list / contacts list / load-cwicr / reindex endpoints all 2xx
+
+## [1.9.5] — 2026-04-18
+
+### Deep audit pass — security + API contract + i18n + mobile
+
+- **API contract normalisers (5 modules)** — Submittals, Meetings, Safety, Inspections and NCR all had field drift between backend (`submittal_type`, `incident_date`, `inspection_date`, `location_description`, `created_by`) and frontend (`type`, `date`, `location`, `reported_by`). Each feature's `api.ts` (or inline `select`) now runs the fetched row through a `normalise*()` function — same pattern as the v1.9.4 Transmittals fix. Resolves `type_undefined` / `status_undefined` i18n key leaks on all five list pages.
+- **Procurement + Finance defensive fallbacks** — backend doesn't yet emit `vendor_name` / `counterparty_name` (resolved from `vendor_contact_id` / `contact_id`). Frontend now falls back to the raw id so the PO / Invoice tables render instead of crashing on `.toLowerCase()` of undefined. Proper backend enrichment tracked as follow-up #45.
+- **NCR type hardening** — `ncr_number` and `linked_inspection_number` are numeric on the UI but strings on the wire ("NCR-001"). Normaliser now extracts the numeric suffix so `.toString().padStart()` calls behave. `cost_impact` string → number conversion on the same path.
+- **Schedule `t()` API cleanup** — 5 call sites (`status_*`, `zoom_*`, `type_*`, `boq.*`) were passing a plain string as the second argument. Modernised to the `{ defaultValue }` object form so i18next never renders a raw key when the dictionary misses.
+- **Security — external links** — `Sidebar.tsx:373` (`/api/source`) was missing `rel="noopener noreferrer"` on its `target="_blank"`. MeetingsPage attachment chips carried only `rel="noreferrer"` (noopener implied by modern browsers but not best practice). Both now use the full `noopener noreferrer` pair. Full audit of 20 files confirmed no other tabnabbing surfaces remain.
+- **Header tablet overlap** — at 768 px the title, ProjectSwitcher, GitHub button, Report Issue button and 192 px Search box all fought for space and physically overlapped. GitHub and Report Issue now hide until `lg` (≥1024); the `<h1>` route title also stays hidden until `lg`; search shrinks to `w-40 md:w-44 lg:w-56`. iPad portrait users get a clean header.
+- **Tasks action bar mobile** — the 375-px mobile view had the action bar overflow (Project select + Export + Import + New Task = 457 px). Row now wraps (`flex-wrap`) so actions reflow onto a second line instead of pushing off-screen.
+- **ProjectMap i18n** — new component shipped without `useTranslation`, so "Locating…" and "No location set" were hardcoded English. Both now flow through `t('projects.map_locating', ...)` / `t('projects.map_no_location', ...)`.
+
+### Quality gates
+
+- `tsc --noEmit`: 0 errors
+- R5 verification suite: 9/9 pass
+
+## [1.9.4] — 2026-04-18
+
+### v1.9 completion pass — finishes 6 items the earlier rounds left unshipped
+
+- **#31 Transmittals Edit + Delete** — inline `EditTransmittalModal` (subject / purpose / response-due / cover-note, unlocked-only), new backend `PATCH /v1/transmittals/{id}` was already wired + new `DELETE /v1/transmittals/{id}` with 409 on issued transmittals. Frontend Row grows Edit + Delete buttons next to Issue in draft state; audit-safe delete via service/repo.
+- **#13 DWG drawing scale 1:N** — `drawingScale` state in DwgTakeoffPage + floating "Scale 1:N" input under the ToolPalette. Applied as a linear multiplier to all rubber-band length labels, polyline segment pills / perimeter / area labels, and the `measurement_value` persisted with every distance/area/line/polyline/circle annotation. Persisted per-drawing in `localStorage` so the estimator doesn't re-enter it on reopen. Text-pin popup was already landed in v1.9.1.
+- **#9 DWG Offline Ready badge** — verified already shipped. The component `OfflineReadyBadge` was added alongside the backend `/v1/dwg_takeoff/offline-readiness/` probe; earlier audit missed it because the grep pattern didn't match the hyphenated class name.
+- **#12 DWG Summary measurements panel redesign** — verified already shipped. The `SummaryTab` component with KPI cards + per-layer + per-type breakdowns was landed alongside the v1.9.3 PDF export work.
+- **#10 DWG UploadDock UI** — new `DwgUploadIndicator` component (bottom-right, above the BIM indicator) reads from `useDwgUploadStore`: minimised pill + expandable job list, per-job cancel / retry / dismiss, `beforeunload` guard while transferring. DwgTakeoffPage upload button now dispatches via the store (`startUpload`) and closes the modal immediately; a subscription invalidates `['dwg-drawings']` + `['documents']` queries and auto-selects the new drawing when the job flips to `ready`. Uploads now genuinely survive navigation.
+- **#15 DWG drawing primitives** — ToolPalette now exposes `line`, `polyline`, `circle` alongside existing `rectangle` / `arrow` / `text_pin` / `area`. Two-click circle tool emits πr² × scale² as the measurement value; open polyline finishes on double-click with Σ segment length; line and distance share the same renderer path. Backend annotation-type pattern widened to accept the new `circle|polyline|line` kinds.
+- **#22 Split BIM Rules / Quantity Rules navigation (v2)** — single page `BIMQuantityRulesPage` now drives two distinct user-facing entries: Takeoff section "BIM Rules" opens `/bim/rules?mode=requirements` (Requirements tab locked, tab switcher hidden, page title + subtitle swap to the compliance framing, BIM Requirements Import/Export drawer moves into this mode only); Estimation section "Quantity Rules" opens `/bim/rules` (original tab switcher, Quantity Rules + Requirements both visible). Replaces the earlier nav-only split that had pointed Takeoff at `/validation`.
+
+### Post-release polish
+
+- **Tasks create error fix** — Assignee free-text input was sending names like "John Doe" as `responsible_id` into a UUID-typed column, blowing up task creation. `handleCreateSubmit` now UUID-checks the assignee: real UUIDs go to `responsible_id`, typed names fall into `metadata.assignee_name` so the label survives without corrupting the FK column.
+- **Project Intelligence layout** — Section 2 restructured: readiness ring now sits in a fixed 3-col card next to a full-height Critical-Gaps card (9-col), gaps render in a 2-col grid at wide widths, and the analytics grid takes the full container width below instead of being squeezed into an 8-of-12 column. Eliminates the big empty gutter the left column used to leave under the ring.
+- **BIM measure-miss feedback** — `MeasureManager` now surfaces an `onMiss` callback when the raycast returns no geometry; the viewer shows a toast so users know the click registered but did not land on an element (the tool previously silently ignored these clicks, reading as "broken").
+- **About page Changelog** — catch-up entries for v1.9.1 / v1.9.2 / v1.9.3 (previously stopped at v1.9.0).
+- **Security** — `MessageBubble` markdown link renderer now allow-lists URL schemes (http/https/internal/mailto); rejects `javascript:`/`data:`/`vbscript:` injection.
+- **Screenshot timing** — `round4-screenshots.spec.ts` snap helper waits for `networkidle` + the `Analyzing project…` spinner to disappear before capturing. Fixes the empty Estimation Dashboard capture (6 KB → 151 KB).
+
+### Post-sweep polish (R5 full end-to-end verification)
+
+- **E2E infra** — new `e2e/v1.9/global-setup.ts` logs in once per run, caches the JWT to `.auth-token.txt`, every spec reuses it. Avoids the 5/min rate limit on `/login/` when many parallel workers fan out. Helpers also fixed for ESM (`"type": "module"` → `fileURLToPath(import.meta.url)` replaces raw `__dirname`).
+- **Tasks assignee display** — the free-text assignee name saved in `metadata.assignee_name` (when the user typed "John Doe" rather than a UUID) was never rendered on the Kanban card. `TasksPage` now falls back to `metadata.assignee_name` so typed names show up like any resolved user name. Edit form pre-fill reads the same fallback.
+- **Tasks edit UUID safety** — the edit-submit path was passing free-text assignee names straight into the backend's UUID-typed `assigned_to` column, which would 422 on any edit that touched a legitimate real UUID after a name round-trip. `editMut` now applies the same UUID regex guard as the create path.
+- **Transmittals purpose display** — the grid was rendering the raw i18n key `transmittals.purpose_undefined` because the backend serialises the enum as `purpose_code` while the UI models expected `purpose`. New `normaliseTransmittal` in `features/transmittals/api.ts` maps `purpose_code → purpose`, `response_due_date → response_due`, `is_locked → locked` at the API boundary; fetch/create/patch/issue all go through it.
+- **CAD Explorer missingness 404** — `/v1/takeoff/cad-data/missingness/` returned 404 against a running backend because uvicorn was started before the endpoint was added and `--reload` missed the module addition. Restarted; endpoint now returns the 7-key shape (`total_rows`, `sampled_rows`, `columns`, `row_completeness`, `presence_matrix`, `applied_filters`, `sampled`) as expected.
+
+### Quality gates
+
+- `tsc --noEmit`: 0 errors
+- Vitest: 609 passed, 24 skipped
+- Playwright R5 sweep: cluster A (Tasks, 3/3), cluster B (CAD/BIM, 3/3 after backend restart), cluster C (Rules + Dashboard + 45-route nav, 5/5), cluster D (broad nav, 27/27), r5-verification (9/9)
+- Backend pytest (transmittals slice): 7/7 passing
+
 ## [1.9.3] — 2026-04-18
 
 ### R4 new features
@@ -1612,7 +1698,7 @@ in one click.
 - **Unified create buttons** — 14 pages standardized to "+ New X" pattern
 
 ### Changed
-- ODA SDK references replaced with DDC cad2data
+- CAD converter references unified under DDC cad2data
 - Integrations moved from sidebar to Settings
 - Architecture Map in Modules section
 - GitHub button moved to header

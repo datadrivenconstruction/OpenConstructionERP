@@ -9,9 +9,39 @@ Limits are configurable via environment variables:
   LOGIN_RATE_LIMIT — max login attempts per minute per IP (default 10)
 """
 
+from __future__ import annotations
+
 import time
 from collections import defaultdict
 from threading import Lock
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from starlette.requests import Request
+
+
+def client_identifier(request: "Request") -> str:
+    """Resolve the best available client identifier for rate-limiting buckets.
+
+    Prefers the ``X-Forwarded-For`` header when present (first entry — the
+    original client) so that Uvicorn sitting behind a reverse proxy
+    (nginx/Traefik/Caddy) doesn't lump every request under a single proxy IP
+    and accidentally lock out legitimate users after one attacker hits the
+    limit. Falls back to the direct socket peer.
+
+    Trust note: ``X-Forwarded-For`` is spoofable from the public internet.
+    Production deployments MUST strip or overwrite it at the edge proxy
+    before requests reach the app — see deploy/docker/nginx.conf for the
+    standard template.
+    """
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        first = xff.split(",", 1)[0].strip()
+        if first:
+            return first
+    if request.client and request.client.host:
+        return request.client.host
+    return "unknown"
 
 
 class RateLimiter:
@@ -71,3 +101,10 @@ ai_limiter, api_limiter, login_limiter = _create_limiters()
 # Rate limiter for approval / financial mutation endpoints.
 # Tighter window to limit potential abuse of state-changing actions.
 approval_limiter = RateLimiter(max_requests=20, window_seconds=60)
+
+# Rate limiter for file uploads (documents, BIM, CAD, takeoff).
+# Each upload buffers the full body server-side and may kick off background
+# processing (OCR, thumbnailing, DDC conversion), so a single authenticated
+# user could fill disk and/or worker pool if uncapped. 30/min is wide
+# enough for legitimate batch BIM uploads while rejecting abuse.
+upload_limiter = RateLimiter(max_requests=30, window_seconds=60)

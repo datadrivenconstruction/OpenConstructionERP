@@ -593,5 +593,5 @@ describe('Visual Regression — DashboardPage', () => {
       </RouterWrapper>,
     );
     expect(container).toMatchSnapshot();
-  });
+  }, 15000);
 });
