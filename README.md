@@ -506,40 +506,42 @@ Three demo accounts are created automatically on first start:
 
 ```mermaid
 flowchart TB
-    classDef fe fill:#1f6feb,stroke:#0d3885,color:#fff
-    classDef be fill:#238636,stroke:#104822,color:#fff
-    classDef data fill:#8250df,stroke:#4a2c7d,color:#fff
-    classDef ai fill:#db6d28,stroke:#7a3c14,color:#fff
+    UI["Frontend SPA<br/>React 18 · TypeScript · Vite<br/>AG Grid · Tailwind · PDF.js"]
 
-    subgraph Client["Client"]
-        UI["<b>Frontend SPA</b><br/>React 18 · TypeScript · Vite<br/>AG Grid · Tailwind · PDF.js<br/>Three.js · Yjs (collab)"]:::fe
-    end
-
-    subgraph API["FastAPI Backend · 60+ auto-discovered modules"]
-        CORE["<b>Core</b><br/>Module loader · Event bus · Hooks<br/>RBAC · Validation engine"]:::be
-        BIZ["<b>Business modules</b><br/>BOQ · Costs · Schedule · 5D<br/>Takeoff · Tendering · Risk · Reports<br/>Catalog · Requirements · Markups<br/>Punch List · BIM Hub · CDE"]:::be
-        AIS["<b>AI services</b><br/>AI Chat (SSE) · AI Estimate<br/>Cost Intelligence Advisor<br/>7 LLM providers"]:::ai
+    subgraph Backend["FastAPI Backend — 60+ auto-discovered modules"]
+        CORE["Core<br/>Module loader · Event bus · Hooks · RBAC · Validation"]
+        BIZ["Business modules<br/>BOQ · Costs · Schedule · 5D · Takeoff<br/>Tendering · Risk · Reports · Catalog<br/>Requirements · Markups · Punch List · BIM Hub · CDE"]
+        AIS["AI services<br/>AI Chat (SSE) · AI Estimate · Cost Intelligence<br/>7 LLM providers"]
+        CORE --> BIZ
+        CORE --> AIS
     end
 
     subgraph Data["Data layer"]
-        PG[("<b>PostgreSQL 16</b><br/>/ SQLite (dev)")]:::data
-        VEC[("<b>Vector DB</b><br/>LanceDB / Qdrant")]:::data
-        S3[("<b>MinIO / S3</b><br/>files, CAD, PDFs")]:::data
+        PG[("PostgreSQL 16<br/>SQLite in dev")]
+        VEC[("Vector DB<br/>LanceDB / Qdrant")]
+        S3[("MinIO / S3<br/>files · CAD · PDFs")]
     end
 
-    subgraph Pipe["Pipelines"]
-        CAD["<b>DDC cad2data</b><br/>RVT · IFC · DWG · DGN<br/>→ canonical JSON"]:::data
-        CV["<b>CV / OCR</b><br/>PaddleOCR 3.0 · YOLOv11<br/>PDF takeoff, symbol detection"]:::data
+    subgraph Pipelines["Pipelines"]
+        CAD["DDC cad2data<br/>RVT · IFC · DWG · DGN → canonical JSON"]
+        CV["CV / OCR<br/>PaddleOCR 3.0 · YOLOv11<br/>PDF takeoff · symbol detection"]
     end
 
-    UI <-->|REST + SSE| API
-    CORE --> BIZ
-    CORE --> AIS
+    UI -- "REST + SSE" --> CORE
     BIZ --> PG
     BIZ --> VEC
     BIZ --> S3
     CAD --> BIZ
     CV --> BIZ
+
+    classDef fe fill:#1f6feb,stroke:#0d3885,color:#fff;
+    classDef be fill:#238636,stroke:#104822,color:#fff;
+    classDef ai fill:#db6d28,stroke:#7a3c14,color:#fff;
+    classDef data fill:#8250df,stroke:#4a2c7d,color:#fff;
+    class UI fe;
+    class CORE,BIZ be;
+    class AIS ai;
+    class PG,VEC,S3,CAD,CV data;
 ```
 
 <details>
