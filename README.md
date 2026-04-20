@@ -8,8 +8,13 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 
 [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
-![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-2.0.0-green)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
+[![Version](https://img.shields.io/badge/version-2.0.0-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.0.0)
+[![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi)](https://pypi.org/project/openconstructionerp/)
+[![Downloads](https://static.pepy.tech/badge/openconstructionerp/month)](https://pepy.tech/project/openconstructionerp)
+[![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers)
+[![Last commit](https://img.shields.io/github/last-commit/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/commits/main)
+[![Issues](https://img.shields.io/github/issues/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 ![Standards](https://img.shields.io/badge/standards-20-blueviolet)
@@ -31,6 +36,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 
 **Getting Started**
 - [Why OpenConstructionERP?](#why-openconstructionerp)
+- [See It In Action](#see-it-in-action)
 - [Quick Start](#quick-start)
 - [Demo Accounts](#demo-accounts)
 
@@ -63,7 +69,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 </td>
 <td valign="top">
 
-**Standards & Regions**
+**Standards & Onboarding**
 - [20 Regional Standards](#-20-regional-standards)
 - [Guided Onboarding](#-guided-onboarding)
 - [Key Features Overview](#key-features)
@@ -78,9 +84,76 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 
 </td>
 </tr>
+<tr>
+<td valign="top">
+
+**Project & Community**
+- [Support the Project](#support-the-project)
+
+</td>
+<td valign="top">
+
+**Compliance**
+- [AI Disclaimer](#ai-disclaimer)
+- [Trademarks](#trademarks)
+- [Export Control](#export-control)
+
+</td>
+<td valign="top">
+
+**Legal & Privacy**
+- [Star History](#star-history)
+- [License](#license)
+- [Privacy and Terms](#privacy-and-terms)
+
+</td>
+</tr>
 </table>
 
 </details>
+
+---
+
+## ✨ What's New in v2.0.0
+
+The second stable release — shipped **April 20, 2026**. Supersedes the entire 1.x line.
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**🔧 Reliability**
+- AI Chat SSE streams survive middleware cancellation
+- AI API keys survive backend restarts (absolute-path `.env` loading, Fernet decryption gating)
+- DWG Takeoff respects DXF `$INSUNITS` end-to-end
+- BIM Linked-BOQ panel populates via new aggregate endpoint
+- 48 backend integration tests fixed — 61/61 green
+
+**🧩 Module Developer Experience**
+- `MODULES.md` at repo root — single entry point
+- New in-app `/modules/developer-guide` page
+- **"+ Add module"** CTA in the sidebar
+- Covers backend Python + frontend React scaffolding
+
+</td>
+<td width="50%" valign="top">
+
+**📊 CAD-BIM BI Explorer**
+- Renamed from *CAD-BIM Explorer*
+- KPI strip: Elements · Volume · Area · Length · Weight · Categories · Levels
+- Power-BI-style data bars in pivot cells
+- Slicers, saved views, drill-down from charts
+
+**✨ UX Polish**
+- Dashboard: Quick Start is now pure-navigation, explicit *New Estimate* button, Quality Score icon + click-through
+- About page: Artem Boiko avatar, DDC logo, full-width clickable book banner, LinkedIn / Telegram / X community block
+- Layered DDC provenance watermarks for copyright enforcement
+
+</td>
+</tr>
+</table>
+
+See the [full v2.0.0 changelog](CHANGELOG.md#200--2026-04-20) or the [v2.0.0 GitHub release](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.0.0).
 
 ---
 
@@ -431,25 +504,69 @@ Three demo accounts are created automatically on first start:
 
 ## Architecture
 
+```mermaid
+flowchart TB
+    classDef fe fill:#1f6feb,stroke:#0d3885,color:#fff
+    classDef be fill:#238636,stroke:#104822,color:#fff
+    classDef data fill:#8250df,stroke:#4a2c7d,color:#fff
+    classDef ai fill:#db6d28,stroke:#7a3c14,color:#fff
+
+    subgraph Client["Client"]
+        UI["<b>Frontend SPA</b><br/>React 18 · TypeScript · Vite<br/>AG Grid · Tailwind · PDF.js<br/>Three.js · Yjs (collab)"]:::fe
+    end
+
+    subgraph API["FastAPI Backend · 60+ auto-discovered modules"]
+        CORE["<b>Core</b><br/>Module loader · Event bus · Hooks<br/>RBAC · Validation engine"]:::be
+        BIZ["<b>Business modules</b><br/>BOQ · Costs · Schedule · 5D<br/>Takeoff · Tendering · Risk · Reports<br/>Catalog · Requirements · Markups<br/>Punch List · BIM Hub · CDE"]:::be
+        AIS["<b>AI services</b><br/>AI Chat (SSE) · AI Estimate<br/>Cost Intelligence Advisor<br/>7 LLM providers"]:::ai
+    end
+
+    subgraph Data["Data layer"]
+        PG[("<b>PostgreSQL 16</b><br/>/ SQLite (dev)")]:::data
+        VEC[("<b>Vector DB</b><br/>LanceDB / Qdrant")]:::data
+        S3[("<b>MinIO / S3</b><br/>files, CAD, PDFs")]:::data
+    end
+
+    subgraph Pipe["Pipelines"]
+        CAD["<b>DDC cad2data</b><br/>RVT · IFC · DWG · DGN<br/>→ canonical JSON"]:::data
+        CV["<b>CV / OCR</b><br/>PaddleOCR 3.0 · YOLOv11<br/>PDF takeoff, symbol detection"]:::data
+    end
+
+    UI <-->|REST + SSE| API
+    CORE --> BIZ
+    CORE --> AIS
+    BIZ --> PG
+    BIZ --> VEC
+    BIZ --> S3
+    CAD --> BIZ
+    CV --> BIZ
+```
+
+<details>
+<summary>Plain-text version (for screen readers or non-Mermaid renderers)</summary>
+
 ```
 ┌──────────────────────────────────────────────────┐
 │  Frontend (React SPA)                            │
 │  TypeScript · Tailwind · AG Grid · PDF.js        │
 └──────────────────┬───────────────────────────────┘
-                   │ REST API
+                   │ REST + SSE
 ┌──────────────────┴───────────────────────────────┐
 │  Backend (FastAPI)                               │
-│  20 auto-discovered modules · Plugin system      │
+│  60+ auto-discovered modules · Plugin system     │
 ├──────────────────────────────────────────────────┤
-│  BOQ · Costs · Schedule · 5D · Validation · AI  │
+│  BOQ · Costs · Schedule · 5D · Validation · AI   │
 │  Takeoff · Tendering · Risk · Reports · Catalog  │
-│  Requirements · Markups · Punch List             │
+│  Requirements · Markups · Punch List · BIM Hub   │
 ├──────────────────────────────────────────────────┤
 │  Database (PostgreSQL / SQLite)                  │
 │  Vector DB (LanceDB / Qdrant)                    │
 │  CAD Converters (DDC cad2data)                   │
+│  CV Pipeline (PaddleOCR + YOLOv11)               │
 └──────────────────────────────────────────────────┘
 ```
+
+</details>
 
 ---
 
@@ -500,6 +617,16 @@ Software is **not authorised** for download, use, or re-export to
 jurisdictions subject to comprehensive OFAC sanctions (currently Cuba,
 Iran, North Korea, Syria, and the Crimea / Donetsk / Luhansk regions of
 Ukraine). See [NOTICE](NOTICE) for the full notice.
+
+## Star History
+
+<a href="https://star-history.com/#datadrivenconstruction/OpenConstructionERP&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date" width="720" />
+  </picture>
+</a>
 
 ## License
 

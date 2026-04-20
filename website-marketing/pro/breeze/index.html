@@ -715,24 +715,23 @@
        Each tile is absolutely positioned so neighbours share slanted edges.
        The layout is a rectangular ring: top row of 5, two side hexes on
        each side, bottom row of 5 — city lives in the middle hole. */
-    /* Flat-top hex geometry — hexes interlock on their slanted edges.
-       Col step = 3/4 * W (horizontal column distance).
-       Row step = H (same-column vertical distance, cells share flat edges).
-       Zigzag = H/2 (alternate columns offset for edge-sharing zigzag row). */
+    /* Two zigzag rows of glass tiles — one above the panel, one below.
+       The whole 3D city is clear of tiles: the ring frames it from outside.
+       Col step ≈ 0.77W leaves a tiny 2-3 px gap between neighbours. */
     .module-honeycomb {
       position: absolute;
       inset: 0;
       pointer-events: none;
       z-index: 7;
-      --hc-w: 128px;
+      --hc-w: 94px;
       --hc-h: calc(var(--hc-w) * 0.866);
-      --hc-col: calc(var(--hc-w) * 0.75);
+      --hc-col: calc(var(--hc-w) * 0.77);
       --hc-zig: calc(var(--hc-h) * 0.5);
-      --hc-row: var(--hc-h);
-      /* Ring of 5 columns — span = 4*col + W = 4W, centred on panel. */
-      --ring-x: calc(50% - var(--hc-w) * 2);
-      /* Vertical: top row peeks above panel, bottom row peeks below. */
-      --ring-y: calc(0% - var(--hc-h) * 0.25);
+      /* 7-hex row span = 6*col + W, centred on the panel. */
+      --ring-x: calc(50% - var(--hc-w) / 2 - var(--hc-col) * 3);
+      /* Top row sits entirely above panel top, bottom row entirely below. */
+      --ring-y-top: calc(0% - var(--hc-h) - var(--hc-zig) - 6px);
+      --ring-y-bot: calc(100% + 6px + var(--hc-zig));
     }
 
     .hc-cell {
@@ -745,7 +744,10 @@
       transform: translateY(6px) scale(0.92);
       animation: hc-in 0.55s cubic-bezier(.18,.72,.26,1) forwards;
       perspective: 700px;
-      filter: drop-shadow(0 4px 10px color-mix(in oklab, var(--tint, var(--accent)) 24%, rgba(15,23,42,0.14)));
+      /* Soft glass shadow — subtle lift off the 3D scene. */
+      filter:
+        drop-shadow(0 1px 0 color-mix(in oklab, var(--tint, var(--accent)) 40%, rgba(255,255,255,0.3)))
+        drop-shadow(0 6px 14px color-mix(in oklab, var(--tint, var(--accent)) 18%, rgba(15,23,42,0.12)));
     }
     @keyframes hc-in {
       to { opacity: 1; transform: translateY(0) scale(1); }
@@ -766,31 +768,40 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
+    /* Frosted-glass front face — semi-transparent tint over a backdrop blur,
+       so the 3D city stays visible through every hex. */
     .hc-cell .hc-face-front {
       background: linear-gradient(180deg,
-        color-mix(in oklab, var(--tint, var(--accent)) 42%, #ffffff 58%),
-        color-mix(in oklab, var(--tint, var(--accent)) 24%, #ffffff 76%));
+        color-mix(in oklab, var(--tint, var(--accent)) 22%, rgba(255,255,255,0.55)),
+        color-mix(in oklab, var(--tint, var(--accent)) 10%, rgba(255,255,255,0.38)));
       color: var(--ink-0);
       transform: rotateY(0deg);
       z-index: 2;
-      border: 1px solid color-mix(in oklab, var(--tint, var(--accent)) 38%, transparent);
+      -webkit-backdrop-filter: blur(14px) saturate(1.25);
+              backdrop-filter: blur(14px) saturate(1.25);
     }
+    /* Back face stays richer (high-contrast tint) so the feature text is readable. */
     .hc-cell .hc-face-back {
       background: linear-gradient(180deg,
-        color-mix(in oklab, var(--tint, var(--accent)) 80%, #0b1220 10%),
-        color-mix(in oklab, var(--tint, var(--accent)) 55%, #0b1220 30%));
+        color-mix(in oklab, var(--tint, var(--accent)) 72%, rgba(11,18,32,0.65)),
+        color-mix(in oklab, var(--tint, var(--accent)) 48%, rgba(11,18,32,0.82)));
       color: #fff;
       transform: rotateY(-180deg);
       z-index: 1;
+      -webkit-backdrop-filter: blur(10px) saturate(1.4);
+              backdrop-filter: blur(10px) saturate(1.4);
     }
-    /* Subtle inner highlight on the front face */
+    /* Glass refraction — bright top-left highlight that fakes a light edge. */
     .hc-cell .hc-face-front::before {
       content: '';
       position: absolute;
-      inset: 2px;
+      inset: 0;
       clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-      background: linear-gradient(160deg, color-mix(in oklab, #ffffff 48%, transparent), transparent 55%);
+      background:
+        linear-gradient(155deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.08) 42%, transparent 60%),
+        linear-gradient(0deg, color-mix(in oklab, var(--tint, var(--accent)) 14%, transparent), transparent 45%);
       pointer-events: none;
+      mix-blend-mode: screen;
     }
     .hc-cell .hc-face > * { position: relative; z-index: 1; }
 
@@ -866,54 +877,41 @@
       text-shadow: 0 1px 2px rgba(0,0,0,0.18);
     }
 
-    /* --------- Closed honeycomb ring around the 3D panel ----------
-       Every hex shares an edge with at least one neighbour.
-       Layout (col x row in hex-grid units):
-                t1 ─ t2 ─ t3 ─ t4 ─ t5       <- top zigzag (cols 0..4)
-                │                   │
-                l1                 r1        <- col 0 / col 4
-                │                   │
-                l2                 r2
-                │                   │
-                b1 ─ b2 ─ b3 ─ b4 ─ b5       <- bottom zigzag
-    */
-    /* Top zigzag — cols 0,2,4 at high y; cols 1,3 dip by H/2. */
-    .hc-pos-t1 { left: var(--ring-x);                                      top: var(--ring-y); }
-    .hc-pos-t2 { left: calc(var(--ring-x) + var(--hc-col) * 1);            top: calc(var(--ring-y) + var(--hc-zig)); }
-    .hc-pos-t3 { left: calc(var(--ring-x) + var(--hc-col) * 2);            top: var(--ring-y); }
-    .hc-pos-t4 { left: calc(var(--ring-x) + var(--hc-col) * 3);            top: calc(var(--ring-y) + var(--hc-zig)); }
-    .hc-pos-t5 { left: calc(var(--ring-x) + var(--hc-col) * 4);            top: var(--ring-y); }
+    /* --------- Two zigzag rows flanking the 3D panel ----------
+       Top row (7 tiles) sits above the panel; bottom row (7 tiles) below.
+       Panel is completely clear in between — the full 3D city is visible.
+       Cols 0,2,4,6 sit at the outer y; cols 1,3,5 dip inward by H/2. */
+    .hc-pos-t1 { left: var(--ring-x);                                      top: var(--ring-y-top); }
+    .hc-pos-t2 { left: calc(var(--ring-x) + var(--hc-col) * 1);            top: calc(var(--ring-y-top) + var(--hc-zig)); }
+    .hc-pos-t3 { left: calc(var(--ring-x) + var(--hc-col) * 2);            top: var(--ring-y-top); }
+    .hc-pos-t4 { left: calc(var(--ring-x) + var(--hc-col) * 3);            top: calc(var(--ring-y-top) + var(--hc-zig)); }
+    .hc-pos-t5 { left: calc(var(--ring-x) + var(--hc-col) * 4);            top: var(--ring-y-top); }
+    .hc-pos-t6 { left: calc(var(--ring-x) + var(--hc-col) * 5);            top: calc(var(--ring-y-top) + var(--hc-zig)); }
+    .hc-pos-t7 { left: calc(var(--ring-x) + var(--hc-col) * 6);            top: var(--ring-y-top); }
 
-    /* Left column — col 0, directly below T1 (shares top edge with cell above). */
-    .hc-pos-l1 { left: var(--ring-x);                                      top: calc(var(--ring-y) + var(--hc-row) * 1); }
-    .hc-pos-l2 { left: var(--ring-x);                                      top: calc(var(--ring-y) + var(--hc-row) * 2); }
+    .hc-pos-b1 { left: var(--ring-x);                                      top: var(--ring-y-bot); }
+    .hc-pos-b2 { left: calc(var(--ring-x) + var(--hc-col) * 1);            top: calc(var(--ring-y-bot) - var(--hc-zig)); }
+    .hc-pos-b3 { left: calc(var(--ring-x) + var(--hc-col) * 2);            top: var(--ring-y-bot); }
+    .hc-pos-b4 { left: calc(var(--ring-x) + var(--hc-col) * 3);            top: calc(var(--ring-y-bot) - var(--hc-zig)); }
+    .hc-pos-b5 { left: calc(var(--ring-x) + var(--hc-col) * 4);            top: var(--ring-y-bot); }
+    .hc-pos-b6 { left: calc(var(--ring-x) + var(--hc-col) * 5);            top: calc(var(--ring-y-bot) - var(--hc-zig)); }
+    .hc-pos-b7 { left: calc(var(--ring-x) + var(--hc-col) * 6);            top: var(--ring-y-bot); }
 
-    /* Right column — col 4, symmetric to the left. */
-    .hc-pos-r1 { left: calc(var(--ring-x) + var(--hc-col) * 4);            top: calc(var(--ring-y) + var(--hc-row) * 1); }
-    .hc-pos-r2 { left: calc(var(--ring-x) + var(--hc-col) * 4);            top: calc(var(--ring-y) + var(--hc-row) * 2); }
-
-    /* Bottom zigzag — mirror of top. Cols 0,2,4 low; cols 1,3 dip up by H/2. */
-    .hc-pos-b1 { left: var(--ring-x);                                      top: calc(var(--ring-y) + var(--hc-row) * 3); }
-    .hc-pos-b2 { left: calc(var(--ring-x) + var(--hc-col) * 1);            top: calc(var(--ring-y) + var(--hc-row) * 3 - var(--hc-zig)); }
-    .hc-pos-b3 { left: calc(var(--ring-x) + var(--hc-col) * 2);            top: calc(var(--ring-y) + var(--hc-row) * 3); }
-    .hc-pos-b4 { left: calc(var(--ring-x) + var(--hc-col) * 3);            top: calc(var(--ring-y) + var(--hc-row) * 3 - var(--hc-zig)); }
-    .hc-pos-b5 { left: calc(var(--ring-x) + var(--hc-col) * 4);            top: calc(var(--ring-y) + var(--hc-row) * 3); }
-
-    /* Entrance stagger — clockwise around the ring from top-left. */
+    /* Entrance stagger — cascades left→right across the top, then the bottom. */
     .hc-pos-t1 { animation-delay: 1.55s; }
-    .hc-pos-t2 { animation-delay: 1.62s; }
-    .hc-pos-t3 { animation-delay: 1.69s; }
-    .hc-pos-t4 { animation-delay: 1.76s; }
-    .hc-pos-t5 { animation-delay: 1.83s; }
-    .hc-pos-r1 { animation-delay: 1.90s; }
-    .hc-pos-r2 { animation-delay: 1.97s; }
-    .hc-pos-b5 { animation-delay: 2.04s; }
-    .hc-pos-b4 { animation-delay: 2.11s; }
-    .hc-pos-b3 { animation-delay: 2.18s; }
-    .hc-pos-b2 { animation-delay: 2.25s; }
-    .hc-pos-b1 { animation-delay: 2.32s; }
-    .hc-pos-l2 { animation-delay: 2.39s; }
-    .hc-pos-l1 { animation-delay: 2.46s; }
+    .hc-pos-t2 { animation-delay: 1.61s; }
+    .hc-pos-t3 { animation-delay: 1.67s; }
+    .hc-pos-t4 { animation-delay: 1.73s; }
+    .hc-pos-t5 { animation-delay: 1.79s; }
+    .hc-pos-t6 { animation-delay: 1.85s; }
+    .hc-pos-t7 { animation-delay: 1.91s; }
+    .hc-pos-b1 { animation-delay: 1.97s; }
+    .hc-pos-b2 { animation-delay: 2.03s; }
+    .hc-pos-b3 { animation-delay: 2.09s; }
+    .hc-pos-b4 { animation-delay: 2.15s; }
+    .hc-pos-b5 { animation-delay: 2.21s; }
+    .hc-pos-b6 { animation-delay: 2.27s; }
+    .hc-pos-b7 { animation-delay: 2.33s; }
 
     @media (max-width: 1280px) {
       .module-honeycomb { --hc-w: 126px; }
@@ -5021,7 +5019,7 @@
 
       <div class="eyebrow" id="fx-eyebrow">
         <span class="dot" aria-hidden="true"></span>
-        <span><b>v1.9.3</b> &middot; shipped 2026-04-19</span>
+        <span><b>v2.0.0</b> &middot; shipped 2026-04-20 &middot; second stable</span>
       </div>
 
       <h1 class="headline" id="headline">
@@ -6255,6 +6253,16 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         <div class="voices-aside-label">Recently shipped</div>
         <ul class="changelog">
           <li>
+            <div class="changelog-ver">v2.0.0</div>
+            <div class="changelog-note">Second stable release — AI chat reliability, CAD-BIM BI Explorer, module developer experience, provenance watermarks</div>
+            <div class="changelog-date">2026-04-20</div>
+          </li>
+          <li>
+            <div class="changelog-ver">v1.9.7</div>
+            <div class="changelog-note">Reliability hotfixes + workflow polish</div>
+            <div class="changelog-date">2026-04-19</div>
+          </li>
+          <li>
             <div class="changelog-ver">v1.9.3</div>
             <div class="changelog-note">DWG features round 4 (3 tickets)</div>
             <div class="changelog-date">2026-04-19</div>
@@ -6272,11 +6280,6 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
           <li>
             <div class="changelog-ver">v1.9.0</div>
             <div class="changelog-note">Critical bug fixes (8 items)</div>
-            <div class="changelog-date">2026-04-17</div>
-          </li>
-          <li>
-            <div class="changelog-ver">v1.8.3</div>
-            <div class="changelog-note">BOQ Apply-to-BOQ CTA + Dashboard quick upload</div>
             <div class="changelog-date">2026-04-17</div>
           </li>
           <li>

@@ -1,14 +1,14 @@
-# Contributing to OpenEstimate
+# Contributing to OpenConstructionERP
 
-Thank you for your interest in contributing! OpenEstimate is an open-source platform
+Thank you for your interest in contributing! OpenConstructionERP is an open-source platform
 for construction cost estimation, and we welcome contributions of all kinds.
 
 ## Quick Start
 
 ```bash
 # 1. Fork and clone
-git clone https://github.com/YOUR_USERNAME/openestimate.git
-cd openestimate
+git clone https://github.com/YOUR_USERNAME/OpenConstructionERP.git
+cd OpenConstructionERP
 
 # 2. Start dev environment
 docker compose up -d   # PostgreSQL + Redis
@@ -97,20 +97,20 @@ See existing modules (`boq`, `costs`, `projects`) for reference implementations.
 
 ## Reporting Issues
 
-- Use [GitHub Issues](https://github.com/openestimate/openestimate/issues)
+- Use [GitHub Issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 - Include: version, steps to reproduce, expected vs actual behavior
 - For security issues, see [SECURITY.md](SECURITY.md)
 
 ## Contributor License Agreement (CLA)
 
-OpenEstimate uses dual licensing (AGPL-3.0 + Commercial). By submitting a PR,
+OpenConstructionERP uses dual licensing (AGPL-3.0 + Commercial). By submitting a PR,
 you agree that your contribution can be distributed under both licenses.
 
 First-time contributors will be asked to sign a CLA via a GitHub bot.
 
 ## Questions?
 
-- Open a [Discussion](https://github.com/openestimate/openestimate/discussions)
+- Open a [Discussion](https://github.com/datadrivenconstruction/OpenConstructionERP/discussions)
 - Join our community chat (coming soon)
 
 Thank you for helping make construction cost estimation open and accessible!
