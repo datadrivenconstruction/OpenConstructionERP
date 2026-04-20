@@ -69,6 +69,21 @@ async def _safe_publish(
     except Exception:
         _logger_events.debug("Event publish skipped (SQLite async): %s", name)
 
+
+def _safe_float(value: Any) -> float | None:
+    """Coerce a Position string/Decimal/None money or quantity to float.
+
+    Position.quantity / unit_rate / total are stored as strings to avoid
+    SQLite REAL precision loss. Aggregation endpoints surface them as JSON
+    floats for the viewer — ``None`` stays ``None``, empty stays ``None``.
+    """
+    if value is None or value == "":
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError, InvalidOperation):
+        return None
+
 # Sentinel key used by ``list_elements_with_links`` to signal that a
 # BIM-model validation report exists. Routers can detect "report ran but
 # element passed" vs "no report at all" by checking this key's presence.
@@ -1149,6 +1164,66 @@ class BIMHubService:
     ) -> list[BOQElementLink]:
         """List all BIM element links for a BOQ position."""
         return await self.link_repo.list_by_boq_position(boq_position_id)
+
+    async def list_links_for_model(
+        self,
+        model_id: uuid.UUID,
+    ) -> list[dict[str, Any]]:
+        """Aggregate BOQ links for every element in a model.
+
+        Returns one row per ``(boq_position_id, link_type, confidence)`` with
+        the full list of linked BIM element UUIDs and a handful of position
+        fields. Powers the BIM viewer's "Linked BOQ" side-panel, which needs
+        the totals across the whole model — not just the 2000-element page
+        the enriched elements endpoint returns.
+        """
+        stmt = (
+            select(
+                BOQElementLink.boq_position_id,
+                BOQElementLink.bim_element_id,
+                BOQElementLink.link_type,
+                BOQElementLink.confidence,
+                Position.boq_id,
+                Position.ordinal,
+                Position.description,
+                Position.quantity,
+                Position.unit,
+                Position.unit_rate,
+                Position.total,
+            )
+            .join(BIMElement, BIMElement.id == BOQElementLink.bim_element_id)
+            .join(Position, Position.id == BOQElementLink.boq_position_id)
+            .where(BIMElement.model_id == model_id)
+        )
+        result = await self.session.execute(stmt)
+        rows = result.all()
+
+        # Aggregate by (position_id, link_type, confidence) — matches how the
+        # panel groups visually. A position with both ``manual`` and
+        # ``rule_based`` links shows as two rows, which is what the user
+        # expects to see.
+        agg: dict[tuple[uuid.UUID, str, str | None], dict[str, Any]] = {}
+        for row in rows:
+            key = (row.boq_position_id, row.link_type, row.confidence)
+            entry = agg.get(key)
+            if entry is None:
+                entry = {
+                    "boq_position_id": row.boq_position_id,
+                    "boq_id": row.boq_id,
+                    "boq_position_ordinal": row.ordinal,
+                    "boq_position_description": row.description,
+                    "boq_position_quantity": _safe_float(row.quantity),
+                    "boq_position_unit": row.unit,
+                    "boq_position_unit_rate": _safe_float(row.unit_rate),
+                    "boq_position_total": _safe_float(row.total),
+                    "link_type": row.link_type,
+                    "confidence": row.confidence,
+                    "element_ids": [],
+                }
+                agg[key] = entry
+            entry["element_ids"].append(row.bim_element_id)
+
+        return list(agg.values())
 
     async def create_link(
         self,

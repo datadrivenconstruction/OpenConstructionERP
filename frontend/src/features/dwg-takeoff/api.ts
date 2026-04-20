@@ -23,6 +23,8 @@ export interface DwgDrawing {
   scale_denominator?: number;
   /** Which scale strategy the user picked last for this drawing. */
   scale_mode?: DwgScaleMode;
+  /** DXF $INSUNITS name: "mm", "cm", "m", "inches", "feet", "unitless", ... */
+  units?: string | null;
   created_at: string;
   updated_at: string;
 }

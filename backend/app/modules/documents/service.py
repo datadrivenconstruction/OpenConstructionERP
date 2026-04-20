@@ -186,6 +186,8 @@ class DocumentService:
             ALLOWED_CAD_TYPES,
             ALLOWED_DOCUMENT_TYPES,
             SIGNATURE_BYTES_REQUIRED,
+        )
+        from app.core.file_signature import (
             detect as _sig_detect,
         )
 

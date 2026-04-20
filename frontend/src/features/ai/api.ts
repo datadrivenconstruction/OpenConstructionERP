@@ -216,7 +216,7 @@ export const aiApi = {
 
   createBOQFromEstimate: (jobId: string, data: CreateBOQFromEstimate) =>
     apiPost<{ boq_id: string; project_id: string }, CreateBOQFromEstimate>(
-      `/v1/ai/estimate/${jobId}/create-boq`,
+      `/v1/ai/estimate/${jobId}/create-boq/`,
       data,
     ),
 

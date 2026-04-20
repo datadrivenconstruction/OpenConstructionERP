@@ -7,6 +7,7 @@ import {
   Mail, Shield, BookOpen, Users, Award,
   Code2, Building2, Briefcase, Globe, ExternalLink,
   Linkedin, Youtube, Star, Coffee, Rocket, ArrowRight, Handshake,
+  Github, MessageCircle,
 } from 'lucide-react';
 import { Card, Button, Badge } from '@/shared/ui';
 import { APP_VERSION } from '@/shared/lib/version';
@@ -81,6 +82,99 @@ export function AboutPage() {
           <p className="mt-4 text-sm text-content-secondary leading-relaxed">
             {t('about.platform_desc', { defaultValue: 'OpenConstructionERP covers the full construction estimation workflow — BOQ editing, 4D scheduling, 5D cost modeling, AI-powered estimation, CAD/BIM quantity takeoff (RVT, IFC, DWG, DGN), tendering, and reporting. Supports regional classification standards and custom schemas.' })}
           </p>
+
+          {/* Community — invite for feedback & ideas */}
+          <div className="mt-5 rounded-xl border border-oe-blue/20 bg-gradient-to-br from-oe-blue/5 via-transparent to-blue-50/40 dark:from-blue-950/20 dark:via-transparent dark:to-slate-900/30 p-5">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="shrink-0 h-9 w-9 rounded-xl bg-oe-blue/10 text-oe-blue flex items-center justify-center">
+                <MessageCircle size={18} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-semibold text-content-primary">
+                  {t('about.community_title', { defaultValue: 'Join the community — your feedback shapes the roadmap' })}
+                </h3>
+                <p className="text-xs text-content-secondary mt-1 leading-relaxed">
+                  {t('about.community_desc', {
+                    defaultValue:
+                      'Share what works, what breaks, and what you want next. Every release in the changelog started as a user request. Pick the channel you already use — we read all three.',
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <a
+                href="https://www.linkedin.com/company/78381569"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-primary px-3 py-2.5 hover:border-[#0A66C2]/50 hover:bg-[#0A66C2]/[0.04] transition-all"
+              >
+                <span className="shrink-0 h-8 w-8 rounded-md bg-[#0A66C2]/10 text-[#0A66C2] flex items-center justify-center">
+                  <Linkedin size={15} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-content-primary leading-tight">
+                    LinkedIn
+                  </p>
+                  <p className="text-[10px] text-content-tertiary truncate">
+                    {t('about.community_linkedin', { defaultValue: 'Industry discussions' })}
+                  </p>
+                </div>
+                <ExternalLink size={11} className="text-content-quaternary group-hover:text-[#0A66C2] shrink-0" />
+              </a>
+
+              <a
+                href="https://t.me/datadrivenconstruction"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-primary px-3 py-2.5 hover:border-[#26A5E4]/50 hover:bg-[#26A5E4]/[0.04] transition-all"
+              >
+                <span className="shrink-0 h-8 w-8 rounded-md bg-[#26A5E4]/10 text-[#26A5E4] flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden>
+                    <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.06-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+                  </svg>
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-content-primary leading-tight">
+                    Telegram
+                  </p>
+                  <p className="text-[10px] text-content-tertiary truncate">
+                    {t('about.community_telegram', { defaultValue: 'Live chat & support' })}
+                  </p>
+                </div>
+                <ExternalLink size={11} className="text-content-quaternary group-hover:text-[#26A5E4] shrink-0" />
+              </a>
+
+              <a
+                href="https://x.com/datadrivenconst"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-primary px-3 py-2.5 hover:border-slate-700 hover:bg-slate-900/[0.04] dark:hover:border-slate-300 transition-all"
+              >
+                <span className="shrink-0 h-8 w-8 rounded-md bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5" aria-hidden>
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117l11.966 15.644z"/>
+                  </svg>
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-content-primary leading-tight">
+                    X / Twitter
+                  </p>
+                  <p className="text-[10px] text-content-tertiary truncate">
+                    {t('about.community_x', { defaultValue: 'Release announcements' })}
+                  </p>
+                </div>
+                <ExternalLink size={11} className="text-content-quaternary group-hover:text-content-primary shrink-0" />
+              </a>
+            </div>
+
+            <p className="mt-4 text-[11px] text-content-tertiary text-center">
+              {t('about.community_cta', {
+                defaultValue:
+                  'Have a feature idea? A bug? A workflow we haven\'t thought of? Drop a message — we reply.',
+              })}
+            </p>
+          </div>
         </div>
       </Card>
 
@@ -88,10 +182,15 @@ export function AboutPage() {
       <Card className="animate-card-in" style={{ animationDelay: '100ms' }}>
         <div className="p-6">
           {/* DDC Logo + Header */}
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-5 mb-4">
             <a href="https://datadrivenconstruction.io" target="_blank" rel="noopener noreferrer" className="shrink-0">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-extrabold text-lg shadow-md hover:shadow-lg transition-shadow">
-                DDC
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 ring-1 ring-border-light shadow-lg hover:shadow-xl transition-shadow p-2">
+                <img
+                  src="/brand/ddc-logo.png"
+                  alt="Data Driven Construction"
+                  className="h-full w-full object-contain"
+                  loading="lazy"
+                />
               </div>
             </a>
             <div>
@@ -111,26 +210,55 @@ export function AboutPage() {
 
           {/* Product cards with links */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <a href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR" target="_blank" rel="noopener noreferrer" className="rounded-xl border border-border-light bg-surface-secondary/30 p-4 text-center hover:border-oe-blue/40 hover:bg-oe-blue/[0.03] transition-all group">
+            <a
+              href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative flex flex-col items-center rounded-xl border border-border-light bg-surface-secondary/30 p-4 text-center hover:border-oe-blue/40 hover:bg-oe-blue/[0.03] transition-all"
+            >
+              <span className="absolute top-2 right-2 inline-flex items-center justify-center h-6 w-6 rounded-md bg-surface-primary border border-border-light text-content-tertiary group-hover:text-content-primary group-hover:border-oe-blue/40 transition-colors">
+                <Github size={12} />
+              </span>
               <div className="text-2xl font-bold text-content-primary group-hover:text-oe-blue transition-colors">CWICR</div>
               <div className="text-xs text-content-tertiary mt-1">
                 {t('about.ddc_cwicr', { defaultValue: '55,000+ cost items · 9 languages · 11 regional databases' })}
               </div>
               <div className="mt-2 text-2xs text-oe-blue opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                <ExternalLink size={10} /> GitHub
+                <Github size={10} /> Repository
               </div>
             </a>
-            <a href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto" target="_blank" rel="noopener noreferrer" className="rounded-xl border border-border-light bg-surface-secondary/30 p-4 text-center hover:border-oe-blue/40 hover:bg-oe-blue/[0.03] transition-all group">
+            <a
+              href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative flex flex-col items-center rounded-xl border border-border-light bg-surface-secondary/30 p-4 text-center hover:border-oe-blue/40 hover:bg-oe-blue/[0.03] transition-all"
+            >
+              <span className="absolute top-2 right-2 inline-flex items-center justify-center h-6 w-6 rounded-md bg-surface-primary border border-border-light text-content-tertiary group-hover:text-content-primary group-hover:border-oe-blue/40 transition-colors">
+                <Github size={12} />
+              </span>
               <div className="text-2xl font-bold text-content-primary group-hover:text-oe-blue transition-colors">cad2data</div>
               <div className="text-xs text-content-tertiary mt-1">
                 {t('about.ddc_cad2data', { defaultValue: 'CAD/BIM pipeline — RVT, IFC, DWG, DGN to structured quantities' })}
               </div>
               <div className="mt-2 text-2xs text-oe-blue opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                <ExternalLink size={10} /> GitHub
+                <Github size={10} /> Repository
               </div>
             </a>
-            <a href="https://datadrivenconstruction.io/contact-support/" target="_blank" rel="noopener noreferrer" className="rounded-xl border border-border-light bg-surface-secondary/30 p-4 text-center hover:border-oe-blue/40 hover:bg-oe-blue/[0.03] transition-all group">
-              <div className="text-2xl font-bold text-content-primary group-hover:text-oe-blue transition-colors">DDC</div>
+            <a
+              href="https://datadrivenconstruction.io/contact-support/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative flex flex-col items-center justify-center rounded-xl border border-border-light bg-surface-secondary/30 p-4 text-center hover:border-oe-blue/40 hover:bg-oe-blue/[0.03] transition-all"
+            >
+              <span className="absolute top-2 right-2 inline-flex items-center justify-center h-6 w-6 rounded-md bg-surface-primary border border-border-light text-content-tertiary group-hover:text-content-primary group-hover:border-oe-blue/40 transition-colors">
+                <ExternalLink size={11} />
+              </span>
+              <img
+                src="/brand/ddc-logo.webp"
+                alt="Data Driven Construction"
+                className="h-8 w-auto mt-1 mb-0.5 object-contain"
+                loading="lazy"
+              />
               <div className="text-xs text-content-tertiary mt-1">
                 {t('about.ddc_platform', { defaultValue: 'Consulting, training & enterprise solutions for digital construction' })}
               </div>
@@ -146,9 +274,12 @@ export function AboutPage() {
       <Card className="animate-card-in" style={{ animationDelay: '150ms' }}>
         <div className="p-6">
           <div className="flex items-start gap-5">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-oe-blue to-blue-600 text-2xl font-bold text-white shadow-lg">
-              AB
-            </div>
+            <img
+              src="/brand/artem-boiko-avatar.png"
+              alt={t('about.founder_name', { defaultValue: 'Artem Boiko' })}
+              className="h-20 w-20 shrink-0 rounded-2xl object-cover bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 ring-1 ring-border-light shadow-lg"
+              loading="lazy"
+            />
             <div className="min-w-0 flex-1">
               <h2 className="text-lg font-bold text-content-primary">
                 {t('about.founder_name', { defaultValue: 'Artem Boiko' })}
@@ -388,12 +519,26 @@ export function AboutPage() {
       <Card className="animate-card-in" style={{ animationDelay: '300ms' }}>
         <div className="p-6">
           <div className="flex items-center gap-2 mb-3">
-            <BookOpen size={18} className="text-purple-500" />
+            <BookOpen size={18} className="text-oe-blue" />
             <h2 className="text-lg font-semibold text-content-primary">
               {t('about.book_title', { defaultValue: 'Free Guidebook: Data Driven Construction' })}
             </h2>
-            <Badge variant="success" size="sm">Free Download</Badge>
+            <Badge variant="blue" size="sm">Free Download</Badge>
           </div>
+          <a
+            href="https://datadrivenconstruction.io/books/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mb-4 block overflow-hidden rounded-xl bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 border border-border-light hover:border-oe-blue/40 hover:shadow-lg transition-all"
+            title={t('about.book_cta', { defaultValue: 'Pick your language on datadrivenconstruction.io' })}
+          >
+            <img
+              src="/brand/ddc-book.png"
+              alt={t('about.book_title', { defaultValue: 'Free Guidebook: Data Driven Construction' })}
+              className="block w-full h-auto transition-transform duration-500 group-hover:scale-[1.02]"
+              loading="lazy"
+            />
+          </a>
           <p className="text-sm text-content-secondary leading-relaxed mb-4">
             {t('about.book_desc', { defaultValue: 'A comprehensive guide to digital transformation in the construction industry. Learn about project data management, requirements gathering, Data workflows, cost estimation automation, AI in construction, data-driven decision making, and how to build efficient digital pipelines for construction projects.' })}
           </p>
@@ -415,7 +560,7 @@ export function AboutPage() {
             href="https://datadrivenconstruction.io/books/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-oe-blue px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
           >
             <BookOpen size={16} />
             {t('about.book_download', { defaultValue: 'Download Free Guidebook' })}

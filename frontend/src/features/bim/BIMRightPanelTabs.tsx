@@ -164,6 +164,7 @@ export default function BIMRightPanelTabs({
       <div className="flex-1 min-h-0 overflow-y-auto">
         {activeTab === 'properties' && (
           <BIMLinkedBOQPanel
+            modelId={modelId}
             elements={elements}
             onHighlightElements={onHighlightBOQElements}
             onClose={onClose}

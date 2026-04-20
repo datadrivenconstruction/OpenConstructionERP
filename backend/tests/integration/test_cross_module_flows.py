@@ -69,6 +69,9 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
     )
     assert reg.status_code == 201, f"Registration failed: {reg.text}"
 
+    from ._auth_helpers import promote_to_admin
+    await promote_to_admin(email)
+
     token = ""
     for attempt in range(3):
         resp = await shared_client.post(
@@ -681,7 +684,7 @@ class TestGlobalSearch:
 
         # 5. Search for the keyword
         resp = await client.get(
-            f"/api/v1/search?q={keyword}&limit=50",
+            f"/api/v1/global-search?q={keyword}&limit=50",
             headers=auth,
         )
         assert resp.status_code == 200, f"Search failed: {resp.text}"

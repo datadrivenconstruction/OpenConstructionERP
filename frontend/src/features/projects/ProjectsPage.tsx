@@ -6,7 +6,7 @@ import {
   FolderPlus, FolderOpen, ArrowRight, MoreHorizontal, Copy, Trash2, Archive, ExternalLink,
   Search, ChevronDown, ArrowUpDown, Star, Map as MapIcon, CloudSun,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, SkeletonGrid, Breadcrumb, ProjectMap, ProjectWeather, type LatLng } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, SkeletonGrid, Breadcrumb, ProjectMap, ProjectWeather, FileTypeChips, type LatLng } from '@/shared/ui';
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { projectsApi, type Project } from './api';
@@ -91,6 +91,15 @@ export function ProjectsPage() {
     queryKey: ['projects'],
     queryFn: projectsApi.list,
     staleTime: 5 * 60_000,
+  });
+
+  /* Map of project_id → uploaded file extensions (rvt/ifc/dwg/pdf/…),
+     served by one aggregate endpoint so the cards don't fan out N
+     requests. Used to show "has BIM / drawings / docs" chips. */
+  const { data: fileTypesByProject } = useQuery({
+    queryKey: ['projects-file-types'],
+    queryFn: () => apiGet<Record<string, string[]>>('/v1/documents/file-types-by-project/'),
+    staleTime: 60_000,
   });
 
   /* Fetch BOQ stats for all projects (count + total value) — single request + parallel detail fetches */
@@ -465,6 +474,7 @@ export function ProjectsPage() {
                 key={project.id}
                 project={project}
                 boqStats={boqStatsMap.get(project.id)}
+                fileTypes={fileTypesByProject?.[project.id] ?? []}
                 style={{ animationDelay: `${50 + i * 30}ms` }}
                 onDeleted={() => setStatusFilter('active')}
               />
@@ -560,11 +570,14 @@ export function ProjectsPage() {
 function ProjectCard({
   project,
   boqStats,
+  fileTypes,
   style,
   onDeleted,
 }: {
   project: Project;
   boqStats?: ProjectBOQStats;
+  /** Uploaded file extensions for this project (e.g. ['rvt','dwg','pdf']). */
+  fileTypes?: string[];
   style?: React.CSSProperties;
   onDeleted?: () => void;
 }) {
@@ -802,7 +815,7 @@ function ProjectCard({
             {project.description}
           </p>
         )}
-        <div className="mt-3 flex flex-wrap items-center gap-1.5 overflow-hidden">
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
           <Badge variant="blue" size="sm">
             {standardLabels[project.classification_standard] ?? project.classification_standard}
           </Badge>
@@ -812,6 +825,11 @@ function ProjectCard({
           <Badge variant="neutral" size="sm">
             {project.region}
           </Badge>
+          {fileTypes && fileTypes.length > 0 && (
+            <div className="ml-auto">
+              <FileTypeChips fileTypes={fileTypes} size="md" />
+            </div>
+          )}
         </div>
       </div>
       <div className="border-t border-border-light px-5 py-2.5">
@@ -917,3 +935,4 @@ function PinButton({ projectId }: { projectId: string }) {
     </button>
   );
 }
+

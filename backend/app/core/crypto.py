@@ -34,8 +34,15 @@ def decrypt_secret(ciphertext: str | None) -> str | None:
     try:
         return Fernet(_key()).decrypt(ciphertext.encode("ascii")).decode("utf-8")
     except (InvalidToken, ValueError):
-        # Legacy plaintext value — return as-is so existing rows still
-        # work. They will be re-encrypted on the next save.
+        # If the value looks like a Fernet token (``gAAAAA…``) but the
+        # current key can't open it, the encryption key has rotated —
+        # treat it as unusable so callers don't end up shipping
+        # encrypted garbage as an API key to a remote provider. Genuine
+        # plaintext values (no Fernet prefix) pass through unchanged
+        # so legacy rows saved before encryption was introduced still
+        # work.
+        if ciphertext.startswith("gAAAAA"):
+            return None
         return ciphertext
 
 

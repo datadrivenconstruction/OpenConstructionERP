@@ -5,6 +5,95 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] — 2026-04-20
+
+### Second stable release — AI chat reliability, AI-key encryption stability, DWG scale correctness, UI consistency, module developer experience, provenance watermarks
+
+This is the second major stable release of OpenConstructionERP. It supersedes
+the entire 1.x line and establishes the platform baseline going forward.
+
+**AI Chat (the headline fix)**
+- `/chat` SSE streams were crashing mid-flush because Starlette's `BaseHTTPMiddleware` stack cancels the request task between chunks, killing every `await session.flush()` with `CancelledError`. The stream endpoint now opens its own `async_session_factory()` scope (detached from the request-scoped `SessionDep`), and every DB write inside the agent loop is wrapped in `asyncio.shield(...)` so middleware cancellation can no longer rip an INSERT in half. Clicking any suggestion in the right-panel data pane now actually sends the prompt and streams an answer back.
+
+**AI key encryption — keys finally survive backend restarts**
+- Root cause: `pydantic-settings` was loading `backend/.env` relative to the process CWD. When `uvicorn` was launched from a different directory, the file was silently dropped, `JWT_SECRET` rotated to a default, and every Fernet-encrypted API key became unreadable on the next boot — the UI faithfully showed "Key configured" while every call failed with a 401 "invalid key". `Settings.model_config.env_file` is now resolved by absolute path from the package directory, so stable secret loading is independent of CWD.
+- `_build_settings_response` now marks a provider as "configured" only when `decrypt_secret(...)` actually returns plaintext. A ciphertext under a rotated key surfaces as *not configured*, so the user is prompted to re-enter instead of silently hitting 401s.
+- `resolve_provider_and_key` skips undecryptable keys and falls through to the next provider; if every stored key is undecryptable it raises a clear `ValueError("Stored AI API key could not be decrypted — please re-enter and save...")` instead of handing ciphertext to the provider.
+- `/api/v1/ai/settings/test/` decrypts before calling the provider and returns a self-explanatory error when decryption fails.
+
+**DWG takeoff — scale correctness end-to-end**
+- DXF file `$INSUNITS` now routes through a proper `unitFactorToMetres(...)` helper (mm / cm / m / km / inches / feet / miles). The effective scale applied everywhere is `drawingScale × unitFactor`, so a 3.58 m wall no longer reads as `3580.200 m`.
+- `extractEntityMeasurement` and `toDWGElementPayload` both take `effectiveScale` so the measurement shown on canvas, the number linked into BOQ, and the `ElementInfoPopover` "DWG ENTITY" card all agree.
+- Scale tab shows a small info badge with detected `dxfUnits` and the `effectiveScale` so users can sanity-check.
+
+**BIM**
+- New aggregate endpoint `GET /api/v1/bim_hub/models/{model_id}/boq-links/` returns BOQ-link counts grouped by position. The Linked BOQ panel fetches directly instead of walking 27k skeleton elements client-side; 3,897 real DB links now render instead of a blank panel.
+- BIM Rules button deep-links to `/bim/rules?mode=requirements` (was dropping the mode).
+
+**CAD-BIM BI Explorer** (was *CAD-BIM Explorer*)
+- Renamed to *CAD-BIM BI Explorer* — the module is no longer just a table browser; it's a project-wide BI surface (KPI strip + pivot data bars + slicers + saved views + drill-down from charts).
+- **KPI dashboard strip** — always-visible row of big-number metric tiles above the tab selector. Opportunistically surfaces up to 6 project totals: Elements, Volume m³, Area m², Length m, Weight kg, distinct Categories, distinct Levels. Tiles derive purely from `DescribeResponse.columns.sum` / `.unique`, so no extra API round-trip on session open.
+- **Pivot data bars** — each aggregate cell now renders a Power-BI-style horizontal bar behind the number, scaled to the max value in that column across visible (post-slicer, post-top-N) rows. Magnitudes read at a glance without switching to the Charts tab.
+
+**Modules**
+- New `MODULES.md` at the repo root is the single entry point for building modules (backend Python + frontend React). Covers the 5-minute walkthrough, file conventions, installation, core rules, AI-agent notes, and deep-links into the 450-line `frontend/src/modules/MODULE_DEVELOPMENT_GUIDE.md` and the `modules/oe-module-template/` scaffold.
+- `ModulesPage` header now carries a "Build a module — developer guide" link so contributors discover the docs from the UI.
+- In-app React page at `/modules/developer-guide` replaces the old external-GitHub link: steps, code blocks, install guide, quick-reference table — searchable and deep-linkable.
+- Sidebar — prominent "+ Add module" CTA at the bottom of the nav (dashed brand border, Plus icon tile) routes to the developer guide. First-time contributors discover the entry point without digging through the marketplace.
+
+**Dashboard**
+- Quick Start Estimate — pure-navigation click-through (last BOQ → opens it; else first project → new BOQ; else → new project). Removed the silent API-chain that 403'd on `boq.create` for non-admin users.
+- Explicit "New Estimate" button alongside Quick Start so the primary action is never ambiguous.
+- Quality Score KPI tile — "N/A" replaced with a dashed-circle icon and "run validation" sublabel; tile is now clickable and routes to `/validation`.
+
+**About / Branding**
+- Artem Boiko avatar photo (h-20 rounded-2xl, slate/blue-50 gradient bg) replaces the text placeholder.
+- DDC logo image (same dimensions) replaces the "DDC" text card; two repo cards (CWICR, cad2data) restyled with GitHub icons.
+- Full-width clickable book banner links to `datadrivenconstruction.io/books/` (language picker).
+- Community block with LinkedIn (`/company/78381569`), Telegram (`@datadrivenconstruction`), X (`@datadrivenconst`) — three clean tiles with inline-SVG brand marks and a feedback CTA.
+
+**Provenance / Watermarks**
+- Layered authorship markers (`shared/lib/ddc-integrity.ts` + `middleware/fingerprint.py`): HTML `<meta ddc:*>` tags, CSS custom properties on `<html>`, opaque `_ff_build_hash` localStorage key, `X-DDC-Origin`/`X-DDC-Author`/`X-DDC-License` response headers, console.info banner. Each marker is trivial to strip alone; together they form a provenance trail useful in copyright-enforcement forensics.
+
+**Tests**
+- Fixed 48 integration-test failures in `test_critical_flows.py`, `test_cross_module_flows.py`, `test_requirements_bim_cross.py`: shared fixtures now call `promote_to_admin(email)` after registration (security fix BUG-327/386 demotes self-registered users to `viewer`); trailing-slash drift corrected across I18n / Notifications / RFI respond-close / Finance EVM-snapshot + budgets / Contacts search / Global-search. 61/61 green end-to-end.
+
+**CDE**
+- `POST /api/v1/cde/containers/` — trailing slash restored on the frontend API client so FastAPI's 307 redirect no longer drops the `Authorization` header. Creating a container actually writes now.
+- `CDEPage` optimistic insert writes the created container into the React-Query cache and resets the state filter to *All*, so the new row appears instantly instead of after a 15 s refetch.
+
+**BOQ**
+- `cellRenderers` add a red PDF icon on positions whose origin is a PDF takeoff (detected via `pdfMeasurementId` / `pdfSource` or `TK.NNN` ordinal prefix) with a deep-link to the source page.
+- `MarkupPanel` — removed `overflow-hidden` on the outer wrapper; the Markups & Overheads dropdown is no longer clipped.
+- BOQ list — `FileTypeChips` now shown per-row, pulled from `/v1/documents/file-types-by-project`.
+
+**Projects**
+- Project cards — `FileTypeChips` moved into the same row as Standard / Currency / Region badges, right-aligned (`ml-auto`), bumped to the new `md` size (`text-[11px]`, icon `12px`). No more mismatched tiny second row; a single clean classification panel.
+
+**Estimation**
+- `AI Estimate` sidebar entry carries a BETA badge.
+- `POST /api/v1/ai/estimate/{job_id}/create-boq/` — trailing slash restored so Save-as-BOQ no longer 404s.
+
+**Project Intelligence**
+- `renderTaggedText` rewritten to render a safe markdown subset (headings #/##/###, `**bold**`, `*italic*`, `` `code` ``, bullet lists with `-`/`*`/`•`, paragraphs) instead of just `[SEVERITY]` badges. Inline fast-path avoids `<div>`-inside-`<p>` hydration warnings. Cost Intelligence Advisor no longer shows raw asterisks.
+
+**Layout / Chrome**
+- Sticky header dropped from `z-[100]` to `z-30` so modal backdrops at `z-50` properly cover it.
+- `AppLayout` no longer renders the floating AI Chat bubble on every route (the full-page `/chat` is the entry point now).
+
+**Cleanup**
+- Removed 5 archived duplicate demo projects from the seeded DB. Six regional demos remain: US (Boylston Crossing + Portland Technical School), DACH (Wohnpark Friedrichshain), EU (Residencial Salamanca), LATAM (Residencial Vila Madalena), ASIA-PAC.
+- Removed committed-by-accident diagnostic specs (`_pro-breeze-*`, `*-diagnostic.spec.ts`), `video-output/`, `test-results/`, `backend/audit_output.txt`, one-off seed scripts (`seed_demo_v2*.py`, `seed_*school*.py`). `.gitignore` extended to block these patterns going forward.
+- `ruff --fix` pass over `backend/app/`: 29 import-sort / unused-import / trailing-comma fixes across 29 files.
+
+### Quality gates
+
+- Frontend `npm run typecheck`: clean
+- Frontend `npm run build`: production build succeeds (1m 15s)
+- Backend `uvicorn` cold start: clean, 60 modules load, no migration drift
+- No `console.log` / `debugger` left in `frontend/src`
+- No hardcoded secrets in either tree (`sk-`, `Bearer …` patterns scanned)
+
 ## [1.9.7] — 2026-04-19
 
 ### Workflow polish — reload persistence, onboarding, vector UX, BIM labels

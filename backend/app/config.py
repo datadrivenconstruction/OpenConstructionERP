@@ -49,11 +49,28 @@ def _detect_version() -> str:
         return _read_pyproject_version() or "0.0.0+local"
 
 
+def _find_env_file() -> list[str]:
+    """Locate backend/.env regardless of the process CWD.
+
+    Uvicorn may be launched from the repo root, backend/, or anywhere else,
+    and pydantic-settings's default ``env_file=".env"`` is resolved against
+    CWD — which silently drops the whole file when the CWD is "wrong".
+    A missing JWT_SECRET rotates Fernet keys every boot and makes stored
+    AI API keys undecryptable. Anchor to the package directory instead.
+    """
+    here = Path(__file__).resolve()
+    candidates = [
+        here.parent.parent / ".env",        # backend/.env (app/ is one up)
+        here.parent.parent.parent / ".env", # repo root .env (optional)
+    ]
+    return [str(p) for p in candidates if p.is_file()]
+
+
 class Settings(BaseSettings):
     """OpenConstructionERP application settings."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=_find_env_file() or ".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",

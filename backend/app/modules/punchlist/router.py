@@ -20,6 +20,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, 
 from fastapi.responses import Response
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.documents.service import MAX_PHOTO_SIZE
 from app.modules.punchlist.schemas import (
     PinToSheetRequest,
     PunchItemCreate,
@@ -28,7 +29,6 @@ from app.modules.punchlist.schemas import (
     PunchListSummary,
     PunchStatusTransition,
 )
-from app.modules.documents.service import MAX_PHOTO_SIZE
 from app.modules.punchlist.service import PunchListService
 
 router = APIRouter()

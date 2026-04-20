@@ -521,9 +521,14 @@ def resolve_provider_and_key(
 
     for keywords, provider_name, key_attr in _MODEL_PROVIDER_MAP:
         if any(kw in model for kw in keywords):
-            if settings and getattr(settings, key_attr, None):
-                return provider_name, decrypt_secret(getattr(settings, key_attr))
-            break  # matched model but no key -- fall through to fallback
+            raw = getattr(settings, key_attr, None) if settings else None
+            if raw:
+                decrypted = decrypt_secret(raw)
+                if decrypted:
+                    return provider_name, decrypted
+                # key exists but is undecryptable (JWT_SECRET rotated) —
+                # fall through so the fallback loop can try other providers
+            break  # matched model but no (usable) key — fall through to fallback
 
     # Fallback: try any available key (in priority order)
     _FALLBACK_ORDER: list[tuple[str, str]] = [
@@ -542,11 +547,22 @@ def resolve_provider_and_key(
         ("xai", "xai_api_key"),
     ]
 
+    undecryptable = False
     if settings:
         for provider_name, key_attr in _FALLBACK_ORDER:
             key_val = getattr(settings, key_attr, None)
             if key_val:
-                return provider_name, decrypt_secret(key_val)
+                decrypted = decrypt_secret(key_val)
+                if decrypted:
+                    return provider_name, decrypted
+                undecryptable = True
+
+    if undecryptable:
+        raise ValueError(
+            "Stored AI API key could not be decrypted — the backend encryption "
+            "key has rotated since the key was saved. Please re-enter and save "
+            "your API key in Settings > AI."
+        )
 
     msg = (
         "No AI API key configured. Please add your API key in Settings > AI. "

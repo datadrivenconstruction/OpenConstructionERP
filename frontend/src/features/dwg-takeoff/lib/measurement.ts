@@ -12,6 +12,37 @@ export function calculateDistance(
   return Math.sqrt(dx * dx + dy * dy);
 }
 
+/** Convert a DXF $INSUNITS label to a "native unit → metres" factor.
+ *
+ *  Most architectural DWGs are authored in millimetres even though the
+ *  page is read at 1:100/1:50. Without this factor a 12 000-mm wall on
+ *  an unscaled drawing reads as "12 000 m" — which is what the user
+ *  was seeing. Falls back to 1.0 for "unitless" / missing, which keeps
+ *  the historical "DXF units are metres" assumption intact for files
+ *  that genuinely have no header. */
+export function unitFactorToMetres(units?: string | null): number {
+  switch ((units ?? '').toLowerCase()) {
+    case 'mm':
+      return 0.001;
+    case 'cm':
+      return 0.01;
+    case 'm':
+      return 1;
+    case 'km':
+      return 1000;
+    case 'inches':
+    case 'in':
+      return 0.0254;
+    case 'feet':
+    case 'ft':
+      return 0.3048;
+    case 'miles':
+      return 1609.344;
+    default:
+      return 1;
+  }
+}
+
 /** Area of a polygon defined by ordered vertices (Shoelace formula). */
 export function calculateArea(points: { x: number; y: number }[]): number {
   if (points.length < 3) return 0;

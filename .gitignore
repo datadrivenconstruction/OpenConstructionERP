@@ -50,6 +50,19 @@ frontend/e2e-results/
 frontend/e2e/v1.9/.auth-token.txt
 frontend/e2e/v1.9/.auth-state.json
 *.trace.zip
+frontend/video-output/
+frontend/playwright.video.config.ts
+frontend/e2e/_*.spec.ts
+frontend/e2e/*-diagnostic.spec.ts
+
+# Dev / debug artefacts
+backend/audit_output.txt
+backend/data/bim_samples/
+backend/app/scripts/seed_demo_v*.py
+backend/app/scripts/seed_*school*.py
+backend/app/scripts/seed_*technical*.py
+backend/app/scripts/audit_*.py
+backend/app/scripts/demo_seed_issues.md
 
 # Build
 *.tar.gz
@@ -77,9 +90,14 @@ frontend/debug-bim/
 .claude/tmp/
 .claude/cache/
 .claude/projects/
+.claude/worktrees/
+.claude/scheduled_tasks.lock
 *.claude-session
 .mcp.json
 .playwright-mcp/
+
+# TS incremental build cache
+**/tsconfig.tsbuildinfo
 
 # QA / Dev artifacts
 screenshots/

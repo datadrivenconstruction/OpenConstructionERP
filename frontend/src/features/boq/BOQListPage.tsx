@@ -7,7 +7,7 @@ import {
   Search, ArrowUpDown, ChevronDown, GitCompareArrows, X, Loader2,
   ShieldCheck, Wallet,
 } from 'lucide-react';
-import { Card, Badge, EmptyState, Skeleton, Button, Breadcrumb } from '@/shared/ui';
+import { Card, Badge, EmptyState, Skeleton, Button, Breadcrumb, FileTypeChips } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
@@ -395,6 +395,12 @@ export function BOQListPage() {
     staleTime: 5 * 60_000,
   });
 
+  const { data: fileTypesByProject } = useQuery({
+    queryKey: ['projects-file-types'],
+    queryFn: () => apiGet<Record<string, string[]>>('/v1/documents/file-types-by-project/'),
+    staleTime: 5 * 60_000,
+  });
+
   const { data: allBoqs, isLoading: boqLoading } = useQuery({
     queryKey: ['all-boqs', projects?.map((p) => p.id).join(',')],
     queryFn: async () => {
@@ -778,8 +784,12 @@ export function BOQListPage() {
                     <Badge variant={statusVariant(boq.status)} size="sm" dot>{boq.status}</Badge>
                     {isCollabEnabled && <PresenceAvatars boqId={boq.id} />}
                   </div>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs text-content-tertiary">
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-content-tertiary">
                     <span className="truncate">{boq.projectName}</span>
+                    <FileTypeChips
+                      fileTypes={fileTypesByProject?.[boq.project_id]}
+                      size="xs"
+                    />
                     <span>·</span>
                     <span className="tabular-nums">{boq.positionCount} {t('boq.positions_short', { defaultValue: 'pos.' })}</span>
                   </div>

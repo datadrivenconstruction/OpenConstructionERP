@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from starlette.requests import Request
 
 
-def client_identifier(request: "Request") -> str:
+def client_identifier(request: Request) -> str:
     """Resolve the best available client identifier for rate-limiting buckets.
 
     Prefers the ``X-Forwarded-For`` header when present (first entry — the

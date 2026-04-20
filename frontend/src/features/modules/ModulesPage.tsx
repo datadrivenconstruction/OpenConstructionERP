@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Search,
@@ -185,15 +185,27 @@ export function ModulesPage() {
       />
 
       {/* Header */}
-      <div className="mb-6 animate-card-in">
-        <h1 className="text-2xl font-bold text-content-primary">
-          {t('modules.page_title', { defaultValue: 'Modules & Marketplace' })}
-        </h1>
-        <p className="mt-1 text-sm text-content-secondary">
-          {t('modules.page_subtitle', {
-            defaultValue: 'Manage your company profile, data packages, and system modules.',
+      <div className="mb-6 animate-card-in flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">
+            {t('modules.page_title', { defaultValue: 'Modules & Marketplace' })}
+          </h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {t('modules.page_subtitle', {
+              defaultValue: 'Manage your company profile, data packages, and system modules.',
+            })}
+          </p>
+        </div>
+        <Link
+          to="/modules/developer-guide"
+          className="inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-oe-blue/30 bg-oe-blue/5 text-xs font-medium text-oe-blue hover:bg-oe-blue/10 hover:border-oe-blue/50 transition-colors shrink-0"
+          title={t('modules.dev_guide_hint', {
+            defaultValue: 'Learn how to build your own module',
           })}
-        </p>
+        >
+          <Info size={14} />
+          {t('modules.dev_guide', { defaultValue: 'Build a module — developer guide' })}
+        </Link>
       </div>
 
       {/* Tab bar */}

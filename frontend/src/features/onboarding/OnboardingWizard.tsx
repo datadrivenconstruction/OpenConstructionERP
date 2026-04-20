@@ -445,7 +445,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
                       ? 'bg-oe-blue text-white shadow-sm'
                       : here
                         ? 'bg-white dark:bg-surface-elevated text-oe-blue ring-2 ring-oe-blue shadow-[0_0_0_4px_rgba(37,99,235,0.18)] scale-110'
-                        : 'bg-surface-secondary text-content-tertiary border border-border-light',
+                        : 'bg-surface-secondary text-content-tertiary',
                   )}
                 >
                   {done ? <Check size={13} strokeWidth={3} /> : i + 1}
@@ -557,10 +557,10 @@ function StepWelcome({
                 onClick={() => handleSelect(lang.code)}
                 className={clsx(
                   'relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-start',
-                  'border transition-all duration-normal ease-oe',
+                  'backdrop-blur-md transition-all duration-normal ease-oe',
                   isSelected
-                    ? 'border-oe-blue bg-oe-blue-subtle/50 ring-2 ring-oe-blue/25 shadow-sm'
-                    : 'border-border-light bg-surface-elevated/80 hover:border-oe-blue/60 hover:bg-oe-blue-subtle/20 hover:-translate-y-0.5 hover:shadow-sm active:scale-[0.98]',
+                    ? 'bg-oe-blue-subtle/70 ring-2 ring-oe-blue/50 shadow-sm shadow-oe-blue/15'
+                    : 'bg-surface-elevated/50 ring-1 ring-white/50 dark:ring-white/10 shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/30 hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/[0.06] active:scale-[0.98]',
                 )}
               >
                 <CountryFlag code={lang.country} size={24} className="shrink-0" />
@@ -591,12 +591,6 @@ function StepWelcome({
       >
         {t('onboarding.get_started', { defaultValue: 'Get Started' })}
       </Button>
-
-      <p className="mt-2 text-xs text-content-tertiary">
-        {t('onboarding.welcome_hint', {
-          defaultValue: 'Free and open source. No credit card required.',
-        })}
-      </p>
     </div>
   );
 }
@@ -625,27 +619,27 @@ function StepStartChoice({
         })}
       </p>
 
-      <div className="mt-5 w-full max-w-lg grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="mt-10 w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-7">
         {/* Quick Start card */}
         <button
           onClick={onQuickStart}
           className={clsx(
-            'group relative flex flex-col items-start rounded-2xl p-4 text-left',
-            'border-2 border-border-light bg-surface-elevated',
-            'hover:border-oe-blue hover:bg-oe-blue-subtle/20 hover:shadow-lg hover:shadow-oe-blue/5',
+            'group relative flex flex-col items-start rounded-3xl p-10 text-left min-h-[360px]',
+            'bg-surface-elevated/70 backdrop-blur-md shadow-sm shadow-black/[0.04]',
+            'hover:bg-oe-blue-subtle/30 hover:shadow-2xl hover:shadow-oe-blue/10 hover:-translate-y-1',
             'transition-all duration-300 ease-oe active:scale-[0.98]',
           )}
         >
-          <Badge variant="blue" size="sm" className="mb-2">
+          <Badge variant="blue" size="sm" className="mb-4">
             {t('onboarding.recommended', { defaultValue: 'Recommended' })}
           </Badge>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue mb-2 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
-            <Sparkles size={20} />
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue mb-6 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Sparkles size={30} />
           </div>
-          <h3 className="text-base font-bold text-content-primary">
+          <h3 className="text-2xl font-bold text-content-primary">
             {t('onboarding.quick_start', { defaultValue: 'Quick Start' })}
           </h3>
-          <p className="mt-1 text-xs text-content-secondary leading-relaxed">
+          <p className="mt-3 text-base text-content-secondary leading-relaxed">
             {t('onboarding.quick_start_desc', {
               defaultValue: 'All essential modules pre-activated. Start working immediately.',
             })}
@@ -656,20 +650,20 @@ function StepStartChoice({
         <button
           onClick={onChooseProfile}
           className={clsx(
-            'group relative flex flex-col items-start rounded-2xl p-4 text-left',
-            'border-2 border-border-light bg-surface-elevated',
-            'hover:border-oe-blue hover:bg-oe-blue-subtle/20 hover:shadow-lg hover:shadow-oe-blue/5',
+            'group relative flex flex-col items-start rounded-3xl p-10 text-left min-h-[360px]',
+            'bg-surface-elevated/70 backdrop-blur-md shadow-sm shadow-black/[0.04]',
+            'hover:bg-oe-blue-subtle/30 hover:shadow-2xl hover:shadow-oe-blue/10 hover:-translate-y-1',
             'transition-all duration-300 ease-oe active:scale-[0.98]',
           )}
         >
-          <div className="h-5 mb-2" aria-hidden />
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary mb-2 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
-            <Settings2 size={20} />
+          <div className="h-[24px] mb-4" aria-hidden />
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-secondary text-content-secondary mb-6 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Settings2 size={30} />
           </div>
-          <h3 className="text-base font-bold text-content-primary">
+          <h3 className="text-2xl font-bold text-content-primary">
             {t('onboarding.choose_profile', { defaultValue: 'Choose Your Profile' })}
           </h3>
-          <p className="mt-1 text-xs text-content-secondary leading-relaxed">
+          <p className="mt-3 text-base text-content-secondary leading-relaxed">
             {t('onboarding.choose_profile_desc', {
               defaultValue: 'Select your role and customize which modules you need.',
             })}
@@ -736,10 +730,10 @@ function StepCompanyProfile({
               onClick={() => handleSelect(preset.key)}
               className={clsx(
                 'group relative flex flex-col items-start rounded-2xl p-5 text-left',
-                'border-2 transition-all duration-300 ease-oe',
+                'transition-all duration-300 ease-oe',
                 isSelected
-                  ? 'border-oe-blue bg-oe-blue-subtle/30 ring-4 ring-oe-blue/10 shadow-md shadow-oe-blue/5'
-                  : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary hover:shadow-sm active:scale-[0.99]',
+                  ? 'bg-oe-blue-subtle/40 ring-2 ring-oe-blue/45 shadow-lg shadow-oe-blue/10'
+                  : 'bg-surface-elevated shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/15 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]',
               )}
             >
               <div className="flex items-center gap-2 mb-3">
@@ -808,10 +802,10 @@ function StepCompanyProfile({
             onClick={() => handleSelect('full_enterprise')}
             className={clsx(
               'mt-3 w-full max-w-2xl group relative flex items-center gap-4 rounded-2xl p-5 text-left',
-              'border-2 transition-all duration-300 ease-oe',
+              'transition-all duration-300 ease-oe',
               isSelected
-                ? 'border-oe-blue bg-oe-blue-subtle/30 ring-4 ring-oe-blue/10 shadow-md shadow-oe-blue/5'
-                : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary hover:shadow-sm active:scale-[0.99]',
+                ? 'bg-oe-blue-subtle/40 ring-2 ring-oe-blue/45 shadow-lg shadow-oe-blue/10'
+                : 'bg-surface-elevated shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/15 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]',
             )}
           >
             <div
@@ -924,7 +918,7 @@ function StepModuleConfig({
 
       {/* AI Tools toggle */}
       <div className="mt-4 w-full max-w-2xl">
-        <div className="flex items-center justify-between rounded-xl border border-border-light bg-surface-elevated px-4 py-3">
+        <div className="flex items-center justify-between rounded-xl bg-surface-elevated shadow-sm shadow-black/[0.04] px-4 py-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 dark:bg-violet-950/30 shrink-0">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-violet-600"><path d="M12 2a4 4 0 0 1 4 4v1a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V6a4 4 0 0 1 4-4Z"/><path d="M16 11v1a4 4 0 1 1-8 0v-1"/><path d="M12 19v3"/><path d="M8 22h8"/></svg>
@@ -978,14 +972,14 @@ function StepModuleConfig({
               <h3 className="text-xs font-bold text-content-tertiary uppercase tracking-wider mb-1 px-4">
                 {t(group.labelKey, { defaultValue: group.id })}
               </h3>
-              <div className="rounded-xl border border-border-light bg-surface-elevated overflow-hidden">
+              <div className="rounded-xl bg-surface-elevated shadow-sm shadow-black/[0.04] overflow-hidden divide-y divide-border-light/40">
                 {groupModules.map((mod) => {
                   const isCore = !!mod.core;
                   const isEnabled = isCore || enabledModules.has(mod.key);
                   return (
                     <div
                       key={mod.key}
-                      className="flex items-center justify-between py-2.5 px-4 border-b border-border-light last:border-b-0 gap-3 overflow-hidden"
+                      className="flex items-center justify-between py-2.5 px-4 gap-3 overflow-hidden"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
@@ -1304,7 +1298,7 @@ function StepDataSetup({
 
       <div className="mt-6 w-full max-w-2xl space-y-4">
         {/* Card 1: Cost Database — full width */}
-        <div className="rounded-2xl border border-border-light bg-surface-elevated p-6">
+        <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
               <Database size={20} />
@@ -1329,10 +1323,10 @@ function StepDataSetup({
                   onClick={() => !loadingDb && !loadedDb && setSelectedRegion(db.id)}
                   disabled={loadingDb || !!loadedDb}
                   className={clsx(
-                    'flex items-center gap-2 rounded-xl px-3 py-2 text-left border transition-all duration-200',
+                    'flex items-center gap-2 rounded-xl px-3 py-2 text-left transition-all duration-200',
                     isSelected
-                      ? 'border-oe-blue bg-oe-blue-subtle/40 ring-2 ring-oe-blue/20 shadow-sm'
-                      : 'border-border-light bg-surface-primary hover:border-border hover:bg-surface-secondary',
+                      ? 'bg-oe-blue-subtle/50 ring-2 ring-oe-blue/40 shadow-sm'
+                      : 'bg-surface-secondary/70 hover:bg-surface-secondary hover:shadow-sm',
                     (loadingDb || !!loadedDb) && 'opacity-60 cursor-not-allowed',
                   )}
                 >
@@ -1379,7 +1373,7 @@ function StepDataSetup({
         </div>
 
         {/* Card 2: Demo Project — full width, simple toggle */}
-        <div className="rounded-2xl border border-border-light bg-surface-elevated p-6">
+        <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
@@ -1417,7 +1411,7 @@ function StepDataSetup({
         </div>
 
         {/* Card 3: AI Provider — collapsible */}
-        <div className="rounded-2xl border border-border-light bg-surface-elevated">
+        <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04]">
           <button
             type="button"
             onClick={() => setAiExpanded(!aiExpanded)}
@@ -1805,7 +1799,7 @@ export function OnboardingWizard() {
         {/* Fine grid overlay — 1px lines every 40px, 4% opacity. Works in
             both light and dark themes. */}
         <div
-          className="absolute inset-0 opacity-[0.045] dark:opacity-[0.07]"
+          className="absolute inset-0 opacity-[0.02] dark:opacity-[0.035]"
           style={{
             backgroundImage:
               'linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)',
@@ -1815,9 +1809,9 @@ export function OnboardingWizard() {
       </div>
 
       {/* ── Sticky glass header with progress + skip ────────────────── */}
-      <div className="sticky top-0 z-10 border-b border-border-light/60 bg-surface-primary/75 backdrop-blur-xl">
-        <div className="max-w-3xl mx-auto w-full px-6 sm:px-8 py-2.5">
-          <div className="flex items-center justify-between gap-4 mb-2">
+      <div className="sticky top-0 z-10 bg-surface-primary/85 backdrop-blur-xl">
+        <div className="max-w-3xl mx-auto w-full px-6 sm:px-8 py-4">
+          <div className="flex items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2 shrink-0">
               <Logo size="sm" />
               <span className="text-[11px] font-semibold text-content-tertiary uppercase tracking-wider hidden sm:inline">
@@ -1852,15 +1846,8 @@ export function OnboardingWizard() {
           on ~768-viewport laptops. Previously ``pt-10 pb-24`` + card
           ``py-8 sm:py-12`` added ~150px of shell chrome alone. */}
       <div className="relative flex flex-1 items-start justify-center px-4 sm:px-6 pt-4 pb-8">
-        <div className="w-full max-w-[720px]">
-          <div
-            className={clsx(
-              'rounded-2xl border border-border-light/70 bg-surface-elevated/90',
-              'shadow-[0_24px_60px_-20px_rgba(15,23,42,0.18)] dark:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.6)]',
-              'backdrop-blur-md',
-              'px-6 sm:px-8 py-5 sm:py-7',
-            )}
-          >
+        <div className="w-full max-w-[960px]">
+          <div className="px-6 sm:px-10 py-6 sm:py-8">
             <StepTransition stepKey={step}>
               {step === 0 && (
                 <StepWelcome onNext={goNext} onLanguageChange={handleLanguageChange} />

@@ -1,6 +1,9 @@
 export { Button } from './Button';
 export type { ButtonProps } from './Button';
 
+export { FileTypeChips } from './FileTypeChips';
+export type { FileTypeChipsProps } from './FileTypeChips';
+
 export { AIDisclaimerBanner } from './AIDisclaimerBanner';
 
 export { Input } from './Input';

@@ -145,16 +145,31 @@ async def test_ai_connection(
             detail=f"Unknown provider: {provider}. Use one of: {', '.join(_VALID_PROVIDERS)}.",
         )
 
+    from app.core.crypto import decrypt_secret
+
     uid = uuid.UUID(user_id)
     settings = await service.settings_repo.get_by_user_id(uid)
 
-    # Resolve the API key for the requested provider
+    # Resolve the API key for the requested provider. Keys are stored
+    # Fernet-encrypted — passing the ciphertext straight to the provider
+    # triggers a 401 ("AI API key is invalid or expired") even for a
+    # fresh, valid key the user just pasted.
     key_attr = f"{provider}_api_key"
-    api_key = getattr(settings, key_attr, None) if settings else None
-    if not api_key:
+    raw = getattr(settings, key_attr, None) if settings else None
+    if not raw:
         return {
             "success": False,
             "message": f"No API key configured for {provider}. Please save your key first.",
+            "latency_ms": None,
+        }
+    api_key = decrypt_secret(raw)
+    if not api_key:
+        return {
+            "success": False,
+            "message": (
+                f"Stored {provider} key could not be decrypted — the backend encryption key "
+                "has rotated since the key was saved. Please re-enter and save it in Settings."
+            ),
             "latency_ms": None,
         }
 

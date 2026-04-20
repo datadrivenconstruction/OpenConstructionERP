@@ -51,6 +51,17 @@ class DDCFingerprintMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         response.headers["X-Powered-By"] = "OpenConstructionERP"
         response.headers["X-DDC-Engine"] = "CWICR/1.0"
+        # Authorship markers — always present, production-safe.
+        # Useful when investigating an unauthorised deployment: a
+        # `curl -I` of any endpoint will surface the DDC origin and
+        # author e-mail without requiring source-code access.
+        response.headers["X-DDC-Origin"] = (
+            "DataDrivenConstruction/OpenConstructionERP/CWICR"
+        )
+        response.headers["X-DDC-Author"] = (
+            "Artem Boiko <info@datadrivenconstruction.io>"
+        )
+        response.headers["X-DDC-License"] = "AGPL-3.0-or-later · DDC-CWICR-OE-2026"
         if not self._production:
             response.headers["X-DDC-Build"] = _INSTANCE_HASH
             response.headers["Server-Timing"] = (

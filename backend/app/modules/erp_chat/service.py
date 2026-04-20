@@ -4,6 +4,7 @@ Supports Anthropic and OpenAI APIs with tool-calling (function calling).
 Other providers fall back to plain text via the shared ai_client.call_ai().
 """
 
+import asyncio
 import json
 import logging
 import uuid
@@ -94,14 +95,18 @@ class ERPChatService:
             if chat_session:
                 return chat_session
 
-        # Create new session
+        # Create new session. Wrap flush() in asyncio.shield() — when the
+        # caller is an SSE streaming endpoint, Starlette's BaseHTTPMiddleware
+        # can cancel the request task between chunks and kill the in-flight
+        # INSERT mid-flush. shield() keeps the DB write atomic from the
+        # engine's perspective.
         chat_session = ChatSession(
             user_id=uuid.UUID(user_id),
             project_id=project_id,
             title="New Chat",
         )
         self.session.add(chat_session)
-        await self.session.flush()
+        await asyncio.shield(self.session.flush())
         return chat_session
 
     async def list_sessions(self, user_id: str, limit: int = 20) -> tuple[list[ChatSession], int]:
@@ -293,15 +298,18 @@ class ERPChatService:
                 for i in range(0, len(assistant_text), chunk_size):
                     yield _sse("text", {"content": assistant_text[i : i + chunk_size]})
 
-            # 6. Persist messages
-            await self._persist_messages(
-                chat_session,
-                user_id,
-                request.message,
-                assistant_text,
-                all_tool_calls,
-                all_tool_results,
-                total_tokens,
+            # 6. Persist messages — shield so middleware cancellation can't
+            # tear down the DB write mid-flush.
+            await asyncio.shield(
+                self._persist_messages(
+                    chat_session,
+                    user_id,
+                    request.message,
+                    assistant_text,
+                    all_tool_calls,
+                    all_tool_results,
+                    total_tokens,
+                )
             )
 
             # Auto-title from first user message
@@ -310,7 +318,7 @@ class ERPChatService:
                 if len(request.message) > 80:
                     title += "..."
                 chat_session.title = title
-                await self.session.flush()
+                await asyncio.shield(self.session.flush())
 
             yield _sse("done", {"session_id": str(chat_session.id), "tokens": total_tokens})
 
@@ -593,7 +601,7 @@ class ERPChatService:
                 tokens_used=tokens_used,
             )
             self.session.add(assistant_msg)
-            await self.session.flush()
+            await asyncio.shield(self.session.flush())
 
             # Publish standardized events so the vector indexer can react.
             # Best-effort — failures must never break the chat persistence

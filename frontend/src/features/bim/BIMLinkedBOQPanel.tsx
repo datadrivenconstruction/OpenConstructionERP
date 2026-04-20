@@ -1,11 +1,14 @@
 import { useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, X, Link2, Hash, ExternalLink } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Search, X, Link2, Hash, ExternalLink, Loader2 } from 'lucide-react';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import type { BIMBOQLinkBrief } from '@/shared/ui/BIMViewer/ElementManager';
+import { fetchBIMModelBOQLinks } from './api';
 
 interface AggregatedPosition {
   boq_position_id: string;
+  boq_id: string;
   ordinal: string | null;
   description: string | null;
   quantity: number | null;
@@ -18,6 +21,7 @@ interface AggregatedPosition {
 }
 
 interface BIMLinkedBOQPanelProps {
+  modelId: string;
   elements: BIMElementData[];
   onHighlightElements: (ids: string[]) => void;
   onClose: () => void;
@@ -25,6 +29,7 @@ interface BIMLinkedBOQPanelProps {
 }
 
 export default function BIMLinkedBOQPanel({
+  modelId,
   elements,
   onHighlightElements,
   onClose,
@@ -34,7 +39,60 @@ export default function BIMLinkedBOQPanel({
   const [search, setSearch] = useState('');
   const [activePositionId, setActivePositionId] = useState<string | null>(null);
 
-  const positions = useMemo(() => {
+  // Viewer loads elements in skeleton mode (no boq_links) for performance
+  // on large models, so the panel fetches aggregated links separately.
+  const linksQuery = useQuery({
+    queryKey: ['bim-model-boq-links', modelId],
+    queryFn: () => fetchBIMModelBOQLinks(modelId),
+    enabled: !!modelId,
+    staleTime: 30_000,
+  });
+
+  // Fallback deep-link BOQ id when none was supplied by the parent —
+  // derived from the aggregate so "Open in BOQ" keeps working.
+  const derivedBoqId = useMemo(() => {
+    if (boqId) return boqId;
+    const first = linksQuery.data?.items?.[0];
+    return first?.boq_id ?? null;
+  }, [boqId, linksQuery.data]);
+
+  const positions = useMemo<AggregatedPosition[]>(() => {
+    // Prefer the aggregated endpoint (works in skeleton mode too).
+    if (linksQuery.data?.items && linksQuery.data.items.length > 0) {
+      // Merge duplicate (position, link_type) pairs from the backend's
+      // (position, link_type, confidence) grouping into a single row so
+      // the UI shows one entry per position.
+      const map = new Map<string, AggregatedPosition>();
+      for (const row of linksQuery.data.items) {
+        const existing = map.get(row.boq_position_id);
+        if (existing) {
+          for (const id of row.element_ids) {
+            if (!existing.elementIds.includes(id)) existing.elementIds.push(id);
+          }
+        } else {
+          map.set(row.boq_position_id, {
+            boq_position_id: row.boq_position_id,
+            boq_id: row.boq_id,
+            ordinal: row.boq_position_ordinal,
+            description: row.boq_position_description,
+            quantity: row.boq_position_quantity,
+            unit: row.boq_position_unit,
+            unit_rate: row.boq_position_unit_rate,
+            total: row.boq_position_total,
+            link_type: row.link_type as BIMBOQLinkBrief['link_type'],
+            confidence: row.confidence,
+            elementIds: [...row.element_ids],
+          });
+        }
+      }
+      return Array.from(map.values()).sort((a, b) => {
+        const oa = a.ordinal ?? '';
+        const ob = b.ordinal ?? '';
+        return oa.localeCompare(ob, undefined, { numeric: true });
+      });
+    }
+
+    // Fallback: derive from elements (works only in enriched mode).
     const map = new Map<string, AggregatedPosition>();
     for (const el of elements) {
       if (!el.boq_links) continue;
@@ -47,6 +105,7 @@ export default function BIMLinkedBOQPanel({
         } else {
           map.set(link.boq_position_id, {
             boq_position_id: link.boq_position_id,
+            boq_id: '',
             ordinal: link.boq_position_ordinal,
             description: link.boq_position_description,
             quantity: link.boq_position_quantity,
@@ -65,7 +124,7 @@ export default function BIMLinkedBOQPanel({
       const ob = b.ordinal ?? '';
       return oa.localeCompare(ob, undefined, { numeric: true });
     });
-  }, [elements]);
+  }, [elements, linksQuery.data]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return positions;
@@ -150,7 +209,14 @@ export default function BIMLinkedBOQPanel({
 
       {/* Position list */}
       <div className="flex-1 overflow-y-auto">
-        {filtered.length === 0 ? (
+        {linksQuery.isLoading && positions.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-32 text-content-quaternary">
+            <Loader2 size={20} className="mb-2 animate-spin opacity-60" />
+            <p className="text-xs">
+              {t('bim.linked_boq_loading', { defaultValue: 'Loading linked positions…' })}
+            </p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-content-quaternary">
             <Link2 size={24} className="mb-2 opacity-40" />
             <p className="text-xs">
@@ -209,9 +275,9 @@ export default function BIMLinkedBOQPanel({
                           {pos.total.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       )}
-                      {boqId && (
+                      {(derivedBoqId || pos.boq_id) && (
                         <a
-                          href={`/boq/${boqId}?highlight=${pos.boq_position_id}`}
+                          href={`/boq/${pos.boq_id || derivedBoqId}?highlight=${pos.boq_position_id}`}
                           onClick={(e) => e.stopPropagation()}
                           className="text-[9px] text-oe-blue hover:text-oe-blue/80 flex items-center gap-0.5"
                           title={t('bim.linked_boq_open_in_boq', { defaultValue: 'Open in BOQ' })}

@@ -1289,3 +1289,31 @@ tbody tr:nth-child(20) { animation-delay: 570ms; }
   --oe-dwg-grid-major: rgba(0, 0, 0, 0.18);
   --oe-dwg-vignette: rgba(0, 0, 0, 0.10);
 }
+
+/* ── MapLibre attribution: collapse by default on all viewport widths ───
+   MapLibre only applies compact mode below 640px by default. On wider
+   screens it prints the full attribution inline — visual noise on a
+   project page. Force compact shape at every width; user clicks the
+   "i" icon to reveal attribution. */
+.maplibregl-ctrl-attrib {
+  min-height: 24px !important;
+  padding: 2px 24px 2px 0 !important;
+}
+.maplibregl-ctrl-attrib:not(.maplibregl-compact-show) .maplibregl-ctrl-attrib-inner {
+  display: none !important;
+}
+.maplibregl-ctrl-attrib-button {
+  display: block !important;
+}
+
+/* ── BOQ grid: centre every column header by default ─────────────────── */
+.ag-theme-alpine .ag-header-cell.oe-header-centered .ag-header-cell-label,
+.ag-theme-alpine-dark .ag-header-cell.oe-header-centered .ag-header-cell-label,
+.ag-theme-quartz .ag-header-cell.oe-header-centered .ag-header-cell-label {
+  justify-content: center;
+  text-align: center;
+}
+/* Right-aligned columns keep their explicit alignment. */
+.ag-header-cell.ag-right-aligned-header .ag-header-cell-label {
+  justify-content: flex-end !important;
+}

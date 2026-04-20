@@ -783,8 +783,8 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
         # against DAE shapes.  This replaces the previous approach which
         # blindly trusted trimesh's scene-graph names.
         try:
-            import struct as _struct
             import json as _json
+            import struct as _struct
 
             element_bboxes, _element_to_shape = _dae_element_bboxes(dae_path)
             if element_bboxes:

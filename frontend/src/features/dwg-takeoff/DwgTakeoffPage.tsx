@@ -16,6 +16,7 @@ import {
   calculatePerimeter,
   getSegmentLengths,
   formatMeasurement,
+  unitFactorToMetres,
 } from './lib/measurement';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -181,9 +182,15 @@ function extractLayers(
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/** Convert a DxfEntity into the shared ElementInfoPopover payload shape. */
+/** Convert a DxfEntity into the shared ElementInfoPopover payload shape.
+ *
+ *  ``effectiveScale`` converts raw DXF units to real metres (combines the
+ *  DXF $INSUNITS factor with the user-picked paper scale). Without it the
+ *  popover shows raw coordinate numbers — e.g. ``3580.2 m`` for a 3.58 m
+ *  wall that is stored in a mm-unit file. */
 function toDWGElementPayload(
   entity: DxfEntity,
+  effectiveScale: number,
   opts?: {
     calculatePerimeter?: (verts: { x: number; y: number }[], closed: boolean) => number;
     calculateArea?: (verts: { x: number; y: number }[]) => number;
@@ -191,18 +198,20 @@ function toDWGElementPayload(
   },
 ): DWGElementPayload {
   const measurements: Record<string, { value: number; unit: string }> = {};
+  const s = effectiveScale;
+  const s2 = s * s;
 
   // Polyline measurements
   if (entity.type === 'LWPOLYLINE' && entity.vertices && entity.vertices.length >= 2) {
     const closed = !!entity.closed;
     if (opts?.calculatePerimeter) {
       measurements['Perimeter'] = {
-        value: opts.calculatePerimeter(entity.vertices, closed),
+        value: opts.calculatePerimeter(entity.vertices, closed) * s,
         unit: 'm',
       };
     }
     if (closed && opts?.calculateArea) {
-      const area = opts.calculateArea(entity.vertices);
+      const area = opts.calculateArea(entity.vertices) * s2;
       if (area > 0) {
         measurements['Area'] = { value: area, unit: 'm\u00B2' };
       }
@@ -216,27 +225,28 @@ function toDWGElementPayload(
   // Line length
   if (entity.type === 'LINE' && entity.start && entity.end && opts?.calculateDistance) {
     measurements['Length'] = {
-      value: opts.calculateDistance(entity.start, entity.end),
+      value: opts.calculateDistance(entity.start, entity.end) * s,
       unit: 'm',
     };
   }
 
   // Circle measurements
   if (entity.type === 'CIRCLE' && entity.radius != null) {
-    measurements['Radius'] = { value: entity.radius, unit: 'm' };
+    const r = entity.radius * s;
+    measurements['Radius'] = { value: r, unit: 'm' };
     measurements['Circumference'] = {
-      value: 2 * Math.PI * entity.radius,
+      value: 2 * Math.PI * r,
       unit: 'm',
     };
     measurements['Area'] = {
-      value: Math.PI * entity.radius ** 2,
+      value: Math.PI * r ** 2,
       unit: 'm\u00B2',
     };
   }
 
   // ARC radius
   if (entity.type === 'ARC' && entity.radius != null) {
-    measurements['Radius'] = { value: entity.radius, unit: 'm' };
+    measurements['Radius'] = { value: entity.radius * s, unit: 'm' };
   }
 
   // Extra properties
@@ -287,31 +297,39 @@ function computeEntityCentroid(entity: DxfEntity): { x: number; y: number } {
  * Derive the primary BOQ-relevant measurement from a DXF entity.
  * Returns the canonical backend unit (`m` / `m2`) and rounded value,
  * or null when the entity carries no measurable geometry.
+ *
+ * ``effectiveScale`` converts raw DXF units to real metres. Combines
+ * the DXF header's $INSUNITS (mm/cm/m/…) with the user-chosen paper
+ * scale. Callers must pass this so the value that gets pushed to BOQ
+ * matches what the user sees on the canvas.
  */
 function extractEntityMeasurement(
   entity: DxfEntity,
+  effectiveScale: number,
 ): { value: number; unit: string; kind: 'length' | 'area' | 'radius' } | null {
+  const s = effectiveScale;
+  const s2 = s * s;
   if (entity.type === 'LWPOLYLINE' && entity.vertices && entity.vertices.length >= 2) {
     const closed = !!entity.closed;
     if (closed) {
-      const area = calculateArea(entity.vertices);
+      const area = calculateArea(entity.vertices) * s2;
       if (area > 0) {
         return { value: Math.round(area * 100) / 100, unit: 'm2', kind: 'area' };
       }
     }
-    const perimeter = calculatePerimeter(entity.vertices, closed);
+    const perimeter = calculatePerimeter(entity.vertices, closed) * s;
     return { value: Math.round(perimeter * 100) / 100, unit: 'm', kind: 'length' };
   }
   if (entity.type === 'LINE' && entity.start && entity.end) {
-    const len = calculateDistance(entity.start, entity.end);
+    const len = calculateDistance(entity.start, entity.end) * s;
     return { value: Math.round(len * 100) / 100, unit: 'm', kind: 'length' };
   }
   if (entity.type === 'CIRCLE' && entity.radius != null) {
-    const area = Math.PI * entity.radius ** 2;
+    const area = Math.PI * (entity.radius * s) ** 2;
     return { value: Math.round(area * 100) / 100, unit: 'm2', kind: 'area' };
   }
   if (entity.type === 'ARC' && entity.radius != null) {
-    return { value: Math.round(entity.radius * 100) / 100, unit: 'm', kind: 'radius' };
+    return { value: Math.round(entity.radius * s * 100) / 100, unit: 'm', kind: 'radius' };
   }
   return null;
 }
@@ -627,6 +645,15 @@ export function DwgTakeoffPage() {
     queryFn: () => fetchDrawings(projectId),
     enabled: !!projectId,
   });
+
+  // Raw DXF unit → real metres factor. Combined with ``drawingScale`` (paper
+  // ratio) produces ``effectiveScale``, the single number every measurement
+  // multiplies by. Without it mm-unit files read as "12 000 m walls".
+  const unitFactor = useMemo(() => {
+    const d = drawings.find((x) => x.id === selectedDrawingId);
+    return unitFactorToMetres(d?.units ?? null);
+  }, [drawings, selectedDrawingId]);
+  const effectiveScale = drawingScale * unitFactor;
 
   const { data: entities = [], isLoading: loadingEntities } = useQuery({
     queryKey: ['dwg-entities', selectedDrawingId],
@@ -1471,7 +1498,7 @@ export function DwgTakeoffPage() {
     if (!entity || !selectedDrawingId) return;
     setLinkingInProgress(true);
     try {
-      const measurement = extractEntityMeasurement(entity);
+      const measurement = extractEntityMeasurement(entity, effectiveScale);
       const annotationId = await ensureAnnotationForEntity(entity, measurement);
 
       if (annotationId) {
@@ -1515,7 +1542,7 @@ export function DwgTakeoffPage() {
     } finally {
       setLinkingInProgress(false);
     }
-  }, [entities, selectedDrawingId, ensureAnnotationForEntity, queryClient, addToast, t]);
+  }, [entities, selectedDrawingId, effectiveScale, ensureAnnotationForEntity, queryClient, addToast, t]);
 
   const handleCreateAndLink = useCallback(async (entityId: string) => {
     const entity = entities.find((e) => e.id === entityId);
@@ -1539,7 +1566,7 @@ export function DwgTakeoffPage() {
       const nextNum = (dwgOrdinals.length ? Math.max(...dwgOrdinals) : 0) + 1;
       const ordinal = `DW.${String(nextNum).padStart(3, '0')}`;
 
-      const measurement = extractEntityMeasurement(entity);
+      const measurement = extractEntityMeasurement(entity, effectiveScale);
       const qty = measurement?.value ?? 0;
       const unit = measurement?.unit ?? 'pcs';
       const description = t('dwg_takeoff.position_default_desc', {
@@ -1592,7 +1619,7 @@ export function DwgTakeoffPage() {
     } finally {
       setLinkingInProgress(false);
     }
-  }, [entities, linkPickerBoqId, linkBoqPositions, ensureAnnotationForEntity, selectedDrawingId, queryClient, addToast, t]);
+  }, [entities, linkPickerBoqId, linkBoqPositions, effectiveScale, ensureAnnotationForEntity, selectedDrawingId, queryClient, addToast, t]);
 
   /* ── RFC 11: per-entity hide / isolate / group handlers ───────────── */
 
@@ -1937,7 +1964,7 @@ export function DwgTakeoffPage() {
                 selectedEntityIds={selectedEntityIds}
                 hiddenEntityIds={hiddenEntityIds}
                 selectedAnnotationId={selectedAnnotationId}
-                drawingScale={drawingScale}
+                drawingScale={effectiveScale}
                 onSelectEntity={handleSelectEntity}
                 onSelectAnnotation={setSelectedAnnotationId}
                 onEntityContextMenu={handleEntityContextMenu}
@@ -1995,7 +2022,7 @@ export function DwgTakeoffPage() {
               {selectedEntity && entityPopup && activeTool === 'select'
                 && selectedEntityIds.size === 1 && (
                 <ElementInfoPopover
-                  element={toDWGElementPayload(selectedEntity, {
+                  element={toDWGElementPayload(selectedEntity, effectiveScale, {
                     calculatePerimeter,
                     calculateArea,
                     calculateDistance,
@@ -2094,7 +2121,7 @@ export function DwgTakeoffPage() {
                   picker pattern but slides in from the right edge of the
                   canvas. */}
               {linkingEntityId && selectedEntity && (() => {
-                const measurement = extractEntityMeasurement(selectedEntity);
+                const measurement = extractEntityMeasurement(selectedEntity, effectiveScale);
                 const alreadyLinked = annotations.find(
                   (a) => a.type === 'text_pin'
                     && (a.metadata as Record<string, unknown> | undefined)?.['dwg_entity_id']
@@ -2765,9 +2792,9 @@ export function DwgTakeoffPage() {
                         // Apply current drawing scale on display so the right-panel
                         // numbers stay in sync with the canvas labels when the user
                         // picks a different ratio via the Scale tab.
-                        const perimeter = calculatePerimeter(verts, closed) * drawingScale;
+                        const perimeter = calculatePerimeter(verts, closed) * effectiveScale;
                         const area = closed
-                          ? calculateArea(verts) * drawingScale * drawingScale
+                          ? calculateArea(verts) * effectiveScale * effectiveScale
                           : 0;
                         return (
                           <div className="mt-3 space-y-2">
@@ -2816,7 +2843,7 @@ export function DwgTakeoffPage() {
                                       #{i + 1}
                                     </span>
                                     <span className="font-mono font-medium text-[11px]">
-                                      {formatMeasurement(len * drawingScale, 'm')}
+                                      {formatMeasurement(len * effectiveScale, 'm')}
                                     </span>
                                   </div>
                                 ))}
@@ -2844,6 +2871,8 @@ export function DwgTakeoffPage() {
                   calibrationPixels={calibrationPixels}
                   onStartCalibration={handleStartCalibration}
                   onCancelCalibration={handleCancelCalibration}
+                  dxfUnits={drawings.find((d) => d.id === selectedDrawingId)?.units ?? null}
+                  effectiveScale={effectiveScale}
                 />
               )}
 
@@ -3383,6 +3412,11 @@ interface ScaleTabProps {
   calibrationPixels: number | null;
   onStartCalibration: () => void;
   onCancelCalibration: () => void;
+  /** DXF $INSUNITS label ("mm", "cm", "m", ...) read from the drawing. */
+  dxfUnits?: string | null;
+  /** drawingScale × unit-factor — the multiplier actually applied to raw
+   *  DXF coordinates before they become display metres. */
+  effectiveScale: number;
 }
 
 function ScaleTab({
@@ -3394,6 +3428,8 @@ function ScaleTab({
   calibrationPixels,
   onStartCalibration,
   onCancelCalibration,
+  dxfUnits,
+  effectiveScale,
 }: ScaleTabProps) {
   const { t } = useTranslation();
   const isPreset = SCALE_PRESETS.some((p) => p.value === drawingScale);
@@ -3477,6 +3513,9 @@ function ScaleTab({
     );
   };
 
+  const unitLabel = (dxfUnits ?? '').toLowerCase();
+  const unitKnown = ['mm', 'cm', 'm', 'km', 'inches', 'in', 'feet', 'ft'].includes(unitLabel);
+
   return (
     <div className="flex flex-col gap-4" data-testid="dwg-scale-tab">
       <div className="flex items-center gap-1.5">
@@ -3484,6 +3523,27 @@ function ScaleTab({
         <h3 className="text-sm font-semibold text-foreground">
           {t('dwg_takeoff.scale_title', { defaultValue: 'Drawing scale' })}
         </h3>
+      </div>
+
+      {/* DXF native unit + effective multiplier — lets the user see why
+          measurements read the way they do. "unitless" DXFs are assumed
+          to be in metres (historical default). */}
+      <div
+        className={clsx(
+          'flex items-center justify-between rounded-md border px-2.5 py-1.5 text-[11px]',
+          unitKnown
+            ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300'
+            : 'border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-300',
+        )}
+        data-testid="dwg-scale-unit-info"
+      >
+        <span className="font-medium">
+          {t('dwg_takeoff.dxf_units', { defaultValue: 'DXF units' })}:{' '}
+          <span className="font-mono">{unitLabel || 'unitless'}</span>
+        </span>
+        <span className="font-mono">
+          × {effectiveScale.toPrecision(4)}
+        </span>
       </div>
 
       {/* Mode picker — 3 strategies */}

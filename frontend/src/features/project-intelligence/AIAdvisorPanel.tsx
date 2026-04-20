@@ -258,7 +258,7 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
                     : 'bg-surface-tertiary text-content-secondary mr-8'
                 )}
               >
-                <p className="whitespace-pre-wrap">{renderTaggedText(msg.text)}</p>
+                <div className="whitespace-pre-wrap">{renderTaggedText(msg.text)}</div>
               </div>
             ))}
             {chatLoading && (
