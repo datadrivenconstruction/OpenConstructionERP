@@ -48,7 +48,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useModuleStore } from '@/stores/useModuleStore';
-import { UpdatePopup } from '@/shared/ui/UpdateChecker';
+import { UpdateNotification } from '@/shared/ui/UpdateChecker';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useRecentStore } from '@/stores/useRecentStore';
 import { getModuleNavItems } from '@/modules/_registry';
@@ -388,10 +388,10 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           ))}
         </ul>
 
-        {/* Update notification — full-screen modal, self-renders when a new
-            upstream release is detected. Replaces the old compact sidebar card
-            so the popup is impossible to miss. */}
-        <UpdatePopup />
+        {/* Update notification — compact clickable card in the sidebar; the
+            whole card opens a full-screen modal with highlights + install
+            commands when the user clicks it. */}
+        <UpdateNotification />
 
         {/* Version + AGPL notice */}
         <div className="px-3 pb-2 text-center">
