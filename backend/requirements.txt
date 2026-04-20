@@ -125,7 +125,7 @@ onnxruntime==1.24.4
 openai==2.15.0
 opencv-python-headless==4.13.0.92
 openpyxl==3.1.5
-packaging==25.0
+packaging==26.1
 pandas==2.2.3
 paramiko==4.0.0
 passlib==1.7.4
