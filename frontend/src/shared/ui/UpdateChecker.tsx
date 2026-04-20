@@ -500,6 +500,306 @@ function HighlightGroup({
   );
 }
 
+/* ── Full-page popup variant ─────────────────────────────────────── */
+
+/**
+ * UpdatePopup — full-page modal shown automatically when a new upstream
+ * release is detected. Used by the main app chrome (sidebar) so the
+ * notification is impossible to miss, unlike the compact sidebar card
+ * that could be overlooked.
+ *
+ * The modal combines the three pieces the user needs in one view:
+ *  1. Version + grouped highlights (added / fixed / polished)
+ *  2. Copy-able install commands (pip / source)
+ *  3. A link to the full GitHub release notes
+ *
+ * Dismiss state is per-version in sessionStorage so every fresh app
+ * session re-shows the popup once, but the user can close it for the
+ * current tab.
+ */
+export function UpdatePopup() {
+  const { t } = useTranslation();
+  const [release, setRelease] = useState<ReleaseInfo | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const checkForUpdate = useCallback(async () => {
+    const cached = readCache();
+    if (cached) {
+      const dismissedVersion = sessionStorage.getItem(DISMISS_KEY);
+      if (
+        dismissedVersion !== cached.data.version &&
+        isNewer(cached.data.version, CURRENT_VERSION)
+      ) {
+        setRelease(cached.data);
+      }
+      return;
+    }
+    try {
+      const resp = await fetch(GITHUB_RELEASES_API);
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const latest = (data.tag_name ?? '').replace(/^v/, '');
+      if (!latest) return;
+      const info: ReleaseInfo = {
+        version: latest,
+        notes: data.body ?? '',
+        url:
+          data.html_url ??
+          'https://github.com/datadrivenconstruction/OpenConstructionERP/releases',
+        publishedAt: data.published_at ?? '',
+      };
+      writeCache(info);
+      if (!isNewer(latest, CURRENT_VERSION)) return;
+      const dismissedVersion = sessionStorage.getItem(DISMISS_KEY);
+      if (dismissedVersion === latest) return;
+      setRelease(info);
+    } catch {
+      /* silent */
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(checkForUpdate, FIRST_CHECK_DELAY_MS);
+    const interval = setInterval(checkForUpdate, CHECK_INTERVAL_MS);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
+  }, [checkForUpdate]);
+
+  const handleDismiss = useCallback(() => {
+    setDismissed(true);
+    if (release) sessionStorage.setItem(DISMISS_KEY, release.version);
+  }, [release]);
+
+  const copy = useCallback(async (key: string, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 1500);
+    } catch {
+      /* silent */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!release || dismissed) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleDismiss();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [release, dismissed, handleDismiss]);
+
+  const grouped = useMemo<GroupedHighlights | null>(
+    () => (release ? groupHighlights(release.notes) : null),
+    [release],
+  );
+
+  if (!release || dismissed) return null;
+
+  const relativeDate = release.publishedAt
+    ? new Date(release.publishedAt).toLocaleDateString()
+    : '';
+
+  const methods: Array<{ key: string; title: string; subtitle: string; cmd: string }> = [
+    {
+      key: 'pip',
+      title: t('update.method_pip', { defaultValue: 'pip / PyPI' }),
+      subtitle: t('update.method_pip_sub', { defaultValue: 'Recommended for Python installs' }),
+      cmd: 'pip install --upgrade openconstructionerp',
+    },
+    {
+      key: 'source',
+      title: t('update.method_source', { defaultValue: 'Source (git)' }),
+      subtitle: t('update.method_source_sub', {
+        defaultValue: 'For self-hosted installs from source',
+      }),
+      cmd: 'git pull && cd frontend && npm ci && npm run build && cd ../backend && pip install -e .',
+    },
+  ];
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-card-in"
+      onClick={handleDismiss}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="update-popup-title"
+    >
+      <div
+        className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl bg-surface-elevated border border-border shadow-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header — version + dismiss */}
+        <div className="relative px-6 py-5 bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 dark:from-sky-950/50 dark:via-blue-950/40 dark:to-cyan-950/30 border-b border-border">
+          <div className="flex items-start gap-3">
+            <div className="relative shrink-0">
+              <span className="absolute inset-0 rounded-xl bg-sky-500/30 animate-ping" aria-hidden="true" />
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-md shadow-blue-500/40">
+                <Sparkles size={20} strokeWidth={2.5} />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2
+                id="update-popup-title"
+                className="text-xl font-bold text-content-primary leading-tight"
+              >
+                {t('update.popup_title', {
+                  defaultValue: 'Update available — v{{version}}',
+                  version: release.version,
+                })}
+              </h2>
+              <div className="flex items-center gap-2 mt-1 text-sm text-content-secondary">
+                {relativeDate && <span>{relativeDate}</span>}
+                {grouped && grouped.totalCount > 0 && (
+                  <>
+                    {relativeDate && <span aria-hidden="true">·</span>}
+                    <span>
+                      {t('update.changes_count', {
+                        defaultValue: '{{count}} changes',
+                        count: grouped.totalCount,
+                      })}
+                    </span>
+                  </>
+                )}
+                <span aria-hidden="true">·</span>
+                <span className="tabular-nums">
+                  {t('update.currently_on', { defaultValue: 'you have v{{version}}', version: CURRENT_VERSION })}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={handleDismiss}
+              aria-label={t('common.close', { defaultValue: 'Close' })}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Body — highlights + install commands */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+          {/* Highlights */}
+          {grouped && grouped.totalCount > 0 && (
+            <section>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
+                {t('update.whats_new', { defaultValue: "What's new" })}
+              </h3>
+              <div className="space-y-4">
+                {grouped.added.length > 0 && (
+                  <HighlightGroup
+                    icon={<Plus size={10} />}
+                    iconClass="text-sky-600 dark:text-sky-300 bg-sky-500/20"
+                    label={t('update.group_new', { defaultValue: 'New' })}
+                    items={grouped.added.slice(0, 6)}
+                    hiddenCount={Math.max(0, grouped.added.length - 6)}
+                  />
+                )}
+                {grouped.fixed.length > 0 && (
+                  <HighlightGroup
+                    icon={<Wrench size={10} />}
+                    iconClass="text-blue-600 dark:text-blue-300 bg-blue-500/20"
+                    label={t('update.group_fixed', { defaultValue: 'Fixed' })}
+                    items={grouped.fixed.slice(0, 6)}
+                    hiddenCount={Math.max(0, grouped.fixed.length - 6)}
+                  />
+                )}
+                {grouped.polished.length > 0 && (
+                  <HighlightGroup
+                    icon={<Palette size={10} />}
+                    iconClass="text-cyan-600 dark:text-cyan-300 bg-cyan-500/20"
+                    label={t('update.group_polished', { defaultValue: 'Polished' })}
+                    items={grouped.polished.slice(0, 6)}
+                    hiddenCount={Math.max(0, grouped.polished.length - 6)}
+                  />
+                )}
+                {grouped.other.length > 0 &&
+                  grouped.added.length + grouped.fixed.length + grouped.polished.length === 0 && (
+                    <ul className="space-y-1">
+                      {grouped.other.slice(0, 6).map((line, i) => (
+                        <li
+                          key={i}
+                          className="flex items-start gap-2 text-sm leading-snug text-content-primary"
+                        >
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-sky-500/70" />
+                          <span>{line}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+              </div>
+            </section>
+          )}
+
+          {/* Install commands */}
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
+              {t('update.how_to_update', { defaultValue: 'How to update' })}
+            </h3>
+            <div className="space-y-3">
+              {methods.map((m) => (
+                <div
+                  key={m.key}
+                  className="rounded-xl border border-border bg-surface-base overflow-hidden"
+                >
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-border/60">
+                    <div>
+                      <div className="text-sm font-semibold text-content-primary">{m.title}</div>
+                      <div className="text-2xs text-content-tertiary">{m.subtitle}</div>
+                    </div>
+                    <button
+                      onClick={() => copy(m.key, m.cmd)}
+                      className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-2xs font-medium text-content-secondary hover:text-content-primary hover:bg-surface-secondary transition-colors"
+                      aria-label={t('common.copy', { defaultValue: 'Copy' })}
+                    >
+                      {copiedKey === m.key ? (
+                        <>
+                          <Check size={11} className="text-sky-500" />
+                          {t('common.copied', { defaultValue: 'Copied' })}
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={11} />
+                          {t('common.copy', { defaultValue: 'Copy' })}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <pre className="px-3 py-2.5 text-[11px] leading-relaxed font-mono text-content-primary bg-surface-secondary/40 overflow-x-auto whitespace-pre">
+                    {m.cmd}
+                  </pre>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Footer — release link + primary dismiss */}
+        <div className="px-6 py-4 bg-surface-secondary/40 border-t border-border flex items-center justify-between gap-3">
+          <a
+            href={release.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-sky-400 dark:hover:text-sky-300"
+          >
+            {t('update.release_notes', { defaultValue: 'Release notes' })}
+            <ExternalLink size={12} />
+          </a>
+          <button
+            onClick={handleDismiss}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-500/30 ring-1 ring-blue-500/20 transition-all"
+          >
+            {t('update.got_it', { defaultValue: 'Got it' })}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Subcomponent: install-instructions modal ────────────────────── */
 
 /**
