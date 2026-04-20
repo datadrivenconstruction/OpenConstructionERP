@@ -731,16 +731,20 @@ export default function AddToBOQModal({
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
 function buildAutoOrdinal(positions: Position[]): string {
-  // Pick the largest leading integer in any ordinal, +1. Fall back to "001".
-  let max = 0;
+  // BIM-sourced positions use a "BIM-NNN" prefix so they can't collide
+  // with MasterFormat division ordinals (03, 04, 32.07.1, …) or produce
+  // zero-padded ambiguities like "033" (which reads as both "division 33"
+  // and "number 33" and then collides on re-submit before the positions
+  // list refetches). Scan existing BIM-NNN entries and pick next.
+  let maxBim = 0;
   for (const p of positions) {
-    const m = /^(\d+)/.exec(p.ordinal || '');
+    const m = /^BIM-(\d+)$/i.exec((p.ordinal || '').trim());
     if (m) {
       const n = Number.parseInt(m[1]!, 10);
-      if (n > max) max = n;
+      if (n > maxBim) maxBim = n;
     }
   }
-  return String(max + 1).padStart(3, '0');
+  return `BIM-${String(maxBim + 1).padStart(3, '0')}`;
 }
 
 function Label({ children }: { children: React.ReactNode }) {

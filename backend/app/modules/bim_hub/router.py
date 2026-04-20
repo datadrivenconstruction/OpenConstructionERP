@@ -66,6 +66,8 @@ from app.modules.bim_hub.schemas import (
     BIMElementGroupUpdate,
     BIMElementListResponse,
     BIMElementResponse,
+    BIMModelBOQLinkAggregate,
+    BIMModelBOQLinksResponse,
     BIMModelCreate,
     BIMModelDiffResponse,
     BIMModelListResponse,
@@ -1334,8 +1336,10 @@ async def upload_cad_file(
     # like one of our accepted CAD/BIM containers.
     from app.core.file_signature import (
         ALLOWED_CAD_TYPES,
-        FileSignatureMismatch,
         SIGNATURE_BYTES_REQUIRED,
+        FileSignatureMismatch,
+    )
+    from app.core.file_signature import (
         require as _require_sig,
     )
 
@@ -1660,14 +1664,14 @@ async def get_model_geometry(
 
         _geo_bytes = await get_storage_backend().get(key)
         compressed = _gzip.compress(_geo_bytes, compresslevel=6)
-        from fastapi.responses import Response
-
         # RFC 5987 encoding so non-ASCII model names (Cyrillic / Arabic / …)
         # don't blow up the latin-1 HTTP header encoder. Without this the
         # whole geometry response 500's and the frontend spins on "loading"
         # forever. We send both a plain-ASCII `filename=` fallback and a
         # UTF-8-encoded `filename*=` for browsers that support it.
         from urllib.parse import quote as _qs
+
+        from fastapi.responses import Response
 
         display_name = f"{model.name}{ext}"
         ascii_fallback = display_name.encode("ascii", "replace").decode("ascii")
@@ -2023,8 +2027,9 @@ async def get_elements_by_ids(
     if not element_ids or len(element_ids) > 100:
         return BIMElementListResponse(items=[], total=0, offset=0, limit=0)
 
-    from app.modules.bim_hub.models import BIMElement
     from sqlalchemy import or_
+
+    from app.modules.bim_hub.models import BIMElement
 
     query = (
         select(BIMElement)
@@ -2147,6 +2152,30 @@ async def list_links(
     return BOQElementLinkListResponse(
         items=[BOQElementLinkResponse.model_validate(lnk) for lnk in items],
         total=len(items),
+    )
+
+
+@router.get(
+    "/models/{model_id}/boq-links/",
+    response_model=BIMModelBOQLinksResponse,
+)
+async def list_model_boq_links(
+    model_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
+    service: BIMHubService = Depends(_get_service),
+) -> BIMModelBOQLinksResponse:
+    """Aggregate BOQ links for every element in a model.
+
+    Used by the "Linked BOQ" side-panel in the BIM viewer: the viewer
+    itself loads elements in ``skeleton`` mode (no boq_links) for speed,
+    so the panel needs a dedicated roll-up across the whole model.
+    """
+    await _verify_model_access(service, model_id, user_id or "")
+    rows = await service.list_links_for_model(model_id)
+    return BIMModelBOQLinksResponse(
+        items=[BIMModelBOQLinkAggregate.model_validate(r) for r in rows],
+        total=len(rows),
     )
 
 

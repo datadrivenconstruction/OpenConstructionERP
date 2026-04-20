@@ -44,6 +44,7 @@ import {
   History,
   BrainCircuit,
   SlidersHorizontal,
+  Plus,
   type LucideIcon,
 } from 'lucide-react';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -106,9 +107,9 @@ const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
-      { labelKey: 'nav.dwg_takeoff', to: '/dwg-takeoff', icon: PencilRuler, badge: 'BETA' },
+      { labelKey: 'nav.dwg_takeoff', to: '/dwg-takeoff', icon: PencilRuler },
       { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties },
-      { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box, badge: 'BETA' },
+      { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box },
       { labelKey: 'nav.bim_rules', to: '/bim/rules?mode=requirements', icon: SlidersHorizontal, badge: 'BETA' },
     ],
   },
@@ -118,7 +119,7 @@ const navGroups: NavGroup[] = [
     defaultOpen: true,
     hideInSimple: true,
     items: [
-      { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
+      { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles, badge: 'BETA' },
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
       { labelKey: 'nav.estimation_dashboard', to: '/project-intelligence', icon: BrainCircuit, badge: 'BETA' },
       { labelKey: 'nav.erp_chat', to: '/chat', icon: MessageSquare, badge: 'BETA' },
@@ -347,6 +348,30 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             </NavGroupSection>
           );
         })}
+        {/* Add-a-module CTA — dashed-border tile with a plus icon. Sits at
+             the very end of the main nav groups so it reads as "keep going,
+             there's more — build your own". Navigates into the in-app
+             developer guide rather than to the marketplace, which gives
+             contributors a clearer first step. */}
+        <li className="px-3 pt-2 pb-3">
+          <NavLink
+            to="/modules/developer-guide"
+            onClick={onClose}
+            className="group flex items-center gap-2.5 rounded-lg border border-dashed border-oe-blue/40 bg-gradient-to-br from-oe-blue/5 via-transparent to-blue-50/40 dark:from-oe-blue/10 dark:via-transparent dark:to-slate-900/30 px-2.5 py-2 hover:border-oe-blue hover:from-oe-blue/10 hover:shadow-sm transition-all"
+          >
+            <span className="shrink-0 flex h-7 w-7 items-center justify-center rounded-md bg-oe-blue/10 text-oe-blue group-hover:bg-oe-blue group-hover:text-white transition-colors">
+              <Plus size={14} strokeWidth={2.5} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-xs font-semibold text-content-primary leading-tight">
+                {t('nav.add_module', { defaultValue: 'Add module' })}
+              </span>
+              <span className="block text-[10px] text-content-tertiary leading-tight mt-0.5 truncate">
+                {t('nav.add_module_hint', { defaultValue: 'Build your own · developer guide' })}
+              </span>
+            </span>
+          </NavLink>
+        </li>
       </nav>
 
       {/* Bottom navigation */}

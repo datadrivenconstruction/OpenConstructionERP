@@ -437,7 +437,7 @@ function ProjectLocationPanel({ project }: { project: Project }) {
           country={project.address?.country}
           label={addressLabel}
           onResolved={handleResolved}
-          className="h-64"
+          className="h-[32rem]"
         />
       )}
       {weatherEnabled && (

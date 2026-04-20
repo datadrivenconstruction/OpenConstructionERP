@@ -15,6 +15,7 @@ import {
   Download as DownloadIcon, Columns3, Search as SearchIcon,
   Upload, FileUp, Loader2, CheckCircle2, AlertCircle, FolderOpen,
   TrendingUp, Hash, Clock, ShieldCheck, Bookmark, ScatterChart as ScatterIcon, Trash2,
+  Box, Ruler, Square, Building2,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
@@ -714,6 +715,22 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
     return groups;
   }, [result, sortCol, sortDesc, slicers, topN, topNDir, aggCols, groupBy]);
 
+  // Max absolute value per aggregate column across visible rows — used for
+  // Power-BI-style inline data bars behind each cell, so the eye can
+  // compare magnitudes without switching to the Charts tab.
+  const maxByAgg = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const col of aggCols) {
+      let max = 0;
+      for (const g of sortedGroups) {
+        const v = Math.abs(g.results[col] ?? 0);
+        if (v > max) max = v;
+      }
+      m.set(col, max);
+    }
+    return m;
+  }, [sortedGroups, aggCols]);
+
   // Tree grouping for multi-level
   const tree = useMemo(() => {
     if (groupBy.length < 2) return null;
@@ -890,7 +907,21 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                     <tr key={Object.values(g.key).join('-')} className="border-b border-border-light hover:bg-surface-secondary/30">
                       {groupBy.map((col) => <td key={col} className="px-3 py-2 text-content-primary">{g.key[col] || '—'}</td>)}
                       <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{g.count.toLocaleString()}</td>
-                      {aggCols.map((col) => <td key={col} className="px-3 py-2 text-right tabular-nums font-medium">{formatNumber(g.results[col])}</td>)}
+                      {aggCols.map((col) => {
+                        const raw = g.results[col] ?? 0;
+                        const max = maxByAgg.get(col) ?? 0;
+                        const pct = max > 0 ? Math.max(0, Math.min(100, (Math.abs(raw) / max) * 100)) : 0;
+                        return (
+                          <td key={col} className="relative px-3 py-2 text-right tabular-nums font-medium">
+                            <span
+                              aria-hidden
+                              className="absolute inset-y-1 right-1 rounded-sm bg-oe-blue/10 dark:bg-oe-blue/20 pointer-events-none"
+                              style={{ width: `${pct}%`, maxWidth: 'calc(100% - 0.5rem)' }}
+                            />
+                            <span className="relative">{formatNumber(raw)}</span>
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))
                 )}
@@ -2355,6 +2386,146 @@ function SaveToProjectDialog({
   );
 }
 
+/* ── KPI strip — BI-style dashboard tiles ─────────────────────────────── */
+/*
+ * Always-visible row of big-number metric tiles, derived purely from the
+ * DescribeResponse. Values are project-wide totals (not filtered by
+ * slicers) — the slicer banner below makes the scope explicit.
+ *
+ * Tiles are picked opportunistically: if the data source has a column
+ * matching the keyword (volume / area / length / weight / count) we
+ * surface its sum; if it has a "level" or "category" column we surface
+ * the cardinality. Missing data = tile hidden. Never shows all 7 tiles
+ * at once — most BIM exports expose 3–5 of these.
+ */
+interface KpiTile {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  accent: string;
+  hint?: string;
+}
+
+function KpiStrip({ describe }: { describe: DescribeResponse }) {
+  const { t } = useTranslation();
+
+  const tiles: KpiTile[] = useMemo(() => {
+    const out: KpiTile[] = [];
+    const byKeyword = (keywords: string[]) =>
+      describe.columns.find(
+        (c) =>
+          c.dtype === 'number' &&
+          (c.sum ?? 0) > 0 &&
+          keywords.some((k) => c.name.toLowerCase() === k || c.name.toLowerCase().includes(k)),
+      );
+    const distinct = (name: string) =>
+      describe.columns.find((c) => c.dtype === 'string' && c.name.toLowerCase() === name)?.unique;
+
+    out.push({
+      icon: Hash,
+      label: t('explorer.kpi_elements', { defaultValue: 'Elements' }),
+      value: describe.total_elements.toLocaleString(),
+      accent: 'text-oe-blue',
+    });
+
+    const volume = byKeyword(['volume']);
+    if (volume?.sum != null) {
+      out.push({
+        icon: Box,
+        label: t('explorer.kpi_volume', { defaultValue: 'Volume m³' }),
+        value: formatNumber(volume.sum),
+        accent: 'text-emerald-600 dark:text-emerald-400',
+        hint: volume.name,
+      });
+    }
+
+    const area = byKeyword(['area']);
+    if (area?.sum != null) {
+      out.push({
+        icon: Square,
+        label: t('explorer.kpi_area', { defaultValue: 'Area m²' }),
+        value: formatNumber(area.sum),
+        accent: 'text-amber-600 dark:text-amber-400',
+        hint: area.name,
+      });
+    }
+
+    const length = byKeyword(['length', 'perimeter']);
+    if (length?.sum != null) {
+      out.push({
+        icon: Ruler,
+        label: t('explorer.kpi_length', { defaultValue: 'Length m' }),
+        value: formatNumber(length.sum),
+        accent: 'text-purple-600 dark:text-purple-400',
+        hint: length.name,
+      });
+    }
+
+    const weight = byKeyword(['weight', 'mass']);
+    if (weight?.sum != null) {
+      out.push({
+        icon: TrendingUp,
+        label: t('explorer.kpi_weight', { defaultValue: 'Weight kg' }),
+        value: formatNumber(weight.sum),
+        accent: 'text-rose-600 dark:text-rose-400',
+        hint: weight.name,
+      });
+    }
+
+    const categories = distinct('category');
+    if (categories && categories > 0) {
+      out.push({
+        icon: Layers,
+        label: t('explorer.kpi_categories', { defaultValue: 'Categories' }),
+        value: categories.toLocaleString(),
+        accent: 'text-indigo-600 dark:text-indigo-400',
+      });
+    }
+
+    const levels = distinct('level');
+    if (levels && levels > 0) {
+      out.push({
+        icon: Building2,
+        label: t('explorer.kpi_levels', { defaultValue: 'Levels' }),
+        value: levels.toLocaleString(),
+        accent: 'text-sky-600 dark:text-sky-400',
+      });
+    }
+
+    return out.slice(0, 6);
+  }, [describe, t]);
+
+  if (tiles.length <= 1) return null;
+
+  return (
+    <div
+      data-testid="explorer-kpi-strip"
+      className="flex items-stretch gap-2 px-3 py-2.5 border-b border-border-light bg-gradient-to-r from-surface-secondary/40 via-surface-primary to-surface-secondary/40"
+    >
+      {tiles.map((tile) => {
+        const Icon = tile.icon;
+        return (
+          <div
+            key={tile.label}
+            className="flex-1 min-w-[120px] flex items-center gap-2.5 rounded-lg border border-border-light/70 bg-surface-primary px-3 py-1.5 shadow-xs"
+            title={tile.hint}
+          >
+            <div className={`shrink-0 w-7 h-7 rounded-md bg-surface-secondary/70 flex items-center justify-center ${tile.accent}`}>
+              <Icon size={14} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-content-quaternary truncate">
+                {tile.label}
+              </p>
+              <p className={`text-sm font-bold tabular-nums ${tile.accent}`}>{tile.value}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function CadDataExplorerPage() {
@@ -2431,7 +2602,7 @@ export function CadDataExplorerPage() {
         <div className="px-6 pt-4 pb-3 border-b border-border-light">
           <Breadcrumb items={[
             { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
-            { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
+            { label: t('explorer.title', { defaultValue: 'CAD-BIM BI Explorer' }) },
           ]} />
         </div>
 
@@ -2665,7 +2836,7 @@ export function CadDataExplorerPage() {
             </div>
             <div>
               <h1 className="text-sm font-bold text-content-primary">
-                {describe ? describe.filename : t('explorer.title', { defaultValue: 'CAD-BIM Explorer' })}
+                {describe ? describe.filename : t('explorer.title', { defaultValue: 'CAD-BIM BI Explorer' })}
               </h1>
               {describe?.format && (
                 <p className="text-[10px] text-content-tertiary truncate max-w-[160px]">{describe.format.toUpperCase()} {t('explorer.data_session', { defaultValue: 'Data Session' })}</p>
@@ -2760,6 +2931,9 @@ export function CadDataExplorerPage() {
           </div>
         ) : describe ? (
           <>
+            {/* KPI dashboard strip — project-wide totals */}
+            <KpiStrip describe={describe} />
+
             {/* Tab selector */}
             <div className="flex items-center gap-1 px-3 border-b border-border-light bg-surface-primary">
               {TABS.map(({ id, icon: Icon, label, description }) => (

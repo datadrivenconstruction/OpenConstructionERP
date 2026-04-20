@@ -61,6 +61,9 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
     )
     assert reg_resp.status_code == 201, f"Registration failed: {reg_resp.text}"
 
+    from ._auth_helpers import promote_to_admin
+    await promote_to_admin(email)
+
     import asyncio
 
     # Retry login up to 3 times with backoff to handle rate limiter
@@ -163,8 +166,10 @@ class TestHealthAndSystem:
             assert key in data, f"Missing section: {key}"
         assert data["api"]["status"] == "healthy"
 
-    async def test_system_modules_list(self, client: AsyncClient) -> None:
-        resp = await client.get("/api/system/modules")
+    async def test_system_modules_list(
+        self, client: AsyncClient, auth_headers: dict[str, str]
+    ) -> None:
+        resp = await client.get("/api/system/modules", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert "modules" in data
@@ -178,8 +183,10 @@ class TestHealthAndSystem:
         assert data["license"] == "AGPL-3.0"
         assert "source_code" in data
 
-    async def test_validation_rules_list(self, client: AsyncClient) -> None:
-        resp = await client.get("/api/system/validation-rules")
+    async def test_validation_rules_list(
+        self, client: AsyncClient, auth_headers: dict[str, str]
+    ) -> None:
+        resp = await client.get("/api/system/validation-rules", headers=auth_headers)
         assert resp.status_code == 200
         data = resp.json()
         assert "rule_sets" in data
@@ -309,7 +316,7 @@ class TestContactsCRUD:
 
         # Search for it
         resp = await client.get(
-            f"/api/v1/contacts/search?q=Searchable-{unique}", headers=auth_headers
+            f"/api/v1/contacts/search/?q=Searchable-{unique}", headers=auth_headers
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -386,7 +393,7 @@ class TestFinanceFlow:
         project_id: str,
     ) -> None:
         resp = await client.post(
-            "/api/v1/finance/budgets",
+            "/api/v1/finance/budgets/",
             json={
                 "project_id": project_id,
                 "category": "Substructure",
@@ -411,7 +418,7 @@ class TestFinanceFlow:
     ) -> None:
         # Create
         resp = await client.post(
-            "/api/v1/finance/budgets",
+            "/api/v1/finance/budgets/",
             json={
                 "project_id": project_id,
                 "category": "Superstructure",
@@ -437,7 +444,7 @@ class TestFinanceFlow:
         project_id: str,
     ) -> None:
         resp = await client.post(
-            "/api/v1/finance/evm/snapshot",
+            "/api/v1/finance/evm/snapshot/",
             json={
                 "project_id": project_id,
                 "snapshot_date": "2026-04-01",
@@ -500,7 +507,7 @@ class TestNotificationsFlow:
         self, client: AsyncClient, auth_headers: dict[str, str]
     ) -> None:
         resp = await client.get(
-            "/api/v1/notifications/unread-count", headers=auth_headers
+            "/api/v1/notifications/unread-count/", headers=auth_headers
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -511,7 +518,7 @@ class TestNotificationsFlow:
         self, client: AsyncClient, auth_headers: dict[str, str]
     ) -> None:
         resp = await client.post(
-            "/api/v1/notifications/read-all", headers=auth_headers
+            "/api/v1/notifications/read-all/", headers=auth_headers
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -598,7 +605,7 @@ class TestRFIFlow:
 
         # Respond
         resp = await client.post(
-            f"/api/v1/rfi/{rfi_id}/respond",
+            f"/api/v1/rfi/{rfi_id}/respond/",
             json={"official_response": "Use S355 for all floor beams as per spec."},
             headers=auth_headers,
         )
@@ -608,7 +615,7 @@ class TestRFIFlow:
 
         # Close
         resp = await client.post(
-            f"/api/v1/rfi/{rfi_id}/close", headers=auth_headers
+            f"/api/v1/rfi/{rfi_id}/close/", headers=auth_headers
         )
         assert resp.status_code == 200
         assert resp.json()["status"] == "closed"
@@ -795,14 +802,14 @@ class TestI18nFoundation:
     """Countries, exchange rates, working days, tax configs."""
 
     async def test_list_countries(self, client: AsyncClient) -> None:
-        resp = await client.get("/api/v1/i18n_foundation/countries")
+        resp = await client.get("/api/v1/i18n_foundation/countries/")
         assert resp.status_code == 200
         data = resp.json()
         assert "items" in data
         assert "total" in data
 
     async def test_list_exchange_rates(self, client: AsyncClient) -> None:
-        resp = await client.get("/api/v1/i18n_foundation/exchange-rates")
+        resp = await client.get("/api/v1/i18n_foundation/exchange-rates/")
         assert resp.status_code == 200
         data = resp.json()
         assert "items" in data
@@ -817,7 +824,7 @@ class TestI18nFoundation:
         # Use from=XAU (gold) to=XAG (silver) with random year to ensure uniqueness
         year = 2200 + uuid.uuid4().int % 700
         resp = await client.post(
-            "/api/v1/i18n_foundation/exchange-rates",
+            "/api/v1/i18n_foundation/exchange-rates/",
             json={
                 "from_currency": "XAU",
                 "to_currency": "XAG",
@@ -833,14 +840,14 @@ class TestI18nFoundation:
         assert data["to_currency"] == "XAG"
 
     async def test_list_work_calendars(self, client: AsyncClient) -> None:
-        resp = await client.get("/api/v1/i18n_foundation/work-calendars")
+        resp = await client.get("/api/v1/i18n_foundation/work-calendars/")
         assert resp.status_code == 200
         data = resp.json()
         assert "items" in data
 
     async def test_calculate_working_days(self, client: AsyncClient) -> None:
         resp = await client.get(
-            "/api/v1/i18n_foundation/work-calendars/working-days",
+            "/api/v1/i18n_foundation/work-calendars/working-days/",
             params={
                 "country_code": "DE",
                 "from_date": "2026-04-01",
@@ -852,7 +859,7 @@ class TestI18nFoundation:
         assert "working_days" in data
 
     async def test_list_tax_configs(self, client: AsyncClient) -> None:
-        resp = await client.get("/api/v1/i18n_foundation/tax-configs")
+        resp = await client.get("/api/v1/i18n_foundation/tax-configs/")
         assert resp.status_code == 200
         data = resp.json()
         assert "items" in data
@@ -863,7 +870,7 @@ class TestI18nFoundation:
         # Create a rate with unique year to avoid constraint violations
         year = 2200 + uuid.uuid4().int % 700
         await client.post(
-            "/api/v1/i18n_foundation/exchange-rates",
+            "/api/v1/i18n_foundation/exchange-rates/",
             json={
                 "from_currency": "GBP",
                 "to_currency": "JPY",
@@ -875,7 +882,7 @@ class TestI18nFoundation:
         )
 
         resp = await client.get(
-            "/api/v1/i18n_foundation/exchange-rates?from_currency=GBP"
+            "/api/v1/i18n_foundation/exchange-rates/?from_currency=GBP"
         )
         assert resp.status_code == 200
         data = resp.json()

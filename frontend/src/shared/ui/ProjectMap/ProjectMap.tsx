@@ -1,5 +1,5 @@
 /**
- * ProjectMap — lightweight OSM map for a project's location.
+ * ProjectMap — modern vector-tile map for a project's location.
  *
  * Two sizes:
  *   variant="card"     → static thumbnail, no zoom / pan — fits in the
@@ -7,46 +7,28 @@
  *   variant="detail"   → full interactive map — pan, zoom, pin, address
  *                        overlay.  Lives on the project detail page.
  *
+ * Engine: MapLibre GL JS (open-source vector-tile renderer, no Leaflet
+ * branding). Tiles come from OpenFreeMap (free, key-less, community-funded),
+ * with CartoDB Voyager raster as a fallback if the vector style fails.
+ *
  * The geocoding pipeline:
  *   1. Accept lat/lng directly (fastest path — stored in project metadata).
  *   2. Otherwise concat (address, city, country), look up via the free
  *      OpenStreetMap Nominatim endpoint, and cache the result in
  *      localStorage under `oe.geocode.<query>` so repeat renders don't
  *      hit the API.
- *
- * Why no Google Maps / Mapbox?  The app ships as self-hosted open-source;
- * shipping an API key (or forcing users to provision one) would break the
- * "download → run" story.  Nominatim + OSM tiles are CC-BY attributed,
- * require no key, and stay within reasonable usage limits for demo /
- * project use.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapPin, Loader2 } from 'lucide-react';
-import L from 'leaflet';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import Map, { Marker, Popup, NavigationControl, AttributionControl } from 'react-map-gl/maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import clsx from 'clsx';
 
-// Leaflet's default marker icon ships as a relative path that breaks with
-// Vite — bundlers see `url(marker-icon.png)` inside leaflet.css but the
-// runtime JS calls `Icon.Default.prototype._getIconUrl()` which tries to
-// auto-derive the path from the bundle URL and fails.  Fix by (1) deleting
-// the broken prototype method so `mergeOptions` actually wins, (2) using
-// Vite's `?url` suffix to force the PNG imports to return final asset URLs.
-import markerIcon from 'leaflet/dist/images/marker-icon.png?url';
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png?url';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png?url';
-
-// Prototype pollution: remove the url-deriving method so our mergeOptions
-// below takes effect (standard Leaflet-with-Vite workaround).
-delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
-
-L.Icon.Default.mergeOptions({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
-  shadowUrl: markerShadow,
-});
+// OpenFreeMap — free, no API key, OSM-community-funded vector tiles.
+// "Liberty" style = colorful, highway-emphasis; "Positron" = minimal light;
+// "Bright" = high-contrast. Liberty fits a construction/infra use case best.
+const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 
 export interface LatLng {
   lat: number;
@@ -166,6 +148,7 @@ export function ProjectMap({
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [popupOpen, setPopupOpen] = useState(false);
 
   const query = useMemo(
     () => (hasExplicitCoords ? null : buildGeocodeQuery(address, city, country)),
@@ -206,8 +189,6 @@ export function ProjectMap({
   const isCard = variant === 'card';
   const heightClass = isCard ? 'h-28' : 'h-80';
 
-  // Empty / loading / error states share the same shell so the card height
-  // stays stable as the async geocode resolves.
   const shell = (content: React.ReactNode) => (
     <div
       className={clsx(
@@ -250,9 +231,7 @@ export function ProjectMap({
     );
   }
 
-  // We have coordinates.  Card variant: non-interactive snapshot.
-  // Detail variant: full Leaflet map.
-  const zoom = isCard ? 12 : 14;
+  const zoom = isCard ? 10 : 13;
 
   return (
     <div
@@ -262,27 +241,65 @@ export function ProjectMap({
         className,
       )}
     >
-      <MapContainer
-        center={[resolved.lat, resolved.lng]}
-        zoom={zoom}
-        zoomControl={!isCard}
-        scrollWheelZoom={!isCard}
-        dragging={!isCard}
+      <Map
+        initialViewState={{
+          longitude: resolved.lng,
+          latitude: resolved.lat,
+          zoom,
+        }}
+        mapStyle={MAP_STYLE_URL}
+        style={{ width: '100%', height: '100%' }}
+        interactive={!isCard}
+        dragPan={!isCard}
+        dragRotate={false}
+        scrollZoom={!isCard}
         doubleClickZoom={!isCard}
-        touchZoom={!isCard}
-        boxZoom={!isCard}
+        touchZoomRotate={!isCard}
         keyboard={!isCard}
-        attributionControl={!isCard}
-        style={{ height: '100%', width: '100%' }}
+        attributionControl={false}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <Marker position={[resolved.lat, resolved.lng]}>
-          {!isCard && label && <Popup>{label}</Popup>}
+        {!isCard && <NavigationControl position="top-right" showCompass={false} />}
+        {!isCard && (
+          <AttributionControl
+            compact
+            customAttribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openfreemap.org">OpenFreeMap</a>'
+          />
+        )}
+
+        <Marker
+          longitude={resolved.lng}
+          latitude={resolved.lat}
+          anchor="bottom"
+          onClick={(e) => {
+            e.originalEvent.stopPropagation();
+            if (!isCard && label) setPopupOpen(true);
+          }}
+        >
+          <div
+            className="relative flex h-8 w-8 items-center justify-center"
+            aria-label={label || 'Project location'}
+          >
+            <span className="absolute inset-0 rounded-full bg-oe-blue/25 animate-ping" />
+            <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-oe-blue text-white shadow-lg shadow-oe-blue/40 ring-2 ring-white">
+              <MapPin size={14} fill="currentColor" strokeWidth={0} />
+            </span>
+          </div>
         </Marker>
-      </MapContainer>
+
+        {popupOpen && !isCard && label && (
+          <Popup
+            longitude={resolved.lng}
+            latitude={resolved.lat}
+            anchor="bottom"
+            onClose={() => setPopupOpen(false)}
+            closeButton
+            closeOnClick={false}
+            offset={28}
+          >
+            <div className="text-xs font-medium text-content-primary">{label}</div>
+          </Popup>
+        )}
+      </Map>
 
       {/* Card variant: subtle gradient + address chip so it reads as a
           "location thumbnail" rather than a random tile. */}

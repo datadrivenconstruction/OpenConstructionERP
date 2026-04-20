@@ -36,10 +36,10 @@ from app.modules.dwg_takeoff.schemas import (
     DwgAnnotationResponse,
     DwgAnnotationUpdate,
     DwgDrawingResponse,
+    DwgDrawingScaleUpdate,
     DwgDrawingVersionResponse,
     DwgEntityGroupCreate,
     DwgEntityGroupResponse,
-    DwgDrawingScaleUpdate,
     DwgLayerVisibilityUpdate,
     DwgOfflineReadinessResponse,
 )

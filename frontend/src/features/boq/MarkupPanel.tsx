@@ -208,7 +208,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
   };
 
   return (
-    <div className="mt-4 rounded-xl border border-border-light bg-surface-elevated shadow-xs overflow-hidden">
+    <div className="mt-4 rounded-xl border border-border-light bg-surface-elevated shadow-xs">
       {/* Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}

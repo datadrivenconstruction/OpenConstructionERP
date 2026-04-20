@@ -128,28 +128,37 @@ def _validate_items(raw_items: Any) -> list[dict[str, Any]]:
 def _build_settings_response(settings: AISettings) -> AISettingsResponse:
     """Build an AISettingsResponse from an AISettings ORM instance.
 
-    Masks API keys — only indicates whether they are set.
+    A key is only reported as "set" when it is both present *and* decryptable
+    with the current backend encryption key. If the ciphertext was written
+    under a rotated JWT_SECRET the key is functionally useless — surfacing it
+    as "configured" would make the Settings UI show "Key configured" while
+    every chat/estimate call fails with a decrypt error.
     """
+    from app.core.crypto import decrypt_secret
+
+    def _usable(value: Any) -> bool:
+        return bool(decrypt_secret(value)) if value else False
+
     return AISettingsResponse(
         id=settings.id,
         user_id=settings.user_id,
-        anthropic_api_key_set=bool(settings.anthropic_api_key),
-        openai_api_key_set=bool(settings.openai_api_key),
-        gemini_api_key_set=bool(settings.gemini_api_key),
-        openrouter_api_key_set=bool(settings.openrouter_api_key),
-        mistral_api_key_set=bool(settings.mistral_api_key),
-        groq_api_key_set=bool(settings.groq_api_key),
-        deepseek_api_key_set=bool(settings.deepseek_api_key),
-        together_api_key_set=bool(getattr(settings, "together_api_key", None)),
-        fireworks_api_key_set=bool(getattr(settings, "fireworks_api_key", None)),
-        perplexity_api_key_set=bool(getattr(settings, "perplexity_api_key", None)),
-        cohere_api_key_set=bool(getattr(settings, "cohere_api_key", None)),
-        ai21_api_key_set=bool(getattr(settings, "ai21_api_key", None)),
-        xai_api_key_set=bool(getattr(settings, "xai_api_key", None)),
-        zhipu_api_key_set=bool(getattr(settings, "zhipu_api_key", None)),
-        baidu_api_key_set=bool(getattr(settings, "baidu_api_key", None)),
-        yandex_api_key_set=bool(getattr(settings, "yandex_api_key", None)),
-        gigachat_api_key_set=bool(getattr(settings, "gigachat_api_key", None)),
+        anthropic_api_key_set=_usable(settings.anthropic_api_key),
+        openai_api_key_set=_usable(settings.openai_api_key),
+        gemini_api_key_set=_usable(settings.gemini_api_key),
+        openrouter_api_key_set=_usable(settings.openrouter_api_key),
+        mistral_api_key_set=_usable(settings.mistral_api_key),
+        groq_api_key_set=_usable(settings.groq_api_key),
+        deepseek_api_key_set=_usable(settings.deepseek_api_key),
+        together_api_key_set=_usable(getattr(settings, "together_api_key", None)),
+        fireworks_api_key_set=_usable(getattr(settings, "fireworks_api_key", None)),
+        perplexity_api_key_set=_usable(getattr(settings, "perplexity_api_key", None)),
+        cohere_api_key_set=_usable(getattr(settings, "cohere_api_key", None)),
+        ai21_api_key_set=_usable(getattr(settings, "ai21_api_key", None)),
+        xai_api_key_set=_usable(getattr(settings, "xai_api_key", None)),
+        zhipu_api_key_set=_usable(getattr(settings, "zhipu_api_key", None)),
+        baidu_api_key_set=_usable(getattr(settings, "baidu_api_key", None)),
+        yandex_api_key_set=_usable(getattr(settings, "yandex_api_key", None)),
+        gigachat_api_key_set=_usable(getattr(settings, "gigachat_api_key", None)),
         preferred_model=settings.preferred_model,
         metadata_=settings.metadata_ or {},
         created_at=settings.created_at,

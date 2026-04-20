@@ -27,14 +27,13 @@ import csv
 import io
 import logging
 import uuid
+from collections.abc import Iterable
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from collections.abc import Iterable
 
 from app.core.rate_limiter import approval_limiter
 from app.core.upload_guards import reject_if_xlsx_bomb

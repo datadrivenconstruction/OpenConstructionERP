@@ -11,7 +11,6 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
-
 from app.modules.finance.models import (
     EVMSnapshot,
     Invoice,

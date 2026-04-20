@@ -2355,7 +2355,8 @@ async def export_boq_excel(
         # sorting, and avoids the 'Number stored as text' warning triangle).
         # ``_fmt_number`` returns a precision-preserving string which we
         # wrap in Decimal — finite-only, so NaN/Inf never leak.
-        from decimal import Decimal as _Dec, InvalidOperation as _InvOp
+        from decimal import Decimal as _Dec
+        from decimal import InvalidOperation as _InvOp
 
         def _num_cell(raw: Any) -> _Dec:
             if raw is None or raw == "":
@@ -2665,7 +2666,7 @@ async def export_boq_gaeb(
         exact representation before rounding, avoiding the float-precision
         drift that ``f"{float(value):.2f}"`` introduces on large totals.
         """
-        from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+        from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
         if value is None or value == "":
             return "0.00"
@@ -3533,7 +3534,7 @@ async def import_boq_gaeb(
             description = _extract_description(item)
             if not description:
                 skipped += 1
-                return
+                return None
 
             unit_raw = _text_of(item, "QU")
             unit = _normalize_unit(unit_raw) or "pcs"
@@ -3547,7 +3548,7 @@ async def import_boq_gaeb(
                         "error": f"Quantity out of range: {quantity}",
                     }
                 )
-                return
+                return None
             if not (0 <= unit_rate <= 1e8):
                 errors.append(
                     {
@@ -3555,7 +3556,7 @@ async def import_boq_gaeb(
                         "error": f"Unit rate out of range: {unit_rate}",
                     }
                 )
-                return
+                return None
 
             position_data = PositionCreate(
                 boq_id=boq_id,

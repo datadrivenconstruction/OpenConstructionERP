@@ -13,7 +13,7 @@ that looks like an actual building — not a grid of boxes.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 # ---------------------------------------------------------------------------
 # IFC STEP helpers
@@ -253,8 +253,8 @@ def generate_demo_ifc(
     lines: list[str] = []
     lines.append("ISO-10303-21;")
     lines.append("HEADER;")
-    lines.append(f"FILE_DESCRIPTION(('ViewDefinition [CoordinationView_V2.0]'),'2;1');")
-    lines.append(f"FILE_NAME('{project_name}.ifc','{datetime.now(timezone.utc).strftime('%Y-%m-%d')}',('OpenConstructionERP'),('DDC'),'','OpenConstructionERP v1.5.0','');")
+    lines.append("FILE_DESCRIPTION(('ViewDefinition [CoordinationView_V2.0]'),'2;1');")
+    lines.append(f"FILE_NAME('{project_name}.ifc','{datetime.now(UTC).strftime('%Y-%m-%d')}',('OpenConstructionERP'),('DDC'),'','OpenConstructionERP v1.5.0','');")
     lines.append("FILE_SCHEMA(('IFC2X3'));")
     lines.append("ENDSEC;")
     lines.append("DATA;")

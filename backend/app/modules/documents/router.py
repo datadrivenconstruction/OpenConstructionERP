@@ -179,6 +179,58 @@ async def list_documents(
     return [_doc_to_response(d) for d in docs]
 
 
+@router.get("/file-types-by-project/")
+async def file_types_by_project(
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> dict[str, list[str]]:
+    """Aggregate map ``{project_id: [file_types]}`` used by the Projects
+    page to render "has RVT / IFC / DWG / PDF" chips on each card in a
+    single round-trip (instead of N requests, one per card).
+
+    Returns extensions lower-cased, without the leading dot. Any project
+    the caller cannot read is silently omitted.
+    """
+    from sqlalchemy import select as _select
+
+    from app.modules.documents.models import Document
+    from app.modules.projects.models import Project
+
+    # Projects the caller owns. The Projects page already filters by
+    # ``owner_id`` client-side, so mirroring the same rule here keeps
+    # the response set identical.
+    if user_id is None:
+        return {}
+    own_ids = (
+        await session.execute(
+            _select(Project.id).where(Project.owner_id == uuid.UUID(str(user_id))),
+        )
+    ).scalars().all()
+    if not own_ids:
+        return {}
+
+    rows = (
+        await session.execute(
+            _select(Document.project_id, Document.file_path, Document.name).where(
+                Document.project_id.in_(own_ids),
+            ),
+        )
+    ).all()
+
+    # Map project → set of extensions. Prefer Document.name (user-visible
+    # filename) since file_path may be a storage key without an extension.
+    from pathlib import Path as _Path
+
+    out: dict[str, set[str]] = {}
+    for project_id, file_path, name in rows:
+        ext = (_Path(str(name or "")).suffix or _Path(str(file_path or "")).suffix).lower().lstrip(".")
+        if not ext:
+            continue
+        out.setdefault(str(project_id), set()).add(ext)
+
+    return {k: sorted(v) for k, v in out.items()}
+
+
 # ══════════════════════════════════════════════════════════════════════════
 # Photo Gallery endpoints
 # NOTE: These MUST come BEFORE /{document_id} parametric routes to avoid

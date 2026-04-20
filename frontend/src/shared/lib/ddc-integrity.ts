@@ -44,12 +44,23 @@ export function ddcHasStamp(text: string): boolean {
 }
 
 /** Inject runtime meta tags that identify the DDC origin.
- *  Called once at app startup. Tags are not visible in UI. */
+ *  Called once at app startup. Tags are not visible in UI.
+ *
+ *  Layered authorship markers:
+ *   1. <meta name="ddc:*"> tags on <head>
+ *   2. CSS custom property on <html> — `getComputedStyle(document.documentElement).getPropertyValue('--ddc-origin')`
+ *      survives DOM mutation and lightweight "white-label" reskinning.
+ *   3. Opaque-looking localStorage key — removing it re-seeds on next load.
+ *   Each marker alone is trivial to strip; all three together form a
+ *   layered provenance trail useful in copyright-enforcement forensics.
+ */
 export function ddcInjectMeta(): void {
   if (typeof document === 'undefined') return;
   const tags: [string, string][] = [
     ['ddc:origin', 'DataDrivenConstruction/CWICR-OE'],
     ['ddc:build', `${new Date().getFullYear()}-OE`],
+    ['ddc:author', 'Artem Boiko · datadrivenconstruction.io'],
+    ['ddc:signature', 'DDC-CWICR-OE-2026'],
   ];
   for (const [name, content] of tags) {
     const el = document.createElement('meta');
@@ -57,4 +68,19 @@ export function ddcInjectMeta(): void {
     el.content = content;
     document.head.appendChild(el);
   }
+  // CSS custom properties — invisible to the eye, visible to the inspector.
+  try {
+    document.documentElement.style.setProperty('--ddc-origin', '"DDC-CWICR-OE"');
+    document.documentElement.style.setProperty('--ddc-author', '"Artem Boiko"');
+  } catch { /* noop */ }
+  // Opaque-looking local key — looks like a feature-flag hash, actually
+  // encodes the authorship fingerprint.
+  try {
+    if (typeof localStorage !== 'undefined' && !localStorage.getItem('_ff_build_hash')) {
+      localStorage.setItem(
+        '_ff_build_hash',
+        btoa('DDC-CWICR-OE-2026/' + DDC_ORIGIN),
+      );
+    }
+  } catch { /* quota / privacy mode — ignore */ }
 }

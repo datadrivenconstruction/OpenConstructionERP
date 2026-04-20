@@ -161,6 +161,18 @@ function labelFor(code: number, t: ReturnType<typeof useTranslation>['t']): stri
   return t('weather.cloudy', { defaultValue: 'Cloudy' });
 }
 
+type WeatherSeverity = 'good' | 'rain' | 'severe';
+
+function classifySeverity(day: { weatherCode: number; precipMm: number }): WeatherSeverity {
+  const { weatherCode: code, precipMm } = day;
+  if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) return 'severe';
+  if (code >= 95 && code <= 99) return 'severe';
+  if (precipMm > 5) return 'severe';
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return 'rain';
+  if (precipMm > 1) return 'rain';
+  return 'good';
+}
+
 export function ProjectWeather({
   lat, lng, locale, className, variant = 'full',
 }: ProjectWeatherProps) {
@@ -282,14 +294,18 @@ export function ProjectWeather({
             const Icon = iconFor(d.weatherCode);
             const date = new Date(d.date);
             const tempRange = d.tMax - d.tMin;
+            const severity = classifySeverity(d);
             return (
               <div
                 key={d.date}
                 className={clsx(
                   'flex flex-col items-center gap-1 rounded-lg px-1.5 py-2 border transition-colors',
-                  i === 0
-                    ? 'border-oe-blue/30 bg-oe-blue/[0.04]'
-                    : 'border-border-light/50 hover:border-border-light',
+                  i === 0 && 'ring-2 ring-oe-blue/30 ring-offset-1 ring-offset-surface-primary',
+                  severity === 'severe'
+                    ? 'border-rose-300/70 bg-rose-50/70 hover:border-rose-400 dark:border-rose-700/60 dark:bg-rose-900/20'
+                    : severity === 'rain'
+                      ? 'border-amber-300/70 bg-amber-50/70 hover:border-amber-400 dark:border-amber-700/60 dark:bg-amber-900/20'
+                      : 'border-border-light/50 hover:border-border-light',
                 )}
                 title={`${labelFor(d.weatherCode, t)} · ${dateFmt.format(date)}`}
               >

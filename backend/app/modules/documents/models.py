@@ -92,7 +92,7 @@ class Document(Base):
     )  # architectural / structural / mechanical / electrical / plumbing / civil
 
     # Relationships
-    bim_links: Mapped[list["DocumentBIMLink"]] = relationship(
+    bim_links: Mapped[list[DocumentBIMLink]] = relationship(
         back_populates="document",
         cascade="all, delete-orphan",
         lazy="selectin",

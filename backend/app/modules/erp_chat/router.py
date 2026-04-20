@@ -10,6 +10,7 @@ Endpoints:
 
 import logging
 import uuid
+from collections.abc import AsyncGenerator
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -35,7 +36,6 @@ router = APIRouter(tags=["ERP Chat"])
 async def stream_chat(
     body: StreamChatRequest,
     user_id: CurrentUserId,
-    session: SessionDep,
     _remaining: int = Depends(check_ai_rate_limit),
 ) -> StreamingResponse:
     """Stream an AI chat response with tool-calling via SSE.
@@ -47,10 +47,28 @@ async def stream_chat(
     - text: emitted with assistant text content (chunked)
     - error: emitted on errors
     - done: emitted when the stream is complete
+
+    Does NOT use the request-scoped SessionDep: Starlette's BaseHTTPMiddleware
+    interacts badly with StreamingResponse and cancels the dependency session
+    between chunks, killing every ``await session.flush()`` inside the agent
+    loop with ``CancelledError``. Instead the generator opens its own session
+    whose lifetime matches the stream.
     """
-    service = ERPChatService(session)
+    from app.database import async_session_factory
+
+    async def stream() -> AsyncGenerator[str, None]:
+        async with async_session_factory() as session:
+            service = ERPChatService(session)
+            try:
+                async for chunk in service.stream_response(user_id, body):
+                    yield chunk
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
+
     return StreamingResponse(
-        service.stream_response(user_id, body),
+        stream(),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

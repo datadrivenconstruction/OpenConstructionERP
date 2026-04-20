@@ -127,7 +127,10 @@ export async function fetchCDEContainers(
   if (filters?.project_id) params.set('project_id', filters.project_id);
   if (filters?.state) params.set('state', filters.state);
   const qs = params.toString();
-  return apiGet<CDEContainer[]>(`/v1/cde/containers${qs ? `?${qs}` : ''}`);
+  // Trailing slash matches FastAPI route exactly — without it we hit a
+  // 307 redirect that some proxies rewrite without forwarding the auth
+  // header, which surfaces as an empty list in the UI.
+  return apiGet<CDEContainer[]>(`/v1/cde/containers/${qs ? `?${qs}` : ''}`);
 }
 
 export async function createCDEContainer(

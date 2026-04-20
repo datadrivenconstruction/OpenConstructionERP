@@ -410,7 +410,13 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
   const pdfDocumentId = meta.pdf_document_id as string | undefined;
   const pdfPage = meta.pdf_page as number | undefined;
   const pdfSource = meta.pdf_measurement_source as string | undefined;
-  const hasPdfLink = !!pdfMeasurementId || !!pdfSource;
+  // Convention: ordinals prefixed "TK." come from the PDF takeoff flow,
+  // even when the source metadata is missing (legacy rows, seed data).
+  // Treat the prefix as a soft link so the red icon surfaces and the
+  // user can at least jump back to the PDF takeoff page for context.
+  const isTakeoffOrdinal = typeof data.ordinal === 'string'
+    && /^TK\.\d+$/.test(data.ordinal.trim());
+  const hasPdfLink = !!pdfMeasurementId || !!pdfSource || isTakeoffOrdinal;
 
   const dwgAnnotationId = meta.dwg_annotation_id as string | undefined;
   const dwgDrawingId = meta.dwg_drawing_id as string | undefined;

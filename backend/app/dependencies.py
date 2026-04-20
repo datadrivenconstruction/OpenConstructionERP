@@ -326,7 +326,7 @@ class RequireRole:
         self,
         payload: Annotated[dict[str, Any], Depends(get_current_user_payload)],
     ) -> None:
-        from app.core.permissions import ROLE_HIERARCHY, Role, _resolve_role
+        from app.core.permissions import ROLE_HIERARCHY, _resolve_role
 
         user_role = _resolve_role(payload.get("role", ""))
         needed = _resolve_role(self.required)

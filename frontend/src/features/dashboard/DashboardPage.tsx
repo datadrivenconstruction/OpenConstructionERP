@@ -38,6 +38,7 @@ import {
   MessageSquare,
   HardHat,
   Percent,
+  CircleDashed,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint, ActivityFeed as CrossModuleActivityFeed } from '@/shared/ui';
 import BIMCoverageCard from './BIMCoverageCard';
@@ -645,6 +646,7 @@ function KpiRibbon({
   projects?: ProjectSummary[];
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const totalValue = useMemo(() => {
     if (!boqs || boqs.length === 0) return 0;
@@ -715,13 +717,19 @@ function KpiRibbon({
     },
     {
       icon: <ShieldCheck size={20} strokeWidth={1.75} />,
-      value: qualityScore !== null ? `${qualityScore}%` : t('dashboard.kpi_not_validated', { defaultValue: 'N/A' }),
+      // When no validation report exists yet we swap the "N/A" string for a
+      // dashed-circle icon — reads as "not measured" and doesn't compete
+      // with the percentage on validated tiles. The sublabel keeps the CTA.
+      value: qualityScore !== null
+        ? `${qualityScore}%`
+        : (<CircleDashed size={18} strokeWidth={1.75} className="text-content-quaternary opacity-70" />),
       sublabel: qualityScore !== null
         ? t('dashboard.kpi_quality_score_label', { defaultValue: 'score' })
         : t('dashboard.kpi_run_validation', { defaultValue: 'run validation' }),
       label: t('dashboard.kpi_quality', { defaultValue: 'Quality Score' }),
       color: qualityScore !== null && qualityScore >= 80 ? 'text-[#16a34a]' : qualityScore !== null && qualityScore >= 50 ? 'text-[#ca8a04]' : 'text-content-tertiary',
       bg: qualityScore !== null && qualityScore >= 80 ? 'bg-[#16a34a]/10' : qualityScore !== null && qualityScore >= 50 ? 'bg-[#ca8a04]/10' : 'bg-surface-secondary',
+      onClick: qualityScore === null ? () => navigate('/validation') : undefined,
     },
   ];
 
@@ -730,28 +738,36 @@ function KpiRibbon({
       className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4 animate-card-in"
       style={{ animationDelay: '50ms' }}
     >
-      {cards.map((card, i) => (
-        <div
-          key={card.label}
-          className="group flex items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in"
-          style={{ animationDelay: `${80 + i * 50}ms` }}
-        >
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${card.bg} ${card.color} transition-transform duration-normal ease-oe group-hover:scale-105`}>
-            {card.icon}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-bold tabular-nums text-content-primary leading-tight truncate">
-                {card.value ?? <span className="inline-block h-5 w-14 animate-pulse rounded bg-surface-tertiary" />}
-              </span>
-              {'sublabel' in card && card.sublabel && (
-                <span className="text-xs text-content-tertiary">{card.sublabel}</span>
-              )}
+      {cards.map((card, i) => {
+        const clickable = 'onClick' in card && typeof card.onClick === 'function';
+        const TileTag = clickable ? 'button' : 'div';
+        return (
+          <TileTag
+            key={card.label}
+            type={clickable ? 'button' : undefined}
+            onClick={clickable ? card.onClick : undefined}
+            className={`group flex w-full items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 text-left transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in ${
+              clickable ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-oe-blue/30' : ''
+            }`}
+            style={{ animationDelay: `${80 + i * 50}ms` }}
+          >
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${card.bg} ${card.color} transition-transform duration-normal ease-oe group-hover:scale-105`}>
+              {card.icon}
             </div>
-            <div className="text-xs text-content-tertiary mt-0.5 truncate">{card.label}</div>
-          </div>
-        </div>
-      ))}
+            <div className="min-w-0">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-lg font-bold tabular-nums text-content-primary leading-tight truncate">
+                  {card.value ?? <span className="inline-block h-5 w-14 animate-pulse rounded bg-surface-tertiary" />}
+                </span>
+                {'sublabel' in card && card.sublabel && (
+                  <span className="text-xs text-content-tertiary">{card.sublabel}</span>
+                )}
+              </div>
+              <div className="text-xs text-content-tertiary mt-0.5 truncate">{card.label}</div>
+            </div>
+          </TileTag>
+        );
+      })}
     </div>
   );
 }
@@ -1555,7 +1571,6 @@ function QuickUploadCard() {
 export function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const addToast = useToastStore((s) => s.addToast);
 
   // First launch: redirect to onboarding wizard
   useEffect(() => {
@@ -1703,7 +1718,7 @@ export function DashboardPage() {
             </div>
           </a>
         </div>
-        <div className="flex items-center gap-2 animate-stagger-in" style={{ animationDelay: '150ms' }}>
+        <div className="flex items-center gap-2 flex-wrap animate-stagger-in" style={{ animationDelay: '150ms' }}>
           <Button
             variant="primary"
             size="lg"
@@ -1713,26 +1728,64 @@ export function DashboardPage() {
           >
             {t('projects.new_project')}
           </Button>
+          {/* New Estimate — always lands on a working create-BOQ flow.
+              Pure navigation, no API writes on the click itself, so this
+              cannot silently 403 on a user who lacks `boq.create` at the
+              button-press moment (the create page surfaces that error
+              inline if they submit).  */}
           <Button
             variant="secondary"
             size="lg"
-            icon={<Sparkles size={14} />}
-            onClick={async () => {
-              try {
-                const proj = await apiPost<{id:string}>('/v1/projects/', {
-                  name: `Estimate ${new Date().toLocaleDateString()}`,
-                  region: 'DACH', currency: 'EUR', classification_standard: 'din276',
-                });
-                const boq = await apiPost<{id:string}>('/v1/boq/boqs/', {
-                  project_id: proj.id, name: 'Bill of Quantities',
-                });
-                navigate(`/boq/${boq.id}`);
-              } catch {
-                addToast({ type: 'error', title: t('dashboard.quick_start_failed', { defaultValue: 'Failed to create quick start estimate' }) });
+            icon={<FileSpreadsheet size={16} />}
+            onClick={() => {
+              const firstProject = projects?.[0];
+              if (firstProject) {
+                navigate(`/projects/${firstProject.id}/boq/new`);
+              } else {
+                // No projects yet — nudge the user through the project
+                // wizard first. After creating the project we land back
+                // on its detail page, from which they can start a BOQ.
+                navigate('/projects/new');
               }
             }}
+            title={t('dashboard.new_estimate_hint', {
+              defaultValue: 'Start a new Bill of Quantities for an existing project',
+            })}
           >
-            {t('dashboard.quick_start', { defaultValue: 'Quick Start' })}
+            {t('dashboard.new_estimate', { defaultValue: 'New Estimate' })}
+          </Button>
+          {/* Quick Start — resume the most recently-edited BOQ in one click.
+              Falls through to New-Estimate behaviour if no BOQ exists yet. */}
+          <Button
+            variant="ghost"
+            size="lg"
+            icon={<Sparkles size={14} />}
+            onClick={() => {
+              if (lastBoq) {
+                navigate(`/boq/${lastBoq.id}`);
+                return;
+              }
+              const firstProject = projects?.[0];
+              if (firstProject) {
+                navigate(`/projects/${firstProject.id}/boq/new`);
+              } else {
+                navigate('/projects/new');
+              }
+            }}
+            title={
+              lastBoq
+                ? t('dashboard.quick_start_resume_hint', {
+                    defaultValue: 'Continue your most recent estimate: {{name}}',
+                    name: lastBoq.name,
+                  })
+                : t('dashboard.quick_start_hint', {
+                    defaultValue: 'Jump into an estimate — resumes the latest or starts a new one',
+                  })
+            }
+          >
+            {lastBoq
+              ? t('dashboard.quick_resume', { defaultValue: 'Resume last estimate' })
+              : t('dashboard.quick_start', { defaultValue: 'Quick Start' })}
           </Button>
         </div>
       </div>

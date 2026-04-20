@@ -2283,7 +2283,7 @@ export function BIMPage() {
                     : t('bim.isolate', { defaultValue: 'Isolate' })}
                 </button>
               )}
-              <button onClick={() => navigate('/bim/rules')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
+              <button onClick={() => navigate('/bim/rules?mode=requirements')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
                 <SlidersHorizontal size={13} /> {t('bim.rules_button', { defaultValue: 'Rules' })}
               </button>
               <button

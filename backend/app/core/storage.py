@@ -436,6 +436,7 @@ class S3StorageBackend(StorageBackend):
         normalised = _normalise_key(key)
         try:
             import boto3  # botocore comes in via aioboto3, but boto3 is the
+
             # canonical presigner.  It is pulled in as a dependency of
             # aioboto3 so this import is safe when S3StorageBackend is
             # instantiated.

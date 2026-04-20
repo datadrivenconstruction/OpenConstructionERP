@@ -69,7 +69,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   return (
     <header
       className={clsx(
-        'sticky top-0 z-[100]',
+        'sticky top-0 z-30',
         'flex h-header items-center justify-between gap-3 px-4 sm:px-6 lg:px-8',
         'border-b border-border-light bg-surface-primary/80 backdrop-blur-xl',
       )}
@@ -596,25 +596,53 @@ function ProjectSwitcher() {
 
   return (
     <div className="relative hidden sm:block" ref={ref}>
-      <button
-        onClick={() => setOpen(!open)}
+      {/* Split-button: left half jumps to the active project's detail page,
+          right half (chevron) opens the switcher dropdown. When no project
+          is active we fall back to a single "Select Project" button that
+          opens the dropdown (no navigation target). */}
+      <div
         className={clsx(
-          'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all border max-w-[220px]',
+          'flex items-center rounded-lg border transition-all max-w-[240px] overflow-hidden',
           activeProjectId
             ? 'bg-oe-blue-subtle text-oe-blue border-oe-blue/20 hover:bg-oe-blue/10 hover:border-oe-blue/30'
             : 'text-content-tertiary border-border-light hover:text-content-primary hover:bg-surface-secondary hover:border-border',
         )}
       >
-        <FolderOpen size={13} className="shrink-0" />
-        <span className="text-content-quaternary shrink-0">{t('common.project', { defaultValue: 'Projekt' })}:</span>
-        <span className="truncate">
-          {activeProjectName || t('schedule.select_project', { defaultValue: 'Select Project' })}
-        </span>
-        <ChevronDown size={12} className={clsx(
-          'shrink-0 text-content-quaternary transition-transform duration-fast',
-          open && 'rotate-180',
-        )} />
-      </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (activeProjectId) {
+              navigate(`/projects/${activeProjectId}`);
+            } else {
+              setOpen(true);
+            }
+          }}
+          className="flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 text-xs font-medium min-w-0"
+          title={activeProjectId
+            ? t('projects.open_current', { defaultValue: 'Open this project' })
+            : t('schedule.select_project', { defaultValue: 'Select Project' })}
+        >
+          <FolderOpen size={13} className="shrink-0" />
+          <span className="text-content-quaternary shrink-0">
+            {t('common.project', { defaultValue: 'Projekt' })}:
+          </span>
+          <span className="truncate">
+            {activeProjectName || t('schedule.select_project', { defaultValue: 'Select Project' })}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className="flex items-center px-1.5 py-1 border-l border-current/15 hover:bg-current/5"
+          title={t('schedule.switch_project', { defaultValue: 'Switch Project' })}
+          aria-label={t('schedule.switch_project', { defaultValue: 'Switch Project' })}
+        >
+          <ChevronDown size={12} className={clsx(
+            'shrink-0 text-content-quaternary transition-transform duration-fast',
+            open && 'rotate-180',
+          )} />
+        </button>
+      </div>
 
       {open && (
         <div className="absolute top-full left-0 mt-1.5 z-50 w-72 rounded-xl border border-border bg-surface-elevated shadow-xl overflow-hidden animate-fade-in">

@@ -172,7 +172,8 @@ async def create_container(
     service: CDEService = Depends(_get_service),
 ) -> ContainerResponse:
     """Create a new document container."""
-    from fastapi import HTTPException, status as _status
+    from fastapi import HTTPException
+    from fastapi import status as _status
 
     logger.info(
         "CDE create_container request: project=%s code=%s state=%s user=%s",

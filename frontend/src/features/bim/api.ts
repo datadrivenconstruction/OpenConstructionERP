@@ -185,6 +185,37 @@ export async function fetchBIMElementsByIds(
   );
 }
 
+export interface BIMModelBOQLinkAggregate {
+  boq_position_id: string;
+  boq_id: string;
+  boq_position_ordinal: string | null;
+  boq_position_description: string | null;
+  boq_position_quantity: number | null;
+  boq_position_unit: string | null;
+  boq_position_unit_rate: number | null;
+  boq_position_total: number | null;
+  link_type: string;
+  confidence: string | null;
+  element_ids: string[];
+}
+
+export interface BIMModelBOQLinksResponse {
+  items: BIMModelBOQLinkAggregate[];
+  total: number;
+}
+
+/** Aggregate all BOQ links for a model in one call.
+ *  Powers the "Linked BOQ" panel, which needs roll-ups across the whole
+ *  model — the viewer loads elements in skeleton mode (no boq_links),
+ *  and the enriched path is capped at 2000 elements per page. */
+export async function fetchBIMModelBOQLinks(
+  modelId: string,
+): Promise<BIMModelBOQLinksResponse> {
+  return apiGet<BIMModelBOQLinksResponse>(
+    `/v1/bim_hub/models/${encodeURIComponent(modelId)}/boq-links/`,
+  );
+}
+
 /** Fetch the geometry file as a blob and return an object URL.
  *
  * Uses the Authorization header instead of a query-param token to avoid

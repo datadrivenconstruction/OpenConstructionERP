@@ -10,7 +10,7 @@ import { OnboardingWizard } from '@/features/onboarding';
 import { AssembliesPage, AssemblyEditorPage, CreateAssemblyPage } from '@/features/assemblies';
 import { ValidationPage } from '@/features/validation';
 import { QuantitiesPage } from '@/features/quantities';
-import { ModulesPage } from '@/features/modules';
+import { ModulesPage, ModuleDeveloperGuide } from '@/features/modules';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
 import { SettingsPage } from '@/features/settings';
 import { DatabaseSetupPage } from '@/features/setup';
@@ -23,7 +23,7 @@ import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
 import { FloatingQueuePanel } from './layout/FloatingQueuePanel';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
-import { ddcVerifyIntegrity } from '@/shared/lib/ddc-integrity';
+import { ddcVerifyIntegrity, ddcInjectMeta, DDC_ORIGIN } from '@/shared/lib/ddc-integrity';
 import { useKeyboardShortcuts } from '@/shared/hooks/useKeyboardShortcuts';
 import { useTranslation } from 'react-i18next';
 import { getLanguageByCode } from './i18n';
@@ -261,6 +261,25 @@ useThemeStore.getState().init();
 // Initialize the anonymized error logger (global handlers for unhandled errors)
 initErrorLogger();
 
+// Inject DDC origin meta tags + subtle console banner. These provide
+// provenance fingerprints: if someone clones the UI and serves it
+// unmodified, the meta tags and console message are direct evidence of
+// the origin. Removing them is not a functional break, but does prove
+// the distribution was tampered with.
+if (typeof document !== 'undefined') {
+  ddcInjectMeta();
+}
+if (typeof window !== 'undefined' && typeof console !== 'undefined') {
+  try {
+    // eslint-disable-next-line no-console
+    console.info(
+      `%c${DDC_ORIGIN}%c · Artem Boiko · datadrivenconstruction.io`,
+      'color:#0071E3;font-weight:700',
+      'color:#64748b',
+    );
+  } catch { /* noop */ }
+}
+
 /** Keeps <html dir="..."> and lang attribute in sync with the active i18n language. */
 function useDocumentDirection() {
   const { i18n } = useTranslation();
@@ -405,6 +424,7 @@ export default function App() {
 
         <Route path="/users" element={<P title="User Management"><UserManagementPage /></P>} />
         <Route path="/modules" element={<P title="Modules"><ModulesPage /></P>} />
+        <Route path="/modules/developer-guide" element={<P title="Module Developer Guide"><ModuleDeveloperGuide /></P>} />
 
         <Route path="/setup/databases" element={<P title="Databases & Resources"><DatabaseSetupPage /></P>} />
         <Route path="/settings" element={<P title="Settings"><SettingsPage /></P>} />

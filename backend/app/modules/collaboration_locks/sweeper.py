@@ -13,7 +13,6 @@ from datetime import UTC, datetime
 
 from app.database import async_session_factory
 from app.modules.collaboration_locks.events import COLLAB_LOCK_EXPIRED
-from app.modules.collaboration_locks.repository import CollabLockRepository
 
 logger = logging.getLogger(__name__)
 

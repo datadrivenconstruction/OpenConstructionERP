@@ -901,6 +901,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       suppressMovable: true,
       suppressHeaderMenuButton: true,
       cellClass: 'text-content-primary',
+      headerClass: 'oe-header-centered',
     }),
     [],
   );

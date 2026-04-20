@@ -140,6 +140,22 @@ export class SelectionManager {
       // Skip non-mesh hits (grid, lights, helpers)
       if (!(hit.object instanceof THREE.Mesh)) continue;
 
+      // THREE.Raycaster does NOT automatically skip objects whose
+      // .visible is false — it still returns them in the intersects
+      // list. That means when the user has an element-group filter
+      // active (everything outside the group set to .visible=false),
+      // clicks would still land on the hidden outer element instead
+      // of the visible inner one. Filter explicitly here by walking
+      // up the tree: if the hit mesh OR any ancestor is invisible,
+      // skip this hit.
+      let visNode: THREE.Object3D | null = hit.object;
+      let anyHidden = false;
+      while (visNode) {
+        if (visNode.visible === false) { anyHidden = true; break; }
+        visNode = visNode.parent;
+      }
+      if (anyHidden) continue;
+
       // Walk up hierarchy to find elementId
       let obj: THREE.Object3D | null = hit.object;
       while (obj) {
