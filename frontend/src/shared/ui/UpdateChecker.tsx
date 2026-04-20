@@ -23,6 +23,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Sparkles, X, ExternalLink, Copy, Check,
@@ -504,7 +505,12 @@ function UpdateFullModal({
     },
   ];
 
-  return (
+  // Portal to <body> so the modal escapes the Sidebar's stacking context.
+  // AppLayout applies `translate-x-0` on the sidebar wrapper, which
+  // establishes a containing block for `position: fixed` descendants —
+  // without the portal, the overlay would be clipped to the sidebar's
+  // width instead of spanning the full viewport.
+  return createPortal(
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-card-in"
       onClick={onClose}
@@ -680,7 +686,8 @@ function UpdateFullModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
