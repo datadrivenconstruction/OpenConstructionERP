@@ -1,16 +1,49 @@
-# OpenEstimate Code Owners
-# These users will be automatically requested for review on PRs.
+# CODEOWNERS for OpenConstructionERP
+#
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/managing-other-settings/about-code-owners
+#
+# Scope: legal, security, compliance, and CI release paths
+# require explicit approval from the repository owner. The
+# account @datadrivenconstruction is the formal owner; branch
+# protection on main should require Code Owner review for any
+# file matched here.
 
 # Default owner for everything
-* @ArtemBoiko
+*                                       @datadrivenconstruction
 
-# Backend
-backend/ @ArtemBoiko
+# Root-level legal and policy files
+/LICENSE                                @datadrivenconstruction
+/NOTICE                                 @datadrivenconstruction
+/CLA.md                                 @datadrivenconstruction
+/COMMERCIAL-LICENSE.md                  @datadrivenconstruction
+/SECURITY.md                            @datadrivenconstruction
+/PRIVACY.md                             @datadrivenconstruction
+/TERMS.md                               @datadrivenconstruction
+/COOKIES.md                             @datadrivenconstruction
+/CODE_OF_CONDUCT.md                     @datadrivenconstruction
+/CONTRIBUTING.md                        @datadrivenconstruction
+/README.md                              @datadrivenconstruction
+/PATENTS.md                             @datadrivenconstruction
+/TRADEMARK.md                           @datadrivenconstruction
+/ACCESSIBILITY.md                       @datadrivenconstruction
+/THIRD_PARTY_LICENSES.md                @datadrivenconstruction
 
-# Frontend
-frontend/ @ArtemBoiko
+# Source trees
+/backend/                               @datadrivenconstruction
+/frontend/                              @datadrivenconstruction
+/desktop/                               @datadrivenconstruction
+/modules/                               @datadrivenconstruction
 
-# Infrastructure & CI
-.github/ @ArtemBoiko
-deploy/ @ArtemBoiko
-docker-compose*.yml @ArtemBoiko
+# GitHub configuration - workflows touch signing, release,
+# and CLA enforcement, so gate them.
+/.github/                               @datadrivenconstruction
+
+# Infrastructure
+/deploy/                                @datadrivenconstruction
+docker-compose*.yml                     @datadrivenconstruction
+
+# Compliance documentation (RoPA template, SOC 2 readiness, etc.)
+/docs/compliance/                       @datadrivenconstruction
+
+# Release signatures
+/signatures/                            @datadrivenconstruction
