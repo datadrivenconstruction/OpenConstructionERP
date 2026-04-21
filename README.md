@@ -683,16 +683,6 @@ jurisdictions subject to comprehensive OFAC sanctions (currently Cuba,
 Iran, North Korea, Syria, and the Crimea / Donetsk / Luhansk regions of
 Ukraine). See [NOTICE](NOTICE) for the full notice.
 
-## Star History
-
-<a href="https://star-history.com/#datadrivenconstruction/OpenConstructionERP&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=datadrivenconstruction/OpenConstructionERP&type=Date" width="720" />
-  </picture>
-</a>
-
 ## License
 
 **AGPL-3.0** — see [LICENSE](LICENSE). Third-party attributions in
