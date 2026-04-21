@@ -1,9 +1,14 @@
 GNU AFFERO GENERAL PUBLIC LICENSE
 Version 3, 19 November 2007
 
-Copyright (C) 2024-2026 Artem Boiko and OpenEstimate Contributors
+Copyright (C) 2024-2026 Artem Boiko / DataDrivenConstruction.io
+and OpenConstructionERP Contributors
 
-OpenEstimate is created and maintained by Artem Boiko.
+Licensor operates as a registered small business (Kleingewerbe /
+Einzelunternehmen) under German law.
+
+OpenConstructionERP is created and maintained by Artem Boiko under
+the DataDrivenConstruction brand.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -27,17 +32,21 @@ https://www.gnu.org/licenses/agpl-3.0.txt
 
 Contributor License Agreement (CLA)
 
-All contributions to OpenEstimate require signing a Contributor License
-Agreement (CLA). The CLA grants Artem Boiko the right to distribute
-contributions under both the AGPL-3.0 license and a separate commercial
+All contributions to OpenConstructionERP require acceptance of a
+Contributor License Agreement (CLA). The CLA grants Artem Boiko -
+and any successor legal entity (UG (haftungsbeschränkt) or GmbH
+formed by Artem Boiko) - the right to distribute contributions
+under both the AGPL-3.0-or-later license and a separate commercial
 license. See CLA.md for the full agreement.
 
 ---
 
 Commercial License
 
-A commercial license is available for organizations that cannot comply
-with the AGPL-3.0 terms (e.g., proprietary SaaS deployments without
-source code disclosure).
+A commercial license is available for organizations that cannot
+comply with the AGPL-3.0 terms (e.g., proprietary SaaS deployments
+without source-code disclosure, embedding in closed-source products,
+or deployments requiring indemnification / SLA). See
+COMMERCIAL-LICENSE.md for the template.
 
-Contact: license@openestimate.io
+Contact: info@datadrivenconstruction.io
