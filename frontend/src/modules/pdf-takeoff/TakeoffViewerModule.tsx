@@ -67,6 +67,7 @@ import {
   polygonPerimeterPixels,
   formatMeasurement,
   deriveScale,
+  formatScaleRatio,
 } from './data/scale-helpers';
 import {
   SHORTCUT_LETTER,
@@ -78,6 +79,8 @@ import {
   computeGroupSummaries,
   formatGroupTotal,
 } from '../../features/takeoff/lib/takeoff-groups';
+import { CalibrationDialog } from '../../features/takeoff/components/CalibrationDialog';
+import { MeasurementLedger } from '../../features/takeoff/components/MeasurementLedger';
 
 // Configure PDF.js worker — bundled locally (no CDN dependency)
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -229,6 +232,34 @@ export default function TakeoffViewerModule({
   const [scaleRefReal, setScaleRefReal] = useState(1);
   const [settingScale, setSettingScale] = useState(false);
   const [scalePoints, setScalePoints] = useState<Point[]>([]);
+
+  // Calibration (two-click → modal).  When armed, the same click-to-pick
+  // logic as the existing legacy Scale dialog runs, but on completion
+  // we route into the new CalibrationDialog which offers unit selection.
+  const [showCalibrationDialog, setShowCalibrationDialog] = useState(false);
+  const [calibrationPixels, setCalibrationPixels] = useState(0);
+  const [calibrationMode, setCalibrationMode] = useState(false);
+  /** Cached last calibration (for badge display) — real length + unit.  */
+  const [lastCalibration, setLastCalibration] = useState<
+    { realLength: number; unit: 'm' | 'mm' | 'ft' | 'in' } | null
+  >(null);
+  /** True once the user has performed at least one two-click calibration
+   *  — drives the "Calibrated · 1:N @ Lm" status badge. */
+  const [isCalibrated, setIsCalibrated] = useState(false);
+
+  // Sidebar right-panel tab: "Properties" (existing) or "Ledger" (new).
+  // Persisted to localStorage so the choice survives reloads.
+  const [sidebarTab, setSidebarTab] = useState<'properties' | 'ledger'>(() => {
+    try {
+      const saved = localStorage.getItem('takeoff.sidebarTab');
+      return saved === 'ledger' ? 'ledger' : 'properties';
+    } catch {
+      return 'properties';
+    }
+  });
+  useEffect(() => {
+    try { localStorage.setItem('takeoff.sidebarTab', sidebarTab); } catch { /* ignore */ }
+  }, [sidebarTab]);
 
   // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -969,7 +1000,7 @@ export default function TakeoffViewerModule({
       const y = (e.clientY - rect.top) / zoom;
       const point: Point = { x, y };
 
-      // Setting scale mode
+      // Setting scale mode (legacy meters-only dialog OR new calibration).
       if (settingScale) {
         const newPoints = [...scalePoints, point];
         setScalePoints(newPoints);
@@ -977,9 +1008,16 @@ export default function TakeoffViewerModule({
           const np0 = newPoints[0]!;
           const np1 = newPoints[1]!;
           const dist = pixelDistance(np0.x, np0.y, np1.x, np1.y);
-          setScaleRefPixels(dist);
           setSettingScale(false);
-          setShowScaleDialog(true);
+          if (calibrationMode) {
+            // Route to the new multi-unit calibration dialog.
+            setCalibrationPixels(dist);
+            setCalibrationMode(false);
+            setShowCalibrationDialog(true);
+          } else {
+            setScaleRefPixels(dist);
+            setShowScaleDialog(true);
+          }
         }
         return;
       }
@@ -1329,6 +1367,41 @@ export default function TakeoffViewerModule({
     setShowScaleDialog(false);
     setScalePoints([]);
   }, [scaleRefPixels, scaleRefReal, addToast, t]);
+
+  /* ── Calibration (two-click → unit picker) ───────────────────────── */
+
+  /** Arm the calibration pick-mode.  The next two canvas clicks define
+   *  the reference segment; the CalibrationDialog then opens. */
+  const handleStartCalibration = useCallback(() => {
+    setCalibrationMode(true);
+    setSettingScale(true);
+    setScalePoints([]);
+  }, []);
+
+  /** User confirmed the calibration dialog — persist the new scale. */
+  const handleCalibrationConfirm = useCallback(
+    (nextScale: ScaleConfig) => {
+      setScale(nextScale);
+      setShowCalibrationDialog(false);
+      setScalePoints([]);
+      setIsCalibrated(true);
+      // Cache the derived "real length in meters" for the badge display.
+      // CalibrationDialog already converted to meters via deriveScale().
+      const meters = calibrationPixels > 0 ? calibrationPixels / nextScale.pixelsPerUnit : 0;
+      setLastCalibration({ realLength: meters, unit: 'm' });
+      addToast({
+        type: 'success',
+        title: t('takeoff_viewer.calibrated', { defaultValue: 'Scale calibrated' }),
+        message: `${formatScaleRatio(nextScale)} · ${meters.toFixed(2)} m`,
+      });
+    },
+    [addToast, t, calibrationPixels],
+  );
+
+  const handleCalibrationCancel = useCallback(() => {
+    setShowCalibrationDialog(false);
+    setScalePoints([]);
+  }, []);
 
   /* ── Recalculate measurements when scale changes ───────────────── */
 
@@ -1912,6 +1985,17 @@ export default function TakeoffViewerModule({
     window.open(`/boq/${m.linkedBoqId}?highlight=${m.linkedPositionId}`, '_blank', 'noopener');
   }, []);
 
+  /** Ledger row click → navigate to the measurement.  Switch to its page
+   *  if it's on a different one, select it, and (if the Properties tab
+   *  is more useful at that point) leave the user on Ledger so they can
+   *  click the next row without losing context. */
+  const handleLedgerRowClick = useCallback((m: Measurement) => {
+    if (m.page !== currentPage) {
+      setCurrentPage(m.page);
+    }
+    setSelectedMeasurementId(m.id);
+  }, [currentPage]);
+
   /* ── Undo ────────────────────────────────────────────────────────── */
 
   const handleUndo = useCallback(() => {
@@ -2102,6 +2186,13 @@ export default function TakeoffViewerModule({
 
       // Esc: cancel any in-progress drawing + deselect any selected measurement
       if (e.key === 'Escape') {
+        if (calibrationMode || settingScale) {
+          // Bail out of two-click pick mode cleanly.
+          setCalibrationMode(false);
+          setSettingScale(false);
+          setScalePoints([]);
+          return;
+        }
         if (activePoints.length > 0 || rectStartPoint !== null || showTextInput || showScaleDialog || showVolumeDepthInput) {
           setActivePoints([]);
           setRectStartPoint(null);
@@ -2126,7 +2217,7 @@ export default function TakeoffViewerModule({
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [handleUndo, handleRedo, selectTool, activePoints.length, rectStartPoint, showTextInput, showScaleDialog, showVolumeDepthInput, selectedMeasurementId]);
+  }, [handleUndo, handleRedo, selectTool, activePoints.length, rectStartPoint, showTextInput, showScaleDialog, showVolumeDepthInput, selectedMeasurementId, calibrationMode, settingScale]);
 
   /* ── Render ──────────────────────────────────────────────────────── */
 
@@ -2522,9 +2613,9 @@ export default function TakeoffViewerModule({
 
               {/* Scale */}
               <button
-                onClick={() => { setSettingScale(true); setScalePoints([]); }}
+                onClick={() => { setCalibrationMode(false); setSettingScale(true); setScalePoints([]); }}
                 className={`flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors ${
-                  settingScale ? 'bg-purple-500 text-white' : 'hover:bg-surface-secondary text-content-secondary'
+                  settingScale && !calibrationMode ? 'bg-purple-500 text-white' : 'hover:bg-surface-secondary text-content-secondary'
                 }`}
                 title={t('takeoff_viewer.set_scale', { defaultValue: 'Set scale' })}
                 aria-label={t('takeoff_viewer.set_scale', { defaultValue: 'Set scale' })}
@@ -2532,6 +2623,40 @@ export default function TakeoffViewerModule({
                 <Settings2 size={14} />
                 <span className="hidden sm:inline">{t('takeoff_viewer.scale', { defaultValue: 'Scale' })}</span>
               </button>
+
+              {/* Calibrate — two-click with multi-unit dialog */}
+              <button
+                onClick={handleStartCalibration}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors ${
+                  calibrationMode ? 'bg-purple-500 text-white' : 'hover:bg-surface-secondary text-content-secondary'
+                }`}
+                title={t('takeoff_viewer.calibrate', { defaultValue: 'Calibrate scale (two-click)' })}
+                aria-label={t('takeoff_viewer.calibrate', { defaultValue: 'Calibrate scale' })}
+                data-testid="calibrate-button"
+              >
+                <Ruler size={14} />
+                <span className="hidden sm:inline">{t('takeoff_viewer.calibrate', { defaultValue: 'Calibrate' })}</span>
+              </button>
+
+              {/* Calibration status badge — shows the active ratio + real length. */}
+              {isCalibrated && !calibrationMode && !settingScale && (
+                <button
+                  onClick={handleStartCalibration}
+                  className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors border border-purple-300/50 dark:border-purple-700/50"
+                  title={t('takeoff_viewer.recalibrate', { defaultValue: 'Recalibrate scale' })}
+                  data-testid="calibration-badge"
+                >
+                  <span className="font-semibold">Calibrated</span>
+                  <span className="text-purple-500">·</span>
+                  <span>{formatScaleRatio(scale)}</span>
+                  {lastCalibration && (
+                    <>
+                      <span className="text-purple-500">@</span>
+                      <span>{lastCalibration.realLength.toFixed(2)} m</span>
+                    </>
+                  )}
+                </button>
+              )}
 
               {/* Legend toggle — shows/hides the color-coded group legend
                   card in the bottom-left of the canvas viewport. */}
@@ -2607,10 +2732,17 @@ export default function TakeoffViewerModule({
                 onTouchEnd={handleTouchEnd}
               />
               {settingScale && (
-                <div className="absolute top-2 left-2 bg-purple-500/90 text-white px-3 py-1.5 rounded-lg text-xs font-medium">
-                  {scalePoints.length === 0
-                    ? t('takeoff_viewer.scale_click_first', { defaultValue: 'Click first point of known dimension' })
-                    : t('takeoff_viewer.scale_click_second', { defaultValue: 'Click second point' })}
+                <div
+                  className="absolute top-2 left-2 bg-purple-500/90 text-white px-3 py-1.5 rounded-lg text-xs font-medium"
+                  data-testid="calibration-hint"
+                >
+                  {calibrationMode
+                    ? (scalePoints.length === 0
+                        ? t('takeoff_viewer.calibrate_click_first', { defaultValue: 'Calibrate: click point A on a known dimension' })
+                        : t('takeoff_viewer.calibrate_click_second', { defaultValue: 'Calibrate: click point B' }))
+                    : (scalePoints.length === 0
+                        ? t('takeoff_viewer.scale_click_first', { defaultValue: 'Click first point of known dimension' })
+                        : t('takeoff_viewer.scale_click_second', { defaultValue: 'Click second point' }))}
                 </div>
               )}
               {/* Inline text input overlay for text annotation tool */}
@@ -2648,7 +2780,13 @@ export default function TakeoffViewerModule({
               {/* Color-coded group legend — bottom-left, click row to toggle visibility. */}
               {showLegend && legendSummaries.length > 0 && (
                 <div
-                  className="absolute bottom-2 left-2 max-w-[240px] rounded-lg border border-border bg-surface-primary/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg overflow-hidden"
+                  className={clsx(
+                    'absolute bottom-2 left-2 max-w-[240px] rounded-lg border border-border bg-surface-primary/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg overflow-hidden',
+                    // When a measurement/annotation tool is armed, let clicks pass through to the
+                    // overlay canvas beneath — otherwise the legend swallows canvas clicks, the user
+                    // sees no mark appear, and group-visibility toggles silently hide their work.
+                    activeTool !== 'select' && 'pointer-events-none',
+                  )}
                   data-testid="legend-overlay"
                 >
                   <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-border-light bg-surface-secondary/40">
@@ -2816,8 +2954,59 @@ export default function TakeoffViewerModule({
               </div>
             )}
 
+            {/* Segmented tab: Properties | Ledger */}
+            <div
+              className="flex rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-1 shadow-sm"
+              role="tablist"
+              data-testid="sidebar-tab-toggle"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={sidebarTab === 'properties'}
+                onClick={() => setSidebarTab('properties')}
+                className={clsx(
+                  'flex-1 px-2 py-1 rounded text-[11px] font-semibold transition-colors',
+                  sidebarTab === 'properties'
+                    ? 'bg-oe-blue text-white shadow-sm'
+                    : 'text-content-secondary hover:bg-surface-secondary',
+                )}
+                data-testid="sidebar-tab-properties"
+              >
+                {t('takeoff_viewer.tab_properties', { defaultValue: 'Properties' })}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={sidebarTab === 'ledger'}
+                onClick={() => setSidebarTab('ledger')}
+                className={clsx(
+                  'flex-1 px-2 py-1 rounded text-[11px] font-semibold transition-colors',
+                  sidebarTab === 'ledger'
+                    ? 'bg-oe-blue text-white shadow-sm'
+                    : 'text-content-secondary hover:bg-surface-secondary',
+                )}
+                data-testid="sidebar-tab-ledger"
+              >
+                {t('takeoff_viewer.tab_ledger', { defaultValue: 'Ledger' })}
+                <span className="ml-1 text-[9px] opacity-70">
+                  ({measurements.length})
+                </span>
+              </button>
+            </div>
+
+            {/* Ledger view — all measurements, sortable + filterable. */}
+            {sidebarTab === 'ledger' && (
+              <MeasurementLedger
+                measurements={measurements}
+                groupColorMap={GROUP_COLOR_MAP}
+                onRowClick={handleLedgerRowClick}
+                selectedMeasurementId={selectedMeasurementId}
+              />
+            )}
+
             {/* Properties panel — shown when a measurement is selected in the list */}
-            {selectedMeasurement && (
+            {sidebarTab === 'properties' && selectedMeasurement && (
               <div
                 className="rounded-md border border-oe-blue/40 bg-oe-blue/5 backdrop-blur-sm p-3 shadow-sm space-y-2.5 animate-fade-in"
                 data-testid="properties-panel"
@@ -2959,7 +3148,9 @@ export default function TakeoffViewerModule({
               </div>
             )}
 
-            {/* Measurements list (grouped) */}
+            {/* Measurements list (grouped) — only on Properties tab; the
+                Ledger tab renders its own, cross-page table instead. */}
+            {sidebarTab === 'properties' && (
             <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-semibold text-content-primary">
@@ -3306,7 +3497,7 @@ export default function TakeoffViewerModule({
                   );
                 })}
 
-                {/* Annotations section */}
+                {/* Annotations section (Properties tab only) */}
                 {(() => {
                   const annotations = pageMeasurements.filter((m) => isAnnotationType(m.type));
                   if (annotations.length === 0) return null;
@@ -3405,6 +3596,7 @@ export default function TakeoffViewerModule({
                 })()}
               </div>
             </div>
+            )}
 
             {/* Export buttons */}
             {measurements.length > 0 && (
@@ -3436,6 +3628,15 @@ export default function TakeoffViewerModule({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Calibration dialog (two-click with multi-unit picker) */}
+      {showCalibrationDialog && (
+        <CalibrationDialog
+          pixelDistance={calibrationPixels}
+          onConfirm={handleCalibrationConfirm}
+          onCancel={handleCalibrationCancel}
+        />
       )}
 
       {/* Scale dialog */}

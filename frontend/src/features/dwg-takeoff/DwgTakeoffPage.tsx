@@ -89,6 +89,18 @@ import {
 import { aggregateEntities } from './lib/group-aggregation';
 import { exportCanvasToPdf } from './lib/pdf-export';
 import { ToolPalette, type DwgTool } from './components/ToolPalette';
+import { CalibrationDialog, type CalibrationStep } from './components/CalibrationDialog';
+import { SheetStrip } from './components/SheetStrip';
+import {
+  deriveScale as deriveCalibration,
+  type CalibrationState,
+  type CalibrationUnit,
+} from './lib/calibration';
+import {
+  calibrationKey,
+  loadCalibration,
+  saveCalibration,
+} from './lib/calibration-store';
 import {
   canRedo as canRedoFn,
   canUndo as canUndoFn,
@@ -562,6 +574,20 @@ export function DwgTakeoffPage() {
   const [isCalibrating, setIsCalibrating] = useState(false);
   const [calibrationPixels, setCalibrationPixels] = useState<number | null>(null);
 
+  /* ── Two-click calibration (Goal 1) ──────────────────────────────────
+   * Independent of the pre-existing scale/calibration UI in the right
+   * panel. Driven by the "Calibrate" (K) tool in the palette:
+   *   - ``calibStep`` walks the state machine: 1 = waiting for A,
+   *     2 = waiting for B, 3 = modal open with length input.
+   *   - ``calibPointA`` / ``calibPointB`` are world-space coordinates
+   *     captured from the viewer's ``onCalibrationPoint`` callback.
+   *   - ``calibration`` is the active (persisted) scale for the current
+   *     drawing + layout, loaded from localStorage on select/layout change. */
+  const [calibStep, setCalibStep] = useState<CalibrationStep>(0);
+  const [calibPointA, setCalibPointA] = useState<{ x: number; y: number } | null>(null);
+  const [calibPointB, setCalibPointB] = useState<{ x: number; y: number } | null>(null);
+  const [calibration, setCalibration] = useState<CalibrationState | null>(null);
+
   // Persist the scale per drawing ID — switching drawings restores its scale.
   useEffect(() => {
     if (!selectedDrawingId) return;
@@ -786,6 +812,142 @@ export function DwgTakeoffPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layouts]);
 
+  // Per-layout entity counts for the SheetStrip. Memoised so a hover on
+  // the strip doesn't re-walk the entity list.
+  const entityCountByLayout = useMemo(() => {
+    const out: Record<string, number> = {};
+    for (const e of entities) {
+      const key = e.layout ?? '__default__';
+      out[key] = (out[key] ?? 0) + 1;
+    }
+    return out;
+  }, [entities]);
+
+  /**
+   * Load the persisted two-click calibration whenever the drawing or
+   * layout changes. The key combines projectId + filename + layout so
+   * multi-layout files keep a scale per sheet — the same floor plan
+   * can appear at 1:50 on one sheet and 1:100 on another.
+   */
+  useEffect(() => {
+    if (!selectedDrawingId) {
+      setCalibration(null);
+      return;
+    }
+    const d = drawings.find((x) => x.id === selectedDrawingId);
+    if (!d) {
+      setCalibration(null);
+      return;
+    }
+    const k = calibrationKey(projectId, d.filename, selectedLayout);
+    setCalibration(loadCalibration(k));
+  }, [selectedDrawingId, selectedLayout, drawings, projectId]);
+
+  // Abort an in-flight two-click calibration when the user switches tool
+  // away from "calibrate" — prevents a stranded Point A from leaking
+  // into a subsequent calibration.
+  useEffect(() => {
+    if (activeTool !== 'calibrate' && calibStep > 0 && calibStep < 3) {
+      setCalibStep(0);
+      setCalibPointA(null);
+      setCalibPointB(null);
+    }
+  }, [activeTool, calibStep]);
+
+  // Open step 1 as soon as the user picks the tool.
+  useEffect(() => {
+    if (activeTool === 'calibrate' && calibStep === 0) {
+      setCalibStep(1);
+      setCalibPointA(null);
+      setCalibPointB(null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTool]);
+
+  /** Step machine driver — receives world-space clicks from DxfViewer. */
+  const handleCalibrationPoint = useCallback(
+    (pt: { x: number; y: number }) => {
+      if (calibStep === 1) {
+        setCalibPointA(pt);
+        setCalibStep(2);
+      } else if (calibStep === 2) {
+        setCalibPointB(pt);
+        setCalibStep(3);
+      }
+    },
+    [calibStep],
+  );
+
+  /** Confirm handler from the dialog: derive scale, persist, reset. */
+  const handleCalibrationConfirm = useCallback(
+    (realLength: number, unit: CalibrationUnit) => {
+      if (!calibPointA || !calibPointB || !selectedDrawingId) {
+        setCalibStep(0);
+        return;
+      }
+      const d = drawings.find((x) => x.id === selectedDrawingId);
+      if (!d) {
+        setCalibStep(0);
+        return;
+      }
+      try {
+        const { unitsPerPixel } = deriveCalibration(
+          [calibPointA.x, calibPointA.y],
+          [calibPointB.x, calibPointB.y],
+          realLength,
+          unit,
+        );
+        const state: CalibrationState = {
+          unitsPerPixel,
+          unit,
+          calibratedAt: Date.now(),
+          pointA: [calibPointA.x, calibPointA.y],
+          pointB: [calibPointB.x, calibPointB.y],
+        };
+        const k = calibrationKey(projectId, d.filename, selectedLayout);
+        saveCalibration(k, state);
+        setCalibration(state);
+        addToast({
+          type: 'success',
+          title: t('dwg_takeoff.cal_success', {
+            defaultValue: 'Scale calibrated',
+          }) as string,
+        });
+      } catch {
+        addToast({
+          type: 'error',
+          title: t('dwg_takeoff.cal_error_generic', {
+            defaultValue: 'Calibration failed — try clicking two distinct points.',
+          }) as string,
+        });
+      }
+      setCalibStep(0);
+      setCalibPointA(null);
+      setCalibPointB(null);
+      setActiveTool('select');
+    },
+    [
+      calibPointA,
+      calibPointB,
+      selectedDrawingId,
+      drawings,
+      projectId,
+      selectedLayout,
+      addToast,
+      t,
+    ],
+  );
+
+  /** Cancel handler — drops any captured points and closes the dialog. */
+  const handleCalibrationCancel = useCallback(() => {
+    setCalibStep(0);
+    setCalibPointA(null);
+    setCalibPointB(null);
+    // Fall back to the select tool so a stray click doesn't immediately
+    // re-open step 1 (which would surprise the user).
+    setActiveTool('select');
+  }, []);
+
   /**
    * Area-cache entities at load time so the ranked hit-test (RFC 11 §4.1) can
    * score candidates in O(1) per entity without recomputing the polygon
@@ -871,6 +1033,9 @@ export function DwgTakeoffPage() {
     mutationFn: (data: CreateAnnotationPayload) => createAnnotation(data),
     onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ['dwg-annotations', selectedDrawingId] });
+      // Feed the unified Markups hub so the new annotation shows up there
+      // without a manual reload (Option B aggregator).
+      queryClient.invalidateQueries({ queryKey: ['unified-markups'] });
       // Q1 UX #2: push a "create" entry so Ctrl+Z can delete the just-
       // persisted annotation. ``skipUndoRef`` suppresses this during
       // replay paths to avoid doubling up entries during redo.
@@ -974,6 +1139,7 @@ export function DwgTakeoffPage() {
     mutationFn: ({ id }) => deleteAnnotation(id),
     onSuccess: (_res, vars) => {
       queryClient.invalidateQueries({ queryKey: ['dwg-annotations', selectedDrawingId] });
+      queryClient.invalidateQueries({ queryKey: ['unified-markups'] });
       setSelectedAnnotationId(null);
       if (skipUndoRef.current) {
         skipUndoRef.current = false;
@@ -2032,6 +2198,9 @@ export function DwgTakeoffPage() {
         case 't': case 'T':
           setActiveTool('text_pin');
           break;
+        case 'k': case 'K':
+          setActiveTool('calibrate');
+          break;
       }
     };
     window.addEventListener('keydown', handler);
@@ -2172,24 +2341,6 @@ export function DwgTakeoffPage() {
             </div>
           ) : (
             <>
-            {layouts.length > 1 && (
-              <div className="flex items-center gap-0.5 border-b border-border bg-surface px-2 py-1 overflow-x-auto flex-shrink-0">
-                {layouts.map((layout) => (
-                  <button
-                    key={layout}
-                    onClick={() => setSelectedLayout(layout)}
-                    className={clsx(
-                      'px-3 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap',
-                      selectedLayout === layout
-                        ? 'bg-oe-blue/15 text-oe-blue'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-surface-secondary',
-                    )}
-                  >
-                    {layout}
-                  </button>
-                ))}
-              </div>
-            )}
             <div className="relative flex-1 min-h-0" data-dwg-viewer-root>
               <DxfViewer
                 entities={viewerEntities}
@@ -2206,6 +2357,36 @@ export function DwgTakeoffPage() {
                 onSelectAnnotation={setSelectedAnnotationId}
                 onEntityContextMenu={handleEntityContextMenu}
                 onAnnotationCreated={handleAnnotationCreated}
+                onCalibrationPoint={handleCalibrationPoint}
+                calibration={
+                  calibration
+                    ? { unitsPerPixel: calibration.unitsPerPixel, unit: calibration.unit }
+                    : null
+                }
+                calibrationOverlay={{
+                  pointA:
+                    calibStep === 2 || calibStep === 3
+                      ? calibPointA
+                      : calibStep === 0 && calibration?.pointA
+                        ? { x: calibration.pointA[0], y: calibration.pointA[1] }
+                        : null,
+                  pointB:
+                    calibStep === 3
+                      ? calibPointB
+                      : calibStep === 0 && calibration?.pointB
+                        ? { x: calibration.pointB[0], y: calibration.pointB[1] }
+                        : null,
+                }}
+              />
+
+              {/* Two-click calibration dialog. Step 0 = hidden. Steps 1/2
+                  render a non-blocking banner; step 3 is a centered modal. */}
+              <CalibrationDialog
+                step={calibStep}
+                pointA={calibPointA ? [calibPointA.x, calibPointA.y] : null}
+                pointB={calibPointB ? [calibPointB.x, calibPointB.y] : null}
+                onConfirm={handleCalibrationConfirm}
+                onCancel={handleCalibrationCancel}
               />
 
               {/* Floating ToolPalette — top-left corner, above the canvas.
@@ -2706,6 +2887,19 @@ export function DwgTakeoffPage() {
                 );
               })()}
             </div>
+            {/* ── Sheet thumbnail strip (Goal 2) ──────────────────────
+                 Bottom of the viewer, above the drawings filmstrip.
+                 Hidden automatically when the DWG has only one layout.
+                 Clicking a thumbnail switches the layout without losing
+                 the current tool; calibration is keyed by layout so the
+                 scale swaps in/out with the sheet. */}
+            <SheetStrip
+              layouts={layouts}
+              entities={entities}
+              activeLayout={selectedLayout}
+              onLayoutChange={setSelectedLayout}
+              entityCountByLayout={entityCountByLayout}
+            />
             </>
           )}
 

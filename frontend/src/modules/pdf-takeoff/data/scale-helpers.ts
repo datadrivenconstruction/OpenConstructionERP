@@ -100,3 +100,47 @@ export function deriveScale(
     unitLabel: 'm',
   };
 }
+
+/** Calibration units supported by the two-click calibration dialog. */
+export type CalibrationUnit = 'm' | 'mm' | 'ft' | 'in';
+
+/** Conversion factors from each supported calibration unit to meters. */
+export const UNIT_TO_METERS: Readonly<Record<CalibrationUnit, number>> = {
+  m: 1,
+  mm: 0.001,
+  ft: 0.3048,
+  in: 0.0254,
+};
+
+/** Convert a real-world length given in `unit` into meters. */
+export function toMeters(value: number, unit: CalibrationUnit): number {
+  return value * (UNIT_TO_METERS[unit] ?? 1);
+}
+
+/** Convert meters back into the supplied display unit. */
+export function fromMeters(meters: number, unit: CalibrationUnit): number {
+  const factor = UNIT_TO_METERS[unit] ?? 1;
+  if (factor === 0) return meters;
+  return meters / factor;
+}
+
+/**
+ * Derive a canonical `1:N` architectural scale ratio from a calibrated
+ * `pixelsPerUnit` value, assuming the drawing is rendered at the common
+ * 72dpi PDF base resolution (matching the inverse logic used by the
+ * preset buttons: `pixelsPerUnit = 72 / (0.0254 * ratio)`).
+ *
+ * Returns the nearest integer ratio, clamped to sensible bounds.
+ */
+export function ratioFromScale(scale: ScaleConfig): number {
+  if (scale.pixelsPerUnit <= 0) return 0;
+  // ppu = 72 / (0.0254 * ratio)  →  ratio = 72 / (ppu * 0.0254)
+  const raw = 72 / (scale.pixelsPerUnit * 0.0254);
+  return Math.max(1, Math.round(raw));
+}
+
+/** Format a derived scale as "1:50" for a status badge. */
+export function formatScaleRatio(scale: ScaleConfig): string {
+  const ratio = ratioFromScale(scale);
+  return ratio > 0 ? `1:${ratio}` : '—';
+}

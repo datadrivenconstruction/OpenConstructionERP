@@ -248,21 +248,66 @@ export async function updateDrawingScale(
 
 /* ── Annotations CRUD ──────────────────────────────────────────────────── */
 
+/** Backend response shape. The API stores `annotation_type` + `geometry`
+ *  (with `points` + primitive-specific extras like `radius`) in separate
+ *  columns; the frontend renderer expects a flattened `{type, points, radius}`.
+ *  ``normaliseAnnotation`` bridges the two. Without it, `AnnotationOverlay`
+ *  reads `ann.type`/`ann.points` as undefined and every user-drawn mark is
+ *  silently invisible on the canvas even though the side panel lists it. */
+interface RawAnnotation {
+  id: string;
+  drawing_id: string;
+  annotation_type?: string;
+  type?: string;
+  geometry?: { points?: { x: number; y: number }[]; radius?: number; [k: string]: unknown };
+  points?: { x: number; y: number }[];
+  radius?: number;
+  text: string | null;
+  color: string;
+  line_width?: number;
+  thickness?: number;
+  layer_name?: string;
+  measurement_value: number | null;
+  measurement_unit: string | null;
+  scale_override?: number | null;
+  linked_boq_position_id: string | null;
+  metadata?: Record<string, unknown>;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+function normaliseAnnotation(raw: RawAnnotation): DwgAnnotation {
+  const type = (raw.type ?? raw.annotation_type ?? 'text_pin') as DwgAnnotation['type'];
+  const geom = raw.geometry ?? {};
+  const points = raw.points ?? geom.points ?? [];
+  const radius = raw.radius ?? (typeof geom.radius === 'number' ? geom.radius : undefined);
+  return {
+    ...raw,
+    type,
+    points,
+    radius,
+  } as DwgAnnotation;
+}
+
 export async function fetchAnnotations(drawingId: string): Promise<DwgAnnotation[]> {
-  return apiGet<DwgAnnotation[]>(
+  const raw = await apiGet<RawAnnotation[]>(
     `/v1/dwg_takeoff/annotations/?drawing_id=${encodeURIComponent(drawingId)}&limit=500`,
   );
+  return raw.map(normaliseAnnotation);
 }
 
 export async function createAnnotation(data: CreateAnnotationPayload): Promise<DwgAnnotation> {
-  return apiPost<DwgAnnotation>('/v1/dwg_takeoff/annotations/', data);
+  const raw = await apiPost<RawAnnotation>('/v1/dwg_takeoff/annotations/', data);
+  return normaliseAnnotation(raw);
 }
 
 export async function updateAnnotation(
   id: string,
   data: UpdateAnnotationPayload,
 ): Promise<DwgAnnotation> {
-  return apiPatch<DwgAnnotation>(`/v1/dwg_takeoff/annotations/${id}`, data);
+  const raw = await apiPatch<RawAnnotation>(`/v1/dwg_takeoff/annotations/${id}`, data);
+  return normaliseAnnotation(raw);
 }
 
 export async function deleteAnnotation(id: string): Promise<void> {
@@ -273,9 +318,10 @@ export async function linkAnnotationToBoq(
   annotId: string,
   boqPositionId: string,
 ): Promise<DwgAnnotation> {
-  return apiPost<DwgAnnotation>(`/v1/dwg_takeoff/annotations/${annotId}/link-boq/`, {
+  const raw = await apiPost<RawAnnotation>(`/v1/dwg_takeoff/annotations/${annotId}/link-boq/`, {
     position_id: boqPositionId,
   });
+  return normaliseAnnotation(raw);
 }
 
 /* ── Pins ──────────────────────────────────────────────────────────────── */

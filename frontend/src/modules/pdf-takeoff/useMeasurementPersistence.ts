@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { QueryClientContext } from '@tanstack/react-query';
 import { takeoffApi, type MeasurementCreate, type MeasurementResponse } from '@/features/takeoff/api';
 
 /* ── Types (mirrored from TakeoffViewerModule) ──────────────────────── */
@@ -191,6 +192,11 @@ export function useMeasurementPersistence({
   const [syncing, setSyncing] = useState(false);
   const [syncedToServer, setSyncedToServer] = useState(false);
   const serverSyncRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Read the QueryClient directly from context — ``useContext`` returns
+  // ``undefined`` instead of throwing when the provider is absent (e.g. in
+  // unit tests that render the hook in isolation). When present, we use
+  // it to broadcast a refresh to the unified Markups hub.
+  const qc = useContext(QueryClientContext);
 
   // Load persisted data when file name changes — try server first, fallback to localStorage
   useEffect(() => {
@@ -269,6 +275,8 @@ export function useMeasurementPersistence({
             );
             return match ? { ...m, serverId: match.id } : m;
           }));
+          // Surface the new measurements in the unified Markups hub.
+          qc?.invalidateQueries({ queryKey: ['unified-markups'] });
         }
         setSyncedToServer(true);
       } catch {
