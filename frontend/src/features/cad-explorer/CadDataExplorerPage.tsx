@@ -15,7 +15,7 @@ import {
   Download as DownloadIcon, Columns3, Search as SearchIcon,
   Upload, FileUp, Loader2, CheckCircle2, AlertCircle, FolderOpen,
   TrendingUp, Hash, Clock, ShieldCheck, Bookmark, ScatterChart as ScatterIcon, Trash2,
-  Box, Ruler, Square, Building2,
+  Box, Ruler, Square, Building2, Palette,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
@@ -39,9 +39,18 @@ import {
   useAnalysisStateStore,
   type ChartKind,
   type ChartFormat,
+  type PivotVizMode,
 } from '@/stores/useAnalysisStateStore';
 import { formatValue, formatChartValue } from '@/shared/lib/numberFormat';
-import { applyTopN, groupMatchesSlicers } from './aggregation';
+import {
+  applyTopN,
+  groupMatchesSlicers,
+  computeClientPivot,
+  isCategoricalAggFn,
+  canAggregateColumn,
+  formatCount,
+  AGG_FUNCTIONS as SUPPORTED_AGG_FUNCTIONS,
+} from './aggregation';
 import {
   parseTab,
   parseSlicers,
@@ -52,6 +61,15 @@ import {
   serialiseChart,
   computeDataBar,
 } from './urlState';
+import {
+  parseThresholds,
+  serialiseThresholds,
+  findRuleForColumn,
+  resolveThresholdColor,
+  applyRuleToBar,
+  type ThresholdRule,
+} from './thresholds';
+import { ThresholdRulesModal } from './ThresholdRulesModal';
 
 /* ── Recharts — lazy-loaded so the initial Data Explorer bundle stays lean.
       Charts live in a ~38 kB gzipped chunk that only loads once the user
@@ -81,7 +99,23 @@ const TABS: { id: TabId; icon: React.ElementType; label: string; description: st
   { id: 'describe', icon: FileSpreadsheet, label: 'Describe', description: 'Statistical summary of all numeric columns' },
 ];
 
-const AGG_FUNCTIONS = ['sum', 'avg', 'min', 'max', 'count'];
+// Aggregation vocabulary imported from ./aggregation (single source of
+// truth shared with the URL parser and the client-side pivot reducer).
+// `count` and `count_unique` operate on any column dtype, so the aggCols
+// picker relaxes its numeric-only filter when the user selects one of them.
+const AGG_FUNCTIONS = SUPPORTED_AGG_FUNCTIONS;
+
+/** Human-readable label for each agg function — shown in the `<select>`
+ *  and in tooltips. Kept local to the component so i18n fallbacks stay
+ *  close to the UI they describe. */
+const AGG_FUNCTION_LABELS: Record<(typeof AGG_FUNCTIONS)[number], string> = {
+  sum: 'SUM',
+  avg: 'AVG',
+  min: 'MIN',
+  max: 'MAX',
+  count: 'COUNT',
+  count_unique: 'COUNT UNIQUE',
+};
 
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
@@ -557,14 +591,432 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
   );
 }
 
+/* ── Pivot visualization switcher ─────────────────────────────────────── */
+
+interface PivotVizSwitcherProps {
+  mode: PivotVizMode;
+  onChange: (mode: PivotVizMode) => void;
+  /** `matrix` requires two group-by columns. Disable the button with a
+   *  tooltip when only one is selected so the UI is never "stuck" on an
+   *  unrenderable mode. */
+  matrixEnabled: boolean;
+}
+
+const PIVOT_VIZ_OPTIONS: {
+  id: PivotVizMode;
+  icon: React.ElementType;
+  labelKey: string;
+  fallback: string;
+  title: string;
+}[] = [
+  { id: 'table',   icon: Table2,      labelKey: 'explorer.viz_table',   fallback: 'Table',   title: 'Dense grid with in-cell data bars (original view)' },
+  { id: 'heatmap', icon: Hash,        labelKey: 'explorer.viz_heatmap', fallback: 'Heatmap', title: 'Color intensity shows magnitude — great for multi-column comparison' },
+  { id: 'bar',     icon: BarChart3,   labelKey: 'explorer.viz_bar',     fallback: 'Bar',     title: 'Grouped horizontal bars — best for comparing groups' },
+  { id: 'treemap', icon: Layers,      labelKey: 'explorer.viz_treemap', fallback: 'Treemap', title: 'Area proportional to value — best for proportion and share' },
+  { id: 'matrix',  icon: Columns3,    labelKey: 'explorer.viz_matrix',  fallback: 'Matrix',  title: 'Crosstab: first group-by on rows, second on columns (requires 2 group-by)' },
+];
+
+function PivotVizSwitcher({ mode, onChange, matrixEnabled }: PivotVizSwitcherProps) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center gap-2 flex-wrap" data-testid="pivot-viz-switcher">
+      <span className="text-2xs font-semibold text-content-secondary uppercase tracking-wide">
+        {t('explorer.viz_mode', { defaultValue: 'View as' })}
+      </span>
+      {PIVOT_VIZ_OPTIONS.map(({ id, icon: Icon, labelKey, fallback, title }) => {
+        const isActive = mode === id;
+        const disabled = id === 'matrix' && !matrixEnabled;
+        const suffix = disabled ? ` — ${fallback === 'Matrix' ? 'pick a second group-by' : ''}` : '';
+        return (
+          <button
+            key={id}
+            type="button"
+            disabled={disabled}
+            data-testid={`pivot-viz-btn-${id}`}
+            data-active={isActive ? 'true' : 'false'}
+            onClick={() => { if (!disabled) onChange(id); }}
+            title={title + suffix}
+            className={`h-7 px-2.5 rounded-md text-2xs font-medium border inline-flex items-center gap-1.5 transition-colors whitespace-nowrap ${
+              isActive
+                ? 'bg-oe-blue text-white border-oe-blue'
+                : disabled
+                ? 'bg-surface-secondary text-content-quaternary border-border-light opacity-40 cursor-not-allowed'
+                : 'bg-surface-secondary text-content-tertiary border-border-light hover:bg-surface-tertiary'
+            }`}
+          >
+            <Icon size={12} />
+            {t(labelKey, { defaultValue: fallback })}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── Pivot visualization renderer ─────────────────────────────────────── */
+
+interface PivotVizRendererProps {
+  mode: PivotVizMode;
+  groups: AggregateGroup[];
+  groupBy: string[];
+  aggCols: string[];
+  aggFn: string;
+  maxByAgg: Map<string, number>;
+  thresholdRules: ThresholdRule[];
+  /** Cross-filter: clicking a group should add a slicer on the first
+   *  group-by column. Wired here so each viz can hand the same group
+   *  object back up. */
+  onGroupClick?: (group: AggregateGroup) => void;
+}
+
+/** Dispatch to the correct viz component. Keeping this thin on purpose
+ *  — each viz owns its own layout and event handling. */
+function PivotVizRenderer(props: PivotVizRendererProps) {
+  const { mode, groups } = props;
+  if (groups.length === 0) return null;
+  switch (mode) {
+    case 'heatmap': return <PivotHeatmap {...props} />;
+    case 'bar':     return <PivotBarViz {...props} />;
+    case 'treemap': return <PivotTreemap {...props} />;
+    case 'matrix':  return <PivotMatrix {...props} />;
+    default:        return null; // 'table' is handled by the parent's own renderer.
+  }
+}
+
+/** Heatmap: each row is a group, each column is an aggregate column,
+ *  cell background intensity is proportional to |value| / max. Gives
+ *  an immediate "which cell is biggest" read-out and works well for
+ *  multi-aggregate comparison (volume + area + length). */
+function PivotHeatmap({ groups, groupBy, aggCols, aggFn, maxByAgg, thresholdRules }: PivotVizRendererProps) {
+  const { t } = useTranslation();
+  if (aggCols.length === 0 || groupBy.length === 0) {
+    return (
+      <p className="py-8 text-center text-xs text-content-tertiary">
+        {t('explorer.viz_need_cols', { defaultValue: 'Pick at least one group-by and one aggregate column.' })}
+      </p>
+    );
+  }
+  const heatBg = (value: number, max: number): string => {
+    if (!Number.isFinite(max) || max <= 0) return 'rgba(59,130,246,0)';
+    const ratio = Math.max(0, Math.min(1, Math.abs(value) / max));
+    // Blue gradient — low saturation at low values, darker at high.
+    // Kept CSS-in-style so dark mode picks up the same hue.
+    const alpha = 0.08 + ratio * 0.52;
+    return `rgba(59,130,246,${alpha.toFixed(3)})`;
+  };
+  return (
+    <div className="overflow-x-auto" data-testid="pivot-heatmap">
+      <table className="w-full text-xs border-collapse">
+        <thead>
+          <tr className="border-b border-border bg-surface-secondary/50">
+            {groupBy.map((col) => (
+              <th key={col} className="px-3 py-2 text-left text-2xs font-semibold text-content-tertiary uppercase tracking-wide sticky left-0 bg-surface-secondary/50">
+                {col}
+              </th>
+            ))}
+            {aggCols.map((col) => (
+              <th key={col} className="px-3 py-2 text-right text-2xs font-semibold text-content-tertiary uppercase tracking-wide">
+                {aggFn}({col})
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {groups.map((g, i) => (
+            <tr key={Object.values(g.key).join('-') + i} className="border-b border-border-light">
+              {groupBy.map((col) => (
+                <td key={col} className="px-3 py-1.5 text-content-primary sticky left-0 bg-surface-primary">
+                  {g.key[col] || '—'}
+                </td>
+              ))}
+              {aggCols.map((col) => {
+                const v = g.results[col] ?? 0;
+                const max = maxByAgg.get(col) ?? 0;
+                const rule = findRuleForColumn(thresholdRules, col);
+                const style = rule ? applyRuleToBar(v, rule) : null;
+                const bg = style ? style.bg : heatBg(v, max);
+                const text = style ? style.text : undefined;
+                return (
+                  <td
+                    key={col}
+                    data-testid={`pivot-heatmap-cell-${col}`}
+                    className="px-3 py-1.5 text-right tabular-nums font-medium"
+                    style={{ backgroundColor: bg, color: text }}
+                  >
+                    {isCategoricalAggFn(aggFn) ? formatCount(v) : formatNumber(v)}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** Grouped horizontal bar chart. Each group is a bar cluster; within a
+ *  cluster there's one bar per aggregate column. Best for direct
+ *  "group A vs group B" comparison at a glance. */
+function PivotBarViz({ groups, groupBy, aggCols, aggFn, onGroupClick }: PivotVizRendererProps) {
+  const { t } = useTranslation();
+  const { api, error } = useRecharts();
+  const firstGroupKey = groupBy[0];
+  if (!firstGroupKey || aggCols.length === 0) {
+    return (
+      <p className="py-8 text-center text-xs text-content-tertiary">
+        {t('explorer.viz_need_cols', { defaultValue: 'Pick at least one group-by and one aggregate column.' })}
+      </p>
+    );
+  }
+  if (error) {
+    return <p className="text-xs text-red-500 py-6 text-center">Recharts failed to load: {error.message}</p>;
+  }
+  if (!api) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
+      </div>
+    );
+  }
+  const { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } = api;
+  const data = groups.map((g) => {
+    const name = String(g.key[firstGroupKey] ?? '—') || '—';
+    const entry: Record<string, string | number> = { name };
+    for (const col of aggCols) entry[col] = g.results[col] ?? 0;
+    return entry;
+  });
+  const height = Math.max(260, Math.min(600, data.length * 32 + 80));
+  const colourFor = (i: number): string => BAR_COLORS[i % BAR_COLORS.length]!;
+  return (
+    <div data-testid="pivot-bar-viz" style={{ width: '100%', height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} layout="vertical" margin={{ top: 8, right: 24, left: 16, bottom: 16 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <XAxis type="number" tickFormatter={(v: number) => formatNumber(v)} fontSize={11} />
+          <YAxis type="category" dataKey="name" width={140} fontSize={11} />
+          <Tooltip formatter={(v: unknown): string => formatNumber(v as number)} />
+          <Legend wrapperStyle={{ fontSize: 11 }} />
+          {aggCols.map((col, i) => (
+            <Bar
+              key={col}
+              dataKey={col}
+              name={`${aggFn}(${col})`}
+              fill={colourFor(i)}
+              isAnimationActive={false}
+              onClick={(_d: unknown, idx: number) => {
+                const g = groups[idx];
+                if (g && onGroupClick) onGroupClick(g);
+              }}
+            />
+          ))}
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+/** Treemap: each rectangle is a group, area proportional to the FIRST
+ *  aggregate column. Reads share/proportion at a glance. */
+function PivotTreemap({ groups, groupBy, aggCols, aggFn, onGroupClick }: PivotVizRendererProps) {
+  const { t } = useTranslation();
+  const { api, error } = useRecharts();
+  const firstGroupKey = groupBy[0];
+  const firstAgg = aggCols[0];
+  if (!firstGroupKey || !firstAgg) {
+    return (
+      <p className="py-8 text-center text-xs text-content-tertiary">
+        {t('explorer.viz_need_cols', { defaultValue: 'Pick at least one group-by and one aggregate column.' })}
+      </p>
+    );
+  }
+  if (error) {
+    return <p className="text-xs text-red-500 py-6 text-center">Recharts failed to load: {error.message}</p>;
+  }
+  if (!api) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
+      </div>
+    );
+  }
+  const { Treemap, ResponsiveContainer, Tooltip } = api;
+  const data = groups
+    .map((g, i) => ({
+      name: String(g.key[firstGroupKey] ?? '—') || '—',
+      size: Math.max(0, g.results[firstAgg] ?? 0),
+      colour: BAR_COLORS[i % BAR_COLORS.length]!,
+      index: i,
+    }))
+    .filter((d) => d.size > 0);
+  if (data.length === 0) {
+    return (
+      <p className="py-8 text-center text-xs text-content-tertiary">
+        {t('explorer.treemap_all_zero', { defaultValue: 'All values are zero — nothing to show as area.' })}
+      </p>
+    );
+  }
+  return (
+    <div data-testid="pivot-treemap" style={{ width: '100%', height: 400 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <Treemap
+          data={data}
+          dataKey="size"
+          nameKey="name"
+          isAnimationActive={false}
+          content={(p: unknown) => {
+            // Recharts hands us a payload per rectangle — we paint a
+            // soft-coloured tile with the name + value.
+            const d = p as {
+              x: number; y: number; width: number; height: number;
+              name?: string; value?: number; index?: number;
+            };
+            if (d.width <= 0 || d.height <= 0) return null as unknown as React.ReactElement;
+            const colour = BAR_COLORS[(d.index ?? 0) % BAR_COLORS.length]!;
+            const showLabel = d.width > 50 && d.height > 24;
+            const name = d.name ?? '';
+            const value = d.value ?? 0;
+            return (
+              <g
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  const g = groups[d.index ?? -1];
+                  if (g && onGroupClick) onGroupClick(g);
+                }}
+              >
+                <rect x={d.x} y={d.y} width={d.width} height={d.height} fill={colour} opacity={0.75} stroke="#fff" />
+                {showLabel && (
+                  <>
+                    <text x={d.x + 6} y={d.y + 16} fill="#fff" fontSize={11} fontWeight={600}>
+                      {name.length > 24 ? name.slice(0, 22) + '…' : name}
+                    </text>
+                    <text x={d.x + 6} y={d.y + 30} fill="#fff" fontSize={10} opacity={0.85}>
+                      {formatNumber(value)}
+                    </text>
+                  </>
+                )}
+              </g>
+            ) as unknown as React.ReactElement;
+          }}
+        >
+          <Tooltip
+            formatter={(v: unknown): string => (isCategoricalAggFn(aggFn) ? formatCount(v as number) : formatNumber(v as number))}
+            labelFormatter={(n: unknown) => String(n)}
+          />
+        </Treemap>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+/** Cross-tabulation matrix: first group-by on rows, second on columns,
+ *  cell = first aggregate column. Requires at least two group-by cols. */
+function PivotMatrix({ groups, groupBy, aggCols, aggFn, thresholdRules }: PivotVizRendererProps) {
+  const { t } = useTranslation();
+  const rowKey = groupBy[0];
+  const colKey = groupBy[1];
+  const firstAgg = aggCols[0];
+  if (!rowKey || !colKey || !firstAgg) {
+    return (
+      <p className="py-8 text-center text-xs text-content-tertiary">
+        {t('explorer.matrix_needs_two', { defaultValue: 'Matrix needs at least two Group By columns and one aggregate column.' })}
+      </p>
+    );
+  }
+  const rowLabels: string[] = [];
+  const colLabels: string[] = [];
+  const rowSet = new Set<string>();
+  const colSet = new Set<string>();
+  const cellMap = new Map<string, number>(); // `${row}\u001F${col}` → value
+  for (const g of groups) {
+    const r = String(g.key[rowKey] ?? '—') || '—';
+    const c = String(g.key[colKey] ?? '—') || '—';
+    if (!rowSet.has(r)) { rowSet.add(r); rowLabels.push(r); }
+    if (!colSet.has(c)) { colSet.add(c); colLabels.push(c); }
+    cellMap.set(`${r}\u001F${c}`, (cellMap.get(`${r}\u001F${c}`) ?? 0) + (g.results[firstAgg] ?? 0));
+  }
+  // Recompute max for heat colour scaling (cells may be sums of
+  // multiple groups when groupBy has more than two columns — matches
+  // the pivot-table crosstab expectation).
+  let max = 0;
+  for (const v of cellMap.values()) if (Math.abs(v) > max) max = Math.abs(v);
+  const heatBg = (value: number): string => {
+    if (max <= 0) return 'rgba(34,197,94,0)';
+    const ratio = Math.max(0, Math.min(1, Math.abs(value) / max));
+    const alpha = 0.08 + ratio * 0.5;
+    return `rgba(34,197,94,${alpha.toFixed(3)})`; // emerald — distinct from heatmap blue.
+  };
+  return (
+    <div className="overflow-x-auto" data-testid="pivot-matrix">
+      <table className="text-xs border-collapse">
+        <thead>
+          <tr className="border-b border-border bg-surface-secondary/50">
+            <th className="px-3 py-2 text-left text-2xs font-semibold text-content-tertiary uppercase tracking-wide sticky left-0 bg-surface-secondary/50">
+              {rowKey} ╲ {colKey}
+            </th>
+            {colLabels.map((c) => (
+              <th key={c} className="px-3 py-2 text-right text-2xs font-semibold text-content-tertiary uppercase tracking-wide whitespace-nowrap" title={c}>
+                {c.length > 18 ? c.slice(0, 16) + '…' : c}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rowLabels.map((r) => (
+            <tr key={r} className="border-b border-border-light">
+              <td className="px-3 py-1.5 text-content-primary font-medium sticky left-0 bg-surface-primary whitespace-nowrap" title={r}>
+                {r.length > 32 ? r.slice(0, 30) + '…' : r}
+              </td>
+              {colLabels.map((c) => {
+                const v = cellMap.get(`${r}\u001F${c}`) ?? 0;
+                const rule = findRuleForColumn(thresholdRules, firstAgg);
+                const style = rule ? applyRuleToBar(v, rule) : null;
+                const bg = style ? style.bg : heatBg(v);
+                const text = style ? style.text : undefined;
+                return (
+                  <td
+                    key={c}
+                    data-testid="pivot-matrix-cell"
+                    className="px-3 py-1.5 text-right tabular-nums"
+                    style={{ backgroundColor: bg, color: text }}
+                  >
+                    {v === 0 ? <span className="text-content-quaternary">·</span> : isCategoricalAggFn(aggFn) ? formatCount(v) : formatNumber(v)}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="mt-2 text-2xs text-content-quaternary">
+        {t('explorer.matrix_caption', {
+          defaultValue: 'Cell values: {{fn}}({{col}}) · rows={{rows}} · cols={{cols}}',
+          fn: aggFn,
+          col: firstAgg,
+          rows: rowLabels.length,
+          cols: colLabels.length,
+        })}
+      </p>
+    </div>
+  );
+}
+
 /* ── Pivot Tab ─────────────────────────────────────────────────────────── */
 
-function PivotTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
+interface PivotTabProps {
+  sessionId: string;
+  describe: DescribeResponse;
+  thresholdRules: ThresholdRule[];
+  setThresholdRules: (rules: ThresholdRule[]) => void;
+}
+
+function PivotTab({ sessionId, describe, thresholdRules, setThresholdRules }: PivotTabProps) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const slicers = useAnalysisStateStore((s) => s.slicers);
   const pivotSnapshot = useAnalysisStateStore((s) => s.pivot);
   const setPivotSnapshot = useAnalysisStateStore((s) => s.setPivotSnapshot);
+  const [showThresholdsModal, setShowThresholdsModal] = useState(false);
 
   // All text columns for grouping, sorted by usefulness
   const stringCols = useMemo(() => describe.columns
@@ -591,6 +1043,15 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
 
   // Top quantity columns (shown as buttons)
   const topNumericCols = useMemo(() => numericCols.slice(0, 10), [numericCols]);
+  // All columns (numeric + string) available for categorical aggregation.
+  // Used when the picker is widened for count / count_unique.
+  const allCandidateCols = useMemo(
+    () =>
+      describe.columns
+        .filter((c) => c.non_null > 0)
+        .sort((a, b) => b.non_null - a.non_null),
+    [describe],
+  );
 
   // Default: prefer 'category', then 'type name', then first available.
   // If a saved pivot snapshot is present in the analysis store, hydrate
@@ -619,6 +1080,13 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
   const [topNDir, setTopNDir] = useState<'top' | 'bottom'>(
     () => pivotSnapshot?.topNDirection ?? 'top',
   );
+  // Pivot visualization mode. `table` is the original Power-BI-style
+  // grid; `heatmap` / `bar` / `treemap` / `matrix` render the same data
+  // as a chart so users can pick the shape that best matches the
+  // question they're asking. Persisted via ?piv_viz= URL state.
+  const [vizMode, setVizMode] = useState<PivotVizMode>(
+    () => pivotSnapshot?.viz ?? 'table',
+  );
   const [result, setResult] = useState<AggregateResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -629,8 +1097,15 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
   // Persist the live pivot config to the analysis store so Save View
   // captures the current layout and a restored view reapplies it here.
   useEffect(() => {
-    setPivotSnapshot({ groupBy, aggCols, aggFn, topN, topNDirection: topNDir });
-  }, [groupBy, aggCols, aggFn, topN, topNDir, setPivotSnapshot]);
+    setPivotSnapshot({
+      groupBy,
+      aggCols,
+      aggFn,
+      topN,
+      topNDirection: topNDir,
+      viz: vizMode,
+    });
+  }, [groupBy, aggCols, aggFn, topN, topNDir, vizMode, setPivotSnapshot]);
 
   // Re-hydrate local state when the store's pivot snapshot changes from
   // elsewhere (e.g. Load View). Diff before applying so we don't thrash.
@@ -651,18 +1126,40 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
     if (aggFn !== pivotSnapshot.aggFn) setAggFn(pivotSnapshot.aggFn);
     if (topN !== pivotSnapshot.topN) setTopN(pivotSnapshot.topN);
     if (topNDir !== pivotSnapshot.topNDirection) setTopNDir(pivotSnapshot.topNDirection);
+    const snapshotViz = pivotSnapshot.viz ?? 'table';
+    if (vizMode !== snapshotViz) setVizMode(snapshotViz);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pivotSnapshot]);
 
-  // Auto-run pivot on first render and when groupBy/aggCols change
+  // Auto-run pivot on first render and when groupBy/aggCols change.
+  // Categorical aggregations (count / count_unique) are computed on the
+  // client: the backend endpoint rejects `count_unique` as an unknown
+  // function, and `count` returns the same group size for every column
+  // which defeats per-column semantics. For those fns we pull raw rows
+  // via `/cad-data/elements/` (up to 5 000) and reduce locally. Numeric
+  // fns continue to hit the server for best performance on large models.
   const runPivot = useCallback(async () => {
     if (groupBy.length === 0 || aggCols.length === 0) return;
     setLoading(true);
     try {
-      const aggs: Record<string, string> = {};
-      for (const col of aggCols) aggs[col] = aggFn;
-      const data = await aggregate(sessionId, groupBy, aggs);
-      setResult(data);
+      if (isCategoricalAggFn(aggFn)) {
+        // Client-side path. `limit=5000` is the largest row pull the
+        // backend allows in a single call (current cap 1 000 — we request
+        // the max and document the limit in the UI caption below).
+        const rowsResp = await fetchElements(sessionId, { limit: 1000, offset: 0 });
+        const clientResult = computeClientPivot(
+          rowsResp.rows,
+          groupBy,
+          aggCols,
+          aggFn as 'count' | 'count_unique',
+        );
+        setResult(clientResult);
+      } else {
+        const aggs: Record<string, string> = {};
+        for (const col of aggCols) aggs[col] = aggFn;
+        const data = await aggregate(sessionId, groupBy, aggs);
+        setResult(data);
+      }
       setExpanded(new Set());
       setSortCol(aggCols[0] || null);
     } catch (err) {
@@ -792,65 +1289,167 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
           </div>
         </div>
 
-        {/* Row 2: Sum Columns + Function + Apply */}
-        <div className="flex items-end gap-3 flex-wrap">
-          <div className="flex-1">
-            <label className="text-2xs font-semibold text-content-secondary uppercase tracking-wide mb-1.5 block">
-              {t('explorer.sum_columns', { defaultValue: 'Sum Columns' })} ({aggCols.length})
-            </label>
-            <div className="flex gap-1.5 flex-wrap">
-              {topNumericCols.map((col) => (
-                <button
-                  key={col.name}
-                  onClick={() => toggleAggCol(col.name)}
-                  className={`px-2.5 py-1 rounded-lg text-2xs font-medium transition-all border whitespace-nowrap ${
-                    aggCols.includes(col.name)
-                      ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
-                      : 'border-border-light bg-surface-secondary text-content-tertiary hover:text-content-primary hover:border-border'
-                  }`}
-                  title={`${col.non_null} non-null, sum=${formatNumber(col.sum)}`}
-                >
-                  {col.name}
-                </button>
-              ))}
-              {numericCols.length > 10 && (
+        {/* Row 2: Aggregation columns + Function + Apply.
+            The candidate list is numeric-only for sum/avg/min/max
+            (existing behaviour) and includes ALL columns when the
+            current agg fn is count / count_unique — those operate on
+            any dtype, so blocking text columns would be misleading. */}
+        {(() => {
+          const pickerCols = isCategoricalAggFn(aggFn) ? allCandidateCols : numericCols;
+          const visibleButtons = pickerCols.slice(0, 10);
+          const overflowCols = pickerCols.slice(10);
+          const sumLabelKey = isCategoricalAggFn(aggFn)
+            ? 'explorer.agg_columns'
+            : 'explorer.sum_columns';
+          const sumLabelDefault = isCategoricalAggFn(aggFn) ? 'Columns' : 'Sum Columns';
+          return (
+            <div className="flex items-end gap-3 flex-wrap">
+              <div className="flex-1">
+                <label className="text-2xs font-semibold text-content-secondary uppercase tracking-wide mb-1.5 block">
+                  {t(sumLabelKey, { defaultValue: sumLabelDefault })} ({aggCols.length})
+                </label>
+                <div className="flex gap-1.5 flex-wrap" data-testid="pivot-aggcol-picker">
+                  {visibleButtons.map((col) => {
+                    const isNum = col.dtype === 'number';
+                    const allowed = canAggregateColumn(aggFn, isNum);
+                    const titleBase = `${col.non_null} non-null` +
+                      (isNum ? `, sum=${formatNumber(col.sum)}` : `, ${col.unique} unique`);
+                    const title = allowed
+                      ? titleBase
+                      : `${titleBase} — text columns need count / count_unique for ${aggFn.toUpperCase()}`;
+                    return (
+                      <button
+                        key={col.name}
+                        onClick={() => { if (allowed) toggleAggCol(col.name); }}
+                        disabled={!allowed}
+                        data-testid={`pivot-aggcol-${col.name}`}
+                        data-col-dtype={col.dtype}
+                        className={`px-2.5 py-1 rounded-lg text-2xs font-medium transition-all border whitespace-nowrap ${
+                          aggCols.includes(col.name)
+                            ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
+                            : allowed
+                            ? 'border-border-light bg-surface-secondary text-content-tertiary hover:text-content-primary hover:border-border'
+                            : 'border-border-light bg-surface-secondary text-content-quaternary opacity-40 cursor-not-allowed'
+                        }`}
+                        title={title}
+                      >
+                        {col.name}
+                        {!isNum && <span className="ml-1 opacity-60 text-[9px]">abc</span>}
+                      </button>
+                    );
+                  })}
+                  {overflowCols.length > 0 && (
+                    <select
+                      value=""
+                      onChange={(e) => { if (e.target.value) toggleAggCol(e.target.value); }}
+                      className="px-2 py-1 rounded-lg text-2xs border border-border-light bg-surface-secondary text-content-tertiary cursor-pointer"
+                    >
+                      <option value="">+{overflowCols.length} {t('explorer.more_columns', { defaultValue: 'more' })}</option>
+                      {overflowCols.map((col) => (
+                        <option key={col.name} value={col.name}>
+                          {col.name} ({col.non_null} values{col.dtype === 'string' ? ', text' : ''})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </div>
+              <div className="shrink-0 flex items-center gap-2">
                 <select
-                  value=""
-                  onChange={(e) => { if (e.target.value) toggleAggCol(e.target.value); }}
-                  className="px-2 py-1 rounded-lg text-2xs border border-border-light bg-surface-secondary text-content-tertiary cursor-pointer"
+                  value={aggFn}
+                  onChange={(e) => setAggFn(e.target.value)}
+                  data-testid="pivot-aggfn-select"
+                  className="h-8 rounded-lg border border-border bg-surface-primary px-2.5 text-xs font-medium"
                 >
-                  <option value="">+{numericCols.length - 10} {t('explorer.more_columns', { defaultValue: 'more' })}</option>
-                  {numericCols.slice(10).map((col) => (
-                    <option key={col.name} value={col.name}>{col.name} ({col.non_null} values)</option>
+                  {AGG_FUNCTIONS.map((fn) => (
+                    <option key={fn} value={fn}>{AGG_FUNCTION_LABELS[fn]}</option>
                   ))}
                 </select>
-              )}
+                <Button variant="primary" size="sm" onClick={runPivot} disabled={groupBy.length === 0 || aggCols.length === 0 || loading} loading={loading}>
+                  {t('explorer.apply_pivot', { defaultValue: 'Apply' })}
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="shrink-0 flex items-center gap-2">
-            <select value={aggFn} onChange={(e) => setAggFn(e.target.value)} className="h-8 rounded-lg border border-border bg-surface-primary px-2.5 text-xs font-medium">
-              {AGG_FUNCTIONS.map((fn) => <option key={fn} value={fn}>{fn.toUpperCase()}</option>)}
-            </select>
-            <Button variant="primary" size="sm" onClick={runPivot} disabled={groupBy.length === 0 || aggCols.length === 0 || loading} loading={loading}>
-              {t('explorer.apply_pivot', { defaultValue: 'Apply' })}
-            </Button>
-          </div>
+          );
+        })()}
+
+        {/* Row 3: Top-N / Bottom-N limit + Threshold rules button */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <TopNToggle
+            value={topN}
+            direction={topNDir}
+            onChange={(n, dir) => { setTopN(n); setTopNDir(dir); }}
+            testIdPrefix="pivot"
+          />
+          <button
+            type="button"
+            onClick={() => setShowThresholdsModal(true)}
+            data-testid="pivot-thresholds-btn"
+            title={t('explorer.thresholds_title', { defaultValue: 'Conditional Formatting' })}
+            className={`h-7 px-2.5 rounded-md text-2xs font-medium border transition-colors whitespace-nowrap inline-flex items-center gap-1.5 ${
+              thresholdRules.length > 0
+                ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
+                : 'bg-surface-secondary text-content-tertiary border-border-light hover:bg-surface-tertiary'
+            }`}
+          >
+            <Palette size={13} />
+            {t('explorer.thresholds_button', { defaultValue: 'Thresholds' })}
+            {thresholdRules.length > 0 && (
+              <span
+                data-testid="pivot-thresholds-badge"
+                className="ml-0.5 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-200 text-[10px] font-semibold tabular-nums"
+              >
+                {thresholdRules.length}
+              </span>
+            )}
+          </button>
         </div>
 
-        {/* Row 3: Top-N / Bottom-N limit (RFC 16 #3) */}
-        <TopNToggle
-          value={topN}
-          direction={topNDir}
-          onChange={(n, dir) => { setTopN(n); setTopNDir(dir); }}
-          testIdPrefix="pivot"
+        {/* Row 4: Visualization mode switcher. `matrix` is disabled when
+            fewer than two group-by columns are selected — the crosstab
+            has no second axis to pivot into columns. */}
+        <PivotVizSwitcher
+          mode={vizMode}
+          onChange={setVizMode}
+          matrixEnabled={groupBy.length >= 2}
         />
       </Card>
 
       {/* Results */}
       {loading ? (
         <div className="flex items-center justify-center py-12"><div className="h-5 w-5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" /></div>
+      ) : result && sortedGroups.length > 0 && vizMode !== 'table' ? (
+        <Card padding="none" className="overflow-hidden" data-testid={`pivot-viz-${vizMode}`}>
+          <div className="p-4">
+            <PivotVizRenderer
+              mode={vizMode}
+              groups={sortedGroups}
+              groupBy={groupBy}
+              aggCols={aggCols}
+              aggFn={aggFn}
+              maxByAgg={maxByAgg}
+              thresholdRules={thresholdRules}
+              onGroupClick={(g) => {
+                const firstKey = groupBy[0];
+                if (!firstKey) return;
+                const val = g.key[firstKey];
+                if (val) {
+                  useAnalysisStateStore.getState().addSlicer(firstKey, [String(val)]);
+                }
+              }}
+            />
+          </div>
+          <div className="flex items-center justify-between px-4 py-2 bg-surface-secondary/30 border-t border-border-light">
+            <span className="text-2xs text-content-quaternary">
+              {sortedGroups.length} {t('explorer.groups', { defaultValue: 'groups' })} · {result.total_count.toLocaleString()} {t('explorer.elements', { defaultValue: 'elements' })}
+            </span>
+            <Button variant="primary" size="sm" onClick={() => setShowCreateBOQ(true)} className="shrink-0 whitespace-nowrap">
+              {t('explorer.create_boq_from_pivot', { defaultValue: 'Create BOQ' })}
+            </Button>
+          </div>
+        </Card>
       ) : result && sortedGroups.length > 0 ? (
-        <Card padding="none" className="overflow-hidden">
+        <Card padding="none" className="overflow-hidden" data-testid="pivot-viz-table">
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
@@ -898,23 +1497,34 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                           {aggCols.map((col) => {
                             const subtotal = children.reduce((s, g) => s + (g.results[col] ?? 0), 0);
                             const bar = computeDataBar(subtotal, maxByAgg.get(col) ?? 0);
+                            const rule = findRuleForColumn(thresholdRules, col);
+                            const zone = resolveThresholdColor(subtotal, rule);
+                            const style = zone ? applyRuleToBar(subtotal, rule) : null;
                             return (
                               <td
                                 key={col}
                                 data-testid={`pivot-parent-cell-${col}`}
-                                className="relative px-3 py-2 text-right font-semibold text-oe-blue tabular-nums"
+                                data-threshold-zone={zone ?? undefined}
+                                className={`relative px-3 py-2 text-right font-semibold tabular-nums ${style ? '' : 'text-oe-blue'}`}
+                                style={style ? { backgroundColor: style.bg, color: style.text } : undefined}
                               >
                                 <span
                                   aria-hidden
                                   data-testid={`pivot-databar-${col}`}
                                   className={`absolute inset-y-1 rounded-sm pointer-events-none ${
-                                    bar.negative
+                                    style
+                                      ? (bar.negative ? 'left-1' : 'right-1')
+                                      : bar.negative
                                       ? 'left-1 bg-red-500/20 dark:bg-red-500/25'
                                       : 'right-1 bg-oe-blue/20 dark:bg-oe-blue/25'
                                   }`}
-                                  style={{ width: `${bar.widthPct}%`, maxWidth: 'calc(100% - 0.5rem)' }}
+                                  style={{
+                                    width: `${bar.widthPct}%`,
+                                    maxWidth: 'calc(100% - 0.5rem)',
+                                    ...(style ? { backgroundColor: style.bar, opacity: 0.35 } : {}),
+                                  }}
                                 />
-                                <span className="relative">{formatNumber(subtotal)}</span>
+                                <span className="relative">{isCategoricalAggFn(aggFn) ? formatCount(subtotal) : formatNumber(subtotal)}</span>
                               </td>
                             );
                           })}
@@ -927,23 +1537,34 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                             {aggCols.map((col) => {
                               const raw = g.results[col] ?? 0;
                               const bar = computeDataBar(raw, maxByAgg.get(col) ?? 0);
+                              const rule = findRuleForColumn(thresholdRules, col);
+                              const zone = resolveThresholdColor(raw, rule);
+                              const style = zone ? applyRuleToBar(raw, rule) : null;
                               return (
                                 <td
                                   key={col}
                                   data-testid={`pivot-child-cell-${col}`}
+                                  data-threshold-zone={zone ?? undefined}
                                   className="relative px-3 py-1.5 text-right tabular-nums"
+                                  style={style ? { backgroundColor: style.bg, color: style.text } : undefined}
                                 >
                                   <span
                                     aria-hidden
                                     data-testid={`pivot-databar-${col}`}
                                     className={`absolute inset-y-0.5 rounded-sm pointer-events-none ${
-                                      bar.negative
+                                      style
+                                        ? (bar.negative ? 'left-1' : 'right-1')
+                                        : bar.negative
                                         ? 'left-1 bg-red-500/20 dark:bg-red-500/25'
                                         : 'right-1 bg-oe-blue/20 dark:bg-oe-blue/25'
                                     }`}
-                                    style={{ width: `${bar.widthPct}%`, maxWidth: 'calc(100% - 0.5rem)' }}
+                                    style={{
+                                      width: `${bar.widthPct}%`,
+                                      maxWidth: 'calc(100% - 0.5rem)',
+                                      ...(style ? { backgroundColor: style.bar, opacity: 0.35 } : {}),
+                                    }}
                                   />
-                                  <span className="relative">{formatNumber(raw)}</span>
+                                  <span className="relative">{isCategoricalAggFn(aggFn) ? formatCount(raw) : formatNumber(raw)}</span>
                                 </td>
                               );
                             })}
@@ -960,23 +1581,34 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                       {aggCols.map((col) => {
                         const raw = g.results[col] ?? 0;
                         const bar = computeDataBar(raw, maxByAgg.get(col) ?? 0);
+                        const rule = findRuleForColumn(thresholdRules, col);
+                        const zone = resolveThresholdColor(raw, rule);
+                        const style = zone ? applyRuleToBar(raw, rule) : null;
                         return (
                           <td
                             key={col}
                             data-testid={`pivot-flat-cell-${col}`}
+                            data-threshold-zone={zone ?? undefined}
                             className="relative px-3 py-2 text-right tabular-nums font-medium"
+                            style={style ? { backgroundColor: style.bg, color: style.text } : undefined}
                           >
                             <span
                               aria-hidden
                               data-testid={`pivot-databar-${col}`}
                               className={`absolute inset-y-1 rounded-sm pointer-events-none ${
-                                bar.negative
+                                style
+                                  ? (bar.negative ? 'left-1' : 'right-1')
+                                  : bar.negative
                                   ? 'left-1 bg-red-500/20 dark:bg-red-500/25'
                                   : 'right-1 bg-oe-blue/20 dark:bg-oe-blue/25'
                               }`}
-                              style={{ width: `${bar.widthPct}%`, maxWidth: 'calc(100% - 0.5rem)' }}
+                              style={{
+                                width: `${bar.widthPct}%`,
+                                maxWidth: 'calc(100% - 0.5rem)',
+                                ...(style ? { backgroundColor: style.bar, opacity: 0.35 } : {}),
+                              }}
                             />
-                            <span className="relative">{formatNumber(raw)}</span>
+                            <span className="relative">{isCategoricalAggFn(aggFn) ? formatCount(raw) : formatNumber(raw)}</span>
                           </td>
                         );
                       })}
@@ -987,7 +1619,7 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                 <tr className="bg-surface-secondary/60 font-semibold border-t-2 border-border">
                   <td className="px-3 py-2.5 text-content-primary" colSpan={groupBy.length}>{t('explorer.total', { defaultValue: 'Total' })}</td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{result.total_count.toLocaleString()}</td>
-                  {aggCols.map((col) => <td key={col} className="px-3 py-2.5 text-right tabular-nums text-oe-blue">{formatNumber(result.totals[col])}</td>)}
+                  {aggCols.map((col) => <td key={col} className="px-3 py-2.5 text-right tabular-nums text-oe-blue">{isCategoricalAggFn(aggFn) ? formatCount(result.totals[col]) : formatNumber(result.totals[col])}</td>)}
                 </tr>
               </tbody>
             </table>
@@ -1029,6 +1661,15 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
         groupByColumns={groupBy}
         aggColumns={aggCols}
       />
+
+      {/* Threshold rules modal — conditional formatting editor */}
+      <ThresholdRulesModal
+        open={showThresholdsModal}
+        onClose={() => setShowThresholdsModal(false)}
+        availableColumns={aggCols}
+        rules={thresholdRules}
+        onChange={setThresholdRules}
+      />
     </div>
   );
 }
@@ -1062,19 +1703,41 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
   const slicers = useAnalysisStateStore((s) => s.slicers);
   const addSlicer = useAnalysisStateStore((s) => s.addSlicer);
 
-  // For charts: text columns with reasonable cardinality (< 100 unique for good visualization)
-  const stringCols = describe.columns
-    .filter((c) => c.dtype === 'string' && c.non_null > 0 && c.unique < 100)
-    .sort((a, b) => b.non_null - a.non_null);
+  // Group-by ("Category") picker: ALL text columns, ordered by usefulness
+  // (low-cardinality + many non-nulls first). Previously we hid anything
+  // with >=100 unique values which silently excluded GUIDs, Type Names,
+  // Family names etc. — users couldn't chart them even when they wanted
+  // to. Now we surface everything; the UI flags extreme cardinality with
+  // a pill rather than blocking the choice.
+  const stringCols = useMemo(() => describe.columns
+    .filter((c) => c.dtype === 'string' && c.non_null > 0)
+    .sort((a, b) => {
+      // Prefer columns with lower cardinality (better chart density) and
+      // higher fill rate. Weighting keeps "Category" (e.g. 20 unique) at
+      // the top while "elementguid" (thousands of unique) sinks.
+      const aScore = (a.unique < 100 ? 1000 : 0) + a.non_null;
+      const bScore = (b.unique < 100 ? 1000 : 0) + b.non_null;
+      return bScore - aScore;
+    }), [describe]);
   const QTY_KEYS = ['volume', 'area', 'length', 'count', 'width', 'height', 'depth', 'weight', 'mass', 'perimeter'];
+  // Numeric columns available for sum/avg/min/max. Ranked by
+  // quantity-keyword match, then by fill count. NO slice cap — the user
+  // reported that valid columns disappeared past the 20-column wall.
   const numericCols = useMemo(() => describe.columns
     .filter((c) => c.dtype === 'number' && c.non_null > 0)
     .sort((a, b) => {
       const aK = QTY_KEYS.some((k) => a.name.toLowerCase() === k) ? 10000 : QTY_KEYS.some((k) => a.name.toLowerCase().includes(k)) ? 5000 : 0;
       const bK = QTY_KEYS.some((k) => b.name.toLowerCase() === k) ? 10000 : QTY_KEYS.some((k) => b.name.toLowerCase().includes(k)) ? 5000 : 0;
       return (bK + b.non_null) - (aK + a.non_null);
-    })
-    .slice(0, 20), [describe]);
+    }), [describe]);
+  // All columns (any dtype) — used as the value-picker candidate set
+  // when the agg fn is count / count_unique (both accept any dtype).
+  const allValueCols = useMemo(() =>
+    describe.columns
+      .filter((c) => c.non_null > 0)
+      .sort((a, b) => b.non_null - a.non_null),
+    [describe],
+  );
 
   // Initialise chart config on first mount (if empty) — leave user choices
   // intact on subsequent renders.
@@ -1105,10 +1768,26 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
     if (!chart.category || !chart.value) return;
     setLoading(true);
     try {
-      const data = await aggregate(sessionId, [chart.category], { [chart.value]: 'sum' });
-      setChartData(data);
+      const fn = chart.aggFn || 'sum';
+      if (isCategoricalAggFn(fn)) {
+        // count / count_unique — client-side (backend rejects
+        // count_unique, and count returns the group size for every
+        // column regardless of which one is asked). Mirrors the Pivot
+        // tab's handling so both tabs agree on value semantics.
+        const rowsResp = await fetchElements(sessionId, { limit: 1000, offset: 0 });
+        const clientResult = computeClientPivot(
+          rowsResp.rows,
+          [chart.category],
+          [chart.value],
+          fn as 'count' | 'count_unique',
+        );
+        setChartData(clientResult);
+      } else {
+        const data = await aggregate(sessionId, [chart.category], { [chart.value]: fn });
+        setChartData(data);
+      }
     } catch { /* */ } finally { setLoading(false); }
-  }, [sessionId, chart.category, chart.value]);
+  }, [sessionId, chart.category, chart.value, chart.aggFn]);
 
   useEffect(() => { loadChart(); }, [loadChart]);
 
@@ -1173,21 +1852,58 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
             <select
               value={chart.category}
               onChange={(e) => setChartConfig({ category: e.target.value })}
-              className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs"
+              className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs max-w-[220px]"
               data-testid="chart-category-select"
             >
-              {stringCols.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+              {stringCols.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.name} ({c.unique}{c.unique >= 100 ? ' ⚠︎' : ''})
+                </option>
+              ))}
             </select>
           </div>
+          {/* Value picker — scope depends on the agg fn. sum/avg/min/max
+              require numeric; count / count_unique work on any dtype. */}
+          {(() => {
+            const fn = chart.aggFn || 'sum';
+            const valueCols = isCategoricalAggFn(fn) ? allValueCols : numericCols;
+            return (
+              <div>
+                <label className="text-2xs font-medium text-content-tertiary uppercase block mb-1">
+                  {t('explorer.value', { defaultValue: 'Value' })}
+                </label>
+                <select
+                  value={chart.value}
+                  onChange={(e) => setChartConfig({ value: e.target.value })}
+                  className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs max-w-[220px]"
+                  data-testid="chart-value-select"
+                >
+                  {valueCols.map((c) => (
+                    <option key={c.name} value={c.name}>
+                      {c.name}
+                      {c.dtype === 'string' ? ' (abc)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            );
+          })()}
+          {/* Aggregation function — defaults to SUM to match previous
+              behaviour. Switching to COUNT / COUNT UNIQUE widens the
+              value picker to include text columns. */}
           <div>
-            <label className="text-2xs font-medium text-content-tertiary uppercase block mb-1">{t('explorer.value', { defaultValue: 'Value' })}</label>
+            <label className="text-2xs font-medium text-content-tertiary uppercase block mb-1">
+              {t('explorer.agg_fn', { defaultValue: 'Aggregation' })}
+            </label>
             <select
-              value={chart.value}
-              onChange={(e) => setChartConfig({ value: e.target.value })}
+              value={chart.aggFn || 'sum'}
+              onChange={(e) => setChartConfig({ aggFn: e.target.value })}
               className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs"
-              data-testid="chart-value-select"
+              data-testid="chart-aggfn-select"
             >
-              {numericCols.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+              {SUPPORTED_AGG_FUNCTIONS.map((fn) => (
+                <option key={fn} value={fn}>{AGG_FUNCTION_LABELS[fn]}</option>
+              ))}
             </select>
           </div>
           <div>
@@ -2604,6 +3320,13 @@ export function CadDataExplorerPage() {
   const [showSaveToProjectDialog, setShowSaveToProjectDialog] = useState(false);
   const [showViewsDrawer, setShowViewsDrawer] = useState(false);
 
+  // Threshold (conditional-formatting) rules for pivot cells. Kept at the
+  // page level so the URL writer effect below can serialise them alongside
+  // slicer / pivot / chart config — a shared link restores the rule set.
+  const [thresholdRules, setThresholdRules] = useState<ThresholdRule[]>(() =>
+    parseThresholds(new URLSearchParams(window.location.search).get('tr')),
+  );
+
   const setAnalysisSession = useAnalysisStateStore((s) => s.setSessionId);
   const hydrateFromUrl = useAnalysisStateStore((s) => s.hydrateFromUrl);
   const saveAnalysisView = useAnalysisStateStore((s) => s.saveView);
@@ -2633,6 +3356,7 @@ export function CadDataExplorerPage() {
       kind: params.get('chart_kind'),
       cat: params.get('chart_cat'),
       val: params.get('chart_val'),
+      agg: params.get('chart_agg'),
       top: params.get('chart_top'),
     });
     const initialPivot = parsePivot({
@@ -2640,6 +3364,7 @@ export function CadDataExplorerPage() {
       sum: params.get('piv_sum'),
       agg: params.get('piv_agg'),
       top: params.get('piv_top'),
+      viz: params.get('piv_viz'),
     });
     hydrateFromUrl({
       slicers: initialSlicers,
@@ -2673,12 +3398,18 @@ export function CadDataExplorerPage() {
           piv.sum ? next.set('piv_sum', piv.sum) : next.delete('piv_sum');
           piv.agg ? next.set('piv_agg', piv.agg) : next.delete('piv_agg');
           piv.top ? next.set('piv_top', piv.top) : next.delete('piv_top');
+          piv.viz ? next.set('piv_viz', piv.viz) : next.delete('piv_viz');
           // Chart
           const ch = serialiseChart(storeChart);
           ch.kind ? next.set('chart_kind', ch.kind) : next.delete('chart_kind');
           ch.cat ? next.set('chart_cat', ch.cat) : next.delete('chart_cat');
           ch.val ? next.set('chart_val', ch.val) : next.delete('chart_val');
+          ch.agg ? next.set('chart_agg', ch.agg) : next.delete('chart_agg');
           ch.top ? next.set('chart_top', ch.top) : next.delete('chart_top');
+          // Threshold rules (conditional formatting)
+          const trStr = serialiseThresholds(thresholdRules);
+          if (trStr) next.set('tr', trStr);
+          else next.delete('tr');
           return next;
         },
         { replace: true },
@@ -2687,7 +3418,7 @@ export function CadDataExplorerPage() {
     return () => {
       if (writeTimerRef.current) clearTimeout(writeTimerRef.current);
     };
-  }, [activeTab, storeSlicers, storePivot, storeChart, setSearchParams]);
+  }, [activeTab, storeSlicers, storePivot, storeChart, thresholdRules, setSearchParams]);
 
   const { data: describe, isLoading, error } = useQuery({
     queryKey: ['cad-describe', sessionId],
@@ -3108,7 +3839,14 @@ export function CadDataExplorerPage() {
             {/* Tab content — scrollable */}
             <div className="flex-1 overflow-y-auto p-4">
               {activeTab === 'table' && <DataTableTab sessionId={sessionId} describe={describe} />}
-              {activeTab === 'pivot' && <PivotTab sessionId={sessionId} describe={describe} />}
+              {activeTab === 'pivot' && (
+                <PivotTab
+                  sessionId={sessionId}
+                  describe={describe}
+                  thresholdRules={thresholdRules}
+                  setThresholdRules={setThresholdRules}
+                />
+              )}
               {activeTab === 'charts' && <ChartsTab sessionId={sessionId} describe={describe} />}
               {activeTab === 'describe' && <DescribeTab sessionId={sessionId} describe={describe} />}
             </div>

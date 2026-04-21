@@ -49,6 +49,7 @@ import type {
   CreateMarkupPayload,
 } from './api';
 import { InlinePdfAnnotator } from './InlinePdfAnnotator';
+import { UnifiedMarkupsList } from './UnifiedMarkupsList';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -854,6 +855,10 @@ export function MarkupsPage() {
   const [showCustomStampForm, setShowCustomStampForm] = useState(false);
   const [customStampName, setCustomStampName] = useState('');
   const [customStampColor, setCustomStampColor] = useState('#3B82F6');
+  // Unified vs hub-only tab. "unified" is the default because the user's
+  // primary complaint was that the three modules were disconnected —
+  // opening this page and seeing only hub markups reinforced that.
+  const [scopeTab, setScopeTab] = useState<'unified' | 'hub'>('unified');
 
   // Data queries
   const { data: projects = [] } = useQuery({
@@ -905,10 +910,12 @@ export function MarkupsPage() {
     );
   }, [markups, searchQuery]);
 
-  // Invalidation
+  // Invalidation. Includes the unified feed so hub-scope mutations appear
+  // in the "All annotations" tab without a manual reload.
   const invalidateAll = useCallback(() => {
     qc.invalidateQueries({ queryKey: ['markups'] });
     qc.invalidateQueries({ queryKey: ['markups-summary'] });
+    qc.invalidateQueries({ queryKey: ['unified-markups'] });
   }, [qc]);
 
   // Mutations
@@ -1123,6 +1130,44 @@ export function MarkupsPage() {
             <StatsBar summary={summary} />
           </div>
 
+          {/* ── Scope Tabs (Unified / Hub only) ───────────────────────────── */}
+          <div
+            className="mt-3 inline-flex items-center rounded-lg border border-border-light bg-surface-primary p-0.5"
+            role="tablist"
+            aria-label={t('markups.scope_tabs', { defaultValue: 'Annotation scope' })}
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={scopeTab === 'unified'}
+              onClick={() => setScopeTab('unified')}
+              data-testid="markups-tab-unified"
+              className={clsx(
+                'px-3 py-1.5 text-xs font-medium rounded-md transition-colors',
+                scopeTab === 'unified'
+                  ? 'bg-oe-blue text-content-inverse'
+                  : 'text-content-secondary hover:bg-surface-secondary',
+              )}
+            >
+              {t('markups.scope_unified', { defaultValue: 'All annotations' })}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={scopeTab === 'hub'}
+              onClick={() => setScopeTab('hub')}
+              data-testid="markups-tab-hub"
+              className={clsx(
+                'px-3 py-1.5 text-xs font-medium rounded-md transition-colors',
+                scopeTab === 'hub'
+                  ? 'bg-oe-blue text-content-inverse'
+                  : 'text-content-secondary hover:bg-surface-secondary',
+              )}
+            >
+              {t('markups.scope_hub_only', { defaultValue: 'Hub only' })}
+            </button>
+          </div>
+
           {/* ── Inline PDF Annotator ──────────────────────────────────────── */}
           {annotateDocId && (
             <div className="mt-3">
@@ -1137,7 +1182,16 @@ export function MarkupsPage() {
             </div>
           )}
 
-          {/* ── Filter / Search / View Toggle ──────────────────────────────── */}
+          {/* ── Unified Feed (all three sources) ──────────────────────────── */}
+          {scopeTab === 'unified' && (
+            <div className="mt-3">
+              <UnifiedMarkupsList projectId={projectId} />
+            </div>
+          )}
+
+          {/* ── Filter / Search / View Toggle (hub-only view) ─────────────── */}
+          {scopeTab === 'hub' && (
+          <>
           <div className="mt-3 flex items-center gap-2 flex-wrap">
             {/* Search */}
             <div className="relative flex-1 min-w-[200px] max-w-xs">
@@ -1347,6 +1401,8 @@ export function MarkupsPage() {
               </div>
             )}
           </div>
+          </>
+          )}
 
           {/* ── Stamps (inline badges row) ─────────────────────────────────── */}
           {displayStamps.length > 0 && (

@@ -179,4 +179,65 @@ describe('snapshotFrom', () => {
     expect(snap.measurement_value).toBe(7.07);
     expect(snap.metadata).toEqual({ font_size: 14 });
   });
+
+  // Regression test for the Q2 production-blocker crash.
+  //
+  // The create-annotation mutation hands ``snapshotFrom`` the raw backend
+  // response, which uses ``annotation_type`` + ``geometry.points`` rather
+  // than ``type`` + ``points``. Before the fix, ``ann.points.map`` threw
+  // ``Cannot read properties of undefined (reading 'map')`` on every tool
+  // that created an annotation (distance, line, rectangle, polyline,
+  // area, circle, text_pin, arrow) — and because the throw happens inside
+  // ``setUndoState``, any subsequent render (snap-menu open, tool switch)
+  // re-entered the same callback and re-threw, so every tool + the Snap
+  // button all appeared to crash together.
+  it('normalises backend-shape responses (annotation_type + geometry.points)', () => {
+    const backendResponse = {
+      id: 'ann-42',
+      project_id: 'p1',
+      drawing_id: 'draw-1',
+      annotation_type: 'area' as const,
+      geometry: {
+        points: [
+          { x: 10, y: 10 },
+          { x: 20, y: 10 },
+          { x: 20, y: 20 },
+        ],
+      },
+      text: null,
+      color: '#22c55e',
+      line_width: 2,
+      thickness: 2.0,
+      layer_name: 'USER_MARKUP',
+      measurement_value: 100,
+      measurement_unit: 'm²',
+      scale_override: null,
+      linked_boq_position_id: null,
+      created_by: 'u1',
+      metadata: {},
+      created_at: '2026-04-21T00:00:00Z',
+      updated_at: '2026-04-21T00:00:00Z',
+    };
+    // Cast to DwgAnnotation to match the (broken) call-site type. This is
+    // exactly how ``onSuccess: (created) => ...snapshotFrom(created)`` sees
+    // the value — the runtime shape differs from the declared type.
+    const snap = snapshotFrom(backendResponse as unknown as DwgAnnotation);
+    expect(snap.id).toBe('ann-42');
+    expect(snap.annotation_type).toBe('area');
+    expect(snap.points).toEqual([
+      { x: 10, y: 10 },
+      { x: 20, y: 10 },
+      { x: 20, y: 20 },
+    ]);
+    expect(snap.measurement_value).toBe(100);
+  });
+
+  // Defence-in-depth: missing ``points`` entirely must not crash. Older
+  // rows / truncated responses shouldn't take the whole undo stack down.
+  it('falls back to an empty points array when neither shape has points', () => {
+    const malformed = { id: 'ann-0', annotation_type: 'line' as const };
+    const snap = snapshotFrom(malformed as unknown as DwgAnnotation);
+    expect(snap.id).toBe('ann-0');
+    expect(snap.points).toEqual([]);
+  });
 });

@@ -25,13 +25,20 @@ import type {
   ChartConfig,
   ChartKind,
   PivotConfigSnapshot,
+  PivotVizMode,
   SlicerFilter,
 } from '@/stores/useAnalysisStateStore';
+import { AGG_FUNCTIONS } from './aggregation';
 
 export type TabId = 'table' | 'pivot' | 'charts' | 'describe';
 
 const VALID_TABS: readonly TabId[] = ['table', 'pivot', 'charts', 'describe'];
 const VALID_CHART_KINDS: readonly ChartKind[] = ['bar', 'line', 'pie', 'scatter'];
+const VALID_PIVOT_VIZ: readonly PivotVizMode[] = ['table', 'heatmap', 'bar', 'treemap', 'matrix'];
+
+/** URL-safe list of aggregation functions accepted by `?piv_agg=` /
+ *  `?chart_agg=`. */
+const VALID_AGG_FUNCTIONS: readonly string[] = AGG_FUNCTIONS;
 
 /* ── Slicers ──────────────────────────────────────────────────────────── */
 
@@ -93,6 +100,7 @@ export interface PivotUrlSerialised {
   sum: string | null;
   agg: string | null;
   top: string | null;
+  viz: string | null;
 }
 
 /** Serialise topN + direction into a single signed-number string. */
@@ -110,12 +118,16 @@ function decodeTopN(raw: string | null): { topN: number | null; direction: 'top'
 }
 
 export function serialisePivot(snapshot: PivotConfigSnapshot | null): PivotUrlSerialised {
-  if (!snapshot) return { group: null, sum: null, agg: null, top: null };
+  if (!snapshot) return { group: null, sum: null, agg: null, top: null, viz: null };
+  // Default viz is `table`; don't bloat the URL when the user hasn't
+  // changed it. Only serialise when the mode differs from the default.
+  const vizOut = snapshot.viz && snapshot.viz !== 'table' ? snapshot.viz : null;
   return {
     group: snapshot.groupBy.length > 0 ? snapshot.groupBy.join(',') : null,
     sum: snapshot.aggCols.length > 0 ? snapshot.aggCols.join(',') : null,
     agg: snapshot.aggFn || null,
     top: encodeTopN(snapshot.topN, snapshot.topNDirection),
+    viz: vizOut,
   };
 }
 
@@ -124,17 +136,28 @@ export function parsePivot(src: {
   sum?: string | null;
   agg?: string | null;
   top?: string | null;
+  viz?: string | null;
 }): PivotConfigSnapshot | null {
   const groupBy = (src.group || '').split(',').map((s) => s.trim()).filter(Boolean);
   const aggCols = (src.sum || '').split(',').map((s) => s.trim()).filter(Boolean);
   if (groupBy.length === 0 && aggCols.length === 0) return null;
   const { topN, direction } = decodeTopN(src.top ?? null);
+  // Validate agg against the known vocabulary. Unknown values fall back to
+  // `sum` so a typo in a shared link doesn't produce an empty pivot
+  // (the `<select>` only has options for known agg fns).
+  const rawAgg = (src.agg || '').toLowerCase();
+  const aggFn = VALID_AGG_FUNCTIONS.includes(rawAgg) ? rawAgg : 'sum';
+  const rawViz = (src.viz || '').toLowerCase();
+  const viz: PivotVizMode = (VALID_PIVOT_VIZ as readonly string[]).includes(rawViz)
+    ? (rawViz as PivotVizMode)
+    : 'table';
   return {
     groupBy,
     aggCols,
-    aggFn: src.agg || 'sum',
+    aggFn,
     topN,
     topNDirection: direction,
+    viz,
   };
 }
 
@@ -144,14 +167,18 @@ export interface ChartUrlSerialised {
   kind: string | null;
   cat: string | null;
   val: string | null;
+  agg: string | null;
   top: string | null;
 }
 
 export function serialiseChart(chart: ChartConfig): ChartUrlSerialised {
+  // Default aggFn for charts is `sum` — only serialise when it differs.
+  const aggOut = chart.aggFn && chart.aggFn !== 'sum' ? chart.aggFn : null;
   return {
     kind: chart.kind !== 'bar' ? chart.kind : null,
     cat: chart.category || null,
     val: chart.value || null,
+    agg: aggOut,
     top: encodeTopN(chart.topN, chart.topNDirection),
   };
 }
@@ -160,6 +187,7 @@ export function parseChart(src: {
   kind?: string | null;
   cat?: string | null;
   val?: string | null;
+  agg?: string | null;
   top?: string | null;
 }): Partial<ChartConfig> {
   const out: Partial<ChartConfig> = {};
@@ -168,6 +196,12 @@ export function parseChart(src: {
   }
   if (src.cat) out.category = src.cat;
   if (src.val) out.value = src.val;
+  if (src.agg) {
+    const rawAgg = src.agg.toLowerCase();
+    if (VALID_AGG_FUNCTIONS.includes(rawAgg)) {
+      out.aggFn = rawAgg;
+    }
+  }
   const { topN, direction } = decodeTopN(src.top ?? null);
   out.topN = topN;
   out.topNDirection = direction;

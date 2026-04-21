@@ -114,20 +114,61 @@ export function canRedo(state: UndoState): boolean {
   return state.redo.length > 0;
 }
 
-/** Build a snapshot from a live annotation so it can be replayed later. */
-export function snapshotFrom(ann: DwgAnnotation): AnnotationSnapshot {
+/** Build a snapshot from a live annotation so it can be replayed later.
+ *
+ *  Callers feed two subtly different shapes in: the viewer-side
+ *  ``DwgAnnotation`` (``type`` / ``points``) from locally-constructed
+ *  annotations, and the raw backend response (``annotation_type`` /
+ *  ``geometry.points``) which arrives via the create-annotation mutation's
+ *  ``onSuccess`` handler. Treating one shape as the other blew up the undo
+ *  stack with ``Cannot read properties of undefined (reading 'map')`` on
+ *  every successful mutation — and because the crash happens inside a
+ *  ``setUndoState`` callback on render, ANY subsequent re-render (e.g.
+ *  clicking Snap, switching tools) re-entered the same state update and
+ *  re-threw, making every tool appear to crash.
+ *
+ *  We now read both shapes and normalise, so the snapshot survives
+ *  regardless of which field naming the input uses. Kept defensive about
+ *  ``points`` being missing entirely (legacy rows / truncated responses) —
+ *  we fall back to an empty array rather than crashing, since an empty
+ *  snapshot is still a valid undo-placeholder. */
+export function snapshotFrom(
+  ann: DwgAnnotation | BackendAnnotationResponse,
+): AnnotationSnapshot {
+  const a = ann as DwgAnnotation & BackendAnnotationResponse;
+  const type = a.type ?? a.annotation_type;
+  const rawPoints = a.points ?? a.geometry?.points ?? [];
   return {
-    id: ann.id,
-    annotation_type: ann.type,
-    points: ann.points.map((p) => ({ x: p.x, y: p.y })),
-    text: ann.text,
-    color: ann.color,
-    measurement_value: ann.measurement_value,
-    measurement_unit: ann.measurement_unit,
-    layer_name: ann.layer_name ?? null,
-    thickness: ann.thickness,
-    line_width: ann.line_width,
-    scale_override: ann.scale_override ?? null,
-    metadata: ann.metadata,
+    id: a.id,
+    annotation_type: type,
+    points: rawPoints.map((p) => ({ x: p.x, y: p.y })),
+    text: a.text,
+    color: a.color,
+    measurement_value: a.measurement_value,
+    measurement_unit: a.measurement_unit,
+    layer_name: a.layer_name ?? null,
+    thickness: a.thickness,
+    line_width: a.line_width,
+    scale_override: a.scale_override ?? null,
+    metadata: a.metadata,
   };
+}
+
+/** Shape of the raw create/update response from the backend. We only model
+ *  the fields ``snapshotFrom`` consumes — the rest come through unchanged
+ *  and are typed as ``DwgAnnotation`` elsewhere (a known-broken contract
+ *  tracked separately; ``snapshotFrom`` here is the crash-path fix). */
+interface BackendAnnotationResponse {
+  id: string;
+  annotation_type?: DwgAnnotation['type'];
+  geometry?: { points?: { x: number; y: number }[] };
+  text?: string | null;
+  color?: string;
+  measurement_value?: number | null;
+  measurement_unit?: string | null;
+  layer_name?: string | null;
+  thickness?: number;
+  line_width?: number;
+  scale_override?: number | null;
+  metadata?: Record<string, unknown>;
 }
