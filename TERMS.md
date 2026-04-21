@@ -45,7 +45,7 @@ You agree not to use the Software or the Service to:
 ## 3. Account
 
 You are responsible for safeguarding your account credentials and for
-activity under your account. Notify `security@datadrivenconstruction.io`
+activity under your account. Notify `info@datadrivenconstruction.io`
 promptly if you suspect unauthorised access.
 
 ## 4. AI-generated output — no reliance for contractual decisions
@@ -121,11 +121,11 @@ their habitual-residence courts where mandatory local law so requires.
 
 ## 13. Contact
 
-- **Email:** info@datadrivenconstruction.io
-- **Legal:** legal@datadrivenconstruction.io
+All enquiries (general, legal, security, privacy):
+`info@datadrivenconstruction.io`
 
 ---
 
-*This stub is not a substitute for legal advice. Before relying on this
-document in production, have it reviewed by a qualified lawyer in your
-jurisdiction.*
+*These Terms provide a baseline and are not a substitute for legal
+advice. Before relying on this document in production, have it reviewed
+by a qualified lawyer in your jurisdiction.*

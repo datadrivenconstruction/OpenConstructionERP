@@ -56,4 +56,4 @@ Material changes are listed in the release notes.
 
 ## Contact
 
-- **Email:** privacy@datadrivenconstruction.io
+- **Email:** info@datadrivenconstruction.io
