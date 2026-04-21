@@ -14,6 +14,30 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '2.1.0',
+    date: '2026-04-20',
+    changes: [
+      'DWG Takeoff — per-tool keyboard shortcuts (V/H/D/L/P/A/R/C/T + Esc) with letter shown in tooltips',
+      'DWG Takeoff — undo/redo stack (50 entries) + toolbar buttons + Ctrl+Z/Ctrl+Y/Ctrl+Shift+Z',
+      'DWG Takeoff — Shift-to-lock ortho/angle ghost ray during line/polyline drawing',
+      'DWG Takeoff — snap modes (endpoint + midpoint) with on-canvas crosshair marker',
+      'PDF Takeoff — per-tool keyboard shortcuts for 11 tools (V/D/P/A/O/C/R/T/H/W/X + Esc)',
+      'PDF Takeoff — redo stack (alongside existing undo) with Ctrl+Y/Ctrl+Shift+Z',
+      'PDF Takeoff — measurement properties panel (Group/Color/Annotation/Notes/Delete)',
+      'PDF Takeoff — color-coded group legend overlay, click-to-hide per group',
+      'BIM Viewer — toolbar screenshot button (PNG download + clipboard best-effort)',
+      'BIM Viewer — 5D cost colour mode with blue→amber→red gradient by unit rate + legend strip',
+      'BIM Viewer — URL deep-link state for camera + selection (?cx=...&cy=...&sel=a,b,c)',
+      'CAD-BIM BI Explorer — URL-driven state for tab/slicers/pivot/chart (reload keeps view)',
+      'CAD-BIM BI Explorer — Power-BI-style data bars across flat, tree-parent, tree-child rows',
+      'Fix: clicking notifications no longer flashes the whole screen to black — Suspense boundary moved inside the layout so sidebar + header stay mounted during lazy chunk loads',
+      'Fix: module preferences GET was calling the wrong URL (/v1/users/module-preferences instead of /v1/users/me/module-preferences/) — preferences now survive reload',
+      'Fix: Dashboard team-count query no longer fires for viewer role users — was producing a red 403 in DevTools because /v1/users/ requires users.list permission',
+      'Fix: RBAC bootstrap — first person to register via /auth/register is now correctly promoted to admin. Previously failed because the seeded demo user claimed the admin slot',
+      'Tests: 220/220 frontend unit tests + 6/6 Q1 Playwright specs + 0 TypeScript errors',
+    ],
+  },
+  {
     version: '2.0.0',
     date: '2026-04-20',
     changes: [

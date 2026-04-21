@@ -147,7 +147,7 @@ export const useModuleStore = create<ModuleStore>((set, get) => ({
     set({ isSyncing: true });
     try {
       const resp = await apiGet<{ modules: Record<string, boolean> }>(
-        '/v1/users/module-preferences',
+        '/v1/users/me/module-preferences/',
       );
       const serverPrefs = resp.modules ?? resp;
       set((state) => {

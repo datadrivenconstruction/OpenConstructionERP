@@ -72,6 +72,7 @@ import {
   updateDrawingScale,
   USER_MARKUP_LAYER,
 } from './api';
+import { Undo2, Redo2, Target } from 'lucide-react';
 import type {
   DxfEntity,
   DxfLayer,
@@ -88,6 +89,18 @@ import {
 import { aggregateEntities } from './lib/group-aggregation';
 import { exportCanvasToPdf } from './lib/pdf-export';
 import { ToolPalette, type DwgTool } from './components/ToolPalette';
+import {
+  canRedo as canRedoFn,
+  canUndo as canUndoFn,
+  emptyUndoState,
+  popRedo,
+  popUndo,
+  pushUndo,
+  snapshotFrom,
+  type UndoEntry,
+  type UndoState,
+} from './lib/undo-stack';
+import type { SnapModes } from './lib/snap';
 import { LayerPanel } from './components/LayerPanel';
 import { EntityNameFilter, entityDisplayName } from './components/EntityNameFilter';
 import CreateTaskFromDwgModal from './CreateTaskFromDwgModal';
@@ -505,6 +518,38 @@ export function DwgTakeoffPage() {
   const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(null);
   const [activeTool, setActiveTool] = useState<DwgTool>('select');
   const [activeColor, setActiveColor] = useState('#ef4444');
+
+  /* ── Q1 UX #2: Undo / redo stack ────────────────────────────────────
+   * Holds the last 50 annotation mutations (create / delete / edit).
+   * Reset when the selected drawing changes — an undo from drawing A
+   * should not delete something on drawing B. */
+  const [undoState, setUndoState] = useState<UndoState>(() => emptyUndoState());
+  useEffect(() => {
+    setUndoState(emptyUndoState());
+  }, [selectedDrawingId]);
+
+  /* ── Q1 UX #4: Snap modes ──────────────────────────────────────────
+   * Estimators who want endpoint-only usually work across large plans,
+   * so both modes default off. Persisted to localStorage so the user's
+   * last choice survives a reload — snap mode is a preference, not a
+   * per-drawing setting. */
+  const [snapModes, setSnapModes] = useState<SnapModes>(() => {
+    try {
+      const raw = localStorage.getItem('dwg:snap_modes');
+      if (raw) return JSON.parse(raw) as SnapModes;
+    } catch {
+      /* fall through */
+    }
+    return { endpoint: false, midpoint: false, intersection: false };
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem('dwg:snap_modes', JSON.stringify(snapModes));
+    } catch {
+      /* storage quota / disabled — acceptable fallback is in-memory only */
+    }
+  }, [snapModes]);
+  const [snapMenuOpen, setSnapMenuOpen] = useState(false);
   /**
    * Drawing scale denominator (RFC 13 #13). `1` = use raw DXF units as
    * meters. `50` = the drawing is 1:50, so a 0.20-unit segment represents
@@ -816,12 +861,33 @@ export function DwgTakeoffPage() {
     },
   });
 
+  /** When true, the next successful create/delete is a replay from an
+   *  undo/redo operation and should NOT push a new entry onto the
+   *  stack. Uses a ref so the flag survives across re-renders without
+   *  triggering re-renders itself. */
+  const skipUndoRef = useRef(false);
+
   const createAnnotationMutation = useMutation({
     mutationFn: (data: CreateAnnotationPayload) => createAnnotation(data),
-    onSuccess: () => {
+    onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ['dwg-annotations', selectedDrawingId] });
+      // Q1 UX #2: push a "create" entry so Ctrl+Z can delete the just-
+      // persisted annotation. ``skipUndoRef`` suppresses this during
+      // replay paths to avoid doubling up entries during redo.
+      if (skipUndoRef.current) {
+        skipUndoRef.current = false;
+        return;
+      }
+      setUndoState((prev) =>
+        pushUndo(prev, {
+          kind: 'create',
+          id: created.id,
+          snapshot: snapshotFrom(created),
+        }),
+      );
     },
     onError: (err: Error) => {
+      skipUndoRef.current = false;
       // Surface the failure — silent 500s previously left users thinking
       // nothing happened.
       addToast({
@@ -900,13 +966,150 @@ export function DwgTakeoffPage() {
     setActiveTool('select');
   }, []);
 
-  const deleteAnnotationMutation = useMutation({
-    mutationFn: (id: string) => deleteAnnotation(id),
-    onSuccess: () => {
+  const deleteAnnotationMutation = useMutation<
+    void,
+    Error,
+    { id: string; snapshotForUndo?: ReturnType<typeof snapshotFrom> | null }
+  >({
+    mutationFn: ({ id }) => deleteAnnotation(id),
+    onSuccess: (_res, vars) => {
       queryClient.invalidateQueries({ queryKey: ['dwg-annotations', selectedDrawingId] });
       setSelectedAnnotationId(null);
+      if (skipUndoRef.current) {
+        skipUndoRef.current = false;
+        return;
+      }
+      if (vars.snapshotForUndo) {
+        setUndoState((prev) =>
+          pushUndo(prev, { kind: 'delete', snapshot: vars.snapshotForUndo! }),
+        );
+      }
+    },
+    onError: () => {
+      skipUndoRef.current = false;
     },
   });
+
+  /* ── Q1 UX #2: Undo / redo handlers ────────────────────────────────
+   *
+   * Executes the inverse mutation for the entry. All backend calls are
+   * wrapped in skipUndoRef guards so the reducer's bookkeeping stays
+   * consistent (the entry was moved to the redo/undo stack synchronously
+   * — the mutation's onSuccess should NOT push a fresh entry on top). */
+  const replayUndo = useCallback(
+    (entry: UndoEntry) => {
+      if (!selectedDrawingId) return;
+      const drawing = drawings.find((d) => d.id === selectedDrawingId);
+      const effectiveProjectId = drawing?.project_id || projectId;
+
+      switch (entry.kind) {
+        case 'create': {
+          // Inverse of create → delete.
+          skipUndoRef.current = true;
+          deleteAnnotationMutation.mutate({ id: entry.id });
+          break;
+        }
+        case 'delete': {
+          if (!effectiveProjectId) return;
+          const s = entry.snapshot;
+          skipUndoRef.current = true;
+          createAnnotationMutation.mutate({
+            project_id: effectiveProjectId,
+            drawing_id: selectedDrawingId,
+            annotation_type: s.annotation_type,
+            geometry: { points: s.points },
+            text: s.text ?? undefined,
+            color: s.color,
+            thickness: s.thickness ?? 2,
+            line_width: s.line_width ?? 2,
+            layer_name: s.layer_name ?? undefined,
+            measurement_value: s.measurement_value ?? undefined,
+            measurement_unit: s.measurement_unit ?? undefined,
+            scale_override: s.scale_override ?? null,
+            metadata: s.metadata,
+          });
+          break;
+        }
+        case 'edit': {
+          // Edits are not yet wired to the page-level stack; no-op.
+          break;
+        }
+      }
+    },
+    [
+      selectedDrawingId,
+      drawings,
+      projectId,
+      createAnnotationMutation,
+      deleteAnnotationMutation,
+    ],
+  );
+
+  const replayRedo = useCallback(
+    (entry: UndoEntry) => {
+      if (!selectedDrawingId) return;
+      const drawing = drawings.find((d) => d.id === selectedDrawingId);
+      const effectiveProjectId = drawing?.project_id || projectId;
+
+      switch (entry.kind) {
+        case 'create': {
+          // Redo of a create → re-create from the captured snapshot.
+          if (!effectiveProjectId) return;
+          const s = entry.snapshot;
+          skipUndoRef.current = true;
+          createAnnotationMutation.mutate({
+            project_id: effectiveProjectId,
+            drawing_id: selectedDrawingId,
+            annotation_type: s.annotation_type,
+            geometry: { points: s.points },
+            text: s.text ?? undefined,
+            color: s.color,
+            thickness: s.thickness ?? 2,
+            line_width: s.line_width ?? 2,
+            layer_name: s.layer_name ?? undefined,
+            measurement_value: s.measurement_value ?? undefined,
+            measurement_unit: s.measurement_unit ?? undefined,
+            scale_override: s.scale_override ?? null,
+            metadata: s.metadata,
+          });
+          break;
+        }
+        case 'delete': {
+          // Redo of a delete → delete again (id may no longer exist if
+          // the undone create produced a new id; best-effort).
+          skipUndoRef.current = true;
+          deleteAnnotationMutation.mutate({ id: entry.snapshot.id });
+          break;
+        }
+        case 'edit': {
+          break;
+        }
+      }
+    },
+    [
+      selectedDrawingId,
+      drawings,
+      projectId,
+      createAnnotationMutation,
+      deleteAnnotationMutation,
+    ],
+  );
+
+  const handleUndo = useCallback(() => {
+    setUndoState((prev) => {
+      const { state: next, entry } = popUndo(prev);
+      if (entry) replayUndo(entry);
+      return next;
+    });
+  }, [replayUndo]);
+
+  const handleRedo = useCallback(() => {
+    setUndoState((prev) => {
+      const { state: next, entry } = popRedo(prev);
+      if (entry) replayRedo(entry);
+      return next;
+    });
+  }, [replayRedo]);
 
   // Handlers
   const handleToggleLayer = useCallback((name: string) => {
@@ -1763,12 +1966,33 @@ export function DwgTakeoffPage() {
     t,
   ]);
 
-  // Global keyboard shortcuts for the page
+  // Global keyboard shortcuts for the page (Q1 UX #1 + #2).
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       // Ignore shortcuts when typing in inputs
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      // Skip if a modifier other than Shift / Ctrl is active — we only
+      // own single-key tools and Ctrl+{Z,Y}/Ctrl+Shift+Z.
+      if (e.altKey || e.metaKey) return;
+
+      // Undo / redo first — these need to swallow the key even when
+      // Ctrl is held, to avoid the browser shortcut kicking in.
+      const key = e.key.toLowerCase();
+      if (e.ctrlKey) {
+        if (key === 'z' && !e.shiftKey) {
+          e.preventDefault();
+          handleUndo();
+          return;
+        }
+        if (key === 'y' || (key === 'z' && e.shiftKey)) {
+          e.preventDefault();
+          handleRedo();
+          return;
+        }
+        // Any other Ctrl+letter combo → bail (don't steal browser shortcuts).
+        return;
+      }
 
       switch (e.key) {
         case 'Escape':
@@ -1790,8 +2014,20 @@ export function DwgTakeoffPage() {
         case 'd': case 'D':
           setActiveTool('distance');
           break;
+        case 'l': case 'L':
+          setActiveTool('line');
+          break;
+        case 'p': case 'P':
+          setActiveTool('polyline');
+          break;
         case 'a': case 'A':
           setActiveTool('area');
+          break;
+        case 'r': case 'R':
+          setActiveTool('rectangle');
+          break;
+        case 'c': case 'C':
+          setActiveTool('circle');
           break;
         case 't': case 'T':
           setActiveTool('text_pin');
@@ -1800,7 +2036,7 @@ export function DwgTakeoffPage() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [selectedEntityIds, selectedAnnotationId, contextMenu]);
+  }, [selectedEntityIds, selectedAnnotationId, contextMenu, handleUndo, handleRedo]);
 
   /* ── Render ──────────────────────────────────────────────────────── */
 
@@ -1965,6 +2201,7 @@ export function DwgTakeoffPage() {
                 hiddenEntityIds={hiddenEntityIds}
                 selectedAnnotationId={selectedAnnotationId}
                 drawingScale={effectiveScale}
+                snapModes={snapModes}
                 onSelectEntity={handleSelectEntity}
                 onSelectAnnotation={setSelectedAnnotationId}
                 onEntityContextMenu={handleEntityContextMenu}
@@ -1975,13 +2212,128 @@ export function DwgTakeoffPage() {
                   Lives here (not in a fixed header bar) so the drawing gets
                   the full viewport height and tools stay visually attached
                   to the thing they act on. */}
-              <div className="absolute top-3 left-3 z-10 rounded-lg border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md shadow-xl shadow-black/30 ring-1 ring-black/5">
-                <ToolPalette
-                  activeTool={activeTool}
-                  onToolChange={setActiveTool}
-                  activeColor={activeColor}
-                  onColorChange={setActiveColor}
-                />
+              <div className="absolute top-3 left-3 z-10 flex items-start gap-2">
+                <div className="rounded-lg border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md shadow-xl shadow-black/30 ring-1 ring-black/5">
+                  <ToolPalette
+                    activeTool={activeTool}
+                    onToolChange={setActiveTool}
+                    activeColor={activeColor}
+                    onColorChange={setActiveColor}
+                  />
+                </div>
+
+                {/* Q1 UX #2 + #4: Undo / redo + snap-mode menu. Sit next
+                    to the tool palette so tool + history + snap controls
+                    are all reachable without leaving the top-left. */}
+                <div
+                  className="flex items-center gap-1 rounded-lg border border-white/60 bg-white/85 dark:bg-white/90 backdrop-blur-md px-1.5 py-1 shadow-xl shadow-black/30 ring-1 ring-black/5"
+                  data-testid="dwg-history-bar"
+                >
+                  <button
+                    type="button"
+                    onClick={handleUndo}
+                    disabled={!canUndoFn(undoState)}
+                    data-testid="dwg-undo"
+                    title={t('dwg_takeoff.undo', { defaultValue: 'Undo (Ctrl+Z)' })}
+                    aria-label="Undo"
+                    className={clsx(
+                      'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
+                      canUndoFn(undoState)
+                        ? 'text-slate-800 hover:bg-slate-100'
+                        : 'text-slate-300 cursor-not-allowed',
+                    )}
+                  >
+                    <Undo2 size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRedo}
+                    disabled={!canRedoFn(undoState)}
+                    data-testid="dwg-redo"
+                    title={t('dwg_takeoff.redo', {
+                      defaultValue: 'Redo (Ctrl+Y / Ctrl+Shift+Z)',
+                    })}
+                    aria-label="Redo"
+                    className={clsx(
+                      'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
+                      canRedoFn(undoState)
+                        ? 'text-slate-800 hover:bg-slate-100'
+                        : 'text-slate-300 cursor-not-allowed',
+                    )}
+                  >
+                    <Redo2 size={14} />
+                  </button>
+
+                  <div className="mx-1 h-5 w-px bg-slate-300" />
+
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setSnapMenuOpen((o) => !o)}
+                      data-testid="dwg-snap-menu-toggle"
+                      title={t('dwg_takeoff.snap_menu', {
+                        defaultValue: 'Snap modes',
+                      })}
+                      aria-label="Snap modes"
+                      className={clsx(
+                        'flex h-7 items-center gap-1 rounded-md px-2 text-xs transition-colors',
+                        snapModes.endpoint || snapModes.midpoint || snapModes.intersection
+                          ? 'bg-emerald-500/20 text-emerald-700'
+                          : 'text-slate-700 hover:bg-slate-100',
+                      )}
+                    >
+                      <Target size={13} />
+                      <span className="font-semibold">
+                        {t('dwg_takeoff.snap_label', { defaultValue: 'Snap' })}
+                      </span>
+                    </button>
+                    {snapMenuOpen && (
+                      <div
+                        data-testid="dwg-snap-menu"
+                        className="absolute left-0 top-full mt-1 w-48 rounded-lg border border-slate-200 bg-white p-2 shadow-xl"
+                        onMouseLeave={() => setSnapMenuOpen(false)}
+                      >
+                        <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100">
+                          <input
+                            type="checkbox"
+                            data-testid="dwg-snap-endpoint"
+                            checked={!!snapModes.endpoint}
+                            onChange={(e) =>
+                              setSnapModes((m) => ({ ...m, endpoint: e.target.checked }))
+                            }
+                          />
+                          {t('dwg_takeoff.snap_endpoint', {
+                            defaultValue: 'Endpoint snap',
+                          })}
+                        </label>
+                        <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs text-slate-700 hover:bg-slate-100">
+                          <input
+                            type="checkbox"
+                            data-testid="dwg-snap-midpoint"
+                            checked={!!snapModes.midpoint}
+                            onChange={(e) =>
+                              setSnapModes((m) => ({ ...m, midpoint: e.target.checked }))
+                            }
+                          />
+                          {t('dwg_takeoff.snap_midpoint', {
+                            defaultValue: 'Midpoint snap',
+                          })}
+                        </label>
+                        <label className="flex cursor-not-allowed items-center gap-2 rounded-md px-2 py-1.5 text-xs text-slate-400">
+                          <input
+                            type="checkbox"
+                            data-testid="dwg-snap-intersection"
+                            checked={!!snapModes.intersection}
+                            disabled
+                          />
+                          {t('dwg_takeoff.snap_intersection', {
+                            defaultValue: 'Intersection snap (soon)',
+                          })}
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Floating Offline Ready badge + PDF export — top-right corner
@@ -2652,7 +3004,12 @@ export function DwgTakeoffPage() {
                               confirmLabel: t('common.delete', 'Delete'),
                               variant: 'danger',
                             });
-                            if (ok) deleteAnnotationMutation.mutate(ann.id);
+                            if (ok) {
+                              deleteAnnotationMutation.mutate({
+                                id: ann.id,
+                                snapshotForUndo: snapshotFrom(ann),
+                              });
+                            }
                           }}
                           className="text-muted-foreground hover:text-red-500"
                         >

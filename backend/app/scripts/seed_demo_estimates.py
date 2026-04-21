@@ -632,13 +632,15 @@ async def main() -> None:
             user = (await session.execute(select(User).limit(1))).scalar_one_or_none()
 
         if user is None:
-            # Create a minimal demo user (password hash for "OpenEstimate2026")
+            # Create a minimal demo user — intentionally *not* admin so the
+            # first real registrant on a freshly-seeded DB still gets the
+            # admin bootstrap path. See UserService.register.
             user = User(
                 id=uuid.uuid4(),
                 email="demo@openestimator.io",
                 hashed_password="$2b$12$DEMO_HASH_NOT_FOR_PRODUCTION_USE_ONLY",
                 full_name="Demo User",
-                role="admin",
+                role="viewer",
                 locale="en",
                 is_active=True,
                 metadata_={},

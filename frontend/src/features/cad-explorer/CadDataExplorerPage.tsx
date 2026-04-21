@@ -42,6 +42,16 @@ import {
 } from '@/stores/useAnalysisStateStore';
 import { formatValue, formatChartValue } from '@/shared/lib/numberFormat';
 import { applyTopN, groupMatchesSlicers } from './aggregation';
+import {
+  parseTab,
+  parseSlicers,
+  parsePivot,
+  parseChart,
+  serialiseSlicers,
+  serialisePivot,
+  serialiseChart,
+  computeDataBar,
+} from './urlState';
 
 /* ── Recharts — lazy-loaded so the initial Data Explorer bundle stays lean.
       Charts live in a ~38 kB gzipped chunk that only loads once the user
@@ -885,18 +895,58 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                           </td>
                           {groupBy.slice(1).map((col) => <td key={col} className="px-3 py-2 text-content-tertiary">—</td>)}
                           <td className="px-3 py-2 text-right font-semibold tabular-nums">{parentCount.toLocaleString()}</td>
-                          {aggCols.map((col) => (
-                            <td key={col} className="px-3 py-2 text-right font-semibold text-oe-blue tabular-nums">
-                              {formatNumber(children.reduce((s, g) => s + (g.results[col] ?? 0), 0))}
-                            </td>
-                          ))}
+                          {aggCols.map((col) => {
+                            const subtotal = children.reduce((s, g) => s + (g.results[col] ?? 0), 0);
+                            const bar = computeDataBar(subtotal, maxByAgg.get(col) ?? 0);
+                            return (
+                              <td
+                                key={col}
+                                data-testid={`pivot-parent-cell-${col}`}
+                                className="relative px-3 py-2 text-right font-semibold text-oe-blue tabular-nums"
+                              >
+                                <span
+                                  aria-hidden
+                                  data-testid={`pivot-databar-${col}`}
+                                  className={`absolute inset-y-1 rounded-sm pointer-events-none ${
+                                    bar.negative
+                                      ? 'left-1 bg-red-500/20 dark:bg-red-500/25'
+                                      : 'right-1 bg-oe-blue/20 dark:bg-oe-blue/25'
+                                  }`}
+                                  style={{ width: `${bar.widthPct}%`, maxWidth: 'calc(100% - 0.5rem)' }}
+                                />
+                                <span className="relative">{formatNumber(subtotal)}</span>
+                              </td>
+                            );
+                          })}
                         </tr>
                         {isOpen && children.map((g) => (
                           <tr key={Object.values(g.key).join('-')} className="border-b border-border-light">
                             <td className="px-3 py-1.5 pl-8 text-content-quaternary">{g.key[groupBy[0]!]}</td>
                             {groupBy.slice(1).map((col) => <td key={col} className="px-3 py-1.5 text-content-secondary">{g.key[col] || '—'}</td>)}
                             <td className="px-3 py-1.5 text-right tabular-nums text-content-secondary">{g.count.toLocaleString()}</td>
-                            {aggCols.map((col) => <td key={col} className="px-3 py-1.5 text-right tabular-nums">{formatNumber(g.results[col])}</td>)}
+                            {aggCols.map((col) => {
+                              const raw = g.results[col] ?? 0;
+                              const bar = computeDataBar(raw, maxByAgg.get(col) ?? 0);
+                              return (
+                                <td
+                                  key={col}
+                                  data-testid={`pivot-child-cell-${col}`}
+                                  className="relative px-3 py-1.5 text-right tabular-nums"
+                                >
+                                  <span
+                                    aria-hidden
+                                    data-testid={`pivot-databar-${col}`}
+                                    className={`absolute inset-y-0.5 rounded-sm pointer-events-none ${
+                                      bar.negative
+                                        ? 'left-1 bg-red-500/20 dark:bg-red-500/25'
+                                        : 'right-1 bg-oe-blue/20 dark:bg-oe-blue/25'
+                                    }`}
+                                    style={{ width: `${bar.widthPct}%`, maxWidth: 'calc(100% - 0.5rem)' }}
+                                  />
+                                  <span className="relative">{formatNumber(raw)}</span>
+                                </td>
+                              );
+                            })}
                           </tr>
                         ))}
                       </React.Fragment>
@@ -909,14 +959,22 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                       <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{g.count.toLocaleString()}</td>
                       {aggCols.map((col) => {
                         const raw = g.results[col] ?? 0;
-                        const max = maxByAgg.get(col) ?? 0;
-                        const pct = max > 0 ? Math.max(0, Math.min(100, (Math.abs(raw) / max) * 100)) : 0;
+                        const bar = computeDataBar(raw, maxByAgg.get(col) ?? 0);
                         return (
-                          <td key={col} className="relative px-3 py-2 text-right tabular-nums font-medium">
+                          <td
+                            key={col}
+                            data-testid={`pivot-flat-cell-${col}`}
+                            className="relative px-3 py-2 text-right tabular-nums font-medium"
+                          >
                             <span
                               aria-hidden
-                              className="absolute inset-y-1 right-1 rounded-sm bg-oe-blue/10 dark:bg-oe-blue/20 pointer-events-none"
-                              style={{ width: `${pct}%`, maxWidth: 'calc(100% - 0.5rem)' }}
+                              data-testid={`pivot-databar-${col}`}
+                              className={`absolute inset-y-1 rounded-sm pointer-events-none ${
+                                bar.negative
+                                  ? 'left-1 bg-red-500/20 dark:bg-red-500/25'
+                                  : 'right-1 bg-oe-blue/20 dark:bg-oe-blue/25'
+                              }`}
+                              style={{ width: `${bar.widthPct}%`, maxWidth: 'calc(100% - 0.5rem)' }}
                             />
                             <span className="relative">{formatNumber(raw)}</span>
                           </td>
@@ -2534,20 +2592,102 @@ export function CadDataExplorerPage() {
   const addToast = useToastStore((s) => s.addToast);
   const [searchParams, setSearchParams] = useSearchParams();
   const sessionId = searchParams.get('session') || '';
-  const [activeTab, setActiveTab] = useState<TabId>('table');
+
+  // ── URL-driven state (Q1 UX) ───────────────────────────────────────────
+  // Read tab from URL so reload / deep-link / back-button restore the view.
+  // All other analysis state (slicers, pivot, chart) lives in the zustand
+  // store and is hydrated/serialised by the effects below.
+  const [activeTab, setActiveTab] = useState<TabId>(() =>
+    parseTab(new URLSearchParams(window.location.search).get('tab')),
+  );
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showSaveToProjectDialog, setShowSaveToProjectDialog] = useState(false);
   const [showViewsDrawer, setShowViewsDrawer] = useState(false);
 
   const setAnalysisSession = useAnalysisStateStore((s) => s.setSessionId);
+  const hydrateFromUrl = useAnalysisStateStore((s) => s.hydrateFromUrl);
   const saveAnalysisView = useAnalysisStateStore((s) => s.saveView);
   const savedViewsCount = useAnalysisStateStore((s) => s.views.length);
+  const storeSlicers = useAnalysisStateStore((s) => s.slicers);
+  const storeChart = useAnalysisStateStore((s) => s.chart);
+  const storePivot = useAnalysisStateStore((s) => s.pivot);
 
   // Bind the analysis-state store to the active session. setSessionId is a
   // no-op when the id hasn't changed, so this is safe to run on every render.
   useEffect(() => {
     setAnalysisSession(sessionId || null);
   }, [sessionId, setAnalysisSession]);
+
+  // One-shot hydration: read URL query params once the session is bound
+  // and push them into the analysis store BEFORE child tabs render for
+  // the first time. Without this, PivotTab/ChartsTab see default state
+  // for a frame and then snap to the URL values → visible flash.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    if (!sessionId) return; // Landing page — nothing to hydrate.
+    hydratedRef.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const initialSlicers = parseSlicers(params.get('slicers'));
+    const initialChart = parseChart({
+      kind: params.get('chart_kind'),
+      cat: params.get('chart_cat'),
+      val: params.get('chart_val'),
+      top: params.get('chart_top'),
+    });
+    const initialPivot = parsePivot({
+      group: params.get('piv_group'),
+      sum: params.get('piv_sum'),
+      agg: params.get('piv_agg'),
+      top: params.get('piv_top'),
+    });
+    hydrateFromUrl({
+      slicers: initialSlicers,
+      chart: initialChart,
+      pivot: initialPivot,
+    });
+  }, [sessionId, hydrateFromUrl]);
+
+  // Debounced URL writer (300ms) — keeps the query string in sync with
+  // tab / slicer / pivot / chart changes. We compute the next URL by
+  // merging existing params (so `session` & unrelated params survive)
+  // with the serialised analysis state.
+  const writeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!hydratedRef.current) return; // Skip writes until hydration ran.
+    if (writeTimerRef.current) clearTimeout(writeTimerRef.current);
+    writeTimerRef.current = setTimeout(() => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          // Tab
+          if (activeTab === 'table') next.delete('tab');
+          else next.set('tab', activeTab);
+          // Slicers
+          const slStr = serialiseSlicers(storeSlicers);
+          if (slStr) next.set('slicers', slStr);
+          else next.delete('slicers');
+          // Pivot
+          const piv = serialisePivot(storePivot);
+          piv.group ? next.set('piv_group', piv.group) : next.delete('piv_group');
+          piv.sum ? next.set('piv_sum', piv.sum) : next.delete('piv_sum');
+          piv.agg ? next.set('piv_agg', piv.agg) : next.delete('piv_agg');
+          piv.top ? next.set('piv_top', piv.top) : next.delete('piv_top');
+          // Chart
+          const ch = serialiseChart(storeChart);
+          ch.kind ? next.set('chart_kind', ch.kind) : next.delete('chart_kind');
+          ch.cat ? next.set('chart_cat', ch.cat) : next.delete('chart_cat');
+          ch.val ? next.set('chart_val', ch.val) : next.delete('chart_val');
+          ch.top ? next.set('chart_top', ch.top) : next.delete('chart_top');
+          return next;
+        },
+        { replace: true },
+      );
+    }, 300);
+    return () => {
+      if (writeTimerRef.current) clearTimeout(writeTimerRef.current);
+    };
+  }, [activeTab, storeSlicers, storePivot, storeChart, setSearchParams]);
 
   const { data: describe, isLoading, error } = useQuery({
     queryKey: ['cad-describe', sessionId],
@@ -2939,6 +3079,7 @@ export function CadDataExplorerPage() {
               {TABS.map(({ id, icon: Icon, label, description }) => (
                 <button
                   key={id}
+                  data-testid={`explorer-tab-${id}`}
                   onClick={() => setActiveTab(id)}
                   className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium border-b-2 transition-colors ${
                     activeTab === id

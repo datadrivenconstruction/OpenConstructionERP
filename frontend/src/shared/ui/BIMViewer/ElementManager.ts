@@ -1496,8 +1496,16 @@ export class ElementManager {
    * coverage" / "color by document coverage" modes — where we want a
    * meaningful red/amber/green colour scale, not the hash-to-hue rainbow
    * the existing `colorBy()` produces.
+   *
+   * Pass an `opacityFn` alongside `colorFn` to fade specific elements (e.g.
+   * the 5D mode fades elements that have no linked BOQ rate so they read
+   * as "no data").  Opacity 1 stays fully opaque and non-transparent;
+   * opacity < 1 sets `transparent=true` so the GPU composites correctly.
    */
-  colorByDirect(colorFn: (el: BIMElementData) => THREE.Color | null): void {
+  colorByDirect(
+    colorFn: (el: BIMElementData) => THREE.Color | null,
+    opacityFn?: (el: BIMElementData) => number,
+  ): void {
     // Dispose all previously created materials to prevent memory leaks
     // when switching between colorBy modes.
     this.disposeCreatedMaterials();
@@ -1505,6 +1513,7 @@ export class ElementManager {
       const el = this.elementDataMap.get(elementId);
       if (!el) continue;
       const color = colorFn(el);
+      const opacity = opacityFn ? opacityFn(el) : 1;
 
       const ud = mesh.userData as {
         customMaterial?: boolean;
@@ -1540,6 +1549,14 @@ export class ElementManager {
       const mat = mesh.material as THREE.MeshStandardMaterial | THREE.MeshPhongMaterial;
       if (mat && 'color' in mat && mat.color) {
         mat.color.copy(color);
+      }
+      // Apply opacity. `transparent` must toggle in lockstep so the GPU
+      // picks the correct depth-write/blend path; at 1.0 we restore
+      // non-transparent rendering to avoid sort-order artefacts.
+      if (mat && 'opacity' in mat) {
+        const clamped = Math.max(0, Math.min(1, opacity));
+        (mat as THREE.Material & { opacity: number }).opacity = clamped;
+        (mat as THREE.Material & { transparent: boolean }).transparent = clamped < 1;
       }
     }
     this.sceneManager.requestRender();

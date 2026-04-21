@@ -21,6 +21,13 @@ import {
   formatMeasurement,
   polygonCentroid,
 } from '../lib/measurement';
+import { snapToOrthoAngle } from '../lib/ortho';
+import {
+  closestSnapCandidate,
+  collectSnapCandidates,
+  type SnapCandidate,
+  type SnapModes,
+} from '../lib/snap';
 
 /* ── Text Pin popup types & constants ─────────────────────────────────── */
 
@@ -78,6 +85,12 @@ interface Props {
    * annotation, so takeoff totals stay in real-world units.
    */
   drawingScale?: number;
+  /**
+   * Which snap kinds to test against when rubber-banding a draw (Q1 UX
+   * #4). Omitted / all-false = snapping disabled. The viewer converts
+   * the 10 CSS-px threshold to world units using the live viewport scale.
+   */
+  snapModes?: SnapModes;
   onSelectEntity: (id: string | null, event?: EntitySelectEvent) => void;
   onSelectAnnotation: (id: string | null) => void;
   onEntityContextMenu?: (event: EntityContextMenuEvent) => void;
@@ -144,6 +157,7 @@ export function DxfViewer({
   hiddenEntityIds,
   selectedAnnotationId,
   drawingScale = 1,
+  snapModes,
   onSelectEntity,
   onSelectAnnotation,
   onEntityContextMenu,
@@ -191,11 +205,79 @@ export function DxfViewer({
   /** Whether the viewport has been fitted at least once (prevents redundant fits). */
   const fittedRef = useRef(false);
 
+  /** Whether Shift is currently held. Mirrored into a ref so the render
+   *  loop (outside React's closure) can read the live value without
+   *  rebuilding the animation-frame callback. Used for ortho-lock
+   *  rubber-banding (Q1 UX #3). */
+  const shiftHeldRef = useRef(false);
+  /** Latest snap mode props, mirrored into a ref for render-loop access. */
+  const snapModesRef = useRef<SnapModes | undefined>(snapModes);
+  snapModesRef.current = snapModes;
+  /** Pre-computed list of snap candidates for the currently visible
+   *  entities. Refreshed whenever the entity list / snap modes change so
+   *  the hot hover path only runs the cheap ``closestSnapCandidate``
+   *  filter instead of rebuilding the list on every mousemove. */
+  const snapCandidatesRef = useRef<SnapCandidate[]>([]);
+  /** The snap candidate currently closest to the cursor (null if none).
+   *  Read by both the render loop (to draw the marker) and the click
+   *  handler (to commit to the snapped world point). */
+  const activeSnapRef = useRef<SnapCandidate | null>(null);
+
   // Clear in-progress draw points and dismiss text pin popup when tool changes
   useEffect(() => {
     drawPointsRef.current = [];
     setTextPinPopup(null);
   }, [activeTool]);
+
+  // Track Shift key globally so ortho-lock works even when the canvas
+  // doesn't have keyboard focus (the browser lets shift drift between
+  // focus targets, so we listen on window). Cleared on blur to prevent
+  // a sticky shift after alt-tabbing away.
+  //
+  // Also listens for Escape while a drawing is in progress so the user
+  // can abandon a half-drawn polyline / area without switching tools.
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') shiftHeldRef.current = true;
+      if (e.key === 'Escape' && drawPointsRef.current.length > 0) {
+        const tag = (e.target as HTMLElement | null)?.tagName;
+        // Never steal Escape when the user is typing in an input.
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        drawPointsRef.current = [];
+        // Trigger a re-render so the rubber band disappears immediately.
+        forceRender((n) => n + 1);
+      }
+    };
+    const up = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') shiftHeldRef.current = false;
+    };
+    const blur = () => {
+      shiftHeldRef.current = false;
+    };
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    window.addEventListener('blur', blur);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', blur);
+    };
+  }, []);
+
+  // Rebuild the snap candidate cache whenever entities / visible layers /
+  // snap modes change. ``collectSnapCandidates`` does not filter by
+  // layer, so we pre-filter here before handing the list to the hot
+  // hover code path.
+  useEffect(() => {
+    if (!snapModes || (!snapModes.endpoint && !snapModes.midpoint)) {
+      snapCandidatesRef.current = [];
+      return;
+    }
+    const visible = entities.filter(
+      (e) => visibleLayers.has(e.layer) && !hiddenEntityIds.has(e.id),
+    );
+    snapCandidatesRef.current = collectSnapCandidates(visible, snapModes);
+  }, [entities, visibleLayers, hiddenEntityIds, snapModes]);
 
   // Recompute extents when entities change, then fit
   useEffect(() => {
@@ -374,10 +456,27 @@ export function DxfViewer({
         }
 
         // ── Rubber band preview line from last placed point to cursor ──
-        const mouseWorld = mousePosRef.current;
-        if (mouseWorld) {
+        const rawMouseWorld = mousePosRef.current;
+        if (rawMouseWorld) {
           const lastPt = pts[pts.length - 1]!;
           const firstPt = pts[0]!;
+
+          // Determine the effective cursor point for the rubber band:
+          //   1. If snap is active (activeSnapRef has a hit), use it.
+          //   2. Else if Shift is held & this is a line/polyline/distance,
+          //      lock the cursor to the nearest 0/45/90/135° ray from the
+          //      previous point (Q1 UX #3).
+          //   3. Else use the raw cursor position.
+          let mouseWorld = rawMouseWorld;
+          const snapHit = activeSnapRef.current;
+          const canOrtho =
+            curTool === 'distance' || curTool === 'line' || curTool === 'polyline';
+          if (snapHit) {
+            mouseWorld = snapHit.point;
+          } else if (shiftHeldRef.current && canOrtho) {
+            mouseWorld = snapToOrthoAngle(lastPt, rawMouseWorld);
+          }
+
           const lastScreen = worldToScreen(lastPt.x, lastPt.y, vp);
           const mouseScreen = worldToScreen(mouseWorld.x, mouseWorld.y, vp);
           const firstScreen = worldToScreen(firstPt.x, firstPt.y, vp);
@@ -421,6 +520,53 @@ export function DxfViewer({
 
           ctx.setLineDash([]);
           ctx.globalAlpha = 1.0;
+
+          // ── Ortho-lock ghost ray ────────────────────────────────────
+          // When Shift is held during a length-style draw, extend a
+          // very faint ray well past the cursor so the user sees the
+          // locked axis unambiguously. Drawn AFTER the dashed rubber
+          // band so it sits under the primary preview line.
+          if (shiftHeldRef.current && canOrtho && !snapHit) {
+            ctx.save();
+            ctx.strokeStyle = '#60a5fa';
+            ctx.globalAlpha = 0.35;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2, 4]);
+            // Extend the ray 2x the rubber-band length in the same direction.
+            const extX = lastScreen.x + (mouseScreen.x - lastScreen.x) * 2.5;
+            const extY = lastScreen.y + (mouseScreen.y - lastScreen.y) * 2.5;
+            ctx.beginPath();
+            ctx.moveTo(lastScreen.x, lastScreen.y);
+            ctx.lineTo(extX, extY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+          }
+
+          // ── Snap marker (tiny crosshair at the snap candidate) ──────
+          if (snapHit) {
+            const sx = mouseScreen.x;
+            const sy = mouseScreen.y;
+            const kindColor =
+              snapHit.kind === 'endpoint'
+                ? '#22c55e'
+                : snapHit.kind === 'midpoint'
+                  ? '#f59e0b'
+                  : '#8b5cf6';
+            ctx.save();
+            ctx.strokeStyle = kindColor;
+            ctx.lineWidth = 1.5;
+            // Square ring
+            ctx.strokeRect(sx - 5, sy - 5, 10, 10);
+            // Inner cross
+            ctx.beginPath();
+            ctx.moveTo(sx - 3, sy);
+            ctx.lineTo(sx + 3, sy);
+            ctx.moveTo(sx, sy - 3);
+            ctx.lineTo(sx, sy + 3);
+            ctx.stroke();
+            ctx.restore();
+          }
 
           // ── Live measurement label near the midpoint of the rubber band ──
           const dist = calculateDistance(lastPt, mouseWorld) * drawingScaleRef.current;
@@ -540,9 +686,26 @@ export function DxfViewer({
         return;
       }
 
-      // Annotation tools: record point in world coords
-      const world = screenToWorld(sx, sy, vpRef.current);
-      const pts = [...drawPointsRef.current, world];
+      // Annotation tools: record point in world coords. If the snap
+      // marker is showing a hit, commit to the snapped point instead of
+      // the raw cursor. If Shift is held on a length-style tool AND
+      // there's a previous point, lock to the nearest 45° ray so the
+      // clicked point lands exactly on the visible ghost ray (Q1 UX #3).
+      const rawWorld = screenToWorld(sx, sy, vpRef.current);
+      const snapHit = activeSnapRef.current;
+      let world = rawWorld;
+      const canOrtho =
+        activeTool === 'distance' ||
+        activeTool === 'line' ||
+        activeTool === 'polyline';
+      const prevPts = drawPointsRef.current;
+      if (snapHit) {
+        world = { x: snapHit.point.x, y: snapHit.point.y };
+      } else if (e.shiftKey && canOrtho && prevPts.length > 0) {
+        const anchor = prevPts[prevPts.length - 1]!;
+        world = snapToOrthoAngle(anchor, rawWorld);
+      }
+      const pts = [...prevPts, world];
       drawPointsRef.current = pts;
 
       // For two-point tools, finalize on second click
@@ -592,20 +755,38 @@ export function DxfViewer({
     [activeTool, entities, visibleLayers, onSelectEntity, onSelectAnnotation, onAnnotationCreated],
   );
 
-  // Mouse move (pan + rubber band tracking)
+  // Mouse move (pan + rubber band tracking + snap hover test)
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (isPanningRef.current) {
       const dx = e.clientX - lastMouseRef.current.x;
       const dy = e.clientY - lastMouseRef.current.y;
       vpRef.current = applyPan(vpRef.current, dx, dy);
       lastMouseRef.current = { x: e.clientX, y: e.clientY };
+      return;
+    }
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const sx = e.clientX - rect.left;
+    const sy = e.clientY - rect.top;
+    const world = screenToWorld(sx, sy, vpRef.current);
+    mousePosRef.current = world;
+
+    // Snap hover test: only runs when a snap mode is enabled AND we're
+    // in a drawing tool that commits points (i.e. not Select / Pan).
+    // 10 CSS px in world space = 10 / viewport.scale.
+    const modes = snapModesRef.current;
+    const curTool = activeToolRef.current;
+    const drawTool =
+      curTool !== 'select' && curTool !== 'pan' && curTool !== 'text_pin';
+    if (modes && drawTool && (modes.endpoint || modes.midpoint)) {
+      const tolWorld = 10 / Math.max(vpRef.current.scale, 1e-9);
+      activeSnapRef.current = closestSnapCandidate(
+        snapCandidatesRef.current,
+        world,
+        tolWorld,
+      );
     } else {
-      const rect = canvasRef.current?.getBoundingClientRect();
-      if (rect) {
-        const sx = e.clientX - rect.left;
-        const sy = e.clientY - rect.top;
-        mousePosRef.current = screenToWorld(sx, sy, vpRef.current);
-      }
+      activeSnapRef.current = null;
     }
   }, []);
 
@@ -714,11 +895,14 @@ export function DxfViewer({
   return (
     <div
       ref={containerRef}
+      data-testid="dwg-viewer"
+      data-active-tool={activeTool}
       className="relative h-full w-full overflow-hidden bg-[#1a1a2e]"
       style={{ cursor: isPanning ? 'grabbing' : activeTool === 'pan' ? 'grab' : activeTool === 'select' ? 'default' : 'crosshair' }}
     >
       <canvas
         ref={canvasRef}
+        data-testid="dwg-canvas"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}

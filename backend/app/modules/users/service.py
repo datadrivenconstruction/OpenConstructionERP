@@ -184,8 +184,12 @@ class UserService:
             # as admin no matter what config says.
             default_role = "viewer"
 
-        user_count = await self.user_repo.count()
-        role = "admin" if user_count == 0 else default_role
+        # "First real user becomes admin" bootstrap. Check for any existing
+        # admin rather than any user — a prior `make seed` run may have
+        # inserted demo/viewer rows that would otherwise block the first
+        # real registrant from receiving admin rights.
+        admin_exists = await self.user_repo.has_admin()
+        role = "admin" if not admin_exists else default_role
 
         # Build registration metadata from form fields + auto-collected data
         reg_meta: dict[str, object] = {}

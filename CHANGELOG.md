@@ -5,6 +5,48 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] — 2026-04-20
+
+### Q1 UX deep improvements — keyboard shortcuts, undo/redo, 5D cost visualization, URL deep-links, and security UX
+
+Same-day follow-up to v2.0.0 — ships 13 user-experience features
+across the four visual modules (DWG Takeoff, PDF Takeoff, BIM Viewer, CAD-BIM
+BI Explorer), plus three RBAC papercuts that were producing red errors in the
+browser console for freshly-registered users.
+
+**DWG Takeoff** (`/dwg-takeoff`)
+- Per-tool keyboard shortcuts: `V` Select · `H` Pan · `D` Distance · `L` Line · `P` Polyline · `A` Area · `R` Rectangle · `C` Circle · `T` Text pin · `Esc` cancel. Shortcut letters are surfaced in the tool button tooltip.
+- Undo/redo stack (50 entries, linear) with visible toolbar buttons and `Ctrl+Z` / `Ctrl+Y` / `Ctrl+Shift+Z` keyboard shortcuts.
+- Shift-to-lock ortho/angle constraint during distance/line/polyline drawing — ghost ray shows the snapped 0°/45°/90°/135° direction.
+- Snap modes dropdown (endpoint + midpoint) with on-canvas crosshair marker at the snap candidate. Intersection snap UI prepared, implementation deferred.
+
+**PDF Takeoff** (`/takeoff?tab=measurements`)
+- Per-tool keyboard shortcuts for all 11 tools (quantitative + annotation): `V/D/P/A/O/C/R/T/H/W/X` + `Esc`.
+- Redo stack added alongside the existing undo, with `Ctrl+Y` / `Ctrl+Shift+Z` bindings and a visible toolbar button.
+- Measurement properties panel — right sidebar opens on selection, edit Group / Color (6-color palette) / Annotation / Notes / Delete.
+- Color-coded group legend overlay — docked bottom-left of canvas, one row per group with chip + count + total, click-to-hide.
+
+**BIM 3D Viewer** (`/bim`)
+- Screenshot button in the viewer toolbar — captures the Three.js canvas to PNG, triggers download, attempts clipboard copy (best-effort).
+- 5D cost colour mode — activates a blue → amber → red gradient based on each element's linked BOQ unit rate, with a legend strip in the bottom-right of the viewport. Elements without a BOQ link render grey at 30% opacity.
+- URL deep-link state — camera position + target + selected element IDs serialize to `?cx=...&cy=...&cz=...&tx=...&ty=...&tz=...&sel=a,b,c`. Writes are debounced to 500ms; on load the params are applied once the model is ready.
+
+**CAD-BIM BI Explorer** (`/data-explorer`)
+- URL-driven state — active tab, slicer chips, pivot config (groupBy / aggCols / aggFn / topN), and chart config all serialize to query string. Reload the page and the view is exactly where it was. Debounced 300ms to avoid history pollution.
+- Power-BI-style horizontal data bars in pivot cells — proportional to each column's visible max. Negatives render a red bar anchored left; positives render an oe-blue bar anchored right. Applied across flat, tree-parent, and tree-child rows.
+
+**Reliability & security**
+- Fix: notification navigation no longer flashes the whole screen to black. The outer `Suspense` fallback (full-screen `bg-surface-secondary` = `#161822` in dark mode) caught every lazy chunk load; moved the `Suspense` boundary inside the layout so only the content area shows a small inline spinner while the sidebar + header stay mounted.
+- Fix: `useModuleStore` GET was calling `/api/v1/users/module-preferences` (no `/me/`) — which returns 404 — while PATCH correctly used `/api/v1/users/me/module-preferences/`. Unified both to the canonical `/me/` path so module preferences survive a reload.
+- Fix: Dashboard's team-count query unconditionally hit `/api/v1/users/` (admin-only endpoint, `users.list` permission) — every viewer-role user saw a red HTTP 403 in DevTools. The query is now gated on `userRole === 'admin' || 'editor'` so it silently no-ops for viewers.
+- Fix: RBAC bootstrap — the "first user becomes admin" rule previously looked at total user count, which was always ≥1 in dev installs because `main.py` seeds a demo admin. Replaced with a `UserRepository.has_admin()` check, and the auto-provisioned demo user is now created as `viewer` (not `admin`) so the next human to register via the API is correctly promoted to admin. Includes an integration test (`tests/integration/test_register_bootstrap.py`).
+
+**Tests & tooling**
+- 220/220 frontend unit tests green (138 net-new across 10 test files).
+- 6/6 Q1 Playwright specs green (graceful `test.skip` when seeded data is absent).
+- 0 TypeScript errors across the frontend.
+- New Playwright diagnostic spec `e2e/viewer-errors-audit.spec.ts` that navigates every top-level route as a viewer and logs every 4xx HTTP response + console error — used to validate the RBAC fixes produce a zero-error console.
+
 ## [2.0.0] — 2026-04-20
 
 ### Second stable release — AI chat reliability, AI-key encryption stability, DWG scale correctness, UI consistency, module developer experience, provenance watermarks

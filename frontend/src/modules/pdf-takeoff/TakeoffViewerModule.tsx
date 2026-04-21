@@ -21,6 +21,7 @@ import {
   Settings2,
   Info,
   Undo2,
+  Redo2,
   Pencil,
   Save,
   HardDriveDownload,
@@ -45,6 +46,7 @@ import {
   Image as ImageIcon,
   Sparkles,
   Layers,
+  List,
   X,
 } from 'lucide-react';
 import clsx from 'clsx';
@@ -66,6 +68,16 @@ import {
   formatMeasurement,
   deriveScale,
 } from './data/scale-helpers';
+import {
+  SHORTCUT_LETTER,
+  labelWithShortcut,
+  shortcutToTool,
+  shouldHandleShortcut,
+} from '../../features/takeoff/lib/takeoff-shortcuts';
+import {
+  computeGroupSummaries,
+  formatGroupTotal,
+} from '../../features/takeoff/lib/takeoff-groups';
 
 // Configure PDF.js worker — bundled locally (no CDN dependency)
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
@@ -113,6 +125,8 @@ interface Measurement {
   color?: string; // Color for annotation tools
   width?: number; // Width for rectangle/highlight
   height?: number; // Height for rectangle/highlight
+  /** Free-form notes entered via the properties panel. */
+  notes?: string;
   /** Server ID (set after first persistence sync). */
   serverId?: string;
   /** Linked BOQ position id — the canonical "this measurement feeds that position". */
@@ -249,10 +263,19 @@ export default function TakeoffViewerModule({
   const [editingAnnotationId, setEditingAnnotationId] = useState<string | null>(null);
   const [editingAnnotationValue, setEditingAnnotationValue] = useState('');
 
-  // Undo stack
+  // Undo / Redo stacks.  Redo is cleared whenever a fresh user operation
+  // is pushed onto undo (so the two stacks never fork).
   const undoStackRef = useRef<UndoOperation[]>([]);
+  const redoStackRef = useRef<UndoOperation[]>([]);
   const [undoCount, setUndoCount] = useState(0);
+  const [redoCount, setRedoCount] = useState(0);
   const addToast = useToastStore((s) => s.addToast);
+
+  // Selected measurement (drives the right-side Properties panel).
+  const [selectedMeasurementId, setSelectedMeasurementId] = useState<string | null>(null);
+
+  // Legend overlay visibility (bottom-left of canvas).
+  const [showLegend, setShowLegend] = useState(true);
 
   // Export to BOQ state
   const [showExportDialog, setShowExportDialog] = useState(false);
@@ -305,7 +328,10 @@ export default function TakeoffViewerModule({
       setFileName(file.name); // Triggers persistence hook to load saved measurements
       setActivePoints([]);
       undoStackRef.current = [];
+      redoStackRef.current = [];
       setUndoCount(0);
+      setRedoCount(0);
+      setSelectedMeasurementId(null);
       annotationCounterRef.current = { distance: 0, polyline: 0, area: 0, volume: 0, count: 0, cloud: 0, arrow: 0, text: 0, rectangle: 0, highlight: 0 };
       setShowVolumeDepthInput(false);
       setPendingVolumePoints([]);
@@ -349,7 +375,10 @@ export default function TakeoffViewerModule({
         setFileName(initialPdfName || 'Document.pdf');
         setActivePoints([]);
         undoStackRef.current = [];
+        redoStackRef.current = [];
         setUndoCount(0);
+        setRedoCount(0);
+        setSelectedMeasurementId(null);
         annotationCounterRef.current = { distance: 0, polyline: 0, area: 0, volume: 0, count: 0, cloud: 0, arrow: 0, text: 0, rectangle: 0, highlight: 0 };
         setShowVolumeDepthInput(false);
         setPendingVolumePoints([]);
@@ -806,6 +835,11 @@ export default function TakeoffViewerModule({
   const pushUndo = useCallback((op: UndoOperation) => {
     undoStackRef.current.push(op);
     setUndoCount(undoStackRef.current.length);
+    // A fresh user action invalidates any pending redo frames.
+    if (redoStackRef.current.length > 0) {
+      redoStackRef.current = [];
+      setRedoCount(0);
+    }
   }, []);
 
   /** Generate a default annotation for a new measurement (e.g. "Distance 1", "Area 2"). */
@@ -1376,6 +1410,40 @@ export default function TakeoffViewerModule({
     return groups;
   }, [pageMeasurements]);
 
+  /** Summaries for the color-coded legend overlay (bottom-left of canvas). */
+  const legendSummaries = useMemo(
+    () => computeGroupSummaries(
+      pageMeasurements.filter((m) => !hiddenGroups.has(m.group)),
+      GROUP_COLOR_MAP,
+    ),
+    [pageMeasurements, hiddenGroups],
+  );
+
+  /** Currently-selected measurement object (null if nothing selected / target deleted). */
+  const selectedMeasurement = useMemo(() => {
+    if (!selectedMeasurementId) return null;
+    return measurements.find((m) => m.id === selectedMeasurementId) ?? null;
+  }, [selectedMeasurementId, measurements]);
+
+  /** All unique group names across all measurements — for the properties-panel
+   *  Group dropdown so users can move items into existing groups. */
+  const availableGroups = useMemo(() => {
+    const names = new Set<string>(MEASUREMENT_GROUPS.map((g) => g.name));
+    for (const m of measurements) names.add(m.group || 'General');
+    return Array.from(names);
+  }, [measurements]);
+
+  /** Patch an arbitrary set of fields on the currently-selected measurement. */
+  const updateSelectedMeasurement = useCallback(
+    (patch: Partial<Measurement>) => {
+      if (!selectedMeasurementId) return;
+      setMeasurements((prev) =>
+        prev.map((m) => (m.id === selectedMeasurementId ? { ...m, ...patch } : m)),
+      );
+    },
+    [selectedMeasurementId],
+  );
+
   /** Toggle visibility of a measurement group */
   const toggleGroupVisibility = useCallback((groupName: string) => {
     setHiddenGroups((prev) => {
@@ -1464,6 +1532,8 @@ export default function TakeoffViewerModule({
       }
       return prev.filter((m) => m.id !== id);
     });
+    // Clear selection if the deleted measurement was selected.
+    setSelectedMeasurementId((cur) => (cur === id ? null : cur));
   }, [pushUndo]);
 
   /* ── Export measurements to BOQ ────────────────────────────────── */
@@ -1535,7 +1605,10 @@ export default function TakeoffViewerModule({
     setMeasurements([]);
     setActivePoints([]);
     undoStackRef.current = [];
+    redoStackRef.current = [];
     setUndoCount(0);
+    setRedoCount(0);
+    setSelectedMeasurementId(null);
     annotationCounterRef.current = { distance: 0, polyline: 0, area: 0, volume: 0, count: 0, cloud: 0, arrow: 0, text: 0, rectangle: 0, highlight: 0 };
     setEditingAnnotationId(null);
     setEditingAnnotationValue('');
@@ -1847,6 +1920,12 @@ export default function TakeoffViewerModule({
     const op = stack.pop()!;
     setUndoCount(stack.length);
 
+    // Push onto the redo stack BEFORE applying the reversal, so that
+    // Redo can re-issue the operation.  For `change_annotation` we
+    // capture the CURRENT (pre-revert) annotation text below so redo
+    // can swap it back.
+    let forwardOp: UndoOperation = op;
+
     switch (op.kind) {
       case 'add_point':
         // Remove the last point from the in-progress measurement
@@ -1857,6 +1936,8 @@ export default function TakeoffViewerModule({
         // Remove the completed measurement and restore active points
         setMeasurements((prev) => prev.filter((m) => m.id !== op.measurement.id));
         setActivePoints(op.previousActivePoints);
+        // Clear selection if we undid its creation
+        setSelectedMeasurementId((sel) => (sel === op.measurement.id ? null : sel));
         break;
 
       case 'add_count_point':
@@ -1880,30 +1961,172 @@ export default function TakeoffViewerModule({
         setMeasurements((prev) => [...prev, op.measurement]);
         break;
 
-      case 'change_annotation':
-        // Revert annotation to previous value
-        setMeasurements((prev) =>
-          prev.map((m) =>
+      case 'change_annotation': {
+        // Grab the current (about-to-be-overwritten) annotation so redo
+        // can replay the forward delta by swapping again.
+        setMeasurements((prev) => {
+          const target = prev.find((m) => m.id === op.measurementId);
+          if (target) {
+            forwardOp = {
+              kind: 'change_annotation',
+              measurementId: op.measurementId,
+              previousAnnotation: target.annotation,
+            };
+          }
+          return prev.map((m) =>
             m.id === op.measurementId ? { ...m, annotation: op.previousAnnotation } : m,
-          ),
-        );
+          );
+        });
         break;
+      }
     }
+
+    // Push the (possibly-adjusted) forward op onto redo.
+    redoStackRef.current.push(forwardOp);
+    setRedoCount(redoStackRef.current.length);
 
     addToast({ type: 'info', title: t('takeoff.undo', { defaultValue: 'Undo' }), message: t('takeoff.measurement_undone', { defaultValue: 'Measurement undone' }) });
   }, [addToast, t]);
 
-  /** Ctrl+Z / Cmd+Z keyboard shortcut */
+  /** Re-apply the most recently undone operation. */
+  const handleRedo = useCallback(() => {
+    const stack = redoStackRef.current;
+    if (stack.length === 0) return;
+    const op = stack.pop()!;
+    setRedoCount(stack.length);
+
+    let reverseOp: UndoOperation = op;
+
+    switch (op.kind) {
+      case 'add_point':
+        setActivePoints((prev) => [...prev, op.point]);
+        break;
+
+      case 'complete_measurement':
+        setMeasurements((prev) => [...prev, op.measurement]);
+        setActivePoints([]);
+        break;
+
+      case 'add_count_point':
+        if (op.wasNew) {
+          // Re-create the count measurement.  Use the previousMeasurement
+          // snapshot plus the new point, or build a minimal one.
+          const base = op.previousMeasurement ?? null;
+          const restored: Measurement = base
+            ? { ...base, points: [...base.points, op.point], value: base.points.length + 1 }
+            : {
+                id: op.measurementId,
+                type: 'count',
+                points: [op.point],
+                value: 1,
+                unit: 'pcs',
+                label: countLabel,
+                annotation: '',
+                page: currentPage,
+                group: activeGroup,
+              };
+          setMeasurements((prev) => [...prev, restored]);
+        } else {
+          setMeasurements((prev) =>
+            prev.map((m) =>
+              m.id === op.measurementId
+                ? { ...m, points: [...m.points, op.point], value: m.points.length + 1 }
+                : m,
+            ),
+          );
+        }
+        break;
+
+      case 'delete_measurement':
+        setMeasurements((prev) => prev.filter((m) => m.id !== op.measurement.id));
+        setSelectedMeasurementId((sel) => (sel === op.measurement.id ? null : sel));
+        break;
+
+      case 'change_annotation': {
+        // Swap annotations again — capture the current value so a
+        // subsequent undo can revert this redo.
+        setMeasurements((prev) => {
+          const target = prev.find((m) => m.id === op.measurementId);
+          if (target) {
+            reverseOp = {
+              kind: 'change_annotation',
+              measurementId: op.measurementId,
+              previousAnnotation: target.annotation,
+            };
+          }
+          return prev.map((m) =>
+            m.id === op.measurementId ? { ...m, annotation: op.previousAnnotation } : m,
+          );
+        });
+        break;
+      }
+    }
+
+    // Push the reverse op onto undo so Ctrl+Z works again.
+    undoStackRef.current.push(reverseOp);
+    setUndoCount(undoStackRef.current.length);
+
+    addToast({
+      type: 'info',
+      title: t('takeoff.redo', { defaultValue: 'Redo' }),
+      message: t('takeoff.measurement_redone', { defaultValue: 'Measurement redone' }),
+    });
+  }, [addToast, t, countLabel, currentPage, activeGroup]);
+
+  /** Unified tool-switch logic (shared between toolbar buttons + shortcuts). */
+  const selectTool = useCallback((tool: MeasureTool) => {
+    setActiveTool(tool);
+    setActivePoints([]);
+    setRectStartPoint(null);
+    setIsDraggingRect(false);
+    setShowTextInput(false);
+    if (isAnnotationTool(tool)) {
+      setAnnotationColor(DEFAULT_ANNOTATION_COLORS[tool]);
+    }
+  }, []);
+
+  /** Keyboard shortcuts: per-tool letters, Ctrl+Z/Y redo/undo, Esc cancel. */
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+      // Undo / Redo — handled even inside inputs (standard browser semantics).
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
         e.preventDefault();
         handleUndo();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+        return;
+      }
+
+      // Esc: cancel any in-progress drawing + deselect any selected measurement
+      if (e.key === 'Escape') {
+        if (activePoints.length > 0 || rectStartPoint !== null || showTextInput || showScaleDialog || showVolumeDepthInput) {
+          setActivePoints([]);
+          setRectStartPoint(null);
+          setIsDraggingRect(false);
+          setShowTextInput(false);
+          setTextInputValue('');
+          // Don't close dialogs here — they have their own handlers
+        } else if (selectedMeasurementId) {
+          setSelectedMeasurementId(null);
+        }
+        return;
+      }
+
+      // Tool letters — only when focus isn't in an input / textarea / etc.
+      if (!shouldHandleShortcut(e.target)) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const tool = shortcutToTool(e.key);
+      if (tool) {
+        e.preventDefault();
+        selectTool(tool);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [handleUndo]);
+  }, [handleUndo, handleRedo, selectTool, activePoints.length, rectStartPoint, showTextInput, showScaleDialog, showVolumeDepthInput, selectedMeasurementId]);
 
   /* ── Render ──────────────────────────────────────────────────────── */
 
@@ -2249,15 +2472,17 @@ export default function TakeoffViewerModule({
               ] as const).map(({ tool, icon: Icon, label }) => (
                 <button
                   key={tool}
-                  onClick={() => { setActiveTool(tool); setActivePoints([]); setRectStartPoint(null); setIsDraggingRect(false); setShowTextInput(false); }}
+                  onClick={() => selectTool(tool)}
                   className={`flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors ${
                     activeTool === tool
                       ? 'bg-oe-blue text-white'
                       : 'hover:bg-surface-secondary text-content-secondary'
                   }`}
-                  title={label}
-                  aria-label={label}
+                  title={labelWithShortcut(label, tool)}
+                  aria-label={labelWithShortcut(label, tool)}
                   aria-pressed={activeTool === tool}
+                  data-tool={tool}
+                  data-shortcut={SHORTCUT_LETTER[tool]}
                 >
                   <Icon size={14} />
                   <span className="hidden sm:inline">{label}</span>
@@ -2277,25 +2502,17 @@ export default function TakeoffViewerModule({
               ] as const).map(({ tool, icon: Icon, label }) => (
                 <button
                   key={tool}
-                  onClick={() => {
-                    setActiveTool(tool);
-                    setActivePoints([]);
-                    setRectStartPoint(null);
-                    setIsDraggingRect(false);
-                    setShowTextInput(false);
-                    // Set default color for this annotation tool type
-                    if (isAnnotationTool(tool)) {
-                      setAnnotationColor(DEFAULT_ANNOTATION_COLORS[tool]);
-                    }
-                  }}
+                  onClick={() => selectTool(tool)}
                   className={`flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors ${
                     activeTool === tool
                       ? 'bg-orange-500 text-white'
                       : 'hover:bg-surface-secondary text-content-secondary'
                   }`}
-                  title={label}
-                  aria-label={label}
+                  title={labelWithShortcut(label, tool)}
+                  aria-label={labelWithShortcut(label, tool)}
                   aria-pressed={activeTool === tool}
+                  data-tool={tool}
+                  data-shortcut={SHORTCUT_LETTER[tool]}
                 >
                   <Icon size={14} />
                 </button>
@@ -2316,15 +2533,46 @@ export default function TakeoffViewerModule({
                 <span className="hidden sm:inline">{t('takeoff_viewer.scale', { defaultValue: 'Scale' })}</span>
               </button>
 
+              {/* Legend toggle — shows/hides the color-coded group legend
+                  card in the bottom-left of the canvas viewport. */}
+              <button
+                onClick={() => setShowLegend((v) => !v)}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors ml-auto ${
+                  showLegend
+                    ? 'bg-surface-secondary text-content-primary'
+                    : 'hover:bg-surface-secondary text-content-secondary'
+                }`}
+                title={t('takeoff_viewer.toggle_legend', { defaultValue: 'Toggle legend' })}
+                aria-label={t('takeoff_viewer.toggle_legend', { defaultValue: 'Toggle legend' })}
+                aria-pressed={showLegend}
+                data-testid="legend-toggle"
+              >
+                <List size={14} />
+                <span className="hidden sm:inline">{t('takeoff_viewer.legend', { defaultValue: 'Legend' })}</span>
+              </button>
+
               {/* Undo */}
               <button
                 onClick={handleUndo}
                 disabled={undoCount === 0}
-                className="flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors hover:bg-surface-secondary text-content-secondary disabled:opacity-30 disabled:pointer-events-none ml-auto"
+                className="flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors hover:bg-surface-secondary text-content-secondary disabled:opacity-30 disabled:pointer-events-none"
                 title={t('takeoff.undo', { defaultValue: 'Undo' }) + ' (Ctrl+Z)'}
+                data-testid="undo-button"
               >
                 <Undo2 size={14} />
                 <span className="hidden sm:inline">{t('takeoff.undo', { defaultValue: 'Undo' })}</span>
+              </button>
+
+              {/* Redo */}
+              <button
+                onClick={handleRedo}
+                disabled={redoCount === 0}
+                className="flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors hover:bg-surface-secondary text-content-secondary disabled:opacity-30 disabled:pointer-events-none"
+                title={t('takeoff.redo', { defaultValue: 'Redo' }) + ' (Ctrl+Y)'}
+                data-testid="redo-button"
+              >
+                <Redo2 size={14} />
+                <span className="hidden sm:inline">{t('takeoff.redo', { defaultValue: 'Redo' })}</span>
               </button>
 
               {/* Clear */}
@@ -2394,6 +2642,90 @@ export default function TakeoffViewerModule({
               {activeTool === 'cloud' && activePoints.length > 0 && (
                 <div className="absolute top-2 left-2 bg-orange-500/90 text-white px-3 py-1.5 rounded-lg text-xs font-medium">
                   {t('takeoff_viewer.cloud_hint', { defaultValue: 'Click points to define cloud shape. Double-click or right-click to finish.' })}
+                </div>
+              )}
+
+              {/* Color-coded group legend — bottom-left, click row to toggle visibility. */}
+              {showLegend && legendSummaries.length > 0 && (
+                <div
+                  className="absolute bottom-2 left-2 max-w-[240px] rounded-lg border border-border bg-surface-primary/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg overflow-hidden"
+                  data-testid="legend-overlay"
+                >
+                  <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-border-light bg-surface-secondary/40">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-content-tertiary">
+                      {t('takeoff_viewer.legend', { defaultValue: 'Legend' })}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowLegend(false)}
+                      className="text-content-tertiary hover:text-content-primary transition-colors p-0.5"
+                      aria-label={t('takeoff_viewer.hide_legend', { defaultValue: 'Hide legend' })}
+                    >
+                      <X size={10} />
+                    </button>
+                  </div>
+                  <div className="py-1">
+                    {/* Always show hidden groups too, so users can restore them */}
+                    {(() => {
+                      // Merge: visible summaries from legendSummaries + placeholder rows for hiddenGroups that have measurements
+                      const allGroupsOnPage = new Set<string>();
+                      for (const m of pageMeasurements) allGroupsOnPage.add(m.group || 'General');
+                      const visible = new Map(legendSummaries.map((s) => [s.name, s]));
+                      const rows: Array<{ name: string; color: string; count: number; total: number; unit: string; hidden: boolean }> = [];
+                      for (const name of Array.from(allGroupsOnPage).sort()) {
+                        const summary = visible.get(name);
+                        if (summary) {
+                          rows.push({ ...summary, hidden: false });
+                        } else {
+                          const items = pageMeasurements.filter((m) => (m.group || 'General') === name);
+                          rows.push({
+                            name,
+                            color: GROUP_COLOR_MAP[name] || '#3B82F6',
+                            count: items.length,
+                            total: items.reduce((s, it) => s + it.value, 0),
+                            unit: items.find((it) => it.unit)?.unit ?? '',
+                            hidden: true,
+                          });
+                        }
+                      }
+                      return rows.map((row) => (
+                        <button
+                          key={row.name}
+                          type="button"
+                          onClick={() => toggleGroupVisibility(row.name)}
+                          className={clsx(
+                            'w-full flex items-center gap-2 px-2.5 py-1.5 text-left transition-colors hover:bg-surface-secondary',
+                            row.hidden && 'opacity-50',
+                          )}
+                          data-testid="legend-row"
+                          data-group={row.name}
+                          data-hidden={row.hidden}
+                          title={row.hidden
+                            ? t('takeoff_viewer.show_group', { defaultValue: 'Show group' })
+                            : t('takeoff_viewer.hide_group', { defaultValue: 'Hide group' })
+                          }
+                        >
+                          <span
+                            className="h-3 w-3 rounded-full shrink-0 ring-1 ring-white/40"
+                            style={{ backgroundColor: row.color }}
+                          />
+                          <span className="flex-1 text-[11px] font-semibold text-content-primary truncate">
+                            {row.name}
+                          </span>
+                          <span className="text-[10px] font-mono text-content-tertiary tabular-nums">
+                            {row.count}
+                          </span>
+                          <span className="text-[10px] font-mono text-content-secondary tabular-nums min-w-0">
+                            {formatGroupTotal(row.total, row.unit)}
+                          </span>
+                          {row.hidden
+                            ? <EyeOff size={10} className="text-content-tertiary shrink-0" />
+                            : <Eye size={10} className="text-content-tertiary shrink-0" />
+                          }
+                        </button>
+                      ));
+                    })()}
+                  </div>
                 </div>
               )}
             </div>
@@ -2484,6 +2816,149 @@ export default function TakeoffViewerModule({
               </div>
             )}
 
+            {/* Properties panel — shown when a measurement is selected in the list */}
+            {selectedMeasurement && (
+              <div
+                className="rounded-md border border-oe-blue/40 bg-oe-blue/5 backdrop-blur-sm p-3 shadow-sm space-y-2.5 animate-fade-in"
+                data-testid="properties-panel"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-oe-blue">
+                    {t('takeoff_viewer.properties', { defaultValue: 'Properties' })}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMeasurementId(null)}
+                    className="text-content-tertiary hover:text-content-primary transition-colors"
+                    aria-label={t('takeoff_viewer.close_properties', { defaultValue: 'Close properties' })}
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+
+                {/* Group dropdown */}
+                <div>
+                  <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                    {t('takeoff_viewer.prop_group', { defaultValue: 'Group' })}
+                  </label>
+                  <select
+                    value={selectedMeasurement.group}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '__new__') {
+                        const name = prompt(t('takeoff_viewer.new_group_prompt', { defaultValue: 'New group name' }));
+                        if (name && name.trim()) {
+                          updateSelectedMeasurement({ group: name.trim() });
+                        }
+                        return;
+                      }
+                      updateSelectedMeasurement({ group: val });
+                    }}
+                    className="w-full rounded border border-border bg-surface-primary px-2 py-1 text-xs text-content-primary"
+                    data-testid="prop-group-select"
+                  >
+                    {availableGroups.map((g) => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                    <option value="__new__">{t('takeoff_viewer.new_group', { defaultValue: '+ New group' })}</option>
+                  </select>
+                </div>
+
+                {/* Color picker (6-color palette matching DWG module) */}
+                <div>
+                  <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                    {t('takeoff_viewer.prop_color', { defaultValue: 'Color' })}
+                  </label>
+                  <div className="flex items-center gap-1.5">
+                    {ANNOTATION_COLORS.map((c) => (
+                      <button
+                        key={c.value}
+                        type="button"
+                        onClick={() => updateSelectedMeasurement({ color: c.value })}
+                        className={clsx(
+                          'h-5 w-5 rounded-full border-2 transition-all',
+                          (selectedMeasurement.color ?? '') === c.value
+                            ? 'border-content-primary scale-110'
+                            : 'border-transparent hover:scale-105',
+                        )}
+                        style={{ backgroundColor: c.value }}
+                        title={c.name}
+                        aria-label={c.name}
+                        data-testid={`prop-color-${c.name.toLowerCase()}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Value + Unit (read-only for computed types) */}
+                <div className="grid grid-cols-[1fr_auto] gap-2">
+                  <div>
+                    <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                      {t('takeoff_viewer.prop_value', { defaultValue: 'Value' })}
+                    </label>
+                    <div
+                      className="w-full rounded border border-border/60 bg-surface-secondary/60 px-2 py-1 text-xs text-content-primary font-mono tabular-nums"
+                      data-testid="prop-value"
+                    >
+                      {selectedMeasurement.value ? selectedMeasurement.value.toFixed(3) : '—'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                      {t('takeoff_viewer.prop_unit', { defaultValue: 'Unit' })}
+                    </label>
+                    <div
+                      className="min-w-[44px] rounded border border-border/60 bg-surface-secondary/60 px-2 py-1 text-xs text-content-primary text-center"
+                      data-testid="prop-unit"
+                    >
+                      {selectedMeasurement.unit || '—'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Annotation / label */}
+                <div>
+                  <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                    {t('takeoff_viewer.prop_annotation', { defaultValue: 'Annotation' })}
+                  </label>
+                  <input
+                    type="text"
+                    value={selectedMeasurement.annotation}
+                    onChange={(e) => updateSelectedMeasurement({ annotation: e.target.value })}
+                    placeholder={t('takeoff_viewer.prop_annotation_placeholder', { defaultValue: 'Label for this measurement' })}
+                    className="w-full rounded border border-border bg-surface-primary px-2 py-1 text-xs text-content-primary"
+                    data-testid="prop-annotation-input"
+                  />
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="text-[10px] font-semibold text-content-tertiary block mb-0.5">
+                    {t('takeoff_viewer.prop_notes', { defaultValue: 'Notes' })}
+                  </label>
+                  <textarea
+                    value={selectedMeasurement.notes ?? ''}
+                    onChange={(e) => updateSelectedMeasurement({ notes: e.target.value })}
+                    placeholder={t('takeoff_viewer.prop_notes_placeholder', { defaultValue: 'Additional details...' })}
+                    rows={3}
+                    className="w-full rounded border border-border bg-surface-primary px-2 py-1 text-xs text-content-primary resize-none"
+                    data-testid="prop-notes-input"
+                  />
+                </div>
+
+                {/* Delete button */}
+                <button
+                  type="button"
+                  onClick={() => deleteMeasurement(selectedMeasurement.id)}
+                  className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-semantic-error-bg text-semantic-error hover:bg-semantic-error hover:text-white px-2 py-1.5 text-xs font-semibold transition-colors border border-semantic-error/30"
+                  data-testid="prop-delete-button"
+                >
+                  <Trash2 size={12} />
+                  {t('takeoff_viewer.prop_delete', { defaultValue: 'Delete measurement' })}
+                </button>
+              </div>
+            )}
+
             {/* Measurements list (grouped) */}
             <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
               <div className="flex items-center justify-between mb-2">
@@ -2567,7 +3042,15 @@ export default function TakeoffViewerModule({
                           {measurementOnly.map((m) => (
                             <div
                               key={m.id}
-                              className="rounded-sm bg-surface-secondary/70 hover:bg-surface-secondary border border-transparent hover:border-border-light px-2 py-1 group/item transition-all"
+                              onClick={() => setSelectedMeasurementId((cur) => (cur === m.id ? null : m.id))}
+                              className={clsx(
+                                'rounded-sm px-2 py-1 group/item transition-all cursor-pointer',
+                                selectedMeasurementId === m.id
+                                  ? 'bg-oe-blue/10 border border-oe-blue/40'
+                                  : 'bg-surface-secondary/70 hover:bg-surface-secondary border border-transparent hover:border-border-light',
+                              )}
+                              data-testid="measurement-item"
+                              data-selected={selectedMeasurementId === m.id}
                             >
                               <div className="flex items-center gap-2 leading-tight">
                                 <span
@@ -2594,7 +3077,7 @@ export default function TakeoffViewerModule({
                                     />
                                   ) : (
                                     <button
-                                      onClick={() => startEditAnnotation(m)}
+                                      onClick={(e) => { e.stopPropagation(); startEditAnnotation(m); }}
                                       className="flex items-center gap-1 text-xs font-medium text-content-primary truncate hover:text-oe-blue transition-colors min-w-0 text-left"
                                       title={t('takeoff.add_label', { defaultValue: 'Add label...' })}
                                     >
@@ -2608,7 +3091,7 @@ export default function TakeoffViewerModule({
                                   {m.linkedPositionOrdinal && (
                                     <button
                                       type="button"
-                                      onClick={() => handleOpenLinkedPosition(m)}
+                                      onClick={(e) => { e.stopPropagation(); handleOpenLinkedPosition(m); }}
                                       className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 text-[9px] font-mono font-semibold hover:bg-emerald-200 dark:hover:bg-emerald-900/70 transition-colors shrink-0"
                                       title={`${t('takeoff.linked_badge_title', { defaultValue: 'Linked to BOQ' })}: ${m.linkedPositionOrdinal}`}
                                     >
@@ -2620,7 +3103,7 @@ export default function TakeoffViewerModule({
                                 <div className="flex items-center gap-0.5 shrink-0">
                                   {/* Link to BOQ button — always visible if linked, hover-only otherwise */}
                                   <button
-                                    onClick={() => handleOpenLinkToBoq(m.id)}
+                                    onClick={(e) => { e.stopPropagation(); handleOpenLinkToBoq(m.id); }}
                                     className={clsx(
                                       'transition-all p-0.5 rounded',
                                       m.linkedPositionId
@@ -2633,7 +3116,7 @@ export default function TakeoffViewerModule({
                                     <Link2 size={12} />
                                   </button>
                                   <button
-                                    onClick={() => deleteMeasurement(m.id)}
+                                    onClick={(e) => { e.stopPropagation(); deleteMeasurement(m.id); }}
                                     className="opacity-0 group-hover/item:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"
                                     aria-label={t('takeoff_viewer.delete_measurement', { defaultValue: 'Delete measurement' })}
                                   >

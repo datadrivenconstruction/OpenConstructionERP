@@ -81,6 +81,18 @@ class UserRepository:
         stmt = select(func.count()).select_from(User)
         return (await self.session.execute(stmt)).scalar_one()
 
+    async def has_admin(self) -> bool:
+        """Return True if at least one active admin user exists.
+
+        Used by the registration bootstrap: if no admin is present in the DB
+        (fresh install, or only seed/demo viewer users exist), the next
+        person to register via the public API is promoted to admin. Once
+        any admin is on record, subsequent self-registered users default
+        to the configured viewer role.
+        """
+        stmt = select(User.id).where(User.role == "admin", User.is_active.is_(True)).limit(1)
+        return (await self.session.execute(stmt)).scalar_one_or_none() is not None
+
 
 class APIKeyRepository:
     """Data access for APIKey model."""

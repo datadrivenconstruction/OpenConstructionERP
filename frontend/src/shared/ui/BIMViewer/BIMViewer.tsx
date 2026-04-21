@@ -40,6 +40,7 @@ import {
   Ruler,
   Tag,
   Settings,
+  Camera,
 } from 'lucide-react';
 import { fetchBIMElementProperties } from '@/features/bim/api';
 import { SceneManager } from './SceneManager';
@@ -50,6 +51,11 @@ import { SelectionManager } from './SelectionManager';
 import { MeasureManager } from './MeasureManager';
 import { BIMContextMenu } from './BIMContextMenu';
 import type { BIMContextMenuState } from './BIMContextMenu';
+import {
+  colorForRate,
+  DEFAULT_5D_GRADIENT,
+  NO_LINK_OPACITY,
+} from './color5d';
 import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
 import { useToastStore } from '@/stores/useToastStore';
@@ -117,7 +123,8 @@ export interface BIMViewerProps {
     | 'type'
     | 'validation'
     | 'boq_coverage'
-    | 'document_coverage';
+    | 'document_coverage'
+    | '5d_cost';
   /** Show bounding box placeholders alongside geometry. Off by default. */
   showBoundingBoxes?: boolean;
   /** Element IDs to isolate (hide everything else). Empty = show all. */
@@ -178,6 +185,10 @@ export interface BIMViewerProps {
   /** Width (in px) of the left filter panel — used to offset the toolbar
    *  when `leftPanelOpen` is true. Defaults to 320 to match BIMFilterPanel. */
   leftPanelWidth?: number;
+  /** Model display name — used in the screenshot filename so users who
+   *  screenshot several models at once can tell them apart. Optional; the
+   *  filename falls back to "bim-screenshot-<timestamp>.png" when unset. */
+  modelName?: string;
 }
 
 /* ── Properties Table ──────────────────────────────────────────────────── */
@@ -405,6 +416,7 @@ export function BIMViewer({
   onSmartFilter,
   leftPanelOpen = false,
   leftPanelWidth = 320,
+  modelName,
 }: BIMViewerProps) {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -464,6 +476,32 @@ export function BIMViewer({
   const [selectionSummary, setSelectionSummary] = useState('');
   /** Whether the viewer is in isolation mode (double-click). */
   const [isIsolated, setIsIsolated] = useState(false);
+
+  /** 5D cost rate stats — min / max unit_rate across all linked BOQ
+   *  positions on the loaded elements.  Drives the legend strip in the
+   *  bottom-right corner when `colorByMode === '5d_cost'`. */
+  const rateStats = useMemo(() => {
+    let min = Infinity;
+    let max = -Infinity;
+    let linkedCount = 0;
+    for (const el of elements ?? []) {
+      let best: number | null = null;
+      for (const link of el.boq_links ?? []) {
+        const r = link.boq_position_unit_rate;
+        if (r == null || !Number.isFinite(r) || r <= 0) continue;
+        if (best === null || r > best) best = r;
+      }
+      if (best !== null) {
+        linkedCount++;
+        if (best < min) min = best;
+        if (best > max) max = best;
+      }
+    }
+    if (!Number.isFinite(min) || !Number.isFinite(max)) {
+      return { min: 0, max: 0, linkedCount: 0 };
+    }
+    return { min, max, linkedCount };
+  }, [elements]);
 
   /** Health-stat rollup over the loaded elements.  Drives the banner at
    *  the top of the viewport: total / linked-to-BOQ / errors / warnings /
@@ -846,6 +884,46 @@ export function BIMViewer({
           (el.linked_documents?.length ?? 0) > 0 ? GREEN : RED,
         );
       });
+    } else if (colorByMode === '5d_cost') {
+      // Build a rate map: for each element, pick the highest unit_rate
+      // across its linked BOQ positions. "Highest" because the user is
+      // looking at a 3D heatmap of cost — an element that participates in
+      // both a €5 position and a €500 position reads as "high cost" to a
+      // human, not "average cost". Zero / null rates are treated as "no
+      // data" so they don't drag the min down to 0 for every model.
+      const rateByElement = new Map<string, number>();
+      let minRate = Infinity;
+      let maxRate = -Infinity;
+      for (const el of elements ?? []) {
+        let best: number | null = null;
+        for (const link of el.boq_links ?? []) {
+          const r = link.boq_position_unit_rate;
+          if (r == null || !Number.isFinite(r) || r <= 0) continue;
+          if (best === null || r > best) best = r;
+        }
+        if (best !== null) {
+          rateByElement.set(el.id, best);
+          if (best < minRate) minRate = best;
+          if (best > maxRate) maxRate = best;
+        }
+      }
+      // If no rates at all, degrade to a single "no data" fade so the
+      // viewer still responds to the mode switch instead of silently
+      // staying on the previous colouring.
+      if (!Number.isFinite(minRate) || !Number.isFinite(maxRate)) {
+        minRate = 0;
+        maxRate = 0;
+      }
+      import('three').then((THREE) => {
+        mgr.colorByDirect(
+          (el) => {
+            const rate = rateByElement.get(el.id) ?? null;
+            const { color } = colorForRate(rate, minRate, maxRate);
+            return new THREE.Color(color);
+          },
+          (el) => (rateByElement.has(el.id) ? 1 : NO_LINK_OPACITY),
+        );
+      });
     } else {
       mgr.resetColors();
     }
@@ -1095,6 +1173,91 @@ export function BIMViewer({
   const handleCameraPreset = useCallback((view: 'top' | 'front' | 'side' | 'iso') => {
     sceneRef.current?.setCameraPreset(view);
   }, []);
+
+  const addToast = useToastStore((s) => s.addToast);
+
+  /** Capture the current 3D viewport as a PNG, prompt the browser to save
+   *  it, and (best-effort) copy it to the clipboard so the user can paste
+   *  into Slack / docs / email without a round-trip through the filesystem.
+   *
+   *  Rendering is synchronous: Three.js' on-demand render loop means the
+   *  canvas may be up to one frame stale relative to the latest selection
+   *  state, so we force a fresh render before calling `toDataURL`.  The
+   *  clipboard step silently falls back when the browser blocks it
+   *  (Firefox at time of writing ignores image/png on http://) — users
+   *  still get the downloaded PNG either way. */
+  const handleScreenshot = useCallback(async () => {
+    const scene = sceneRef.current;
+    if (!scene) return;
+    // Force a synchronous render into the canvas so whatever is visible
+    // right now is what ends up in the PNG — not the pre-selection frame.
+    scene.renderer.render(scene.scene, scene.camera);
+    const canvas = scene.renderer.domElement;
+    let dataUrl: string;
+    try {
+      dataUrl = canvas.toDataURL('image/png');
+    } catch {
+      addToast?.({
+        type: 'error',
+        title: t('bim.screenshot_failed_title', {
+          defaultValue: 'Screenshot failed',
+        }),
+        message: t('bim.screenshot_failed', {
+          defaultValue: 'WebGL context unavailable — try reloading the viewer.',
+        }),
+      });
+      return;
+    }
+
+    // File download — safe in every browser Chrome/Firefox/Safari.
+    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const slug = (modelName ?? 'model')
+      .replace(/[^a-z0-9_-]+/gi, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 48) || 'model';
+    const filename = `bim-screenshot-${slug}-${ts}.png`;
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Clipboard write — requires secure context (https or localhost) AND
+    // a browser that implements ClipboardItem with image/png. Swallow all
+    // errors silently: the download above already fulfils the primary
+    // user need, and we don't want to spam a toast on every click just
+    // because Firefox says no.
+    const nav = navigator as Navigator & {
+      clipboard?: Clipboard & {
+        write?: (items: ClipboardItem[]) => Promise<void>;
+      };
+    };
+    const ClipboardItemCtor = (
+      window as unknown as { ClipboardItem?: typeof ClipboardItem }
+    ).ClipboardItem;
+    if (
+      typeof ClipboardItemCtor === 'function' &&
+      nav.clipboard &&
+      typeof nav.clipboard.write === 'function'
+    ) {
+      try {
+        const blob = await fetch(dataUrl).then((r) => r.blob());
+        const item = new ClipboardItemCtor({ 'image/png': blob });
+        await nav.clipboard.write([item]);
+      } catch {
+        // Clipboard blocked / unsupported — download is already done.
+      }
+    }
+
+    addToast?.({
+      type: 'success',
+      title: t('bim.screenshot_saved_title', {
+        defaultValue: 'Screenshot saved',
+      }),
+      message: filename,
+    });
+  }, [modelName, t, addToast]);
 
   // ── Context menu actions ────────────────────────────────────────────
   const handleCloseContextMenu = useCallback(() => {
@@ -1583,6 +1746,15 @@ export function BIMViewer({
           onClick={handleZoomToSelection}
           variant="group"
         />
+        <ToolbarButton
+          icon={Camera}
+          label={t('bim.screenshot', { defaultValue: 'Screenshot (PNG)' })}
+          onClick={() => {
+            void handleScreenshot();
+          }}
+          variant="group"
+          testId="bim-screenshot-btn"
+        />
         <div className="w-px h-5 bg-border-light mx-1.5" />
         <ToolbarButton
           icon={LayoutGrid}
@@ -1707,6 +1879,64 @@ export function BIMViewer({
           >
             <X size={12} />
           </button>
+        </div>
+      )}
+
+      {/* 5D cost legend — bottom-right, visible only in 5d_cost mode. Shows
+          the rate range linked to the currently-coloured model plus a
+          gradient strip so users can read the colours as cost magnitudes.
+          Rendered above the hidden-elements badge by using a higher bottom
+          offset so the two never collide. */}
+      {colorByMode === '5d_cost' && (
+        <div
+          className="absolute bottom-3 end-3 z-20 flex flex-col items-end gap-1 rounded-lg bg-surface-primary border border-border-light shadow-sm px-3 py-2 min-w-[180px]"
+          data-testid="bim-5d-legend"
+        >
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+            {t('bim.5d_legend_title', { defaultValue: 'Unit rate' })}
+          </span>
+          <div
+            className="h-2 w-full rounded-full"
+            style={{
+              background: `linear-gradient(to right, ${DEFAULT_5D_GRADIENT.map(
+                (s) => `${s.hex} ${Math.round(s.t * 100)}%`,
+              ).join(', ')})`,
+            }}
+          />
+          <div className="flex items-center justify-between w-full text-[10px] text-content-secondary tabular-nums">
+            <span>
+              {rateStats.linkedCount > 0
+                ? rateStats.min.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })
+                : '—'}
+            </span>
+            <span className="text-content-tertiary">
+              {t('bim.5d_legend_unit', { defaultValue: '/ unit' })}
+            </span>
+            <span>
+              {rateStats.linkedCount > 0
+                ? rateStats.max.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })
+                : '—'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 w-full justify-between text-[10px] text-content-tertiary">
+            <span>
+              {t('bim.5d_legend_linked', {
+                defaultValue: '{{n}} linked',
+                n: rateStats.linkedCount,
+              })}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span
+                className="inline-block h-2 w-2 rounded-full"
+                style={{ background: '#9ca3af', opacity: NO_LINK_OPACITY }}
+              />
+              {t('bim.5d_legend_no_link', { defaultValue: 'no link' })}
+            </span>
+          </div>
         </div>
       )}
 
@@ -3029,6 +3259,7 @@ function ToolbarButton({
   onClick,
   active = false,
   variant = 'standalone',
+  testId,
 }: {
   icon: React.ElementType;
   label: string;
@@ -3038,11 +3269,15 @@ function ToolbarButton({
    *  `group` renders flat so it slots into a shared container (the reorganised
    *  toolbar wraps every button in one bordered row). */
   variant?: 'standalone' | 'group';
+  /** Optional data-testid for e2e selectors. */
+  testId?: string;
 }) {
   return (
     <button
       onClick={onClick}
       title={label}
+      aria-label={label}
+      data-testid={testId}
       className={clsx(
         'flex h-7 w-7 items-center justify-center rounded transition-colors',
         variant === 'standalone' && 'shadow-sm border bg-surface-primary/90 backdrop-blur border-border-light',

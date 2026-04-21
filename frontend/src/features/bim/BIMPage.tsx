@@ -53,6 +53,11 @@ import { Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
+import {
+  parseBIMUrlState,
+  serializeBIMUrlState,
+  BIM_URL_STATE_KEYS,
+} from '@/shared/ui/BIMViewer/urlState';
 import BIMFilterPanel from './BIMFilterPanel';
 import BIMGroupsPanel from './BIMGroupsPanel';
 import BIMRightPanelTabs from './BIMRightPanelTabs';
@@ -1451,6 +1456,7 @@ export function BIMPage() {
     | 'validation'
     | 'boq_coverage'
     | 'document_coverage'
+    | '5d_cost'
   >('default');
   const showBoundingBoxes = false;
   const [isolatedIds, setIsolatedIds] = useState<string[] | null>(null);
@@ -1713,6 +1719,127 @@ export function BIMPage() {
   useEffect(() => {
     return () => clearBIMLinkSelection();
   }, [clearBIMLinkSelection]);
+
+  /* ── URL deep-link: camera + selection ──────────────────────────────
+   * Writes the current camera position/target and the multi-selection
+   * ID list to the URL so users can copy-paste a link that reopens
+   * /bim with the exact same view.  On mount, once the model has
+   * loaded and the viewer's camera bridge is available, we hydrate
+   * the camera + selection from the URL.
+   *
+   * The write is debounced to 500ms — an OrbitControls drag fires
+   * dozens of change events per second, which would flood the
+   * history stack and create noticeable stutter on 100k-element
+   * models. */
+  const urlStateAppliedRef = useRef(false);
+
+  // Hydrate camera + selection from URL when the model and viewer
+  // bridge are both ready. Runs once per activeModelId — subsequent
+  // camera moves or selection changes are driven by user input.
+  useEffect(() => {
+    if (!activeModelId) return;
+    if (urlStateAppliedRef.current) return;
+    if (elements.length === 0) return; // wait for elements to load
+    const state = parseBIMUrlState(searchParams);
+    if (!state.camera && state.selection.length === 0) {
+      urlStateAppliedRef.current = true;
+      return;
+    }
+    // Try applying via the viewer's camera bridge; back off one frame
+    // if it isn't ready yet (the bridge publishes after the <canvas />
+    // ref populates, which can be 1–2 frames behind the parent render).
+    let cancelled = false;
+    let attempts = 0;
+    const apply = () => {
+      if (cancelled) return;
+      const bridge = (
+        window as unknown as {
+          __oeBim?: {
+            setViewpoint: (
+              pos: { x: number; y: number; z: number },
+              target: { x: number; y: number; z: number },
+            ) => void;
+          };
+        }
+      ).__oeBim;
+      if (!bridge && attempts < 60) {
+        attempts++;
+        requestAnimationFrame(apply);
+        return;
+      }
+      if (state.camera && bridge) {
+        bridge.setViewpoint(state.camera.position, state.camera.target);
+      }
+      if (state.selection.length > 0) {
+        setMultiSelectedIds(state.selection);
+        setSelectedElementId(state.selection[state.selection.length - 1] ?? null);
+      }
+      urlStateAppliedRef.current = true;
+    };
+    apply();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeModelId, elements.length, searchParams]);
+
+  // Reset hydration flag when switching models so each /bim/:modelId
+  // can carry its own ?cx=...&sel=... combination.
+  useEffect(() => {
+    urlStateAppliedRef.current = false;
+  }, [activeModelId]);
+
+  // Debounced writer: camera + selection -> URL. We read the camera on
+  // an interval rather than listening to OrbitControls directly to keep
+  // this scoped to the parent page (the bridge is the public contract
+  // BIMViewer exposes; wiring into SceneManager here would cross that
+  // boundary and force every consumer to learn three.js internals).
+  //
+  // selectionSignature tracks whatever the current multi/single selection
+  // resolves to — we derive it inside the effect so this hook doesn't
+  // depend on a value declared lower in the component.
+  const selectionSignature = multiSelectedIds.length > 0
+    ? multiSelectedIds.join(',')
+    : (selectedElementId ?? '');
+  useEffect(() => {
+    if (!activeModelId) return;
+    if (!urlStateAppliedRef.current) return;
+    let lastSerialized = '';
+    const interval = window.setInterval(() => {
+      const bridge = (
+        window as unknown as {
+          __oeBim?: {
+            getViewpoint: () => {
+              position: { x: number; y: number; z: number };
+              target: { x: number; y: number; z: number };
+            } | null;
+          };
+        }
+      ).__oeBim;
+      const camera = bridge?.getViewpoint?.() ?? null;
+      const selection: string[] = multiSelectedIds.length > 0
+        ? multiSelectedIds
+        : (selectedElementId ? [selectedElementId] : []);
+      const payload = serializeBIMUrlState({
+        camera,
+        selection,
+      });
+      const serialized = JSON.stringify(payload);
+      if (serialized === lastSerialized) return;
+      lastSerialized = serialized;
+      // Merge into current params so we never clobber unrelated keys
+      // (group, docName, etc.).  Only add sel when non-empty so the URL
+      // stays short when nothing's selected.
+      const next = new URLSearchParams(window.location.search);
+      for (const k of BIM_URL_STATE_KEYS) next.delete(k);
+      for (const [k, v] of Object.entries(payload)) next.set(k, v);
+      setSearchParams(next, { replace: true });
+    }, 500);
+    return () => window.clearInterval(interval);
+    // selectionSignature is intentional — we want to re-evaluate when the
+    // selection changes but keep the interval running across many URL
+    // writes, so the dep list stays minimal.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeModelId, selectionSignature]);
 
   // Stable callback for BIMFilterPanel — uses functional setState so it
   // doesn't need to track filterPredicate in its dependency list.
@@ -2240,11 +2367,13 @@ export function BIMPage() {
                       | 'type'
                       | 'validation'
                       | 'boq_coverage'
-                      | 'document_coverage',
+                      | 'document_coverage'
+                      | '5d_cost',
                   )
                 }
                 title={t('bim.color_by', { defaultValue: 'Color by' })}
                 aria-label={t('bim.color_by', { defaultValue: 'Color by' })}
+                data-testid="bim-color-mode-select"
                 className="text-[11px] py-1.5 px-2 rounded-lg border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue"
               >
                 <optgroup label={t('bim.color_group_field', { defaultValue: 'By field' })}>
@@ -2261,6 +2390,11 @@ export function BIMPage() {
                   </option>
                   <option value="document_coverage">
                     {t('bim.color_doc_coverage', { defaultValue: 'Document coverage' })}
+                  </option>
+                </optgroup>
+                <optgroup label={t('bim.color_group_cost', { defaultValue: 'By cost' })}>
+                  <option value="5d_cost">
+                    {t('bim.color_5d_cost', { defaultValue: '5D unit rate' })}
                   </option>
                 </optgroup>
               </select>
@@ -2463,6 +2597,7 @@ export function BIMPage() {
           <BIMViewer
             modelId={activeModelId}
             projectId={projectId}
+            modelName={activeModel?.name}
             selectedElementIds={selectedElementIds}
             onElementSelect={handleElementSelect}
             onSelectionChange={setMultiSelectedIds}

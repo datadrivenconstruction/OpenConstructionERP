@@ -162,6 +162,18 @@ function LoadingScreen() {
   );
 }
 
+// Small inline loader for lazy page chunks — shown inside the main content
+// area while the layout (sidebar + header) stays visible. Prevents the
+// full-screen dark flash when navigating between code-split routes (e.g.
+// clicking a notification that links to /tasks or /cde).
+function PageLoadingInline() {
+  return (
+    <div className="flex min-h-[40vh] items-center justify-center">
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
+    </div>
+  );
+}
+
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const location = useLocation();
@@ -180,7 +192,9 @@ function P({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <RequireAuth>
       <AppLayout title={title}>
-        <ErrorBoundary>{children}</ErrorBoundary>
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoadingInline />}>{children}</Suspense>
+        </ErrorBoundary>
       </AppLayout>
     </RequireAuth>
   );

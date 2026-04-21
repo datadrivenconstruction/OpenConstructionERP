@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { uploadDocument, fetchDocuments, type DocumentItem } from '@/features/documents/api';
@@ -1296,11 +1297,17 @@ function SystemStatusSummary({
     staleTime: 60_000,
   });
 
+  // `/v1/users/` requires the `users.list` permission which viewers don't
+  // have (v2.0.0 BUG-327/386 security hardening). Skip the fetch for them
+  // so the team-count badge doesn't log a red 403 in the browser console.
+  const userRole = useAuthStore((s) => s.userRole);
+  const canListUsers = userRole === 'admin' || userRole === 'editor';
   const { data: usersList } = useQuery({
     queryKey: ['dashboard-users-count'],
     queryFn: () => apiGet<{ id: string }[]>('/v1/users/').catch(() => []),
     retry: false,
     staleTime: 60_000,
+    enabled: canListUsers,
   });
 
   const moduleCount = modules?.modules?.length ?? 0;

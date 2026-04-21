@@ -376,12 +376,16 @@ async def _seed_demo_account() -> None:
             ).scalar_one_or_none()
 
             if demo is None:
+                # Demo user is intentionally `viewer` so the admin bootstrap
+                # still fires for the first real registrant on a freshly
+                # provisioned install. The demo login still works for the
+                # hands-on walkthrough — just in read-only mode.
                 demo = User(
                     id=uuid.uuid4(),
                     email="demo@openestimator.io",
                     hashed_password=hash_password("DemoPass1234!"),
                     full_name="Demo User",
-                    role="admin",
+                    role="viewer",
                     locale="en",
                     is_active=True,
                     metadata_={},

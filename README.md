@@ -9,7 +9,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0.0-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.0.0)
+[![Version](https://img.shields.io/badge/version-2.1.0-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.1.0)
 [![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi)](https://pypi.org/project/openconstructionerp/)
 [![Downloads](https://static.pepy.tech/badge/openconstructionerp/month)](https://pepy.tech/project/openconstructionerp)
 [![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers)
@@ -205,6 +205,8 @@ Construction cost estimation software is expensive, closed-source, and locked to
 
 ## See It In Action
 
+### Core workflows
+
 <table>
 <tr>
 <td align="center" width="50%">
@@ -240,6 +242,59 @@ Construction cost estimation software is expensive, closed-source, and locked to
 <strong>⚡ Build BOQ in 60 Seconds</strong><br/>
 <em>Keyboard-first editor with inline cost lookup</em><br/><br/>
 <img src="docs/gifs/06_Build_BOQ_Fast.gif" alt="Build BOQ Fast" width="400" />
+</td>
+</tr>
+</table>
+
+### Module deep-dives
+
+<table>
+<tr>
+<td align="center" width="50%">
+<strong>👤 Role-Based Setup</strong><br/>
+<em>Onboarding wizard pre-selects the right 17 of 46 modules for your role</em><br/><br/>
+<img src="docs/gifs/07_Role_Based_Onboarding.gif" alt="Role-Based Onboarding" width="400" />
+</td>
+<td align="center" width="50%">
+<strong>🌍 Multi-Region Project</strong><br/>
+<em>Any region, any standard, any currency — live map & weather built-in</em><br/><br/>
+<img src="docs/gifs/08_New_Project_Global.gif" alt="New Project Global" width="400" />
+</td>
+</tr>
+<tr>
+<td align="center">
+<strong>🏗️ Bulk BIM Quantities</strong><br/>
+<em>Link 100 walls → one BOQ line with aggregated area / volume / length</em><br/><br/>
+<img src="docs/gifs/09_Bulk_Link_BIM_Group.gif" alt="Bulk Link BIM Group" width="400" />
+</td>
+<td align="center">
+<strong>📐 DWG Layer Control</strong><br/>
+<em>636 wall entities across 10 layers — every one linkable to the BOQ</em><br/><br/>
+<img src="docs/gifs/10_DWG_Layers.gif" alt="DWG Layers" width="400" />
+</td>
+</tr>
+<tr>
+<td align="center">
+<strong>💵 $6.26M in 215 Positions</strong><br/>
+<em>Real Revit project → 88 sections, CWICR-priced, quality score 99</em><br/><br/>
+<img src="docs/gifs/11_Complete_Estimate_6M.gif" alt="Complete Estimate" width="400" />
+</td>
+<td align="center">
+<strong>✅ BIM-Linked Tasks</strong><br/>
+<em>Issues tied to exact model elements, tracked on a Kanban board</em><br/><br/>
+<img src="docs/gifs/12_Tasks_Linked_To_BIM.gif" alt="Tasks Linked To BIM" width="400" />
+</td>
+</tr>
+<tr>
+<td align="center">
+<strong>📊 Pivot → BOQ</strong><br/>
+<em>CAD-BIM Explorer pivot becomes 10 BOQ positions in one click</em><br/><br/>
+<img src="docs/gifs/13_Data_Explorer_Pivot.gif" alt="Data Explorer Pivot" width="400" />
+</td>
+<td align="center">
+<strong>🗺️ Global Portfolio</strong><br/>
+<em>7 projects, 4 continents, $28.3M in active estimates — one workspace</em><br/><br/>
+<img src="docs/gifs/14_Projects_Dashboard.gif" alt="Projects Dashboard" width="400" />
 </td>
 </tr>
 </table>
@@ -658,6 +713,6 @@ For **commercial licensing** without AGPL obligations, see
 
 [Website](https://datadrivenconstruction.io) · [YouTube](https://www.youtube.com/@datadrivenconstruction) · [GitHub](https://github.com/datadrivenconstruction) · [Telegram](https://t.me/datadrivenconstruction)
 
-<sub>OpenConstructionERP v2.0.0 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
+<sub>OpenConstructionERP v2.1.0 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
 
 </div>

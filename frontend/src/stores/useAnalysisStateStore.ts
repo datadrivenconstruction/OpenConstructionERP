@@ -65,8 +65,20 @@ interface AnalysisState extends AnalysisStateSnapshot {
   removeSlicer: (column: string) => void;
   clearSlicers: () => void;
 
+  /** Bulk replace all slicers at once — used for URL hydration. */
+  setSlicers: (slicers: SlicerFilter[]) => void;
+
   setChartConfig: (patch: Partial<ChartConfig>) => void;
   setPivotSnapshot: (snapshot: PivotConfigSnapshot | null) => void;
+
+  /** Hydrate analysis state from URL query params on mount. Applied once
+   *  before first render so Pivot/Charts tabs see the pre-set values
+   *  instead of flashing defaults. */
+  hydrateFromUrl: (init: {
+    slicers?: SlicerFilter[];
+    chart?: Partial<ChartConfig>;
+    pivot?: PivotConfigSnapshot | null;
+  }) => void;
 
   saveView: (name: string) => SavedView;
   loadView: (id: string) => void;
@@ -152,12 +164,33 @@ export const useAnalysisStateStore = create<AnalysisState>((set, get) => ({
     set({ slicers: [] });
   },
 
+  setSlicers: (slicers) => {
+    const normalised = slicers
+      .filter((s) => s.column && s.values.length > 0)
+      .map((s) => ({ column: s.column, values: [...s.values] }));
+    set({ slicers: normalised });
+  },
+
   setChartConfig: (patch) => {
     set({ chart: { ...get().chart, ...patch } });
   },
 
   setPivotSnapshot: (snapshot) => {
     set({ pivot: snapshot });
+  },
+
+  hydrateFromUrl: ({ slicers, chart, pivot }) => {
+    const patch: Partial<AnalysisStateSnapshot> = {};
+    if (slicers && slicers.length > 0) {
+      patch.slicers = slicers.map((s) => ({ column: s.column, values: [...s.values] }));
+    }
+    if (chart && Object.keys(chart).length > 0) {
+      patch.chart = { ...get().chart, ...chart };
+    }
+    if (pivot) {
+      patch.pivot = { ...pivot };
+    }
+    if (Object.keys(patch).length > 0) set(patch);
   },
 
   saveView: (name) => {
