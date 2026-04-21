@@ -1,0 +1,99 @@
+name: Release Signing (Sigstore / cosign)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to sign"
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  sign:
+    name: Sign release artefacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: "v2.4.1"
+
+      - name: Download release artefacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          mkdir -p release-assets
+          cd release-assets
+          gh release download "$TAG" \
+            --repo "${{ github.repository }}" \
+            --skip-existing || true
+          ls -la
+
+      - name: Produce SHA-256 checksums
+        working-directory: release-assets
+        run: |
+          if [ -z "$(ls -A . 2>/dev/null)" ]; then
+            echo "No release assets to checksum." >&2
+            exit 0
+          fi
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Sign the checksums file (keyless, OIDC)
+        working-directory: release-assets
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          if [ ! -f SHA256SUMS ]; then
+            echo "No SHA256SUMS to sign." >&2
+            exit 0
+          fi
+          cosign sign-blob --yes \
+            --output-signature SHA256SUMS.sig \
+            --output-certificate SHA256SUMS.pem \
+            SHA256SUMS
+
+      - name: Upload checksums and signature to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        working-directory: release-assets
+        run: |
+          for f in SHA256SUMS SHA256SUMS.sig SHA256SUMS.pem; do
+            if [ -f "$f" ]; then
+              gh release upload "$TAG" "$f" --repo "${{ github.repository }}" --clobber
+            fi
+          done
+
+      - name: Verification snippet (for the release notes)
+        working-directory: release-assets
+        run: |
+          cat <<'EOF'
+          To verify this release:
+
+            cosign verify-blob \
+              --certificate SHA256SUMS.pem \
+              --signature SHA256SUMS.sig \
+              --certificate-identity-regexp 'https://github.com/datadrivenconstruction/OpenConstructionERP/.*' \
+              --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+              SHA256SUMS
+
+            sha256sum -c SHA256SUMS
+
+          EOF
