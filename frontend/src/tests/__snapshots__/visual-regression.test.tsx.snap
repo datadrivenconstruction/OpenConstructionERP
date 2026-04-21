@@ -765,7 +765,7 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
         </a>
       </div>
       <div
-        class="flex items-center gap-2 animate-stagger-in"
+        class="flex items-center gap-2 flex-wrap animate-stagger-in"
         style="animation-delay: 150ms;"
       >
         <button
@@ -805,6 +805,52 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
         </button>
         <button
           class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-10 px-5 text-sm gap-2 rounded-xl"
+          title="Start a new Bill of Quantities for an existing project"
+        >
+          <span
+            class="shrink-0"
+          >
+            <svg
+              class="lucide lucide-file-spreadsheet"
+              fill="none"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"
+              />
+              <path
+                d="M14 2v4a2 2 0 0 0 2 2h4"
+              />
+              <path
+                d="M8 13h2"
+              />
+              <path
+                d="M14 13h2"
+              />
+              <path
+                d="M8 17h2"
+              />
+              <path
+                d="M14 17h2"
+              />
+            </svg>
+          </span>
+          <span
+            class="inline-flex items-center"
+          >
+            New Estimate
+          </span>
+        </button>
+        <button
+          class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-transparent text-content-secondary hover:bg-surface-secondary active:bg-surface-tertiary border border-transparent active:scale-[0.98] h-10 px-5 text-sm gap-2 rounded-xl"
+          title="Jump into an estimate — resumes the latest or starts a new one"
         >
           <span
             class="shrink-0"
@@ -1151,7 +1197,7 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
       style="animation-delay: 50ms;"
     >
       <div
-        class="group flex items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in"
+        class="group flex w-full items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 text-left transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in "
         style="animation-delay: 80ms;"
       >
         <div
@@ -1202,7 +1248,7 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
         </div>
       </div>
       <div
-        class="group flex items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in"
+        class="group flex w-full items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 text-left transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in "
         style="animation-delay: 130ms;"
       >
         <div
@@ -1259,7 +1305,7 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
         </div>
       </div>
       <div
-        class="group flex items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in"
+        class="group flex w-full items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 text-left transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in "
         style="animation-delay: 180ms;"
       >
         <div
@@ -1316,9 +1362,10 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
           </div>
         </div>
       </div>
-      <div
-        class="group flex items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in"
+      <button
+        class="group flex w-full items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 text-left transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in cursor-pointer focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
         style="animation-delay: 230ms;"
+        type="button"
       >
         <div
           class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-content-tertiary transition-transform duration-normal ease-oe group-hover:scale-105"
@@ -1352,7 +1399,43 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
             <span
               class="text-lg font-bold tabular-nums text-content-primary leading-tight truncate"
             >
-              N/A
+              <svg
+                class="lucide lucide-circle-dashed text-content-quaternary opacity-70"
+                fill="none"
+                height="18"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.75"
+                viewBox="0 0 24 24"
+                width="18"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10.1 2.182a10 10 0 0 1 3.8 0"
+                />
+                <path
+                  d="M13.9 21.818a10 10 0 0 1-3.8 0"
+                />
+                <path
+                  d="M17.609 3.721a10 10 0 0 1 2.69 2.7"
+                />
+                <path
+                  d="M2.182 13.9a10 10 0 0 1 0-3.8"
+                />
+                <path
+                  d="M20.279 17.609a10 10 0 0 1-2.7 2.69"
+                />
+                <path
+                  d="M21.818 10.1a10 10 0 0 1 0 3.8"
+                />
+                <path
+                  d="M3.721 6.391a10 10 0 0 1 2.7-2.69"
+                />
+                <path
+                  d="M6.391 20.279a10 10 0 0 1-2.69-2.7"
+                />
+              </svg>
             </span>
             <span
               class="text-xs text-content-tertiary"
@@ -1366,7 +1449,7 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
             Quality Score
           </div>
         </div>
-      </div>
+      </button>
     </div>
     <div
       class="animate-card-in"

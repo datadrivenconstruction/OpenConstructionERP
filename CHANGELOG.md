@@ -5,6 +5,52 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] — 2026-04-21
+
+### Q2 UX deep improvements — pivot visualizations, wider Charts, markup hub, calibration, 4D scrubber, BIM panel
+
+**Data Explorer — Pivot visualization modes** (`/data-explorer?tab=pivot`)
+- Five view modes for the same aggregated groups: **Table** (original grid with in-cell data bars), **Heatmap** (color intensity per cell), **Bar** (grouped horizontal bars), **Treemap** (area proportional to value), **Matrix** (crosstab when two group-by columns are selected).
+- New `?piv_viz=` URL parameter persists the chosen mode across reloads and shared links. Saved Views now capture viz mode.
+- Matrix button is automatically disabled with a tooltip when fewer than two group-by columns are selected.
+
+**Data Explorer — Charts widened** (`/data-explorer?tab=charts`)
+- Category (group-by) dropdown now surfaces **all** text columns regardless of cardinality. Previously columns with ≥100 unique values (GUIDs, type names, family names) were silently hidden. High-cardinality options are flagged with `⚠︎` but remain selectable.
+- Value dropdown no longer caps at 20 columns — all numeric columns are available.
+- New **Aggregation** picker (sum / avg / min / max / count / count_unique). Switching to `count` or `count_unique` widens the value picker to accept any column dtype, mirroring the Pivot tab behaviour.
+- `?chart_agg=` added to the URL state for shareable chart links.
+
+**DWG Takeoff — annotation render fix** (`/dwg-takeoff`)
+- Annotations created through the panel tools (cloud / arrow / text / rect / highlight / distance) now render on the canvas. The backend response shape (`annotation_type` + `geometry.points`) is normalised at the API boundary so the renderer and undo-stack see the expected `type` + `points` fields.
+- Tool palette no longer crashes with `Cannot read properties of undefined (reading 'map')` when fetching annotations.
+
+**PDF Takeoff — annotation click-through** (`/takeoff?tab=measurements`)
+- Legend overlay now passes clicks through to the canvas when an annotation tool is active. Previously clicking to place a cloud / arrow / text / rect / highlight was intercepted by the legend's hidden-groups handler, silently toggling visibility instead of creating the annotation.
+
+**BIM Viewer — properties panel polish** (`/bim`)
+- Each property / parameter row in the right sidebar now has its own translucent card background instead of sharing a single flat surface. Panel-wide background is softened so nested rows stand out.
+- Top toolbar renamed "Dimensions" to **"BBox Dimensions"** to disambiguate from the unit-specific length / width / height parameters in the quantities table.
+
+**Markups hub** (`/markups`)
+- New **Unified** tab aggregates markups from all three sources: general markup API, DWG annotations, PDF takeoff measurements. Each entry shows source file name, format icon and origin module.
+- Read-only aggregator view — the authoritative stores remain per-module; clicking a markup deep-links into its native editor.
+
+**Q2 features shipped earlier in the series** (re-landing with this release)
+- **Data Explorer — Threshold rules** — conditional formatting for pivot cells with red / amber / green bands per aggregate column, persisted via `?tr=`.
+- **BIM Viewer — 4D timeline scrubber** — play / pause animation through construction sequence when phase data is present.
+- **DWG Takeoff — Calibration dialog + Sheet strip** — click-to-set scale by picking two reference points; sheet thumbnails for multi-layout drawings.
+- **PDF Takeoff — Calibration dialog + Measurement ledger** — same calibration flow as DWG; exportable running ledger of all measurements with totals.
+- **Data Explorer — count / count_unique aggregation** — categorical aggregation for any column dtype.
+
+### Fixed
+- Frontend `APP_VERSION` now reports v2.2.0 (Vite build-time injection from `package.json`).
+- Stale `DashboardPage` visual-regression snapshot regenerated (was pointing at pre-quick-upload layout).
+
+### Tests
+- 135 new Pivot / Charts / aggregation / urlState tests (all green). Total frontend vitest: 923 passing.
+- Backend unit tests: 1272 passing, unchanged.
+- New Playwright spec `_data-explorer-viz-modes.spec.ts` verifies all 5 pivot viz modes render with a real RVT upload (9,512 elements, 798 parameter columns).
+
 ## [2.1.0] — 2026-04-20
 
 ### Q1 UX deep improvements — keyboard shortcuts, undo/redo, 5D cost visualization, URL deep-links, and security UX

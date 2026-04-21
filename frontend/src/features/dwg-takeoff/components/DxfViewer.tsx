@@ -103,6 +103,38 @@ interface Props {
     measurement_value?: number;
     measurement_unit?: string;
   }) => void;
+  /**
+   * Called with the world-space coordinates of a click when the active
+   * tool is ``calibrate``. The parent owns the two-click state machine
+   * (first click = point A, second = point B + open dialog) and the
+   * localStorage write — the viewer just forwards clicks.
+   */
+  onCalibrationPoint?: (point: { x: number; y: number }) => void;
+  /**
+   * Calibration overlay — render a reference segment on top of the
+   * canvas. ``pointA`` shows as a dot; ``pointB`` (if provided) draws
+   * a dashed line between them. Used both during the two-click flow
+   * (pointA set, pointB null → rubber band to cursor handled by caller)
+   * and after a persisted calibration is loaded (both points present →
+   * static reminder line).
+   */
+  calibrationOverlay?: {
+    pointA?: { x: number; y: number } | null;
+    pointB?: { x: number; y: number } | null;
+  };
+  /**
+   * When present, override the display of every measurement label with
+   * this calibration-derived unit/scale. ``unitsPerPixel`` is applied
+   * to the raw DXF ``measurement_value`` (linear values multiplied,
+   * areal values squared), and ``unit`` is the label suffix
+   * ("m" / "mm" / "ft" / "in"). When null, the existing ``drawingScale``
+   * path is used as before — keeps the feature fully additive so users
+   * who rely on preset scales aren't affected.
+   */
+  calibration?: {
+    unitsPerPixel: number;
+    unit: 'm' | 'mm' | 'ft' | 'in';
+  } | null;
 }
 
 function computeExtents(entities: DxfEntity[]): Extents {
@@ -162,9 +194,16 @@ export function DxfViewer({
   onSelectAnnotation,
   onEntityContextMenu,
   onAnnotationCreated,
+  onCalibrationPoint,
+  calibrationOverlay,
+  calibration,
 }: Props) {
   const drawingScaleRef = useRef(drawingScale);
   drawingScaleRef.current = drawingScale;
+  const calibrationOverlayRef = useRef(calibrationOverlay);
+  calibrationOverlayRef.current = calibrationOverlay;
+  const calibrationRef = useRef(calibration);
+  calibrationRef.current = calibration;
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -418,6 +457,7 @@ export function DxfViewer({
         vp,
         selectedAnnotationIdRef.current,
         drawingScaleRef.current,
+        calibrationRef.current ?? undefined,
       );
 
       // Draw polyline measurements overlay for the primary selected entity only
@@ -569,8 +609,13 @@ export function DxfViewer({
           }
 
           // ── Live measurement label near the midpoint of the rubber band ──
-          const dist = calculateDistance(lastPt, mouseWorld) * drawingScaleRef.current;
-          const label = formatMeasurement(dist, 'm');
+          // If a two-click calibration is active, use it; otherwise fall
+          // back to the preset-scale path.
+          const rawPx = calculateDistance(lastPt, mouseWorld);
+          const calHot = calibrationRef.current;
+          const label = calHot
+            ? `${(rawPx * calHot.unitsPerPixel).toFixed(2)} ${calHot.unit}`
+            : formatMeasurement(rawPx * drawingScaleRef.current, 'm');
           const midX = (lastScreen.x + mouseScreen.x) / 2;
           const midY = (lastScreen.y + mouseScreen.y) / 2;
 
@@ -594,6 +639,51 @@ export function DxfViewer({
 
           ctx.restore();
         }
+      }
+
+      // ── Calibration overlay (reference line + end markers) ─────────
+      // Drawn on top of everything so the estimator can always see
+      // where they calibrated, regardless of zoom / pan state.
+      const calOverlay = calibrationOverlayRef.current;
+      if (calOverlay && (calOverlay.pointA || calOverlay.pointB)) {
+        const curTool = activeToolRef.current;
+        const rawMouse = mousePosRef.current;
+        const a = calOverlay.pointA ?? null;
+        const b =
+          calOverlay.pointB ??
+          (curTool === 'calibrate' && a && rawMouse ? rawMouse : null);
+        ctx.save();
+        if (a && b) {
+          const aScreen = worldToScreen(a.x, a.y, vp);
+          const bScreen = worldToScreen(b.x, b.y, vp);
+          ctx.strokeStyle = '#0ea5e9';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([6, 4]);
+          ctx.beginPath();
+          ctx.moveTo(aScreen.x, aScreen.y);
+          ctx.lineTo(bScreen.x, bScreen.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          for (const sp of [aScreen, bScreen]) {
+            ctx.beginPath();
+            ctx.arc(sp.x, sp.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#0ea5e9';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        } else if (a) {
+          const aScreen = worldToScreen(a.x, a.y, vp);
+          ctx.beginPath();
+          ctx.arc(aScreen.x, aScreen.y, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#0ea5e9';
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        ctx.restore();
       }
 
       rafRef.current = requestAnimationFrame(draw);
@@ -632,6 +722,17 @@ export function DxfViewer({
         isPanningRef.current = true;
         setIsPanning(true);
         lastMouseRef.current = { x: e.clientX, y: e.clientY };
+        return;
+      }
+
+      // Calibrate tool: forward the click (in world coords) to the parent,
+      // which drives the two-click + dialog state machine. We honour snap
+      // hits here too so users can calibrate against existing endpoints.
+      if (activeTool === 'calibrate') {
+        const rawWorld = screenToWorld(sx, sy, vpRef.current);
+        const snapHit = activeSnapRef.current;
+        const world = snapHit ? { x: snapHit.point.x, y: snapHit.point.y } : rawWorld;
+        if (onCalibrationPoint) onCalibrationPoint(world);
         return;
       }
 
@@ -752,7 +853,7 @@ export function DxfViewer({
         drawPointsRef.current = [];
       }
     },
-    [activeTool, entities, visibleLayers, onSelectEntity, onSelectAnnotation, onAnnotationCreated],
+    [activeTool, entities, visibleLayers, onSelectEntity, onSelectAnnotation, onAnnotationCreated, onCalibrationPoint],
   );
 
   // Mouse move (pan + rubber band tracking + snap hover test)

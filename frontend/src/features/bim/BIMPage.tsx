@@ -1457,6 +1457,7 @@ export function BIMPage() {
     | 'boq_coverage'
     | 'document_coverage'
     | '5d_cost'
+    | '4d_schedule'
   >('default');
   const showBoundingBoxes = false;
   const [isolatedIds, setIsolatedIds] = useState<string[] | null>(null);
@@ -2334,7 +2335,7 @@ export function BIMPage() {
                 aria-pressed={dimensionsVisible}
               >
                 <Maximize2 size={13} />
-                {t('bim.dimensions_button', { defaultValue: 'Dimensions' })}
+                {t('bim.dimensions_button', { defaultValue: 'BBox Dimensions' })}
               </button>
 
               <button
@@ -2368,7 +2369,8 @@ export function BIMPage() {
                       | 'validation'
                       | 'boq_coverage'
                       | 'document_coverage'
-                      | '5d_cost',
+                      | '5d_cost'
+                      | '4d_schedule',
                   )
                 }
                 title={t('bim.color_by', { defaultValue: 'Color by' })}
@@ -2395,6 +2397,11 @@ export function BIMPage() {
                 <optgroup label={t('bim.color_group_cost', { defaultValue: 'By cost' })}>
                   <option value="5d_cost">
                     {t('bim.color_5d_cost', { defaultValue: '5D unit rate' })}
+                  </option>
+                </optgroup>
+                <optgroup label={t('bim.color_group_schedule', { defaultValue: 'By schedule' })}>
+                  <option value="4d_schedule">
+                    {t('bim.color_4d_schedule', { defaultValue: '4D timeline' })}
                   </option>
                 </optgroup>
               </select>

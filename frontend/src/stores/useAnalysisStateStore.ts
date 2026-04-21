@@ -14,6 +14,12 @@ import { create } from 'zustand';
 export type ChartKind = 'bar' | 'line' | 'pie' | 'scatter';
 export type ChartFormat = 'number' | 'currency' | 'percent';
 
+/** Pivot visualization modes. `table` is the original behaviour (dense
+ *  grid with in-cell data bars). The other four render the same
+ *  aggregated groups with a different geometry — see PivotTab for the
+ *  per-mode renderer. */
+export type PivotVizMode = 'table' | 'heatmap' | 'bar' | 'treemap' | 'matrix';
+
 export interface SlicerFilter {
   column: string;
   values: string[];
@@ -23,6 +29,10 @@ export interface ChartConfig {
   kind: ChartKind;
   category: string;
   value: string;
+  /** Aggregation function applied to the `value` column before plotting.
+   *  `count` / `count_unique` accept any dtype and ignore the numeric
+   *  restriction otherwise imposed on the value picker. */
+  aggFn: string;
   /** null = show all groups */
   topN: number | null;
   /** When topN is set, 'top' or 'bottom' slice direction. */
@@ -36,6 +46,10 @@ export interface PivotConfigSnapshot {
   aggFn: string;
   topN: number | null;
   topNDirection: 'top' | 'bottom';
+  /** Visualization mode for the aggregated result. Optional so existing
+   *  saved views (pre-Q2b) keep working — a missing value is treated as
+   *  `table`. */
+  viz?: PivotVizMode;
 }
 
 export interface SavedView {
@@ -89,6 +103,7 @@ const DEFAULT_CHART: ChartConfig = {
   kind: 'bar',
   category: '',
   value: '',
+  aggFn: 'sum',
   topN: null,
   topNDirection: 'top',
   format: 'number',

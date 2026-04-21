@@ -56,6 +56,9 @@ import {
   DEFAULT_5D_GRADIENT,
   NO_LINK_OPACITY,
 } from './color5d';
+import { TimelineScrubber } from './TimelineScrubber';
+import { use4dTimeline } from './use4dTimeline';
+import { resolveElementStatus } from './4dStatus';
 import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
 import { useToastStore } from '@/stores/useToastStore';
@@ -124,7 +127,8 @@ export interface BIMViewerProps {
     | 'validation'
     | 'boq_coverage'
     | 'document_coverage'
-    | '5d_cost';
+    | '5d_cost'
+    | '4d_schedule';
   /** Show bounding box placeholders alongside geometry. Off by default. */
   showBoundingBoxes?: boolean;
   /** Element IDs to isolate (hide everything else). Empty = show all. */
@@ -315,7 +319,7 @@ function PropertiesTable({ properties }: { properties: Record<string, unknown> }
   if (entries.length === 0) return null;
 
   return (
-    <div className="space-y-0.5">
+    <div className="space-y-1.5">
       {entries.map(([key, value]) => {
         const label = prettyKey(key);
         const bool = parseBool(value);
@@ -323,7 +327,7 @@ function PropertiesTable({ properties }: { properties: Record<string, unknown> }
         return (
           <div
             key={key}
-            className="flex flex-col gap-0.5 py-1.5 px-2 rounded hover:bg-surface-secondary/50 group"
+            className="flex flex-col gap-0.5 py-1.5 px-2 rounded-md border bg-white/60 border-black/5 dark:bg-white/5 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/10 transition-colors group"
           >
             <div className="flex justify-between items-start gap-3">
               <span
@@ -360,11 +364,11 @@ function QuantitiesTable({ quantities }: { quantities: Record<string, number> })
   if (entries.length === 0) return null;
 
   return (
-    <div className="space-y-0.5">
+    <div className="space-y-1.5">
       {entries.map(([key, value]) => (
         <div
           key={key}
-          className="flex justify-between items-center gap-3 py-1.5 px-2 rounded hover:bg-surface-secondary/50"
+          className="flex justify-between items-center gap-3 py-1.5 px-2 rounded-md border bg-white/60 border-black/5 dark:bg-white/5 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/10 transition-colors"
         >
           <span className="text-[11px] text-content-tertiary truncate max-w-[50%]" title={key}>
             {key}
@@ -384,7 +388,7 @@ function QuantitiesTable({ quantities }: { quantities: Record<string, number> })
 
 export function BIMViewer({
   modelId,
-  projectId: _projectId,
+  projectId,
   selectedElementIds,
   onElementSelect,
   onSelectionChange,
@@ -476,6 +480,13 @@ export function BIMViewer({
   const [selectionSummary, setSelectionSummary] = useState('');
   /** Whether the viewer is in isolation mode (double-click). */
   const [isIsolated, setIsIsolated] = useState(false);
+
+  /** 4D timeline state — fetches schedule + activities for the project
+   *  and manages the playable cursor.  Enabled only when the user
+   *  activates 4D mode so we don't hit the schedule API on every page
+   *  visit.  When the project has no schedule, `isAvailable` is false
+   *  and the scrubber renders nothing. */
+  const fourD = use4dTimeline(projectId, colorByMode === '4d_schedule');
 
   /** 5D cost rate stats — min / max unit_rate across all linked BOQ
    *  positions on the loaded elements.  Drives the legend strip in the
@@ -884,6 +895,49 @@ export function BIMViewer({
           (el.linked_documents?.length ?? 0) > 0 ? GREEN : RED,
         );
       });
+    } else if (colorByMode === '4d_schedule') {
+      // 4D schedule mode — recolour based on the status of each element
+      // at the current scrubber position.  When the schedule isn't
+      // available we degrade to "default" colors so the viewer still
+      // looks sensible while the user is picking a 4D-enabled project.
+      if (!fourD.isAvailable) {
+        mgr.resetColors();
+        return;
+      }
+      import('three').then((THREE) => {
+        const GREY_HIDDEN = new THREE.Color('#9ca3af');
+        // Amber = in-progress (spec allows a user-configured colour later,
+        // but the default matches validation-warning amber so the visual
+        // language stays consistent across the viewer).
+        const AMBER = new THREE.Color('#f59e0b');
+        mgr.colorByDirect(
+          (el) => {
+            const status = resolveElementStatus(
+              el.id,
+              fourD.currentMs,
+              fourD.elementToActivities,
+              fourD.activitiesById,
+            );
+            if (status === 'unlinked') return null; // leave untouched
+            if (status === 'not_started') return GREY_HIDDEN;
+            if (status === 'completed') return null; // full normal colour
+            return AMBER; // in_progress
+          },
+          (el) => {
+            const status = resolveElementStatus(
+              el.id,
+              fourD.currentMs,
+              fourD.elementToActivities,
+              fourD.activitiesById,
+            );
+            // Not-started elements fade to 20% opacity so the user still
+            // sees the ghost shape of the future work (helps orient the
+            // scene as the scrubber moves).
+            if (status === 'not_started') return 0.2;
+            return 1;
+          },
+        );
+      });
     } else if (colorByMode === '5d_cost') {
       // Build a rate map: for each element, pick the highest unit_rate
       // across its linked BOQ positions. "Highest" because the user is
@@ -927,7 +981,17 @@ export function BIMViewer({
     } else {
       mgr.resetColors();
     }
-  }, [colorByMode, elements]);
+  }, [
+    colorByMode,
+    elements,
+    // 4D mode is time-varying: recolour whenever the scrubber moves or
+    // the schedule data re-arrives.  These deps are harmless for other
+    // modes because `fourD.currentMs` is a stable 0 when unavailable.
+    fourD.isAvailable,
+    fourD.currentMs,
+    fourD.activitiesById,
+    fourD.elementToActivities,
+  ]);
 
   // Sync per-category opacity (RFC 19 §4.2) from the shared store — materials
   // are cloned on first use so this is cheap on subsequent slider drags.
@@ -1882,6 +1946,24 @@ export function BIMViewer({
         </div>
       )}
 
+      {/* 4D schedule scrubber — bottom-center, visible only in 4d_schedule
+          mode AND when the project has a usable schedule.  The hook
+          returns `isAvailable: false` for unscheduled projects so the
+          viewer stays clean. */}
+      {colorByMode === '4d_schedule' && fourD.isAvailable && (
+        <TimelineScrubber
+          startMs={fourD.startMs}
+          endMs={fourD.endMs}
+          currentMs={fourD.currentMs}
+          onChange={fourD.setCurrentMs}
+          playing={fourD.playing}
+          onPlayToggle={fourD.togglePlay}
+          speed={fourD.speed}
+          onSpeedChange={fourD.setSpeed}
+          activeActivity={fourD.activeActivityName}
+        />
+      )}
+
       {/* 5D cost legend — bottom-right, visible only in 5d_cost mode. Shows
           the rate range linked to the currently-coloured model plus a
           gradient strip so users can read the colours as cost magnitudes.
@@ -2668,7 +2750,7 @@ export function BIMViewer({
             ))}
           </div>
 
-          <div className="overflow-y-auto p-3 space-y-3">
+          <div className="overflow-y-auto p-3 space-y-3 bg-white/40 dark:bg-white/5">
             {/* ── Tab: Properties (merged Key + All) ──────────────────── */}
             {propsTab === 'key' && (
               <>
@@ -2701,7 +2783,7 @@ export function BIMViewer({
                 </div>
 
                 {/* Element info */}
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <InfoRow
                     label={t('bim.prop_type', { defaultValue: 'Type' })}
                     value={selectedElement.element_type}
@@ -3294,7 +3376,7 @@ function ToolbarButton({
 function InfoRow({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
   return (
-    <div className="flex justify-between items-center gap-3 py-1 px-2 rounded hover:bg-surface-secondary/50">
+    <div className="flex justify-between items-center gap-3 py-1.5 px-2 rounded-md border bg-white/60 border-black/5 dark:bg-white/5 dark:border-white/10 hover:bg-white/80 dark:hover:bg-white/10 transition-colors">
       <span className="text-[11px] text-content-tertiary shrink-0">{label}</span>
       <span className="text-[11px] text-content-primary font-medium text-end truncate min-w-0" title={value}>
         {value}

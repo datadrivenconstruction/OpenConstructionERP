@@ -19,6 +19,7 @@ import {
   Circle,
   Spline,
   Minus,
+  Crosshair,
 } from 'lucide-react';
 
 export type DwgTool =
@@ -31,7 +32,8 @@ export type DwgTool =
   | 'rectangle'
   | 'circle'
   | 'polyline'
-  | 'line';
+  | 'line'
+  | 'calibrate';
 
 interface ToolDef {
   id: DwgTool;
@@ -56,6 +58,7 @@ const TOOLS: ToolDef[] = [
   { id: 'circle', icon: Circle, labelKey: 'dwg_takeoff.tool_circle', labelFallback: 'Circle', shortcut: 'C' },
   { id: 'arrow', icon: ArrowRight, labelKey: 'dwg_takeoff.tool_arrow', labelFallback: 'Arrow' },
   { id: 'text_pin', icon: Type, labelKey: 'dwg_takeoff.tool_text_pin', labelFallback: 'Text pin', shortcut: 'T' },
+  { id: 'calibrate', icon: Crosshair, labelKey: 'dwg_takeoff.tool_calibrate', labelFallback: 'Calibrate', shortcut: 'K' },
 ];
 
 const PRESET_COLORS = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899'];

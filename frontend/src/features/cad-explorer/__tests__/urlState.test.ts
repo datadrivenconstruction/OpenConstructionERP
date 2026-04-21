@@ -112,6 +112,7 @@ describe('urlState — pivot round-trip', () => {
     aggFn: 'sum',
     topN: 10,
     topNDirection: 'top',
+    viz: 'table',
   };
 
   it('round-trips a full snapshot', () => {
@@ -121,6 +122,7 @@ describe('urlState — pivot round-trip', () => {
       sum: 'volume,area',
       agg: 'sum',
       top: '10',
+      viz: null, // 'table' is the default and is omitted from the URL
     });
     expect(parsePivot(s)).toEqual(snapshot);
   });
@@ -139,8 +141,9 @@ describe('urlState — pivot round-trip', () => {
       aggFn: '',
       topN: null,
       topNDirection: 'top',
+      viz: 'table',
     });
-    expect(s).toEqual({ group: null, sum: null, agg: null, top: null });
+    expect(s).toEqual({ group: null, sum: null, agg: null, top: null, viz: null });
   });
 
   it('returns null when the URL has no pivot params at all', () => {
@@ -155,12 +158,53 @@ describe('urlState — pivot round-trip', () => {
   });
 
   it('returns null snapshot when passed null', () => {
-    expect(serialisePivot(null)).toEqual({ group: null, sum: null, agg: null, top: null });
+    expect(serialisePivot(null)).toEqual({ group: null, sum: null, agg: null, top: null, viz: null });
   });
 
   it('tolerates bogus top values', () => {
     expect(parsePivot({ group: 'x', top: 'banana' })?.topN).toBeNull();
     expect(parsePivot({ group: 'x', top: '0' })?.topN).toBeNull();
+  });
+
+  it('round-trips count_unique through ?piv_agg=', () => {
+    const snap: PivotConfigSnapshot = {
+      groupBy: ['category'],
+      aggCols: ['client_name'],
+      aggFn: 'count_unique',
+      topN: null,
+      topNDirection: 'top',
+      viz: 'table',
+    };
+    const s = serialisePivot(snap);
+    expect(s.agg).toBe('count_unique');
+    expect(parsePivot(s)).toEqual(snap);
+  });
+
+  it('round-trips count through ?piv_agg=', () => {
+    const snap: PivotConfigSnapshot = {
+      groupBy: ['category'],
+      aggCols: ['family'],
+      aggFn: 'count',
+      topN: null,
+      topNDirection: 'top',
+      viz: 'table',
+    };
+    const s = serialisePivot(snap);
+    expect(s.agg).toBe('count');
+    expect(parsePivot(s)).toEqual(snap);
+  });
+
+  it('rejects unknown agg functions in the URL (falls back to sum)', () => {
+    // A typo in a shared link should not break the Pivot tab — the
+    // `<select>` only has options for known agg fns, so we coerce back
+    // to the default.
+    const parsed = parsePivot({ group: 'category', agg: 'median' });
+    expect(parsed?.aggFn).toBe('sum');
+  });
+
+  it('is case-insensitive for agg function names', () => {
+    const parsed = parsePivot({ group: 'category', agg: 'COUNT_UNIQUE' });
+    expect(parsed?.aggFn).toBe('count_unique');
   });
 });
 
@@ -169,6 +213,7 @@ describe('urlState — chart round-trip', () => {
     kind: 'line',
     category: 'category',
     value: 'volume',
+    aggFn: 'sum',
     topN: 20,
     topNDirection: 'top',
     format: 'number',
@@ -176,7 +221,7 @@ describe('urlState — chart round-trip', () => {
 
   it('round-trips kind / category / value / topN', () => {
     const s = serialiseChart(full);
-    expect(s).toEqual({ kind: 'line', cat: 'category', val: 'volume', top: '20' });
+    expect(s).toEqual({ kind: 'line', cat: 'category', val: 'volume', agg: null, top: '20' });
     const parsed = parseChart(s);
     expect(parsed.kind).toBe('line');
     expect(parsed.category).toBe('category');
@@ -200,6 +245,73 @@ describe('urlState — chart round-trip', () => {
 
   it('ignores unknown chart kinds', () => {
     expect(parseChart({ kind: 'wasabi' }).kind).toBeUndefined();
+  });
+
+  it('round-trips a non-default aggFn', () => {
+    const s = serialiseChart({ ...full, aggFn: 'count_unique' });
+    expect(s.agg).toBe('count_unique');
+    const parsed = parseChart(s);
+    expect(parsed.aggFn).toBe('count_unique');
+  });
+
+  it('omits aggFn when it is the default (sum)', () => {
+    const s = serialiseChart({ ...full, aggFn: 'sum' });
+    expect(s.agg).toBeNull();
+  });
+
+  it('ignores unknown aggFn values (leaves aggFn undefined)', () => {
+    expect(parseChart({ agg: 'median' }).aggFn).toBeUndefined();
+  });
+
+  it('is case-insensitive for chart aggFn', () => {
+    expect(parseChart({ agg: 'COUNT' }).aggFn).toBe('count');
+  });
+});
+
+describe('urlState — pivot viz mode', () => {
+  it('defaults to table when the viz key is absent', () => {
+    const parsed = parsePivot({ group: 'category', sum: 'volume' });
+    expect(parsed?.viz).toBe('table');
+  });
+
+  it('round-trips a non-default viz mode', () => {
+    const snapshot: PivotConfigSnapshot = {
+      groupBy: ['category'],
+      aggCols: ['volume'],
+      aggFn: 'sum',
+      topN: null,
+      topNDirection: 'top',
+      viz: 'heatmap',
+    };
+    const s = serialisePivot(snapshot);
+    expect(s.viz).toBe('heatmap');
+    const parsed = parsePivot({ group: s.group, sum: s.sum, agg: s.agg, top: s.top, viz: s.viz });
+    expect(parsed?.viz).toBe('heatmap');
+  });
+
+  it('omits viz when it is the default (table)', () => {
+    const snapshot: PivotConfigSnapshot = {
+      groupBy: ['category'],
+      aggCols: ['volume'],
+      aggFn: 'sum',
+      topN: null,
+      topNDirection: 'top',
+      viz: 'table',
+    };
+    const s = serialisePivot(snapshot);
+    expect(s.viz).toBeNull();
+  });
+
+  it('accepts each of the five valid viz modes', () => {
+    for (const viz of ['table', 'heatmap', 'bar', 'treemap', 'matrix'] as const) {
+      const parsed = parsePivot({ group: 'category', viz });
+      expect(parsed?.viz).toBe(viz);
+    }
+  });
+
+  it('falls back to table on unknown viz values', () => {
+    const parsed = parsePivot({ group: 'category', viz: 'radar' });
+    expect(parsed?.viz).toBe('table');
   });
 });
 

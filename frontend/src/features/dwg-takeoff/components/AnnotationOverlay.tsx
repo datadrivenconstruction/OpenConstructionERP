@@ -10,6 +10,57 @@ import type { DwgAnnotation } from '../api';
 import type { ViewportState } from '../lib/viewport';
 import { worldToScreen } from '../lib/viewport';
 import { formatMeasurement } from '../lib/measurement';
+import type { CalibrationUnit } from '../lib/calibration';
+
+/** Optional two-click calibration override. When present, every linear
+ *  ``measurement_value`` is multiplied by ``unitsPerPixel`` and areal
+ *  values by its square, then labelled in ``unit``. When null/undefined
+ *  the pre-existing ``drawingScale`` path runs unchanged. */
+export interface CalibrationOverride {
+  unitsPerPixel: number;
+  unit: CalibrationUnit;
+}
+
+/** Format a measurement using the calibration override. Linear = "m",
+ *  areal = "m²". Precision mirrors page-wide convention (2 decimals for
+ *  normal magnitudes). */
+function formatCalibrated(
+  rawValue: number,
+  isArea: boolean,
+  cal: CalibrationOverride,
+): string {
+  const factor = isArea ? cal.unitsPerPixel * cal.unitsPerPixel : cal.unitsPerPixel;
+  const v = rawValue * factor;
+  const unit = isArea ? `${cal.unit}\u00B2` : cal.unit;
+  if (v >= 1000) return `${(v / 1000).toFixed(2)}k ${unit}`;
+  if (v < 0.01) return `${v.toFixed(4)} ${unit}`;
+  if (v < 1) return `${v.toFixed(3)} ${unit}`;
+  return `${v.toFixed(2)} ${unit}`;
+}
+
+/** Pick between calibrated and preset-scale formatting. Kept in one
+ *  place so every renderer picks the same path consistently. */
+function measurementLabel(
+  ann: DwgAnnotation,
+  drawingScale: number,
+  cal: CalibrationOverride | undefined,
+  fallbackUnit: string,
+): string | null {
+  if (ann.measurement_value == null) return ann.text ?? null;
+  const isArea =
+    ann.measurement_unit === 'm\u00B2' ||
+    ann.measurement_unit === 'm2' ||
+    (ann.measurement_unit ?? '').includes('\u00B2');
+  if (cal) {
+    return formatCalibrated(ann.measurement_value, isArea, cal);
+  }
+  const scaled = scaleMeasurement(
+    ann.measurement_value,
+    ann.measurement_unit,
+    drawingScale,
+  );
+  return formatMeasurement(scaled, ann.measurement_unit ?? fallbackUnit);
+}
 
 /**
  * Compute the effective stroke thickness for a single annotation.
@@ -55,6 +106,7 @@ export function renderAnnotations(
   vp: ViewportState,
   selectedId?: string | null,
   drawingScale: number = 1,
+  calibration?: CalibrationOverride,
 ): void {
   for (const ann of annotations) {
     const isSelected = ann.id === selectedId;
@@ -73,16 +125,16 @@ export function renderAnnotations(
         break;
       case 'distance':
       case 'line':
-        renderDistance(ctx, ann, vp, color, isSelected, width, drawingScale);
+        renderDistance(ctx, ann, vp, color, isSelected, width, drawingScale, calibration);
         break;
       case 'area':
-        renderArea(ctx, ann, vp, color, isSelected, width, drawingScale);
+        renderArea(ctx, ann, vp, color, isSelected, width, drawingScale, calibration);
         break;
       case 'circle':
-        renderCircle(ctx, ann, vp, color, isSelected, width, drawingScale);
+        renderCircle(ctx, ann, vp, color, isSelected, width, drawingScale, calibration);
         break;
       case 'polyline':
-        renderPolyline(ctx, ann, vp, color, isSelected, width, drawingScale);
+        renderPolyline(ctx, ann, vp, color, isSelected, width, drawingScale, calibration);
         break;
     }
   }
@@ -96,6 +148,7 @@ function renderCircle(
   _isSelected: boolean,
   width = 2,
   drawingScale = 1,
+  calibration?: CalibrationOverride,
 ): void {
   if (ann.points.length < 2) return;
   const center = worldToScreen(ann.points[0]!.x, ann.points[0]!.y, vp);
@@ -113,13 +166,8 @@ function renderCircle(
   ctx.fill();
 
   // Area label at centre when measurement is available.
-  if (ann.measurement_value != null) {
-    const scaled = scaleMeasurement(
-      ann.measurement_value,
-      ann.measurement_unit,
-      drawingScale,
-    );
-    const label = formatMeasurement(scaled, ann.measurement_unit ?? 'm\u00B2');
+  const label = measurementLabel(ann, drawingScale, calibration, 'm\u00B2');
+  if (label) {
     ctx.font = '600 11px ui-monospace, monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -140,6 +188,7 @@ function renderPolyline(
   _isSelected: boolean,
   width = 2,
   drawingScale = 1,
+  calibration?: CalibrationOverride,
 ): void {
   if (ann.points.length < 2) return;
   ctx.strokeStyle = color;
@@ -167,21 +216,18 @@ function renderPolyline(
     );
     const mx = (pA.x + pB.x) / 2;
     const my = (pA.y + pB.y) / 2;
-    const scaled = scaleMeasurement(
-      ann.measurement_value,
-      ann.measurement_unit,
-      drawingScale,
-    );
-    const label = formatMeasurement(scaled, ann.measurement_unit ?? 'm');
-    ctx.font = '600 11px ui-monospace, monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(0,0,0,0.75)';
-    const tw = ctx.measureText(label).width + 10;
-    const th = 18;
-    ctx.fillRect(mx - tw / 2, my - 20 - th / 2, tw, th);
-    ctx.fillStyle = '#fff';
-    ctx.fillText(label, mx, my - 19);
+    const label = measurementLabel(ann, drawingScale, calibration, 'm');
+    if (label) {
+      ctx.font = '600 11px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      const tw = ctx.measureText(label).width + 10;
+      const th = 18;
+      ctx.fillRect(mx - tw / 2, my - 20 - th / 2, tw, th);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(label, mx, my - 19);
+    }
   }
 }
 
@@ -347,6 +393,7 @@ function renderDistance(
   _isSelected: boolean,
   width = 1.5,
   drawingScale = 1,
+  calibration?: CalibrationOverride,
 ): void {
   if (ann.points.length < 2) return;
   const dPt0 = ann.points[0]!;
@@ -368,13 +415,7 @@ function renderDistance(
   ctx.setLineDash([]);
 
   // Dimension text
-  const label =
-    ann.measurement_value != null
-      ? formatMeasurement(
-          scaleMeasurement(ann.measurement_value, ann.measurement_unit, drawingScale),
-          ann.measurement_unit ?? 'm',
-        )
-      : ann.text ?? '';
+  const label = measurementLabel(ann, drawingScale, calibration, 'm') ?? '';
   if (label) {
     const mx = (p1.x + p2.x) / 2;
     const my = (p1.y + p2.y) / 2;
@@ -403,6 +444,7 @@ function renderArea(
   _isSelected: boolean,
   width = 1.5,
   drawingScale = 1,
+  calibration?: CalibrationOverride,
 ): void {
   if (ann.points.length < 3) return;
   const screenPts = ann.points.map((p) => worldToScreen(p.x, p.y, vp));
@@ -434,13 +476,7 @@ function renderArea(
   // Area text at centroid
   const cx = screenPts.reduce((s, p) => s + p.x, 0) / screenPts.length;
   const cy = screenPts.reduce((s, p) => s + p.y, 0) / screenPts.length;
-  const label =
-    ann.measurement_value != null
-      ? formatMeasurement(
-          scaleMeasurement(ann.measurement_value, ann.measurement_unit, drawingScale),
-          ann.measurement_unit ?? 'm\u00B2',
-        )
-      : ann.text ?? '';
+  const label = measurementLabel(ann, drawingScale, calibration, 'm\u00B2') ?? '';
   if (label) {
     ctx.font = 'bold 11px Inter, system-ui, sans-serif';
     ctx.fillStyle = color;
