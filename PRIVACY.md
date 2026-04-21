@@ -71,7 +71,7 @@ Under CCPA / CPRA you may additionally:
 - Request deletion
 - Not be discriminated against for exercising these rights
 
-To exercise any right, email **privacy@datadrivenconstruction.io**. We
+To exercise any right, email **info@datadrivenconstruction.io**. We
 respond within 30 days (GDPR) or 45 days (CCPA).
 
 ## 5. Third-party processors
@@ -112,14 +112,14 @@ days before taking effect.
 ## 10. Contact
 
 - **Data controller (DDC instance):** DataDrivenConstruction, Artem Boiko
-- **Email:** privacy@datadrivenconstruction.io
+- **Email:** info@datadrivenconstruction.io
 - **Supervisory authority:** the data-protection authority in your EU
   member state; for users in the UK, the Information Commissioner's
   Office (ICO).
 
 ---
 
-*This stub policy is not a substitute for legal advice. Before relying on
-this document for a production deployment with third-party users, have
-it reviewed by a qualified privacy lawyer in the jurisdictions where you
-offer the service.*
+*This policy provides a baseline and is not a substitute for legal
+advice. Before relying on it for a production deployment with
+third-party users, have it reviewed by a qualified privacy lawyer in
+the jurisdictions where you offer the service.*
