@@ -645,7 +645,15 @@ OpenConstructionERP includes security hardening for production deployments:
 - Generic error responses to prevent account enumeration
 - Production startup checks for secrets, credentials, and database configuration
 
-Report vulnerabilities via [GitHub Issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues) (private reports supported).
+**Do not open public GitHub issues for security vulnerabilities.**
+Report privately via
+[GitHub Security Advisories](https://github.com/datadrivenconstruction/OpenConstructionERP/security/advisories/new)
+or by email to
+[info@datadrivenconstruction.io](mailto:info@datadrivenconstruction.io).
+See [SECURITY.md](SECURITY.md) for the full coordinated-disclosure
+policy, response timelines, supported versions, scope, and
+regulatory-reporting obligations under EU Regulation 2024/2847
+(Cyber Resilience Act).
 
 ## AI disclaimer
 
