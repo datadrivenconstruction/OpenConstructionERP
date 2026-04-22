@@ -576,28 +576,28 @@ environment variables before the first start.
 
 ```mermaid
 flowchart TB
-    UI["Frontend SPA<br/>React 18 · TypeScript · Vite<br/>AG Grid · Tailwind · PDF.js"]
+    UI["Frontend SPA<br>React 18, TypeScript, Vite<br>AG Grid, Tailwind, PDF.js"]
 
-    subgraph Backend["FastAPI Backend — 60+ auto-discovered modules"]
-        CORE["Core<br/>Module loader · Event bus · Hooks · RBAC · Validation"]
-        BIZ["Business modules<br/>BOQ · Costs · Schedule · 5D · Takeoff<br/>Tendering · Risk · Reports · Catalog<br/>Requirements · Markups · Punch List · BIM Hub · CDE"]
-        AIS["AI services<br/>AI Chat (SSE) · AI Estimate · Cost Intelligence<br/>7 LLM providers"]
+    subgraph Backend ["FastAPI Backend, 60+ modules"]
+        CORE["Core<br>Module loader, Event bus, Hooks, RBAC, Validation"]
+        BIZ["Business modules<br>BOQ, Costs, Schedule, 5D, Takeoff<br>Tendering, Risk, Reports, Catalog<br>Requirements, Markups, Punch List, BIM Hub, CDE"]
+        AIS["AI services<br>AI Chat SSE, AI Estimate, Cost Intelligence<br>7 LLM providers"]
         CORE --> BIZ
         CORE --> AIS
     end
 
-    subgraph Data["Data layer"]
-        PG[("PostgreSQL 16<br/>SQLite in dev")]
-        VEC[("Vector DB<br/>LanceDB / Qdrant")]
-        S3[("MinIO / S3<br/>files · CAD · PDFs")]
+    subgraph Data ["Data layer"]
+        PG[("PostgreSQL 16<br>SQLite in dev")]
+        VEC[("Vector DB<br>LanceDB / Qdrant")]
+        S3[("MinIO / S3<br>files, CAD, PDFs")]
     end
 
-    subgraph Pipelines["Pipelines"]
-        CAD["DDC cad2data<br/>RVT · IFC · DWG · DGN → canonical JSON"]
-        CV["CV / OCR<br/>PaddleOCR 3.0 · YOLOv11<br/>PDF takeoff · symbol detection"]
+    subgraph Pipelines ["Pipelines"]
+        CAD["DDC cad2data<br>RVT, IFC, DWG, DGN to canonical JSON"]
+        CV["CV / OCR<br>PaddleOCR 3.0, YOLOv11<br>PDF takeoff, symbol detection"]
     end
 
-    UI -- "REST + SSE" --> CORE
+    UI -- "REST, SSE" --> CORE
     BIZ --> PG
     BIZ --> VEC
     BIZ --> S3
@@ -608,10 +608,10 @@ flowchart TB
     classDef be fill:#238636,stroke:#104822,color:#fff;
     classDef ai fill:#db6d28,stroke:#7a3c14,color:#fff;
     classDef data fill:#8250df,stroke:#4a2c7d,color:#fff;
-    class UI fe;
-    class CORE,BIZ be;
-    class AIS ai;
-    class PG,VEC,S3,CAD,CV data;
+    class UI fe
+    class CORE,BIZ be
+    class AIS ai
+    class PG,VEC,S3,CAD,CV data
 ```
 
 <details>
