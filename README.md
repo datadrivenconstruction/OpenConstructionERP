@@ -14,7 +14,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [![Downloads (pepy)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=total&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy))](https://pepy.tech/project/openconstructionerp)
 [![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers)
 [![Last commit](https://img.shields.io/github/last-commit/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/commits/main)
-
+<br/>
 [![Issues](https://img.shields.io/github/issues/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
@@ -32,8 +32,13 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 <summary><h2>Table of Contents</h2></summary>
 
 <table width="100%">
+<colgroup>
+<col width="33%"/>
+<col width="34%"/>
+<col width="33%"/>
+</colgroup>
 <tr>
-<td width="33%" valign="top">
+<td valign="top">
 
 **Getting Started**
 - [Why OpenConstructionERP?](#why-openconstructionerp)
@@ -42,7 +47,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 - [Demo Accounts](#demo-accounts)
 
 </td>
-<td width="33%" valign="top">
+<td valign="top">
 
 **Core Modules**
 - [BOQ Management](#-bill-of-quantities-boq-management)
@@ -50,7 +55,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 - [CAD/BIM & AI Estimation](#%EF%B8%8F-cadbim-takeoff--ai-estimation)
 
 </td>
-<td width="33%" valign="top">
+<td valign="top">
 
 **Planning & Delivery**
 - [4D Scheduling & 5D Cost](#-4d-scheduling--5d-cost-model)
