@@ -121,20 +121,57 @@ class StorageBackend(ABC):
         Raises :class:`FileNotFoundError` if ``key`` does not exist.
         """
 
-    @abstractmethod
-    def open_stream(self, key: str) -> AsyncIterator[bytes]:
+    async def read_bytes(self, key: str) -> bytes:
+        """Return the blob at ``key`` as a single ``bytes`` object.
+
+        Default implementation delegates to :meth:`get`.  Subclasses
+        that prefer a ``read_bytes``-shaped API (e.g. simple wrappers
+        around ``pathlib.Path.read_bytes``) may override this instead
+        of :meth:`get`, in which case the default :meth:`open_stream`
+        fallback below will still work — it calls :meth:`read_bytes`.
+
+        Raises :class:`FileNotFoundError` if ``key`` does not exist.
+        """
+        return await self.get(key)
+
+    async def open_stream(self, key: str) -> AsyncIterator[bytes]:
         """Return an async iterator yielding the blob in chunks.
 
-        Implementations are async-generator functions — the caller
-        invokes them **without** ``await`` and iterates the result with
-        ``async for``.  Used by the BIM geometry endpoint to feed
-        ``StreamingResponse``.
+        Concrete subclasses typically override this as an async
+        generator (``async def`` + ``yield``) — see
+        :class:`LocalStorageBackend` and :class:`S3StorageBackend`.
+
+        When a subclass implements only :meth:`get` or :meth:`read_bytes`
+        but not :meth:`open_stream`, this default reads the whole blob
+        into memory and yields it as a single chunk.  That keeps the
+        streaming endpoint functional for simple community backends at
+        the cost of loading the blob in full — not ideal for large
+        files.  A DEBUG line is emitted per call so authors can see
+        when the fallback engaged and know to provide a real streaming
+        implementation.
+
+        If neither :meth:`read_bytes` (nor its underlying :meth:`get`)
+        is overridden, :class:`NotImplementedError` is raised with a
+        hint pointing to the two methods the subclass must provide.
         """
-        # Must be a regular (non-async) function that returns an async
-        # iterator.  Concrete subclasses implement this as an async
-        # generator (``async def`` + ``yield``) which has exactly this
-        # runtime signature.
-        raise NotImplementedError
+        try:
+            payload = await self.read_bytes(key)
+        except NotImplementedError as exc:
+            raise NotImplementedError(
+                "StorageBackend subclasses must override either "
+                "open_stream() for streamed reads, or read_bytes()/get() "
+                "so the default open_stream() fallback has something to "
+                "yield. See LocalStorageBackend for an example of the "
+                "streaming form."
+            ) from exc
+        logger.debug(
+            "storage.open_stream default fallback engaged for backend=%s key=%r "
+            "(%d bytes) — override open_stream() for true streaming",
+            type(self).__name__,
+            key,
+            len(payload),
+        )
+        yield payload
 
     def url_for(self, key: str, *, expires_in: int = 3600) -> str | None:
         """Return a presigned download URL for ``key``.
@@ -179,9 +216,7 @@ class LocalStorageBackend(StorageBackend):
         try:
             resolved.relative_to(self.base_dir)
         except ValueError as exc:
-            raise ValueError(
-                f"Storage key {key!r} escapes base_dir {self.base_dir}"
-            ) from exc
+            raise ValueError(f"Storage key {key!r} escapes base_dir {self.base_dir}") from exc
         return resolved
 
     # -- public API -----------------------------------------------------
@@ -223,11 +258,7 @@ class LocalStorageBackend(StorageBackend):
 
     async def delete_prefix(self, prefix: str) -> int:
         normalised = _normalise_key(prefix) if prefix else ""
-        root = (
-            self.base_dir
-            if not normalised
-            else self.base_dir.joinpath(*normalised.split("/"))
-        )
+        root = self.base_dir if not normalised else self.base_dir.joinpath(*normalised.split("/"))
 
         def _sweep() -> int:
             if not root.exists():
@@ -510,10 +541,7 @@ def build_storage_backend(settings: Settings) -> StorageBackend:
             region=settings.s3_region,
         )
 
-    raise ValueError(
-        f"Unknown storage backend {backend_name!r}. "
-        f"Expected one of: 'local', 's3'."
-    )
+    raise ValueError(f"Unknown storage backend {backend_name!r}. Expected one of: 'local', 's3'.")
 
 
 @lru_cache(maxsize=1)
