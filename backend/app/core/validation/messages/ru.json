@@ -1,0 +1,209 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Позиция {ordinal} не может иметь нулевое или отсутствующее количество",
+      "suggestion": "Укажите количество больше 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Позиции {ordinal} должна быть назначена единичная расценка",
+      "suggestion": "Примените расценку из базы стоимостей"
+    },
+    "position_has_description": {
+      "fail": "У позиции {ordinal} не может быть пустого описания"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Повторяющийся номер '{ordinal}' найден в {count} позициях"
+    },
+    "unit_rate_in_range": {
+      "fail": "Позиция {ordinal}: расценка {rate} превышает {threshold} (5× медиана)",
+      "suggestion": "Проверьте единичную расценку — она необычно высокая"
+    },
+    "negative_values": {
+      "fail": "Позиция {ordinal} содержит отрицательные значения: {details}",
+      "suggestion": "Исправьте отрицательные значения — используйте положительные числа"
+    },
+    "unrealistic_rate": {
+      "fail": "Позиция {ordinal}: {details}",
+      "suggestion": "Проверьте значение — оно выглядит нереалистично высоким"
+    },
+    "total_mismatch": {
+      "fail": "Позиция {ordinal}: расчёт {computed} != сохранённое {stored} (разница={diff})",
+      "suggestion": "Пересчитайте итог = количество × единичная расценка"
+    },
+    "empty_unit": {
+      "fail": "У позиции {ordinal} отсутствует или пуста единица измерения",
+      "suggestion": "Назначьте единицу измерения (м, м2, м3, кг, шт, lsum и т.п.)"
+    },
+    "section_without_items": {
+      "fail": "Раздел {ordinal} ({title}) не содержит дочерних позиций",
+      "suggestion": "Добавьте позиции в раздел или удалите пустой раздел"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Позиция {ordinal}: единичная расценка {rate}/{unit} превышает эталонный порог {threshold}/{unit} — потенциально нереалистично",
+      "suggestion": "Проверьте расценку — обычные значения для {unit} ниже {threshold}. Проверьте единицу и десятичные разряды."
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} из {total_count} позиций ({percent}) используют паушальную стоимость — превышает порог {threshold}",
+      "suggestion": "Разбейте паушальные позиции на измеримые количества (м, м2, м3, кг, шт) для более точной оценки"
+    },
+    "cost_concentration": {
+      "fail": "Позиция {ordinal} составляет {share} от общей стоимости ({value} из {grand_total}) — превышает порог {threshold}",
+      "suggestion": "Разбейте позицию на меньшие или проверьте стоимость — одна позиция не должна доминировать в оценке"
+    },
+    "currency_consistency": {
+      "fail": "Найдены разные валюты: {currencies}",
+      "suggestion": "Используйте единую валюту во всей ведомости"
+    },
+    "measurement_consistency": {
+      "fail": "В ведомости смешаны метрические и имперские единицы — используйте одну систему",
+      "suggestion": "Приведите все количества к одной системе единиц (метрической или имперской)"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "У позиции {ordinal} отсутствует DIN 276 Kostengruppe",
+      "suggestion": "Назначьте 3-значную DIN 276 Kostengruppe (например, 330 для стен)"
+    },
+    "valid_cost_group": {
+      "fail": "Неверный код DIN 276 '{code}' в позиции {ordinal}"
+    },
+    "hierarchy": {
+      "fail": "Позиция {ordinal}: KG {child} не входит в родительскую KG {parent} (ожидается префикс '{prefix}')",
+      "suggestion": "Переместите позицию к правильному родителю или обновите KG-код в соответствии с иерархией ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "Группа KG {group} — {group_name} отсутствует в ведомости",
+      "suggestion": "Добавьте позиции для KG {group} ({group_name}) для полного покрытия"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Номер '{ordinal}' не соответствует формату GAEB XX.XX.XXXX",
+      "suggestion": "Используйте формат вида 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Позиция {ordinal}: конечная позиция без родительского раздела — иерархия GAEB LV требует родителя Leistungsgruppe",
+      "suggestion": "Привяжите позицию к родительскому разделу (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "fail": "Позиция {ordinal}: единичная расценка {rate} должна быть > 0 для не-паушальных позиций (единица='{unit}')",
+      "suggestion": "Укажите положительный Einheitspreis или отметьте позицию как паушальную (единица='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "Верхний раздел '{ordinal}' не имеет кода GAEB Leistungsbereich (ожидается 3-значный код работ, например '012')",
+      "suggestion": "Добавьте 3-значный код Leistungsbereich в раздел — например '012' для земляных работ, '013' для каменных"
+    },
+    "quantity_decimals": {
+      "fail": "Позиция {ordinal}: количество {quantity} имеет {decimals} знаков после запятой — GAEB X83 разрешает максимум 3",
+      "suggestion": "Округлите количество до не более чем 3 знаков после запятой согласно GAEB X83"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "У позиции {ordinal} отсутствует NRM-код элемента",
+      "suggestion": "Назначьте NRM 1/2 код элемента (например, 2.6.1 для наружных стен)"
+    },
+    "valid_element": {
+      "fail": "Неверный NRM-код '{code}' в позиции {ordinal}"
+    },
+    "completeness": {
+      "fail": "Группа NRM {group} — {group_name} отсутствует в ведомости",
+      "suggestion": "Добавьте позиции для NRM-группы {group} ({group_name})"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "У позиции {ordinal} отсутствует код MasterFormat",
+      "suggestion": "Назначьте код MasterFormat (например, 03 30 00 для монолитного бетона)"
+    },
+    "valid_division": {
+      "fail": "Неверный код MasterFormat '{code}' в позиции {ordinal}",
+      "suggestion": "Используйте 6-значный формат MasterFormat: XX XX XX (например, 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Раздел {division} — {division_name} отсутствует в ведомости",
+      "suggestion": "Добавьте позиции для раздела {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "У позиции {ordinal} отсутствует код SINAPI",
+      "suggestion": "Назначьте композиционный код SINAPI (например, 87878 для бетона C30)"
+    },
+    "valid_code": {
+      "fail": "Неверный код SINAPI '{code}' в позиции {ordinal}"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "У позиции {ordinal} отсутствует код ГЭСН/ФЕР",
+      "suggestion": "Назначьте код ГЭСН (например, 06-01-001-01 для бетона)"
+    },
+    "valid_code": {
+      "fail": "Код ГЭСН '{code}' не соответствует формату XX-XX-XXX-XX",
+      "suggestion": "Используйте формат: NN-NN-NNN-NN (например, 06-01-001-01)"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Позиция {ordinal} не привязана к Lot technique",
+      "suggestion": "Назначьте Lot technique (например, Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Расценены только {priced}/{total} позиций ({percent}) — ниже порога 80%",
+      "suggestion": "Завершите расчёт расценок для всех позиций перед подачей DPGF"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Номер '{ordinal}' не соответствует формату ÖNORM XX.XX.XXXXA",
+      "suggestion": "Используйте формат ÖNORM B 2063 (например, 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Позиция {ordinal}: описание слишком короткое ({length} симв., мин. 20)",
+      "suggestion": "Добавьте подробности в описание позиции согласно ÖNORM B 2063"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "У позиции {ordinal} отсутствует код GB/T 50500",
+      "suggestion": "Назначьте 9-значный код GB/T 50500 (например, 010101001)"
+    },
+    "valid_code": {
+      "fail": "Неверный код GB/T 50500 '{code}' — ожидается 9 или 12 цифр"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "У позиции {ordinal} отсутствует код CPWD/DSR",
+      "suggestion": "Назначьте CPWD DSR-ссылку (например, 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "Единица '{unit}' в позиции {ordinal} не соответствует стандарту IS 1200",
+      "suggestion": "Используйте стандартные единицы IS 1200: m, m2, m3, kg, nos, rm и т.п."
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "У позиции {ordinal} отсутствует номер поз. birim fiyat",
+      "suggestion": "Назначьте номер поз. Bayındırlık (например, 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Поз '{code}' не соответствует формату XX.XXX/X",
+      "suggestion": "Используйте формат: NN.NNN или NN.NNN/N (например, 04.013/1)"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "У позиции {ordinal} отсутствует код 積算",
+      "suggestion": "Назначьте код позиции 積算基準"
+    },
+    "metric_units": {
+      "fail": "Единица '{unit}' в позиции {ordinal} не является стандартной",
+      "suggestion": "Используйте стандартные метрические единицы: m, m2, m3, kg, t, 式 и т.п."
+    }
+  }
+}

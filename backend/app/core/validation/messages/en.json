@@ -1,0 +1,209 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Position {ordinal} must not have zero or missing quantity",
+      "suggestion": "Set a quantity greater than 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Position {ordinal} should have a unit rate assigned",
+      "suggestion": "Assign a rate from the cost database"
+    },
+    "position_has_description": {
+      "fail": "Position {ordinal} cannot have an empty description"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Duplicate ordinal '{ordinal}' found in {count} positions"
+    },
+    "unit_rate_in_range": {
+      "fail": "Position {ordinal}: rate {rate} is >{threshold} (5x median)",
+      "suggestion": "Verify this unit rate — it's unusually high"
+    },
+    "negative_values": {
+      "fail": "Position {ordinal} has negative {details}",
+      "suggestion": "Correct negative values — use positive numbers"
+    },
+    "unrealistic_rate": {
+      "fail": "Position {ordinal}: {details}",
+      "suggestion": "Verify this value — it seems unrealistically high"
+    },
+    "total_mismatch": {
+      "fail": "Position {ordinal}: computed {computed} != stored {stored} (diff={diff})",
+      "suggestion": "Recalculate total = quantity × unit_rate"
+    },
+    "empty_unit": {
+      "fail": "Position {ordinal} has empty or missing unit",
+      "suggestion": "Assign a measurement unit (m, m2, m3, kg, pcs, lsum, etc.)"
+    },
+    "section_without_items": {
+      "fail": "Section {ordinal} ({title}) has no child items",
+      "suggestion": "Add positions under this section or remove the empty section"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Position {ordinal}: unit rate {rate}/{unit} exceeds benchmark threshold {threshold}/{unit} — potentially unrealistic",
+      "suggestion": "Verify this rate — typical rates for {unit} should be below {threshold}. Check for unit or decimal errors."
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} of {total_count} positions ({percent}) use lump sum — exceeds {threshold} threshold",
+      "suggestion": "Break down lump sum positions into measured quantities (m, m2, m3, kg, pcs) for better estimation accuracy"
+    },
+    "cost_concentration": {
+      "fail": "Position {ordinal} accounts for {share} of total BOQ cost ({value} of {grand_total}) — exceeds {threshold} threshold",
+      "suggestion": "Break this position into smaller items or verify the cost — a single position should not dominate the estimate"
+    },
+    "currency_consistency": {
+      "fail": "Mixed currencies found: {currencies}",
+      "suggestion": "Use a single currency throughout the BOQ"
+    },
+    "measurement_consistency": {
+      "fail": "BOQ mixes metric and imperial units — use one system consistently",
+      "suggestion": "Convert all quantities to either metric or imperial units"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Position {ordinal} missing DIN 276 KG",
+      "suggestion": "Assign a 3-digit DIN 276 Kostengruppe (e.g., 330 for walls)"
+    },
+    "valid_cost_group": {
+      "fail": "Invalid DIN 276 code '{code}' in position {ordinal}"
+    },
+    "hierarchy": {
+      "fail": "Position {ordinal}: KG {child} is not under parent KG {parent} (expected prefix '{prefix}')",
+      "suggestion": "Move position to correct parent or update KG code to match parent hierarchy ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "KG group {group} — {group_name} is missing from BOQ",
+      "suggestion": "Add positions for KG {group} ({group_name}) to ensure complete coverage"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Ordinal '{ordinal}' doesn't match GAEB format XX.XX.XXXX",
+      "suggestion": "Use format like 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Position {ordinal}: leaf position has no parent section — GAEB LV hierarchy requires a Leistungsgruppe parent",
+      "suggestion": "Assign this position to a parent section (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "fail": "Position {ordinal}: unit_rate {rate} must be > 0 for non-lump-sum positions (unit='{unit}')",
+      "suggestion": "Provide a positive Einheitspreis or mark the position as lump sum (unit='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "Top-level section '{ordinal}' has no GAEB Leistungsbereich code (expected 3-digit trade code, e.g. '012')",
+      "suggestion": "Add a 3-digit trade code (Leistungsbereich) to the section — e.g. '012' for Erdarbeiten, '013' for Mauerarbeiten"
+    },
+    "quantity_decimals": {
+      "fail": "Position {ordinal}: quantity {quantity} has {decimals} decimal places — GAEB X83 convention limits to 3",
+      "suggestion": "Round the quantity to at most 3 decimal places per GAEB X83"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Position {ordinal} missing NRM element code",
+      "suggestion": "Assign an NRM 1/2 element code (e.g., 2.6.1 for external walls)"
+    },
+    "valid_element": {
+      "fail": "Invalid NRM code '{code}' in position {ordinal}"
+    },
+    "completeness": {
+      "fail": "NRM group {group} — {group_name} missing from BOQ",
+      "suggestion": "Add positions for NRM group {group} ({group_name})"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Position {ordinal} missing MasterFormat code",
+      "suggestion": "Assign a MasterFormat code (e.g., 03 30 00 for Cast-in-Place Concrete)"
+    },
+    "valid_division": {
+      "fail": "Invalid MasterFormat code '{code}' in position {ordinal}",
+      "suggestion": "Use 6-digit MasterFormat format: XX XX XX (e.g., 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Division {division} — {division_name} missing from BOQ",
+      "suggestion": "Add positions for Division {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Position {ordinal} missing SINAPI code",
+      "suggestion": "Assign a SINAPI composition code (e.g., 87878 for concrete C30)"
+    },
+    "valid_code": {
+      "fail": "Invalid SINAPI code '{code}' in position {ordinal}"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Position {ordinal} missing ГЭСН/ФЕР code",
+      "suggestion": "Assign a ГЭСН code (e.g., 06-01-001-01 for concrete)"
+    },
+    "valid_code": {
+      "fail": "ГЭСН code '{code}' doesn't match format XX-XX-XXX-XX",
+      "suggestion": "Use format: NN-NN-NNN-NN (e.g., 06-01-001-01)"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Position {ordinal} not assigned to any Lot technique",
+      "suggestion": "Assign a Lot technique (e.g., Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Only {priced}/{total} positions ({percent}) have pricing — below 80% threshold",
+      "suggestion": "Complete pricing for all positions before DPGF submission"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Ordinal '{ordinal}' doesn't match ÖNORM format XX.XX.XXXXA",
+      "suggestion": "Use ÖNORM B 2063 format (e.g., 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Position {ordinal}: description too short ({length} chars, min 20)",
+      "suggestion": "Add more detail to the position description per ÖNORM B 2063"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Position {ordinal} missing GB/T 50500 code",
+      "suggestion": "Assign a 9-digit GB/T 50500 code (e.g., 010101001)"
+    },
+    "valid_code": {
+      "fail": "Invalid GB/T 50500 code '{code}' — expected 9 or 12 digits"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Position {ordinal} missing CPWD/DSR code",
+      "suggestion": "Assign a CPWD DSR item reference (e.g., 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "Unit '{unit}' in position {ordinal} not standard IS 1200",
+      "suggestion": "Use standard IS 1200 units: m, m2, m3, kg, nos, rm, etc."
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Position {ordinal} missing birim fiyat poz number",
+      "suggestion": "Assign a Bayındırlık poz number (e.g., 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Poz '{code}' doesn't match format XX.XXX/X",
+      "suggestion": "Use format: NN.NNN or NN.NNN/N (e.g., 04.013/1)"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Position {ordinal} missing 積算 code",
+      "suggestion": "Assign a 積算基準 item code"
+    },
+    "metric_units": {
+      "fail": "Unit '{unit}' in position {ordinal} not standard",
+      "suggestion": "Use standard metric units: m, m2, m3, kg, t, 式, etc."
+    }
+  }
+}

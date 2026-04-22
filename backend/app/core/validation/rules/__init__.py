@@ -2,9 +2,22 @@
 
 Registers all standard rule sets that ship with OpenEstimate.
 Modules can register additional rules via the rule_registry.
+
+Every user-facing ``message`` and ``suggestion`` is resolved through
+:mod:`app.core.validation.messages` so that the 20 built-in locales (and
+any third-party translations) can render validation feedback without
+a single hardcoded string leaking through.
+
+The translator reads the caller's locale from
+``ValidationContext.metadata["locale"]`` (defaulting to English). Callers
+that don't supply a locale behave identically to the pre-i18n code path.
 """
 
+from __future__ import annotations
+
 import logging
+import re
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from app.core.validation.engine import (
@@ -15,8 +28,52 @@ from app.core.validation.engine import (
     ValidationRule,
     rule_registry,
 )
+from app.core.validation.messages import DEFAULT_LOCALE, translate
 
 logger = logging.getLogger(__name__)
+
+
+# ── Helpers ─────────────────────────────────────────────────────────────────
+
+
+def _get_positions(context: ValidationContext) -> list[dict[str, Any]]:
+    """Extract positions list from context data (handles different data shapes)."""
+    data = context.data
+    if isinstance(data, dict):
+        return data.get("positions", [])
+    if isinstance(data, list):
+        return data
+    return []
+
+
+def _get_locale(context: ValidationContext) -> str:
+    """Pull the active locale from the validation context.
+
+    The engine passes caller-supplied ``metadata`` straight into
+    :class:`ValidationContext`; rules look up ``metadata["locale"]`` so
+    that i18n threading is a single-line change at the call site
+    (``engine.validate(..., metadata={"locale": "de"})``).
+    """
+    meta = getattr(context, "metadata", None) or {}
+    locale = meta.get("locale") if isinstance(meta, dict) else None
+    if isinstance(locale, str) and locale:
+        return locale
+    return DEFAULT_LOCALE
+
+
+def _ok(locale: str) -> str:
+    """Shared "OK" string — every rule that emits passing results uses this."""
+    return translate("common.ok", locale=locale)
+
+
+def _fmt_decimal(value: float, places: int = 2) -> str:
+    """Format a float to a fixed number of decimals without locale noise."""
+    return f"{value:,.{places}f}"
+
+
+def _fmt_percent(value: float) -> str:
+    """Format a ratio (0.0-1.0) as a percentage string."""
+    return f"{value:.0%}"
 
 
 # ── BOQ Quality Rules (Universal) ──────────────────────────────────────────
@@ -31,10 +88,24 @@ class PositionHasQuantity(ValidationRule):
     description = "Every BOQ position must have a non-zero quantity"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             qty = pos.get("quantity", 0)
             passed = qty is not None and float(qty) > 0
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "boq_quality.position_has_quantity.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "boq_quality.position_has_quantity.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -42,9 +113,9 @@ class PositionHasQuantity(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} must not have zero or missing quantity",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Set a quantity greater than 0" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -59,10 +130,24 @@ class PositionHasUnitRate(ValidationRule):
     description = "Every BOQ position should have a unit rate assigned"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             rate = pos.get("unit_rate", 0)
             passed = rate is not None and float(rate) > 0
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "boq_quality.position_has_unit_rate.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "boq_quality.position_has_unit_rate.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -70,9 +155,9 @@ class PositionHasUnitRate(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} should have a unit rate assigned",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign a rate from the cost database" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -87,10 +172,20 @@ class PositionHasDescription(ValidationRule):
     description = "Every BOQ position must have a description"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             desc = (pos.get("description") or "").strip()
             passed = len(desc) >= 3
+            message = (
+                _ok(locale)
+                if passed
+                else translate(
+                    "boq_quality.position_has_description.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+            )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -98,7 +193,7 @@ class PositionHasDescription(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} cannot have an empty description",
+                    message=message,
                     element_ref=pos.get("id"),
                 )
             )
@@ -114,6 +209,7 @@ class NoDuplicateOrdinals(ValidationRule):
     description = "BOQ positions must have unique ordinal numbers"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         ordinals: dict[str, list[str]] = {}
         for pos in positions:
@@ -124,6 +220,16 @@ class NoDuplicateOrdinals(ValidationRule):
         results: list[RuleResult] = []
         for ordinal, ids in ordinals.items():
             passed = len(ids) == 1
+            message = (
+                _ok(locale)
+                if passed
+                else translate(
+                    "boq_quality.no_duplicate_ordinals.fail",
+                    locale=locale,
+                    ordinal=ordinal,
+                    count=len(ids),
+                )
+            )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -131,7 +237,7 @@ class NoDuplicateOrdinals(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Duplicate ordinal '{ordinal}' found in {len(ids)} positions",
+                    message=message,
                     element_ref=ids[0] if len(ids) == 1 else None,
                     details={"duplicate_ids": ids} if not passed else {},
                 )
@@ -148,6 +254,7 @@ class UnitRateInRange(ValidationRule):
     description = "Flags unit rates that deviate significantly from median"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         rates = [float(p.get("unit_rate", 0)) for p in positions if p.get("unit_rate")]
         if len(rates) < 3:
@@ -163,6 +270,21 @@ class UnitRateInRange(ValidationRule):
             if rate <= 0:
                 continue
             passed = rate <= threshold
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "boq_quality.unit_rate_in_range.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                    rate=_fmt_decimal(rate),
+                    threshold=_fmt_decimal(threshold),
+                )
+                suggestion = translate(
+                    "boq_quality.unit_rate_in_range.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -170,12 +292,10 @@ class UnitRateInRange(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK"
-                    if passed
-                    else (f"Position {pos.get('ordinal', '?')}: rate {rate:.2f} is >{threshold:.2f} (5x median)"),
+                    message=message,
                     element_ref=pos.get("id"),
                     details={"rate": rate, "median": median, "threshold": threshold},
-                    suggestion="Verify this unit rate — it's unusually high" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -193,10 +313,24 @@ class DIN276CostGroupRequired(ValidationRule):
     description = "Every BOQ position must have a DIN 276 cost group (Kostengruppe)"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             kg = (pos.get("classification") or {}).get("din276", "")
             passed = bool(kg) and len(str(kg)) >= 3
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "din276.cost_group_required.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "din276.cost_group_required.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -204,9 +338,9 @@ class DIN276CostGroupRequired(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing DIN 276 KG",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign a 3-digit DIN 276 Kostengruppe (e.g., 330 for walls)" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -224,12 +358,23 @@ class DIN276ValidCostGroup(ValidationRule):
     VALID_TOP_GROUPS = {"1", "2", "3", "4", "5", "6", "7"}
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             kg = str((pos.get("classification") or {}).get("din276", ""))
             if not kg:
                 continue  # Handled by cost_group_required
             passed = len(kg) == 3 and kg.isdigit() and kg[0] in self.VALID_TOP_GROUPS
+            message = (
+                _ok(locale)
+                if passed
+                else translate(
+                    "din276.valid_cost_group.fail",
+                    locale=locale,
+                    code=kg,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+            )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -237,7 +382,7 @@ class DIN276ValidCostGroup(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Invalid DIN 276 code '{kg}' in position {pos.get('ordinal', '?')}",
+                    message=message,
                     element_ref=pos.get("id"),
                     details={"given_code": kg},
                 )
@@ -256,16 +401,29 @@ class GAEBOrdinalFormat(ValidationRule):
     category = RuleCategory.COMPLIANCE
     description = "Ordinal numbers should follow GAEB LV structure (e.g., 01.02.0030)"
 
-    async def validate(self, context: ValidationContext) -> list[RuleResult]:
-        import re
+    _PATTERN = re.compile(r"^\d{2}\.\d{2}\.\d{4}$")  # XX.XX.XXXX
 
-        pattern = re.compile(r"^\d{2}\.\d{2}\.\d{4}$")  # XX.XX.XXXX
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             ordinal = pos.get("ordinal", "")
             if not ordinal:
                 continue
-            passed = bool(pattern.match(ordinal))
+            passed = bool(self._PATTERN.match(ordinal))
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "gaeb.ordinal_format.fail",
+                    locale=locale,
+                    ordinal=ordinal,
+                )
+                suggestion = translate(
+                    "gaeb.ordinal_format.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -273,12 +431,318 @@ class GAEBOrdinalFormat(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Ordinal '{ordinal}' doesn't match GAEB format XX.XX.XXXX",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Use format like 01.02.0030" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
+
+
+class GAEBLVStructure(ValidationRule):
+    """Flags leaf positions missing a ``parent_id``.
+
+    GAEB Leistungsverzeichnis (LV) files are strictly hierarchical:
+
+        OZ-Stamm (trade) → Leistungsgruppe → Leistungsposition
+
+    A leaf position without a parent is almost always the sign of a
+    broken import or an incomplete manually-built LV. The rule skips
+    positions that are themselves sections (they are allowed to sit at
+    the top of the tree) and positions whose own id appears as a parent
+    elsewhere in the LV (i.e. intermediate-level sections).
+    """
+
+    rule_id = "gaeb.lv_structure"
+    name = "GAEB LV Structure"
+    standard = "gaeb"
+    severity = Severity.WARNING
+    category = RuleCategory.STRUCTURE
+    description = (
+        "Flags leaf positions with no parent_id — GAEB LV hierarchy requires "
+        "every Leistungsposition to live under a Leistungsgruppe."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        positions = _get_positions(context)
+        if not positions:
+            return []
+
+        parent_ids: set[str] = {
+            str(p.get("parent_id")) for p in positions if p.get("parent_id") is not None
+        }
+
+        results: list[RuleResult] = []
+        for pos in positions:
+            pos_type = str(pos.get("type") or "").lower()
+            if pos_type == "section":
+                continue  # Top-level sections legitimately have no parent
+            pos_id = str(pos.get("id") or "")
+            # Intermediate nodes (those that parent something) are also fine
+            if pos_id and pos_id in parent_ids:
+                continue
+            parent_id = pos.get("parent_id")
+            passed = parent_id is not None and str(parent_id) != ""
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "gaeb.lv_structure.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "gaeb.lv_structure.suggestion",
+                    locale=locale,
+                )
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=pos.get("id"),
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
+class GAEBEinheitspreisSanity(ValidationRule):
+    """Flags zero/negative Einheitspreis on non-lump-sum positions.
+
+    GAEB X83 treats an Einheitspreis of 0 as a bid-withdrawal signal.
+    Importing such a position silently is almost always a mistake — the
+    rule forces reviewers to confirm whether they meant a zero-priced
+    lump sum (valid) or a missing rate (invalid).
+    """
+
+    rule_id = "gaeb.einheitspreis_sanity"
+    name = "GAEB Einheitspreis Sanity"
+    standard = "gaeb"
+    severity = Severity.ERROR
+    category = RuleCategory.QUALITY
+    description = (
+        "Einheitspreis must be > 0 for every non-lump-sum position. "
+        "Zero or negative values would break GAEB X83 Angebotsabgabe."
+    )
+
+    LUMP_SUM_UNITS = {"lsum", "ls", "psch", "pausch", "pauschal"}
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            pos_type = str(pos.get("type") or "").lower()
+            if pos_type == "section":
+                continue
+            unit = str(pos.get("unit") or "").strip().lower()
+            if unit in self.LUMP_SUM_UNITS:
+                continue  # Lump-sum positions are allowed to have arbitrary pricing shape
+            rate = pos.get("unit_rate")
+            if rate is None:
+                # Missing rate is covered by PositionHasUnitRate; skip to keep signals orthogonal
+                continue
+            try:
+                rate_val = float(rate)
+            except (TypeError, ValueError):
+                continue
+            passed = rate_val > 0
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "gaeb.einheitspreis_sanity.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                    rate=_fmt_decimal(rate_val),
+                    unit=unit or "-",
+                )
+                suggestion = translate(
+                    "gaeb.einheitspreis_sanity.suggestion",
+                    locale=locale,
+                )
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=pos.get("id"),
+                    details={"unit_rate": rate_val, "unit": unit},
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
+class GAEBTradeSectionCode(ValidationRule):
+    """Flags top-level sections missing a GAEB Leistungsbereich (trade) code.
+
+    A well-formed GAEB LV organises work into Leistungsbereiche, each
+    identified by a 3-digit code (e.g. ``012`` Erdarbeiten, ``013``
+    Mauerarbeiten per StLB-Bau). The rule accepts the code either on
+    ``classification.gaeb_lb`` or as the leading digits of the section's
+    ordinal (``012.xx...``).
+    """
+
+    rule_id = "gaeb.trade_section_code"
+    name = "GAEB Trade Section Code"
+    standard = "gaeb"
+    severity = Severity.WARNING
+    category = RuleCategory.STRUCTURE
+    description = (
+        "Top-level sections should carry a 3-digit GAEB Leistungsbereich "
+        "code so imports/exports preserve the trade breakdown."
+    )
+
+    _LB_PATTERN = re.compile(r"^\d{3}(\..*)?$")
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        positions = _get_positions(context)
+        results: list[RuleResult] = []
+        for pos in positions:
+            pos_type = str(pos.get("type") or "").lower()
+            if pos_type != "section":
+                continue
+            if pos.get("parent_id"):
+                # Only top-level sections need the trade code.
+                continue
+            classification = pos.get("classification") or {}
+            lb_code = str(classification.get("gaeb_lb") or "").strip()
+            ordinal = str(pos.get("ordinal") or "").strip()
+            has_valid_lb = bool(lb_code) and bool(re.fullmatch(r"\d{3}", lb_code))
+            has_valid_ordinal = bool(self._LB_PATTERN.match(ordinal))
+            passed = has_valid_lb or has_valid_ordinal
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "gaeb.trade_section_code.fail",
+                    locale=locale,
+                    ordinal=ordinal or "?",
+                )
+                suggestion = translate(
+                    "gaeb.trade_section_code.suggestion",
+                    locale=locale,
+                )
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=pos.get("id"),
+                    details={"gaeb_lb": lb_code, "ordinal": ordinal},
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
+class GAEBQuantityDecimals(ValidationRule):
+    """Flags quantities with more than 3 decimal places (GAEB X83 convention).
+
+    GAEB X83 specifies that quantity values are transported with up to
+    three decimals. More precision than that either gets silently
+    truncated by downstream tools or triggers schema validation errors.
+    The rule warns so users round explicitly instead of relying on
+    implementation-specific truncation.
+    """
+
+    rule_id = "gaeb.quantity_decimals"
+    name = "GAEB Quantity Decimals"
+    standard = "gaeb"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = (
+        "Quantities should be rounded to at most 3 decimal places for GAEB X83 exports."
+    )
+
+    MAX_DECIMALS = 3
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            qty = pos.get("quantity")
+            if qty is None:
+                continue
+            decimals = _count_decimal_places(qty)
+            if decimals is None:
+                continue  # Non-numeric payload; skip rather than falsely flag
+            passed = decimals <= self.MAX_DECIMALS
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "gaeb.quantity_decimals.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                    quantity=qty,
+                    decimals=decimals,
+                )
+                suggestion = translate(
+                    "gaeb.quantity_decimals.suggestion",
+                    locale=locale,
+                )
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=pos.get("id"),
+                    details={"quantity": str(qty), "decimals": decimals},
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
+def _count_decimal_places(value: Any) -> int | None:
+    """Count trailing decimal places in ``value``.
+
+    Uses :class:`Decimal` for an exact answer when possible so that
+    float artefacts like ``0.1 + 0.2 == 0.30000000000000004`` don't
+    trigger false positives: we round-trip via ``str(Decimal(...))`` on
+    floats to remove IEEE-754 noise.
+    """
+    if isinstance(value, bool):
+        return 0
+    if isinstance(value, int):
+        return 0
+    try:
+        if isinstance(value, float):
+            dec = Decimal(str(value))
+        elif isinstance(value, Decimal):
+            dec = value
+        elif isinstance(value, str):
+            dec = Decimal(value.strip())
+        else:
+            dec = Decimal(str(value))
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+    normalized = dec.normalize()
+    # `normalize` may yield an exponent like 1E+2 for large integers; treat those as 0 decimals
+    exponent = normalized.as_tuple().exponent
+    if not isinstance(exponent, int) or exponent >= 0:
+        return 0
+    return -exponent
 
 
 # ── Additional BOQ Quality Rules ──────────────────────────────────────────
@@ -293,6 +757,7 @@ class NegativeValues(ValidationRule):
     description = "Positions must not have negative quantity or unit_rate"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             qty = pos.get("quantity")
@@ -300,15 +765,25 @@ class NegativeValues(ValidationRule):
             qty_val = float(qty) if qty is not None else 0
             rate_val = float(rate) if rate is not None else 0
             passed = qty_val >= 0 and rate_val >= 0
-            if not passed:
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
                 parts: list[str] = []
                 if qty_val < 0:
                     parts.append(f"quantity={qty_val}")
                 if rate_val < 0:
                     parts.append(f"unit_rate={rate_val}")
-                msg = f"Position {pos.get('ordinal', '?')} has negative {', '.join(parts)}"
-            else:
-                msg = "OK"
+                message = translate(
+                    "boq_quality.negative_values.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                    details=", ".join(parts),
+                )
+                suggestion = translate(
+                    "boq_quality.negative_values.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -316,9 +791,9 @@ class NegativeValues(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message=msg,
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Correct negative values — use positive numbers" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -336,6 +811,7 @@ class UnrealisticRate(ValidationRule):
     TOTAL_THRESHOLD = 10_000_000
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             rate = float(pos.get("unit_rate", 0)) if pos.get("unit_rate") is not None else 0
@@ -343,15 +819,29 @@ class UnrealisticRate(ValidationRule):
             rate_ok = rate <= self.RATE_THRESHOLD
             total_ok = total <= self.TOTAL_THRESHOLD
             passed = rate_ok and total_ok
-            if not passed:
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
                 parts: list[str] = []
                 if not rate_ok:
-                    parts.append(f"unit_rate {rate:,.2f} > {self.RATE_THRESHOLD:,}")
+                    parts.append(
+                        f"unit_rate {_fmt_decimal(rate)} > {self.RATE_THRESHOLD:,}"
+                    )
                 if not total_ok:
-                    parts.append(f"total {total:,.2f} > {self.TOTAL_THRESHOLD:,}")
-                msg = f"Position {pos.get('ordinal', '?')}: {'; '.join(parts)}"
-            else:
-                msg = "OK"
+                    parts.append(
+                        f"total {_fmt_decimal(total)} > {self.TOTAL_THRESHOLD:,}"
+                    )
+                message = translate(
+                    "boq_quality.unrealistic_rate.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                    details="; ".join(parts),
+                )
+                suggestion = translate(
+                    "boq_quality.unrealistic_rate.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -359,10 +849,10 @@ class UnrealisticRate(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message=msg,
+                    message=message,
                     element_ref=pos.get("id"),
                     details={"unit_rate": rate, "total": total},
-                    suggestion="Verify this value — it seems unrealistically high" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -379,6 +869,7 @@ class TotalMismatch(ValidationRule):
     TOLERANCE = 0.01
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             qty = pos.get("quantity")
@@ -393,6 +884,22 @@ class TotalMismatch(ValidationRule):
             computed = qty_val * rate_val
             diff = abs(computed - stored_val)
             passed = diff <= self.TOLERANCE
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "boq_quality.total_mismatch.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                    computed=_fmt_decimal(computed),
+                    stored=_fmt_decimal(stored_val),
+                    diff=_fmt_decimal(diff),
+                )
+                suggestion = translate(
+                    "boq_quality.total_mismatch.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -400,13 +907,7 @@ class TotalMismatch(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK"
-                    if passed
-                    else (
-                        f"Position {pos.get('ordinal', '?')}: "
-                        f"computed {computed:.2f} != stored {stored_val:.2f} "
-                        f"(diff={diff:.2f})"
-                    ),
+                    message=message,
                     element_ref=pos.get("id"),
                     details={
                         "quantity": qty_val,
@@ -415,7 +916,7 @@ class TotalMismatch(ValidationRule):
                         "stored_total": stored_val,
                         "difference": diff,
                     },
-                    suggestion="Recalculate total = quantity × unit_rate" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -430,10 +931,24 @@ class EmptyUnit(ValidationRule):
     description = "Every BOQ position must have a unit field (e.g., m, m2, m3, kg, pcs)"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             unit = (pos.get("unit") or "").strip()
             passed = len(unit) > 0
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "boq_quality.empty_unit.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "boq_quality.empty_unit.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -441,9 +956,9 @@ class EmptyUnit(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} has empty or missing unit",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign a measurement unit (m, m2, m3, kg, pcs, lsum, etc.)" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -458,6 +973,7 @@ class SectionWithoutItems(ValidationRule):
     description = "Section-type positions should contain at least one child position"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         # Build a set of all parent IDs
         parent_ids: set[str] = set()
@@ -473,6 +989,20 @@ class SectionWithoutItems(ValidationRule):
                 continue
             pos_id = pos.get("id", "")
             has_children = pos_id in parent_ids
+            if has_children:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "boq_quality.section_without_items.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                    title=pos.get("description", "untitled"),
+                )
+                suggestion = translate(
+                    "boq_quality.section_without_items.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -480,15 +1010,9 @@ class SectionWithoutItems(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=has_children,
-                    message="OK"
-                    if has_children
-                    else (
-                        f"Section {pos.get('ordinal', '?')} ({pos.get('description', 'untitled')}) has no child items"
-                    ),
+                    message=message,
                     element_ref=pos_id,
-                    suggestion="Add positions under this section or remove the empty section"
-                    if not has_children
-                    else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -515,6 +1039,7 @@ class RateVsBenchmark(ValidationRule):
     }
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             rate = pos.get("unit_rate")
@@ -528,6 +1053,24 @@ class RateVsBenchmark(ValidationRule):
             if threshold is None:
                 continue
             passed = rate_val <= threshold
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "boq_quality.rate_vs_benchmark.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                    rate=_fmt_decimal(rate_val),
+                    unit=unit,
+                    threshold=_fmt_decimal(threshold),
+                )
+                suggestion = translate(
+                    "boq_quality.rate_vs_benchmark.suggestion",
+                    locale=locale,
+                    unit=unit,
+                    threshold=_fmt_decimal(threshold),
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -535,25 +1078,14 @@ class RateVsBenchmark(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK"
-                    if passed
-                    else (
-                        f"Position {pos.get('ordinal', '?')}: unit rate "
-                        f"{rate_val:,.2f}/{unit} exceeds benchmark threshold "
-                        f"{threshold:,.2f}/{unit} — potentially unrealistic"
-                    ),
+                    message=message,
                     element_ref=pos.get("id"),
                     details={
                         "unit_rate": rate_val,
                         "unit": unit,
                         "benchmark_threshold": threshold,
                     },
-                    suggestion=(
-                        f"Verify this rate — typical rates for {unit} should be "
-                        f"below {threshold:,.2f}. Check for unit or decimal errors."
-                    )
-                    if not passed
-                    else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -572,6 +1104,7 @@ class LumpSumRatio(ValidationRule):
     THRESHOLD = 0.30  # 30%
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         if not positions:
             return []
@@ -581,6 +1114,23 @@ class LumpSumRatio(ValidationRule):
         ratio = lsum_count / total_count
         passed = ratio <= self.THRESHOLD
 
+        if passed:
+            message = _ok(locale)
+            suggestion = None
+        else:
+            message = translate(
+                "boq_quality.lump_sum_ratio.fail",
+                locale=locale,
+                lsum_count=lsum_count,
+                total_count=total_count,
+                percent=_fmt_percent(ratio),
+                threshold=_fmt_percent(self.THRESHOLD),
+            )
+            suggestion = translate(
+                "boq_quality.lump_sum_ratio.suggestion",
+                locale=locale,
+            )
+
         return [
             RuleResult(
                 rule_id=self.rule_id,
@@ -588,24 +1138,14 @@ class LumpSumRatio(ValidationRule):
                 severity=self.severity,
                 category=self.category,
                 passed=passed,
-                message="OK"
-                if passed
-                else (
-                    f"{lsum_count} of {total_count} positions "
-                    f"({ratio:.0%}) use lump sum — exceeds {self.THRESHOLD:.0%} threshold"
-                ),
+                message=message,
                 details={
                     "lsum_count": lsum_count,
                     "total_count": total_count,
                     "ratio": round(ratio, 3),
                     "threshold": self.THRESHOLD,
                 },
-                suggestion=(
-                    "Break down lump sum positions into measured quantities "
-                    "(m, m2, m3, kg, pcs) for better estimation accuracy"
-                )
-                if not passed
-                else None,
+                suggestion=suggestion,
             )
         ]
 
@@ -624,6 +1164,7 @@ class CostConcentration(ValidationRule):
     THRESHOLD = 0.40  # 40%
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         if not positions:
             return []
@@ -662,10 +1203,14 @@ class CostConcentration(ValidationRule):
                         severity=self.severity,
                         category=self.category,
                         passed=False,
-                        message=(
-                            f"Position {pos.get('ordinal', '?')} accounts for "
-                            f"{share:.0%} of total BOQ cost ({val:,.2f} of "
-                            f"{grand_total:,.2f}) — exceeds {self.THRESHOLD:.0%} threshold"
+                        message=translate(
+                            "boq_quality.cost_concentration.fail",
+                            locale=locale,
+                            ordinal=pos.get("ordinal", "?"),
+                            share=_fmt_percent(share),
+                            value=_fmt_decimal(val),
+                            grand_total=_fmt_decimal(grand_total),
+                            threshold=_fmt_percent(self.THRESHOLD),
                         ),
                         element_ref=pos.get("id"),
                         details={
@@ -674,10 +1219,9 @@ class CostConcentration(ValidationRule):
                             "share": round(share, 3),
                             "threshold": self.THRESHOLD,
                         },
-                        suggestion=(
-                            "Break this position into smaller items or verify "
-                            "the cost — a single position should not dominate "
-                            "the estimate"
+                        suggestion=translate(
+                            "boq_quality.cost_concentration.suggestion",
+                            locale=locale,
                         ),
                     )
                 )
@@ -691,7 +1235,7 @@ class CostConcentration(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=True,
-                    message="OK",
+                    message=_ok(locale),
                     details={"grand_total": grand_total, "threshold": self.THRESHOLD},
                 )
             )
@@ -711,6 +1255,7 @@ class DIN276Hierarchy(ValidationRule):
     description = "Child KG code should be nested under the correct parent (e.g., 331 under 330 under 300)"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         # Build a map from position id to its DIN 276 KG code
         id_to_kg: dict[str, str] = {}
@@ -730,24 +1275,28 @@ class DIN276Hierarchy(ValidationRule):
                 continue
             parent_kg = id_to_kg[parent_id]
             # A valid hierarchy means the child KG starts with the parent KG prefix.
-            # e.g., child "331" should start with parent "330" is wrong;
-            # but child "331" should start with parent "33" or "3" level.
-            # DIN 276 hierarchy: 3xx (top) → 3x0 (mid) → 3xx (detail)
             # The parent KG prefix (ignoring trailing zeros) should match.
-            # Simpler check: the child code must start with the same leading digit(s)
-            # as the parent code at a higher level.
             # parent=300 (3 chars) → child should start with "3"
             # parent=330 (3 chars) → child should start with "33"
-            # Determine the significant prefix of the parent
             parent_prefix = parent_kg.rstrip("0") or parent_kg[0]
             passed = kg.startswith(parent_prefix)
-            if not passed:
-                msg = (
-                    f"Position {pos.get('ordinal', '?')}: KG {kg} is not "
-                    f"under parent KG {parent_kg} (expected prefix '{parent_prefix}')"
-                )
+            if passed:
+                message = _ok(locale)
+                suggestion = None
             else:
-                msg = "OK"
+                message = translate(
+                    "din276.hierarchy.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                    child=kg,
+                    parent=parent_kg,
+                    prefix=parent_prefix,
+                )
+                suggestion = translate(
+                    "din276.hierarchy.suggestion",
+                    locale=locale,
+                    prefix=parent_prefix,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -755,15 +1304,10 @@ class DIN276Hierarchy(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message=msg,
+                    message=message,
                     element_ref=pos.get("id"),
                     details={"child_kg": kg, "parent_kg": parent_kg},
-                    suggestion=(
-                        f"Move position to correct parent or update KG code to "
-                        f"match parent hierarchy ({parent_prefix}xx)"
-                    )
-                    if not passed
-                    else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -778,8 +1322,16 @@ class DIN276Completeness(ValidationRule):
     description = "Major KG groups 300 (Building Construction) and 400 (Technical Systems) should be present"
 
     REQUIRED_GROUPS = {"300", "400"}
+    # Group names kept in English only — passed through {group_name} into
+    # the i18n template so de/ru translations embed the canonical German
+    # term in parentheses.
+    GROUP_NAMES = {
+        "300": "Building Construction (Baukonstruktionen)",
+        "400": "Technical Systems (Technische Anlagen)",
+    }
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         # Collect all top-level KG groups (first digit × 100) present in the BOQ
         present_groups: set[str] = set()
@@ -793,10 +1345,23 @@ class DIN276Completeness(ValidationRule):
         results: list[RuleResult] = []
         for group in sorted(self.REQUIRED_GROUPS):
             passed = group in present_groups
-            group_names = {
-                "300": "Building Construction (Baukonstruktionen)",
-                "400": "Technical Systems (Technische Anlagen)",
-            }
+            group_name = self.GROUP_NAMES.get(group, "")
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "din276.completeness.fail",
+                    locale=locale,
+                    group=group,
+                    group_name=group_name,
+                )
+                suggestion = translate(
+                    "din276.completeness.suggestion",
+                    locale=locale,
+                    group=group,
+                    group_name=group_name,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -804,18 +1369,12 @@ class DIN276Completeness(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK"
-                    if passed
-                    else (f"KG group {group} — {group_names.get(group, '')} is missing from BOQ"),
+                    message=message,
                     details={
                         "required_group": group,
                         "present_groups": sorted(present_groups),
                     },
-                    suggestion=(
-                        f"Add positions for KG {group} ({group_names.get(group, '')}) to ensure complete coverage"
-                    )
-                    if not passed
-                    else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -833,10 +1392,24 @@ class NRMClassificationRequired(ValidationRule):
     description = "Every BOQ position must have an NRM element code"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             nrm = (pos.get("classification") or {}).get("nrm", "")
             passed = bool(nrm) and len(str(nrm)) >= 3
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "nrm.classification_required.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "nrm.classification_required.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -844,11 +1417,9 @@ class NRMClassificationRequired(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing NRM element code",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign an NRM 1/2 element code (e.g., 2.6.1 for external walls)"
-                    if not passed
-                    else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -863,18 +1434,27 @@ class NRMValidElement(ValidationRule):
     description = "NRM element code must match NRM 1/2 structure (e.g., 1.1, 2.6.1)"
 
     VALID_GROUPS = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"}
+    _PATTERN = re.compile(r"^\d{1,2}(\.\d{1,2}){0,3}$")
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
-        import re
-
-        pattern = re.compile(r"^\d{1,2}(\.\d{1,2}){0,3}$")
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             nrm = str((pos.get("classification") or {}).get("nrm", ""))
             if not nrm:
                 continue
             top = nrm.split(".")[0]
-            passed = bool(pattern.match(nrm)) and top in self.VALID_GROUPS
+            passed = bool(self._PATTERN.match(nrm)) and top in self.VALID_GROUPS
+            message = (
+                _ok(locale)
+                if passed
+                else translate(
+                    "nrm.valid_element.fail",
+                    locale=locale,
+                    code=nrm,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+            )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -882,7 +1462,7 @@ class NRMValidElement(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Invalid NRM code '{nrm}' in position {pos.get('ordinal', '?')}",
+                    message=message,
                     element_ref=pos.get("id"),
                     details={"given_code": nrm},
                 )
@@ -899,8 +1479,14 @@ class NRMCompleteness(ValidationRule):
     description = "Major NRM groups (Substructure, Superstructure, Services) should be present"
 
     REQUIRED_GROUPS = {"1", "2", "5"}  # 1=Substructure, 2=Superstructure, 5=Services
+    GROUP_NAMES = {
+        "1": "Substructure",
+        "2": "Superstructure",
+        "5": "Services",
+    }
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         present_groups: set[str] = set()
         for pos in positions:
@@ -908,14 +1494,26 @@ class NRMCompleteness(ValidationRule):
             if nrm:
                 present_groups.add(nrm.split(".")[0])
 
-        group_names = {
-            "1": "Substructure",
-            "2": "Superstructure",
-            "5": "Services",
-        }
         results: list[RuleResult] = []
         for group in sorted(self.REQUIRED_GROUPS):
             passed = group in present_groups
+            group_name = self.GROUP_NAMES.get(group, "")
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "nrm.completeness.fail",
+                    locale=locale,
+                    group=group,
+                    group_name=group_name,
+                )
+                suggestion = translate(
+                    "nrm.completeness.suggestion",
+                    locale=locale,
+                    group=group,
+                    group_name=group_name,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -923,11 +1521,9 @@ class NRMCompleteness(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"NRM group {group} — {group_names.get(group, '')} missing from BOQ",
+                    message=message,
                     details={"required_group": group, "present_groups": sorted(present_groups)},
-                    suggestion=f"Add positions for NRM group {group} ({group_names.get(group, '')})"
-                    if not passed
-                    else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -945,10 +1541,24 @@ class MasterFormatClassificationRequired(ValidationRule):
     description = "Every BOQ position must have a CSI MasterFormat division code"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             mf = (pos.get("classification") or {}).get("masterformat", "")
             passed = bool(mf) and len(str(mf).replace(" ", "")) >= 4
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "masterformat.classification_required.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "masterformat.classification_required.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -956,11 +1566,9 @@ class MasterFormatClassificationRequired(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing MasterFormat code",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign a MasterFormat code (e.g., 03 30 00 for Cast-in-Place Concrete)"
-                    if not passed
-                    else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -974,10 +1582,10 @@ class MasterFormatValidDivision(ValidationRule):
     category = RuleCategory.COMPLIANCE
     description = "MasterFormat code must be a valid division (00-49)"
 
-    async def validate(self, context: ValidationContext) -> list[RuleResult]:
-        import re
+    _PATTERN = re.compile(r"^\d{2}(\s?\d{2}){0,2}(\.\d{2})?$")
 
-        pattern = re.compile(r"^\d{2}(\s?\d{2}){0,2}(\.\d{2})?$")
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             mf = str((pos.get("classification") or {}).get("masterformat", ""))
@@ -985,7 +1593,21 @@ class MasterFormatValidDivision(ValidationRule):
                 continue
             div = mf[:2]
             valid_div = div.isdigit() and 0 <= int(div) <= 49
-            passed = bool(pattern.match(mf)) and valid_div
+            passed = bool(self._PATTERN.match(mf)) and valid_div
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "masterformat.valid_division.fail",
+                    locale=locale,
+                    code=mf,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "masterformat.valid_division.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -993,12 +1615,10 @@ class MasterFormatValidDivision(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK"
-                    if passed
-                    else f"Invalid MasterFormat code '{mf}' in position {pos.get('ordinal', '?')}",
+                    message=message,
                     element_ref=pos.get("id"),
                     details={"given_code": mf},
-                    suggestion="Use 6-digit MasterFormat format: XX XX XX (e.g., 03 30 00)" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1013,8 +1633,14 @@ class MasterFormatCompleteness(ValidationRule):
     description = "Core divisions (03 Concrete, 05 Metals, 26 Electrical) should be present"
 
     REQUIRED_DIVISIONS = {"03", "05", "26"}
+    DIV_NAMES = {
+        "03": "Concrete",
+        "05": "Metals",
+        "26": "Electrical",
+    }
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         present_divs: set[str] = set()
         for pos in positions:
@@ -1022,14 +1648,26 @@ class MasterFormatCompleteness(ValidationRule):
             if mf and len(mf) >= 2:
                 present_divs.add(mf[:2])
 
-        div_names = {
-            "03": "Concrete",
-            "05": "Metals",
-            "26": "Electrical",
-        }
         results: list[RuleResult] = []
         for div in sorted(self.REQUIRED_DIVISIONS):
             passed = div in present_divs
+            div_name = self.DIV_NAMES.get(div, "")
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "masterformat.completeness.fail",
+                    locale=locale,
+                    division=div,
+                    division_name=div_name,
+                )
+                suggestion = translate(
+                    "masterformat.completeness.suggestion",
+                    locale=locale,
+                    division=div,
+                    division_name=div_name,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1037,9 +1675,9 @@ class MasterFormatCompleteness(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Division {div} — {div_names.get(div, '')} missing from BOQ",
+                    message=message,
                     details={"required_div": div, "present_divs": sorted(present_divs)},
-                    suggestion=f"Add positions for Division {div} ({div_names.get(div, '')})" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1057,10 +1695,24 @@ class SINAPICodeRequired(ValidationRule):
     description = "BOQ positions should have a SINAPI composition code"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             code = (pos.get("classification") or {}).get("sinapi", "")
             passed = bool(code) and len(str(code)) >= 4
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "sinapi.code_required.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "sinapi.code_required.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1068,11 +1720,9 @@ class SINAPICodeRequired(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing SINAPI code",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign a SINAPI composition code (e.g., 87878 for concrete C30)"
-                    if not passed
-                    else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1087,12 +1737,23 @@ class SINAPIValidCode(ValidationRule):
     description = "SINAPI codes should be 5-digit numeric codes"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             code = str((pos.get("classification") or {}).get("sinapi", ""))
             if not code:
                 continue
             passed = code.isdigit() and 4 <= len(code) <= 6
+            message = (
+                _ok(locale)
+                if passed
+                else translate(
+                    "sinapi.valid_code.fail",
+                    locale=locale,
+                    code=code,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+            )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1100,7 +1761,7 @@ class SINAPIValidCode(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Invalid SINAPI code '{code}' in position {pos.get('ordinal', '?')}",
+                    message=message,
                     element_ref=pos.get("id"),
                     details={"given_code": code},
                 )
@@ -1120,10 +1781,24 @@ class GESNCodeRequired(ValidationRule):
     description = "BOQ positions should have a ГЭСН/ФЕР code"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             code = (pos.get("classification") or {}).get("gesn", "")
             passed = bool(code) and len(str(code)) >= 5
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "gesn.code_required.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "gesn.code_required.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1131,9 +1806,9 @@ class GESNCodeRequired(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing ГЭСН/ФЕР code",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign a ГЭСН code (e.g., 06-01-001-01 for concrete)" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1147,16 +1822,29 @@ class GESNValidCode(ValidationRule):
     category = RuleCategory.COMPLIANCE
     description = "ГЭСН codes should follow XX-XX-XXX-XX format"
 
-    async def validate(self, context: ValidationContext) -> list[RuleResult]:
-        import re
+    _PATTERN = re.compile(r"^\d{2}-\d{2}-\d{3}-\d{2}$")
 
-        pattern = re.compile(r"^\d{2}-\d{2}-\d{3}-\d{2}$")
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             code = str((pos.get("classification") or {}).get("gesn", ""))
             if not code:
                 continue
-            passed = bool(pattern.match(code))
+            passed = bool(self._PATTERN.match(code))
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "gesn.valid_code.fail",
+                    locale=locale,
+                    code=code,
+                )
+                suggestion = translate(
+                    "gesn.valid_code.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1164,10 +1852,10 @@ class GESNValidCode(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"ГЭСН code '{code}' doesn't match format XX-XX-XXX-XX",
+                    message=message,
                     element_ref=pos.get("id"),
                     details={"given_code": code},
-                    suggestion="Use format: NN-NN-NNN-NN (e.g., 06-01-001-01)" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1185,10 +1873,24 @@ class DPGFLotRequired(ValidationRule):
     description = "BOQ positions must be assigned to a Lot technique (trade package)"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             lot = (pos.get("classification") or {}).get("dpgf", "") or pos.get("section", "")
             passed = bool(lot)
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "dpgf.lot_required.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "dpgf.lot_required.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1196,9 +1898,9 @@ class DPGFLotRequired(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} not assigned to any Lot technique",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign a Lot technique (e.g., Lot 01 Gros Œuvre)" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1213,6 +1915,7 @@ class DPGFPricingComplete(ValidationRule):
     description = "All DPGF positions should have complete pricing (unit rate or lump sum)"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         if not positions:
             return []
@@ -1220,6 +1923,21 @@ class DPGFPricingComplete(ValidationRule):
         total = len(positions)
         ratio = priced / total if total > 0 else 0
         passed = ratio >= 0.80
+        if passed:
+            message = _ok(locale)
+            suggestion = None
+        else:
+            message = translate(
+                "dpgf.pricing_complete.fail",
+                locale=locale,
+                priced=priced,
+                total=total,
+                percent=_fmt_percent(ratio),
+            )
+            suggestion = translate(
+                "dpgf.pricing_complete.suggestion",
+                locale=locale,
+            )
         return [
             RuleResult(
                 rule_id=self.rule_id,
@@ -1227,11 +1945,9 @@ class DPGFPricingComplete(ValidationRule):
                 severity=self.severity,
                 category=self.category,
                 passed=passed,
-                message="OK"
-                if passed
-                else f"Only {priced}/{total} positions ({ratio:.0%}) have pricing — below 80% threshold",
+                message=message,
                 details={"priced": priced, "total": total, "ratio": round(ratio, 3)},
-                suggestion="Complete pricing for all positions before DPGF submission" if not passed else None,
+                suggestion=suggestion,
             )
         ]
 
@@ -1247,16 +1963,29 @@ class ONORMPositionFormat(ValidationRule):
     category = RuleCategory.COMPLIANCE
     description = "Position ordinals should follow ÖNORM B 2063 LV structure"
 
-    async def validate(self, context: ValidationContext) -> list[RuleResult]:
-        import re
+    _PATTERN = re.compile(r"^\d{2}\.\d{2}\.\d{2,4}[A-Z]?$")
 
-        pattern = re.compile(r"^\d{2}\.\d{2}\.\d{2,4}[A-Z]?$")
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             ordinal = pos.get("ordinal", "")
             if not ordinal:
                 continue
-            passed = bool(pattern.match(ordinal))
+            passed = bool(self._PATTERN.match(ordinal))
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "onorm.position_format.fail",
+                    locale=locale,
+                    ordinal=ordinal,
+                )
+                suggestion = translate(
+                    "onorm.position_format.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1264,9 +1993,9 @@ class ONORMPositionFormat(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Ordinal '{ordinal}' doesn't match ÖNORM format XX.XX.XXXXA",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Use ÖNORM B 2063 format (e.g., 01.02.01A)" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1281,10 +2010,25 @@ class ONORMDescriptionLength(ValidationRule):
     description = "ÖNORM positions should have descriptions with sufficient detail (min 20 chars)"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             desc = (pos.get("description") or "").strip()
             passed = len(desc) >= 20
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "onorm.description_length.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                    length=len(desc),
+                )
+                suggestion = translate(
+                    "onorm.description_length.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1292,11 +2036,9 @@ class ONORMDescriptionLength(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK"
-                    if passed
-                    else (f"Position {pos.get('ordinal', '?')}: description too short ({len(desc)} chars, min 20)"),
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Add more detail to the position description per ÖNORM B 2063" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1314,10 +2056,24 @@ class GBT50500CodeRequired(ValidationRule):
     description = "BOQ positions must have a GB/T 50500 item code (工程量清单编码)"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             code = (pos.get("classification") or {}).get("gbt50500", "")
             passed = bool(code) and len(str(code)) >= 6
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "gbt50500.code_required.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "gbt50500.code_required.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1325,9 +2081,9 @@ class GBT50500CodeRequired(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing GB/T 50500 code",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign a 9-digit GB/T 50500 code (e.g., 010101001)" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1342,12 +2098,22 @@ class GBT50500ValidCode(ValidationRule):
     description = "GB/T 50500 codes should be 9-digit or 12-digit numeric codes"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             code = str((pos.get("classification") or {}).get("gbt50500", ""))
             if not code:
                 continue
             passed = code.isdigit() and len(code) in (9, 12)
+            message = (
+                _ok(locale)
+                if passed
+                else translate(
+                    "gbt50500.valid_code.fail",
+                    locale=locale,
+                    code=code,
+                )
+            )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1355,7 +2121,7 @@ class GBT50500ValidCode(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Invalid GB/T 50500 code '{code}' — expected 9 or 12 digits",
+                    message=message,
                     element_ref=pos.get("id"),
                     details={"given_code": code},
                 )
@@ -1375,10 +2141,24 @@ class CPWDCodeRequired(ValidationRule):
     description = "BOQ positions should have a CPWD/DSR item reference"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             code = (pos.get("classification") or {}).get("cpwd", "")
             passed = bool(code) and len(str(code)) >= 3
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "cpwd.code_required.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "cpwd.code_required.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1386,9 +2166,9 @@ class CPWDCodeRequired(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing CPWD/DSR code",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign a CPWD DSR item reference (e.g., 4.1.1)" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1424,12 +2204,27 @@ class CPWDMeasurementUnits(ValidationRule):
     }
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             unit = (pos.get("unit") or "").strip().lower()
             if not unit:
                 continue
             passed = unit in self.VALID_UNITS
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "cpwd.measurement_units.fail",
+                    locale=locale,
+                    unit=unit,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "cpwd.measurement_units.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1437,11 +2232,9 @@ class CPWDMeasurementUnits(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK"
-                    if passed
-                    else f"Unit '{unit}' in position {pos.get('ordinal', '?')} not standard IS 1200",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Use standard IS 1200 units: m, m2, m3, kg, nos, rm, etc." if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1459,10 +2252,24 @@ class BirimFiyatCodeRequired(ValidationRule):
     description = "BOQ positions must have a Bayındırlık birim fiyat poz number"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             code = (pos.get("classification") or {}).get("birimfiyat", "")
             passed = bool(code) and len(str(code)) >= 4
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "birimfiyat.code_required.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "birimfiyat.code_required.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1470,9 +2277,9 @@ class BirimFiyatCodeRequired(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing birim fiyat poz number",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign a Bayındırlık poz number (e.g., 04.013/1)" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1486,16 +2293,29 @@ class BirimFiyatValidPoz(ValidationRule):
     category = RuleCategory.COMPLIANCE
     description = "Poz numbers should follow Bayındırlık format (XX.XXX/X)"
 
-    async def validate(self, context: ValidationContext) -> list[RuleResult]:
-        import re
+    _PATTERN = re.compile(r"^\d{2}\.\d{3}(/\d{1,2})?$")
 
-        pattern = re.compile(r"^\d{2}\.\d{3}(/\d{1,2})?$")
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             code = str((pos.get("classification") or {}).get("birimfiyat", ""))
             if not code:
                 continue
-            passed = bool(pattern.match(code))
+            passed = bool(self._PATTERN.match(code))
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "birimfiyat.valid_poz.fail",
+                    locale=locale,
+                    code=code,
+                )
+                suggestion = translate(
+                    "birimfiyat.valid_poz.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1503,10 +2323,10 @@ class BirimFiyatValidPoz(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Poz '{code}' doesn't match format XX.XXX/X",
+                    message=message,
                     element_ref=pos.get("id"),
                     details={"given_code": code},
-                    suggestion="Use format: NN.NNN or NN.NNN/N (e.g., 04.013/1)" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1524,10 +2344,24 @@ class SekisanCodeRequired(ValidationRule):
     description = "BOQ positions should have a 積算基準 item code"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             code = (pos.get("classification") or {}).get("sekisan", "")
             passed = bool(code) and len(str(code)) >= 3
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "sekisan.code_required.fail",
+                    locale=locale,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "sekisan.code_required.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1535,9 +2369,9 @@ class SekisanCodeRequired(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing 積算 code",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Assign a 積算基準 item code" if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1572,12 +2406,27 @@ class SekisanMetricUnits(ValidationRule):
     }
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_positions(context):
             unit = (pos.get("unit") or "").strip().lower()
             if not unit:
                 continue
             passed = unit in self.VALID_UNITS or unit in {u.lower() for u in self.VALID_UNITS}
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "sekisan.metric_units.fail",
+                    locale=locale,
+                    unit=unit,
+                    ordinal=pos.get("ordinal", "?"),
+                )
+                suggestion = translate(
+                    "sekisan.metric_units.suggestion",
+                    locale=locale,
+                )
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -1585,9 +2434,9 @@ class SekisanMetricUnits(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Unit '{unit}' in position {pos.get('ordinal', '?')} not standard",
+                    message=message,
                     element_ref=pos.get("id"),
-                    suggestion="Use standard metric units: m, m2, m3, kg, t, 式, etc." if not passed else None,
+                    suggestion=suggestion,
                 )
             )
         return results
@@ -1605,6 +2454,7 @@ class CurrencyConsistency(ValidationRule):
     description = "All positions in a BOQ should use the same currency"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         currencies: set[str] = set()
         for pos in positions:
@@ -1619,7 +2469,7 @@ class CurrencyConsistency(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=True,
-                    message="OK",
+                    message=_ok(locale),
                 )
             ]
         return [
@@ -1629,9 +2479,16 @@ class CurrencyConsistency(ValidationRule):
                 severity=self.severity,
                 category=self.category,
                 passed=False,
-                message=f"Mixed currencies found: {', '.join(sorted(currencies))}",
+                message=translate(
+                    "boq_quality.currency_consistency.fail",
+                    locale=locale,
+                    currencies=", ".join(sorted(currencies)),
+                ),
                 details={"currencies": sorted(currencies)},
-                suggestion="Use a single currency throughout the BOQ",
+                suggestion=translate(
+                    "boq_quality.currency_consistency.suggestion",
+                    locale=locale,
+                ),
             )
         ]
 
@@ -1648,6 +2505,7 @@ class MeasurementConsistency(ValidationRule):
     METRIC_UNITS = {"m", "m2", "m3", "mm", "cm", "km", "kg", "t", "l", "kl", "ml"}
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
         positions = _get_positions(context)
         has_metric = False
         has_imperial = False
@@ -1665,8 +2523,14 @@ class MeasurementConsistency(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=False,
-                    message="BOQ mixes metric and imperial units — use one system consistently",
-                    suggestion="Convert all quantities to either metric or imperial units",
+                    message=translate(
+                        "boq_quality.measurement_consistency.fail",
+                        locale=locale,
+                    ),
+                    suggestion=translate(
+                        "boq_quality.measurement_consistency.suggestion",
+                        locale=locale,
+                    ),
                 )
             ]
         return [
@@ -1676,22 +2540,9 @@ class MeasurementConsistency(ValidationRule):
                 severity=self.severity,
                 category=self.category,
                 passed=True,
-                message="OK",
+                message=_ok(locale),
             )
         ]
-
-
-# ── Helpers ─────────────────────────────────────────────────────────────────
-
-
-def _get_positions(context: ValidationContext) -> list[dict[str, Any]]:
-    """Extract positions list from context data (handles different data shapes)."""
-    data = context.data
-    if isinstance(data, dict):
-        return data.get("positions", [])
-    if isinstance(data, list):
-        return data
-    return []
 
 
 # ── Registration ────────────────────────────────────────────────────────────
@@ -1721,8 +2572,12 @@ def register_builtin_rules() -> None:
         (DIN276ValidCostGroup(), None),
         (DIN276Hierarchy(), None),
         (DIN276Completeness(), None),
-        # GAEB (DACH)
+        # GAEB (DACH) — slice D expansion
         (GAEBOrdinalFormat(), None),
+        (GAEBLVStructure(), None),
+        (GAEBEinheitspreisSanity(), None),
+        (GAEBTradeSectionCode(), None),
+        (GAEBQuantityDecimals(), None),
         # NRM (UK)
         (NRMClassificationRequired(), None),
         (NRMValidElement(), None),
