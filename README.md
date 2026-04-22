@@ -2,7 +2,7 @@
 
 # OpenConstructionERP
 
-**The #1 Open-Source Construction Estimation & Project Management Software**
+**Open-source ERP for construction estimation and project management**
 
 Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all in one platform.
 
@@ -532,15 +532,24 @@ One command installs everything. Opens browser at **http://localhost:8080** with
 
 ### Demo Accounts
 
-Three demo accounts are created automatically on first start:
+Three demo accounts are created automatically on first start. **Passwords are
+randomly generated per installation and printed to the container logs** on
+first boot — look for the `=== DEMO ACCOUNTS ===` banner in `docker compose
+logs backend` (or in the stdout of `make dev`). You can override them with
+environment variables before the first start.
 
-| Account | Email | Password | Role |
-|---------|-------|----------|------|
-| Admin | `demo@openestimator.io` | `DemoPass1234!` | Full access |
-| Estimator | `estimator@openestimator.io` | `DemoPass1234!` | Estimator |
-| Manager | `manager@openestimator.io` | `DemoPass1234!` | Manager |
+| Account | Email | Password source | Role |
+|---------|-------|-----------------|------|
+| Admin | `demo@openestimator.io` | `DEMO_ADMIN_PASSWORD` env var, or generated | Full access |
+| Estimator | `estimator@openestimator.io` | `DEMO_ESTIMATOR_PASSWORD` env var, or generated | Estimator |
+| Manager | `manager@openestimator.io` | `DEMO_MANAGER_PASSWORD` env var, or generated | Manager |
 
 > Demo accounts include 5 pre-loaded projects from Berlin, London, New York, Paris, and Dubai with complete BOQs, schedules, and cost models.
+>
+> **Security note.** For any internet-exposed deployment, set the three
+> `DEMO_*_PASSWORD` variables to strong, unique secrets, or disable demo
+> accounts entirely with `DISABLE_DEMO_ACCOUNTS=1`. Do not reuse
+> passwords from examples, screenshots, or earlier versions of this README.
 
 ---
 
