@@ -20,6 +20,7 @@ from jose import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
+from app.core.email import get_email_service
 from app.core.events import event_bus
 
 _logger_ev = __import__("logging").getLogger(__name__ + ".events")
@@ -382,17 +383,21 @@ class UserService:
 
         logger.info("Password reset token generated for user %s", user.email)
 
-        # TODO: Send token via email service.  The token is never exposed in
-        # the HTTP response.  In development the token is logged at DEBUG so
-        # developers can complete the reset flow without an email service.
-        #
-        # BUG-345: the Settings field is ``app_debug``, not ``debug`` — the
-        # old reference raised AttributeError only when a real user existed,
-        # which made this endpoint a user-enumeration oracle (200 for
-        # unknown, 500 for known). Keep the attribute spelling in sync with
-        # ``app.config.Settings``.
-        if self.settings.app_debug:
-            logger.debug("Reset token for %s (dev-only log): %s", user.email, token)
+        reset_url = f"{self.settings.resolved_frontend_url}/auth/reset?token={token}"
+        recipient_name = user.full_name or user.email.split("@", 1)[0]
+        email_service = get_email_service()
+        result = await email_service.send_password_reset(
+            to=user.email,
+            reset_url=reset_url,
+            recipient_name=recipient_name,
+            token_lifetime_minutes=self.settings.jwt_expire_minutes,
+        )
+        # Never raise — the response must stay enumeration-proof even
+        # when SMTP is down. The service already logs failure reasons.
+        if not result.ok and self.settings.app_debug:
+            # Dev-only fallback so developers without SMTP can still
+            # complete the reset flow from logs.
+            logger.debug("Reset URL for %s (dev-only log): %s", user.email, reset_url)
 
         return ForgotPasswordResponse(message=message)
 

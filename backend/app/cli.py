@@ -55,6 +55,8 @@ MIN_PYTHON = (3, 12)
 DOCS_URL = "https://openconstructionerp.com/docs"
 TROUBLESHOOTING_URL = "https://openconstructionerp.com/docs#troubleshooting"
 ISSUES_URL = "https://github.com/datadrivenconstruction/OpenConstructionERP/issues"
+COMMUNITY_URL = "https://t.me/datadrivenconstruction"
+GITHUB_URL = "https://github.com/datadrivenconstruction/OpenConstructionERP"
 
 logger = logging.getLogger("openestimate.cli")
 
@@ -762,6 +764,90 @@ def cmd_version(_args: argparse.Namespace) -> None:
     print(f"Docs: {DOCS_URL}")
 
 
+def _resolve_version() -> str:
+    """Best-effort version lookup shared by welcome/version commands."""
+    try:
+        from importlib.metadata import version as _v
+
+        return _v("openconstructionerp")
+    except Exception:
+        try:
+            from app.config import Settings
+
+            return Settings.model_fields["app_version"].default
+        except Exception:
+            return "unknown"
+
+
+def print_welcome(*, next_command_hint: bool = True) -> None:
+    """Fast, zero-network welcome screen.
+
+    Shown on the first bare ``openestimate`` invocation and when the
+    user runs ``openestimate welcome`` explicitly. Tells them what the
+    package does, the three commands that matter, and where to ask
+    questions when something goes wrong.
+    """
+    version = _resolve_version()
+    print()
+    print(_amber(_BANNER_ART))
+    print()
+    print(f"  {_bold('OpenConstructionERP')} {_dim('v' + version)}")
+    print(f"  {_dim('Open-source construction cost estimation platform')}")
+    print()
+    print(f"  {_bold('Three commands get you running:')}")
+    print(f"    {_amber('openestimate init-db')}   {_dim('# one-time, creates ~/.openestimate/')}")
+    print(f"    {_amber('openestimate serve')}     {_dim('# start the server (Ctrl+C to stop)')}")
+    print(f"    {_amber('openestimate doctor')}    {_dim('# health check if something looks wrong')}")
+    print()
+    print(f"  {_bold('After serve, open:')} {_amber('http://127.0.0.1:8080')}")
+    print(f"  {_dim('Demo login:')} demo@openestimator.io / DemoPass1234!")
+    print()
+    print(f"  {_bold('Get help or ask questions')}")
+    print(f"    {_dim('Docs:')}      {DOCS_URL}")
+    print(f"    {_dim('GitHub:')}    {GITHUB_URL}")
+    print(f"    {_dim('Issues:')}    {ISSUES_URL}")
+    print(f"    {_dim('Community:')} {COMMUNITY_URL} {_dim('(Telegram)')}")
+    print()
+    if next_command_hint:
+        print(f"  {_dim('Tip:')} run {_amber('openestimate')} again and it will start the server for you.")
+        print()
+
+
+def cmd_welcome(_args: argparse.Namespace) -> None:
+    """Print the welcome screen and exit — no server, no I/O."""
+    print_welcome(next_command_hint=True)
+
+
+def _prompt_open_browser(url: str, default_open: bool = True) -> bool:
+    """Ask whether to open the browser on first-run.
+
+    Returns True if the user presses ``o`` (or just Enter when the
+    default is open), False if they decline. Safe against non-TTY
+    invocations (CI, piped input) — returns ``default_open`` and moves
+    on without blocking.
+
+    The prompt is deliberately short so the user can hit Enter in under
+    a second without reading the whole sentence.
+    """
+    if not sys.stdin.isatty() or not sys.stdout.isatty():
+        return default_open
+
+    default_hint = "[O/n]" if default_open else "[o/N]"
+    prompt = (
+        f"  {_bold('Open')} {_amber(url)} "
+        f"{_dim('in your browser now?')} {_dim(default_hint)} "
+    )
+    try:
+        answer = input(prompt).strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        print()
+        return False
+
+    if answer == "":
+        return default_open
+    return answer.startswith("o") or answer in ("y", "yes", "да", "д")
+
+
 def cmd_seed(args: argparse.Namespace) -> None:
     """Load demo data into the database."""
     data_dir = Path(args.data_dir).expanduser().resolve()
@@ -858,6 +944,16 @@ def main() -> None:
     # version
     subparsers.add_parser("version", help="Show version information")
 
+    # welcome (zero-network greeting + quick-start + support links)
+    subparsers.add_parser(
+        "welcome",
+        help="Print a welcome screen with quick-start commands and support links",
+    )
+    subparsers.add_parser(
+        "hello",
+        help="Alias for 'welcome'",
+    )
+
     # seed
     seed_p = subparsers.add_parser("seed", help="Load seed/demo data")
     seed_p.add_argument("--demo", action="store_true", help="Install demo project with sample data")
@@ -879,13 +975,41 @@ def main() -> None:
         cmd_version(args)
     elif args.command == "seed":
         cmd_seed(args)
+    elif args.command in ("welcome", "hello"):
+        cmd_welcome(args)
     elif args.command is None:
-        # Default: serve with sensible defaults + open browser
+        # Default behaviour for bare ``openestimate`` / ``openconstructionerp``:
+        # * First run (no data dir yet) — show the welcome screen and an
+        #   interactive "open in browser?" prompt so the user sees the URL,
+        #   community link, and three-command quick start BEFORE uvicorn
+        #   eats the terminal for 30 s of startup.
+        # * Subsequent runs — jump straight to serve (they already know).
+        data_dir = Path(DEFAULT_DATA_DIR)
+        first_run = not data_dir.exists() or not (data_dir / "openestimate.db").exists()
         args.host = DEFAULT_HOST
         args.port = DEFAULT_PORT
         args.data_dir = str(DEFAULT_DATA_DIR)
-        args.open = True
         args.quiet = False
+
+        if first_run:
+            print_welcome(next_command_hint=False)
+            url = f"http://{DEFAULT_HOST}:{DEFAULT_PORT}"
+            # Press 'o' (or Enter) to let the server open the browser
+            # after it has bound the socket; any other answer keeps the
+            # terminal focused (useful for SSH sessions).
+            args.open = _prompt_open_browser(url, default_open=True)
+            print()
+            print(
+                _dim(
+                    _u(
+                        "  Starting the server now \u2014 press Ctrl+C to stop.",
+                        "  Starting the server now - press Ctrl+C to stop.",
+                    ),
+                ),
+            )
+            print()
+        else:
+            args.open = True
         cmd_serve(args)
     else:
         parser.print_help()

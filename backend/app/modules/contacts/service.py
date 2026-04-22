@@ -114,6 +114,10 @@ class ContactService:
             currency_code=data.currency_code,
             name_translations=data.name_translations,
             notes=data.notes,
+            # ``tenant_id`` is the access gate. For single-tenant installs
+            # it equals the creator's user id so new contacts stay
+            # siloed per user. ``created_by`` stays as the audit field.
+            tenant_id=user_id,
             created_by=user_id,
             metadata_=data.metadata,
         )
@@ -163,10 +167,10 @@ class ContactService:
     ) -> tuple[list[Contact], int]:
         """List contacts with filters.
 
-        ``owner_id`` scopes the result via the ``created_by`` proxy
-        (until a real ``tenant_id`` schema lands).  Pass ``None`` to
-        opt out of the scope filter — only admin callers should do
-        that.
+        ``owner_id`` scopes the result by the caller's ``tenant_id``
+        (with a ``created_by`` fallback for rows that existed before
+        the v2.3.1 backfill). Pass ``None`` to opt out of the scope
+        filter — only admin callers should do that.
         """
         return await self.repo.list(
             contact_type=contact_type,
@@ -282,7 +286,8 @@ class ContactService:
     ) -> tuple[list[Contact], int]:
         """List contacts grouped by company name.
 
-        ``owner_id`` scopes the result via the ``created_by`` proxy.
+        ``owner_id`` scopes the result by ``tenant_id`` (with a
+        ``created_by`` fallback for pre-v2.3.1 rows).
         """
         return await self.repo.list_by_company(
             company_name,

@@ -4,19 +4,45 @@
 
 Professional BOQ, 4D scheduling, 5D cost model, AI-powered estimation, CAD/BIM takeoff — all in one platform.
 
+---
+
+> ### ▶ After `pip install`, type one command: **`openestimate`**
+>
+> That's the only thing you need to remember. It prints a welcome,
+> asks **press `o` + Enter** to open the app in your browser, then
+> starts the server at **http://127.0.0.1:8080**.
+
+---
+
 ## Quick Start
 
 ```bash
 pip install openconstructionerp
-openestimate init-db
-openestimate serve
+openestimate                 # welcome screen + o-to-open-browser + server
 ```
 
-Opens at **http://localhost:8080** with SQLite — zero configuration needed.
+That's the whole first run. The bare `openestimate` command:
+
+1. Prints a welcome with links to docs, issues, and the community chat.
+2. Creates a local SQLite database and data folder under `~/.openestimate/`.
+3. Starts the server at **http://127.0.0.1:8080** and opens your browser.
 
 Demo login: `demo@openestimator.io` / `DemoPass1234!`
 
-If anything goes wrong, run `openestimate doctor` for diagnostics.
+Prefer explicit steps? Run them yourself:
+
+```bash
+openestimate init-db         # create the local database
+openestimate serve           # start the server
+openestimate doctor          # health check if anything looks wrong
+openestimate welcome         # re-print the welcome screen + support links
+```
+
+### Where to ask questions
+
+- **Community chat (Telegram):** https://t.me/datadrivenconstruction
+- **Bug reports / feature requests:** https://github.com/datadrivenconstruction/OpenConstructionERP/issues
+- **Docs:** https://openconstructionerp.com/docs
 
 ## Features
 

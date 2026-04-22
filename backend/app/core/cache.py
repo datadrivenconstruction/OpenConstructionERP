@@ -27,6 +27,47 @@ from typing import Any, Callable
 logger = logging.getLogger(__name__)
 
 
+class _RateLimitedLogger:
+    """Collapse repeated warnings so an outage does not spam the log.
+
+    Keyed by ``(operation, error_type)`` — if the same pair is emitted
+    within ``window_seconds`` we skip the log line and bump an in-memory
+    counter that gets flushed the next time the pair is logged.  That
+    way a Redis that's been down for 30 minutes produces one line per
+    minute per operation instead of thousands.
+    """
+
+    def __init__(self, window_seconds: float = 60.0) -> None:
+        self._window = window_seconds
+        self._last_emit: dict[tuple[str, str], float] = {}
+        self._skipped: dict[tuple[str, str], int] = {}
+        self._lock = Lock()
+
+    def warn(self, operation: str, key: str, exc: BaseException) -> None:
+        err_type = type(exc).__name__
+        bucket_key = (operation, err_type)
+        now = time.time()
+        with self._lock:
+            last = self._last_emit.get(bucket_key, 0.0)
+            if now - last < self._window:
+                self._skipped[bucket_key] = self._skipped.get(bucket_key, 0) + 1
+                return
+            skipped = self._skipped.pop(bucket_key, 0)
+            self._last_emit[bucket_key] = now
+        suffix = f" (+{skipped} similar in the last {int(self._window)}s)" if skipped else ""
+        logger.warning(
+            "cache %s failed on key=%r: %s: %s%s",
+            operation,
+            key,
+            err_type,
+            exc,
+            suffix,
+        )
+
+
+_rate_limited_warn = _RateLimitedLogger()
+
+
 class InMemoryCache:
     """LRU cache with TTL expiration. No external dependencies."""
 
@@ -84,7 +125,7 @@ class RedisCache:
 
     async def _get_redis(self) -> Any | None:
         if self._redis is not None:
-            return self._redis
+            return self._redis or None
         try:
             from app.config import get_settings
 
@@ -97,8 +138,15 @@ class RedisCache:
             await self._redis.ping()
             logger.info("Redis cache connected: %s", settings.redis_url)
             return self._redis
-        except Exception:
-            logger.debug("Redis not available, using in-memory cache")
+        except Exception as exc:  # noqa: BLE001 — we want the reason visible once
+            # Connect-time failure is logged once at INFO (it's normal in dev
+            # where Redis is not running); further per-op failures go through
+            # the rate-limited warner so the log stays readable.
+            logger.info(
+                "Redis not available (%s: %s) — using in-memory cache",
+                type(exc).__name__,
+                exc,
+            )
             self._redis = False  # Mark as unavailable
             return None
 
@@ -108,8 +156,8 @@ class RedisCache:
             try:
                 val = await r.get(f"oe:{key}")
                 return json.loads(val) if val else None
-            except Exception:
-                pass
+            except Exception as exc:  # noqa: BLE001 — funnel all errors through the rate limiter
+                _rate_limited_warn.warn("get", key, exc)
         return await self._fallback.get(key)
 
     async def set(self, key: str, value: Any, ttl: int = 300) -> None:
@@ -118,8 +166,8 @@ class RedisCache:
             try:
                 await r.setex(f"oe:{key}", ttl, json.dumps(value, default=str))
                 return
-            except Exception:
-                pass
+            except Exception as exc:  # noqa: BLE001
+                _rate_limited_warn.warn("set", key, exc)
         await self._fallback.set(key, value, ttl)
 
     async def delete(self, key: str) -> None:
@@ -127,8 +175,9 @@ class RedisCache:
         if r:
             try:
                 await r.delete(f"oe:{key}")
-            except Exception:
-                pass
+                return
+            except Exception as exc:  # noqa: BLE001
+                _rate_limited_warn.warn("delete", key, exc)
         await self._fallback.delete(key)
 
     async def clear(self) -> None:

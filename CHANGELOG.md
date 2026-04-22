@@ -5,6 +5,48 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] — 2026-04-22
+
+### Hardening pass from the v2.3.0 post-release audit
+
+**Pluggable email service** (`app.core.email`)
+- Extracted SMTP / template code from `modules/integrations/email_service.py` into a proper `EmailBackend` abstraction. Backends: `console` (logs at INFO — dev default), `smtp` (production), `noop` (silent drop for CI), `memory` (capture-in-list for tests).
+- `EmailService.send_password_reset()` is the first typed helper; `POST /auth/forgot-password` now actually delivers the reset link through whichever backend is configured (the TODO in `users/service.py:385` is gone).
+- `DeliveryResult` replaces `bool` — structured `ok / backend / reason`, never raises.
+- Settings: `EMAIL_BACKEND` (default `console`) + `FRONTEND_URL` (falls back to first CORS origin) for building reset URLs.
+- Back-compat shim: the old `integrations.email_service.send_email` import still works; returns `bool` for callers that haven't migrated.
+- 30 new unit tests in `test_email_service.py`.
+
+**Contact multi-tenancy fix** (IDOR hardening)
+- New `Contact.tenant_id` column with index. Alembic `v231_contact_tenant_id` backfills `tenant_id := created_by` for every existing row.
+- Repository `list` / `stats` / `list_by_company` now scope via `tenant_id` with a `created_by` fallback for rows inserted before the migration. The IDOR guard at `_require_contact_access` reads `tenant_id` first.
+- Fixes the corner case where a pre-v2.3.1 row with `created_by=NULL` was unreachable even to its author — now admin-only, previously a 403 for everyone.
+- 10 new unit tests covering cross-tenant isolation + legacy-row fallback.
+
+**Cache error logging** (`app.core.cache`)
+- Removed four `except: pass` blocks in `RedisCache.get/set/delete`. Errors now flow through a dedup `_RateLimitedLogger` — first failure per `(operation, error_type)` logs at WARNING, repeats within 60 s are suppressed with a `+N similar` suffix on the next flush.
+- Connect-time Redis unavailability demotes from noisy silent-pass to a single INFO line, matching dev ergonomics without hiding real outages.
+- 9 new unit tests covering rate-limiting window, different error types logging separately, and fallback still serving.
+
+**bim_hub IFC parser — data quality logging**
+- Replaced four silent `except ValueError: pass` handlers in `ifc_processor.py` with DEBUG logs that include the offending raw value, so malformed IFC placements / Revit IDs surface during investigation without being promoted to production noise.
+
+**Pip-install onboarding UX**
+- `openestimate welcome` (alias `openestimate hello`) — zero-network welcome screen with docs / GitHub / issues / Telegram community links. Printed before the server boots on first run.
+- Bare `openestimate` / `openconstructionerp` now detects first run (no `~/.openestimate/openestimate.db`) and shows welcome + interactive `Open … in your browser now? [O/n]` prompt — press `o` + Enter (or just Enter) to launch with the browser, `n` to stay on the terminal (useful over SSH).
+- PyPI short description now ends with `After install, run: openestimate` so `pip show` / PyPI search surfaces the next command.
+- README top adds a blockquote banner pointing at the one command users need to type.
+
+### Tests
+- **Backend**: +49 new unit tests across email / contacts / cache. Full suite: **1373 / 1373 green**.
+
+### Migrations
+- `v231_contact_tenant_id` — adds `Contact.tenant_id` + backfills from `created_by` + adds `ix_oe_contacts_contact_tenant_id`. Idempotent.
+
+### Compatibility
+- `EMAIL_BACKEND` defaults to `console`; production deploys should set `EMAIL_BACKEND=smtp` + `SMTP_HOST`. SMTP-without-host falls back to console with a warning — no silent drops.
+- `Contact.created_by` retained as audit field; external scripts that read it keep working.
+
 ## [2.3.0] — 2026-04-22
 
 ### ISO 19650 Phase A — Asset Register, COBie export, Scheduled reports

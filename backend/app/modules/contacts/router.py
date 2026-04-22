@@ -46,11 +46,9 @@ def _get_service(session: SessionDep) -> ContactService:
 
 # ── IDOR protection helpers ─────────────────────────────────────────────────
 #
-# TODO(v1.4-tenancy): the Contact model has no ``tenant_id`` column today.
-# Until a proper multi-tenant schema migration lands we fall back to the
-# ``created_by`` field as a tenant proxy: owner of the contact record.
-# Admins bypass the check. Once tenancy is in place these helpers should be
-# replaced with a ``tenant_id`` filter at the repository layer.
+# Tenancy gate: v2.3.1 promotes the ``tenant_id`` column to the primary
+# access filter. ``created_by`` remains as an audit field and as a
+# fallback for rows inserted before the backfill migration ran.
 
 
 async def _is_admin(session: AsyncSession, user_id: str | None) -> bool:
@@ -78,8 +76,10 @@ async def _require_contact_access(
 ) -> Contact:
     """Load a contact and verify the caller owns it or is an admin.
 
-    Ownership is derived from ``Contact.created_by`` as a tenant proxy until
-    a dedicated ``tenant_id`` column is introduced. See TODO(v1.4-tenancy).
+    Access is granted when the contact's ``tenant_id`` matches the caller,
+    with a fallback to ``created_by`` for rows inserted before the v2.3.1
+    migration backfilled tenant_id. Legacy rows with neither field set
+    are treated as admin-only.
     """
     if user_id is None:
         raise HTTPException(
@@ -97,15 +97,18 @@ async def _require_contact_access(
     if await _is_admin(session, user_id):
         return contact
 
-    owner = getattr(contact, "created_by", None)
-    # Legacy records with no created_by fall through the same 403 — safer to
-    # block enumeration than accidentally grant access.
-    if owner is None or str(owner) != str(user_id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied: you do not own this contact",
-        )
-    return contact
+    caller = str(user_id)
+    tenant = getattr(contact, "tenant_id", None)
+    created_by = getattr(contact, "created_by", None)
+    if (tenant is not None and str(tenant) == caller) or (
+        tenant is None and created_by is not None and str(created_by) == caller
+    ):
+        return contact
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Access denied: you do not own this contact",
+    )
 
 
 # ── List ──────────────────────────────────────────────────────────────────────
@@ -137,9 +140,9 @@ async def list_contacts(
 ) -> ContactListResponse:
     """List contacts with optional filters.
 
-    Results are scoped to the caller's own contacts via the
-    ``created_by`` proxy (until a real ``tenant_id`` migration lands).
-    Admins bypass the scope and see every contact in the database.
+    Results are scoped to the caller's tenant (``tenant_id`` column,
+    with a ``created_by`` fallback for pre-v2.3.1 rows). Admins
+    bypass the scope and see every contact in the database.
     """
     # Map friendly sort field names to model column names
     _sort_aliases = {"name": "company_name", "email": "primary_email"}

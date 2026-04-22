@@ -165,13 +165,26 @@ class Settings(BaseSettings):
     yandex_api_key: str | None = None
     gigachat_api_key: str | None = None
 
-    # ── Email (SMTP) ──────────────────────────────────────────────────────
+    # ── Email ────────────────────────────────────────────────────────────
+    # ``email_backend`` picks the transport for outbound email.  Dev
+    # defaults to ``console`` so a fresh checkout can exercise the
+    # password-reset flow without MSA credentials; production should set
+    # ``smtp`` plus the SMTP fields below.
+    #
+    # ``noop`` and ``memory`` are for automated tests — the service
+    # layer in ``app.core.email`` resolves these names into concrete
+    # backends.
+    email_backend: Literal["console", "smtp", "noop", "memory"] = "console"
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_password: str = ""
     smtp_from: str = "notifications@openconstructionerp.com"
     smtp_tls: bool = True
+    # Public URL used to build password-reset and notification links.
+    # Falls back to the first CORS origin so dev installs work without
+    # an explicit setting.
+    frontend_url: str = ""
 
     # ── External Services ────────────────────────────────────────────────
     cad_converter_url: str | None = "http://localhost:8001"
@@ -213,6 +226,20 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",")]
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def resolved_frontend_url(self) -> str:
+        """URL used in outbound email links.
+
+        Prefers the explicit ``FRONTEND_URL`` setting; falls back to the
+        first CORS origin so a zero-config dev install still produces
+        clickable reset links pointing at Vite's 5173.
+        """
+        if self.frontend_url:
+            return self.frontend_url.rstrip("/")
+        origins = self.cors_origins
+        return origins[0].rstrip("/") if origins else "http://localhost:5173"
 
 
 @lru_cache

@@ -14,6 +14,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.contacts.models import Contact
 
 
+def _tenant_scope(owner_id: str):  # type: ignore[no-untyped-def]
+    """Produce the WHERE clause that scopes contacts to ``owner_id``.
+
+    Prefers the ``tenant_id`` column (populated from v2.3.1 onwards) and
+    falls back to ``created_by`` so rows inserted before the migration
+    backfill still resolve correctly. Both branches are indexed.
+    """
+    owner = str(owner_id)
+    return or_(Contact.tenant_id == owner, Contact.created_by == owner)
+
+
 class ContactRepository:
     """Data access for Contact model."""
 
@@ -54,10 +65,10 @@ class ContactRepository:
     ) -> tuple[list[Contact], int]:
         """List contacts with filters and pagination.
 
-        ``owner_id`` scopes the result to contacts the caller created
-        (``created_by`` proxy used until a real ``tenant_id`` column
-        lands).  Pass ``None`` to skip the owner filter — only admins
-        should ever do that.
+        ``owner_id`` scopes the result to contacts in the caller's
+        tenant (``tenant_id`` column, with a fallback to ``created_by``
+        for rows inserted before the v2.3.1 migration).  Pass ``None``
+        to skip the scope filter — only admins should ever do that.
 
         Returns (contacts, total_count).
         """
@@ -68,7 +79,7 @@ class ContactRepository:
         if country_code is not None:
             base = base.where(Contact.country_code == country_code)
         if owner_id is not None:
-            base = base.where(Contact.created_by == str(owner_id))
+            base = base.where(_tenant_scope(owner_id))
         if search is not None:
             term = f"%{search}%"
             base = base.where(
@@ -123,17 +134,15 @@ class ContactRepository:
     async def stats(self, *, owner_id: str | None = None) -> dict:
         """Compute aggregate contact statistics.
 
-        ``owner_id`` scopes the aggregates to a single user's contacts
-        via the ``created_by`` proxy.  Pass ``None`` for the global
-        view — admins only.
+        ``owner_id`` scopes the aggregates to a single tenant via the
+        ``tenant_id`` column (``created_by`` fallback for legacy rows).
+        Pass ``None`` for the global view — admins only.
 
         Returns dict with keys: total, by_type, by_country_top10,
         with_expiring_prequalification.
         """
         # Reused base predicate for all 4 sub-queries below.
-        owner_filter = (
-            (Contact.created_by == str(owner_id)) if owner_id is not None else None
-        )
+        owner_filter = _tenant_scope(owner_id) if owner_id is not None else None
 
         def _scope(stmt):  # type: ignore[no-untyped-def]
             return stmt.where(owner_filter) if owner_filter is not None else stmt
@@ -195,7 +204,7 @@ class ContactRepository:
         """List all contacts at the same company.
 
         Uses case-insensitive matching on company_name.  ``owner_id``
-        scopes the result via the ``created_by`` proxy.
+        scopes the result by ``tenant_id`` (with ``created_by`` fallback).
         """
         base = (
             select(Contact)
@@ -203,7 +212,7 @@ class ContactRepository:
             .where(func.lower(Contact.company_name) == company_name.lower())
         )
         if owner_id is not None:
-            base = base.where(Contact.created_by == str(owner_id))
+            base = base.where(_tenant_scope(owner_id))
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()

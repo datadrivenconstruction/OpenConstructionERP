@@ -1232,13 +1232,19 @@ def _extract_placements(
             if len(nums) >= 3:
                 try:
                     placement_map[eid] = (float(nums[0]), float(nums[1]), float(nums[2]))
-                except ValueError:
-                    pass
+                except ValueError as exc:
+                    logger.debug(
+                        "IFC placement skipped: malformed 3D coordinate at #%d (%r): %s",
+                        eid, nums[:3], exc,
+                    )
             elif len(nums) == 2:
                 try:
                     placement_map[eid] = (float(nums[0]), float(nums[1]), 0.0)
-                except ValueError:
-                    pass
+                except ValueError as exc:
+                    logger.debug(
+                        "IFC placement skipped: malformed 2D coordinate at #%d (%r): %s",
+                        eid, nums[:2], exc,
+                    )
 
     # Build IfcAxis2Placement3D → location point
     axis_to_point: dict[int, tuple[float, float, float]] = {}
@@ -1502,8 +1508,11 @@ def _extract_revit_element_id(lc_row: dict[str, Any]) -> int | None:
     if raw is not None:
         try:
             return int(raw)
-        except (TypeError, ValueError):
-            pass
+        except (TypeError, ValueError) as exc:
+            logger.debug(
+                "DDC id column not numeric (%r) — trying UniqueId fallback: %s",
+                raw, exc,
+            )
 
     # 2) UniqueId -> hex element id
     uid = lc_row.get("uniqueid")
@@ -1511,8 +1520,11 @@ def _extract_revit_element_id(lc_row: dict[str, Any]) -> int | None:
         last = uid.rsplit("-", 1)[-1]
         try:
             return int(last, 16)
-        except ValueError:
-            pass
+        except ValueError as exc:
+            logger.debug(
+                "UniqueId tail not hex (%r) — trying alternate columns: %s",
+                last, exc,
+            )
 
     # 3) Alternate column names used by other CAD tools.
     for key in ("element_id", "elementid", "revit_id", "revitid", "elem_id"):
