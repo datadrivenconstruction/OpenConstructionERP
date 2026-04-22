@@ -111,6 +111,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties },
       { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box },
       { labelKey: 'nav.bim_rules', to: '/bim/rules?mode=requirements', icon: SlidersHorizontal, badge: 'BETA' },
+      { labelKey: 'nav.assets', to: '/assets', icon: Package, badge: 'NEW' },
     ],
   },
   {

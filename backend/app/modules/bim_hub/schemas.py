@@ -260,6 +260,8 @@ class BIMElementResponse(BaseModel):
     mesh_ref: str | None = None
     lod_variants: dict[str, Any] | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    asset_info: dict[str, Any] = Field(default_factory=dict)
+    is_tracked_asset: bool = False
     boq_links: list[BOQElementLinkBrief] = Field(default_factory=list)
     linked_documents: list[DocumentLinkBrief] = Field(default_factory=list)
     linked_tasks: list[TaskBrief] = Field(default_factory=list)
@@ -278,6 +280,88 @@ class BIMElementListResponse(BaseModel):
     total: int = 0
     offset: int = 0
     limit: int = 200
+
+
+# ── Asset Register schemas (v2.3.0) ──────────────────────────────────────────
+
+
+class AssetInfoPayload(BaseModel):
+    """Operational-phase metadata written into ``BIMElement.asset_info``.
+
+    All fields optional — the asset workflow is incremental (user fills
+    in what they know, updates later). Extra keys outside this schema
+    are preserved on write so tenants can extend the bag.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="allow")
+
+    manufacturer: str | None = Field(default=None, max_length=255)
+    model: str | None = Field(default=None, max_length=255)
+    serial_number: str | None = Field(default=None, max_length=255)
+    # ISO-8601 date — stored as string for cross-DB portability.
+    warranty_until: str | None = Field(default=None, max_length=20)
+    commissioned_at: str | None = Field(default=None, max_length=20)
+    # operational | decommissioned | under_maintenance | retired | unknown
+    operational_status: str | None = Field(default=None, max_length=50)
+    # Parent system grouping for COBie System-sheet and hierarchy views.
+    # Free-form string (e.g. "HVAC-01", "Electrical Main Board").
+    parent_system: str | None = Field(default=None, max_length=255)
+    # Stable asset tag used on physical labels / QR stickers.
+    asset_tag: str | None = Field(default=None, max_length=100)
+    # Notes field — whatever the facility manager wants to remember.
+    notes: str | None = Field(default=None, max_length=2000)
+
+
+class AssetInfoUpdateRequest(BaseModel):
+    """Request body for PATCH /assets/{element_id}/asset-info.
+
+    Merges into the existing ``asset_info`` JSON. Pass ``is_tracked_asset``
+    explicitly to override the auto-derived flag (auto: ``True`` when any
+    asset_info field is set for the first time).
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    asset_info: AssetInfoPayload
+    is_tracked_asset: bool | None = None
+
+
+class AssetSummary(BaseModel):
+    """Thin row for the Assets list view — does NOT hydrate relationships.
+
+    Joins BIMElement + BIMModel so the list shows project/model context
+    without a second round-trip.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    model_id: UUID
+    project_id: UUID
+    model_name: str
+    stable_id: str
+    element_type: str | None = None
+    name: str | None = None
+    storey: str | None = None
+    discipline: str | None = None
+    asset_info: dict[str, Any] = Field(default_factory=dict)
+    # Convenience copies lifted out of asset_info so the frontend can
+    # render sortable columns without peeking into the JSON blob.
+    manufacturer: str | None = None
+    model: str | None = None
+    serial_number: str | None = None
+    warranty_until: str | None = None
+    operational_status: str | None = None
+    asset_tag: str | None = None
+
+
+class AssetListResponse(BaseModel):
+    """Paginated Assets list response."""
+
+    items: list[AssetSummary] = Field(default_factory=list)
+    total: int = 0
+    offset: int = 0
+    limit: int = 100
 
 
 # ── BOQElementLink schemas ───────────────────────────────────────────────────

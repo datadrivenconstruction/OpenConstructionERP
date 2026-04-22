@@ -1424,6 +1424,66 @@ def create_app() -> FastAPI:
 
         asyncio.create_task(_kpi_scheduler())
 
+        # ── Scheduled reports worker (1-minute tick) ────────────────────
+        # Polls oe_reporting_template for rows whose ``next_run_at`` is
+        # due, renders each one via the existing generate_report path,
+        # then advances ``next_run_at`` using the stored cron expression.
+        # Deliberately uses the same asyncio-based loop as the KPI
+        # scheduler (not Celery) to keep the single-process footprint —
+        # CLAUDE.md "LIGHTWEIGHT & SIMPLE".
+        async def _reports_scheduler() -> None:
+            from datetime import UTC
+            from datetime import datetime as _dt
+
+            while True:
+                await asyncio.sleep(60)
+                try:
+                    from uuid import uuid4 as _uuid4
+
+                    from app.database import async_session_factory as _rep_sf
+                    from app.modules.reporting.schemas import (
+                        GenerateReportRequest as _GenReq,
+                    )
+                    from app.modules.reporting.service import (
+                        ReportingService as _RepSvc,
+                    )
+
+                    async with _rep_sf() as rep_session:
+                        svc = _RepSvc(rep_session)
+                        due = await svc.list_due_templates(_dt.now(UTC))
+                        for template in due:
+                            if template.project_id_scope is None:
+                                # Portfolio reports need cross-project
+                                # context we don't have yet — pause so
+                                # the worker doesn't busy-loop.
+                                template.is_scheduled = False
+                                template.next_run_at = None
+                                await svc.template_repo.update(template)
+                                continue
+                            try:
+                                gen = _GenReq(
+                                    project_id=template.project_id_scope,
+                                    template_id=template.id,
+                                    report_type=template.report_type,
+                                    title=f"{template.name} (scheduled {_dt.now(UTC):%Y-%m-%d %H:%M} UTC)",
+                                    format="pdf",
+                                    metadata={
+                                        "triggered_by": "scheduler",
+                                        "run_id": str(_uuid4()),
+                                    },
+                                )
+                                await svc.generate_report(gen)
+                                await svc.mark_template_ran(template)
+                            except Exception:
+                                logger.exception(
+                                    "Scheduled report %s failed", template.id,
+                                )
+                        await rep_session.commit()
+                except Exception:
+                    logger.exception("Reports scheduler tick failed")
+
+        asyncio.create_task(_reports_scheduler())
+
         _section("Ready")
         # Friendly multi-line ready banner. The CLI (`openestimate serve`)
         # exposes OE_CLI_HOST / OE_CLI_PORT / OE_CLI_DATA_DIR so we can show

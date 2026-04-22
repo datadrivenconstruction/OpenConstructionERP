@@ -1,14 +1,17 @@
 """Reporting & Dashboards API routes.
 
 Endpoints:
-    GET    /kpi?project_id=X           — Latest KPI snapshot
-    GET    /kpi/history?project_id=X   — KPI snapshots over time
-    POST   /kpi/snapshot               — Create KPI snapshot
-    GET    /templates                   — List report templates
-    POST   /templates                   — Create custom template
-    POST   /generate                    — Generate a report
-    GET    /reports?project_id=X        — List generated reports
-    GET    /reports/{report_id}         — Get a generated report
+    GET    /kpi?project_id=X                     — Latest KPI snapshot
+    GET    /kpi/history?project_id=X             — KPI snapshots over time
+    POST   /kpi/snapshot                         — Create KPI snapshot
+    GET    /templates                             — List report templates
+    POST   /templates                             — Create custom template
+    POST   /templates/{id}/schedule               — Attach/replace/clear cron schedule
+    POST   /templates/{id}/run-now                — Trigger an immediate render
+    GET    /templates/scheduled                   — List all scheduled templates
+    POST   /generate                              — Generate a report
+    GET    /reports?project_id=X                  — List generated reports
+    GET    /reports/{report_id}                   — Get a generated report
 """
 
 import logging
@@ -22,6 +25,7 @@ from app.modules.reporting.schemas import (
     GenerateReportRequest,
     KPISnapshotCreate,
     KPISnapshotResponse,
+    ReportScheduleRequest,
     ReportTemplateCreate,
     ReportTemplateResponse,
 )
@@ -126,6 +130,74 @@ async def create_template(
     """Create a custom report template."""
     template = await service.create_template(data, user_id=user_id)
     return ReportTemplateResponse.model_validate(template)
+
+
+@router.get("/templates/scheduled/", response_model=list[ReportTemplateResponse])
+async def list_scheduled_templates(
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: ReportingService = Depends(_get_service),
+) -> list[ReportTemplateResponse]:
+    """List every template that has a cron schedule attached."""
+    templates = await service.list_scheduled_templates()
+    return [ReportTemplateResponse.model_validate(t) for t in templates]
+
+
+@router.post(
+    "/templates/{template_id}/schedule/",
+    response_model=ReportTemplateResponse,
+)
+async def schedule_template(
+    template_id: uuid.UUID,
+    data: ReportScheduleRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("reporting.create")),
+    service: ReportingService = Depends(_get_service),
+) -> ReportTemplateResponse:
+    """Attach/replace/clear a cron schedule on an existing template."""
+    if data.project_id_scope is not None:
+        await verify_project_access(data.project_id_scope, user_id, session)
+    template = await service.schedule_template(template_id, data)
+    return ReportTemplateResponse.model_validate(template)
+
+
+@router.post(
+    "/templates/{template_id}/run-now/",
+    response_model=GeneratedReportResponse,
+    status_code=201,
+)
+async def run_template_now(
+    template_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("reporting.create")),
+    service: ReportingService = Depends(_get_service),
+) -> GeneratedReportResponse:
+    """Render a scheduled template immediately without waiting for its
+    cron trigger. Useful for 'preview' buttons and for backfilling a
+    missed run. Respects the template's ``project_id_scope``.
+    """
+    template = await service.get_template(template_id)
+    if template.project_id_scope is None:
+        from fastapi import HTTPException
+        from fastapi import status as http_status
+        raise HTTPException(
+            status_code=http_status.HTTP_400_BAD_REQUEST,
+            detail="Portfolio-wide run-now is not supported yet; set project_id_scope first",
+        )
+    await verify_project_access(template.project_id_scope, user_id, session)
+    # Use the existing generate_report path so the history is consistent.
+    gen_data = GenerateReportRequest(
+        project_id=template.project_id_scope,
+        template_id=template.id,
+        report_type=template.report_type,
+        title=f"{template.name} (ad-hoc)",
+        format="pdf",
+        metadata={"triggered_by": "run-now"},
+    )
+    report = await service.generate_report(gen_data, user_id=user_id)
+    await service.mark_template_ran(template)
+    return GeneratedReportResponse.model_validate(report)
 
 
 # ── Generated Report endpoints ────────────────────────────────────────────

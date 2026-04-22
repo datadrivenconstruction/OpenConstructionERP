@@ -94,6 +94,36 @@ class ReportTemplateRepository:
         )
         return (await self.session.execute(stmt)).scalar_one()
 
+    async def update(self, template: ReportTemplate) -> ReportTemplate:
+        """Persist updates to an existing template."""
+        await self.session.flush()
+        await self.session.refresh(template)
+        return template
+
+    async def list_due(self, as_of: str) -> list[ReportTemplate]:
+        """Return scheduled templates whose ``next_run_at`` is due.
+
+        ``as_of`` is an ISO-8601 string. Because we store ``next_run_at``
+        as an ISO-8601 string (not a native datetime), lexical comparison
+        is equivalent to chronological comparison.
+        """
+        stmt = select(ReportTemplate).where(
+            ReportTemplate.is_scheduled.is_(True),
+            ReportTemplate.schedule_cron.is_not(None),
+            ReportTemplate.next_run_at.is_not(None),
+            ReportTemplate.next_run_at <= as_of,
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def list_scheduled(self) -> list[ReportTemplate]:
+        """Return every template that has scheduling configured."""
+        stmt = select(ReportTemplate).where(
+            ReportTemplate.schedule_cron.is_not(None),
+        ).order_by(ReportTemplate.next_run_at.asc().nulls_last())
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
 
 class GeneratedReportRepository:
     """Data access for GeneratedReport models."""

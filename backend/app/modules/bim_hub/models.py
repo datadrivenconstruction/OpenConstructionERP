@@ -78,11 +78,23 @@ class BIMModel(Base):
 
 
 class BIMElement(Base):
-    """Single element extracted from a BIM model."""
+    """Single element extracted from a BIM model.
+
+    Since v2.3.0 BIMElement is also the **asset register** for the project
+    (ISO 19650 Asset Information Model). ``asset_info`` holds the
+    operational-phase metadata (manufacturer, warranty, serial) and
+    ``is_tracked_asset`` flags the element as a real-world object that
+    persists after construction — pumps, AHUs, doors, elevators etc.
+    Most geometry-only elements (walls, floors) leave both fields at
+    their defaults and are invisible to the Assets page.
+    """
 
     __tablename__ = "oe_bim_element"
     __table_args__ = (
         Index("ix_bim_element_model_stable", "model_id", "stable_id"),
+        # Speeds up the Assets list query which filters by this flag
+        # across every BIMElement in a project (joined through model_id).
+        Index("ix_bim_element_tracked", "is_tracked_asset"),
     )
 
     model_id: Mapped[uuid.UUID] = mapped_column(
@@ -118,6 +130,26 @@ class BIMElement(Base):
         nullable=False,
         default=dict,
         server_default="{}",
+    )
+    # Operational-phase metadata. Free-form JSON so tenants can extend
+    # beyond the fields listed in AssetInfoPayload without a migration.
+    # Canonical keys: manufacturer, model, serial_number, warranty_until,
+    # commissioned_at, operational_status, parent_system_id, asset_tag.
+    asset_info: Mapped[dict] = mapped_column(
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    # Whether this element represents a real-world tracked asset
+    # (pump, AHU, door). Filtered by the /assets page. Flipped
+    # automatically when asset_info is first populated, but users can
+    # also toggle manually (e.g. mark a specific wall as tracked).
+    is_tracked_asset: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
     )
 
     # Relationships

@@ -83,8 +83,47 @@ class ReportTemplateResponse(BaseModel):
     is_system: bool = False
     created_by: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    # Schedule fields (v2.3.0)
+    schedule_cron: str | None = None
+    recipients: list[str] = Field(default_factory=list)
+    is_scheduled: bool = False
+    last_run_at: str | None = None
+    next_run_at: str | None = None
+    project_id_scope: UUID | None = None
     created_at: datetime
     updated_at: datetime
+
+
+# ── Schedule Request / Response (v2.3.0) ────────────────────────────────
+
+
+class ReportScheduleRequest(BaseModel):
+    """Turn a template into a scheduled report.
+
+    Passing ``schedule_cron=None`` turns scheduling off without clearing
+    the recipient list — the worker then skips the template on its
+    next-due scan.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    schedule_cron: str | None = Field(
+        default=None,
+        max_length=100,
+        description="5-field POSIX cron expression (e.g. '0 9 * * 1' for 09:00 every Mon)",
+    )
+    recipients: list[str] = Field(
+        default_factory=list,
+        description="Email addresses or user IDs that receive the rendered report",
+    )
+    project_id_scope: UUID | None = Field(
+        default=None,
+        description="Scope the report to one project; None = portfolio-wide",
+    )
+    is_scheduled: bool = Field(
+        default=True,
+        description="Pass False to pause without clearing the cron expression",
+    )
 
 
 # ── Generated Report schemas ─────────────────────────────────────────────

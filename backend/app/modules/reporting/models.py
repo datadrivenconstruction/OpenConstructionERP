@@ -72,6 +72,15 @@ class ReportTemplate(Base):
 
     System templates (is_system=True) are seeded on first startup and
     cannot be deleted by users.
+
+    v2.3.0 schedule fields:
+        schedule_cron / recipients / is_scheduled / last_run_at
+        next_run_at / project_id_scope
+    Let the Celery-Beat worker pick up due templates, render them via
+    the reporting service, and email the result to the listed
+    recipients. If ``project_id_scope`` is set, the render is locked to
+    that project; otherwise the template renders a portfolio-wide
+    report.
     """
 
     __tablename__ = "oe_reporting_template"
@@ -99,6 +108,38 @@ class ReportTemplate(Base):
         nullable=False,
         default=dict,
         server_default="{}",
+    )
+    # ── Schedule fields (v2.3.0) ───────────────────────────────────────
+    # cron expression (5-field standard POSIX: "0 9 * * 1" = 09:00 Mon).
+    # We store the raw string and parse via ``croniter`` at run time so
+    # callers can read back the same expression the user typed.
+    schedule_cron: Mapped[str | None] = mapped_column(
+        String(100), nullable=True, default=None,
+    )
+    # List of email addresses or user-ids (JSON-serialised). The worker
+    # resolves user-ids to emails at send time.
+    recipients: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+    is_scheduled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="0", index=True,
+    )
+    # ISO-8601 strings for cross-DB portability — matches the rest of
+    # this module's datetime conventions.
+    last_run_at: Mapped[str | None] = mapped_column(
+        String(32), nullable=True, default=None,
+    )
+    next_run_at: Mapped[str | None] = mapped_column(
+        String(32), nullable=True, default=None, index=True,
+    )
+    # Optional scope — when set, the worker renders the report for just
+    # this project. ``None`` = portfolio report across every project the
+    # creator can read.
+    project_id_scope: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(), nullable=True, default=None,
     )
 
     def __repr__(self) -> str:

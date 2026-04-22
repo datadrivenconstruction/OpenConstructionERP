@@ -5,6 +5,40 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] — 2026-04-22
+
+### ISO 19650 Phase A — Asset Register, COBie export, Scheduled reports
+
+**Asset Register** (`/assets`)
+- New sidebar page that lists every BIM element flagged as a tracked asset (equipment, fixtures, systems). Columns: element + stable id, manufacturer, model, serial number, operational status (operational / under maintenance / decommissioned / planned), warranty-until, source BIM model, COBie-XLSX download shortcut, edit.
+- Search box filters manufacturer / model / serial / notes (JSON substring search on the backend, indexed).
+- Status-filter chips update the URL (`?status=…`), so filtered views are shareable.
+- Edit modal covers the full COBie field set (manufacturer / model / serial / installation date / warranty until / operational status / parent system / notes). Partial merge semantics — untouched keys survive the PATCH, empty strings clear values.
+- In-viewer asset card (`/bim/{modelId}`): selecting a single element reveals a compact card alongside the BBox Dimensions card showing manufacturer / model / serial / status / warranty and an Edit/Register CTA that opens the same modal.
+- New `BIMElement.asset_info` (JSONB) + `is_tracked_asset` (bool, indexed) columns, idempotent Alembic migration `v230_bim_element_asset_info`.
+- API: `GET /v1/bim_hub/assets?project_id=…` (searchable, status-filterable); `PATCH /v1/bim_hub/assets/{element_id}/asset-info/`.
+
+**COBie UK 2.4 export** (`GET /v1/bim_hub/models/{model_id}/export/cobie.xlsx`)
+- Full seven-sheet workbook (Contact / Facility / Floor / Space / Type / Component / System) generated with `openpyxl`. Tracked assets populate the Component sheet; (element_type, manufacturer, model) tuples aggregate into the Type sheet; `asset_info.parent_system` groups rows on the System sheet.
+- Deterministic `frozen_now` option so exports are reproducible for snapshot testing and audit.
+- 16 unit tests covering structure, headers, row counts, data correctness, determinism, and a 5000-element perf baseline (<5 s).
+
+**Scheduled reports** (`/v1/reporting/templates/{id}/schedule`, `/run-now`, `/scheduled`)
+- Report templates now support a 5-field POSIX cron expression + recipient list + optional project scope. Worker-ready `is_scheduled` boolean, indexed `next_run_at` for cheap due-template queries.
+- Custom minimal cron parser (`app/modules/reporting/cron.py`) — no `croniter` dep added, keeping CLAUDE.md's "LIGHTWEIGHT & SIMPLE" commitment. Supports `*`, `N`, `N,M,…`, `N-M`, `*/N`. Explicitly doesn't support nicknames / day-name aliases — file an issue and we upgrade.
+- `next_occurrence(expr, after)` walks minute-by-minute with coarse field skip; bounded at 5 years so pathological inputs terminate in ms.
+- `POST /templates/{id}/schedule` accepts `ReportScheduleRequest` — computes `next_run_at` on save. `schedule_cron=null` clears schedule; `is_scheduled=false` pauses without clearing the expression.
+- `POST /templates/{id}/run-now` renders immediately and records the run (useful for preview + backfill). Requires `project_id_scope` — portfolio-wide ad-hoc run is not implemented yet.
+- Minute-tick async scheduler wired into the FastAPI lifespan next to the KPI auto-recalc (same single-process asyncio loop, no Celery dep).
+
+### Tests
+- **Backend**: 43 new unit tests — 16 cron parser, 11 schedule service, 9 asset register, 16 COBie exporter. Full unit suite: 1324 / 1324 green.
+- **Frontend**: 4 new Vitest specs for `AssetsPage` (empty / loaded / empty state / edit-modal round-trip). Playwright `assets-register.spec.ts` covers the happy-path load + COBie link wiring.
+
+### Migrations
+- `v230_bim_element_asset_info` — adds `asset_info` / `is_tracked_asset` + `ix_bim_element_tracked` index.
+- `v230_reporting_schedule` — adds six schedule columns + `ix_reporting_template_scheduled` + `ix_reporting_template_next_run`.
+
 ## [2.2.0] — 2026-04-21
 
 ### Q2 UX deep improvements — pivot visualizations, wider Charts, markup hub, calibration, 4D scrubber, BIM panel

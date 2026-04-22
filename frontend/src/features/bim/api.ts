@@ -959,3 +959,91 @@ export function bimRequirementsExportExcelUrl(setId: string, language = 'en'): s
 export function bimRequirementsExportIdsUrl(setId: string): string {
   return `/api/v1/bim_requirements/export/${encodeURIComponent(setId)}/ids/`;
 }
+
+/* ── Asset Register (v2.3.0) ──────────────────────────────────────────── */
+
+/** Asset-info payload persisted on a BIMElement row.
+ *
+ *  Every field is optional because assets evolve: a row is "tracked" as
+ *  soon as *any* field gets a value. Sending an explicit `null` or
+ *  empty-string clears a key from the stored JSON.
+ */
+export interface AssetInfoPayload {
+  manufacturer?: string | null;
+  model?: string | null;
+  serial_number?: string | null;
+  installation_date?: string | null;
+  warranty_until?: string | null;
+  operational_status?: string | null;
+  parent_system?: string | null;
+  notes?: string | null;
+  /** Allow free-form keys — avoid dropping unknown fields on round-trip. */
+  [key: string]: string | null | undefined;
+}
+
+/** Summary row returned by `GET /v1/bim_hub/assets`. */
+export interface AssetSummary {
+  id: string;
+  stable_id: string;
+  element_type: string;
+  name: string | null;
+  model_id: string;
+  model_name: string;
+  project_id: string;
+  asset_info: AssetInfoPayload;
+}
+
+export interface AssetListResponse {
+  items: AssetSummary[];
+  total: number;
+}
+
+/** List all tracked assets for a project.
+ *
+ *  * `search` does a JSON substring match across manufacturer / model /
+ *    serial / notes — case-insensitive.
+ *  * `operationalStatus` filters by the stored `operational_status` key
+ *    (e.g. `"operational"`, `"under_maintenance"`, `"decommissioned"`).
+ */
+export async function listTrackedAssets(
+  projectId: string,
+  opts?: {
+    search?: string;
+    operationalStatus?: string;
+    offset?: number;
+    limit?: number;
+  },
+): Promise<AssetListResponse> {
+  const params = new URLSearchParams({
+    project_id: projectId,
+    offset: String(opts?.offset ?? 0),
+    limit: String(opts?.limit ?? 200),
+  });
+  if (opts?.search) params.set('search', opts.search);
+  if (opts?.operationalStatus) params.set('operational_status', opts.operationalStatus);
+  return apiGet<AssetListResponse>(`/v1/bim_hub/assets/?${params.toString()}`);
+}
+
+/** Patch asset-info on a BIMElement. Partial merge — unspecified keys
+ *  are preserved; `null`/empty string clears a key; non-empty value
+ *  auto-flips `is_tracked_asset=true` unless the caller explicitly
+ *  overrides it via `isTrackedAsset`. */
+export async function updateElementAssetInfo(
+  elementId: string,
+  assetInfo: AssetInfoPayload,
+  isTrackedAsset?: boolean,
+): Promise<AssetSummary> {
+  const body: { asset_info: AssetInfoPayload; is_tracked_asset?: boolean } = {
+    asset_info: assetInfo,
+  };
+  if (isTrackedAsset !== undefined) body.is_tracked_asset = isTrackedAsset;
+  return apiPatch<AssetSummary, typeof body>(
+    `/v1/bim_hub/assets/${encodeURIComponent(elementId)}/asset-info/`,
+    body,
+  );
+}
+
+/** URL to the COBie UK 2.4 XLSX export for a BIM model. */
+export function cobieExportUrl(modelId: string): string {
+  return `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/export/cobie.xlsx/`;
+}

@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.reporting.cron import CronParseError, next_occurrence
 from app.modules.reporting.models import GeneratedReport, KPISnapshot, ReportTemplate
 from app.modules.reporting.repository import (
     GeneratedReportRepository,
@@ -16,6 +17,7 @@ from app.modules.reporting.repository import (
 from app.modules.reporting.schemas import (
     GenerateReportRequest,
     KPISnapshotCreate,
+    ReportScheduleRequest,
     ReportTemplateCreate,
 )
 
@@ -188,6 +190,114 @@ class ReportingService:
         )
         template = await self.template_repo.create(template)
         logger.info("Report template created: %s (%s)", data.name, data.report_type)
+        return template
+
+    async def get_template(self, template_id: uuid.UUID) -> ReportTemplate:
+        """Fetch a template or raise 404."""
+        template = await self.template_repo.get_by_id(template_id)
+        if template is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Report template not found",
+            )
+        return template
+
+    # ── Scheduling (v2.3.0) ───────────────────────────────────────────────
+
+    async def schedule_template(
+        self,
+        template_id: uuid.UUID,
+        data: ReportScheduleRequest,
+    ) -> ReportTemplate:
+        """Attach/replace/clear a cron schedule on a template.
+
+        Passing ``schedule_cron=None`` clears scheduling (and also clears
+        ``next_run_at``). Otherwise the cron is parsed, the next run is
+        computed from ``now`` in UTC, and persisted.
+        """
+        template = await self.get_template(template_id)
+
+        template.recipients = list(data.recipients)
+        template.project_id_scope = data.project_id_scope
+
+        if data.schedule_cron is None:
+            template.schedule_cron = None
+            template.next_run_at = None
+            template.is_scheduled = False
+        else:
+            try:
+                next_run = next_occurrence(
+                    data.schedule_cron,
+                    datetime.now(UTC),
+                )
+            except CronParseError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid cron expression: {exc}",
+                ) from exc
+            template.schedule_cron = data.schedule_cron
+            template.next_run_at = next_run.strftime("%Y-%m-%dT%H:%M:%SZ")
+            template.is_scheduled = data.is_scheduled
+
+        await self.template_repo.update(template)
+        logger.info(
+            "Report template %s scheduled: cron=%r is_scheduled=%s next_run=%s",
+            template.id,
+            template.schedule_cron,
+            template.is_scheduled,
+            template.next_run_at,
+        )
+        return template
+
+    async def list_due_templates(self, as_of: datetime | None = None) -> list[ReportTemplate]:
+        """List scheduled templates whose next_run_at has arrived.
+
+        Used by the Celery-Beat worker. Accepts an optional ``as_of``
+        datetime (UTC) for tests; defaults to now.
+        """
+        if as_of is None:
+            as_of = datetime.now(UTC)
+        as_of_iso = as_of.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+        return await self.template_repo.list_due(as_of_iso)
+
+    async def list_scheduled_templates(self) -> list[ReportTemplate]:
+        """List every template that has a cron expression set."""
+        return await self.template_repo.list_scheduled()
+
+    async def mark_template_ran(
+        self,
+        template: ReportTemplate,
+        *,
+        ran_at: datetime | None = None,
+    ) -> ReportTemplate:
+        """Advance a template after a successful worker run.
+
+        Records ``last_run_at`` and recomputes ``next_run_at`` using the
+        stored cron expression. If the cron expression is no longer valid
+        or scheduling was paused, ``next_run_at`` is cleared so the
+        worker won't pick it up again.
+        """
+        if ran_at is None:
+            ran_at = datetime.now(UTC)
+        ran_at = ran_at.astimezone(UTC)
+        template.last_run_at = ran_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        if not template.is_scheduled or not template.schedule_cron:
+            template.next_run_at = None
+        else:
+            try:
+                next_run = next_occurrence(template.schedule_cron, ran_at)
+                template.next_run_at = next_run.strftime("%Y-%m-%dT%H:%M:%SZ")
+            except CronParseError:
+                logger.exception(
+                    "Template %s has invalid cron %r — pausing",
+                    template.id,
+                    template.schedule_cron,
+                )
+                template.next_run_at = None
+                template.is_scheduled = False
+
+        await self.template_repo.update(template)
         return template
 
     # ── Generated Reports ─────────────────────────────────────────────────

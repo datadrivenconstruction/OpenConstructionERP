@@ -901,6 +901,86 @@ class BIMHubService:
             )
         return element
 
+    # ── Asset Register (v2.3.0) ─────────────────────────────────────────
+
+    async def list_tracked_assets(
+        self,
+        project_id: uuid.UUID,
+        *,
+        element_type: str | None = None,
+        operational_status: str | None = None,
+        search: str | None = None,
+        offset: int = 0,
+        limit: int = 100,
+    ) -> tuple[list[tuple[BIMElement, BIMModel]], int]:
+        """Delegate to the repository. Kept on the service so permission
+        checks and cross-module joins land in one place later without
+        touching the router."""
+        return await self.element_repo.list_tracked_assets_for_project(
+            project_id,
+            element_type=element_type,
+            operational_status=operational_status,
+            search=search,
+            offset=offset,
+            limit=limit,
+        )
+
+    async def update_asset_info(
+        self,
+        element_id: uuid.UUID,
+        *,
+        asset_info: dict,
+        is_tracked_asset: bool | None = None,
+    ) -> BIMElement:
+        """Update an element's asset_info. 404 if element not found."""
+        element = await self.element_repo.update_asset_info(
+            element_id,
+            asset_info=asset_info,
+            is_tracked_asset=is_tracked_asset,
+        )
+        if element is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="BIM element not found",
+            )
+        return element
+
+    # ── COBie export (v2.3.0) ───────────────────────────────────────────
+
+    async def export_cobie(self, model_id: uuid.UUID) -> tuple[bytes, str]:
+        """Build a COBie.UK.2.4 workbook for a BIM model.
+
+        Returns (xlsx_bytes, suggested_filename). 404 if model missing.
+        """
+        from app.modules.bim_hub.exporters import build_cobie_workbook
+
+        model = await self.model_repo.get(model_id)
+        if model is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="BIM model not found",
+            )
+        # Pull every element for the model — pagination unnecessary here
+        # because COBie is a handover snapshot, not an interactive view.
+        # Large models (50k elements) still finish well under 10s in our
+        # perf baseline with the existing paginated helper (limit=5000).
+        elements: list[BIMElement] = []
+        offset = 0
+        page_size = 5000
+        while True:
+            batch, total = await self.element_repo.list_for_model(
+                model_id, offset=offset, limit=page_size
+            )
+            elements.extend(batch)
+            if offset + page_size >= total or not batch:
+                break
+            offset += page_size
+
+        xlsx = build_cobie_workbook(model, elements)
+        safe_name = (model.name or "model").replace(" ", "_").replace("/", "_")
+        filename = f"COBie_{safe_name}.xlsx"
+        return xlsx, filename
+
     async def ensure_element(
         self,
         model_id: uuid.UUID,

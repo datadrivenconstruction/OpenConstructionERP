@@ -133,6 +133,9 @@ const ReportingPage = lazy(() =>
 const DwgTakeoffPage = lazy(() =>
   import('@/features/dwg-takeoff/DwgTakeoffPage').then((m) => ({ default: m.DwgTakeoffPage }))
 );
+const AssetsPage = lazy(() =>
+  import('@/features/bim/AssetsPage').then((m) => ({ default: m.AssetsPage }))
+);
 const BIMPage = lazy(() =>
   import('@/features/bim/BIMPage').then((m) => ({ default: m.BIMPage }))
 );
@@ -355,6 +358,7 @@ export default function App() {
         <Route path="/data-explorer" element={<P title="Data Explorer"><CadDataExplorerPage /></P>} />
         <Route path="/bim" element={<P title="BIM Viewer"><BIMPage /></P>} />
         <Route path="/bim/rules" element={<P title="BIM Rules"><BIMQuantityRulesPage /></P>} />
+        <Route path="/assets" element={<P title="Asset Register"><AssetsPage /></P>} />
         <Route path="/bim/:modelId" element={<P title="BIM Viewer"><BIMPage /></P>} />
         <Route path="/projects/:projectId/bim" element={<P title="BIM Viewer"><BIMPage /></P>} />
         <Route path="/projects/:projectId/bim/:modelId" element={<P title="BIM Viewer"><BIMPage /></P>} />

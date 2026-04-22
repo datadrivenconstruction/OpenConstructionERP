@@ -60,6 +60,9 @@ from app.core.rate_limiter import upload_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.schemas import (
+    AssetInfoUpdateRequest,
+    AssetListResponse,
+    AssetSummary,
     BIMElementBulkImport,
     BIMElementGroupCreate,
     BIMElementGroupResponse,
@@ -2100,6 +2103,135 @@ async def get_element(
     # Verify caller owns the project this element's model belongs to.
     await _verify_model_access(service, element.model_id, user_id or "")
     return BIMElementResponse.model_validate(element)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Asset Register (v2.3.0)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+def _summarise_asset(element, model) -> AssetSummary:
+    """Project BIMElement+BIMModel onto the flat AssetSummary row.
+
+    Lifts commonly-displayed fields out of the ``asset_info`` blob so
+    the frontend list can sort them without peeking into the JSON.
+    """
+    info = dict(element.asset_info or {})
+    return AssetSummary(
+        id=element.id,
+        model_id=element.model_id,
+        project_id=model.project_id,
+        model_name=model.name,
+        stable_id=element.stable_id,
+        element_type=element.element_type,
+        name=element.name,
+        storey=element.storey,
+        discipline=element.discipline,
+        asset_info=info,
+        manufacturer=info.get("manufacturer"),
+        model=info.get("model"),
+        serial_number=info.get("serial_number"),
+        warranty_until=info.get("warranty_until"),
+        operational_status=info.get("operational_status"),
+        asset_tag=info.get("asset_tag"),
+    )
+
+
+@router.get("/assets", response_model=AssetListResponse)
+async def list_assets(
+    project_id: uuid.UUID = Query(..., description="Scope the asset list to this project"),
+    element_type: str | None = Query(default=None),
+    operational_status: str | None = Query(default=None),
+    search: str | None = Query(default=None, min_length=1, max_length=200),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
+    service: BIMHubService = Depends(_get_service),
+) -> AssetListResponse:
+    """List tracked assets across every BIM model in a project.
+
+    Tracked = ``BIMElement.is_tracked_asset == True``. Managed-asset
+    rows appear on the Assets page with manufacturer / serial / warranty
+    columns lifted out of the ``asset_info`` JSON blob for convenient
+    sorting.
+    """
+    await _verify_project_access(service, project_id, user_id or "")
+    rows, total = await service.list_tracked_assets(
+        project_id,
+        element_type=element_type,
+        operational_status=operational_status,
+        search=search,
+        offset=offset,
+        limit=limit,
+    )
+    return AssetListResponse(
+        items=[_summarise_asset(element, model) for element, model in rows],
+        total=total,
+        offset=offset,
+        limit=limit,
+    )
+
+
+@router.patch("/assets/{element_id}/asset-info", response_model=BIMElementResponse)
+async def update_asset_info(
+    element_id: uuid.UUID,
+    payload: AssetInfoUpdateRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.write")),
+    service: BIMHubService = Depends(_get_service),
+) -> BIMElementResponse:
+    """Merge-update asset_info on a BIMElement.
+
+    Semantics:
+    - Any key you send overwrites the matching key in ``asset_info``.
+    - Sending ``null`` or ``""`` for a key clears that key.
+    - ``is_tracked_asset`` auto-flips to ``True`` on first non-empty
+      write; pass an explicit bool to override.
+    - Unrelated keys already in ``asset_info`` survive untouched.
+    """
+    # Locate the element first so we can verify project access.
+    element = await service.get_element(element_id)
+    await _verify_model_access(service, element.model_id, user_id or "")
+
+    updated = await service.update_asset_info(
+        element_id,
+        asset_info=payload.asset_info.model_dump(exclude_unset=False),
+        is_tracked_asset=payload.is_tracked_asset,
+    )
+    return BIMElementResponse.model_validate(updated)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# COBie Export (v2.3.0)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+@router.get("/models/{model_id}/export/cobie.xlsx")
+async def export_cobie_xlsx(
+    model_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
+    service: BIMHubService = Depends(_get_service),
+) -> StreamingResponse:
+    """Generate an ISO-19650 COBie UK 2.4 handover workbook.
+
+    The response streams an ``.xlsx`` file with seven sheets (Contact /
+    Facility / Floor / Space / Type / Component / System) built from
+    the current canonical BIM data + ``asset_info`` payload.
+    """
+    await _verify_model_access(service, model_id, user_id or "")
+    xlsx_bytes, filename = await service.export_cobie(model_id)
+    return StreamingResponse(
+        io.BytesIO(xlsx_bytes),
+        media_type=(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ),
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Content-Length": str(len(xlsx_bytes)),
+        },
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

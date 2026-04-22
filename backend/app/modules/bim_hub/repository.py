@@ -192,6 +192,130 @@ class BIMElementRepository:
         await self.session.execute(stmt)
         return count
 
+    # ── Asset Register (v2.3.0) ──────────────────────────────────────────
+
+    async def list_tracked_assets_for_project(
+        self,
+        project_id: uuid.UUID,
+        *,
+        element_type: str | None = None,
+        operational_status: str | None = None,
+        search: str | None = None,
+        offset: int = 0,
+        limit: int = 100,
+    ) -> tuple[list[tuple[BIMElement, BIMModel]], int]:
+        """List tracked assets across every model in a project.
+
+        Joins BIMElement → BIMModel so the API response can expose
+        ``model_name`` and ``project_id`` without a second round-trip.
+        Returns (element, model) tuples.
+
+        Filters:
+        - ``element_type``: exact match against BIMElement.element_type.
+        - ``operational_status``: matches ``asset_info.operational_status``
+          (JSON lookup, SQL-portable via ``JSON_EXTRACT``).
+        - ``search``: case-insensitive LIKE across stable_id/name/
+          serial_number/asset_tag/manufacturer. Tiny projects stay fast
+          because the ``is_tracked_asset`` index narrows first.
+        """
+        base = (
+            select(BIMElement, BIMModel)
+            .join(BIMModel, BIMElement.model_id == BIMModel.id)
+            .where(
+                BIMModel.project_id == project_id,
+                BIMElement.is_tracked_asset.is_(True),
+            )
+        )
+        if element_type is not None:
+            base = base.where(BIMElement.element_type == element_type)
+        if operational_status is not None:
+            # Portable JSON extraction — works on SQLite + Postgres.
+            base = base.where(
+                func.json_extract(BIMElement.asset_info, "$.operational_status")
+                == operational_status
+            )
+        if search is not None and search.strip():
+            q = f"%{search.strip().lower()}%"
+            base = base.where(
+                func.lower(BIMElement.stable_id).like(q)
+                | func.lower(func.coalesce(BIMElement.name, "")).like(q)
+                | func.lower(
+                    func.coalesce(
+                        func.json_extract(BIMElement.asset_info, "$.serial_number"),
+                        "",
+                    )
+                ).like(q)
+                | func.lower(
+                    func.coalesce(
+                        func.json_extract(BIMElement.asset_info, "$.asset_tag"),
+                        "",
+                    )
+                ).like(q)
+                | func.lower(
+                    func.coalesce(
+                        func.json_extract(BIMElement.asset_info, "$.manufacturer"),
+                        "",
+                    )
+                ).like(q)
+            )
+
+        count_stmt = select(func.count()).select_from(base.subquery())
+        total = (await self.session.execute(count_stmt)).scalar_one()
+
+        stmt = (
+            base.options(noload(BIMElement.boq_links))
+            .order_by(BIMModel.name, BIMElement.stable_id)
+            .offset(offset)
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        rows: list[tuple[BIMElement, BIMModel]] = []
+        for row in result.all():
+            element, model = row
+            rows.append((element, model))
+        return rows, total
+
+    async def update_asset_info(
+        self,
+        element_id: uuid.UUID,
+        *,
+        asset_info: dict,
+        is_tracked_asset: bool | None = None,
+    ) -> BIMElement | None:
+        """Merge-update asset_info on an element.
+
+        Behaviour:
+        - ``asset_info`` is shallow-merged into the existing JSON (pass
+          the new keys/values; pre-existing unrelated keys survive).
+        - ``is_tracked_asset`` is flipped to ``True`` automatically when
+          the merged ``asset_info`` ends up non-empty AND the caller did
+          not pass an explicit override.
+        - Returns the refreshed element, or ``None`` if not found.
+        """
+        element = await self.session.get(BIMElement, element_id)
+        if element is None:
+            return None
+
+        merged = dict(element.asset_info or {})
+        for key, value in (asset_info or {}).items():
+            # Treat empty-string / None as "clear this field" — keeps
+            # the JSON clean so AssetSummary columns don't show "" for
+            # cleared keys.
+            if value is None or (isinstance(value, str) and value == ""):
+                merged.pop(key, None)
+            else:
+                merged[key] = value
+        element.asset_info = merged
+
+        if is_tracked_asset is not None:
+            element.is_tracked_asset = is_tracked_asset
+        elif merged:
+            element.is_tracked_asset = True
+
+        await self.session.flush()
+        await self.session.refresh(element)
+        return element
+
 
 class BOQElementLinkRepository:
     """Data access for BOQElementLink."""

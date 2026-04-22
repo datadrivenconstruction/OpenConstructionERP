@@ -61,6 +61,7 @@ import {
 import BIMFilterPanel from './BIMFilterPanel';
 import BIMGroupsPanel from './BIMGroupsPanel';
 import BIMRightPanelTabs from './BIMRightPanelTabs';
+import ElementAssetCard from './ElementAssetCard';
 import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
 import { BIMConverterStatusBanner } from './BIMConverterStatusBanner';
 import { InstallConverterPrompt } from './InstallConverterPrompt';
@@ -2543,6 +2544,34 @@ export function BIMPage() {
             </div>
           </div>
         )}
+
+        {/* Asset-info card — renders right below the dimensions card when
+            exactly one element is selected. Lets the estimator attach or
+            review manufacturer / model / serial / warranty right from the
+            viewer. */}
+        {(() => {
+          if (!projectId || !selectedElementId || selectedElementIds.length > 1) return null;
+          const el = elements.find((e) => e.id === selectedElementId);
+          if (!el) return null;
+          const activeModel = models.find((m) => m.id === activeModelId);
+          return (
+            <ElementAssetCard
+              projectId={projectId}
+              elementId={selectedElementId}
+              element={{
+                id: el.id,
+                stable_id: el.stable_id ?? el.id,
+                name: el.name ?? null,
+                element_type: el.element_type ?? null,
+                model_id: activeModelId ?? '',
+                model_name: activeModel?.name ?? '',
+              }}
+              insetInlineStart={filterPanelOpen && elements.length > 0 ? 332 : 12}
+              topPx={selectedDimensions ? 210 : 60}
+              visible={Boolean(dimensionsVisible || selectedElementId)}
+            />
+          );
+        })()}
 
         {/* PDF generation indicator — shown when the upload job for the
             active model has a deferred PDF export running on the backend.
