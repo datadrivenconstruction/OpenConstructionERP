@@ -9,11 +9,12 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.1.0-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.1.0)
+[![Version](https://img.shields.io/badge/version-2.3.1-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.3.1)
 [![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi)](https://pypi.org/project/openconstructionerp/)
-[![Downloads](https://static.pepy.tech/badge/openconstructionerp/month)](https://pepy.tech/project/openconstructionerp)
+[![Downloads (pepy)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=total&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy))](https://pepy.tech/project/openconstructionerp)
 [![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers)
 [![Last commit](https://img.shields.io/github/last-commit/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/commits/main)
+
 [![Issues](https://img.shields.io/github/issues/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
@@ -27,10 +28,10 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 
 ---
 
-<details open style="width: 100%">
+<details open>
 <summary><h2>Table of Contents</h2></summary>
 
-<table style="width: 100%; table-layout: fixed;">
+<table width="100%">
 <tr>
 <td width="33%" valign="top">
 
@@ -111,6 +112,16 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 </table>
 
 </details>
+
+---
+
+⭐ <b>If you want to see new updates and database versions and if you find our tools useful please give our repositories a star to see more similar applications for the construction industry.</b>
+Star OpenConstructionERP on GitHub and be instantly notified of new releases.
+<p align="center">
+  <br>
+  <img src="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto/blob/main/DDC_in_additon/DDC_readme_content/OCE%20star%20GitHub.gif" width="100%"/>
+  <br></br>
+</p>
 
 ---
 
@@ -320,16 +331,6 @@ OpenConstructionERP covers the full lifecycle — from first sketch to final ten
                                                          │ Reports    │
                                                          └────────────┘
 ```
-
----
-
-⭐ <b>If you want to see new updates and database versions and if you find our tools useful please give our repositories a star to see more similar applications for the construction industry.</b>
-Star OpenConstructionERP on GitHub and be instantly notified of new releases.
-<p align="center">
-  <br>
-  <img src="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto/blob/main/DDC_in_additon/DDC_readme_content/OCE%20star%20GitHub.gif" width="100%"/>
-  <br></br>
-</p>
 
 ---
 
@@ -688,9 +689,8 @@ This software contains cryptographic functionality (bcrypt password
 hashing, JWT signing). Export is classified under **US EAR 740.17** (TSU
 mass-market exemption) and **EU Regulation 2021/821** (dual-use). The
 Software is **not authorised** for download, use, or re-export to
-jurisdictions subject to comprehensive OFAC sanctions (currently Cuba,
-Iran, North Korea, Syria, and the Crimea / Donetsk / Luhansk regions of
-Ukraine). See [NOTICE](NOTICE) for the full notice.
+jurisdictions subject to comprehensive OFAC sanctions. See [NOTICE](NOTICE)
+for the full notice.
 
 ## License
 
