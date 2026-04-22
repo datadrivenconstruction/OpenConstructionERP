@@ -11,14 +11,12 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 [![Version](https://img.shields.io/badge/version-2.3.1-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.3.1)
 [![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi)](https://pypi.org/project/openconstructionerp/)
-[![Downloads (pepy)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=total&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy))](https://pepy.tech/project/openconstructionerp)
+[![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp)
 [![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers)
-[![Last commit](https://img.shields.io/github/last-commit/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/commits/main)
 <br/>
-[![Issues](https://img.shields.io/github/issues/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
+[![Last commit](https://img.shields.io/github/last-commit/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/commits/main)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
-![Standards](https://img.shields.io/badge/standards-20-blueviolet)
 
 <img src="docs/screenshots/hero-overview.jpg" alt="OpenConstructionERP — Dashboard Overview" width="800" />
 
