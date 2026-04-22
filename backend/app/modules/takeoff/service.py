@@ -19,12 +19,33 @@ logger = logging.getLogger(__name__)
 _TAKEOFF_DOCUMENTS_DIR = Path.home() / ".openestimator" / "takeoff_documents"
 
 
-def _extract_pdf_pages(content: bytes) -> list[dict]:
+def _describe_pdf_input(content: bytes, *, filename: str | None = None) -> str:
+    """Build a short server-side diagnostic string for a PDF blob.
+
+    Includes size, the ``%PDF-`` magic header presence, and a filename
+    extension guess.  Kept free of any filesystem paths so the return
+    value is safe to log (but we never surface it to API callers).
+    """
+    size = len(content) if content is not None else 0
+    has_magic = bool(content and content[:5] == b"%PDF-")
+    ext = Path(filename).suffix.lower() if filename else ""
+    name_hint = filename or "<anonymous>"
+    return f"filename={name_hint!r} size={size}B ext={ext!r} has_pdf_magic={has_magic}"
+
+
+def _extract_pdf_pages(content: bytes, *, filename: str | None = None) -> list[dict]:
     """Extract text and tables from each page of a PDF.
 
     Returns a list of dicts: [{ page: 1, text: "...", tables: [...] }, ...]
+
+    Parsing failures are logged with the input fingerprint (size, magic
+    bytes, filename hint) so a production incident can be triaged
+    without needing access to the uploaded bytes themselves.  We return
+    an empty list on total failure — the caller still persists the
+    document row so the user can re-upload without losing ownership.
     """
     pages: list[dict] = []
+    input_fp = _describe_pdf_input(content, filename=filename)
     try:
         import pdfplumber
 
@@ -53,7 +74,15 @@ def _extract_pdf_pages(content: bytes) -> list[dict]:
                     }
                 )
     except Exception:
-        # If pdfplumber fails, try pymupdf as fallback
+        # First-pass parser failed — log it with the full stack and fall
+        # back to pymupdf.  We log at WARNING (not EXCEPTION) because a
+        # fallback is about to be attempted; the real red line is only
+        # drawn if both parsers fail.
+        logger.warning(
+            "takeoff.pdf_extract pdfplumber failed (%s) — falling back to pymupdf",
+            input_fp,
+            exc_info=True,
+        )
         try:
             import pymupdf
 
@@ -63,19 +92,34 @@ def _extract_pdf_pages(content: bytes) -> list[dict]:
                 pages.append({"page": i, "text": text.strip(), "tables": []})
             doc.close()
         except Exception:
-            logger.warning("PDF extraction failed with both pdfplumber and pymupdf")
+            logger.exception(
+                "takeoff.pdf_extract both pdfplumber and pymupdf failed (%s) — document will have no extracted pages",
+                input_fp,
+            )
 
     return pages
 
 
-def _count_pdf_pages(content: bytes) -> int:
-    """Count the number of pages in a PDF."""
+def _count_pdf_pages(content: bytes, *, filename: str | None = None) -> int:
+    """Count the number of pages in a PDF.
+
+    Mirrors :func:`_extract_pdf_pages` — pdfplumber first, pymupdf as a
+    fallback, zero on double-failure.  Both failure paths log the input
+    fingerprint so operators can correlate the log line with whatever
+    the caller uploaded without leaking the bytes themselves.
+    """
+    input_fp = _describe_pdf_input(content, filename=filename)
     try:
         import pdfplumber
 
         with pdfplumber.open(io.BytesIO(content)) as pdf:
             return len(pdf.pages)
     except Exception:
+        logger.warning(
+            "takeoff.pdf_count pdfplumber failed (%s) — falling back to pymupdf",
+            input_fp,
+            exc_info=True,
+        )
         try:
             import pymupdf
 
@@ -84,6 +128,10 @@ def _count_pdf_pages(content: bytes) -> int:
             doc.close()
             return count
         except Exception:
+            logger.exception(
+                "takeoff.pdf_count both pdfplumber and pymupdf failed (%s) — reporting zero pages",
+                input_fp,
+            )
             return 0
 
 
@@ -104,13 +152,37 @@ class TakeoffService:
         owner_id: str,
         project_id: str | None = None,
     ) -> TakeoffDocument:
-        """Upload and process a PDF document for takeoff."""
-        # Count pages
-        page_count = _count_pdf_pages(content)
+        """Upload and process a PDF document for takeoff.
 
-        # Extract text from each page
-        page_data = _extract_pdf_pages(content)
+        If PDF parsing fails on both pdfplumber and pymupdf the document
+        is still persisted (with 0 pages and empty text) and a
+        structured error line is emitted — the caller sees a generic
+        ``HTTPException(400)`` via the router layer, and the operator
+        sees the full stack + input fingerprint server-side.
+        """
+        # Count pages (failure-safe: logs internally and returns 0)
+        page_count = _count_pdf_pages(content, filename=filename)
+
+        # Extract text from each page (failure-safe: logs internally)
+        page_data = _extract_pdf_pages(content, filename=filename)
         full_text = "\n\n".join(p["text"] for p in page_data if p["text"])
+
+        if page_count == 0 and not page_data:
+            # Both parsers failed — neither _count_pdf_pages nor
+            # _extract_pdf_pages raised (they log + swallow by design),
+            # but the user uploaded something unreadable.  Tell the
+            # caller in generic terms; the real diagnostic is already
+            # in the server log.
+            logger.warning(
+                "takeoff.upload_document produced zero pages and empty text for "
+                "filename=%r size=%dB — rejecting upload",
+                filename,
+                size_bytes,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to parse PDF document. Please check the file and try again.",
+            )
 
         # Save the PDF file to disk so it can be retrieved later for viewing
         _TAKEOFF_DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)

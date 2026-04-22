@@ -15,6 +15,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+from app.core.cache import _RateLimitedLogger
 from app.core.events import Event, event_bus
 from app.core.vector_index import delete_one as vector_delete_one
 from app.core.vector_index import index_one as vector_index_one
@@ -23,6 +24,37 @@ from app.modules.boq.models import BOQActivityLog, Position
 from app.modules.boq.vector_adapter import boq_position_adapter
 
 logger = logging.getLogger(__name__)
+
+# Dedicated rate limiter so a transient embedding-service outage doesn't
+# flood the log — one line per (operation, error-type) per 60 s, with a
+# "+N similar" suffix on the next emit.  Mirrors the cache-layer pattern.
+_vector_warn = _RateLimitedLogger(window_seconds=60.0)
+
+
+def _is_sqlite_dialect() -> bool:
+    """Return True when the app database URL points at SQLite.
+
+    SQLite on SQLAlchemy async triggers ``MissingGreenlet`` when a
+    wildcard ``*`` event subscription writes to a separate session
+    outside the greenlet that published the event.  Detecting this once
+    at import time lets us skip registering the activity-log wildcard
+    handler on SQLite (the dev default) while keeping it on PostgreSQL
+    in production.  Uses a local import to avoid executing Settings
+    resolution at module-import time for every importer of this file.
+    """
+    try:
+        from app.config import get_settings
+
+        url = (get_settings().database_url or "").lower()
+    except Exception:  # pragma: no cover - config bootstrap should never fail
+        logger.warning(
+            "boq.events could not resolve database_url for dialect check — "
+            "assuming non-SQLite and registering the activity-log wildcard",
+            exc_info=True,
+        )
+        return False
+    return "sqlite" in url
+
 
 # ── Mapping from event names to human-readable descriptions ──────────────────
 
@@ -112,9 +144,10 @@ def _extract_project_id(data: dict) -> uuid.UUID | None:
 # ── Wildcard handler for all boq.* events ────────────────────────────────────
 
 
-# Disabled: wildcard handler causes MissingGreenlet with SQLite
-# Re-enable when using PostgreSQL
-# @event_bus.on("*")
+# SQLite + async SQLAlchemy greenlet-bridge cannot safely handle a
+# wildcard subscription that opens its own session (MissingGreenlet
+# error), so we guard registration at import time: PostgreSQL registers,
+# SQLite skips with an INFO log.  The handler itself is unchanged.
 async def _log_boq_activity(event: Event) -> None:
     """Handle all events and log BOQ-related ones to the activity table.
 
@@ -171,7 +204,13 @@ async def _log_boq_activity(event: Event) -> None:
 
 
 async def _index_position(event: Event) -> None:
-    """Re-embed a single Position row after create / update."""
+    """Re-embed a single Position row after create / update.
+
+    Failures (embedding model missing, Qdrant unreachable, LanceDB IO
+    error, etc.) are funnelled through :data:`_vector_warn` which
+    collapses duplicate ``(operation, error-type)`` pairs to one line
+    per 60 s — a long outage produces a handful of lines, not a flood.
+    """
     pid_raw = (event.data or {}).get("position_id")
     if not pid_raw:
         return
@@ -182,11 +221,7 @@ async def _index_position(event: Event) -> None:
 
     try:
         async with async_session_factory() as session:
-            stmt = (
-                select(Position)
-                .options(selectinload(Position.boq))
-                .where(Position.id == position_id)
-            )
+            stmt = select(Position).options(selectinload(Position.boq)).where(Position.id == position_id)
             row = (await session.execute(stmt)).scalar_one_or_none()
             if row is None:
                 # Race: row was deleted between publish and handler.
@@ -200,19 +235,24 @@ async def _index_position(event: Event) -> None:
                 row,
                 project_id=project_id,
             )
-    except Exception:
-        logger.debug("BOQ vector index failed for %s", pid_raw, exc_info=True)
+    except Exception as exc:  # noqa: BLE001 — outage funnel
+        _vector_warn.warn("boq.vector.index", str(pid_raw), exc)
 
 
 async def _delete_position_vector(event: Event) -> None:
-    """Remove a deleted Position row from the vector store."""
+    """Remove a deleted Position row from the vector store.
+
+    See :func:`_index_position` for the rationale behind the rate-limited
+    warning — deletes use the same embedding backend so they flake in
+    the same ways.
+    """
     pid_raw = (event.data or {}).get("position_id")
     if not pid_raw:
         return
     try:
         await vector_delete_one(boq_position_adapter, str(pid_raw))
-    except Exception:
-        logger.debug("BOQ vector delete failed for %s", pid_raw, exc_info=True)
+    except Exception as exc:  # noqa: BLE001 — outage funnel
+        _vector_warn.warn("boq.vector.delete", str(pid_raw), exc)
 
 
 # Wrappers that match the EventBus handler signature (Event → awaitable).
@@ -228,7 +268,36 @@ async def _on_position_deleted(event: Event) -> None:
     await _delete_position_vector(event)
 
 
-event_bus.subscribe("boq.position.created", _on_position_created)
-event_bus.subscribe("boq.position.updated", _on_position_updated)
-event_bus.subscribe("boq.position.deleted", _on_position_deleted)
-event_bus.subscribe("boq.position.duplicated", _on_position_created)
+def _register_handlers() -> None:
+    """Register event-bus handlers honouring the SQLite greenlet caveat.
+
+    Vector-index handlers always register (they are per-event, not
+    wildcard, so the greenlet issue does not apply).  The activity-log
+    wildcard handler only registers on non-SQLite URLs.  Calling this
+    helper is idempotent — tests that monkeypatch settings can call
+    :func:`event_bus.clear` then re-invoke it to re-evaluate the
+    dialect guard.
+    """
+    event_bus.subscribe("boq.position.created", _on_position_created)
+    event_bus.subscribe("boq.position.updated", _on_position_updated)
+    event_bus.subscribe("boq.position.deleted", _on_position_deleted)
+    event_bus.subscribe("boq.position.duplicated", _on_position_created)
+
+    if _is_sqlite_dialect():
+        # SQLite-safe path: the activity-log wildcard opens a fresh
+        # session inside the handler which trips MissingGreenlet under
+        # aiosqlite.  Skip registration until we solve the greenlet
+        # bridge properly; callers can still audit activity directly
+        # via the BOQ service layer which runs inside the original
+        # request greenlet.
+        logger.info(
+            "boq.events: skipping activity-log wildcard handler on SQLite "
+            "(MissingGreenlet with aiosqlite + separate session). "
+            "Activity log still functions via direct service calls."
+        )
+        return
+
+    event_bus.subscribe("*", _log_boq_activity)
+
+
+_register_handlers()

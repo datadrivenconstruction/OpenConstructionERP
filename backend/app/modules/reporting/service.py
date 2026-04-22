@@ -397,7 +397,12 @@ class ReportingService:
                         total_actual = float(dashboard.get("total_actual", 0))
                         budget_consumed_pct = str(round((total_actual / total_budget) * 100, 1))
                 except Exception:
-                    logger.debug("KPI snapshot: finance data unavailable", exc_info=True)
+                    logger.warning(
+                        "reporting.kpi_recalc finance.get_dashboard failed for project_id=%s — "
+                        "budget_consumed_pct will be null",
+                        pid,
+                        exc_info=True,
+                    )
 
                 try:
                     from app.modules.costmodel.service import CostModelService
@@ -409,7 +414,11 @@ class ReportingService:
                     if cm_dash.get("spi"):
                         spi = str(cm_dash["spi"])
                 except Exception:
-                    logger.debug("KPI snapshot: cost model data unavailable", exc_info=True)
+                    logger.warning(
+                        "reporting.kpi_recalc costmodel.get_dashboard failed for project_id=%s — cpi/spi will be null",
+                        pid,
+                        exc_info=True,
+                    )
 
                 # ── Safety: open defects & observations ──
                 open_defects = 0
@@ -426,7 +435,12 @@ class ReportingService:
                         open_observations = 0
                     open_defects = getattr(safety_stats, "total_incidents", 0)
                 except Exception:
-                    logger.debug("KPI snapshot: safety data unavailable", exc_info=True)
+                    logger.warning(
+                        "reporting.kpi_recalc safety.get_stats failed for project_id=%s — "
+                        "open_defects/open_observations default to 0",
+                        pid,
+                        exc_info=True,
+                    )
 
                 # ── RFIs ──
                 open_rfis = 0
@@ -437,7 +451,11 @@ class ReportingService:
                     rfi_stats = await rfi_svc.get_stats(pid)
                     open_rfis = getattr(rfi_stats, "open", 0)
                 except Exception:
-                    logger.debug("KPI snapshot: RFI data unavailable", exc_info=True)
+                    logger.warning(
+                        "reporting.kpi_recalc rfi.get_stats failed for project_id=%s — open_rfis defaults to 0",
+                        pid,
+                        exc_info=True,
+                    )
 
                 # ── Submittals ──
                 open_submittals = 0
@@ -456,7 +474,12 @@ class ReportingService:
                     ).scalar_one()
                     open_submittals = sub_count
                 except Exception:
-                    logger.debug("KPI snapshot: submittals data unavailable", exc_info=True)
+                    logger.warning(
+                        "reporting.kpi_recalc submittals count failed for project_id=%s — "
+                        "open_submittals defaults to 0",
+                        pid,
+                        exc_info=True,
+                    )
 
                 # ── Schedule progress ──
                 schedule_progress_pct: str | None = None
@@ -478,7 +501,12 @@ class ReportingService:
                         if avg_progress is not None:
                             schedule_progress_pct = str(round(avg_progress, 1))
                 except Exception:
-                    logger.debug("KPI snapshot: schedule data unavailable", exc_info=True)
+                    logger.warning(
+                        "reporting.kpi_recalc schedule.avg_progress failed for project_id=%s — "
+                        "schedule_progress_pct will be null",
+                        pid,
+                        exc_info=True,
+                    )
 
                 # ── Risk score ──
                 risk_score_avg: str | None = None
@@ -496,7 +524,11 @@ class ReportingService:
                     if avg_risk is not None:
                         risk_score_avg = str(round(avg_risk, 2))
                 except Exception:
-                    logger.debug("KPI snapshot: risk data unavailable", exc_info=True)
+                    logger.warning(
+                        "reporting.kpi_recalc risk.avg_score failed for project_id=%s — risk_score_avg will be null",
+                        pid,
+                        exc_info=True,
+                    )
 
                 # ── Create snapshot (upsert for today) ──
                 existing = None
