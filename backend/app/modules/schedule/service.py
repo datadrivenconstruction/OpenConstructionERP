@@ -23,6 +23,13 @@ from sqlalchemy.orm import noload
 
 from app.core.events import event_bus
 
+# Hard cap for bulk row loads on schedule-scoped queries. 5 000 rows keeps
+# a single CPM/relationship pass under ~50 MB on ORM-hydrated objects and
+# matches the pagination contract the v2.4.0 audit locked in. Callers that
+# legitimately need every row (e.g. CPM) log a WARNING when the cap trips
+# so ops notices before correctness silently degrades.
+MAX_SCHEDULE_ROWS: int = 5000
+
 _logger_ev = __import__("logging").getLogger(__name__ + ".events")
 
 
@@ -384,8 +391,11 @@ class ScheduleService:
         Raises:
             HTTPException 404 if the target schedule doesn't exist.
         """
-        # Verify schedule exists
-        await self.get_schedule(data.schedule_id)
+        # Verify schedule exists and snapshot its project_id for the
+        # outbound event. Snapshotted up-front so it survives any later
+        # expire_all() inside the repo layer.
+        schedule = await self.get_schedule(data.schedule_id)
+        project_id_str = str(schedule.project_id)
 
         # Auto-compute duration only when the client omitted it (sent explicit
         # null / not provided). An explicit ``duration_days=0`` is respected
@@ -445,6 +455,7 @@ class ScheduleService:
             {
                 "activity_id": str(activity.id),
                 "schedule_id": str(data.schedule_id),
+                "project_id": project_id_str,
                 "wbs_code": data.wbs_code,
             },
             source_module="oe_schedule",
@@ -488,10 +499,13 @@ class ScheduleService:
         """
         activity = await self.get_activity(activity_id)
 
-        # Capture schedule_id before update_fields() calls expire_all(),
-        # which would invalidate the ORM object and trigger a sync lazy-load
-        # (MissingGreenlet) when accessing activity.schedule_id afterwards.
+        # Capture schedule_id + project_id before update_fields() calls
+        # expire_all(), which would invalidate the ORM object and trigger a
+        # sync lazy-load (MissingGreenlet) when accessing the attributes
+        # afterwards.
         schedule_id_str = str(activity.schedule_id)
+        parent_schedule = await self.schedule_repo.get_by_id(activity.schedule_id)
+        project_id_str = str(parent_schedule.project_id) if parent_schedule else ""
 
         fields = data.model_dump(exclude_unset=True)
 
@@ -534,6 +548,7 @@ class ScheduleService:
                 {
                     "activity_id": str(activity_id),
                     "schedule_id": schedule_id_str,
+                    "project_id": project_id_str,
                     "fields": list(fields.keys()),
                 },
                 source_module="oe_schedule",
@@ -549,12 +564,22 @@ class ScheduleService:
         """
         activity = await self.get_activity(activity_id)
         schedule_id = str(activity.schedule_id)
+        # Resolve project_id before the CASCADE delete so the canonical
+        # event payload carries it. If the schedule has already been
+        # removed (race / orphan row) we fall back to an empty string
+        # rather than raising — the activity delete itself is idempotent.
+        parent_schedule = await self.schedule_repo.get_by_id(activity.schedule_id)
+        project_id_str = str(parent_schedule.project_id) if parent_schedule else ""
 
         await self.activity_repo.delete(activity_id)
 
         await _safe_publish(
             "schedule.activity.deleted",
-            {"activity_id": str(activity_id), "schedule_id": schedule_id},
+            {
+                "activity_id": str(activity_id),
+                "schedule_id": schedule_id,
+                "project_id": project_id_str,
+            },
             source_module="oe_schedule",
         )
 
@@ -1565,7 +1590,10 @@ class ScheduleService:
         Raises:
             HTTPException 404 if schedule not found or has no activities.
         """
-        await self.get_schedule(schedule_id)
+        schedule = await self.get_schedule(schedule_id)
+        # Snapshot project_id before any expire_all() so we can emit the
+        # canonical event without a sync lazy-load (MissingGreenlet).
+        schedule_project_id = str(schedule.project_id)
 
         activities, count = await self.activity_repo.list_for_schedule(schedule_id)
         if count == 0:
@@ -1595,17 +1623,32 @@ class ScheduleService:
         # Parse dependencies: map activity_id -> list of (predecessor_id, type, lag)
         deps: dict[str, list[tuple[str, str, int]]] = {d["id"]: [] for d in act_data}
 
-        # 1. Load explicit ScheduleRelationship records from the database
+        # 1. Load explicit ScheduleRelationship records from the database.
+        #    CPM correctness requires every relationship — we can't paginate
+        #    the result set and still produce a valid forward/backward pass.
+        #    Instead we apply a hard cap (MAX_SCHEDULE_ROWS) and log a
+        #    WARNING if we hit it so ops is alerted before the analysis
+        #    silently truncates a real-world schedule.
         from sqlalchemy import select
 
         from app.modules.schedule.models import ScheduleRelationship
 
-        rel_stmt = select(ScheduleRelationship).where(
-            ScheduleRelationship.schedule_id == schedule_id
+        rel_stmt = (
+            select(ScheduleRelationship)
+            .where(ScheduleRelationship.schedule_id == schedule_id)
+            .limit(MAX_SCHEDULE_ROWS)
         )
         rel_result = await self.session.execute(rel_stmt)
+        rel_rows = list(rel_result.scalars().all())
+        if len(rel_rows) >= MAX_SCHEDULE_ROWS:
+            logger.warning(
+                "CPM relationship load capped at MAX_SCHEDULE_ROWS=%d for schedule=%s "
+                "— critical path may be incomplete. Consider splitting the schedule.",
+                MAX_SCHEDULE_ROWS,
+                schedule_id,
+            )
         seen_pairs: set[tuple[str, str]] = set()
-        for r in rel_result.scalars().all():
+        for r in rel_rows:
             pred_id = str(r.predecessor_id)
             succ_id = str(r.successor_id)
             if pred_id in active_ids and succ_id in active_ids:
@@ -1790,10 +1833,15 @@ class ScheduleService:
                 metadata_=existing_meta,
             )
 
+        # Canonical inter-module event — consumed by reporting / analytics.
+        # Payload is intentionally flat + JSON-serialisable so the webhook
+        # dispatcher can forward it without adapter code.
         await _safe_publish(
-            "schedule.cpm.calculated",
+            "schedule.critical_path.recomputed",
             {
+                "activity_id": "",  # recompute is schedule-scoped, not activity-scoped
                 "schedule_id": str(schedule_id),
+                "project_id": str(schedule_project_id),
                 "project_duration": project_duration,
                 "critical_count": len(critical_results),
             },
@@ -1922,13 +1970,26 @@ class ScheduleService:
             LaborCostByPhaseRow,
         )
 
+        # Phase rollup must aggregate over every activity for the project.
+        # We can't paginate and still produce a correct total, so we apply
+        # the shared MAX_SCHEDULE_ROWS guard and log a WARNING if we hit
+        # it — the response will then reflect only the first slice but
+        # ops is notified that the rollup is incomplete.
         stmt = (
             _select(Activity)
             .join(Schedule, Activity.schedule_id == Schedule.id)
             .where(Schedule.project_id == project_id)
+            .limit(MAX_SCHEDULE_ROWS)
         )
         result = await self.session.execute(stmt)
         activities: list[Activity] = list(result.scalars().all())
+        if len(activities) >= MAX_SCHEDULE_ROWS:
+            logger.warning(
+                "Labour-cost rollup capped at MAX_SCHEDULE_ROWS=%d for project=%s "
+                "— phase totals may be incomplete.",
+                MAX_SCHEDULE_ROWS,
+                project_id,
+            )
 
         if not activities:
             return LaborCostByPhaseResponse()

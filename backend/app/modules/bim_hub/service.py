@@ -57,6 +57,14 @@ from app.modules.boq.models import BOQ, Position
 logger = logging.getLogger(__name__)
 _logger_events = logging.getLogger(__name__ + ".events")
 
+# Hard cap for bulk row loads on bim_hub queries that cannot meaningfully
+# paginate (orphan scans, dynamic-group membership resolution). 5 000
+# rows keeps these paths under ~20 MB in memory while still being large
+# enough for realistic BIM models (typical RVT file: 2 – 8 k elements).
+# When the cap trips we log at WARNING so ops spots trunc before a
+# silent correctness regression ships.
+MAX_BIM_HUB_ROWS: int = 5000
+
 
 async def _safe_publish(
     name: str,
@@ -376,10 +384,32 @@ class BIMHubService:
             return {"scanned": 0, "removed_models": 0, "removed_projects": 0, "bytes_freed": 0}
 
         # Load all known model ids from the DB in a single query.
+        # Orphan detection NEEDS every live id — an unpaginated load on a
+        # huge tenant would OOM us, so we apply the MAX_BIM_HUB_ROWS cap
+        # and log a WARNING if we hit it.  When the cap trips we bail
+        # out of the cleanup run entirely: deleting a model dir for a row
+        # that simply got dropped by the cap would be silent data loss,
+        # and that is not a trade-off we make.
         from app.modules.bim_hub.models import BIMModel
 
-        result = await self.session.execute(select(BIMModel.id))
-        known_ids = {str(row[0]) for row in result.all()}
+        id_stmt = select(BIMModel.id).limit(MAX_BIM_HUB_ROWS)
+        result = await self.session.execute(id_stmt)
+        id_rows = list(result.all())
+        if len(id_rows) >= MAX_BIM_HUB_ROWS:
+            logger.warning(
+                "Orphan cleanup aborted: known-model load capped at "
+                "MAX_BIM_HUB_ROWS=%d. Re-run after the table has been "
+                "pruned or raise the cap if this is a legitimate size.",
+                MAX_BIM_HUB_ROWS,
+            )
+            return {
+                "scanned": 0,
+                "removed_models": 0,
+                "removed_projects": 0,
+                "bytes_freed": 0,
+                "skipped_reason": "known_model_cap_hit",
+            }
+        known_ids = {str(row[0]) for row in id_rows}
 
         scanned = 0
         removed_models = 0
@@ -2312,6 +2342,8 @@ class BIMHubService:
         project_id: uuid.UUID,
         *,
         model_id: uuid.UUID | None = None,
+        limit: int = 500,
+        offset: int = 0,
     ) -> list[BIMElementGroupResponse]:
         """List element groups for a project, optionally scoped to one model.
 
@@ -2319,11 +2351,22 @@ class BIMHubService:
         ``member_element_ids``; it is NOT re-resolved on list calls. Callers
         that need up-to-the-second membership should PATCH the group (which
         triggers a re-resolve) or fetch via the dedicated resolve endpoint.
+
+        Paginated to keep per-request memory bounded on large tenants.
+        ``limit`` is clamped to ``MAX_BIM_HUB_ROWS`` so callers can't bypass
+        the hard cap by passing a gigantic value.
         """
+        effective_limit = max(1, min(int(limit), MAX_BIM_HUB_ROWS))
+        effective_offset = max(0, int(offset))
+
         stmt = select(BIMElementGroup).where(BIMElementGroup.project_id == project_id)
         if model_id is not None:
             stmt = stmt.where(BIMElementGroup.model_id == model_id)
-        stmt = stmt.order_by(BIMElementGroup.created_at.asc())
+        stmt = (
+            stmt.order_by(BIMElementGroup.created_at.asc())
+            .offset(effective_offset)
+            .limit(effective_limit)
+        )
         result = await self.session.execute(stmt)
         groups = list(result.scalars().all())
         return [self._group_to_response(g) for g in groups]
@@ -2514,10 +2557,26 @@ class BIMHubService:
         if group.model_id is not None:
             base = base.where(BIMElement.model_id == group.model_id)
         else:
-            # Constrain to every model belonging to the project.
-            model_ids_stmt = select(BIMModel.id).where(BIMModel.project_id == group.project_id)
+            # Constrain to every model belonging to the project. Capped at
+            # MAX_BIM_HUB_ROWS — a single project with >5 000 models is
+            # already an outlier, and the downstream IN-clause would blow
+            # out the query planner. We log at WARNING so ops sees the
+            # trunc before a silent correctness loss.
+            model_ids_stmt = (
+                select(BIMModel.id)
+                .where(BIMModel.project_id == group.project_id)
+                .limit(MAX_BIM_HUB_ROWS)
+            )
             model_ids_result = await self.session.execute(model_ids_stmt)
-            model_ids = [row[0] for row in model_ids_result.all()]
+            model_id_rows = list(model_ids_result.all())
+            if len(model_id_rows) >= MAX_BIM_HUB_ROWS:
+                logger.warning(
+                    "Group resolve capped at MAX_BIM_HUB_ROWS=%d models for "
+                    "project=%s — membership may be incomplete.",
+                    MAX_BIM_HUB_ROWS,
+                    group.project_id,
+                )
+            model_ids = [row[0] for row in model_id_rows]
             if not model_ids:
                 return []
             base = base.where(BIMElement.model_id.in_(model_ids))
@@ -2568,6 +2627,20 @@ class BIMHubService:
             category_values = category if isinstance(category, list) else [category]
             category_values = [str(v) for v in category_values if v]
 
+        # Both resolver branches must return every matching element for
+        # the group to be correct. We apply MAX_BIM_HUB_ROWS as a hard
+        # safety rail and log a WARNING if we trip it — at that point
+        # the membership is authoritatively incomplete, and ops should
+        # either split the group filter or raise the cap consciously.
+        def _warn_if_capped(rows: list[BIMElement]) -> None:
+            if len(rows) >= MAX_BIM_HUB_ROWS:
+                logger.warning(
+                    "Dynamic-group resolve capped at MAX_BIM_HUB_ROWS=%d "
+                    "for group=%s — member list is incomplete.",
+                    MAX_BIM_HUB_ROWS,
+                    group.id,
+                )
+
         # On Postgres: use @> JSON containment when possible (property_filter
         # only; category with multiple values still needs Python-side check).
         if is_postgres and expected_props and not category_values:
@@ -2575,14 +2648,18 @@ class BIMHubService:
             from sqlalchemy.dialects.postgresql import JSONB
 
             base = base.where(cast(BIMElement.properties, JSONB).contains(expected_props))
+            base = base.limit(MAX_BIM_HUB_ROWS)
             result = await self.session.execute(base)
             elements = list(result.scalars().all())
+            _warn_if_capped(elements)
             return [e.id for e in elements]
 
         # Fallback: load candidates and filter in Python. This is the path
         # used on SQLite and whenever we need list-semantics for ``category``.
+        base = base.limit(MAX_BIM_HUB_ROWS)
         result = await self.session.execute(base)
         elements = list(result.scalars().all())
+        _warn_if_capped(elements)
 
         def _matches(elem: BIMElement) -> bool:
             props = elem.properties or {}
