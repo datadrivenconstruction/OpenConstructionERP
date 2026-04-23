@@ -72,6 +72,16 @@ dependencies = [
     "trimesh>=4.0.0",
     # DWG/DXF parsing for 2D takeoff viewer
     "ezdxf>=0.18.0",
+    # Analytical queries on snapshot Parquet files (dashboards layer).
+    # Promoted to base in v2.5.0 — the dashboard layer treats DuckDB as
+    # load-bearing for filter / aggregation / FTS endpoints. Previously
+    # lived in [analytics] as optional; fallback path through pure-pyarrow
+    # still exists for row-level reads but isn't sufficient for the
+    # dashboard workflow.
+    "duckdb>=1.2.0",
+    # Fuzzy autocomplete for attribute-value suggestions (T03). Small
+    # wheel, no deps; much faster than pure-Python ratio loops.
+    "rapidfuzz>=3.0.0",
 ]
 
 [project.scripts]
@@ -124,12 +134,10 @@ cv = [
     "pymupdf>=1.25.0",
     "Pillow>=12.1.1",
 ]
-# Analytical queries on BIM element Parquet files via DuckDB.
-# When not installed the dataframe endpoints fall back to pure-pyarrow
-# row-level filtering (slower but functional).
-analytics = [
-    "duckdb>=1.2.0",
-]
+# Deprecated alias since v2.5.0 — `duckdb` is in base deps now.
+# Kept so existing `pip install openconstructionerp[analytics]` commands
+# continue to work without failing.
+analytics = []
 # S3-compatible object storage backend (MinIO / AWS S3 / Backblaze B2 /
 # DigitalOcean Spaces).  Enables ``storage_backend=s3`` in settings so
 # BIM/CAD blobs live in a bucket instead of the local filesystem.

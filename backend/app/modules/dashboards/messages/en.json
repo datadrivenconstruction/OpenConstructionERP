@@ -1,0 +1,22 @@
+{
+  "common.ok": "OK",
+  "common.unknown_error": "An unexpected error occurred.",
+  "module.display_name": "Dashboards",
+  "snapshot.label.required": "A snapshot label is required.",
+  "snapshot.label.duplicate": "A snapshot with this label already exists in the project.",
+  "snapshot.label.too_long": "Snapshot label is too long (max 200 characters).",
+  "snapshot.not_found": "Snapshot not found.",
+  "snapshot.access_denied": "You do not have access to this snapshot.",
+  "snapshot.manifest.missing_keys": "Snapshot manifest is missing required keys: {keys}.",
+  "snapshot.parquet.missing_entities": "Snapshot has no entities to analyse.",
+  "snapshot.parquet.not_local": "This storage backend cannot expose Parquet files to DuckDB yet. Switch STORAGE_BACKEND to 'local' or install the DuckDB httpfs extension.",
+  "dashboard.scope.promote_admin_only": "Only administrators can promote a dashboard to organisation scope.",
+  "dashboard.yaml.invalid": "Dashboard spec is not valid YAML: {reason}.",
+  "dashboard.yaml.schema_violation": "Dashboard spec does not match the expected schema: {reason}.",
+  "chart.auto.attribute_not_found": "The attribute '{attribute}' was not found in category '{category}'.",
+  "filter.attribute.unknown": "Filter attribute '{attribute}' is not present in this snapshot's schema.",
+  "filter.operator.unsupported": "Filter operator '{op}' is not supported.",
+  "import.csv.encoding_unknown": "Could not detect the encoding of the uploaded file.",
+  "import.column.missing": "The file is missing a required column: {column}.",
+  "export.no_rows": "There is nothing to export — the query returned zero rows."
+}

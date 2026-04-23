@@ -5,6 +5,44 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Dashboards layer — Phase 0 foundation (T00)
+
+First instalment of the 13-task dashboards / compliance / cost-match
+roadmap documented in `CLAUDE-DASHBOARDS.md`. No user-facing changes yet —
+this landing is pure scaffolding so later phases have a running baseline.
+
+**New modules** (auto-discovered via `ModuleLoader`):
+
+- `oe_dashboards` (core) — will host snapshot registry, cascade filters, dashboards, explore, integrity overview, 3D sync, federation, historical navigator.
+- `oe_compliance_ai` (core, depends on `oe_dashboards`, optionally on `oe_ai`) — DSL engine + NL rule builder.
+- `oe_cost_match` (core, depends on `oe_costs` + `oe_dashboards`) — CWICR matcher.
+
+Each module ships a `manifest.py`, empty `router.py` (with a `/_health` probe for the loader to verify mount), `events.py` with the taxonomy constants other modules will consume, and a `messages/` bundle in English / German / Russian.
+
+**Core primitives** (inside `oe_dashboards`):
+
+- `snapshot_storage.py` — deterministic Parquet key layout
+  (`dashboards/<project_id>/<snapshot_id>/{entities,materials,source_files,attribute_value_index}.parquet` + `manifest.json`), DataFrame → Parquet serialisation through pyarrow, and `resolve_local_parquet_path` so DuckDB can `read_parquet('…')` off the `LocalStorageBackend` without copying. Non-local backends raise a typed `ParquetNotLocalError`; S3 / httpfs support is a follow-up.
+- `duckdb_pool.py` — LRU-cached, read-only DuckDB connections keyed by snapshot id. Registers each Parquet file as a view so analytical SQL reads `FROM entities`, not long absolute paths. Errors route through the `_RateLimitedLogger` from `app.core.cache`, matching the v2.4.0 observability pattern.
+
+**Dependency bump**:
+
+- `duckdb>=1.2.0` promoted from the `[analytics]` extra into base dependencies (ADR-001). Wheel grows ~50 MB; the extra is kept as a deprecated-empty alias so prior `pip install openconstructionerp[analytics]` commands still work.
+- `rapidfuzz>=3.0.0` added to base for T03 autocomplete.
+
+**Docs**:
+
+- New `docs/adr/` directory + `docs/adr/README.md` index.
+- `docs/adr/001-snapshot-storage-model.md` — why SQL meta + Parquet data + DuckDB queries beat pure-SQL and pure-columnar alternatives.
+- `CLAUDE-DASHBOARDS.md` (repo root) — full 13-task plan adapted to the existing modular architecture (fixes stack conflicts in the original draft: no PG-only, no "pick a 3D viewer" ADR, no parallel validation engine, no vendor AI SDKs).
+
+**Tests**:
+
+- `backend/tests/unit/test_dashboards_scaffolding.py` — 25 tests covering manifests, router mounts, i18n coverage parity, snapshot-storage key composition, Parquet round-trip on `LocalStorageBackend`, `ParquetNotLocalError` on other backends, DuckDB pool execute / LRU eviction / invalidate, event taxonomy constants.
+- Full backend suite: **1470 / 1470 green** (1445 + 25 new).
+
 ## [2.4.0] — 2026-04-22
 
 ### Observability + i18n — audit-driven hardening continues

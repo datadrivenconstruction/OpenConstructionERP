@@ -1,0 +1,22 @@
+{
+  "common.ok": "ОК",
+  "common.unknown_error": "Произошла неожиданная ошибка.",
+  "module.display_name": "Дашборды",
+  "snapshot.label.required": "Название снапшота обязательно.",
+  "snapshot.label.duplicate": "Снапшот с таким названием уже существует в проекте.",
+  "snapshot.label.too_long": "Название снапшота слишком длинное (максимум 200 символов).",
+  "snapshot.not_found": "Снапшот не найден.",
+  "snapshot.access_denied": "У вас нет доступа к этому снапшоту.",
+  "snapshot.manifest.missing_keys": "В манифесте снапшота отсутствуют обязательные поля: {keys}.",
+  "snapshot.parquet.missing_entities": "В снапшоте нет данных для анализа.",
+  "snapshot.parquet.not_local": "Текущее хранилище пока не поддерживает передачу Parquet-файлов в DuckDB. Переключите STORAGE_BACKEND на 'local' или установите расширение DuckDB httpfs.",
+  "dashboard.scope.promote_admin_only": "Только администратор может повысить дашборд до уровня организации.",
+  "dashboard.yaml.invalid": "Спецификация дашборда не является корректным YAML: {reason}.",
+  "dashboard.yaml.schema_violation": "Спецификация дашборда не соответствует ожидаемой схеме: {reason}.",
+  "chart.auto.attribute_not_found": "Атрибут '{attribute}' не найден в категории '{category}'.",
+  "filter.attribute.unknown": "Атрибут фильтра '{attribute}' отсутствует в схеме этого снапшота.",
+  "filter.operator.unsupported": "Оператор фильтра '{op}' не поддерживается.",
+  "import.csv.encoding_unknown": "Не удалось определить кодировку загруженного файла.",
+  "import.column.missing": "В файле отсутствует обязательная колонка: {column}.",
+  "export.no_rows": "Экспортировать нечего — запрос вернул ноль строк."
+}
