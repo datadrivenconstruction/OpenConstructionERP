@@ -5,6 +5,47 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] — 2026-04-22
+
+### Observability + i18n — audit-driven hardening continues
+
+**Structured error logging** (slice C)
+
+Replaces bare `except Exception: pass` / `logger.debug(...)` blocks flagged by the v2.3.0 audit with WARNING/EXCEPTION lines that carry operation names and entity IDs, so production incidents are triageable from logs.
+
+- `reporting/service.auto_recalculate_kpis` — 7 sub-module failure paths log at WARNING with `reporting.kpi_recalc <op> failed for project_id=…` and original stack. Fallback semantics (null field, zero count) preserved exactly; only visibility changes.
+- `takeoff/service._extract_pdf_pages` / `_count_pdf_pages` — new input fingerprint helper (size / magic-byte / extension, never absolute paths) and the real pdfplumber / PyMuPDF exception on first-pass failure at WARNING, `logger.exception` when both parsers fail. `upload_document` rejects a double-parse-failure with a generic 400 while keeping the diagnostic server-side only.
+- `boq/events` — re-enables the wildcard activity-log handler behind a dialect guard (registers on PostgreSQL, skips on SQLite with a single INFO line; the aiosqlite greenlet bridge still trips MissingGreenlet). Vector-index failures upgrade from DEBUG to WARNING and funnel through `_RateLimitedLogger` from `app.core.cache`, so a 30-min embedding outage emits a handful of lines per operation instead of thousands.
+- `core/storage.StorageBackend.open_stream` — downgrades from unconditional `NotImplementedError` to a safe default that yields `read_bytes()` as a single chunk (with a DEBUG trace note). Double-missing override paths still raise `NotImplementedError` with a pointer to the two hooks authors can implement.
+- 28 new unit tests across `test_reporting_error_logging.py` / `test_takeoff_error_logging.py` / `test_boq_events.py` / `test_storage_open_stream.py` using the `caplog` pattern from `test_cache_logging.py`.
+
+**Validation i18n + GAEB expansion** (slice D)
+
+- `backend/app/core/validation/messages/` — new self-contained translation package co-located with the rules it serves.
+  - `__init__.py` — `MessageBundle` loader with a cached, thread-safe `translate(key, locale, **params)` API. Fallback chain: `locale → en → raw key` (logged WARNING, deduped so a 1 000-row BOQ doesn't log 1 000 lines).
+  - `en.json` / `de.json` / `ru.json` — 87 keys each, fully in sync. English is the source of truth; German and Russian cover every key.
+- `core/validation/rules/__init__.py` — all 42 built-in rules now call `translate(...)` for user-facing `message` / `suggestion` text. `RuleResult.details` (structured data) stays untouched by design. Active locale is read from `ValidationContext.metadata['locale']`, so the engine API is unchanged; omitting the key preserves pre-refactor English output (backward-compatible).
+- **GAEB rule set expanded from 1 → 5** (aligned with CLAUDE.md Phase 1 DACH focus):
+  - `gaeb.lv_structure` — warns on leaf positions missing parent_id.
+  - `gaeb.einheitspreis_sanity` — **errors** on zero/negative Einheitspreis for non-lump-sum positions (would break GAEB X83 Angebotsabgabe).
+  - `gaeb.trade_section_code` — warns on top-level sections missing a 3-digit Leistungsbereich code (accepts either `classification.gaeb_lb` or a matching ordinal prefix).
+  - `gaeb.quantity_decimals` — warns on >3 decimals (GAEB X83 cap). `Decimal(str(value))` roundtrip strips IEEE-754 artefacts so `0.3` is not flagged as ~16 decimals.
+- **Total validation rules: 42 → 46; GAEB set: 1 → 5.**
+- 44 new unit tests across `test_validation_i18n.py` (bundle loader, fallback chain, rule wiring, locale coverage) and `test_gaeb_rules.py` (pass/fail fixture for every new rule + end-to-end engine smoke test in German).
+
+### Tests
+
+- **Backend**: +72 new unit tests (28 slice C + 44 slice D). Full suite: **1445 / 1445 green**.
+
+### Compatibility
+
+- `ValidationContext.metadata['locale']` is optional — omitting it keeps pre-v2.4.0 English messages.
+- `StorageBackend.open_stream` no longer raises by default; custom backends that relied on the exception to signal "not implemented" should override and raise explicitly.
+
+### Deferred from this release
+
+Three slices identified in the audit were scoped out of v2.4.0 pending further review: authentication/IDOR hotfixes (erp_chat, costs `/autocomplete` and `/search`, reporting `list_kpi_history`), pagination on unbounded `.scalars().all()` calls (schedule, bim_hub), and event-bus adoption in five silent modules (costs, projects, finance, tendering, validation). These remain tracked for a follow-up patch.
+
 ## [2.3.1] — 2026-04-22
 
 ### Hardening pass from the v2.3.0 post-release audit
