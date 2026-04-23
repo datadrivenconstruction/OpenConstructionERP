@@ -1,0 +1,5 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Cost Match",
+  "match.semantic.not_installed": "Semantische Kostenzuordnung benötigt `pip install openconstructionerp[semantic]`. Es werden nur exakte Treffer angezeigt; installieren Sie das Extra für unscharfe Zuordnung."
+}
