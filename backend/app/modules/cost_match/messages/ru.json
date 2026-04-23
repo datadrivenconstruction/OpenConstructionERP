@@ -1,0 +1,5 @@
+{
+  "common.ok": "ОК",
+  "module.display_name": "Cost Match",
+  "match.semantic.not_installed": "Для семантического сопоставления нужен `pip install openconstructionerp[semantic]`. Сейчас показаны только точные совпадения; установите extra для нечёткого сопоставления."
+}

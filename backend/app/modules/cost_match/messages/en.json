@@ -1,0 +1,5 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Cost Match",
+  "match.semantic.not_installed": "Semantic matching requires `pip install openconstructionerp[semantic]`. Exact-match results are shown; install the extra for fuzzy cost matching."
+}

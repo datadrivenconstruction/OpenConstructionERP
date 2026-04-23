@@ -1,0 +1,22 @@
+{
+  "common.ok": "OK",
+  "common.unknown_error": "Ein unerwarteter Fehler ist aufgetreten.",
+  "module.display_name": "Dashboards",
+  "snapshot.label.required": "Ein Snapshot-Label ist erforderlich.",
+  "snapshot.label.duplicate": "Ein Snapshot mit diesem Label existiert in diesem Projekt bereits.",
+  "snapshot.label.too_long": "Snapshot-Label ist zu lang (max. 200 Zeichen).",
+  "snapshot.not_found": "Snapshot nicht gefunden.",
+  "snapshot.access_denied": "Sie haben keinen Zugriff auf diesen Snapshot.",
+  "snapshot.manifest.missing_keys": "Im Snapshot-Manifest fehlen erforderliche Schlüssel: {keys}.",
+  "snapshot.parquet.missing_entities": "Der Snapshot enthält keine auswertbaren Elemente.",
+  "snapshot.parquet.not_local": "Dieses Storage-Backend kann Parquet-Dateien noch nicht an DuckDB durchreichen. Stellen Sie STORAGE_BACKEND auf 'local' oder installieren Sie die DuckDB-httpfs-Erweiterung.",
+  "dashboard.scope.promote_admin_only": "Nur Administratoren können ein Dashboard auf Organisations-Scope heben.",
+  "dashboard.yaml.invalid": "Dashboard-Spezifikation ist kein gültiges YAML: {reason}.",
+  "dashboard.yaml.schema_violation": "Dashboard-Spezifikation entspricht nicht dem erwarteten Schema: {reason}.",
+  "chart.auto.attribute_not_found": "Das Attribut '{attribute}' wurde in der Kategorie '{category}' nicht gefunden.",
+  "filter.attribute.unknown": "Filter-Attribut '{attribute}' existiert in diesem Snapshot nicht.",
+  "filter.operator.unsupported": "Filter-Operator '{op}' wird nicht unterstützt.",
+  "import.csv.encoding_unknown": "Die Kodierung der hochgeladenen Datei konnte nicht erkannt werden.",
+  "import.column.missing": "Der Datei fehlt eine erforderliche Spalte: {column}.",
+  "export.no_rows": "Es gibt nichts zu exportieren — die Abfrage lieferte keine Zeilen."
+}
