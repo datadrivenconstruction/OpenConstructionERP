@@ -14,6 +14,30 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '2.4.0',
+    date: '2026-04-22',
+    changes: [
+      'Observability: reporting.auto_recalculate_kpis — 7 silent fallbacks now log at WARNING with project_id and full stack; fallback values (null / 0) preserved exactly',
+      'Observability: takeoff PDF parsing — real pdfplumber/PyMuPDF exceptions surface in logs with size/magic-byte fingerprint (never absolute paths); double-failure returns a generic 400, keeps diagnostics server-side',
+      'Observability: boq wildcard activity-log handler re-enabled behind a SQLite/PostgreSQL dialect guard; vector-index failures funneled through the 60 s rate-limited logger instead of thousand-line DEBUG spam',
+      'Observability: StorageBackend.open_stream — safe default yields read_bytes() as a single chunk instead of raising NotImplementedError unconditionally',
+      'i18n: all 42 built-in validation rules extract user-facing message / suggestion text to locale JSON bundles (en / de / ru, 87 keys each); locale read from ValidationContext.metadata["locale"], omission keeps pre-refactor English output',
+      'Validation: GAEB rule set expanded from 1 → 5 — lv_structure, einheitspreis_sanity (ERROR), trade_section_code, quantity_decimals. Total built-in rules: 42 → 46',
+      'Tests: +72 new unit tests (28 observability + 44 i18n/GAEB). Full backend suite: 1445 / 1445 green',
+    ],
+  },
+  {
+    version: '2.3.1',
+    date: '2026-04-22',
+    changes: [
+      'Email: pluggable EmailBackend abstraction — backends: console / smtp / noop / memory; POST /auth/forgot-password now actually delivers the reset link',
+      'Security: Contact.tenant_id column + idempotent backfill from created_by; list / stats / list_by_company scope via tenant_id with legacy-row fallback',
+      'Observability: cache error logging — removed four except: pass blocks in RedisCache get/set/delete; rate-limited dedup (60 s window)',
+      'Onboarding: `openestimate welcome` command + first-run detection + interactive "Open in browser now? [O/n]" prompt',
+      'Tests: +49 new unit tests (email / contacts / cache); 1373 / 1373 green',
+    ],
+  },
+  {
     version: '2.1.0',
     date: '2026-04-20',
     changes: [
