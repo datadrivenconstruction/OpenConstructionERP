@@ -18,11 +18,9 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 
-<video src="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/download/v2.0.0/oce_full_demo.mp4" controls width="800" poster="docs/screenshots/hero-overview.jpg" playsinline>
-  <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/download/v2.0.0/oce_full_demo.mp4"><img src="docs/screenshots/hero-overview.jpg" alt="▶ Play the 12-minute walkthrough (with music)" width="800"/></a>
-</video>
+[![▶ Play the full 12-minute walkthrough (with music)](docs/screenshots/hero-overview.jpg)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/download/v2.0.0/oce_full_demo.mp4)
 
-<sub>🎬 <b>Full 12-minute walkthrough</b> · press play · onboarding → BoQ → BIM → DWG → PDF → AI → dashboard</sub>
+<sub>🎬 <b>Click the image above</b> to play the full 12-minute walkthrough (with music) — onboarding → BoQ → BIM → DWG → PDF → AI → dashboard</sub>
 
 *100% open source · 55,000+ cost items · AI estimation · 21 languages · Self-hosted*
 
