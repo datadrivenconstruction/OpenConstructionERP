@@ -18,7 +18,11 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 
-<img src="docs/screenshots/hero-overview.jpg" alt="OpenConstructionERP — Dashboard Overview" width="800" />
+<video src="docs/media/oce_full_demo.mp4" controls width="800" poster="docs/screenshots/hero-overview.jpg" playsinline muted>
+  <a href="docs/media/oce_full_demo.mp4">▶ Full 12-minute product walkthrough (with music) — click to play</a>
+</video>
+
+<sub>🎬 <b>Full 12-minute walkthrough</b> · press play · onboarding → BoQ → BIM → DWG → PDF → AI → dashboard</sub>
 
 *100% open source · 55,000+ cost items · AI estimation · 21 languages · Self-hosted*
 
@@ -219,96 +223,79 @@ Construction cost estimation software is expensive, closed-source, and locked to
 
 ## See It In Action
 
-### Core workflows
+Each block below is a short GIF cut from the full walkthrough above — same order as the video, so you can jump to whichever workflow matters most.
 
 <table>
 <tr>
 <td align="center" width="50%">
-<strong>🎬 Full Workflow</strong><br/>
-<em>From upload to estimate — complete demo</em><br/><br/>
-<img src="docs/gifs/01_HERO_Full_Workflow.gif" alt="Full Workflow" width="400" />
-</td>
-<td align="center" width="50%">
-<strong>📸 AI Photo → Estimate</strong><br/>
-<em>Upload a construction photo, get a BOQ in seconds</em><br/><br/>
-<img src="docs/gifs/02_AI_Photo_to_Estimate.gif" alt="AI Photo to Estimate" width="400" />
-</td>
-</tr>
-<tr>
-<td align="center">
-<strong>🏗️ BIM → BOQ Takeoff</strong><br/>
-<em>Import IFC/RVT, auto-extract quantities to BOQ</em><br/><br/>
-<img src="docs/gifs/03_BIM_to_BOQ.gif" alt="BIM to BOQ" width="400" />
-</td>
-<td align="center">
-<strong>📐 PDF Takeoff</strong><br/>
-<em>Measure directly on PDF drawings</em><br/><br/>
-<img src="docs/gifs/04_PDF_Takeoff.gif" alt="PDF Takeoff" width="400" />
-</td>
-</tr>
-<tr>
-<td align="center">
-<strong>🔍 55K+ Cost Items</strong><br/>
-<em>Find any cost item across 11 regional databases</em><br/><br/>
-<img src="docs/gifs/05_Instant_Search.gif" alt="Instant Search" width="400" />
-</td>
-<td align="center">
-<strong>⚡ Build BOQ in 60 Seconds</strong><br/>
-<em>Keyboard-first editor with inline cost lookup</em><br/><br/>
-<img src="docs/gifs/06_Build_BOQ_Fast.gif" alt="Build BOQ Fast" width="400" />
-</td>
-</tr>
-</table>
-
-### Module deep-dives
-
-<table>
-<tr>
-<td align="center" width="50%">
-<strong>👤 Role-Based Setup</strong><br/>
-<em>Onboarding wizard pre-selects the right 17 of 46 modules for your role</em><br/><br/>
+<strong>👤 1 · Role-Based Onboarding</strong><br/>
+<em>Sign in as Admin / Estimator / Manager — the wizard pre-selects the right 17 of 46 modules for your role</em><br/><br/>
 <img src="docs/gifs/07_Role_Based_Onboarding.gif" alt="Role-Based Onboarding" width="400" />
 </td>
 <td align="center" width="50%">
-<strong>🌍 Multi-Region Project</strong><br/>
-<em>Any region, any standard, any currency — live map & weather built-in</em><br/><br/>
+<strong>🌍 2 · New Project, Any Region</strong><br/>
+<em>Pick currency, classification standard, regional factor — live map & weather come along for free</em><br/><br/>
 <img src="docs/gifs/08_New_Project_Global.gif" alt="New Project Global" width="400" />
 </td>
 </tr>
 <tr>
 <td align="center">
-<strong>🏗️ Bulk BIM Quantities</strong><br/>
-<em>Link 100 walls → one BOQ line with aggregated area / volume / length</em><br/><br/>
-<img src="docs/gifs/09_Bulk_Link_BIM_Group.gif" alt="Bulk Link BIM Group" width="400" />
+<strong>⚡ 3 · Build the Bill of Quantities</strong><br/>
+<em>Keyboard-first editor, 55K+ priced items, AI cost finder & Smart AI — quality score updates live</em><br/><br/>
+<img src="docs/gifs/15_BoQ_Editor.gif" alt="BoQ Editor" width="400" />
 </td>
 <td align="center">
-<strong>📐 DWG Layer Control</strong><br/>
-<em>636 wall entities across 10 layers — every one linkable to the BOQ</em><br/><br/>
-<img src="docs/gifs/10_DWG_Layers.gif" alt="DWG Layers" width="400" />
+<strong>🏗️ 4 · BIM → BOQ Bulk Link</strong><br/>
+<em>Link 100 Revit walls → one BOQ line with aggregated area / volume / length — no IfcOpenShell</em><br/><br/>
+<img src="docs/gifs/09_Bulk_Link_BIM_Group.gif" alt="Bulk Link BIM Group" width="400" />
 </td>
 </tr>
 <tr>
 <td align="center">
-<strong>💵 $6.26M in 215 Positions</strong><br/>
-<em>Real Revit project → 88 sections, CWICR-priced, quality score 99</em><br/><br/>
+<strong>📐 5 · DWG Drawings & Layers</strong><br/>
+<em>636 wall entities across 10 DWG layers — every one linkable to the BOQ, measured in place</em><br/><br/>
+<img src="docs/gifs/10_DWG_Layers.gif" alt="DWG Layers" width="400" />
+</td>
+<td align="center">
+<strong>🖊️ 6 · PDF Takeoff</strong><br/>
+<em>Drop a floorplan, measure distance / area / count, push the numbers straight into the BOQ</em><br/><br/>
+<img src="docs/gifs/16_PDF_Takeoff_v2.gif" alt="PDF Takeoff" width="400" />
+</td>
+</tr>
+<tr>
+<td align="center">
+<strong>💵 7 · Complete Estimate — $6.26M</strong><br/>
+<em>Real Revit project → 215 positions, 88 sections, CWICR-priced, quality score 99</em><br/><br/>
 <img src="docs/gifs/11_Complete_Estimate_6M.gif" alt="Complete Estimate" width="400" />
 </td>
 <td align="center">
-<strong>✅ BIM-Linked Tasks</strong><br/>
-<em>Issues tied to exact model elements, tracked on a Kanban board</em><br/><br/>
+<strong>✅ 8 · Every Module — BIM-Linked Tasks</strong><br/>
+<em>Issues tied to exact model elements, tracked on a Kanban board alongside schedule, docs & requirements</em><br/><br/>
 <img src="docs/gifs/12_Tasks_Linked_To_BIM.gif" alt="Tasks Linked To BIM" width="400" />
 </td>
 </tr>
 <tr>
 <td align="center">
-<strong>📊 Pivot → BOQ</strong><br/>
-<em>CAD-BIM Explorer pivot becomes 10 BOQ positions in one click</em><br/><br/>
+<strong>📊 9 · Data Explorer — Pivot → BOQ</strong><br/>
+<em>CAD-BIM Explorer pivot becomes 10 BOQ positions in one click — charts, data bars & drill-down included</em><br/><br/>
 <img src="docs/gifs/13_Data_Explorer_Pivot.gif" alt="Data Explorer Pivot" width="400" />
 </td>
 <td align="center">
-<strong>🗺️ Global Portfolio</strong><br/>
-<em>7 projects, 4 continents, $28.3M in active estimates — one workspace</em><br/><br/>
+<strong>📸 10 · AI Estimate from a Photo</strong><br/>
+<em>Upload a construction photo → GPT-4o + YOLO return a scoped BOQ in seconds, confidence-scored</em><br/><br/>
+<img src="docs/gifs/02_AI_Photo_to_Estimate.gif" alt="AI Photo to Estimate" width="400" />
+</td>
+</tr>
+<tr>
+<td align="center">
+<strong>🗺️ 11 · Global Portfolio Dashboard</strong><br/>
+<em>7 projects, 4 continents, $28.3M in active estimates — one workspace, one map</em><br/><br/>
 <img src="docs/gifs/14_Projects_Dashboard.gif" alt="Projects Dashboard" width="400" />
+</td>
+<td align="center">
+<strong>🔍 Bonus · Instant Search</strong><br/>
+<em>Find any of 55K+ cost items across 11 regional databases by keyword, unit or classification</em><br/><br/>
+<img src="docs/gifs/05_Instant_Search.gif" alt="Instant Search" width="400" />
 </td>
 </tr>
 </table>
