@@ -48,6 +48,7 @@ import {
   ShieldCheck,
   LayoutGrid,
   Maximize2,
+  Package,
 } from 'lucide-react';
 import { Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -58,10 +59,10 @@ import {
   serializeBIMUrlState,
   BIM_URL_STATE_KEYS,
 } from '@/shared/ui/BIMViewer/urlState';
-import BIMFilterPanel from './BIMFilterPanel';
-import BIMGroupsPanel from './BIMGroupsPanel';
+import BIMFilterGroupsPanel from './BIMFilterGroupsPanel';
 import BIMRightPanelTabs from './BIMRightPanelTabs';
 import ElementAssetCard from './ElementAssetCard';
+import BIMSnapshotsPopover from './BIMSnapshotsPopover';
 import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
 import { BIMConverterStatusBanner } from './BIMConverterStatusBanner';
 import { InstallConverterPrompt } from './InstallConverterPrompt';
@@ -1446,6 +1447,9 @@ export function BIMPage() {
   const setSummaryPanelOpen = useBIMViewerStore((s) => s.setSummaryPanelOpen);
   const dimensionsVisible = useBIMViewerStore((s) => s.dimensionsVisible);
   const setDimensionsVisible = useBIMViewerStore((s) => s.setDimensionsVisible);
+  const assetCardEnabled = useBIMViewerStore((s) => s.assetCardEnabled);
+  const setAssetCardEnabled = useBIMViewerStore((s) => s.setAssetCardEnabled);
+  const [snapshotsOpen, setSnapshotsOpen] = useState(false);
   const [filterPredicate, setFilterPredicate] = useState<
     ((el: BIMElementData) => boolean) | null
   >(null);
@@ -2025,12 +2029,18 @@ export function BIMPage() {
       }
       const search = filter.search.trim();
       if (search) criteria.name_contains = search;
+      // Prefer the explicit multi-selection when the user has Ctrl+clicked
+      // a subset — that gesture means "this is what I want", not "every
+      // element matching the current filter".  Falls back to the visible
+      // (filtered + isolated) subset otherwise.
+      const targetIds =
+        multiSelectedIds.length > 0 ? multiSelectedIds : visibleElementIds;
       setSaveGroupState({
         filterCriteria: criteria,
-        elementIds: visibleElementIds,
+        elementIds: targetIds,
       });
     },
-    [],
+    [multiSelectedIds],
   );
 
   // Isolate a saved group's member elements in the 3D viewport.
@@ -2339,6 +2349,54 @@ export function BIMPage() {
                 {t('bim.dimensions_button', { defaultValue: 'BBox Dimensions' })}
               </button>
 
+              {projectId && (
+                <button
+                  onClick={() => setSnapshotsOpen((p) => !p)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                    snapshotsOpen
+                      ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
+                      : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
+                  }`}
+                  title={t('bim.snapshots_button_title', {
+                    defaultValue: 'Data snapshots for this project',
+                  })}
+                  aria-label={t('bim.snapshots_toggle', {
+                    defaultValue: 'Toggle snapshots popover',
+                  })}
+                  aria-pressed={snapshotsOpen}
+                  data-testid="bim-snapshots-toggle"
+                >
+                  <Layers size={13} />
+                  {t('bim.snapshots_button', { defaultValue: 'Snapshots' })}
+                </button>
+              )}
+
+              <button
+                onClick={() => setAssetCardEnabled(!assetCardEnabled)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                  assetCardEnabled
+                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
+                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
+                }`}
+                title={
+                  assetCardEnabled
+                    ? t('bim.asset_card_hide', {
+                        defaultValue: 'Hide asset-info card on selection',
+                      })
+                    : t('bim.asset_card_show', {
+                        defaultValue: 'Show asset-info card on selection',
+                      })
+                }
+                aria-label={t('bim.asset_card_toggle', {
+                  defaultValue: 'Toggle asset register card',
+                })}
+                aria-pressed={assetCardEnabled}
+                data-testid="bim-asset-card-toggle"
+              >
+                <Package size={13} />
+                {t('bim.asset_card_button', { defaultValue: 'Asset Card' })}
+              </button>
+
               <button
                 onClick={() => setBoqPanelOpen(!boqPanelOpen)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
@@ -2454,8 +2512,10 @@ export function BIMPage() {
         {/* Filter sidebar — only when model has loaded elements */}
         {activeModelId && !isModelNonReady && elements.length > 0 && filterPanelOpen && (
           <div className="absolute top-0 start-0 h-full z-20 overflow-y-auto flex flex-col">
-            <BIMFilterPanel
+            <BIMFilterGroupsPanel
               elements={elements}
+              savedGroups={savedGroups}
+              projectId={projectId}
               modelId={activeModelId ?? undefined}
               modelFormat={activeModel?.model_format || activeModel?.format}
               onFilterChange={handleFilterChange}
@@ -2464,27 +2524,17 @@ export function BIMPage() {
               onQuickTakeoff={handleQuickTakeoff}
               visibleElementCount={visibleElementCount}
               onSaveAsGroup={handleSaveAsGroup}
-              savedGroups={savedGroups}
               onLinkGroupToBOQ={handleLinkGroupToBOQ}
               onDeleteGroup={handleDeleteGroup}
               onSmartFilter={handleSmartFilter}
               isolatedIds={isolatedIds}
               onClearIsolation={() => setIsolatedIds(null)}
+              onIsolateGroup={handleIsolateGroup}
+              onHighlightGroup={handleHighlightGroup}
+              onNavigateToBOQ={handleNavigateToBOQ}
+              onGroupUpdated={handleGroupUpdated}
             />
-            {/* Saved Groups panel — shows all groups with quantities + BOQ links */}
-            {savedGroups.length > 0 && (
-              <BIMGroupsPanel
-                savedGroups={savedGroups}
-                elements={elements}
-                projectId={projectId}
-                onIsolateGroup={handleIsolateGroup}
-                onHighlightGroup={handleHighlightGroup}
-                onLinkToBOQ={handleLinkGroupToBOQ}
-                onNavigateToBOQ={handleNavigateToBOQ}
-                onDeleteGroup={handleDeleteGroup}
-                onGroupUpdated={handleGroupUpdated}
-              />
-            )}
+
           </div>
         )}
 
@@ -2545,15 +2595,25 @@ export function BIMPage() {
           </div>
         )}
 
-        {/* Asset-info card — renders right below the dimensions card when
-            exactly one element is selected. Lets the estimator attach or
-            review manufacturer / model / serial / warranty right from the
-            viewer. */}
+        {/* Snapshot registry popover — toolbar button → projects-level list
+            of frozen parquet datasets (replaces the /dashboards page). */}
+        {snapshotsOpen && projectId && (
+          <BIMSnapshotsPopover
+            projectId={projectId}
+            onClose={() => setSnapshotsOpen(false)}
+          />
+        )}
+
+        {/* Asset-info card — anchored bottom-right of the viewport. Hidden
+            when the user toggles the "Asset Card" button off in the top
+            toolbar or dismisses the card directly. */}
         {(() => {
+          if (!assetCardEnabled) return null;
           if (!projectId || !selectedElementId || selectedElementIds.length > 1) return null;
           const el = elements.find((e) => e.id === selectedElementId);
           if (!el) return null;
           const activeModel = models.find((m) => m.id === activeModelId);
+          const sidebarOpen = Boolean(activeModelId && !isModelNonReady && elements.length > 0 && boqPanelOpen);
           return (
             <ElementAssetCard
               projectId={projectId}
@@ -2566,9 +2626,10 @@ export function BIMPage() {
                 model_id: activeModelId ?? '',
                 model_name: activeModel?.name ?? '',
               }}
-              insetInlineStart={filterPanelOpen && elements.length > 0 ? 332 : 12}
-              topPx={selectedDimensions ? 210 : 60}
-              visible={Boolean(dimensionsVisible || selectedElementId)}
+              rightPx={sidebarOpen ? 352 : 12}
+              bottomPx={24}
+              visible
+              onDismiss={() => setAssetCardEnabled(false)}
             />
           );
         })()}

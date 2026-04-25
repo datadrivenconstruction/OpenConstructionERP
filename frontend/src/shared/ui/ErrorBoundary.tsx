@@ -32,6 +32,28 @@ export class ErrorBoundary extends React.Component<Props, State> {
     logError(error, 'react_error', {
       componentStack: info.componentStack ?? '',
     });
+    // "Failed to fetch dynamically imported module" is the canonical stale-
+    // chunk error: Vite/Rollup rebuilt chunks with new hashes but the user's
+    // browser is still holding references to the old hashed URLs.  A one-shot
+    // reload fetches the current index.html with fresh chunk hashes and the
+    // app recovers cleanly.  We guard with sessionStorage so an actual broken
+    // build doesn't loop reload forever.
+    const msg = String(error?.message ?? '');
+    const isChunkError =
+      msg.includes('Failed to fetch dynamically imported module') ||
+      msg.includes('Importing a module script failed') ||
+      /Loading chunk \d+ failed/i.test(msg);
+    if (isChunkError) {
+      const flag = 'oe_chunk_reload_attempt';
+      const tries = Number(sessionStorage.getItem(flag) ?? '0');
+      if (tries < 1) {
+        sessionStorage.setItem(flag, String(tries + 1));
+        window.location.reload();
+        return;
+      }
+      // Second crash → real build problem; let the boundary render the UI.
+      sessionStorage.removeItem(flag);
+    }
   }
 
   handleReset = () => {

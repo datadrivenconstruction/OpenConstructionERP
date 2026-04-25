@@ -37,6 +37,15 @@ export default defineConfig({
       },
     },
   },
+  // Pre-bundle heavy deps that are imported lazily by route-level chunks.
+  // Without this, Vite discovers them only when the chunk first loads and
+  // triggers a "504 Outdated Optimize Dep" on the in-flight import — which
+  // surfaces as "Failed to fetch dynamically imported module" on the takeoff
+  // and BIM pages.  Including them up-front keeps the version hash stable
+  // across the dev session.
+  optimizeDeps: {
+    include: ['pdfjs-dist', 'pdfjs-dist/build/pdf.worker.min.mjs', 'three'],
+  },
   build: {
     rollupOptions: {
       output: {

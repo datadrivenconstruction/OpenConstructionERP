@@ -151,6 +151,13 @@ const ArchitectureMapPage = lazy(() =>
 const ProjectIntelligencePage = lazy(() =>
   import('@/features/project-intelligence/ProjectIntelligencePage').then((m) => ({ default: m.ProjectIntelligencePage }))
 );
+const SnapshotsPage = lazy(() =>
+  import('@/features/dashboards').then((m) => ({ default: m.SnapshotsPage }))
+);
+// EAC-3.1 scaffolding (RFC 35 §7) — block primitives preview. Dev-only route.
+const EacDemoPage = lazy(() =>
+  import('@/features/eac/pages/EacDemoPage').then((m) => ({ default: m.EacDemoPage }))
+);
 
 function LoadingScreen() {
   return (
@@ -393,6 +400,9 @@ export default function App() {
 
         <Route path="/analytics" element={<P title="Analytics"><AnalyticsPage /></P>} />
 
+        <Route path="/dashboards" element={<P title="Dashboards"><SnapshotsPage /></P>} />
+        <Route path="/projects/:projectId/dashboards" element={<P title="Dashboards"><SnapshotsPage /></P>} />
+
         <Route path="/reports" element={<P title="Reports"><ReportsPage /></P>} />
         <Route path="/reporting" element={<P title="Reporting Dashboards"><ReportingPage /></P>} />
 
@@ -450,6 +460,9 @@ export default function App() {
         <Route path="/about" element={<P title="About"><AboutPage /></P>} />
         <Route path="/project-intelligence" element={<P title="Project Intelligence"><ProjectIntelligencePage /></P>} />
         <Route path="/architecture" element={<P title="Architecture Map"><ArchitectureMapPage /></P>} />
+
+        {/* EAC v2 (RFC 35) — block editor primitives preview, dev-only */}
+        <Route path="/eac/demo" element={<P title="EAC Block Primitives"><EacDemoPage /></P>} />
 
         {/* Convenience route aliases — redirect to canonical paths */}
         <Route path="/dashboard" element={<Navigate to="/" replace />} />

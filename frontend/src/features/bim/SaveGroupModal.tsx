@@ -50,7 +50,15 @@ export default function SaveGroupModal({
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [isDynamic, setIsDynamic] = useState(true);
+  // Dynamic mode means "re-resolve from filter criteria every time".  If the
+  // criteria are empty (e.g. the user only Ctrl+selected elements without
+  // filtering), dynamic would resolve to *every* element in the project —
+  // never what's wanted.  Default to static and disable dynamic in that case.
+  const criteriaEmpty =
+    !filterCriteria || Object.keys(filterCriteria).length === 0;
+  const [isDynamic, setIsDynamic] = useState(false);
+  const dynamicAllowed = !criteriaEmpty;
+  const effectiveDynamic = isDynamic && dynamicAllowed;
   const [color, setColor] = useState('#2979ff');
 
   const createMut = useMutation({
@@ -59,9 +67,12 @@ export default function SaveGroupModal({
         name: name.trim(),
         description: description.trim() || undefined,
         model_id: modelId,
-        is_dynamic: isDynamic,
+        is_dynamic: effectiveDynamic,
         filter_criteria: filterCriteria,
-        element_ids: isDynamic ? undefined : elementIds,
+        // Static mode always sends the explicit element ids — dynamic relies
+        // on filter criteria.  We force static when criteria are empty so we
+        // never accidentally save "all elements in the project".
+        element_ids: effectiveDynamic ? undefined : elementIds,
         color,
       }),
     onSuccess: (group) => {
@@ -74,7 +85,12 @@ export default function SaveGroupModal({
           count: group.element_count,
         }),
       });
-      qc.invalidateQueries({ queryKey: ['bim-element-groups', projectId] });
+      qc.invalidateQueries({
+        predicate: (q) => {
+          const k = q.queryKey;
+          return Array.isArray(k) && k[0] === 'bim-element-groups' && k[1] === projectId;
+        },
+      });
       onSaved?.(group);
       onClose();
     },
@@ -172,11 +188,24 @@ export default function SaveGroupModal({
 
           {/* Dynamic vs static toggle */}
           <div className="rounded-md border border-border-light p-3 space-y-2">
-            <label className="flex items-start gap-2 cursor-pointer">
+            <label
+              className={`flex items-start gap-2 ${
+                dynamicAllowed ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+              }`}
+              title={
+                dynamicAllowed
+                  ? undefined
+                  : t('bim.group_dynamic_disabled_title', {
+                      defaultValue:
+                        'Dynamic mode needs at least one filter (storey, type, or search). Apply a filter to enable it.',
+                    })
+              }
+            >
               <input
                 type="radio"
-                checked={isDynamic}
+                checked={effectiveDynamic}
                 onChange={() => setIsDynamic(true)}
+                disabled={!dynamicAllowed}
                 className="mt-0.5"
               />
               <div className="text-xs">
@@ -184,17 +213,22 @@ export default function SaveGroupModal({
                   {t('bim.group_dynamic', { defaultValue: 'Dynamic' })}
                 </div>
                 <div className="text-content-tertiary text-[11px]">
-                  {t('bim.group_dynamic_desc', {
-                    defaultValue:
-                      'Re-compute members from the filter every time. Auto-updates when the model is re-imported.',
-                  })}
+                  {dynamicAllowed
+                    ? t('bim.group_dynamic_desc', {
+                        defaultValue:
+                          'Re-compute members from the filter every time. Auto-updates when the model is re-imported.',
+                      })
+                    : t('bim.group_dynamic_desc_disabled', {
+                        defaultValue:
+                          'Disabled — no filter is active. Apply a storey, type or search filter to enable dynamic mode.',
+                      })}
                 </div>
               </div>
             </label>
             <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="radio"
-                checked={!isDynamic}
+                checked={!effectiveDynamic}
                 onChange={() => setIsDynamic(false)}
                 className="mt-0.5"
               />
@@ -206,17 +240,17 @@ export default function SaveGroupModal({
                   {t('bim.group_static_desc', {
                     defaultValue:
                       'Snapshot the current {{count}} elements. Membership stays frozen even if the model changes.',
-                    count: visibleCount,
+                    count: elementIds.length,
                   })}
                 </div>
               </div>
             </label>
           </div>
 
-          {/* Counts pill */}
+          {/* Counts pill — show what will actually be saved */}
           <div className="flex items-center gap-2 text-[11px] text-content-tertiary">
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-oe-blue/10 text-oe-blue font-medium">
-              {visibleCount.toLocaleString()}{' '}
+              {(effectiveDynamic ? visibleCount : elementIds.length).toLocaleString()}{' '}
               {t('bim.elements', { defaultValue: 'elements' })}
             </span>
             {modelId && (
