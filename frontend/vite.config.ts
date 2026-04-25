@@ -57,7 +57,6 @@ export default defineConfig({
       'jspdf',
       'jspdf-autotable',
       'maplibre-gl',
-      'react-map-gl',
       'react-map-gl/maplibre',
       'xlsx',
       'yjs',
