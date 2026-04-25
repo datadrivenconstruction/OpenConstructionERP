@@ -287,6 +287,11 @@ export default function TakeoffViewerModule({
   const [showTextInput, setShowTextInput] = useState(false);
   const [textInputPos, setTextInputPos] = useState<Point>({ x: 0, y: 0 });
   const [textInputValue, setTextInputValue] = useState('');
+  /** Set on Escape so the imminent input onBlur skips handleTextConfirm.
+   *  Without it, the unmounting input fires blur, blur calls confirm with
+   *  the still-typed value, and a "ghost" annotation is created despite
+   *  the user pressing Escape to cancel. */
+  const textInputCancellingRef = useRef(false);
   const [rectStartPoint, setRectStartPoint] = useState<Point | null>(null);
   const [isDraggingRect, setIsDraggingRect] = useState(false);
 
@@ -2250,6 +2255,21 @@ export default function TakeoffViewerModule({
       // Tool letters — only when focus isn't in an input / textarea / etc.
       if (!shouldHandleShortcut(e.target)) return;
       if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      // Delete / Backspace removes the selected measurement.  Users coming
+      // from any other CAD/design tool expect this — without it the only
+      // way to delete is right-click → menu, which feels clunky.
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedMeasurementId) {
+        e.preventDefault();
+        setMeasurements((prev) => {
+          const target = prev.find((m) => m.id === selectedMeasurementId);
+          if (target) pushUndo({ kind: 'delete_measurement', measurement: target });
+          return prev.filter((m) => m.id !== selectedMeasurementId);
+        });
+        setSelectedMeasurementId(null);
+        return;
+      }
+
       const tool = shortcutToTool(e.key);
       if (tool) {
         e.preventDefault();
@@ -2424,17 +2444,26 @@ export default function TakeoffViewerModule({
               <div className="flex flex-col">
                 <div className="rounded-2xl bg-white dark:bg-gray-800/60 border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6 flex flex-col h-full">
                   <label
-                    aria-label={t('takeoff.landing_dropzone_aria', { defaultValue: 'Drop a PDF, PNG, JPG or TIFF here or click to browse.' })}
+                    aria-label={t('takeoff.landing_dropzone_aria', { defaultValue: 'Drop a PDF here or click to browse.' })}
                     onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.add('ring-2', 'ring-oe-blue/40'); }}
                     onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.remove('ring-2', 'ring-oe-blue/40'); }}
                     onDrop={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       e.currentTarget.classList.remove('ring-2', 'ring-oe-blue/40');
-                      const file = Array.from(e.dataTransfer.files).find((f) => f.type === 'application/pdf');
-                      if (file) {
-                        const fakeEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
+                      const dropped = Array.from(e.dataTransfer.files);
+                      if (dropped.length === 0) return;
+                      const pdf = dropped.find((f) => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+                      if (pdf) {
+                        const fakeEvent = { target: { files: [pdf] } } as unknown as React.ChangeEvent<HTMLInputElement>;
                         handleFileUpload(fakeEvent);
+                      } else {
+                        // Visible feedback so the user isn't left wondering why a non-PDF drop did nothing.
+                        addToast({
+                          type: 'warning',
+                          title: t('takeoff.landing_drop_pdf_only_title', { defaultValue: 'PDF only' }),
+                          message: t('takeoff.landing_drop_pdf_only_msg', { defaultValue: 'Image support is coming soon — drop a PDF for now.' }),
+                        });
                       }
                     }}
                     className="group/drop flex flex-col items-center justify-center gap-4 rounded-xl p-10 text-center cursor-pointer transition-all flex-1 border-2 border-dashed border-border-medium bg-gradient-to-br from-blue-50/60 via-white to-violet-50/40 dark:from-blue-950/20 dark:via-gray-800/40 dark:to-violet-950/20 hover:border-oe-blue/50 hover:shadow-md"
@@ -2447,14 +2476,11 @@ export default function TakeoffViewerModule({
                         {t('takeoff.landing_drop_here', { defaultValue: 'Drop a PDF here or click to browse' })}
                       </p>
                       <p className="text-xs text-content-tertiary mt-1">
-                        {t('takeoff.landing_size_hint', { defaultValue: 'PDF, PNG, JPG, TIFF — up to 50MB' })}
+                        {t('takeoff.landing_size_hint', { defaultValue: 'PDF — up to 50MB' })}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap justify-center">
                       <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-oe-blue/8 text-oe-blue border border-oe-blue/15 font-semibold">.pdf</span>
-                      <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-oe-blue/8 text-oe-blue border border-oe-blue/15 font-semibold">.png</span>
-                      <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-oe-blue/8 text-oe-blue border border-oe-blue/15 font-semibold">.jpg</span>
-                      <span className="text-[10px] font-mono px-2 py-1 rounded-md bg-oe-blue/8 text-oe-blue border border-oe-blue/15 font-semibold">.tiff</span>
                     </div>
                     <p className="text-[10px] text-content-quaternary leading-relaxed mt-1 text-center">
                       {t('takeoff.landing_dropzone_hint', { defaultValue: 'Architectural drawings \u00B7 floor plans \u00B7 sections \u00B7 scans' })}
@@ -2801,9 +2827,19 @@ export default function TakeoffViewerModule({
                     onChange={(e) => setTextInputValue(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleTextConfirm();
-                      if (e.key === 'Escape') { setShowTextInput(false); setTextInputValue(''); }
+                      if (e.key === 'Escape') {
+                        textInputCancellingRef.current = true;
+                        setShowTextInput(false);
+                        setTextInputValue('');
+                      }
                     }}
-                    onBlur={handleTextConfirm}
+                    onBlur={() => {
+                      if (textInputCancellingRef.current) {
+                        textInputCancellingRef.current = false;
+                        return;
+                      }
+                      handleTextConfirm();
+                    }}
                     autoFocus
                     placeholder={t('takeoff_viewer.text_placeholder', { defaultValue: 'Type annotation text...' })}
                     className="rounded border-2 bg-white/95 dark:bg-gray-800/95 px-2 py-1 text-sm font-medium outline-none shadow-lg min-w-[150px]"
