@@ -702,7 +702,7 @@ For **commercial licensing** without AGPL obligations, see
 
 ---
 
-<p align="center">
+<p align="left">
   <!-- Social Links -->
   <a href="https://x.com/datadrivenconst" target="_blank">
     <img src="https://img.shields.io/twitter/follow/datadrivenconst?logo=X&style=flat&color=%23f5f5f5" alt="Follow on X">
