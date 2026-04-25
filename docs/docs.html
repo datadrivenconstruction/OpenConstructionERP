@@ -23,7 +23,7 @@
  <!-- Open Graph -->
  <meta property="og:type" content="article">
  <meta property="og:title" content="OpenConstructionERP Documentation — Free Construction ERP">
- <meta property="og:description" content="Step-by-step guide: BOQ editor, 55K+ cost items, AI estimation, 4D/5D, CAD/BIM takeoff, Project Intelligence. 55 modules, 20 languages, v1.2.0.">
+ <meta property="og:description" content="Step-by-step guide: BOQ editor, 55K+ cost items, AI estimation, 4D/5D, CAD/BIM takeoff, Asset Register, Markups, Pivot dashboards. 40+ modules, 20 languages, v2.0.">
  <meta property="og:url" content="https://openconstructionerp.com/docs">
  <meta property="og:site_name" content="OpenConstructionERP">
 
@@ -222,7 +222,7 @@ document.querySelectorAll('.sidebar a').forEach(a=>{
 
 <nav class="nav"><div class="nav-i"><a href="/" class="nav-l">OpenConstructionERP</a><div class="nav-r"><a href="/">Home</a><a href="/docs.html" style="color:var(--blue)">Docs</a><a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank">GitHub</a><a href="/contact.html">Contact</a></div></div></nav>
 
-<div class="hero"><div class="ctr"><div style="margin-bottom:16px"><span class="bdg bdg-b">v0.9.0</span> <span class="bdg bdg-g">Open Source</span></div><h1><span>Documentation</span></h1><p>Everything you need to install, configure, and use OpenConstructionERP for professional construction cost estimation.</p><p style="margin-top:18px"><a href="https://www.youtube.com/watch?v=X06cIaroAeI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;background:#ff0000;color:#fff;font-weight:600;font-size:.9rem;text-decoration:none;box-shadow:0 4px 14px rgba(255,0,0,.25)"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.016 3.016 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.016 3.016 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.546 15.568V8.432L15.818 12l-6.272 3.568z"/></svg>Watch the 12-min walkthrough on YouTube</a></p></div></div>
+<div class="hero"><div class="ctr"><div style="margin-bottom:16px"><span class="bdg bdg-b">v2.0</span> <span class="bdg bdg-g">Open Source</span></div><h1><span>Documentation</span></h1><p>Everything you need to install, configure, and use OpenConstructionERP for professional construction cost estimation.</p><p style="margin-top:18px"><a href="https://www.youtube.com/watch?v=X06cIaroAeI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;background:#ff0000;color:#fff;font-weight:600;font-size:.9rem;text-decoration:none;box-shadow:0 4px 14px rgba(255,0,0,.25)"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.016 3.016 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.016 3.016 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.546 15.568V8.432L15.818 12l-6.272 3.568z"/></svg>Watch the 12-min walkthrough on YouTube</a></p></div></div>
 
 <!-- Full walkthrough video -->
 <div style="background:#0f172a;padding:40px 0 48px;color:#e2e8f0">
@@ -267,9 +267,9 @@ document.querySelectorAll('.sidebar a').forEach(a=>{
 </div>
 
 <div class="ctr">
-<div class="toc" style="margin-left:0"><h3>Contents</h3><ol><li><a href="#overview">Platform Overview</a></li><li><a href="#install">Installation Guide</a></li><li><a href="#boq">BOQ Editor</a></li><li><a href="#costs">Cost Database</a></li><li><a href="#takeoff">CAD/BIM &amp; PDF Takeoff</a></li><li><a href="#ai">AI Estimation</a></li><li><a href="#planning">4D Schedule &amp; 5D Cost Model</a></li><li><a href="#contacts">Contacts Directory</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#tasks">Tasks</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#rfi">RFI</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#finance">Finance</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#procurement">Procurement</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#safety">Safety</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#meetings">Meetings</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#inspections">Inspections</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#ncr">Non-Conformance Reports</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#submittals">Submittals</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#correspondence">Correspondence</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#cde">Common Data Environment</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#transmittals">Transmittals</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#bimhub">BIM Hub</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#reporting">Reporting &amp; KPI Dashboard</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#notifications">Notifications</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#comments">Comments</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#gantt">Gantt Chart</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#regional-settings">Regional Settings</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#module-system">Module System</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#regional-packs">Regional Packs</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#import-export">Import/Export</a> <span class="bdg bdg-b" style="font-size:.65rem">v0.9</span></li><li><a href="#settings">Configuration</a></li><li><a href="#api">API Reference</a></li><li><a href="#support">Support</a></li></ol></div>
+<div class="toc" style="margin-left:0"><h3>Contents</h3><ol><li><a href="#overview">Platform Overview</a></li><li><a href="#install">Installation Guide</a></li><li><a href="#boq">BOQ Editor</a></li><li><a href="#costs">Cost Database</a></li><li><a href="#takeoff">CAD/BIM &amp; PDF Takeoff</a></li><li><a href="#ai">AI Estimation</a></li><li><a href="#planning">4D Schedule &amp; 5D Cost Model</a></li><li><a href="#contacts">Contacts Directory</a></li><li><a href="#tasks">Tasks</a></li><li><a href="#rfi">RFI</a></li><li><a href="#finance">Finance</a></li><li><a href="#procurement">Procurement</a></li><li><a href="#safety">Safety</a></li><li><a href="#meetings">Meetings</a></li><li><a href="#inspections">Inspections</a></li><li><a href="#ncr">Non-Conformance Reports</a></li><li><a href="#submittals">Submittals</a></li><li><a href="#correspondence">Correspondence</a></li><li><a href="#cde">Common Data Environment</a></li><li><a href="#transmittals">Transmittals</a></li><li><a href="#bimhub">BIM Hub</a></li><li><a href="#reporting">Reporting &amp; KPI Dashboard</a></li><li><a href="#notifications">Notifications</a></li><li><a href="#comments">Comments</a></li><li><a href="#gantt">Gantt Chart</a></li><li><a href="#regional-settings">Regional Settings</a></li><li><a href="#module-system">Module System</a></li><li><a href="#regional-packs">Regional Packs</a></li><li><a href="#import-export">Import/Export</a></li><li><a href="#settings">Configuration</a></li><li><a href="#api">API Reference</a></li><li><a href="#support">Support</a></li></ol></div>
 
-<section id="overview"><h2>Platform Overview</h2><p>OpenConstructionERP is a complete construction cost estimation and project management platform that runs entirely on your machine. It replaces expensive commercial estimating suites with an open, self-hosted alternative. The platform covers the entire construction lifecycle — from initial feasibility studies and quantity takeoff to detailed BOQ preparation, tendering, bid comparison, project execution, quality management, and financial control. All your data stays on your server. No cloud dependency, no subscriptions, no per-seat fees.</p><p style="margin-top:12px"><strong>New in v0.9.0:</strong> 22 new modules including Contacts Directory, Tasks with Kanban, RFI tracking, Finance (invoices, budgets, EVM), Procurement, Safety management, Meetings, Quality Inspections, NCR, Submittals, Correspondence, CDE (ISO 19650), Transmittals, BIM Hub, Reporting dashboard, Notifications, Comments, Gantt Chart, Regional Settings, Module System, 8 Regional Packs, and comprehensive Import/Export.</p><div class="ss"><img src="/doc-01-dashboard.png" alt="Dashboard"><div class="ss-c">Dashboard with project KPIs, Getting Started steps, recent projects, and system status panel</div></div><div class="g2"><div class="cd"><h4>BOQ Management</h4><p>Hierarchical Bills of Quantities with sections, positions, resources, assemblies, and automatic markups.</p></div><div class="cd"><h4>55K+ Cost Items</h4><p>CWICR database with 11 regional pricing sets covering DACH, UK, US, France, Spain, Brazil, Russia, UAE, China, India, Canada.</p></div><div class="cd"><h4>AI Estimation</h4><p>Generate BOQ from text, photos, PDFs, Excel, or CAD/BIM models using any LLM provider.</p></div><div class="cd"><h4>CAD/BIM Takeoff</h4><p>Extract quantities from Revit, IFC, AutoCAD, MicroStation via DDC converters.</p></div><div class="cd"><h4>4D/5D Planning</h4><p>Gantt scheduling with CPM, Earned Value Management, S-curve, Monte Carlo simulation.</p></div><div class="cd"><h4>30+ Modules</h4><p>Finance, Safety, Quality, CDE, BIM Hub, Procurement, RFI, Tasks, Meetings, and more. Enable only what you need.</p></div></div></section>
+<section id="overview"><h2>Platform Overview</h2><p>OpenConstructionERP is a complete construction cost estimation and project management platform that runs entirely on your machine. It replaces expensive commercial estimating suites with an open, self-hosted alternative. The platform covers the entire construction lifecycle — from initial feasibility studies and quantity takeoff to detailed BOQ preparation, tendering, bid comparison, project execution, quality management, and financial control. All your data stays on your server. No cloud dependency, no subscriptions, no per-seat fees.</p><p style="margin-top:12px"><strong>v2.0 highlights:</strong> 40+ modules covering the full construction lifecycle — Contacts Directory, Tasks with Kanban, RFI tracking, Finance (invoices, budgets, EVM), Procurement, Safety, Meetings, Quality Inspections, NCR, Submittals, Correspondence, CDE (ISO&nbsp;19650), Transmittals, BIM Hub, Asset Register with COBie export, Reporting &amp; KPI dashboard, Markups (PDF↔DWG↔hub), Pivot visualisations &amp; Charts column picker, Pluggable email service, Multi-tenant Contacts, scheduled reports, 11 Regional Packs, and full Import/Export.</p><div class="ss"><img src="/doc-01-dashboard.png" alt="Dashboard"><div class="ss-c">Dashboard with project KPIs, Getting Started steps, recent projects, and system status panel</div></div><div class="g2"><div class="cd"><h4>BOQ Management</h4><p>Hierarchical Bills of Quantities with sections, positions, resources, assemblies, and automatic markups.</p></div><div class="cd"><h4>55K+ Cost Items</h4><p>CWICR database with 11 regional pricing sets covering DACH, UK, US, France, Spain, Brazil, Russia, UAE, China, India, Canada.</p></div><div class="cd"><h4>AI Estimation</h4><p>Generate BOQ from text, photos, PDFs, Excel, or CAD/BIM models using any LLM provider.</p></div><div class="cd"><h4>CAD/BIM Takeoff</h4><p>Extract quantities from Revit, IFC, AutoCAD, MicroStation via DDC converters.</p></div><div class="cd"><h4>4D/5D Planning</h4><p>Gantt scheduling with CPM, Earned Value Management, S-curve, Monte Carlo simulation.</p></div><div class="cd"><h4>30+ Modules</h4><p>Finance, Safety, Quality, CDE, BIM Hub, Procurement, RFI, Tasks, Meetings, and more. Enable only what you need.</p></div></div></section>
 
 <section id="first-steps">
 <h2>First Steps After Installation</h2>
@@ -557,7 +557,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="contacts">
-<h2>Contacts Directory <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Contacts Directory</h2>
 <p>Manage all project stakeholders in a centralized directory. Track clients, subcontractors, suppliers, architects, and consultants with full contact details, company associations, and role-based categorization. Link contacts to projects, tenders, purchase orders, and correspondence for full traceability.</p>
 <h3>Key Features</h3>
 <ul>
@@ -578,7 +578,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="tasks">
-<h2>Tasks <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Tasks</h2>
 <p>Organize project work with a 5-type task taxonomy and visual Kanban board. Tasks can be assigned to team members, linked to specific BOQ positions, documents, or RFIs, and tracked through customizable workflow stages. Each task type has its own color coding and default fields.</p>
 <h3>Key Features</h3>
 <ul>
@@ -598,7 +598,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="rfi">
-<h2>RFI &mdash; Requests for Information <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>RFI &mdash; Requests for Information</h2>
 <p>Track formal information requests between project parties with ball-in-court assignment. RFIs flow through a structured lifecycle from draft to closed, ensuring every question gets a documented answer. Ball-in-court tracking shows who currently owns the action at any time.</p>
 <h3>Key Features</h3>
 <ul>
@@ -618,7 +618,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="finance">
-<h2>Finance <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Finance</h2>
 <p>Full project financial management covering invoices, budgets, payments, and Earned Value Management (EVM). Track planned vs actual costs, generate payment applications, and monitor budget health with real-time variance analysis. Integrates with BOQ data for automatic cost baseline generation.</p>
 <h3>Key Features</h3>
 <ul>
@@ -640,7 +640,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="procurement">
-<h2>Procurement <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Procurement</h2>
 <p>Manage purchase orders and goods receipts for construction materials and services. Create POs linked to BOQ positions, track delivery status, and record goods receipts with quantity verification. Integrates with the Contacts module for supplier management.</p>
 <h3>Key Features</h3>
 <ul>
@@ -660,7 +660,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="safety">
-<h2>Safety <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Safety</h2>
 <p>Record safety incidents, near-misses, and behavioral observations with a risk scoring system. Track safety performance metrics across projects, identify trends, and ensure compliance with occupational health and safety regulations.</p>
 <h3>Key Features</h3>
 <ul>
@@ -681,7 +681,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="meetings">
-<h2>Meetings <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Meetings</h2>
 <p>Manage meeting minutes with structured agendas and tracked action items. Create recurring meeting series (e.g., weekly site meetings), record attendees, capture discussion points, and automatically generate action items that integrate with the Tasks module.</p>
 <h3>Key Features</h3>
 <ul>
@@ -701,7 +701,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="inspections">
-<h2>Inspections <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Inspections</h2>
 <p>Conduct quality inspections using configurable checklists. Define inspection templates per trade or activity type, fill them out on-site, attach photos, and track deficiency resolution. Inspection results feed into the project quality score and NCR workflow.</p>
 <h3>Key Features</h3>
 <ul>
@@ -721,7 +721,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="ncr">
-<h2>Non-Conformance Reports (NCR) <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Non-Conformance Reports (NCR)</h2>
 <p>Document and track quality non-conformances when work does not meet specifications. NCRs follow a formal lifecycle from identification through root cause analysis to corrective action verification, ensuring all quality deviations are properly resolved and documented.</p>
 <h3>Key Features</h3>
 <ul>
@@ -741,7 +741,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="submittals">
-<h2>Submittals <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Submittals</h2>
 <p>Manage the submittal review process for construction materials, shop drawings, and product data. Track multi-stage review workflows where submittals pass through multiple reviewers before final approval. Maintain a complete audit trail of all review cycles and revision history.</p>
 <h3>Key Features</h3>
 <ul>
@@ -761,7 +761,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="correspondence">
-<h2>Correspondence <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Correspondence</h2>
 <p>Maintain a formal communication register for all project correspondence. Track letters, emails, notices, and instructions between project parties with unique reference numbers, response tracking, and full-text search. Ensures contractual communications are properly documented and traceable.</p>
 <h3>Key Features</h3>
 <ul>
@@ -781,7 +781,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="cde">
-<h2>Common Data Environment (CDE) <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Common Data Environment (CDE)</h2>
 <p>ISO 19650-compliant Common Data Environment for managing project information with controlled status transitions. Documents move through Work in Progress (WIP), Shared, Published, and Archived states with approval gates. Ensures information management follows BIM standards for collaborative delivery.</p>
 <h3>Key Features</h3>
 <ul>
@@ -801,7 +801,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="transmittals">
-<h2>Transmittals <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Transmittals</h2>
 <p>Formally distribute documents to external parties with tracked delivery and acknowledgment. Create transmittal packages containing multiple documents, specify recipients, and track whether each recipient has received and acknowledged the documents. Provides a contractual record of information exchange.</p>
 <h3>Key Features</h3>
 <ul>
@@ -821,7 +821,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="bimhub">
-<h2>BIM Hub <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>BIM Hub</h2>
 <p>Central hub for BIM model management with element-level data access and direct BOQ linkage. Upload IFC/Revit models, browse building elements with their properties and quantities, and link elements to BOQ positions for 5D cost integration. Provides a bridge between design data and cost estimation.</p>
 <p style="margin:8px 0 16px;font-size:.875rem;color:var(--g500)">🎬 <a href="https://www.youtube.com/watch?v=X06cIaroAeI" target="_blank" rel="noopener"><strong>BIM bulk-link demo on YouTube</strong></a> &mdash; 100 Revit walls &rarr; one BOQ line with aggregated area, volume and length.</p>
 <h3>Key Features</h3>
@@ -842,7 +842,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="reporting">
-<h2>Reporting &amp; KPI Dashboard <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Reporting &amp; KPI Dashboard</h2>
 <p>Comprehensive reporting engine with a KPI dashboard, customizable report templates, and scheduled report generation. Aggregate data across projects for portfolio-level insights. Create custom report templates combining data from any module (BOQ, Finance, Schedule, Safety, Quality).</p>
 <h3>Key Features</h3>
 <ul>
@@ -862,7 +862,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="notifications">
-<h2>Notifications <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Notifications</h2>
 <p>In-app notification system that keeps users informed about events relevant to them. Notifications are triggered by actions across all modules &mdash; task assignments, RFI responses, submittal reviews, approval requests, overdue items, and more. Users control their notification preferences per category.</p>
 <h3>Key Features</h3>
 <ul>
@@ -882,7 +882,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="comments">
-<h2>Comments <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Comments</h2>
 <p>Threaded comment system that can be attached to any entity in the platform &mdash; BOQ positions, tasks, RFIs, submittals, documents, inspections, and more. Supports @mentions to notify team members, file attachments, and resolution tracking for action-oriented discussions.</p>
 <h3>Key Features</h3>
 <ul>
@@ -902,7 +902,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="gantt">
-<h2>Gantt Chart <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Gantt Chart</h2>
 <p>Pure SVG-based Gantt chart for construction schedule visualization. Renders timelines, dependencies, milestones, and critical path directly in the browser without external libraries. Supports zooming from day-level to year-level views and exports to PDF/PNG for reporting.</p>
 <h3>Key Features</h3>
 <ul>
@@ -921,7 +921,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="regional-settings">
-<h2>Regional Settings <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Regional Settings</h2>
 <p>Configure timezone, currency, number format, and date format preferences per user and per project. Regional settings cascade from system defaults to project-level overrides to user-level preferences, ensuring each team member sees data formatted according to their locale.</p>
 <h3>Key Features</h3>
 <ul>
@@ -941,7 +941,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="module-system">
-<h2>Module System <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Module System</h2>
 <p>Enable or disable platform modules to customize OpenConstructionERP for your workflow. Each module can be toggled independently without affecting other modules. Disabled modules are hidden from the UI, their API endpoints return 404, and their database tables remain intact for re-activation.</p>
 <h3>Key Features</h3>
 <ul>
@@ -960,7 +960,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="regional-packs">
-<h2>Regional Packs <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Regional Packs</h2>
 <p>Pre-configured regional packages that set up classification standards, tax rules, cost database defaults, report templates, and regulatory compliance rules for specific markets. Install a regional pack to immediately configure the platform for your country or region.</p>
 <h3>Available Packs</h3>
 <table><tr><th>Pack</th><th>Region</th><th>Standards</th><th>Currency</th></tr>
@@ -989,7 +989,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 </section>
 
 <section id="import-export">
-<h2>Import/Export <span class="bdg bdg-b">v0.9.0</span></h2>
+<h2>Import/Export</h2>
 <p>Comprehensive data import and export capabilities across all modules. Import contacts, budgets, BOQs, and cost databases from Excel and CSV files with intelligent column mapping. Export project data to Excel, PDF, and CSV with customizable templates. All exports preserve formatting and include metadata headers.</p>
 <h3>Key Features</h3>
 <ul>
@@ -1013,7 +1013,7 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 <section id="api"><h2>API Reference</h2><p>OpenConstructionERP exposes a comprehensive REST API that powers the frontend and can be used for integrations, automation, and custom workflows. Every action available in the UI — creating projects, editing BOQs, running AI estimates, searching costs — is available as an API endpoint. Interactive Swagger documentation with try-it-out buttons is available at <code>/api/docs</code> when running the backend.</p>
 <h3>Core Endpoints</h3>
 <table><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr><tr><td>POST</td><td><code>/api/v1/users/auth/login</code></td><td>Login</td></tr><tr><td>GET</td><td><code>/api/v1/projects/</code></td><td>List projects</td></tr><tr><td>GET</td><td><code>/api/v1/boq/boqs/?project_id=...</code></td><td>List BOQs</td></tr><tr><td>GET</td><td><code>/api/v1/costs/?q=concrete</code></td><td>Search costs</td></tr><tr><td>POST</td><td><code>/api/v1/ai/quick-estimate</code></td><td>AI estimation</td></tr><tr><td>POST</td><td><code>/api/v1/takeoff/cad-extract</code></td><td>CAD extraction</td></tr><tr><td>GET</td><td><code>/api/health</code></td><td>Health check</td></tr></table>
-<h3>New in v0.9.0</h3>
+<h3>v2.0 modules</h3>
 <table><tr><th>Module</th><th>Prefix</th><th>Description</th></tr>
 <tr><td>Contacts</td><td><code>/api/v1/contacts/</code></td><td>Contacts directory CRUD, import</td></tr>
 <tr><td>Tasks</td><td><code>/api/v1/tasks/</code></td><td>Task management, Kanban board</td></tr>
