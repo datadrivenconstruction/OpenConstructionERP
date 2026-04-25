@@ -44,7 +44,30 @@ export default defineConfig({
   // and BIM pages.  Including them up-front keeps the version hash stable
   // across the dev session.
   optimizeDeps: {
-    include: ['pdfjs-dist', 'pdfjs-dist/build/pdf.worker.min.mjs', 'three'],
+    include: [
+      'pdfjs-dist',
+      'pdfjs-dist/build/pdf.worker.min.mjs',
+      'three',
+      // High-risk: heavy deps reached only via lazy route chunks.  Without
+      // pre-bundling, Vite discovers them mid-navigation and the in-flight
+      // import 504s with "Failed to fetch dynamically imported module".
+      'ag-grid-react',
+      'ag-grid-community',
+      'recharts',
+      'jspdf',
+      'jspdf-autotable',
+      'maplibre-gl',
+      'react-map-gl',
+      'react-map-gl/maplibre',
+      'xlsx',
+      'yjs',
+      'y-websocket',
+      'y-webrtc',
+      '@xyflow/react',
+      '@dnd-kit/core',
+      '@dnd-kit/sortable',
+      '@dnd-kit/utilities',
+    ],
   },
   build: {
     rollupOptions: {

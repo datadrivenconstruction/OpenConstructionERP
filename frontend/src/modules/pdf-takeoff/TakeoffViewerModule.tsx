@@ -381,6 +381,33 @@ export default function TakeoffViewerModule({
     }
   }, []);
 
+  /* ── Reset cross-page in-progress state on page change ───────────
+   * Without this, an in-progress drawing (one click placed) on page 1,
+   * a half-finished calibration pick, or a selected measurement that
+   * lives on another page all leak to the new page.  Symptoms: the next
+   * click on page 2 completes a polygon spanning pages, the calibration
+   * dialog opens with a nonsense distance, the Properties panel shows
+   * data for an off-screen measurement.  See takeoff audit BUG-1/2/5/6. */
+  useEffect(() => {
+    setActivePoints([]);
+    setRectStartPoint(null);
+    setIsDraggingRect(false);
+    setShowTextInput(false);
+    setPendingVolumePoints([]);
+    setShowVolumeDepthInput(false);
+    setSettingScale(false);
+    setCalibrationMode(false);
+    setScalePoints([]);
+  }, [currentPage]);
+
+  /* Deselect a measurement that lives on a different page than the one
+   * being viewed — keeps Properties panel coherent with the canvas. */
+  useEffect(() => {
+    if (!selectedMeasurementId) return;
+    const m = measurements.find((x) => x.id === selectedMeasurementId);
+    if (m && m.page !== currentPage) setSelectedMeasurementId(null);
+  }, [currentPage, selectedMeasurementId, measurements]);
+
   /* ── Load PDF from URL (filmstrip click / deep link) ────────────── */
 
   useEffect(() => {
