@@ -229,7 +229,7 @@ urllib3==2.6.3
 uvicorn==0.41.0
 webencodings==0.5.1
 websockets==15.0.1
-win32_setctime==1.2.0
+win32_setctime==1.2.0; sys_platform == 'win32'
 wrapt==2.1.1
 xlrd==2.0.2
 xlsxwriter==3.2.9
