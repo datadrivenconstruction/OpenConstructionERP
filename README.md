@@ -702,12 +702,27 @@ For **commercial licensing** without AGPL obligations, see
 
 ---
 
-<div align="center">
+<p align="center">
+  <!-- Social Links -->
+  <a href="https://x.com/datadrivenconst" target="_blank">
+    <img src="https://img.shields.io/twitter/follow/datadrivenconst?logo=X&style=flat&color=%23f5f5f5" alt="Follow on X">
+  </a>
+  <a href="https://www.youtube.com/@datadrivenconstruction" target="_blank">
+    <img src="https://img.shields.io/badge/YouTube-FF0000?logo=youtube&logoColor=white" alt="Subscribe on YouTube">
+  </a>
+  <a href="https://www.linkedin.com/company/78381569" target="_blank">
+    <img src="https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff" alt="Connect on LinkedIn">
+  </a>
+</p>
 
-**[Data Driven Construction](https://datadrivenconstruction.io)** — open-source tools for the global construction industry.
 
-[Website](https://datadrivenconstruction.io) · [YouTube](https://www.youtube.com/@datadrivenconstruction) · [GitHub](https://github.com/datadrivenconstruction) · [Telegram](https://t.me/datadrivenconstruction)
+<p align="left">
 
-<sub>OpenConstructionERP v2.1.0 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
-
-</div>
+  <a href="https://datadrivenconstruction.io">
+    <img src="https://datadrivenconstruction.io/wp-content/uploads/2023/07/DataDrivenConstruction-1-1.png" alt="DDC Logo" width="200"/>
+  </a>
+  <br>
+   <b>   Unlock the Power of Data in Construction</b>
+   <br>
+     🚀 Move to full-cycle data management  where only unified <br /> structured data & processes remain and where  🔓 your data is yours
+</p>
