@@ -571,7 +571,7 @@ export function BIMViewer({
         setParquetProps(null);
         setParquetExpanded(false);
         setPropsTab('key');
-        onElementSelect?.(id);
+        onElementSelectRef.current?.(id);
       },
       onElementHover: (id) => {
         if (id) {
@@ -581,7 +581,7 @@ export function BIMViewer({
           setHoveredElement(null);
           setTooltipPos(null);
         }
-        onElementHover?.(id);
+        onElementHoverRef.current?.(id);
       },
       onSelectionChange: (ids) => {
         setSelectionCount(ids.length);
@@ -614,8 +614,8 @@ export function BIMViewer({
         // for callers that only need single-selection) and the FULL set
         // (so the parent can echo it back via selectedElementIds and keep
         // every Ctrl+click highlighted across renders).
-        onElementSelect?.(ids.length > 0 ? ids[ids.length - 1]! : null);
-        onSelectionChange?.(ids);
+        onElementSelectRef.current?.(ids.length > 0 ? ids[ids.length - 1]! : null);
+        onSelectionChangeRef.current?.(ids);
         // Close context menu on selection change
         setContextMenu(null);
       },
@@ -714,30 +714,33 @@ export function BIMViewer({
     return () => observer.disconnect();
   }, []);
 
-  // Re-wire callbacks when handlers change (avoid stale closures)
+  // Re-wire callbacks when handlers change (avoid stale closures).  The mount
+  // effect above captures the initial values of these props in the
+  // SelectionManager closures, so without ref-forwarding the prop changes
+  // never reach the parent.  Mirrors what onIsolationChangeRef already does.
   const onElementSelectRef = useRef(onElementSelect);
   onElementSelectRef.current = onElementSelect;
   const onElementHoverRef = useRef(onElementHover);
   onElementHoverRef.current = onElementHover;
+  const onSelectionChangeRef = useRef(onSelectionChange);
+  onSelectionChangeRef.current = onSelectionChange;
 
-  // Load elements when data changes. When a real DAE/COLLADA geometry
-  // URL is available we skip the placeholder boxes — the placeholders
-  // would briefly render at the BIM bounding-box coordinates (which are
-  // in source-CAD units, often a different scale than the COLLADA scene)
-  // and trigger a wrong-distance camera fit before the DAE finishes
-  // loading. Skipping them keeps the first zoomToFit clean.
+  // Load elements when data changes.  Reload (clear + recreate meshes) on
+  // model identity change — driving off `modelId` rather than element count
+  // avoids the silent failure where two models happen to have the same
+  // count and the new model's data is grafted onto the previous model's
+  // meshes.  In-place data updates remain for non-identity changes (link
+  // updates, validation refresh).
+  const lastLoadedModelIdRef = useRef<string | null>(null);
   useEffect(() => {
     if (!elementMgrRef.current || !elements) return;
-    // Bounding box placeholders only when user explicitly toggles them on.
-    // Real 3D geometry comes from DAE/GLB — no boxes by default.
-    // Only reload elements if the element count actually changed (new model).
-    // Data updates (link changes, validation) don't require full element reload
-    // — just update the elementDataMap in-place.
-    const prevCount = elementMgrRef.current.getElementCount();
-    if (elements.length !== prevCount) {
+    const modelChanged = lastLoadedModelIdRef.current !== modelId;
+    if (modelChanged) {
+      elementMgrRef.current.clear();
       elementMgrRef.current.loadElements(elements, { skipPlaceholders: !showBoundingBoxes });
+      lastLoadedModelIdRef.current = modelId;
     } else {
-      // Update element data in-place without recreating meshes
+      // Same model, data refreshed (e.g. new BOQ links).  Update in place.
       elementMgrRef.current.updateElementData(elements);
     }
     setElementCount(elements.length);
@@ -817,16 +820,36 @@ export function BIMViewer({
     // clean slate.  Without this, IDs hidden via the context-menu
     // "Hide element" action leak across filter changes.
     setHiddenIds(new Set());
-    if (isolatedIds && isolatedIds.length > 0) {
-      elementMgrRef.current.isolate(isolatedIds);
+    const hasIsolation = !!(isolatedIds && isolatedIds.length > 0);
+    const hasFilter = !!filterPredicate;
+    if (hasIsolation && hasFilter) {
+      // Intersection semantics: visible = isolatedIds ∩ filterPredicate(elements).
+      // Compute the intersecting id set and route through isolate() so the
+      // unmatched DAE background is hidden (consistent with pure-isolate
+      // mode). An empty intersection is fine — viewer shows nothing, same
+      // as a filter that rejects everything.
+      const idSet = new Set(isolatedIds);
+      const pool = elements ?? [];
+      const intersectIds = pool
+        .filter((e) => idSet.has(e.id) && filterPredicate!(e))
+        .map((e) => e.id);
+      elementMgrRef.current.isolate(intersectIds);
       const visibleMeshes = elementMgrRef.current
         .getAllMeshes()
         .filter((m) => m.visible);
       if (visibleMeshes.length > 0) {
         sceneRef.current.zoomToSelection(visibleMeshes);
       }
-    } else if (filterPredicate) {
-      const visibleCount = elementMgrRef.current.applyFilter(filterPredicate);
+    } else if (hasIsolation) {
+      elementMgrRef.current.isolate(isolatedIds!);
+      const visibleMeshes = elementMgrRef.current
+        .getAllMeshes()
+        .filter((m) => m.visible);
+      if (visibleMeshes.length > 0) {
+        sceneRef.current.zoomToSelection(visibleMeshes);
+      }
+    } else if (hasFilter) {
+      const visibleCount = elementMgrRef.current.applyFilter(filterPredicate!);
       if (visibleCount > 0 && visibleCount < elementMgrRef.current.getAllMeshes().length) {
         const visibleMeshes = elementMgrRef.current
           .getAllMeshes()
@@ -1599,6 +1622,9 @@ export function BIMViewer({
     // sees. Isolation narrows this BEFORE any other scope reasoning so
     // the summary numbers match the geometry visible on screen (a
     // 109-element filter that isolates 6 walls should report 6, not 109).
+    // NOTE: when both isolation AND a filterPredicate are active, the
+    // filter below runs over `universe` — so `subset` ends up as the
+    // intersection (ids ∩ predicate), matching the viewer's render logic.
     const isolationSet =
       isolatedIds && isolatedIds.length > 0 ? new Set(isolatedIds) : null;
     const universe = isolationSet ? all.filter((el) => isolationSet.has(el.id)) : all;
