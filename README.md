@@ -24,7 +24,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
   <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/download/v2.0.0/oce_full_demo.mp4">▶ 1-minute teaser (your browser can't inline this — click for full 12-min walkthrough)</a>
 </video>
 
-<sub>🎬 <b>1-minute teaser above</b> · for the full 12-minute walkthrough (with music) → <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/download/v2.0.0/oce_full_demo.mp4"><b>click here</b></a> · onboarding → BoQ → BIM → DWG → PDF → AI → dashboard</sub>
+<sub>🎬 <b>1-minute teaser above</b> · for the full 12-minute walkthrough → <a href="https://www.youtube.com/watch?v=X06cIaroAeI"><b>watch on YouTube</b></a> · onboarding → BoQ → BIM → DWG → PDF → AI → dashboard</sub>
 
 *100% open source · 55,000+ cost items · AI estimation · 21 languages · Self-hosted*
 
