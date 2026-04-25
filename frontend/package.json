@@ -31,7 +31,7 @@
     "date-fns": "^4.1.0",
     "i18next": "^24.2.0",
     "i18next-browser-languagedetector": "^8.0.0",
-    "i18next-http-backend": "^3.0.0",
+    "i18next-http-backend": "^3.0.5",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
     "jszip": "^3.10.1",
