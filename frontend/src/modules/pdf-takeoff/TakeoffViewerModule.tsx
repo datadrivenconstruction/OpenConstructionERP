@@ -1463,7 +1463,17 @@ export default function TakeoffViewerModule({
   /* ── Page navigation ─────────────────────────────────────────────── */
 
   const prevPage = useCallback(() => setCurrentPage((p) => Math.max(p - 1, 1)), []);
-  const nextPage = useCallback(() => setCurrentPage((p) => Math.min(p + 1, totalPages)), []);
+  // BUG-fix: totalPages MUST be a dependency.  With `[]` the callback was
+  // captured on first render when totalPages=0, so Math.min(p+1, 0) clamped
+  // every "next" click to 0 — surfacing as "0/31" in the page indicator
+  // and an empty Measurements list (no measurement has page=0).
+  const nextPage = useCallback(
+    () =>
+      setCurrentPage((p) =>
+        totalPages > 0 ? Math.min(p + 1, totalPages) : p,
+      ),
+    [totalPages],
+  );
 
   /* ── Measurement summary ─────────────────────────────────────────── */
 
@@ -1990,11 +2000,15 @@ export default function TakeoffViewerModule({
    *  is more useful at that point) leave the user on Ledger so they can
    *  click the next row without losing context. */
   const handleLedgerRowClick = useCallback((m: Measurement) => {
-    if (m.page !== currentPage) {
-      setCurrentPage(m.page);
+    // Defensive clamp: server-stored measurements may have page=0 from older
+    // imports.  Snapping to the valid 1..totalPages range avoids pushing
+    // currentPage to 0 (which would render an empty viewport + "0/N" header).
+    const target = Math.max(1, Math.min(m.page || 1, totalPages || 1));
+    if (target !== currentPage) {
+      setCurrentPage(target);
     }
     setSelectedMeasurementId(m.id);
-  }, [currentPage]);
+  }, [currentPage, totalPages]);
 
   /* ── Undo ────────────────────────────────────────────────────────── */
 
@@ -3154,7 +3168,21 @@ export default function TakeoffViewerModule({
             <div className="rounded-md border border-border/80 bg-surface-primary/80 backdrop-blur-sm p-3 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-semibold text-content-primary">
-                  {t('takeoff_viewer.measurements', { defaultValue: 'Measurements' })} ({pageMeasurements.filter((m) => !isAnnotationType(m.type)).length})
+                  {t('takeoff_viewer.measurements', { defaultValue: 'Measurements' })}{' '}
+                  <span className="tabular-nums text-content-tertiary font-normal">
+                    {(() => {
+                      const onPage = pageMeasurements.filter((m) => !isAnnotationType(m.type)).length;
+                      const total = measurements.filter((m) => !isAnnotationType(m.type)).length;
+                      // "5 on page · 31 total" reads as "yes your data is still there".
+                      return total > onPage
+                        ? t('takeoff_viewer.measurement_count_split', {
+                            defaultValue: '({{onPage}} on page · {{total}} total)',
+                            onPage,
+                            total,
+                          })
+                        : `(${onPage})`;
+                    })()}
+                  </span>
                 </p>
                 {fileName && (
                   <div className="flex items-center gap-1.5">
@@ -3185,11 +3213,26 @@ export default function TakeoffViewerModule({
                 )}
               </div>
 
-              {pageMeasurements.length === 0 && (
-                <p className="text-xs text-content-tertiary py-4 text-center">
-                  {t('takeoff_viewer.no_measurements', { defaultValue: 'No measurements yet. Select a tool and click on the drawing.' })}
-                </p>
-              )}
+              {pageMeasurements.length === 0 && (() => {
+                const totalOtherPages = measurements.filter(
+                  (m) => !isAnnotationType(m.type) && m.page !== currentPage,
+                ).length;
+                return (
+                  <p className="text-xs text-content-tertiary py-4 text-center px-2">
+                    {totalOtherPages > 0
+                      ? t('takeoff_viewer.no_measurements_this_page', {
+                          defaultValue:
+                            'No measurements on page {{page}}. {{count}} measurement(s) on other pages — open the Ledger tab to see them all.',
+                          page: currentPage,
+                          count: totalOtherPages,
+                        })
+                      : t('takeoff_viewer.no_measurements', {
+                          defaultValue:
+                            'No measurements yet. Select a tool and click on the drawing.',
+                        })}
+                  </p>
+                );
+              })()}
 
               <div className="space-y-2 max-h-[400px] overflow-auto">
                 {/* Measurement groups (non-annotation types) */}
