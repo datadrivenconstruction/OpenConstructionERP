@@ -84,7 +84,7 @@ migrate-down: ## Rollback last migration
 	cd $(BACKEND_DIR) && alembic downgrade -1
 
 seed: ## Load seed data (CWICR, classifications, demo)
-	cd $(BACKEND_DIR) && python -m app.scripts.seed
+	cd $(BACKEND_DIR) && python -m app.scripts.seed_demo_showcase
 
 db-reset: ## Drop and recreate database (DESTRUCTIVE)
 	$(DOCKER_COMPOSE) exec postgres psql -U oe -c "DROP DATABASE IF EXISTS openestimate;"
