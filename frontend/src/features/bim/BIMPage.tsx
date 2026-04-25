@@ -1587,7 +1587,11 @@ export function BIMPage() {
     }
   }, [activeModelId, urlProjectId, navigate]);
 
-  // Reset transient viewer state when switching between models
+  // Reset transient viewer state when switching between models — covers the
+  // auto-pick + deep-link paths above which only set activeModelId without
+  // clearing selection (only explicit user clicks do that today).  Without
+  // these clears, stale element ids from the previous model would highlight
+  // (or crash) the new scene.
   useEffect(() => {
     setMeshMatchRatio(null);
     setFilterPredicate(null);
@@ -1596,7 +1600,10 @@ export function BIMPage() {
     setColorByMode('default');
     setFullModelRequested(false);
     setActiveGroupId(null);
-  }, [activeModelId]);
+    setSelectedElementId(null);
+    setMultiSelectedIds([]);
+    clearBIMLinkSelection();
+  }, [activeModelId, clearBIMLinkSelection]);
 
   // When ?group= is present, load only that group's elements from the
   // backend (lazy loading).  This makes cross-module navigation instant
