@@ -6,7 +6,7 @@
 
 Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all in one platform.
 
-[Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
+[▶ Watch the 12-min walkthrough](https://www.youtube.com/watch?v=X06cIaroAeI) · [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 [![Version](https://img.shields.io/badge/version-2.3.1-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.3.1)
@@ -225,7 +225,7 @@ Construction cost estimation software is expensive, closed-source, and locked to
 
 ## See It In Action
 
-Each block below is a short GIF cut from the full walkthrough above — same order as the video, so you can jump to whichever workflow matters most.
+Each block below is a short GIF cut from the full walkthrough above — same order as the video, so you can jump to whichever workflow matters most. Prefer one continuous video? **[▶ Watch the 12-minute walkthrough on YouTube](https://www.youtube.com/watch?v=X06cIaroAeI)**.
 
 <table>
 <tr>
@@ -472,6 +472,8 @@ Get productive in under 10 minutes:
 
 ## Quick Start
 
+> 👀 **Prefer to see it first?** [▶ Watch the 12-minute walkthrough on YouTube](https://www.youtube.com/watch?v=X06cIaroAeI) — onboarding → BoQ → BIM → DWG → PDF → AI → dashboard.
+
 ### Fastest: One-Line Install
 
 ```bash
@@ -716,6 +718,9 @@ For **commercial licensing** without AGPL obligations, see
   </a>
   <a href="https://www.linkedin.com/company/78381569" target="_blank">
     <img src="https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff" alt="Connect on LinkedIn">
+  </a>
+  <a href="https://www.youtube.com/watch?v=X06cIaroAeI" target="_blank">
+    <img src="https://img.shields.io/badge/▶_Watch_demo-12_min_walkthrough-FF0000?logo=youtube&logoColor=white" alt="Watch the 12-minute walkthrough">
   </a>
 </p>
 
