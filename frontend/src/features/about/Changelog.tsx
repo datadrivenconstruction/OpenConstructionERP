@@ -14,6 +14,25 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '2.5.0',
+    date: '2026-04-25',
+    changes: [
+      'Fix: PDF takeoff page indicator no longer resets to 0/31 on Next click — stale useCallback closure over totalPages',
+      'Fix: alembic multiple-head error blocking fresh-clone backend startup — v232 merge migration unifies money + contact-tenant chains',
+      'Fix: PDF takeoff cross-page state leaks — in-progress drawing, calibration pick, and selected-measurement state now reset on page navigation (no more polygons that span pages)',
+      'Fix: DWG takeoff cross-state leaks — half-drawn measurements no longer carry over between drawings or Model/Paper Space layouts; calibration pick state now resets on layout switch',
+      'Fix: BIM viewer model-switch leaks — selection cleared on auto-pick / deep-link paths; geometry reload now keyed on modelId (not element count) so two same-count models no longer overlay',
+      'Fix: BIM viewer prop callbacks (onElementSelect / onElementHover / onSelectionChange) now reach the parent — were captured-at-mount in stale closures',
+      'Fix: PDF takeoff drop-zone advertised PDF/PNG/JPG/TIFF but silently rejected non-PDF files — now PDF-only with a warning toast on rejection',
+      'Fix: Text-annotation Escape no longer creates a "ghost" annotation (onBlur race that fired confirm with the typed value despite cancel)',
+      'Fix: Vite "Failed to fetch dynamically imported module" — pre-bundle 14 heavy lazy deps (ag-grid, recharts, jspdf, maplibre-gl, xlsx, yjs, dnd-kit, @xyflow/react) like pdf.js to keep chunk hashes stable across HMR',
+      'Add: Delete / Backspace keyboard shortcut to remove the selected measurement (matches CAD/design tool convention)',
+      'Fix: Makefile `make seed` and `make db-reset` no longer fail with ModuleNotFoundError — pointed at the actual seed_demo_showcase script',
+      'Fix: requirements.txt win32_setctime now has sys_platform marker — pip install on Linux/macOS no longer aborts',
+      'Verified: prod E2E confirms Next button advances 1/31 → 2/31 → 7/31 (no 0/31 regression) on https://openconstructionerp.com',
+    ],
+  },
+  {
     version: '2.4.0',
     date: '2026-04-22',
     changes: [

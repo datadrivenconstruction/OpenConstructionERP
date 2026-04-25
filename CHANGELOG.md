@@ -5,6 +5,59 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] — 2026-04-25
+
+Stability bug-fix release. No DB migration required for existing 2.4.0 installs (the v232 merge migration is a no-op for upgrades; only fresh clones benefit).
+
+### Fixed
+
+- **PDF takeoff page indicator reset to `0/31`** on Next-button click — the
+  `nextPage` callback captured `totalPages=0` from first render. Indicator
+  now correctly advances `1/31 → 2/31 → 31/31`.
+- **Alembic multiple-head error** blocked fresh-clone backend startup
+  (`alembic upgrade head` aborted on `Multiple head revisions are present`).
+  New `v232_merge_heads` no-op migration unifies the money/CO chain with
+  the contact-tenant chain. External users no longer need to patch the
+  codebase to compile.
+- **PDF takeoff cross-page state leaks** — in-progress drawing, calibration
+  pick, and selected-measurement state now reset on page navigation. Half-
+  drawn polygons no longer span pages, calibration no longer arms with
+  cross-page pixels.
+- **DWG takeoff cross-state leaks** — half-drawn measurements no longer
+  carry over between drawings or Model/Paper Space layouts; calibration
+  pick state resets on layout switch.
+- **BIM viewer state leaks on model switch** — selection cleared on
+  auto-pick / deep-link paths; geometry reload now keyed on `modelId`
+  identity (not element count) so two same-count models no longer overlay.
+- **BIM viewer prop callbacks** (`onElementSelect`, `onElementHover`,
+  `onSelectionChange`) now reach the parent — previously captured at
+  mount in stale closures.
+- **PDF takeoff drop-zone** advertised PDF / PNG / JPG / TIFF but silently
+  rejected non-PDF files. Now honest (PDF-only) with a warning toast on
+  rejection.
+- **Text-annotation Escape race** — pressing Esc while typing no longer
+  creates a "ghost" annotation via the unmounting input's `onBlur`.
+- **Vite "Failed to fetch dynamically imported module"** — pre-bundle 14
+  heavy lazy-loaded deps (ag-grid, recharts, jspdf, maplibre-gl, xlsx,
+  yjs / y-websocket / y-webrtc, dnd-kit, @xyflow/react) like pdf.js so
+  chunk hashes stay stable across HMR reloads.
+- **`make seed`** and `make db-reset` no longer fail with
+  `ModuleNotFoundError: app.scripts.seed` — Makefile target now points at
+  the actual `seed_demo_showcase` script.
+- **`requirements.txt win32_setctime`** now has `sys_platform == 'win32'`
+  marker — pip install on Linux / macOS no longer aborts on a Windows-only
+  package.
+
+### Added
+
+- **Delete / Backspace keyboard shortcut** in PDF takeoff to remove the
+  selected measurement (matches every other CAD/design tool).
+
+### Verified
+
+Production E2E confirms Next button advances `1/31 → 2/31 → 7/31` with
+no `0/31` regression (https://openconstructionerp.com).
+
 ## [Unreleased]
 
 ### Dashboards layer — Phase 0 foundation (T00)
