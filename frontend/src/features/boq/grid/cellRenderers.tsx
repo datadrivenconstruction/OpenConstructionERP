@@ -1885,6 +1885,7 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
   const meta = (data.metadata ?? {}) as Record<string, unknown>;
   const hasBimSource = !!meta.bim_qty_source;
   const hasPdfSource = !!meta.pdf_measurement_source;
+  const formulaSource = typeof meta.formula === 'string' ? meta.formula : null;
 
   let colorClass = '';
   let titleText: string | undefined;
@@ -1894,6 +1895,33 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
   } else if (hasBimSource) {
     colorClass = 'font-semibold text-emerald-700 dark:text-emerald-400';
     titleText = String(meta.bim_qty_source);
+  } else if (formulaSource) {
+    // Issue #90: cells with a stored formula get a violet accent + the
+    // formula string in the title so a user knows the qty is computed.
+    colorClass = 'font-semibold text-violet-700 dark:text-violet-300';
+    titleText = `Formula: ${formulaSource}`;
+  }
+
+  // When a formula is the source of the value, give the cell a clear,
+  // unmissable visual treatment: a violet ƒx pill on the left, the resolved
+  // number on the right, and the original formula string surfaced in the
+  // browser tooltip. Click → re-enter edit mode and the FormulaCellEditor
+  // pre-fills with the source formula (not the resolved number).
+  if (formulaSource && !hasBimSource && !hasPdfSource) {
+    return (
+      <span
+        className="relative flex items-center justify-end gap-1 w-full h-full text-xs tabular-nums leading-[32px]"
+        title={`ƒx ${formulaSource}  =  ${formatted}\n\nClick to edit the formula.`}
+      >
+        <span
+          aria-hidden="true"
+          className="inline-flex items-center px-1 h-[16px] rounded text-[9px] font-bold leading-none tracking-tight bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 border border-violet-300/60 dark:border-violet-700/50"
+        >
+          ƒx
+        </span>
+        <span className="font-semibold text-violet-700 dark:text-violet-300">{formatted}</span>
+      </span>
+    );
   }
 
   return (

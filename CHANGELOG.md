@@ -5,6 +5,33 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.5] — 2026-04-26
+
+Issue #90: Excel-style formulas in BOQ Quantity cells. Plus the v2.5.4 Undo defensive wrapper, an "About" copy edit, and three small marketing-page text updates.
+
+### Added — Issue #90 formulas in Qty
+- New `formulaCellEditor` wired to the BOQ Quantity column. Type `=2*PI()^2*3`, `=sqrt(144) + 5`, `12.5 x 4`, etc. — the cell evaluates the expression and stores the resolved number, while the source formula is persisted in `metadata.formula` so you can re-edit it later.
+- The parser is hand-written recursive-descent (CSP-safe; **no eval / no Function**) and supports:
+  - Operators `+ − * / ^` (and `**` as exponent alias), parentheses
+  - `x` / `×` as multiplication aliases (so "2 x 3" works)
+  - `,` as decimal separator (es / de / ru locales) — only when the input has no parens, so it never collides with function-arg separators
+  - Constants: `PI`, `E`
+  - Functions: `sqrt`, `abs`, `round`, `floor`, `ceil`, `pow(x,y)`, `min(...)`, `max(...)`, `sin`, `cos`, `tan`, `log`, `exp`
+  - Optional Excel-style leading `=`
+- Editor UX: violet `ƒx` badge, live evaluation preview (`= 59.22` in green or `⚠ syntax error` in red as you type), inline `?` help popover with a cheat-sheet of operators / functions / examples.
+- Cell display when a formula is stored: violet `ƒx` pill + violet number + AG Grid tooltip showing the source formula. Click the cell → editor pre-fills with the original formula, not the resolved number.
+- 20 unit tests cover precedence, exponent associativity, locale decimals, multiplication aliases, function calls, identifier-injection guards (rejects `=window`, `=alert(1)`, etc.), and the user's reported example `=2xPI()^2x3`.
+
+### Fixed — Undo defensive wrapper (was v2.5.4)
+- `BOQService.update_position` wraps the DB write block (`update_fields` → `flush` → `refresh`) in a defensive try/except. Any unexpected SQLAlchemy/IntegrityError now surfaces as `422 Unprocessable Entity` with a helpful "row may have been deleted or modified concurrently — reload and retry" message instead of a bare 500. The full traceback + a type-only field summary is logged via `logger.exception` so the underlying cause is recoverable from server logs (Bug 1, partial).
+
+### Changed — copy
+- About / "Voices" founder bio: tightened the closing two paragraphs — drops the redundant "ten years" / "decade" repetition, ends with "an open-source modular ERP for the construction industry" + a single follow-up paragraph about the AI-tooling consolidation.
+
+### Known issues (still tracking)
+- Bug 1 root cause not yet identified — the defensive wrapper neutralises the user-facing impact (no more silent 500) but the trigger condition is still unknown. Server logs will now expose it on next occurrence.
+- Bug 4 (description cell crash on newly-added position) — needs user-side repro with browser console screenshot.
+
 ## [2.5.3] — 2026-04-26
 
 BOQ-editor stability + UX sweep. User reported 23 bugs on a single project's BOQ page (`/boq/{id}`); 21 fixed in this release, the remaining 2 (Undo replay 500 on stale parent_id; description-cell crash on newly-added rows) need a reproducible repro and are tracked separately.
