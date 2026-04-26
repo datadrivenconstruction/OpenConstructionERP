@@ -469,3 +469,81 @@ export function buildSnapshotExportUrl(
     snapshotId,
   )}/export?${params.toString()}`;
 }
+
+/* ── Dataset Integrity Overview (T07) ────────────────────────────────────── */
+
+export type IntegrityIssueCode =
+  | 'all_null'
+  | 'high_null_pct'
+  | 'constant'
+  | 'dtype_mismatch'
+  | 'outliers_present'
+  | 'high_zero_pct'
+  | 'low_cardinality_string'
+  | 'uuid_like';
+
+export type IntegrityInferredType =
+  | 'numeric'
+  | 'datetime'
+  | 'boolean'
+  | 'string'
+  | 'empty';
+
+export interface IntegritySampleValue {
+  value: string;
+  count: number;
+}
+
+export interface IntegrityColumn {
+  name: string;
+  dtype: string;
+  inferred_type: IntegrityInferredType;
+  row_count: number;
+  null_count: number;
+  null_pct: number;
+  unique_count: number;
+  completeness: number;
+  sample_values: IntegritySampleValue[];
+  zero_pct: number | null;
+  outlier_count: number | null;
+  min_value: number | null;
+  max_value: number | null;
+  mean_value: number | null;
+  issues: IntegrityIssueCode[];
+}
+
+export interface IntegrityReport {
+  snapshot_id: string;
+  project_id: string;
+  row_count: number;
+  column_count: number;
+  completeness_score: number;
+  schema_hash: string;
+  columns: IntegrityColumn[];
+  issue_summary: Record<string, number>;
+}
+
+export interface GetIntegrityReportInput {
+  snapshotId: string;
+  projectId: string;
+}
+
+/**
+ * Fetch the dataset-integrity report for a snapshot.
+ *
+ * The endpoint is POST (not GET) because the body carries both the
+ * snapshot id and the project id — the server cross-checks them so a
+ * caller can't request integrity for a snapshot in a project they
+ * don't own.
+ */
+export async function getIntegrityReport(
+  input: GetIntegrityReportInput,
+): Promise<IntegrityReport> {
+  return apiPost<IntegrityReport, { snapshot_id: string; project_id: string }>(
+    `/v1/dashboards/integrity-report`,
+    {
+      snapshot_id: input.snapshotId,
+      project_id: input.projectId,
+    },
+  );
+}

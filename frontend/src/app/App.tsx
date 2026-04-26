@@ -158,6 +158,10 @@ const SnapshotsPage = lazy(() =>
 const EacDemoPage = lazy(() =>
   import('@/features/eac/pages/EacDemoPage').then((m) => ({ default: m.EacDemoPage }))
 );
+// EAC-3.2 — visual block editor canvas (xyflow). Per-ruleset editing UI.
+const EACBlockEditorPage = lazy(() =>
+  import('@/features/eac/EACBlockEditorPage').then((m) => ({ default: m.EACBlockEditorPage }))
+);
 
 function LoadingScreen() {
   return (
@@ -464,6 +468,7 @@ export default function App() {
 
         {/* EAC v2 (RFC 35) — block editor primitives preview, dev-only */}
         <Route path="/eac/demo" element={<P title="EAC Block Primitives"><EacDemoPage /></P>} />
+        <Route path="/eac/blocks/:eacId" element={<P title="EAC Block Editor"><EACBlockEditorPage /></P>} />
 
         {/* Convenience route aliases — redirect to canonical paths */}
         <Route path="/dashboard" element={<Navigate to="/" replace />} />

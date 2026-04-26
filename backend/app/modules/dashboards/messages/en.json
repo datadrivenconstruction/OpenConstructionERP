@@ -27,5 +27,15 @@
   "rows.query.invalid": "The rows query is invalid.",
   "export.format.unsupported": "Unsupported export format. Supported: {supported}.",
   "import.staging.not_found": "Staged import not found or expired — please re-upload.",
-  "import.schema.mismatch": "The uploaded file is not compatible with the snapshot schema."
+  "import.schema.mismatch": "The uploaded file is not compatible with the snapshot schema.",
+  "integrity.project_mismatch": "Snapshot does not belong to the supplied project.",
+  "integrity.empty_snapshot": "Snapshot has no rows to analyse yet.",
+  "integrity.issue.all_null": "All values are missing.",
+  "integrity.issue.high_null_pct": "More than 30% of values are missing.",
+  "integrity.issue.constant": "Column has only a single value across all rows.",
+  "integrity.issue.dtype_mismatch": "Inferred type differs from the stored column dtype.",
+  "integrity.issue.outliers_present": "Numeric outliers detected (1.5·IQR rule).",
+  "integrity.issue.high_zero_pct": "More than 50% of numeric values are exactly zero.",
+  "integrity.issue.low_cardinality_string": "String column with very few distinct values — consider categorising.",
+  "integrity.issue.uuid_like": "Values look like UUIDs — usually not useful for filtering."
 }
