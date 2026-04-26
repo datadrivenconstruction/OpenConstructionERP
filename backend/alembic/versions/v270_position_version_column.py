@@ -31,6 +31,8 @@ def upgrade() -> None:
     """Add ``version INT NOT NULL DEFAULT 0`` to ``oe_boq_position``."""
     bind = op.get_bind()
     inspector = sa.inspect(bind)
+    if "oe_boq_position" not in inspector.get_table_names():
+        return
     existing_cols = {col["name"] for col in inspector.get_columns("oe_boq_position")}
     if "version" in existing_cols:
         return
@@ -49,6 +51,8 @@ def downgrade() -> None:
     """Drop the ``version`` column."""
     bind = op.get_bind()
     inspector = sa.inspect(bind)
+    if "oe_boq_position" not in inspector.get_table_names():
+        return
     existing_cols = {col["name"] for col in inspector.get_columns("oe_boq_position")}
     if "version" not in existing_cols:
         return
