@@ -1,19 +1,65 @@
 # OpenConstructionERP — One-Line Installer for Windows
 #
 # Usage:
-#   irm https://get.openconstructionerp.com/windows | iex
+#   irm https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.ps1 | iex
 #
 # What it does:
 #   1. If Docker Desktop is running → runs via docker compose
 #   2. If Python 3.12+ is installed → installs via pip
 #   3. Otherwise → installs uv → installs via uv
 
-$ErrorActionPreference = "Stop"
+# Native commands (uv, python, docker) write progress to stderr by design.
+# In Windows PowerShell 5.1, `$ErrorActionPreference = "Stop"` combined with
+# `irm | iex` execution turns every stderr line into a NativeCommandError
+# terminating exception — so a successful "Resolved 64 packages in 1.28s"
+# from uv aborts the script before the install actually runs (issue #87).
+# We rely on explicit `$LASTEXITCODE` checks after every native call instead.
+$ErrorActionPreference = "Continue"
+
+# Belt-and-braces for users on PowerShell 7.3+: also disable native-command
+# error preference so `& uv ...` never escalates stderr to a terminating error.
+if ($PSVersionTable.PSVersion.Major -ge 7) {
+    $PSNativeCommandUseErrorActionPreference = $false
+}
 
 $OE_VERSION = if ($env:OE_VERSION) { $env:OE_VERSION } else { "latest" }
 $OE_INSTALL_DIR = if ($env:OE_INSTALL_DIR) { $env:OE_INSTALL_DIR } else { "$env:LOCALAPPDATA\OpenConstructionERP" }
 $OE_PORT = if ($env:OE_PORT) { $env:OE_PORT } else { "8080" }
 $OE_REPO = "https://github.com/datadrivenconstruction/OpenConstructionERP"
+
+# Helper: run a native command, suppress PS's stderr-as-error wrapping,
+# and check $LASTEXITCODE explicitly. Returns the merged stdout+stderr
+# as a string array so the caller can log progress to the host.
+function Invoke-Native {
+    param(
+        [Parameter(Mandatory)] [scriptblock] $Block,
+        [Parameter(Mandatory)] [string]      $Description,
+        [switch]                              $TolerateNonZero
+    )
+    $prevPref = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        # Merge stderr into stdout so the script can keep running even when
+        # the native command emits progress text. ForEach-Object unwraps
+        # ErrorRecord objects so they print as plain text instead of being
+        # surfaced as PS errors.
+        & $Block 2>&1 | ForEach-Object {
+            if ($_ -is [System.Management.Automation.ErrorRecord]) {
+                Write-Host $_.Exception.Message
+            } else {
+                Write-Host $_
+            }
+        }
+        $exit = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $prevPref
+    }
+    if ($exit -ne 0 -and -not $TolerateNonZero) {
+        Write-Err "${Description}: exit code $exit"
+        exit 1
+    }
+    return $exit
+}
 
 function Write-Info($msg) { Write-Host "[INFO] $msg" -ForegroundColor Blue }
 function Write-Ok($msg)   { Write-Host "[OK] $msg" -ForegroundColor Green }
@@ -61,14 +107,17 @@ function Install-Docker {
     Set-Location $OE_INSTALL_DIR
 
     $url = "$OE_REPO/raw/main/docker-compose.quickstart.yml"
-    Invoke-WebRequest -Uri $url -OutFile "docker-compose.yml"
-
-    Write-Info "Starting OpenConstructionERP..."
-    & docker compose up -d
-    if ($LASTEXITCODE -ne 0) {
-        Write-Err "docker compose up failed (exit code $LASTEXITCODE)"
+    try {
+        Invoke-WebRequest -Uri $url -OutFile "docker-compose.yml" -ErrorAction Stop
+    } catch {
+        Write-Err "Failed to download docker-compose.quickstart.yml: $($_.Exception.Message)"
         exit 1
     }
+
+    Write-Info "Starting OpenConstructionERP..."
+    Invoke-Native -Description "docker compose up -d" -Block {
+        & docker compose up -d
+    } | Out-Null
 
     # Wait for health check
     Write-Info "Waiting for health check..."
@@ -114,11 +163,11 @@ function Install-Uv {
         "$env:USERPROFILE\.local\bin\uv.exe"
     } else { "uv" }
 
-    & $uvPath tool install openconstructionerp
-    if ($LASTEXITCODE -ne 0) {
-        Write-Err "uv tool install failed (exit code $LASTEXITCODE)"
-        exit 1
-    }
+    # Use Invoke-Native so uv's "Resolved N packages" stderr progress does
+    # not terminate the script under `irm | iex` (GitHub issue #87).
+    Invoke-Native -Description "uv tool install openconstructionerp" -Block {
+        & $uvPath tool install openconstructionerp
+    } | Out-Null
     Write-Ok "OpenConstructionERP installed!"
     Write-Host ""
     Write-Host "Run: openconstructionerp serve --port $OE_PORT --open"
@@ -154,14 +203,16 @@ function Install-Pip {
     Write-Ok "[2/5] Virtual environment ready"
 
     # 3. Install package
+    # Wrap in Invoke-Native: pip emits deprecation warnings + SSL retry
+    # notices to stderr, which would re-trigger issue #87's NativeCommandError
+    # under `irm | iex`. --quiet silences progress but not warnings.
     Write-Info "[3/5] Installing openconstructionerp from PyPI..."
-    & "$OE_INSTALL_DIR\venv\Scripts\python.exe" -m pip install --quiet --upgrade pip
-    & "$OE_INSTALL_DIR\venv\Scripts\python.exe" -m pip install --quiet --upgrade openconstructionerp
-    if ($LASTEXITCODE -ne 0) {
-        Write-Err "pip install failed (exit code $LASTEXITCODE)"
-        Write-Host "  Try: $OE_INSTALL_DIR\venv\Scripts\python.exe -m pip install openconstructionerp"
-        exit 1
-    }
+    Invoke-Native -Description "pip install --upgrade pip" -Block {
+        & "$OE_INSTALL_DIR\venv\Scripts\python.exe" -m pip install --quiet --upgrade pip
+    } | Out-Null
+    Invoke-Native -Description "pip install openconstructionerp" -Block {
+        & "$OE_INSTALL_DIR\venv\Scripts\python.exe" -m pip install --quiet --upgrade openconstructionerp
+    } | Out-Null
     Write-Ok "[3/5] Package installed"
 
     # 4. Initialise database

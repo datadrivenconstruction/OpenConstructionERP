@@ -2,7 +2,7 @@
 # OpenConstructionERP — One-Line Installer for Linux / macOS
 #
 # Usage:
-#   curl -sSL https://get.openconstructionerp.com | bash
+#   curl -fsSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.sh | bash
 #
 # What it does:
 #   1. If Docker is installed → runs via docker compose
@@ -65,11 +65,14 @@ install_docker() {
     mkdir -p "$OE_INSTALL_DIR"
     cd "$OE_INSTALL_DIR"
 
-    # Download quickstart compose file
+    # Download quickstart compose file. -f makes curl exit non-zero on
+    # HTTP 4xx/5xx (without it, a 404 silently writes the HTML error page
+    # to docker-compose.yml and `docker compose up` then dies on a YAML
+    # parse error — opaque failure mode for the user).
     if [ "$OE_VERSION" = "latest" ]; then
-        curl -sSL "$OE_REPO/raw/main/docker-compose.quickstart.yml" -o docker-compose.yml
+        curl -fsSL "$OE_REPO/raw/main/docker-compose.quickstart.yml" -o docker-compose.yml
     else
-        curl -sSL "$OE_REPO/raw/v$OE_VERSION/docker-compose.quickstart.yml" -o docker-compose.yml
+        curl -fsSL "$OE_REPO/raw/v$OE_VERSION/docker-compose.quickstart.yml" -o docker-compose.yml
     fi
 
     info "Starting OpenEstimate..."
@@ -94,7 +97,12 @@ install_uv() {
     fi
 
     # Install OpenConstructionERP (PyPI package name — see pyproject.toml).
-    uv tool install openconstructionerp
+    # Honour OE_VERSION env var (advertised in file header).
+    if [ "$OE_VERSION" = "latest" ]; then
+        uv tool install openconstructionerp
+    else
+        uv tool install "openconstructionerp==$OE_VERSION"
+    fi
     ok "OpenConstructionERP installed!"
 
     # Create systemd service if on Linux
@@ -110,19 +118,38 @@ install_uv() {
 install_pip() {
     info "Installing via pip..."
 
-    local python_cmd="python3"
-    if command -v python3.12 &>/dev/null; then
-        python_cmd="python3.12"
+    # Mirror has_python312()'s fallback: pick the first interpreter that is
+    # actually >=3.12. Picking `python3` blindly used to install into a
+    # 3.10 venv when the system shipped python3.12 only via the versioned
+    # binary, then fail at first import with cryptic syntax errors.
+    local python_cmd=""
+    for cmd in python3.12 python3 python; do
+        if command -v "$cmd" &>/dev/null; then
+            if "$cmd" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)' &>/dev/null; then
+                python_cmd="$cmd"
+                break
+            fi
+        fi
+    done
+    if [ -z "$python_cmd" ]; then
+        error "No Python 3.12+ interpreter found on PATH."
+        exit 1
     fi
+    info "Using $python_cmd ($("$python_cmd" --version 2>&1))"
 
     # Create virtual environment
     mkdir -p "$OE_INSTALL_DIR"
     $python_cmd -m venv "$OE_INSTALL_DIR/venv"
     source "$OE_INSTALL_DIR/venv/bin/activate"
 
-    # Install
+    # Install. --upgrade so re-running picks up new releases; OE_VERSION
+    # pin honours the env var advertised in the file header.
     pip install --upgrade pip
-    pip install openconstructionerp
+    if [ "$OE_VERSION" = "latest" ]; then
+        pip install --upgrade openconstructionerp
+    else
+        pip install --upgrade "openconstructionerp==$OE_VERSION"
+    fi
 
     ok "OpenConstructionERP installed in $OE_INSTALL_DIR/venv"
 
