@@ -27,5 +27,15 @@
   "rows.query.invalid": "Die Zeilen-Abfrage ist ungültig.",
   "export.format.unsupported": "Nicht unterstütztes Exportformat. Unterstützt: {supported}.",
   "import.staging.not_found": "Vorbereiteter Import nicht gefunden oder abgelaufen — bitte erneut hochladen.",
-  "import.schema.mismatch": "Die hochgeladene Datei ist mit dem Snapshot-Schema nicht kompatibel."
+  "import.schema.mismatch": "Die hochgeladene Datei ist mit dem Snapshot-Schema nicht kompatibel.",
+  "integrity.project_mismatch": "Der Snapshot gehört nicht zum angegebenen Projekt.",
+  "integrity.empty_snapshot": "Snapshot enthält noch keine Zeilen zur Auswertung.",
+  "integrity.issue.all_null": "Alle Werte fehlen.",
+  "integrity.issue.high_null_pct": "Mehr als 30% der Werte fehlen.",
+  "integrity.issue.constant": "Spalte enthält nur einen einzigen Wert über alle Zeilen.",
+  "integrity.issue.dtype_mismatch": "Erkannter Typ weicht vom gespeicherten Spaltentyp ab.",
+  "integrity.issue.outliers_present": "Numerische Ausreißer erkannt (1.5·IQR-Regel).",
+  "integrity.issue.high_zero_pct": "Mehr als 50% der numerischen Werte sind exakt null.",
+  "integrity.issue.low_cardinality_string": "String-Spalte mit sehr wenigen verschiedenen Werten — als Kategorie behandeln.",
+  "integrity.issue.uuid_like": "Werte sehen wie UUIDs aus — meist nicht für Filter geeignet."
 }

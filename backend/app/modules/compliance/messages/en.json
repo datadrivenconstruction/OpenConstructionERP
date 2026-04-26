@@ -1,0 +1,16 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Compliance DSL error",
+      "syntax_error": "Compliance DSL syntax error: {detail}",
+      "type_error": "Compliance DSL type error: {detail}",
+      "validation_failed": "Compliance DSL validation failed: {detail}",
+      "not_found": "Compliance DSL rule not found",
+      "duplicate_rule_id": "A rule with id '{rule_id}' already exists",
+      "access_denied": "Only the rule owner can perform this action",
+      "compiled": "Rule '{rule_id}' compiled and registered successfully",
+      "deleted": "Rule '{rule_id}' deleted",
+      "evaluation_failed": "Rule '{rule_id}' could not be evaluated: {detail}"
+    }
+  }
+}

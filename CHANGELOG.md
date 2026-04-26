@@ -5,6 +5,26 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.2] — 2026-04-27
+
+Patch release bundling three wave-3 features (T07 Dataset Integrity, T08 Compliance DSL Engine, EAC §3.2 Block Editor canvas) and a downgrade-path migration fix.
+
+### Fixed
+- **Alembic v260b downgrade failed on SQLite** — `drop_column("idempotency_key")` raised "error in index … after drop column" because SQLAlchemy's `create_all()` lays down an auto-named `ix_oe_eac_run_idempotency_key` index that the migration didn't know about. Now walks `inspector.get_indexes()` and drops every index covering the column. Migration roundtrip test sweep: 11/11 + 1 xfail.
+
+### Added — Dashboards (T07)
+- **Dataset Integrity Overview** — `compute_integrity_report()` in `backend/app/modules/dashboards/integrity.py` produces per-column null/unique/dtype/sample/zero/outlier/issue-code stats plus a project-wide completeness score and stable schema hash. `POST /api/v1/dashboards/integrity-report` endpoint with project cross-check. `IntegrityOverview.tsx` table component with completeness chip, per-column issue badges, click-to-expand sample-values drawer, and `issuesOnly` filter.
+
+### Added — Compliance (T08)
+- **DSL Engine for ValidationRule** — `backend/app/core/validation/dsl/` package provides a typed AST (`RuleDefinition`, `ForEachAssert`, `Comparison`, `Aggregation`, `Logical`, `FieldRef`, `Literal`) parsed from YAML/JSON via `yaml.safe_load`, dunder-rejection, depth-cap 16, python-tag attack rejection. `compile_rule()` produces a registered ValidationRule subclass; supports `forEach`/`assert`, `count`/`sum`/`avg`/`min`/`max`, comparisons (`==`,`!=`,`<`,`<=`,`>`,`>=`,`in`), logical (`and`/`or`/`not`). New `oe_compliance_dsl_rule` table (alembic `v2a0_compliance_dsl_rules`), 5 endpoints under `/api/v1/compliance/dsl/` (validate-syntax, compile, list, get, delete) with tenant isolation and owner-only delete.
+
+### Added — EAC (§3.2 Block Editor canvas)
+- **Spatial block canvas with slot DnD** — `frontend/src/features/eac/canvas/` package built on `@xyflow/react`: `BlockCanvas` (zoom/pan/multi-select/keyboard), `BlockNode` (editable title + expandable params + typed slot handles), `SlotConnection` (typed bezier edges colored by data type), `CanvasToolbar` (undo/redo, fit-view, save, validate, compile), `useBlockCanvasStore` Zustand store with bounded undo/redo and clipboard, `dnd.ts` slot-type compatibility matrix. New page `EACBlockEditorPage.tsx` mounted at `/eac/blocks/:eacId`.
+
+### Tests
+- 19 + 5 (T07) + 19 + 12 + 8 (T08) + 15 + 10 + 4 + 5 (EAC canvas) = 97 new tests, all passing
+- Migration roundtrip 11/11 (was 10 + 1 xfail before v260b downgrade fix)
+
 ## [2.6.1] — 2026-04-26
 
 Patch release on top of v2.6.0 — bundles a prod-deploy migration fix and three Dashboards features (T04 Cascade Filter Engine, T05 Presets & Collections, T06 Tabular Data I/O) that were nearly complete at the v2.6.0 cut.

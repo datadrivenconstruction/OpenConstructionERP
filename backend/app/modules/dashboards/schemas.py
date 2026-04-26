@@ -114,7 +114,8 @@ class QuickInsightChartOut(BaseModel):
     """
 
     chart_type: str = Field(
-        ..., description='One of "histogram" | "bar" | "line" | "scatter" | "donut".',
+        ...,
+        description='One of "histogram" | "bar" | "line" | "scatter" | "donut".',
     )
     title: str
     data: list[dict[str, Any]] = Field(default_factory=list)
@@ -284,3 +285,71 @@ class SnapshotImportCommitOut(BaseModel):
     snapshot_id: uuid.UUID
     staging_id: str
     rows_committed: int
+
+
+# ── Dataset Integrity Overview (T07) ───────────────────────────────────────
+
+
+class IntegritySampleValueOut(BaseModel):
+    """One top-frequency value from a column's sample."""
+
+    value: str
+    count: int = Field(..., ge=0)
+
+
+class IntegrityColumnOut(BaseModel):
+    """Per-column integrity diagnostics."""
+
+    name: str
+    dtype: str
+    inferred_type: str = Field(
+        ...,
+        description='One of "numeric" | "datetime" | "boolean" | "string" | "empty".',
+    )
+    row_count: int = Field(..., ge=0)
+    null_count: int = Field(..., ge=0)
+    null_pct: float = Field(..., ge=0.0, le=1.0)
+    unique_count: int = Field(..., ge=0)
+    completeness: float = Field(..., ge=0.0, le=1.0)
+    sample_values: list[IntegritySampleValueOut] = Field(default_factory=list)
+    zero_pct: float | None = Field(default=None, ge=0.0, le=1.0)
+    outlier_count: int | None = Field(default=None, ge=0)
+    min_value: float | None = None
+    max_value: float | None = None
+    mean_value: float | None = None
+    issues: list[str] = Field(default_factory=list)
+
+
+class IntegrityReportOut(BaseModel):
+    """Whole-snapshot integrity report.
+
+    ``completeness_score`` is the average of per-column completeness
+    (1 − null_pct). ``schema_hash`` lets the frontend cache column
+    detail views across reloads — a hash change means the snapshot's
+    column shape moved.
+    """
+
+    snapshot_id: uuid.UUID
+    project_id: uuid.UUID
+    row_count: int = Field(..., ge=0)
+    column_count: int = Field(..., ge=0)
+    completeness_score: float = Field(..., ge=0.0, le=1.0)
+    schema_hash: str
+    columns: list[IntegrityColumnOut] = Field(default_factory=list)
+    issue_summary: dict[str, int] = Field(default_factory=dict)
+
+
+class IntegrityReportRequest(BaseModel):
+    """Body for ``POST /v1/dashboards/integrity-report``.
+
+    The endpoint takes ``snapshot_id`` in the body (rather than the URL)
+    so the panel can refresh after a snapshot edit without re-keying
+    the route. ``project_id`` is required up front — the report has to
+    namespace caches by project, and we don't want to round-trip the
+    snapshot detail just for that.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    snapshot_id: uuid.UUID
+    project_id: uuid.UUID
