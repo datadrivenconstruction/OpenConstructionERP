@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0",
+  "name": "Door codes end with '-EXT' or '-INT'",
+  "output_mode": "boolean",
+  "tags": ["doors", "naming"],
+  "selector": {"kind": "ifc_class", "values": ["IfcDoor"]},
+  "predicate": {
+    "kind": "or",
+    "children": [
+      {
+        "kind": "triplet",
+        "attribute": {"kind": "exact", "pset_name": null, "name": "Mark"},
+        "constraint": {"operator": "ends_with", "value": "-EXT", "case_sensitive": true}
+      },
+      {
+        "kind": "triplet",
+        "attribute": {"kind": "exact", "pset_name": null, "name": "Mark"},
+        "constraint": {"operator": "ends_with", "value": "-INT", "case_sensitive": true}
+      }
+    ]
+  }
+}

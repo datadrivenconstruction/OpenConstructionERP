@@ -1,0 +1,19 @@
+{
+  "schema_version": "2.0",
+  "name": "Wall mass via density local variable",
+  "description": "Compute mass = volume * density using a local variable for the density lookup.",
+  "output_mode": "aggregate",
+  "result_unit": "kg",
+  "tags": ["walls", "qto", "structural"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": null,
+  "formula": "Volume * density_kg_per_m3",
+  "local_variables": [
+    {
+      "name": "density_kg_per_m3",
+      "expression": "2400",
+      "result_unit": "kg/m3",
+      "description": "Default reinforced concrete density"
+    }
+  ]
+}

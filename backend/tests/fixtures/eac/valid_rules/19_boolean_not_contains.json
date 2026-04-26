@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Names must not contain 'TODO'",
+  "output_mode": "boolean",
+  "tags": ["data-quality"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "exact", "pset_name": null, "name": "Name"},
+    "constraint": {"operator": "not_contains", "value": "TODO", "case_sensitive": false}
+  }
+}

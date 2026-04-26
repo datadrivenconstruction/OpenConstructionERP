@@ -585,6 +585,8 @@ describe('Visual Regression — LoginPage', () => {
 ═══════════════════════════════════════════════════════════════════════ */
 
 describe('Visual Regression — DashboardPage', () => {
+  // 60s timeout: DashboardPage pulls in many lazy chunks (charts, maps, weather);
+  // under full-suite parallel load 15s isn't enough. Solo run takes ~4s.
   it('renders loading/skeleton state', async () => {
     const { DashboardPage } = await import('@/features/dashboard/DashboardPage');
     const { container } = render(
@@ -593,5 +595,5 @@ describe('Visual Regression — DashboardPage', () => {
       </RouterWrapper>,
     );
     expect(container).toMatchSnapshot();
-  }, 15000);
+  }, 60000);
 });

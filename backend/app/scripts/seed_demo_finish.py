@@ -14,8 +14,11 @@ import httpx
 
 # Reuse the specs from the main seeder — same 3 projects, same BOQ structure.
 from app.scripts.seed_demo_showcase import (
-    ADMIN_EMAIL, ADMIN_PASSWORD, BASE, DEMO_PROJECTS,
-    login_or_register, seed_boq, link_bim_sample,
+    BASE,
+    DEMO_PROJECTS,
+    link_bim_sample,
+    login_or_register,
+    seed_boq,
 )
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":

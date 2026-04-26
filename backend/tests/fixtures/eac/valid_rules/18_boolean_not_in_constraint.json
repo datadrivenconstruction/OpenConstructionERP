@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Reject deprecated wall types",
+  "output_mode": "boolean",
+  "tags": ["walls", "deprecated"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "exact", "pset_name": null, "name": "Type"},
+    "constraint": {"operator": "not_in", "values": ["DEPRECATED-A", "DEPRECATED-B", "LEGACY"]}
+  }
+}

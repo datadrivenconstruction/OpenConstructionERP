@@ -36,7 +36,11 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
-          queries: security-and-quality
+          queries: security-extended
+          # Repo-level path & query filters live in the config file. Edit
+          # .github/codeql/codeql-config.yml to scope alerts (see the file
+          # for justifications). Shipped code remains fully analysed.
+          config-file: ./.github/codeql/codeql-config.yml
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

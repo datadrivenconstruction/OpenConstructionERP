@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "between with min > max",
+  "output_mode": "boolean",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "alias", "alias_id": "alias_thickness"},
+    "constraint": {"operator": "between", "min": 0.5, "max": 0.1, "inclusive": true}
+  },
+  "_invalid_reason": "between operator requires min <= max (FR-1.10)"
+}

@@ -120,6 +120,10 @@ class ProjectService:
             contingency_pct=data.contingency_pct,
             custom_fields=data.custom_fields,
             work_calendar_id=data.work_calendar_id,
+            # ── v2.6.0 multi-currency / VAT (RFC 37) ────────────────────
+            fx_rates=list(data.fx_rates or []),
+            default_vat_rate=data.default_vat_rate,
+            custom_units=list(data.custom_units or []),
         )
         project = await self.repo.create(project)
 

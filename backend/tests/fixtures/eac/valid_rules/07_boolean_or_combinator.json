@@ -1,0 +1,26 @@
+{
+  "schema_version": "2.0",
+  "name": "Walls OR slabs have IsExternal",
+  "description": "Boolean predicate using OR combinator across two attributes.",
+  "output_mode": "boolean",
+  "tags": ["envelope"],
+  "selector": {"kind": "or", "children": [
+    {"kind": "category", "values": ["Walls"]},
+    {"kind": "category", "values": ["Floors"]}
+  ]},
+  "predicate": {
+    "kind": "or",
+    "children": [
+      {
+        "kind": "triplet",
+        "attribute": {"kind": "exact", "pset_name": "Pset_WallCommon", "name": "IsExternal"},
+        "constraint": {"operator": "eq", "value": true}
+      },
+      {
+        "kind": "triplet",
+        "attribute": {"kind": "exact", "pset_name": "Pset_SlabCommon", "name": "IsExternal"},
+        "constraint": {"operator": "eq", "value": true}
+      }
+    ]
+  }
+}

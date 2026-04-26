@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ids:ids xmlns:ids="http://standards.buildingsmart.org/IDS"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://standards.buildingsmart.org/IDS IDS-1.0.xsd">
+  <ids:info>
+    <ids:title>Walls with IsExternal property</ids:title>
+    <ids:copyright>OpenConstructionERP test fixtures</ids:copyright>
+    <ids:version>1.0.0</ids:version>
+    <ids:description>All IfcWall instances must carry Pset_WallCommon.IsExternal.</ids:description>
+    <ids:author>fixtures@openconstructionerp.io</ids:author>
+    <ids:date>2026-04-25</ids:date>
+  </ids:info>
+  <ids:specifications>
+    <ids:specification name="Walls have IsExternal" ifcVersion="IFC4" identifier="ids_02">
+      <ids:applicability minOccurs="1" maxOccurs="unbounded">
+        <ids:entity>
+          <ids:name>
+            <ids:simpleValue>IFCWALL</ids:simpleValue>
+          </ids:name>
+        </ids:entity>
+      </ids:applicability>
+      <ids:requirements>
+        <ids:property cardinality="required" dataType="IFCBOOLEAN">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_WallCommon</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>IsExternal</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+      </ids:requirements>
+    </ids:specification>
+  </ids:specifications>
+</ids:ids>

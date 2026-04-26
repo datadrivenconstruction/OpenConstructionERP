@@ -110,3 +110,117 @@ describe('ElementManager.setCategoryOpacity', () => {
     ).toBe(0);
   });
 });
+
+/**
+ * BIMViewer combines `isolatedIds` and `filterPredicate` by isolating
+ * the intersection of the two sets (ids ∩ predicate-pass).  This test
+ * confirms that passing that pre-computed intersection straight through
+ * `isolate()` produces the expected mesh-visibility state — i.e. that
+ * the contract the viewer relies on holds.
+ */
+describe('ElementManager.isolate (intersection with filter predicate)', () => {
+  let scene: SceneManager;
+  let mgr: ElementManager;
+  let elements: BIMElementData[];
+
+  beforeEach(() => {
+    scene = makeFakeSceneManager();
+    mgr = new ElementManager(scene);
+    elements = sampleElements();
+    mgr.loadElements(elements, { skipPlaceholders: false });
+  });
+
+  it('isolates only ids that appear in BOTH isolatedIds and filterPredicate', () => {
+    // Scenario: user saved a group of { w1, w2 } and then typed a
+    // search that only matches walls with a "1" suffix. The
+    // intersection should leave just w1 visible.
+    const isolatedIds = ['w1', 'w2'];
+    const predicate = (el: BIMElementData) => el.name?.endsWith('1') ?? false;
+    const idSet = new Set(isolatedIds);
+    const intersectIds = elements
+      .filter((e) => idSet.has(e.id) && predicate(e))
+      .map((e) => e.id);
+    mgr.isolate(intersectIds);
+    expect(mgr.getMesh('w1')!.visible).toBe(true);
+    expect(mgr.getMesh('w2')!.visible).toBe(false);
+    expect(mgr.getMesh('d1')!.visible).toBe(false);
+  });
+
+  it('hides everything when the intersection is empty', () => {
+    // isolatedIds = [w1], filter keeps only doors → no overlap
+    const isolatedIds = ['w1'];
+    const predicate = (el: BIMElementData) => el.element_type === 'Doors';
+    const idSet = new Set(isolatedIds);
+    const intersectIds = elements
+      .filter((e) => idSet.has(e.id) && predicate(e))
+      .map((e) => e.id);
+    mgr.isolate(intersectIds);
+    expect(mgr.getMesh('w1')!.visible).toBe(false);
+    expect(mgr.getMesh('w2')!.visible).toBe(false);
+    expect(mgr.getMesh('d1')!.visible).toBe(false);
+  });
+});
+
+/**
+ * Up-axis handling in `processLoadedScene` — branch by loader.
+ *
+ *  - GLB scenes need an explicit -90° X rotation: GLTFLoader does no
+ *    auto-rotation and our trimesh export keeps the source Z_UP frame.
+ *  - DAE scenes from ColladaLoader are pre-rotated to Y_UP by the loader
+ *    when the COLLADA `<up_axis>` is `Z_UP`, so we MUST NOT rotate again
+ *    (regression of fix 1f80522 / 1f0530f produced an upside-down model).
+ *  - DAE scenes that arrive un-rotated (writer omitted `<up_axis>` or
+ *    declared Y_UP) are detected via a bbox heuristic — Y extent ≥ Z
+ *    extent ⇒ already upright ⇒ skip rotation.
+ */
+describe('ElementManager.processLoadedScene up-axis handling', () => {
+  let scene: SceneManager;
+  let mgr: ElementManager;
+
+  beforeEach(() => {
+    scene = makeFakeSceneManager();
+    mgr = new ElementManager(scene);
+    mgr.loadElements(sampleElements(), { skipPlaceholders: true });
+  });
+
+  /** Build a Group whose bbox extends mostly along the chosen axis. */
+  function makeSceneTallOn(axis: 'y' | 'z'): THREE.Group {
+    const group = new THREE.Group();
+    // 1×1 mesh in xy, then make it tall along the chosen axis. The other
+    // axis is left small so the bbox heuristic has a clear winner.
+    const big = axis === 'z' ? 10 : 1;
+    const tall = axis === 'y' ? 10 : 1;
+    const geom = new THREE.BoxGeometry(1, tall, big);
+    const mesh = new THREE.Mesh(geom, new THREE.MeshBasicMaterial());
+    group.add(mesh);
+    return group;
+  }
+
+  it('GLB-loaded scene gets rotation.x = -PI/2', () => {
+    const glbScene = makeSceneTallOn('z'); // bbox shape irrelevant when isGLB=true
+    // processLoadedScene is private; test via bracket access.
+    (mgr as unknown as {
+      processLoadedScene: (s: THREE.Object3D, p?: unknown, isGLB?: boolean) => void;
+    }).processLoadedScene(glbScene, undefined, true);
+    expect(glbScene.rotation.x).toBeCloseTo(-Math.PI / 2);
+  });
+
+  it('DAE-loaded scene with Z_UP-pre-rotated bbox (Y > Z) is NOT rotated', () => {
+    // ColladaLoader pre-rotates Z_UP → Y_UP, so the loaded scene's bbox
+    // should now have larger Y extent than Z extent. We must NOT rotate again.
+    const daeScene = makeSceneTallOn('y');
+    (mgr as unknown as {
+      processLoadedScene: (s: THREE.Object3D, p?: unknown, isGLB?: boolean) => void;
+    }).processLoadedScene(daeScene, undefined, false);
+    expect(daeScene.rotation.x).toBe(0);
+  });
+
+  it('DAE-loaded scene with Y_UP bbox (Y >= Z) is NOT rotated', () => {
+    // Y_UP DAE: arrives un-rotated by ColladaLoader, but is already upright.
+    const daeScene = makeSceneTallOn('y');
+    (mgr as unknown as {
+      processLoadedScene: (s: THREE.Object3D, p?: unknown, isGLB?: boolean) => void;
+    }).processLoadedScene(daeScene, undefined, false);
+    expect(daeScene.rotation.x).toBe(0);
+  });
+});

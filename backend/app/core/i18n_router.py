@@ -22,6 +22,33 @@ async def list_locales() -> dict:
     return {"locales": get_available_locales()}
 
 
+@router.get("/locales/{locale}/messages")
+@router.get("/locales/{locale}/messages/")
+async def get_locale_messages(locale: str) -> dict:
+    """Get translation messages for a locale (BUG-API13).
+
+    Mirrors the ``GET /i18n/{locale}`` endpoint but at the
+    ``/i18n/locales/{code}/messages/`` path expected by
+    ``i18next-http-backend`` and consumers that follow the
+    ``/locales/{code}/messages`` convention. Returns 404 for unsupported
+    locale codes; supplies the English fallback (with ``_meta.fallback``)
+    for supported but unloaded locales.
+    """
+    if locale not in SUPPORTED_LOCALES:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=(
+                f"Locale '{locale}' is not supported. "
+                f"Supported codes: {', '.join(SUPPORTED_LOCALES)}"
+            ),
+        )
+    translations = get_all_translations(locale)
+    meta: dict[str, object] = {"locale": locale, "fallback": not is_locale_loaded(locale)}
+    if meta["fallback"]:
+        meta["fallback_locale"] = "en"
+    return {"_meta": meta, **translations}
+
+
 @router.get("/{locale}")
 async def get_translations(locale: str) -> dict:
     """Get all translations for a locale (used by frontend i18next-http-backend).

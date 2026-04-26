@@ -10,6 +10,8 @@
   "snapshot.manifest.missing_keys": "Snapshot manifest is missing required keys: {keys}.",
   "snapshot.parquet.missing_entities": "Snapshot has no entities to analyse.",
   "snapshot.parquet.not_local": "This storage backend cannot expose Parquet files to DuckDB yet. Switch STORAGE_BACKEND to 'local' or install the DuckDB httpfs extension.",
+  "snapshot.format.unsupported": "One of the uploaded files uses a format that is not supported yet. Supported formats today: {supported}.",
+  "snapshot.conversion.failed": "Could not convert the uploaded files into a snapshot: {reason}.",
   "dashboard.scope.promote_admin_only": "Only administrators can promote a dashboard to organisation scope.",
   "dashboard.yaml.invalid": "Dashboard spec is not valid YAML: {reason}.",
   "dashboard.yaml.schema_violation": "Dashboard spec does not match the expected schema: {reason}.",

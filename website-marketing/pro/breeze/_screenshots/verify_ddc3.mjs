@@ -1,0 +1,15 @@
+import { chromium } from '../../../../frontend/node_modules/playwright/index.mjs';
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 1800 }, deviceScaleFactor: 1 });
+const page = await ctx.newPage();
+await page.goto('https://openconstructionerp.com/?lang=de&nocache=' + Date.now(), { waitUntil: 'networkidle' });
+await page.evaluate(() => { const cb = document.querySelector('.cookie-banner'); if (cb) cb.style.display = 'none'; document.querySelectorAll('.reveal').forEach(el => { el.classList.add('is-visible'); el.style.opacity = '1'; el.style.transform = 'none'; }); });
+const ddc = await page.locator('#ddc').boundingBox();
+const eco = await page.locator('.ddc-ecosystem').boundingBox();
+console.log('section', JSON.stringify(ddc));
+console.log('ecosystem', JSON.stringify(eco));
+await page.evaluate((y) => window.scrollTo(0, y), ddc.y);
+await page.waitForTimeout(2200);
+await page.screenshot({ path: './ddc-full.png', fullPage: false });
+await ctx.close();
+await browser.close();

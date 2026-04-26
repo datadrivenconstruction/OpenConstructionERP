@@ -91,8 +91,21 @@ class InvoiceCreate(BaseModel):
     invoice_number: str | None = Field(
         default=None, max_length=50, examples=["INV-2026-0042"]
     )
-    invoice_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20, examples=["2026-04-01"])
-    due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20, examples=["2026-05-01"])
+    # Phase 2.5: invoice_date may be empty when an invoice is being drafted
+    # (TBD) — seeded data and frontend drafts both produce "". Validate format
+    # only when a value is supplied. (BUG-FINANCE01)
+    invoice_date: str = Field(
+        default="",
+        pattern=r"^(\d{4}-\d{2}-\d{2})?$",
+        max_length=20,
+        examples=["2026-04-01"],
+    )
+    due_date: str | None = Field(
+        default=None,
+        pattern=r"^(\d{4}-\d{2}-\d{2})?$",
+        max_length=20,
+        examples=["2026-05-01"],
+    )
     currency_code: str = Field(default="EUR", max_length=10, examples=["EUR"])
     amount_subtotal: str = Field(default="0", max_length=50, examples=["50000.00"])
     tax_amount: str = Field(default="0", max_length=50, examples=["9500.00"])

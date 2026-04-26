@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Mark must not match temp pattern",
+  "output_mode": "boolean",
+  "tags": ["data-quality"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "regex", "pset_name": null, "pattern": "^Mark.*", "case_sensitive": false},
+    "constraint": {"operator": "not_matches", "pattern": "^TEMP-.*", "case_sensitive": false}
+  }
+}

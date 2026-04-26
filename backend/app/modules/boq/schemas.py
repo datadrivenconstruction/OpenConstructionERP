@@ -114,6 +114,19 @@ class BOQResponse(BaseModel):
     approved_by: str | None = None
     approved_at: str | None = None
 
+    # BUG-MATH04: defence-in-depth strip of any residual HTML on output.
+    # Input validators only block the *dangerous* subset; legacy rows
+    # written before that fix may still contain ``<b>`` etc. Stripping at
+    # serialisation guarantees the JSON consumer sees plain text even if
+    # storage was ever compromised by a path that bypassed the input
+    # validators (bulk import, raw SQL migration, etc.).
+    @field_validator("name", "description", mode="after")
+    @classmethod
+    def _strip_html_on_response(cls, v: str) -> str:
+        from app.core.sanitize import sanitise_text
+
+        return sanitise_text(v) or ""
+
 
 class BOQListItem(BOQResponse):
     """BOQ summary returned from list endpoints, includes computed grand_total."""
@@ -151,12 +164,13 @@ class PositionCreate(BaseModel):
         ...,
         min_length=1,
         max_length=20,
-        description="Unit of measurement (m, m2, m3, kg, pcs, lsum, etc.)",
+        description="Unit of measurement (m, m2, m3, kg, t, pcs, lsum, hr, etc.)",
         examples=["m3"],
     )
-    quantity: float = Field(
-        default=0.0, ge=0.0, description="Measured quantity", examples=[125.5]
-    )
+    # BUG-MATH02: quantity is REQUIRED on create.  Previously it defaulted to
+    # 0.0, so an Excel import with a blank quantity cell silently zero-filled
+    # the line and rolled up as €0 instead of being flagged as missing data.
+    quantity: float = Field(..., ge=0.0, description="Measured quantity", examples=[125.5])
     unit_rate: float = Field(
         default=0.0, ge=0.0, description="Price per unit", examples=[285.00]
     )
@@ -167,8 +181,12 @@ class PositionCreate(BaseModel):
     )
     source: str = Field(
         default="manual",
-        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff|smart_import|smart_import_ai|cad_import_ai|cost_database|assembly)$",
-        description="Data source. Must be: manual, cad_import, ai_takeoff, gaeb_import, excel_import, or takeoff",
+        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff|smart_import|smart_import_ai|cad_import_ai|cost_database|assembly|cwicr|enriched)$",
+        description=(
+            "Data source. One of: manual, cad_import, ai_takeoff, gaeb_import, "
+            "excel_import, takeoff, smart_import, smart_import_ai, cad_import_ai, "
+            "cost_database, assembly, cwicr, enriched."
+        ),
         examples=["manual"],
     )
     confidence: float | None = Field(
@@ -183,6 +201,36 @@ class PositionCreate(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, description="Arbitrary metadata")
     wbs_id: str | None = Field(default=None, description="Linked WBS node ID")
     cost_code_id: str | None = Field(default=None, description="Linked cost code ID")
+    # Issue #79: link a BOQ position to a CostItem in the cost database
+    # (CWICR / RSMeans / etc.).  Persisted in ``metadata.cost_item_id`` so
+    # no schema migration is required; the service validates that the
+    # supplied UUID resolves to an active CostItem before persisting.
+    cost_item_id: UUID | None = Field(
+        default=None,
+        description=(
+            "UUID of a CostItem in the cost database to link this position to "
+            "(typically used together with source='cwicr'). The service "
+            "validates that the referenced CostItem exists and is active."
+        ),
+    )
+
+    # BUG-MATH03: ``unit`` was free-text — typos like "tonne"/"tonnes"/"ton"
+    # produced three buckets in the unit-breakdown statistic and broke GAEB
+    # X83 export.  Validate against the curated catalogue at the schema
+    # layer; the DB column stays String for backwards-compat with legacy
+    # rows and the section-header sentinel.
+    @field_validator("unit", mode="after")
+    @classmethod
+    def _check_unit(cls, v: str) -> str:
+        from app.modules.boq.units import APPROVED_UNITS
+
+        normalised = v.strip().lower()
+        if normalised not in APPROVED_UNITS:
+            raise ValueError(
+                f"unit '{v}' is not in the approved BOQ unit catalogue "
+                f"({', '.join(sorted(APPROVED_UNITS))})"
+            )
+        return normalised
 
 
 class SectionCreate(BaseModel):
@@ -213,7 +261,7 @@ class PositionUpdate(BaseModel):
     classification: dict[str, Any] | None = None
     source: str | None = Field(
         default=None,
-        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff|smart_import|smart_import_ai|cad_import_ai|cost_database|assembly)$",
+        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff|smart_import|smart_import_ai|cad_import_ai|cost_database|assembly|cwicr|enriched)$",
     )
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     cad_element_ids: list[str] | None = None
@@ -225,6 +273,43 @@ class PositionUpdate(BaseModel):
     sort_order: int | None = None
     wbs_id: str | None = None
     cost_code_id: str | None = None
+    # Issue #79: optional re-linkage to a different CostItem.  Mirrors
+    # PositionCreate.cost_item_id; when supplied, the service validates
+    # the new target and stores the UUID under ``metadata.cost_item_id``.
+    cost_item_id: UUID | None = Field(
+        default=None,
+        description=(
+            "UUID of a CostItem to (re)link this position to. The service "
+            "validates that the referenced CostItem exists and is active."
+        ),
+    )
+    # BUG-CONCURRENCY01: optimistic concurrency token. Clients echo the
+    # ``version`` they last read; the service rejects with 409 when the
+    # row's current version no longer matches.
+    version: int | None = Field(
+        default=None,
+        ge=0,
+        description=(
+            "Optimistic concurrency token. If supplied and the row's current "
+            "version does not match, the update is rejected with 409 Conflict."
+        ),
+    )
+
+    # BUG-MATH03 (mirrors PositionCreate): validate unit on partial update too.
+    @field_validator("unit", mode="after")
+    @classmethod
+    def _check_unit(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        from app.modules.boq.units import APPROVED_UNITS
+
+        normalised = v.strip().lower()
+        if normalised not in APPROVED_UNITS:
+            raise ValueError(
+                f"unit '{v}' is not in the approved BOQ unit catalogue "
+                f"({', '.join(sorted(APPROVED_UNITS))})"
+            )
+        return normalised
 
 
 class PositionResponse(BaseModel):
@@ -252,6 +337,24 @@ class PositionResponse(BaseModel):
     updated_at: datetime
     wbs_id: str | None = None
     cost_code_id: str | None = None
+    # Issue #79: linkage to a CostItem in the cost database, surfaced from
+    # ``metadata.cost_item_id`` so clients receive the same shape they sent.
+    cost_item_id: UUID | None = None
+    # BUG-CONCURRENCY01: monotonic per-row counter, surfaced so clients
+    # can echo it back on the next PATCH for conflict detection.
+    version: int = 0
+
+    # BUG-MATH04: response-side HTML strip. Position descriptions are the
+    # most-rendered free-text field in the product (BOQ grid, exports,
+    # AI-chat reuse). Even though input validators block dangerous tags,
+    # the response strip is a belt-and-braces defence for any frontend
+    # that mistakenly uses ``dangerouslySetInnerHTML`` on this field.
+    @field_validator("description", mode="after")
+    @classmethod
+    def _strip_html_on_response(cls, v: str) -> str:
+        from app.core.sanitize import sanitise_text
+
+        return sanitise_text(v) or ""
 
 
 # ── Markup schemas ────────────────────────────────────────────────────────────
@@ -339,6 +442,14 @@ class SectionResponse(BaseModel):
     description: str
     positions: list[PositionResponse] = Field(default_factory=list)
     subtotal: float = 0.0
+
+    # BUG-MATH04: matches PositionResponse / BOQResponse policy.
+    @field_validator("description", mode="after")
+    @classmethod
+    def _strip_html_on_response(cls, v: str) -> str:
+        from app.core.sanitize import sanitise_text
+
+        return sanitise_text(v) or ""
 
 
 class BOQWithSections(BOQResponse):

@@ -1,6 +1,45 @@
-"""Shared test fixtures."""
+"""Shared test fixtures.
 
-import pytest
+Test isolation
+~~~~~~~~~~~~~~
+Per ``feedback_test_isolation.md``: backend tests must NEVER touch the
+production ``backend/openestimate.db``. Several integration suites
+(``test_api_smoke``, ``test_boq_regression``, ``test_boq_import_safety``,
+``test_boq_cycle_detection``, ``test_boq_cost_item_link``) construct the
+FastAPI app via ``create_app()`` which imports ``app.database`` and
+binds ``async_session_factory`` to whatever ``DATABASE_URL`` is set at
+that moment — so the env var has to be redirected to a per-session temp
+SQLite file *before* any ``from app...`` import runs.
+
+Doing it here in ``tests/conftest.py`` (which pytest loads before any
+test module) guarantees the override beats every test-module import
+order, regardless of which suite is collected first. Tests that already
+self-redirect (``test_tenant_isolation``, ``test_register_bootstrap``,
+etc.) are still fine — they overwrite this with their own temp file.
+"""
+
+import os
+import tempfile
+from pathlib import Path
+
+# ── Per-session SQLite isolation (must run before app imports) ─────────────
+_TMP_DIR = Path(tempfile.mkdtemp(prefix="oe-tests-"))
+_TMP_DB = _TMP_DIR / "session.db"
+os.environ.setdefault("DATABASE_URL", f"sqlite+aiosqlite:///{_TMP_DB.as_posix()}")
+os.environ.setdefault("DATABASE_SYNC_URL", f"sqlite:///{_TMP_DB.as_posix()}")
+
+# ── Rate-limiter relaxation for tests ──────────────────────────────────────
+# The integration suites repeatedly hit ``/auth/register`` and ``/auth/login``
+# from the same in-process ``test`` client. The default 10/min login limit
+# (and 100/min API limit) is fine for production but makes whole-suite
+# runs flake with 429s long before the relevant assertion fires. Tests
+# don't measure rate-limiter behaviour itself (those tests stand up their
+# own ``RateLimiter(...)`` instance), so we lift the bucket here.
+os.environ.setdefault("LOGIN_RATE_LIMIT", "10000")
+os.environ.setdefault("API_RATE_LIMIT", "100000")
+os.environ.setdefault("AI_RATE_LIMIT", "10000")
+
+import pytest  # noqa: E402
 
 
 @pytest.fixture

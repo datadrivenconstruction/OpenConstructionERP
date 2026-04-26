@@ -70,8 +70,10 @@ class TestRouters:
     def test_dashboards_router_is_importable_and_mounts_health(self) -> None:
         from app.modules.dashboards.router import router
 
+        # The module loader mounts at /api/v1/dashboards — the router itself
+        # must not double-prefix, so /_health lives at the router root.
         paths = {route.path for route in router.routes}
-        assert "/dashboards/_health" in paths
+        assert "/_health" in paths
 
     def test_compliance_router_is_importable(self) -> None:
         from app.modules.compliance_ai.router import router

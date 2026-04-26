@@ -1,0 +1,143 @@
+# BUG-B06 — Docker build context hardening.
+#
+# Without this file every `docker build` ships ~2GB of irrelevant
+# content (the local SQLite DB, BIM uploads, the marketing site,
+# every test artefact, every .env, every git object) to the build
+# daemon. That makes builds slow, bloats layer caches, and risks
+# leaking secrets and customer data into images.
+#
+# Rule of thumb: only what the Dockerfile explicitly COPYs needs to
+# be present in the build context. When in doubt, exclude — a
+# missing file is loud (build error), an accidentally included one
+# is silent (data leak).
+
+# ── Version control & developer scratch ─────────────────────────────
+.git
+.gitignore
+.gitattributes
+.github
+.claude
+.playwright-mcp
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# ── Python build / cache ────────────────────────────────────────────
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+**/.tox
+**/.coverage
+**/htmlcov
+**/.venv
+**/venv
+**/env
+**/build
+**/dist
+**/*.egg
+
+# ── Node / frontend build ───────────────────────────────────────────
+**/node_modules
+**/.next
+**/.turbo
+**/.cache
+**/.parcel-cache
+frontend/dist
+frontend/coverage
+frontend/test-results
+frontend/playwright-report
+frontend/.playwright
+frontend/tsconfig.tsbuildinfo
+frontend/.vite
+
+# ── Local databases & storage (NEVER ship these in an image) ────────
+backend/openestimate.db
+backend/openestimate.db-journal
+backend/openestimate.db-shm
+backend/openestimate.db-wal
+backend/openestimate.db.cleanup-backup-*
+backend/storage
+backend/*.db
+backend/*.db-journal
+**/*.sqlite
+**/*.sqlite3
+
+# ── Customer / project data (uploaded models, exports, BIM) ─────────
+# These are user-content directories that grow without bound; the
+# build context must never include them.
+data/bim
+data/exports
+data/uploads
+data/tmp
+
+# ── Catalog seed data ───────────────────────────────────────────────
+# Re-fetched at deploy time; the image bakes only the manifest.
+data/catalog/*.parquet
+data/catalog/*.csv
+data/catalog/*.zip
+data/catalog/raw
+
+# ── Secrets ─────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+**/credentials.json
+**/service-account*.json
+*.pem
+*.key
+
+# ── Logs & test output ──────────────────────────────────────────────
+**/*.log
+**/logs
+**/log
+**/test-results
+**/coverage
+**/playwright-report
+
+# ── Out-of-image directories ────────────────────────────────────────
+# These exist in the repo but are not part of any image we build.
+desktop
+website-marketing
+i18n-audit
+deploy/terraform
+deploy/kubernetes
+
+# ── Docs / non-runtime ──────────────────────────────────────────────
+docs
+*.md
+!README.md
+!backend/README.md
+!frontend/README.md
+LICENSE
+NOTICE
+CHANGELOG.md
+SECURITY.md
+TERMS.md
+PRIVACY.md
+COOKIES.md
+COMMERCIAL-LICENSE.md
+CLA.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+PATENTS.md
+THIRD_PARTY_LICENSES.md
+TRADEMARK.md
+ACCESSIBILITY.md
+
+# ── Misc archives ───────────────────────────────────────────────────
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+*.rar
+
+# ── OS artefacts ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini

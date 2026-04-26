@@ -1,0 +1,7 @@
+{
+  "schema_version": "2.0",
+  "name": "geometry_filter with negative volume",
+  "output_mode": "boolean",
+  "selector": {"kind": "geometry_filter", "min_volume_m3": -1.5},
+  "_invalid_reason": "min_volume_m3 has minimum=0; negative values rejected"
+}

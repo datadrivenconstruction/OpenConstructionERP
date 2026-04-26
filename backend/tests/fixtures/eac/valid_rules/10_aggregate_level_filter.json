@@ -1,0 +1,17 @@
+{
+  "schema_version": "2.0",
+  "name": "Ground floor wall area",
+  "description": "Aggregate wall area on Level 00 (ground floor).",
+  "output_mode": "aggregate",
+  "result_unit": "m2",
+  "tags": ["walls", "level"],
+  "selector": {
+    "kind": "and",
+    "children": [
+      {"kind": "ifc_class", "values": ["IfcWall"]},
+      {"kind": "level", "values": ["Level 00", "Ground", "GF"]}
+    ]
+  },
+  "predicate": null,
+  "formula": "Area"
+}

@@ -1,0 +1,28 @@
+{
+  "converter_notes": {
+    "6c9fcd45-4128-4387-a8c2-6efc7fdb3a11": {
+      "converter": "unknown",
+      "raw_element_count": 7361
+    }
+  },
+  "created_at": "2026-04-24T04:42:29.534423+00:00",
+  "created_by_user_id": "292ecdc6-14cc-474f-9fc6-1cf0c906e52a",
+  "label": "\u044b\u0432\u0430\u0432\u0432\u0430",
+  "project_id": "82fd71e0-7e27-4a81-a796-b88a7017265a",
+  "snapshot_id": "5e0b812a-b48e-4c00-86f9-940dad444892",
+  "source_files": [
+    {
+      "bytes_size": 17068032,
+      "discipline": null,
+      "entity_count": 7361,
+      "format": "rvt",
+      "id": "6c9fcd45-4128-4387-a8c2-6efc7fdb3a11",
+      "original_name": "racadvancedsamplerprojesdsd2ctss2223223\u0443.rvt"
+    }
+  ],
+  "summary_stats": {
+    "unknown": 7361
+  },
+  "total_categories": 1,
+  "total_entities": 7361
+}

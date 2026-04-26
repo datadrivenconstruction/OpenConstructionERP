@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0",
+  "name": "Door Comments empty AND Mark not empty",
+  "output_mode": "boolean",
+  "tags": ["doors", "data-quality"],
+  "selector": {"kind": "ifc_class", "values": ["IfcDoor"]},
+  "predicate": {
+    "kind": "and",
+    "children": [
+      {
+        "kind": "triplet",
+        "attribute": {"kind": "exact", "pset_name": null, "name": "Comments"},
+        "constraint": {"operator": "is_empty"}
+      },
+      {
+        "kind": "triplet",
+        "attribute": {"kind": "exact", "pset_name": null, "name": "Mark"},
+        "constraint": {"operator": "is_not_empty"}
+      }
+    ]
+  }
+}

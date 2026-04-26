@@ -2,7 +2,7 @@
 
 import re
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
@@ -161,6 +161,59 @@ class UserCreate(BaseModel):
     @classmethod
     def _sanitize_job_title(cls, v: str) -> str:
         return _sanitize_name(v) if v else ""
+
+
+class AdminUserCreate(BaseModel):
+    """Admin-only: create a user with an arbitrary role.
+
+    BUG-USERS-CREATE — kept distinct from ``UserCreate`` (which is wired to
+    the open ``/auth/register`` endpoint) so the public registration policy
+    (default-to-viewer, bootstrap-first-admin, common-password blacklist)
+    cannot be subverted by anyone hitting the admin endpoint, and so
+    ``role="god"`` / empty email / weak passwords are rejected at the schema
+    boundary instead of bubbling up as 500s from the service.
+
+    Constraints versus ``UserCreate``:
+      - ``role`` is a strict ``Literal`` whitelist — admin / manager /
+        estimator / viewer — so unknown values produce 422 instead of being
+        silently persisted as the literal string.
+      - ``password`` minimum length is bumped to 12 (admins can mint
+        long-lived elevated accounts; weak passwords are unacceptable here
+        even though the public flow tolerates 8-char passwords).
+      - ``is_active`` is exposed so the admin can pre-create dormant rows.
+    """
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    email: EmailStr = Field(..., description="Valid email address (used for login)")
+    password: str = Field(
+        ...,
+        min_length=12,
+        max_length=128,
+        description="Password (min 12 chars, must contain at least one letter and one digit)",
+    )
+    full_name: str = Field(
+        ...,
+        min_length=1,
+        max_length=255,
+        description="Full display name (HTML tags are stripped)",
+    )
+    role: Literal["admin", "manager", "estimator", "viewer"] = Field(
+        default="viewer",
+        description="User role. One of: admin, manager, estimator, viewer.",
+    )
+    locale: str = Field(default="en", max_length=10)
+    is_active: bool = Field(default=True)
+
+    @field_validator("password")
+    @classmethod
+    def _check_password_strength(cls, v: str) -> str:
+        return _validate_strong_password(v)
+
+    @field_validator("full_name")
+    @classmethod
+    def _sanitize_full_name(cls, v: str) -> str:
+        return _sanitize_name(v)
 
 
 class UserUpdate(BaseModel):

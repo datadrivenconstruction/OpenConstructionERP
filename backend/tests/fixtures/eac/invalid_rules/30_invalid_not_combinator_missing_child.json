@@ -1,0 +1,7 @@
+{
+  "schema_version": "2.0",
+  "name": "NOT selector missing child",
+  "output_mode": "boolean",
+  "selector": {"kind": "not"},
+  "_invalid_reason": "not selector requires field 'child'"
+}

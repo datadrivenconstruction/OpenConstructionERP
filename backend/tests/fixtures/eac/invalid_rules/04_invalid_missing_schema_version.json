@@ -1,0 +1,6 @@
+{
+  "name": "Missing schema_version",
+  "output_mode": "boolean",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "_invalid_reason": "required field schema_version is absent"
+}

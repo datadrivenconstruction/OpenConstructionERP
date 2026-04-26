@@ -37,6 +37,7 @@ from app.core.permissions import permission_registry
 from app.modules.users.models import APIKey, User
 from app.modules.users.repository import APIKeyRepository, UserRepository
 from app.modules.users.schemas import (
+    AdminUserCreate,
     APIKeyCreate,
     APIKeyCreatedResponse,
     ChangePasswordRequest,
@@ -160,6 +161,29 @@ class UserService:
         Raises HTTPException 409 if email already taken.
         First user automatically gets admin role.
         """
+        # Resolve registration policy. Re-read settings each call so a
+        # test (or runtime config reload) can switch modes without restart.
+        from app.config import get_settings as _get_settings
+
+        _s = _get_settings()
+        mode = getattr(_s, "registration_mode", "open") or "open"
+
+        # "First real user becomes admin" bootstrap. Check for any existing
+        # admin rather than any user — a prior `make seed` run may have
+        # inserted demo/viewer rows that would otherwise block the first
+        # real registrant from receiving admin rights.
+        admin_exists = await self.user_repo.has_admin()
+
+        # ``closed`` mode rejects every self-registration. The bootstrap
+        # path is still allowed: an admin must be reachable on a fresh
+        # install or the operator has no way in. Once one admin exists,
+        # closed truly closes the door.
+        if mode == "closed" and admin_exists:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Self-registration is disabled. Contact an administrator.",
+            )
+
         if await self.user_repo.email_exists(data.email):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -176,21 +200,24 @@ class UserService:
         # If the tenant wants open self-onboarding to continue creating
         # editors (e.g. internal-only deployment behind a VPN), they can
         # override this via the ``OE_DEFAULT_REGISTRATION_ROLE`` env var.
-        from app.config import get_settings as _get_settings
-
-        _s = _get_settings()
         default_role = getattr(_s, "default_registration_role", "viewer") or "viewer"
         if default_role not in {"viewer", "editor", "manager"}:
             # Admin is intentionally excluded — nobody should self-register
             # as admin no matter what config says.
             default_role = "viewer"
 
-        # "First real user becomes admin" bootstrap. Check for any existing
-        # admin rather than any user — a prior `make seed` run may have
-        # inserted demo/viewer rows that would otherwise block the first
-        # real registrant from receiving admin rights.
-        admin_exists = await self.user_repo.has_admin()
-        role = "admin" if not admin_exists else default_role
+        if not admin_exists:
+            # Bootstrap path — always active so the operator can actually
+            # log in to a fresh install in admin-approve mode.
+            role = "admin"
+            is_active = True
+        else:
+            role = default_role
+            # In gated modes the new account is dormant until an admin
+            # flips it active. ``open`` keeps prior behaviour. ``login``
+            # already returns the same 401 for inactive accounts as for
+            # bad credentials, so no enumeration leak is added.
+            is_active = mode == "open"
 
         # Build registration metadata from form fields + auto-collected data
         reg_meta: dict[str, object] = {}
@@ -215,17 +242,76 @@ class UserService:
             full_name=data.full_name,
             role=role,
             locale=data.locale,
+            is_active=is_active,
             metadata=metadata,
         )
         user = await self.user_repo.create(user)
 
         await _safe_publish(
             "users.user.created",
-            {"user_id": str(user.id), "email": user.email, "role": role},
+            {
+                "user_id": str(user.id),
+                "email": user.email,
+                "role": role,
+                "is_active": is_active,
+                "registration_mode": mode,
+            },
             source_module="oe_users",
         )
 
-        logger.info("User registered: %s (role=%s)", user.email, role)
+        logger.info(
+            "User registered: %s (role=%s, active=%s, mode=%s)",
+            user.email, role, is_active, mode,
+        )
+        return user
+
+    # ── Admin: create user (BUG-USERS-CREATE) ──────────────────────────
+
+    async def admin_create(self, data: AdminUserCreate) -> User:
+        """Admin-only: create a user with an arbitrary role / active state.
+
+        Bypasses the public-registration policy (default-to-viewer, dormant
+        in gated modes, first-real-user-becomes-admin). The router gates
+        this behind ``RequirePermission("users.create")`` (admin only) and
+        the ``AdminUserCreate`` schema rejects bogus roles / weak passwords
+        before they reach this method.
+
+        Raises:
+            HTTPException 409 if the email is already registered.
+        """
+        if await self.user_repo.email_exists(data.email):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already registered",
+            )
+
+        user = User(
+            email=data.email.lower(),
+            hashed_password=hash_password(data.password),
+            full_name=data.full_name,
+            role=data.role,
+            locale=data.locale,
+            is_active=data.is_active,
+            metadata={"registration": {"created_by": "admin"}},
+        )
+        user = await self.user_repo.create(user)
+
+        await _safe_publish(
+            "users.user.created",
+            {
+                "user_id": str(user.id),
+                "email": user.email,
+                "role": data.role,
+                "is_active": data.is_active,
+                "registration_mode": "admin_create",
+            },
+            source_module="oe_users",
+        )
+
+        logger.info(
+            "Admin created user: %s (role=%s, active=%s)",
+            user.email, data.role, data.is_active,
+        )
         return user
 
     # ── Authentication ─────────────────────────────────────────────────

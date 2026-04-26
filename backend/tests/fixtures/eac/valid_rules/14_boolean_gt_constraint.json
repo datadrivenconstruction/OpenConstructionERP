@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Wall height greater than 2.4 m",
+  "output_mode": "boolean",
+  "tags": ["walls", "geometry"],
+  "selector": {"kind": "category", "values": ["Walls"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "alias", "alias_id": "alias_height"},
+    "constraint": {"operator": "gt", "value": 2.4}
+  }
+}

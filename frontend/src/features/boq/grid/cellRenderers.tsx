@@ -26,7 +26,8 @@ import {
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useQuery, useQueries } from '@tanstack/react-query';
-import { RESOURCE_TYPE_BADGE, fmtWithCurrency } from '../boqHelpers';
+import { RESOURCE_TYPE_BADGE, fmtWithCurrency, getUnitsForLocale, saveCustomUnit } from '../boqHelpers';
+import { RESOURCE_TYPES, getResourceTypeLabel } from '../boqResourceTypes';
 import { countComments } from '../CommentDrawer';
 import { BIMQuantityPicker } from './BIMQuantityPicker';
 import { MiniGeometryPreview } from '@/shared/ui/MiniGeometryPreview';
@@ -263,6 +264,13 @@ export type FullGridContext = ActionsContext & ResourceGridContext & SectionGrou
   onDeleteSection?: (sectionId: string) => void;
   /** Reorder sections via drag-and-drop. */
   onReorderSections?: (fromId: string, toId: string) => void;
+  /** Issue #90: persist a Quantity-cell formula on the row's metadata. */
+  onFormulaApplied?: (positionId: string, formula: string, result: number) => void;
+  /**
+   * RFC 37 / Issue #93 — project-level FX template used by the per-resource
+   * currency picker. Empty / undefined ⇒ single-currency project.
+   */
+  fxRates?: { currency: string; rate: number; label?: string }[];
 };
 
 /* ── Actions Cell Renderer ────────────────────────────────────────── */
@@ -1655,12 +1663,103 @@ function InlineTextInput({
 
 interface ColWidths { leftPad: number; unit: number; quantity: number; unitRate: number; total: number; actions: number }
 
+/**
+ * Inline unit input with datalist autocomplete. Accepts free-form values
+ * and persists novel ones via `saveCustomUnit` so they appear next time.
+ *
+ * Behaves like `InlineTextInput` (double-click to edit) but renders a
+ * `<input list="…">` so the browser shows the locale unit suggestions.
+ */
+function InlineUnitInput({
+  value,
+  onCommit,
+  className,
+}: {
+  value: string;
+  onCommit: (v: string) => void;
+  className?: string;
+}) {
+  const { t, i18n } = useTranslation();
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Stable per-component datalist id so multiple rows don't collide.
+  const listId = useMemo(() => `oe-unit-list-${Math.random().toString(36).slice(2, 10)}`, []);
+  const units = useMemo(() => getUnitsForLocale(i18n.language), [i18n.language]);
+
+  const startEdit = useCallback(() => {
+    setText(value);
+    setEditing(true);
+    setTimeout(() => inputRef.current?.select(), 0);
+  }, [value]);
+
+  const commit = useCallback(() => {
+    setEditing(false);
+    const trimmed = text.trim();
+    if (trimmed && trimmed !== value) {
+      // Persist user-typed unit so it shows up in future suggestions.
+      saveCustomUnit(trimmed);
+      onCommit(trimmed);
+    }
+  }, [text, value, onCommit]);
+
+  if (editing) {
+    return (
+      <>
+        <input
+          ref={inputRef}
+          type="text"
+          list={listId}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commit();
+            if (e.key === 'Escape') setEditing(false);
+          }}
+          className={`bg-white dark:bg-surface-primary border border-oe-blue rounded px-1 py-0 outline-none ${className ?? ''}`}
+          aria-label={t('boq.inline_edit_unit', { defaultValue: 'Edit unit' })}
+          autoFocus
+        />
+        <datalist id={listId}>
+          {units.map((u) => <option key={u} value={u} />)}
+        </datalist>
+      </>
+    );
+  }
+
+  return (
+    <span
+      onDoubleClick={startEdit}
+      className={`cursor-text hover:bg-oe-blue-subtle/50 rounded px-1 transition-colors truncate ${className ?? ''}`}
+      title={t('boq.double_click_to_edit', { defaultValue: 'Double-click to edit' })}
+    >
+      {value}
+    </span>
+  );
+}
+
 function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, unknown>; ctx: FullGridContext; colWidths: ColWidths }) {
-  const badge = RESOURCE_TYPE_BADGE[(data._resourceType as string)] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-gray-100 text-gray-600', label: '?' };
+  const resourceType = (data._resourceType as string) || 'other';
+  const badge = RESOURCE_TYPE_BADGE[resourceType] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-gray-100 text-gray-600', label: '?' };
   const qty = (data._resourceQty as number) ?? 0;
   const rate = (data._resourceRate as number) ?? 0;
   const total = qty * rate;
-  const formattedTotal = fmtWithCurrency(total, ctx.locale ?? 'de-DE', ctx.currencyCode ?? 'EUR');
+  const baseCurrency = ctx.currencyCode ?? 'EUR';
+  const resourceCurrency = (data._resourceCurrency as string | undefined) || baseCurrency;
+  const isForeign = resourceCurrency !== baseCurrency;
+  const fxRates = ctx.fxRates ?? [];
+  const fxEntry = isForeign ? fxRates.find((r) => r.currency === resourceCurrency) : undefined;
+  const fxRate = fxEntry?.rate;
+  const hasFxRate = !isForeign || (typeof fxRate === 'number' && fxRate > 0);
+  const totalInBase = isForeign && hasFxRate ? total * (fxRate ?? 1) : total;
+
+  const formattedTotal = fmtWithCurrency(total, ctx.locale ?? 'de-DE', resourceCurrency);
+  const formattedTotalInBase = isForeign && hasFxRate
+    ? fmtWithCurrency(totalInBase, ctx.locale ?? 'de-DE', baseCurrency)
+    : null;
+
   const posId = data._parentPositionId as string;
   const resIdx = data._resourceIndex as number;
 
@@ -1678,6 +1777,61 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
     [ctx, posId, resIdx],
   );
 
+  const handleTypeChange = useCallback(
+    (v: string) => ctx.onUpdateResource?.(posId, resIdx, 'type', v),
+    [ctx, posId, resIdx],
+  );
+
+  const handleCurrencyChange = useCallback(
+    (v: string) => {
+      // Empty string is the explicit "use project base" sentinel — record
+      // an empty string so the backend can clear the override.
+      const value = v === baseCurrency ? '' : v;
+      ctx.onUpdateResource?.(posId, resIdx, 'currency', value);
+    },
+    [ctx, posId, resIdx, baseCurrency],
+  );
+
+  // Currency dropdown options: project base + every fx_rates entry, deduped.
+  const currencyOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    if (baseCurrency) {
+      out.push(baseCurrency);
+      seen.add(baseCurrency);
+    }
+    for (const fx of fxRates) {
+      if (fx.currency && !seen.has(fx.currency)) {
+        out.push(fx.currency);
+        seen.add(fx.currency);
+      }
+    }
+    // If the resource currently uses a currency outside the project FX
+    // template, still include it so the picker can show the current value.
+    if (resourceCurrency && !seen.has(resourceCurrency)) {
+      out.push(resourceCurrency);
+    }
+    return out;
+  }, [baseCurrency, fxRates, resourceCurrency]);
+
+  const totalTitle = (() => {
+    if (!isForeign) return formattedTotal;
+    if (hasFxRate && formattedTotalInBase) {
+      return ctx.t('boq.resource_total_in_base', {
+        defaultValue: '{{foreign}} ≈ {{base}} (1 {{code}} = {{rate}} {{baseCode}})',
+        foreign: formattedTotal,
+        base: formattedTotalInBase,
+        code: resourceCurrency,
+        rate: String(fxRate ?? ''),
+        baseCode: baseCurrency,
+      });
+    }
+    return ctx.t('boq.resource_no_fx_rate', {
+      defaultValue: 'No FX rate configured for {{code}} — total shown in {{code}}',
+      code: resourceCurrency,
+    });
+  })();
+
   return (
     <div
       className="flex items-center w-full h-full gap-2 select-none group/res text-[11px]
@@ -1689,10 +1843,23 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
         ctx.onShowContextMenu?.(e, 'resource', data);
       }}
     >
-      {/* Type badge */}
-      <span className={`shrink-0 inline-flex items-center h-4 px-1.5 rounded text-[9px] font-bold uppercase tracking-wider ${badge.bg}`}>
-        {badge.label}
-      </span>
+      {/* Type — editable badge-styled select */}
+      <select
+        value={resourceType}
+        onChange={(e) => handleTypeChange(e.target.value)}
+        onClick={(e) => e.stopPropagation()}
+        className={`shrink-0 h-4 px-1 rounded text-[9px] font-bold uppercase tracking-wider
+                    appearance-none cursor-pointer outline-none border-0
+                    focus:ring-1 focus:ring-oe-blue ${badge.bg}`}
+        title={ctx.t('boq.resource_type', { defaultValue: 'Type' })}
+        aria-label={ctx.t('boq.resource_type', { defaultValue: 'Type' })}
+      >
+        {RESOURCE_TYPES.map((rt) => (
+          <option key={rt.value} value={rt.value}>
+            {getResourceTypeLabel(rt.value, ctx.t)}
+          </option>
+        ))}
+      </select>
 
       {/* Name — editable */}
       <span className="truncate min-w-0 flex-1 text-content-secondary font-medium">
@@ -1706,9 +1873,13 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
         </span>
       )}
 
-      {/* Unit — aligned to grid Unit column */}
+      {/* Unit — free-form with datalist autocomplete */}
       <span className="shrink-0 text-center text-content-tertiary" style={{ width: `${colWidths.unit}px` }}>
-        <InlineTextInput value={data._resourceUnit as string} onCommit={(v: string) => ctx.onUpdateResource?.(posId, resIdx, 'unit', v)} className="w-full text-[11px] text-center" />
+        <InlineUnitInput
+          value={data._resourceUnit as string}
+          onCommit={(v: string) => ctx.onUpdateResource?.(posId, resIdx, 'unit', v)}
+          className="w-full text-[11px] text-center"
+        />
       </span>
 
       {/* Quantity — aligned to grid Qty column */}
@@ -1721,9 +1892,43 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
         <InlineNumberInput value={rate} onCommit={handleRateChange} fmt={ctx.fmt} className="w-full text-[11px]" />
       </span>
 
+      {/* Currency — small selector between rate and total */}
+      <select
+        value={resourceCurrency}
+        onChange={(e) => handleCurrencyChange(e.target.value)}
+        onClick={(e) => e.stopPropagation()}
+        className="shrink-0 h-4 px-1 rounded text-[9px] font-mono uppercase tracking-wide
+                   bg-surface-primary border border-border-light text-content-secondary
+                   appearance-none cursor-pointer outline-none focus:ring-1 focus:ring-oe-blue"
+        style={{ width: '52px' }}
+        title={ctx.t('boq.resource_currency', { defaultValue: 'Currency' })}
+        aria-label={ctx.t('boq.resource_currency', { defaultValue: 'Currency' })}
+      >
+        {currencyOptions.map((code) => (
+          <option key={code} value={code}>{code}</option>
+        ))}
+      </select>
+
       {/* Total — aligned to grid Total column */}
-      <span className="shrink-0 text-right tabular-nums font-medium text-content-primary" style={{ width: `${colWidths.total}px` }}>
-        {formattedTotal}
+      <span
+        className="shrink-0 text-right tabular-nums font-medium text-content-primary flex items-center justify-end gap-1"
+        style={{ width: `${colWidths.total}px` }}
+        title={totalTitle}
+      >
+        {isForeign && !hasFxRate && (
+          <span
+            className="inline-flex items-center justify-center h-3 px-1 rounded
+                       text-[8px] font-bold uppercase
+                       bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+            title={ctx.t('boq.resource_no_fx_rate', {
+              defaultValue: 'No FX rate configured for {{code}} — total shown in {{code}}',
+              code: resourceCurrency,
+            })}
+          >
+            ⚠ no FX
+          </span>
+        )}
+        <span>{formattedTotal}</span>
       </span>
 
       {/* Actions — aligned to grid Actions column */}

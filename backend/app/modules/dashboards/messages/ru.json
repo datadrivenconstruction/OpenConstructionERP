@@ -10,6 +10,8 @@
   "snapshot.manifest.missing_keys": "В манифесте снапшота отсутствуют обязательные поля: {keys}.",
   "snapshot.parquet.missing_entities": "В снапшоте нет данных для анализа.",
   "snapshot.parquet.not_local": "Текущее хранилище пока не поддерживает передачу Parquet-файлов в DuckDB. Переключите STORAGE_BACKEND на 'local' или установите расширение DuckDB httpfs.",
+  "snapshot.format.unsupported": "Один из загруженных файлов имеет формат, который пока не поддерживается. Поддерживаемые форматы на сегодня: {supported}.",
+  "snapshot.conversion.failed": "Не удалось преобразовать загруженные файлы в снапшот: {reason}.",
   "dashboard.scope.promote_admin_only": "Только администратор может повысить дашборд до уровня организации.",
   "dashboard.yaml.invalid": "Спецификация дашборда не является корректным YAML: {reason}.",
   "dashboard.yaml.schema_violation": "Спецификация дашборда не соответствует ожидаемой схеме: {reason}.",

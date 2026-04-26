@@ -55,6 +55,26 @@ services:
       timeout: 3s
       retries: 3
 
+  # Celery worker for the OE_TECH_SPEC_GLOBAL background-job runner
+  # (RFC 34 §4 W0.1). Reads JobRun ids from Redis and dispatches to the
+  # generic ``oe.dispatch_job`` task, which in turn looks up the
+  # registered handler in ``app.core.job_runner``.
+  worker:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      OE_CELERY_BROKER_URL: redis://redis:6379/1
+      OE_CELERY_RESULT_BACKEND: redis://redis:6379/1
+      DATABASE_URL: postgresql+asyncpg://oe:oe@postgres:5432/openestimate
+      DATABASE_SYNC_URL: postgresql://oe:oe@postgres:5432/openestimate
+    command: ["celery", "-A", "app.core.jobs", "worker", "--loglevel=info"]
+
 volumes:
   pg_data:
   minio_data:

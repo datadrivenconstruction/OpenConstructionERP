@@ -162,3 +162,80 @@ export async function createSnapshot(input: CreateSnapshotInput): Promise<Snapsh
 export async function deleteSnapshot(snapshotId: string): Promise<void> {
   await apiDelete(`/v1/dashboards/snapshots/${encodeURIComponent(snapshotId)}`);
 }
+
+/* ── Quick-Insight Panel (T02) ──────────────────────────────────────────── */
+
+export type QuickInsightChartType =
+  | 'histogram'
+  | 'bar'
+  | 'line'
+  | 'scatter'
+  | 'donut';
+
+export interface QuickInsightChart {
+  chart_type: QuickInsightChartType;
+  title: string;
+  data: Array<Record<string, unknown>>;
+  x_field: string;
+  y_field: string;
+  agg_fn: 'mean' | 'count' | null;
+  interestingness: number;
+  metadata: Record<string, unknown>;
+}
+
+export interface QuickInsightsResponse {
+  snapshot_id: string;
+  charts: QuickInsightChart[];
+  total_candidates: number;
+}
+
+/**
+ * Auto-generated charts for a snapshot. The backend picks chart types
+ * (histogram / bar / line / scatter / donut) using rule-based
+ * heuristics — caller does not select columns.
+ */
+export async function getQuickInsights(
+  snapshotId: string,
+  opts?: { limit?: number },
+): Promise<QuickInsightsResponse> {
+  const params = new URLSearchParams();
+  if (opts?.limit) params.set('limit', String(opts.limit));
+  const qs = params.toString();
+  return apiGet<QuickInsightsResponse>(
+    `/v1/dashboards/snapshots/${encodeURIComponent(snapshotId)}/quick-insights${
+      qs ? `?${qs}` : ''
+    }`,
+  );
+}
+
+/* ── Smart Value Autocomplete (T03) ─────────────────────────────────────── */
+
+export interface SmartValue {
+  value: string;
+  count: number;
+  score: number;
+}
+
+export interface SmartValuesResponse {
+  snapshot_id: string;
+  column: string;
+  query: string;
+  items: SmartValue[];
+}
+
+/**
+ * Distinct-value autocomplete for a snapshot column. Empty `query`
+ * returns the top-N values by frequency.
+ */
+export async function getSmartValues(
+  snapshotId: string,
+  column: string,
+  opts?: { query?: string; limit?: number },
+): Promise<SmartValuesResponse> {
+  const params = new URLSearchParams({ column });
+  if (opts?.query) params.set('q', opts.query);
+  if (opts?.limit) params.set('limit', String(opts.limit));
+  return apiGet<SmartValuesResponse>(
+    `/v1/dashboards/snapshots/${encodeURIComponent(snapshotId)}/values?${params.toString()}`,
+  );
+}

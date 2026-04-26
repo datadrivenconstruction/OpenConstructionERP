@@ -1,0 +1,660 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openconstructionerp.io/schemas/eac/EacRuleDefinition.schema.json",
+  "title": "EacRuleDefinition",
+  "description": "Canonical declarative description of an EAC v2 rule. Body of the eac_rules.definition_json column. Spec §1.5 of OCE_EAC_Implementation_Spec_v2.",
+  "type": "object",
+  "required": ["schema_version", "name", "output_mode", "selector"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "2.0",
+      "description": "Schema version. Current is 2.0; bumping requires a migration."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "description": {
+      "type": ["string", "null"]
+    },
+    "output_mode": {
+      "type": "string",
+      "enum": ["aggregate", "boolean", "clash", "issue"]
+    },
+    "result_unit": {
+      "type": ["string", "null"],
+      "description": "Unit of the aggregate result, e.g. 'm2', 'm3'. Required when output_mode=aggregate."
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "default": []
+    },
+    "selector": {"$ref": "#/$defs/EntitySelector"},
+    "predicate": {
+      "anyOf": [
+        {"$ref": "#/$defs/Predicate"},
+        {"type": "null"}
+      ],
+      "description": "Optional predicate filtering selected entities. Required for boolean and issue modes."
+    },
+    "formula": {
+      "type": ["string", "null"],
+      "description": "simpleeval expression, e.g. 'Volume * Density'. Required for aggregate mode."
+    },
+    "local_variables": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/LocalVariableDefinition"},
+      "default": []
+    },
+    "clash_config": {
+      "anyOf": [
+        {"$ref": "#/$defs/ClashConfig"},
+        {"type": "null"}
+      ]
+    },
+    "issue_template": {
+      "anyOf": [
+        {"$ref": "#/$defs/IssueTemplate"},
+        {"type": "null"}
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "default": {}
+    }
+  },
+  "$defs": {
+    "EntitySelector": {
+      "title": "EntitySelector",
+      "description": "Recursive selector picking elements from a canonical model. One of and|or|not (combinator) or a leaf type.",
+      "type": "object",
+      "required": ["kind"],
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "children"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "and"},
+            "children": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/EntitySelector"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "children"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "or"},
+            "children": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/EntitySelector"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "child"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "not"},
+            "child": {"$ref": "#/$defs/EntitySelector"}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "category"},
+            "values": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "ifc_class"},
+            "values": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "family"},
+            "values": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "type"},
+            "values": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "level"},
+            "values": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "discipline"},
+            "values": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "classification_code"},
+            "system": {
+              "type": ["string", "null"],
+              "description": "Classification system, e.g. 'din276', 'uniformat', 'masterformat'"
+            },
+            "values": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "psets_present"},
+            "values": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1,
+              "description": "Property set names that must be present"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "named_group"},
+            "values": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1,
+              "description": "Saved selection / group names"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "geometry_filter"},
+            "min_volume_m3": {"type": ["number", "null"], "minimum": 0},
+            "max_volume_m3": {"type": ["number", "null"], "minimum": 0},
+            "min_area_m2": {"type": ["number", "null"], "minimum": 0},
+            "max_area_m2": {"type": ["number", "null"], "minimum": 0},
+            "min_length_m": {"type": ["number", "null"], "minimum": 0},
+            "max_length_m": {"type": ["number", "null"], "minimum": 0},
+            "spatial": {
+              "type": ["object", "null"],
+              "additionalProperties": true,
+              "description": "Free-form spatial filter payload (zone, bbox, etc.)"
+            }
+          }
+        }
+      ]
+    },
+    "Predicate": {
+      "title": "Predicate",
+      "description": "Recursive boolean predicate. Either a combinator (and|or|not) or a triplet (attribute + constraint).",
+      "type": "object",
+      "required": ["kind"],
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "children"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "and"},
+            "children": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/Predicate"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "children"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "or"},
+            "children": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/Predicate"},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "child"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "not"},
+            "child": {"$ref": "#/$defs/Predicate"}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "attribute", "constraint"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "triplet"},
+            "attribute": {"$ref": "#/$defs/AttributeRef"},
+            "constraint": {"$ref": "#/$defs/Constraint"},
+            "treat_missing_as_fail": {
+              "type": "boolean",
+              "default": true,
+              "description": "If true, missing attribute counts as failure (FR-1.10)."
+            }
+          }
+        }
+      ]
+    },
+    "AttributeRef": {
+      "title": "AttributeRef",
+      "description": "Reference to an element attribute, optionally via alias or regex.",
+      "type": "object",
+      "required": ["kind"],
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "name"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "exact"},
+            "pset_name": {"type": ["string", "null"]},
+            "name": {"type": "string", "minLength": 1},
+            "case_sensitive": {"type": "boolean", "default": true}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "alias_id"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "alias"},
+            "alias_id": {
+              "type": "string",
+              "description": "ID of an EacParameterAlias row resolved at evaluation time"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "pattern"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "regex"},
+            "pset_name": {"type": ["string", "null"]},
+            "pattern": {
+              "type": "string",
+              "description": "ReDoS-safe regex compiled with timeout (FR-1.10)"
+            },
+            "case_sensitive": {"type": "boolean", "default": false}
+          }
+        }
+      ]
+    },
+    "Constraint": {
+      "title": "Constraint",
+      "description": "Comparison applied to an attribute value. Operator vocabulary per FR-1.6.",
+      "type": "object",
+      "required": ["operator"],
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "eq"},
+            "value": {}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "neq"},
+            "value": {}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "lt"},
+            "value": {"type": ["number", "string"]}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "lte"},
+            "value": {"type": ["number", "string"]}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "gt"},
+            "value": {"type": ["number", "string"]}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "gte"},
+            "value": {"type": ["number", "string"]}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "min", "max"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "between"},
+            "min": {"type": ["number", "string"]},
+            "max": {"type": ["number", "string"]},
+            "inclusive": {"type": "boolean", "default": true}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "min", "max"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "not_between"},
+            "min": {"type": ["number", "string"]},
+            "max": {"type": ["number", "string"]},
+            "inclusive": {"type": "boolean", "default": true}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "in"},
+            "values": {
+              "type": "array",
+              "items": {},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "not_in"},
+            "values": {
+              "type": "array",
+              "items": {},
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "contains"},
+            "value": {"type": "string"},
+            "case_sensitive": {"type": "boolean", "default": false}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "not_contains"},
+            "value": {"type": "string"},
+            "case_sensitive": {"type": "boolean", "default": false}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "starts_with"},
+            "value": {"type": "string"},
+            "case_sensitive": {"type": "boolean", "default": false}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "ends_with"},
+            "value": {"type": "string"},
+            "case_sensitive": {"type": "boolean", "default": false}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "pattern"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "matches"},
+            "pattern": {"type": "string"},
+            "case_sensitive": {"type": "boolean", "default": false}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator", "pattern"],
+          "additionalProperties": false,
+          "properties": {
+            "operator": {"const": "not_matches"},
+            "pattern": {"type": "string"},
+            "case_sensitive": {"type": "boolean", "default": false}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["operator"],
+          "additionalProperties": false,
+          "properties": {"operator": {"const": "exists"}}
+        },
+        {
+          "type": "object",
+          "required": ["operator"],
+          "additionalProperties": false,
+          "properties": {"operator": {"const": "not_exists"}}
+        },
+        {
+          "type": "object",
+          "required": ["operator"],
+          "additionalProperties": false,
+          "properties": {"operator": {"const": "is_null"}}
+        },
+        {
+          "type": "object",
+          "required": ["operator"],
+          "additionalProperties": false,
+          "properties": {"operator": {"const": "is_not_null"}}
+        },
+        {
+          "type": "object",
+          "required": ["operator"],
+          "additionalProperties": false,
+          "properties": {"operator": {"const": "is_empty"}}
+        },
+        {
+          "type": "object",
+          "required": ["operator"],
+          "additionalProperties": false,
+          "properties": {"operator": {"const": "is_not_empty"}}
+        },
+        {
+          "type": "object",
+          "required": ["operator"],
+          "additionalProperties": false,
+          "properties": {"operator": {"const": "is_numeric"}}
+        },
+        {
+          "type": "object",
+          "required": ["operator"],
+          "additionalProperties": false,
+          "properties": {"operator": {"const": "is_boolean"}}
+        },
+        {
+          "type": "object",
+          "required": ["operator"],
+          "additionalProperties": false,
+          "properties": {"operator": {"const": "is_date"}}
+        }
+      ]
+    },
+    "LocalVariableDefinition": {
+      "title": "LocalVariableDefinition",
+      "description": "Rule-scoped named expression resolved before formula/predicate evaluation. Cyclic references are rejected by the validator (FR-1.10).",
+      "type": "object",
+      "required": ["name", "expression"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "expression": {"type": "string", "minLength": 1},
+        "result_unit": {"type": ["string", "null"]},
+        "description": {"type": ["string", "null"]}
+      }
+    },
+    "ClashConfig": {
+      "title": "ClashConfig",
+      "description": "Configuration for clash output mode. Two element sets and a geometric test.",
+      "type": "object",
+      "required": ["set_a", "set_b", "method", "test"],
+      "additionalProperties": false,
+      "properties": {
+        "set_a": {"$ref": "#/$defs/EntitySelector"},
+        "set_b": {"$ref": "#/$defs/EntitySelector"},
+        "method": {
+          "type": "string",
+          "enum": ["exact", "obb", "sphere"]
+        },
+        "test": {
+          "type": "string",
+          "enum": ["min_distance", "intersection_volume", "enclosed"]
+        },
+        "tolerance_m": {"type": ["number", "null"], "minimum": 0},
+        "min_distance_m": {"type": ["number", "null"], "minimum": 0},
+        "min_intersection_volume_m3": {"type": ["number", "null"], "minimum": 0}
+      }
+    },
+    "IssueTemplate": {
+      "title": "IssueTemplate",
+      "description": "Template for issue rendering. Strings support simpleeval interpolation, e.g. 'Wall ${Mark} thickness ${Thickness}mm < ${MIN}mm'.",
+      "type": "object",
+      "required": ["title"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {"type": "string", "minLength": 1, "maxLength": 500},
+        "description": {"type": ["string", "null"]},
+        "topic_type": {
+          "type": "string",
+          "enum": [
+            "clash",
+            "issue",
+            "remark",
+            "request_for_info",
+            "snag",
+            "warning",
+            "error"
+          ],
+          "default": "issue"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "default": "medium"
+        },
+        "stage": {"type": ["string", "null"]},
+        "labels": {
+          "type": "array",
+          "items": {"type": "string"},
+          "default": []
+        }
+      }
+    }
+  }
+}

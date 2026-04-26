@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Slab thickness at most 0.6 m",
+  "output_mode": "boolean",
+  "tags": ["slabs", "geometry"],
+  "selector": {"kind": "ifc_class", "values": ["IfcSlab"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "alias", "alias_id": "alias_thickness"},
+    "constraint": {"operator": "lte", "value": 0.6}
+  }
+}

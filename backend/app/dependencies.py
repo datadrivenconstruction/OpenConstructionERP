@@ -292,13 +292,33 @@ class RequirePermission:
         permissions: list[str] = payload.get("permissions", [])
         role: str = payload.get("role", "")
 
-        # Superadmin bypasses all checks
+        # Superadmin bypasses all checks.
+        #
+        # BUG-RBAC05: this used to log at INFO ("Admin bypass: ..."), which
+        # generated hundreds of identical lines per minute on a busy admin
+        # session AND tripped Splunk/Datadog alert rules that pattern-match
+        # the literal string "Admin bypass" as a security flag. Demoted to
+        # DEBUG — admin permissions are by design, not noteworthy.
         if role == "admin":
             user_id = payload.get("sub", "unknown")
-            logger.info("Admin bypass: permission=%s user=%s", self.permission, user_id)
+            logger.debug(
+                "Permission granted via admin role: permission=%s user=%s",
+                self.permission, user_id,
+            )
             return
 
         if self.permission not in permissions:
+            # BUG-RBAC05: log denials at DEBUG, not WARN. Viewer accounts
+            # navigating normal pages routinely hit gated routes that the
+            # UI knows are off-limits; flooding WARN with these false-
+            # positive "Missing permission" lines drowns out genuinely
+            # suspicious patterns. Still emitted so curious operators can
+            # opt in via LOG_LEVEL=DEBUG.
+            user_id = payload.get("sub", "unknown")
+            logger.debug(
+                "Permission denied: permission=%s user=%s role=%s",
+                self.permission, user_id, role,
+            )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Missing permission: {self.permission}",

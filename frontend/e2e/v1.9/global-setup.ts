@@ -15,6 +15,17 @@ const STATE_PATH = path.resolve(__dirname_esm, '.auth-state.json');
 const TOKEN_PATH = path.resolve(__dirname_esm, '.auth-token.txt');
 
 async function globalSetup(_config: FullConfig) {
+  // Skip globalSetup when E2E_SKIP_BACKEND_LOGIN=1 — used by
+  // critical_paths.spec.ts which mocks every backend route at the
+  // network layer and seeds its own tokens via addInitScript.
+  if (process.env.E2E_SKIP_BACKEND_LOGIN === '1') {
+    // Write empty token / state files so dependent specs that read them
+    // don't crash on missing-file ENOENT.
+    fs.writeFileSync(TOKEN_PATH, 'skipped', 'utf-8');
+    fs.writeFileSync(STATE_PATH, JSON.stringify({ cookies: [], origins: [] }), 'utf-8');
+    return;
+  }
+
   const browser = await chromium.launch();
   const ctx = await browser.newContext();
   const page = await ctx.newPage();

@@ -1,0 +1,7 @@
+{
+  "schema_version": "2.0",
+  "name": "Unknown selector kind",
+  "output_mode": "boolean",
+  "selector": {"kind": "spatial_volume_intersection", "values": ["zone-a"]},
+  "_invalid_reason": "selector.kind 'spatial_volume_intersection' is not in the allowed const list"
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": "2.0",
+  "name": "External doors named EXT-*",
+  "description": "External doors must have Name starting with 'EXT'.",
+  "output_mode": "boolean",
+  "tags": ["doors", "naming"],
+  "selector": {
+    "kind": "and",
+    "children": [
+      {"kind": "ifc_class", "values": ["IfcDoor"]},
+      {"kind": "psets_present", "values": ["Pset_DoorCommon"]}
+    ]
+  },
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "exact", "pset_name": null, "name": "Name", "case_sensitive": true},
+    "constraint": {"operator": "starts_with", "value": "EXT", "case_sensitive": true}
+  }
+}

@@ -35,6 +35,7 @@ from app.dependencies import (
     SettingsDep,
 )
 from app.modules.users.schemas import (
+    AdminUserCreate,
     APIKeyCreate,
     APIKeyCreatedResponse,
     APIKeyResponse,
@@ -175,11 +176,19 @@ async def reset_password(
 
 
 @router.get("/me/", response_model=UserMeResponse)
+@router.get("/me", response_model=UserMeResponse, include_in_schema=False)
 async def get_me(
     user_id: CurrentUserId,
     service: UserService = Depends(_get_service),
 ) -> UserMeResponse:
-    """Get current user profile with permissions."""
+    """Get current user profile with permissions.
+
+    BUG-API01: the bare-path ``/me`` (no trailing slash) is registered alongside
+    ``/me/`` so requests against ``GET /api/v1/users/me`` resolve to "current
+    user" instead of falling through to ``/{user_id}`` and 422-failing UUID
+    parsing on the literal ``"me"``. Both must be declared *before* the
+    ``/{user_id}`` route — FastAPI matches in source order.
+    """
     from app.core.permissions import permission_registry
 
     user = await service.get_user(uuid.UUID(user_id))
@@ -379,6 +388,41 @@ async def get_onboarding_presets() -> list[dict[str, Any]]:
 
 
 # ── Admin: User management ─────────────────────────────────────────────────
+
+
+@router.post(
+    "/",
+    response_model=UserResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("users.create"))],
+)
+@router.post(
+    "",
+    response_model=UserResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("users.create"))],
+    include_in_schema=False,
+)
+async def admin_create_user(
+    data: AdminUserCreate,
+    service: UserService = Depends(_get_service),
+) -> UserResponse:
+    """Admin-only: create a user with an arbitrary role and active state.
+
+    BUG-USERS-CREATE: distinct from ``/auth/register`` (open self-signup) so
+    the admin can mint accounts in any role bypassing the
+    "first-real-user-becomes-admin / subsequent users default to viewer"
+    bootstrap policy. The ``AdminUserCreate`` schema enforces:
+      - ``EmailStr`` email format,
+      - password length >= 12 + the standard strong-password policy,
+      - ``role`` constrained to a fixed Literal whitelist,
+      - ``is_active`` defaulting to True (admin can opt for dormant).
+
+    Anything else (e.g. ``role="god"``) is rejected by Pydantic with 422
+    *before* it can reach the service layer.
+    """
+    user = await service.admin_create(data)
+    return UserResponse.model_validate(user)
 
 
 @router.get(

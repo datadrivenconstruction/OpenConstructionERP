@@ -11,16 +11,21 @@
  * tracked (``is_tracked_asset=false``), the card shows a register CTA
  * instead of the populated fields.
  *
- * Positioning matches the dimensions card in ``BIMPage`` (top-right,
- * respects the filter-panel offset).
+ * Anchored bottom-right of the viewer; ``rightPx`` is shifted left when
+ * the right side panel is open so the card stays visible. Plain solid
+ * background (no glassmorphism) so the asset fields read clearly over
+ * 3D-viewer content.
  */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Package, Edit3 } from 'lucide-react';
+import { Package, Edit3, X } from 'lucide-react';
 
 import { AssetEditModal } from './AssetEditModal';
-import { listTrackedAssets, type AssetSummary } from './api';
+import { ensureBIMElement, listTrackedAssets, type AssetSummary } from './api';
+import { useToastStore } from '@/stores/useToastStore';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface ElementAssetCardProps {
   projectId: string;
@@ -35,23 +40,31 @@ interface ElementAssetCardProps {
     model_id?: string;
     model_name?: string;
   } | null;
-  /** Horizontal offset in px (keeps the card out of the filter panel). */
-  insetInlineStart: number;
-  /** Vertical offset so it stacks below the dimensions card. */
-  topPx: number;
+  /** Offset from the right edge, in px. Keeps the card clear of the right
+   *  sidebar when it is open. */
+  rightPx: number;
+  /** Offset from the bottom edge, in px. Anchoring from the bottom places
+   *  the card visually below the Saved-views panel in the right sidebar. */
+  bottomPx: number;
   visible: boolean;
+  /** Hide the card for the rest of the session. Wired to the toggle in the
+   *  Tools tab via ``useBIMViewerStore.setAssetCardEnabled(false)``. */
+  onDismiss?: () => void;
 }
 
 export default function ElementAssetCard({
   projectId,
   elementId,
   element,
-  insetInlineStart,
-  topPx,
+  rightPx,
+  bottomPx,
   visible,
+  onDismiss,
 }: ElementAssetCardProps) {
   const { t } = useTranslation();
+  const toast = useToastStore((s) => s.addToast);
   const [editing, setEditing] = useState<AssetSummary | null>(null);
+  const [resolving, setResolving] = useState(false);
 
   // Fetch the project's tracked assets and pick out this element. We
   // piggy-back on the list endpoint instead of adding a dedicated GET
@@ -71,31 +84,54 @@ export default function ElementAssetCard({
 
   if (!visible || !elementId || !element) return null;
 
-  const handleEditClick = () => {
+  const handleEditClick = async () => {
     if (tracked) {
       setEditing(tracked);
-    } else {
-      // Element isn't registered yet — synth a minimal summary so the
-      // modal can still prefill the header. Saving will flip
-      // is_tracked_asset to true on the backend.
-      setEditing({
-        id: element.id,
-        stable_id: element.stable_id,
-        element_type: element.element_type ?? 'Element',
-        name: element.name ?? null,
-        model_id: element.model_id ?? '',
-        model_name: element.model_name ?? '',
-        project_id: projectId,
-        asset_info: {},
-      });
+      return;
     }
+    // Element isn't registered yet. The viewer sometimes hands us a
+    // client-side stub id (mesh with no oe_bim_element row). Resolve
+    // it to a real DB UUID via ensureBIMElement before we let the
+    // modal PATCH asset-info — otherwise the backend returns 404.
+    let realId = element.id;
+    if (!UUID_RE.test(element.id) && element.model_id) {
+      setResolving(true);
+      try {
+        const resolved = await ensureBIMElement(element.model_id, {
+          stableId: element.stable_id ?? null,
+          meshRef: element.stable_id ?? null,
+        });
+        realId = resolved.id;
+      } catch (err) {
+        toast({
+          type: 'error',
+          title: t('assets.resolve_failed', {
+            defaultValue: 'Could not prepare asset row',
+          }),
+          message: err instanceof Error ? err.message : undefined,
+        });
+        setResolving(false);
+        return;
+      }
+      setResolving(false);
+    }
+    setEditing({
+      id: realId,
+      stable_id: element.stable_id,
+      element_type: element.element_type ?? 'Element',
+      name: element.name ?? null,
+      model_id: element.model_id ?? '',
+      model_name: element.model_name ?? '',
+      project_id: projectId,
+      asset_info: {},
+    });
   };
 
   return (
     <>
       <div
-        className="absolute z-30 select-none rounded-lg border border-oe-blue/30 bg-surface-primary/95 backdrop-blur-sm shadow-md px-3 py-2 min-w-[200px] transition-[inset-inline-start] duration-200"
-        style={{ insetInlineStart, top: topPx }}
+        className="absolute z-30 select-none rounded-lg border border-border-light bg-surface-primary shadow-lg px-3 py-2 min-w-[220px] max-w-[280px] transition-[inset-inline-end] duration-200"
+        style={{ insetInlineEnd: rightPx, bottom: bottomPx, backgroundColor: 'var(--oe-bg)' }}
         data-testid="bim-asset-card"
       >
         <div className="flex items-center justify-between gap-2 mb-1.5">
@@ -105,17 +141,34 @@ export default function ElementAssetCard({
               {t('assets.card_title', { defaultValue: 'Asset info' })}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={handleEditClick}
-            className="inline-flex items-center gap-1 text-[10px] text-oe-blue hover:underline"
-            data-testid="bim-asset-edit"
-          >
-            <Edit3 size={10} />
-            {tracked
-              ? t('common.edit', { defaultValue: 'Edit' })
-              : t('assets.register', { defaultValue: 'Register' })}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleEditClick}
+              disabled={resolving}
+              className="inline-flex items-center gap-1 text-[10px] text-oe-blue hover:underline disabled:opacity-50"
+              data-testid="bim-asset-edit"
+            >
+              <Edit3 size={10} />
+              {resolving
+                ? t('common.loading', { defaultValue: 'Loading…' })
+                : tracked
+                ? t('common.edit', { defaultValue: 'Edit' })
+                : t('assets.register', { defaultValue: 'Register' })}
+            </button>
+            {onDismiss && (
+              <button
+                type="button"
+                onClick={onDismiss}
+                className="rounded p-0.5 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+                aria-label={t('assets.hide_card', { defaultValue: 'Hide asset card' })}
+                title={t('assets.hide_card', { defaultValue: 'Hide asset card' })}
+                data-testid="bim-asset-dismiss"
+              >
+                <X size={11} />
+              </button>
+            )}
+          </div>
         </div>
 
         {tracked ? (

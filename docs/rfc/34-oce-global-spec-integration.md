@@ -35,7 +35,7 @@ Existing modules vs. spec coverage (verified via two parallel codebase audits):
 | 2. BIM Diff | `bim_hub/BIMModelDiff` (table only) | **25 %** | **No engine.** No BCF/SARIF export. No diff UI. No requirements-impact analysis. |
 | 3. Validation EAC | `validation/`, `compliance_ai/`, `features/validation/` | 60 % | EAC tuple formalization, IDS XML round-trip, computed constraints with safe-eval, SARIF export. |
 | 4. Classification | embedded in `validation/`, `boq/`, `catalog/` | **40 %** | No formal `classification/` module. No multi-system registry. No ML auto-classify. |
-| 5. QTO + BoQ formats | `boq/`, `takeoff/`, `dwg_takeoff/`, three frontend features | 70 % | Nine locale adapters (GAEB DA XML 3.3, AIA G702/G703, RICS NRM2, КС-2/3, …), progress billing, variation tracking from BIM diff. |
+| 5. QTO + BoQ formats | `boq/`, `takeoff/`, `dwg_takeoff/`, three frontend features | 70 % | Nine locale adapters (GAEB DA XML 3.3, AIA G702/G703, RICS NRM2, …), progress billing, variation tracking from BIM diff. |
 | 6. AI Copilot | `ai/`, `cost_match/`, `erp_chat/`, `features/erp-chat/` | 65 % | Hybrid search (sparse+dense+RRF+rerank), citation post-validation, semantic chunking, on-prem LLM provider abstraction. |
 | **EAC v2 Platform** (added 2026-04-25, deep audit in RFC 35 §2) | `core/validation/engine.py` + `validation/` + `compliance_ai/` skeleton + `bim_requirements/parsers/ids_parser.py` + `schedule/` (skeleton) | **~25 %** | EAC engine + JSON Schema + 4 output modes greenfield; aliases greenfield; block editor greenfield; Excel-DSL import greenfield; classifier composition greenfield; 4D simulation + PWA greenfield. |
 
@@ -276,7 +276,7 @@ Largest gap (25 % → 100 %). Pure greenfield engine on top of canonical format.
 
 ## 8. Wave 4 — QTO + BoQ formats (4 weeks) — **partially superseded by RFC 35 (Wave EAC-1 aggregate mode + EAC-5 composition)**
 
-> The QTO engine itself becomes the `aggregate` output mode of the unified EAC engine (RFC 35 §5). What stays in Wave 4 below is **only the locale-export layer** (W4.2 — GAEB DA XML 3.3, AIA G703, RICS NRM2, КС-2/3, etc.) and **progress billing** (W4.3, W4.5). Variation tracking (W4.4) is wired to `ModelDiffCompleted` from Wave 2 and consumes EAC `aggregate` runs. W4.1 (`QuantityExtractionRule` schema) is replaced by `EacRule` with `output_mode='aggregate'`.
+> The QTO engine itself becomes the `aggregate` output mode of the unified EAC engine (RFC 35 §5). What stays in Wave 4 below is **only the locale-export layer** (W4.2 — GAEB DA XML 3.3, AIA G703, RICS NRM2, etc.) and **progress billing** (W4.3, W4.5). Variation tracking (W4.4) is wired to `ModelDiffCompleted` from Wave 2 and consumes EAC `aggregate` runs. W4.1 (`QuantityExtractionRule` schema) is replaced by `EacRule` with `output_mode='aggregate'`.
 
 ### W4.1 — QuantityExtractionRule schema + engine
 

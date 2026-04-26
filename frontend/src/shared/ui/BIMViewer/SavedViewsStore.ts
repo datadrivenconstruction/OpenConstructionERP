@@ -101,6 +101,27 @@ export function removeViewpoint(modelId: string, viewpointId: string): boolean {
   return true;
 }
 
+/**
+ * Rename a stored viewpoint in place.  Empty / whitespace-only names are
+ * rejected (we keep the previous label).  Returns true on success, false
+ * if the viewpoint id wasn't found.
+ */
+export function renameViewpoint(
+  modelId: string,
+  viewpointId: string,
+  newName: string,
+): boolean {
+  const trimmed = newName.trim().slice(0, 80);
+  if (!trimmed) return false;
+  const all = readAll(modelId);
+  const idx = all.findIndex((v) => v.id === viewpointId);
+  if (idx < 0) return false;
+  const next = all.slice();
+  next[idx] = { ...next[idx]!, name: trimmed };
+  writeAll(modelId, next);
+  return true;
+}
+
 export const __test__ = {
   storageKey,
   MAX_VIEWS_PER_MODEL,

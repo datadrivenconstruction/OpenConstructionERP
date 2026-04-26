@@ -1,6 +1,13 @@
 """Procurement service — business logic for purchase orders and goods receipts.
 
 Stateless service layer.
+
+Event publishing (slice E):
+    procurement.po.created      — new PO row inserted
+    procurement.po.updated      — PO fields changed (incl. status transition)
+    procurement.po.issued       — PO transitioned to 'issued'
+    procurement.gr.created      — new goods receipt inserted
+    procurement.gr.confirmed    — goods receipt confirmed (may flip PO status)
 """
 
 import logging
@@ -10,6 +17,7 @@ from decimal import Decimal, InvalidOperation
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
 from app.modules.procurement.models import (
     GoodsReceipt,
     GoodsReceiptItem,
@@ -30,6 +38,15 @@ from app.modules.procurement.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+_logger_ev = logging.getLogger(__name__ + ".events")
+
+
+async def _safe_publish(name: str, data: dict, source_module: str = "oe_procurement") -> None:
+    """Best-effort event publish — never blocks the caller on failure."""
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug("Event publish skipped: %s", name)
 
 # ── Allowed PO status transitions ───────────────────────────────────────────
 
@@ -134,6 +151,21 @@ class ProcurementService:
             )
             await self.po_item_repo.create(item)
 
+        await _safe_publish(
+            "procurement.po.created",
+            {
+                "po_id": str(po.id),
+                "project_id": str(po.project_id),
+                "po_number": po.po_number,
+                "po_type": po.po_type,
+                "status": po.status,
+                "vendor_contact_id": str(po.vendor_contact_id) if po.vendor_contact_id else None,
+                "amount_total": po.amount_total,
+                "currency_code": po.currency_code,
+                "item_count": len(data.items),
+            },
+        )
+
         logger.info("PO created: %s (type=%s)", po.po_number, po.po_type)
         return po
 
@@ -237,6 +269,17 @@ class ProcurementService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Purchase order not found",
             )
+
+        await _safe_publish(
+            "procurement.po.updated",
+            {
+                "po_id": str(po_id),
+                "project_id": str(updated.project_id),
+                "updated_fields": list(fields.keys()),
+                "status": updated.status,
+            },
+        )
+
         logger.info("PO updated: %s", po_id)
         return updated
 
@@ -255,6 +298,17 @@ class ProcurementService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Purchase order not found",
             )
+
+        await _safe_publish(
+            "procurement.po.issued",
+            {
+                "po_id": str(po_id),
+                "project_id": str(updated.project_id),
+                "po_number": updated.po_number,
+                "amount_total": updated.amount_total,
+            },
+        )
+
         logger.info("PO issued: %s", po.po_number)
         return updated
 
@@ -334,6 +388,17 @@ class ProcurementService:
             )
             await self.gr_item_repo.create(item)
 
+        await _safe_publish(
+            "procurement.gr.created",
+            {
+                "gr_id": str(gr.id),
+                "po_id": str(gr.po_id),
+                "project_id": str(po.project_id),
+                "status": gr.status,
+                "item_count": len(data.items),
+            },
+        )
+
         logger.info("GR created for PO %s (date=%s)", data.po_id, data.receipt_date)
         return gr
 
@@ -392,6 +457,16 @@ class ProcurementService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Goods receipt not found",
             )
+
+        await _safe_publish(
+            "procurement.gr.confirmed",
+            {
+                "gr_id": str(gr_id),
+                "po_id": str(updated.po_id),
+                "project_id": str(po.project_id),
+            },
+        )
+
         logger.info("GR confirmed: %s", gr_id)
         return updated
 

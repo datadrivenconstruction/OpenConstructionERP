@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Door height at least 2.0 m",
+  "output_mode": "boolean",
+  "tags": ["doors", "code"],
+  "selector": {"kind": "ifc_class", "values": ["IfcDoor"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "alias", "alias_id": "alias_height"},
+    "constraint": {"operator": "gte", "value": 2.0}
+  }
+}

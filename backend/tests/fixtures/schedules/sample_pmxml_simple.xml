@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<APIBusinessObjects xmlns="http://xmlns.oracle.com/Primavera/P6/V8/API/BusinessObjects" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Project>
+    <Id>OE-PMXML-SAMPLE-01</Id>
+    <Name>Sample PMXML Project</Name>
+    <DataDate>2026-01-01T00:00:00</DataDate>
+    <PlannedStartDate>2026-01-01T00:00:00</PlannedStartDate>
+    <MustFinishByDate>2026-06-30T00:00:00</MustFinishByDate>
+    <CalendarObjectId>1</CalendarObjectId>
+    <WBS>
+      <ObjectId>1001</ObjectId>
+      <Code>1</Code>
+      <Name>Site Preparation</Name>
+      <ParentObjectId/>
+    </WBS>
+    <WBS>
+      <ObjectId>1002</ObjectId>
+      <Code>2</Code>
+      <Name>Foundations</Name>
+      <ParentObjectId/>
+    </WBS>
+    <WBS>
+      <ObjectId>1003</ObjectId>
+      <Code>3</Code>
+      <Name>Superstructure</Name>
+      <ParentObjectId/>
+    </WBS>
+    <Activity>
+      <ObjectId>2001</ObjectId>
+      <Id>A1000</Id>
+      <Name>Survey site</Name>
+      <WBSObjectId>1001</WBSObjectId>
+      <PlannedStartDate>2026-01-01T08:00:00</PlannedStartDate>
+      <PlannedFinishDate>2026-01-05T17:00:00</PlannedFinishDate>
+      <PlannedDuration>40</PlannedDuration>
+      <PercentComplete>0</PercentComplete>
+      <Type>Task Dependent</Type>
+    </Activity>
+    <Activity>
+      <ObjectId>2002</ObjectId>
+      <Id>A1010</Id>
+      <Name>Clear site</Name>
+      <WBSObjectId>1001</WBSObjectId>
+      <PlannedStartDate>2026-01-06T08:00:00</PlannedStartDate>
+      <PlannedFinishDate>2026-01-12T17:00:00</PlannedFinishDate>
+      <PlannedDuration>56</PlannedDuration>
+      <PercentComplete>0</PercentComplete>
+      <Type>Task Dependent</Type>
+    </Activity>
+    <Activity>
+      <ObjectId>2003</ObjectId>
+      <Id>A1020</Id>
+      <Name>Excavate foundations</Name>
+      <WBSObjectId>1002</WBSObjectId>
+      <PlannedStartDate>2026-01-13T08:00:00</PlannedStartDate>
+      <PlannedFinishDate>2026-01-26T17:00:00</PlannedFinishDate>
+      <PlannedDuration>112</PlannedDuration>
+      <PercentComplete>0</PercentComplete>
+      <Type>Task Dependent</Type>
+    </Activity>
+    <Activity>
+      <ObjectId>2004</ObjectId>
+      <Id>A1030</Id>
+      <Name>Pour foundation slab</Name>
+      <WBSObjectId>1002</WBSObjectId>
+      <PlannedStartDate>2026-01-27T08:00:00</PlannedStartDate>
+      <PlannedFinishDate>2026-02-09T17:00:00</PlannedFinishDate>
+      <PlannedDuration>112</PlannedDuration>
+      <PercentComplete>0</PercentComplete>
+      <Type>Task Dependent</Type>
+    </Activity>
+    <Activity>
+      <ObjectId>2005</ObjectId>
+      <Id>A1040</Id>
+      <Name>Erect ground floor walls</Name>
+      <WBSObjectId>1003</WBSObjectId>
+      <PlannedStartDate>2026-02-10T08:00:00</PlannedStartDate>
+      <PlannedFinishDate>2026-03-02T17:00:00</PlannedFinishDate>
+      <PlannedDuration>168</PlannedDuration>
+      <PercentComplete>0</PercentComplete>
+      <Type>Task Dependent</Type>
+    </Activity>
+    <Activity>
+      <ObjectId>2006</ObjectId>
+      <Id>A1050</Id>
+      <Name>Pour level 1 slab</Name>
+      <WBSObjectId>1003</WBSObjectId>
+      <PlannedStartDate>2026-03-03T08:00:00</PlannedStartDate>
+      <PlannedFinishDate>2026-03-16T17:00:00</PlannedFinishDate>
+      <PlannedDuration>112</PlannedDuration>
+      <PercentComplete>0</PercentComplete>
+      <Type>Task Dependent</Type>
+    </Activity>
+    <Activity>
+      <ObjectId>2007</ObjectId>
+      <Id>A1060</Id>
+      <Name>Erect level 1 walls</Name>
+      <WBSObjectId>1003</WBSObjectId>
+      <PlannedStartDate>2026-03-17T08:00:00</PlannedStartDate>
+      <PlannedFinishDate>2026-04-06T17:00:00</PlannedFinishDate>
+      <PlannedDuration>168</PlannedDuration>
+      <PercentComplete>0</PercentComplete>
+      <Type>Task Dependent</Type>
+    </Activity>
+    <Activity>
+      <ObjectId>2008</ObjectId>
+      <Id>A1070</Id>
+      <Name>Roof structure</Name>
+      <WBSObjectId>1003</WBSObjectId>
+      <PlannedStartDate>2026-04-07T08:00:00</PlannedStartDate>
+      <PlannedFinishDate>2026-04-20T17:00:00</PlannedFinishDate>
+      <PlannedDuration>112</PlannedDuration>
+      <PercentComplete>0</PercentComplete>
+      <Type>Task Dependent</Type>
+    </Activity>
+    <Activity>
+      <ObjectId>2009</ObjectId>
+      <Id>A1080</Id>
+      <Name>Window installation</Name>
+      <WBSObjectId>1003</WBSObjectId>
+      <PlannedStartDate>2026-04-21T08:00:00</PlannedStartDate>
+      <PlannedFinishDate>2026-05-04T17:00:00</PlannedFinishDate>
+      <PlannedDuration>112</PlannedDuration>
+      <PercentComplete>0</PercentComplete>
+      <Type>Task Dependent</Type>
+    </Activity>
+    <Activity>
+      <ObjectId>2010</ObjectId>
+      <Id>A1090</Id>
+      <Name>Internal finishes</Name>
+      <WBSObjectId>1003</WBSObjectId>
+      <PlannedStartDate>2026-05-05T08:00:00</PlannedStartDate>
+      <PlannedFinishDate>2026-06-29T17:00:00</PlannedFinishDate>
+      <PlannedDuration>440</PlannedDuration>
+      <PercentComplete>0</PercentComplete>
+      <Type>Task Dependent</Type>
+    </Activity>
+    <Relationship>
+      <ObjectId>3001</ObjectId>
+      <PredecessorActivityObjectId>2001</PredecessorActivityObjectId>
+      <SuccessorActivityObjectId>2002</SuccessorActivityObjectId>
+      <Type>Finish to Start</Type>
+      <Lag>0</Lag>
+    </Relationship>
+    <Relationship>
+      <ObjectId>3002</ObjectId>
+      <PredecessorActivityObjectId>2002</PredecessorActivityObjectId>
+      <SuccessorActivityObjectId>2003</SuccessorActivityObjectId>
+      <Type>Finish to Start</Type>
+      <Lag>0</Lag>
+    </Relationship>
+    <Relationship>
+      <ObjectId>3003</ObjectId>
+      <PredecessorActivityObjectId>2003</PredecessorActivityObjectId>
+      <SuccessorActivityObjectId>2004</SuccessorActivityObjectId>
+      <Type>Finish to Start</Type>
+      <Lag>0</Lag>
+    </Relationship>
+    <Relationship>
+      <ObjectId>3004</ObjectId>
+      <PredecessorActivityObjectId>2004</PredecessorActivityObjectId>
+      <SuccessorActivityObjectId>2005</SuccessorActivityObjectId>
+      <Type>Finish to Start</Type>
+      <Lag>0</Lag>
+    </Relationship>
+    <Relationship>
+      <ObjectId>3005</ObjectId>
+      <PredecessorActivityObjectId>2005</PredecessorActivityObjectId>
+      <SuccessorActivityObjectId>2006</SuccessorActivityObjectId>
+      <Type>Finish to Start</Type>
+      <Lag>0</Lag>
+    </Relationship>
+  </Project>
+</APIBusinessObjects>

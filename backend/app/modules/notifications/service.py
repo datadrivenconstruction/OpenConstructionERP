@@ -2,6 +2,12 @@
 
 Stateless service layer.  Wraps the repository and provides convenience
 helpers like ``notify_users`` for bulk delivery.
+
+Event publishing (slice E):
+    notifications.notification.created  — new notification row
+    notifications.notification.read     — single mark-read
+    notifications.notification.bulk_read — mark-all-read
+    notifications.notification.deleted  — single delete
 """
 
 import logging
@@ -10,10 +16,20 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
 from app.modules.notifications.models import Notification
 from app.modules.notifications.repository import NotificationRepository
 
 logger = logging.getLogger(__name__)
+_logger_ev = logging.getLogger(__name__ + ".events")
+
+
+async def _safe_publish(name: str, data: dict, source_module: str = "oe_notifications") -> None:
+    """Best-effort event publish — never blocks the caller on failure."""
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug("Event publish skipped: %s", name)
 
 
 class NotificationService:
@@ -52,6 +68,19 @@ class NotificationService:
             metadata_=metadata or {},
         )
         notification = await self.repo.create(notification)
+
+        await _safe_publish(
+            "notifications.notification.created",
+            {
+                "notification_id": str(notification.id),
+                "user_id": str(uid),
+                "notification_type": notification_type,
+                "entity_type": entity_type,
+                "entity_id": entity_id,
+                "title_key": title_key,
+            },
+        )
+
         logger.info(
             "Notification created: type=%s user=%s title_key=%s",
             notification_type,
@@ -120,12 +149,29 @@ class NotificationService:
     async def mark_read(self, notification_id: uuid.UUID, user_id: uuid.UUID | str) -> bool:
         """Mark a single notification as read."""
         uid = uuid.UUID(str(user_id)) if not isinstance(user_id, uuid.UUID) else user_id
-        return await self.repo.mark_read(notification_id, uid)
+        ok = await self.repo.mark_read(notification_id, uid)
+        if ok:
+            await _safe_publish(
+                "notifications.notification.read",
+                {
+                    "notification_id": str(notification_id),
+                    "user_id": str(uid),
+                },
+            )
+        return ok
 
     async def mark_all_read(self, user_id: uuid.UUID | str) -> int:
         """Mark all notifications as read for a user."""
         uid = uuid.UUID(str(user_id)) if not isinstance(user_id, uuid.UUID) else user_id
         count = await self.repo.mark_all_read(uid)
+        if count:
+            await _safe_publish(
+                "notifications.notification.bulk_read",
+                {
+                    "user_id": str(uid),
+                    "count": count,
+                },
+            )
         logger.info("Marked %d notifications as read for user=%s", count, uid)
         return count
 
@@ -134,7 +180,16 @@ class NotificationService:
     async def delete(self, notification_id: uuid.UUID, user_id: uuid.UUID | str) -> bool:
         """Delete a single notification."""
         uid = uuid.UUID(str(user_id)) if not isinstance(user_id, uuid.UUID) else user_id
-        return await self.repo.delete_by_id(notification_id, uid)
+        ok = await self.repo.delete_by_id(notification_id, uid)
+        if ok:
+            await _safe_publish(
+                "notifications.notification.deleted",
+                {
+                    "notification_id": str(notification_id),
+                    "user_id": str(uid),
+                },
+            )
+        return ok
 
     async def delete_old(self, days: int = 90) -> int:
         """Cleanup: delete notifications older than ``days``."""

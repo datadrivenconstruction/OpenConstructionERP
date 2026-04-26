@@ -423,7 +423,7 @@ export function BOQToolbar({
           </div>
 
           {/* Cost Finder — search cost database */}
-          <div className="relative group/cf border-l-2 border-blue-400 dark:border-blue-500 pl-1">
+          <div className="relative group/cf">
             <Button
               variant={costFinderOpen ? 'primary' : 'ghost'}
               size="sm"
@@ -439,7 +439,7 @@ export function BOQToolbar({
           </div>
 
           {/* AI Chat — generate positions */}
-          <div className="relative group/chat border-l-2 border-violet-400 dark:border-violet-500 pl-1">
+          <div className="relative group/chat">
             <Button
               variant={aiChatOpen ? 'primary' : 'ghost'}
               size="sm"
@@ -456,7 +456,7 @@ export function BOQToolbar({
           </div>
 
           {/* Smart AI — analysis tools */}
-          <div className="relative group/smart border-l-2 border-fuchsia-400 dark:border-fuchsia-500 pl-1">
+          <div className="relative group/smart">
             <Button
               variant={smartPanelOpen ? 'primary' : 'ghost'}
               size="sm"

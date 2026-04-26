@@ -1,0 +1,1101 @@
+{
+  "format_version": "1.0",
+  "description": "RFC 35 §6 EAC-2.2 — built-in parameter alias catalog. 40 canonical aliases, multi-language synonyms (en, es, fr, de, it, pt, ru, zh, ja).",
+  "aliases": [
+    {
+      "name": "_Length",
+      "value_type_hint": "number",
+      "default_unit": "m",
+      "description": {
+        "en": "Length of the element in metres",
+        "es": "Longitud del elemento en metros",
+        "fr": "Longueur de l'élément en mètres",
+        "de": "Länge des Elements in Metern",
+        "it": "Lunghezza dell'elemento in metri",
+        "pt": "Comprimento do elemento em metros",
+        "ru": "Длина элемента в метрах",
+        "zh": "构件长度(米)",
+        "ja": "要素の長さ(メートル)"
+      },
+      "synonyms": [
+        {"pattern": "Length", "kind": "exact", "priority": 10},
+        {"pattern": "LENGTH", "kind": "exact", "priority": 20, "case_sensitive": true},
+        {"pattern": "length_mm", "kind": "exact", "priority": 30, "unit_multiplier": "0.001"},
+        {"pattern": "Longitud", "kind": "exact", "priority": 40},
+        {"pattern": "Longueur", "kind": "exact", "priority": 50},
+        {"pattern": "Länge", "kind": "exact", "priority": 60},
+        {"pattern": "Lunghezza", "kind": "exact", "priority": 70},
+        {"pattern": "Comprimento", "kind": "exact", "priority": 80},
+        {"pattern": "Длина", "kind": "exact", "priority": 90},
+        {"pattern": "长度", "kind": "exact", "priority": 100},
+        {"pattern": "長さ", "kind": "exact", "priority": 110}
+      ]
+    },
+    {
+      "name": "_Width",
+      "value_type_hint": "number",
+      "default_unit": "m",
+      "description": {
+        "en": "Width of the element in metres",
+        "es": "Ancho del elemento",
+        "fr": "Largeur de l'élément",
+        "de": "Breite des Elements",
+        "it": "Larghezza dell'elemento",
+        "pt": "Largura do elemento",
+        "ru": "Ширина элемента",
+        "zh": "宽度",
+        "ja": "幅"
+      },
+      "synonyms": [
+        {"pattern": "Width", "kind": "exact", "priority": 10},
+        {"pattern": "WIDTH", "kind": "exact", "priority": 20, "case_sensitive": true},
+        {"pattern": "width_mm", "kind": "exact", "priority": 30, "unit_multiplier": "0.001"},
+        {"pattern": "Ancho", "kind": "exact", "priority": 40},
+        {"pattern": "Largeur", "kind": "exact", "priority": 50},
+        {"pattern": "Breite", "kind": "exact", "priority": 60},
+        {"pattern": "Larghezza", "kind": "exact", "priority": 70},
+        {"pattern": "Largura", "kind": "exact", "priority": 80},
+        {"pattern": "Ширина", "kind": "exact", "priority": 90},
+        {"pattern": "宽度", "kind": "exact", "priority": 100},
+        {"pattern": "幅", "kind": "exact", "priority": 110}
+      ]
+    },
+    {
+      "name": "_Height",
+      "value_type_hint": "number",
+      "default_unit": "m",
+      "description": {
+        "en": "Height of the element",
+        "es": "Altura",
+        "fr": "Hauteur",
+        "de": "Höhe",
+        "it": "Altezza",
+        "pt": "Altura",
+        "ru": "Высота",
+        "zh": "高度",
+        "ja": "高さ"
+      },
+      "synonyms": [
+        {"pattern": "Height", "kind": "exact", "priority": 10},
+        {"pattern": "HEIGHT", "kind": "exact", "priority": 20, "case_sensitive": true},
+        {"pattern": "height_mm", "kind": "exact", "priority": 30, "unit_multiplier": "0.001"},
+        {"pattern": "Altura", "kind": "exact", "priority": 40},
+        {"pattern": "Hauteur", "kind": "exact", "priority": 50},
+        {"pattern": "Höhe", "kind": "exact", "priority": 60},
+        {"pattern": "Altezza", "kind": "exact", "priority": 70},
+        {"pattern": "Высота", "kind": "exact", "priority": 80},
+        {"pattern": "高度", "kind": "exact", "priority": 90},
+        {"pattern": "高さ", "kind": "exact", "priority": 100},
+        {"pattern": "Hoehe", "kind": "exact", "priority": 110}
+      ]
+    },
+    {
+      "name": "_Thickness",
+      "value_type_hint": "number",
+      "default_unit": "m",
+      "description": {
+        "en": "Thickness",
+        "es": "Espesor",
+        "fr": "Épaisseur",
+        "de": "Dicke",
+        "it": "Spessore",
+        "pt": "Espessura",
+        "ru": "Толщина",
+        "zh": "厚度",
+        "ja": "厚さ"
+      },
+      "synonyms": [
+        {"pattern": "Thickness", "kind": "exact", "priority": 10},
+        {"pattern": "thickness_mm", "kind": "exact", "priority": 20, "unit_multiplier": "0.001"},
+        {"pattern": "Espesor", "kind": "exact", "priority": 30},
+        {"pattern": "Épaisseur", "kind": "exact", "priority": 40},
+        {"pattern": "Dicke", "kind": "exact", "priority": 50},
+        {"pattern": "Spessore", "kind": "exact", "priority": 60},
+        {"pattern": "Espessura", "kind": "exact", "priority": 70},
+        {"pattern": "Толщина", "kind": "exact", "priority": 80},
+        {"pattern": "厚度", "kind": "exact", "priority": 90},
+        {"pattern": "厚さ", "kind": "exact", "priority": 100}
+      ]
+    },
+    {
+      "name": "_Volume",
+      "value_type_hint": "number",
+      "default_unit": "m3",
+      "description": {
+        "en": "Volume",
+        "es": "Volumen",
+        "fr": "Volume",
+        "de": "Volumen",
+        "it": "Volume",
+        "pt": "Volume",
+        "ru": "Объём",
+        "zh": "体积",
+        "ja": "体積"
+      },
+      "synonyms": [
+        {"pattern": "Volume", "kind": "exact", "priority": 10},
+        {"pattern": "VOLUME", "kind": "exact", "priority": 20, "case_sensitive": true},
+        {"pattern": "Volumen", "kind": "exact", "priority": 30},
+        {"pattern": "Volume_m3", "kind": "exact", "priority": 40},
+        {"pattern": "Объём", "kind": "exact", "priority": 50},
+        {"pattern": "Объем", "kind": "exact", "priority": 60},
+        {"pattern": "体积", "kind": "exact", "priority": 70},
+        {"pattern": "体積", "kind": "exact", "priority": 80},
+        {"pattern": "NetVolume", "kind": "exact", "priority": 90},
+        {"pattern": "GrossVolume", "kind": "exact", "priority": 100}
+      ]
+    },
+    {
+      "name": "_Area",
+      "value_type_hint": "number",
+      "default_unit": "m2",
+      "description": {
+        "en": "Surface area",
+        "es": "Área",
+        "fr": "Surface",
+        "de": "Fläche",
+        "it": "Area",
+        "pt": "Área",
+        "ru": "Площадь",
+        "zh": "面积",
+        "ja": "面積"
+      },
+      "synonyms": [
+        {"pattern": "Area", "kind": "exact", "priority": 10},
+        {"pattern": "AREA", "kind": "exact", "priority": 20, "case_sensitive": true},
+        {"pattern": "Área", "kind": "exact", "priority": 30},
+        {"pattern": "Surface", "kind": "exact", "priority": 40},
+        {"pattern": "Fläche", "kind": "exact", "priority": 50},
+        {"pattern": "Площадь", "kind": "exact", "priority": 60},
+        {"pattern": "面积", "kind": "exact", "priority": 70},
+        {"pattern": "面積", "kind": "exact", "priority": 80},
+        {"pattern": "NetArea", "kind": "exact", "priority": 90},
+        {"pattern": "GrossArea", "kind": "exact", "priority": 100}
+      ]
+    },
+    {
+      "name": "_Perimeter",
+      "value_type_hint": "number",
+      "default_unit": "m",
+      "description": {
+        "en": "Perimeter",
+        "es": "Perímetro",
+        "fr": "Périmètre",
+        "de": "Umfang",
+        "it": "Perimetro",
+        "pt": "Perímetro",
+        "ru": "Периметр",
+        "zh": "周长",
+        "ja": "周長"
+      },
+      "synonyms": [
+        {"pattern": "Perimeter", "kind": "exact", "priority": 10},
+        {"pattern": "Perímetro", "kind": "exact", "priority": 20},
+        {"pattern": "Périmètre", "kind": "exact", "priority": 30},
+        {"pattern": "Umfang", "kind": "exact", "priority": 40},
+        {"pattern": "Perimetro", "kind": "exact", "priority": 50},
+        {"pattern": "Периметр", "kind": "exact", "priority": 60},
+        {"pattern": "周长", "kind": "exact", "priority": 70},
+        {"pattern": "周長", "kind": "exact", "priority": 80},
+        {"pattern": "perimeter_mm", "kind": "exact", "priority": 90, "unit_multiplier": "0.001"}
+      ]
+    },
+    {
+      "name": "_Weight",
+      "value_type_hint": "number",
+      "default_unit": "kg",
+      "description": {
+        "en": "Weight",
+        "es": "Peso",
+        "fr": "Poids",
+        "de": "Gewicht",
+        "it": "Peso",
+        "pt": "Peso",
+        "ru": "Вес",
+        "zh": "重量",
+        "ja": "重量"
+      },
+      "synonyms": [
+        {"pattern": "Weight", "kind": "exact", "priority": 10},
+        {"pattern": "Peso", "kind": "exact", "priority": 20},
+        {"pattern": "Poids", "kind": "exact", "priority": 30},
+        {"pattern": "Gewicht", "kind": "exact", "priority": 40},
+        {"pattern": "Вес", "kind": "exact", "priority": 50},
+        {"pattern": "重量", "kind": "exact", "priority": 60},
+        {"pattern": "weight_g", "kind": "exact", "priority": 70, "unit_multiplier": "0.001"},
+        {"pattern": "weight_kg", "kind": "exact", "priority": 80},
+        {"pattern": "weight_lb", "kind": "exact", "priority": 90, "unit_multiplier": "0.45359237"}
+      ]
+    },
+    {
+      "name": "_Mass",
+      "value_type_hint": "number",
+      "default_unit": "kg",
+      "description": {
+        "en": "Mass",
+        "es": "Masa",
+        "fr": "Masse",
+        "de": "Masse",
+        "it": "Massa",
+        "pt": "Massa",
+        "ru": "Масса",
+        "zh": "质量",
+        "ja": "質量"
+      },
+      "synonyms": [
+        {"pattern": "Mass", "kind": "exact", "priority": 10},
+        {"pattern": "Masa", "kind": "exact", "priority": 20},
+        {"pattern": "Masse", "kind": "exact", "priority": 30},
+        {"pattern": "Massa", "kind": "exact", "priority": 40},
+        {"pattern": "Масса", "kind": "exact", "priority": 50},
+        {"pattern": "质量", "kind": "exact", "priority": 60},
+        {"pattern": "質量", "kind": "exact", "priority": 70},
+        {"pattern": "mass_kg", "kind": "exact", "priority": 80},
+        {"pattern": "mass_g", "kind": "exact", "priority": 90, "unit_multiplier": "0.001"}
+      ]
+    },
+    {
+      "name": "_Diameter",
+      "value_type_hint": "number",
+      "default_unit": "m",
+      "description": {
+        "en": "Diameter",
+        "es": "Diámetro",
+        "fr": "Diamètre",
+        "de": "Durchmesser",
+        "it": "Diametro",
+        "pt": "Diâmetro",
+        "ru": "Диаметр",
+        "zh": "直径",
+        "ja": "直径"
+      },
+      "synonyms": [
+        {"pattern": "Diameter", "kind": "exact", "priority": 10},
+        {"pattern": "Diámetro", "kind": "exact", "priority": 20},
+        {"pattern": "Diamètre", "kind": "exact", "priority": 30},
+        {"pattern": "Durchmesser", "kind": "exact", "priority": 40},
+        {"pattern": "Diametro", "kind": "exact", "priority": 50},
+        {"pattern": "Diâmetro", "kind": "exact", "priority": 60},
+        {"pattern": "Диаметр", "kind": "exact", "priority": 70},
+        {"pattern": "直径", "kind": "exact", "priority": 80},
+        {"pattern": "diameter_mm", "kind": "exact", "priority": 90, "unit_multiplier": "0.001"}
+      ]
+    },
+    {
+      "name": "_Radius",
+      "value_type_hint": "number",
+      "default_unit": "m",
+      "description": {
+        "en": "Radius",
+        "es": "Radio",
+        "fr": "Rayon",
+        "de": "Radius",
+        "it": "Raggio",
+        "pt": "Raio",
+        "ru": "Радиус",
+        "zh": "半径",
+        "ja": "半径"
+      },
+      "synonyms": [
+        {"pattern": "Radius", "kind": "exact", "priority": 10},
+        {"pattern": "Radio", "kind": "exact", "priority": 20},
+        {"pattern": "Rayon", "kind": "exact", "priority": 30},
+        {"pattern": "Raggio", "kind": "exact", "priority": 40},
+        {"pattern": "Raio", "kind": "exact", "priority": 50},
+        {"pattern": "Радиус", "kind": "exact", "priority": 60},
+        {"pattern": "半径", "kind": "exact", "priority": 70},
+        {"pattern": "radius_mm", "kind": "exact", "priority": 80, "unit_multiplier": "0.001"},
+        {"pattern": "Halbmesser", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Depth",
+      "value_type_hint": "number",
+      "default_unit": "m",
+      "description": {
+        "en": "Depth",
+        "es": "Profundidad",
+        "fr": "Profondeur",
+        "de": "Tiefe",
+        "it": "Profondità",
+        "pt": "Profundidade",
+        "ru": "Глубина",
+        "zh": "深度",
+        "ja": "深さ"
+      },
+      "synonyms": [
+        {"pattern": "Depth", "kind": "exact", "priority": 10},
+        {"pattern": "Profundidad", "kind": "exact", "priority": 20},
+        {"pattern": "Profondeur", "kind": "exact", "priority": 30},
+        {"pattern": "Tiefe", "kind": "exact", "priority": 40},
+        {"pattern": "Profondità", "kind": "exact", "priority": 50},
+        {"pattern": "Profundidade", "kind": "exact", "priority": 60},
+        {"pattern": "Глубина", "kind": "exact", "priority": 70},
+        {"pattern": "深度", "kind": "exact", "priority": 80},
+        {"pattern": "深さ", "kind": "exact", "priority": 90},
+        {"pattern": "depth_mm", "kind": "exact", "priority": 100, "unit_multiplier": "0.001"}
+      ]
+    },
+    {
+      "name": "_Mark",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Mark / tag",
+        "es": "Marca",
+        "fr": "Marque",
+        "de": "Bezeichnung",
+        "it": "Marca",
+        "pt": "Marca",
+        "ru": "Маркировка",
+        "zh": "标记",
+        "ja": "符号"
+      },
+      "synonyms": [
+        {"pattern": "Mark", "kind": "exact", "priority": 10},
+        {"pattern": "Tag", "kind": "exact", "priority": 20},
+        {"pattern": "Marca", "kind": "exact", "priority": 30},
+        {"pattern": "Marque", "kind": "exact", "priority": 40},
+        {"pattern": "Bezeichnung", "kind": "exact", "priority": 50},
+        {"pattern": "Маркировка", "kind": "exact", "priority": 60},
+        {"pattern": "标记", "kind": "exact", "priority": 70},
+        {"pattern": "符号", "kind": "exact", "priority": 80},
+        {"pattern": "TypeMark", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Code",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Code",
+        "es": "Código",
+        "fr": "Code",
+        "de": "Code",
+        "it": "Codice",
+        "pt": "Código",
+        "ru": "Код",
+        "zh": "代码",
+        "ja": "コード"
+      },
+      "synonyms": [
+        {"pattern": "Code", "kind": "exact", "priority": 10},
+        {"pattern": "Código", "kind": "exact", "priority": 20},
+        {"pattern": "Codice", "kind": "exact", "priority": 30},
+        {"pattern": "CODE", "kind": "exact", "priority": 40, "case_sensitive": true},
+        {"pattern": "Код", "kind": "exact", "priority": 50},
+        {"pattern": "代码", "kind": "exact", "priority": 60},
+        {"pattern": "コード", "kind": "exact", "priority": 70},
+        {"pattern": "ItemCode", "kind": "exact", "priority": 80},
+        {"pattern": "ProductCode", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Name",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Name",
+        "es": "Nombre",
+        "fr": "Nom",
+        "de": "Name",
+        "it": "Nome",
+        "pt": "Nome",
+        "ru": "Имя",
+        "zh": "名称",
+        "ja": "名前"
+      },
+      "synonyms": [
+        {"pattern": "Name", "kind": "exact", "priority": 10},
+        {"pattern": "Nombre", "kind": "exact", "priority": 20},
+        {"pattern": "Nom", "kind": "exact", "priority": 30},
+        {"pattern": "Nome", "kind": "exact", "priority": 40},
+        {"pattern": "Имя", "kind": "exact", "priority": 50},
+        {"pattern": "Название", "kind": "exact", "priority": 60},
+        {"pattern": "名称", "kind": "exact", "priority": 70},
+        {"pattern": "名前", "kind": "exact", "priority": 80},
+        {"pattern": "DisplayName", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Description",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Description",
+        "es": "Descripción",
+        "fr": "Description",
+        "de": "Beschreibung",
+        "it": "Descrizione",
+        "pt": "Descrição",
+        "ru": "Описание",
+        "zh": "说明",
+        "ja": "説明"
+      },
+      "synonyms": [
+        {"pattern": "Description", "kind": "exact", "priority": 10},
+        {"pattern": "Descripción", "kind": "exact", "priority": 20},
+        {"pattern": "Beschreibung", "kind": "exact", "priority": 30},
+        {"pattern": "Descrizione", "kind": "exact", "priority": 40},
+        {"pattern": "Descrição", "kind": "exact", "priority": 50},
+        {"pattern": "Описание", "kind": "exact", "priority": 60},
+        {"pattern": "说明", "kind": "exact", "priority": 70},
+        {"pattern": "説明", "kind": "exact", "priority": 80},
+        {"pattern": "Comments", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Comments",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Comments",
+        "es": "Comentarios",
+        "fr": "Commentaires",
+        "de": "Kommentare",
+        "it": "Commenti",
+        "pt": "Comentários",
+        "ru": "Комментарии",
+        "zh": "注释",
+        "ja": "コメント"
+      },
+      "synonyms": [
+        {"pattern": "Comments", "kind": "exact", "priority": 10},
+        {"pattern": "Comment", "kind": "exact", "priority": 20},
+        {"pattern": "Comentarios", "kind": "exact", "priority": 30},
+        {"pattern": "Commentaires", "kind": "exact", "priority": 40},
+        {"pattern": "Kommentare", "kind": "exact", "priority": 50},
+        {"pattern": "Commenti", "kind": "exact", "priority": 60},
+        {"pattern": "Comentários", "kind": "exact", "priority": 70},
+        {"pattern": "Комментарии", "kind": "exact", "priority": 80},
+        {"pattern": "注释", "kind": "exact", "priority": 90},
+        {"pattern": "コメント", "kind": "exact", "priority": 100}
+      ]
+    },
+    {
+      "name": "_Manufacturer",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Manufacturer",
+        "es": "Fabricante",
+        "fr": "Fabricant",
+        "de": "Hersteller",
+        "it": "Produttore",
+        "pt": "Fabricante",
+        "ru": "Производитель",
+        "zh": "制造商",
+        "ja": "メーカー"
+      },
+      "synonyms": [
+        {"pattern": "Manufacturer", "kind": "exact", "priority": 10},
+        {"pattern": "Fabricante", "kind": "exact", "priority": 20},
+        {"pattern": "Fabricant", "kind": "exact", "priority": 30},
+        {"pattern": "Hersteller", "kind": "exact", "priority": 40},
+        {"pattern": "Produttore", "kind": "exact", "priority": 50},
+        {"pattern": "Производитель", "kind": "exact", "priority": 60},
+        {"pattern": "制造商", "kind": "exact", "priority": 70},
+        {"pattern": "メーカー", "kind": "exact", "priority": 80},
+        {"pattern": "Brand", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Model",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Model",
+        "es": "Modelo",
+        "fr": "Modèle",
+        "de": "Modell",
+        "it": "Modello",
+        "pt": "Modelo",
+        "ru": "Модель",
+        "zh": "型号",
+        "ja": "モデル"
+      },
+      "synonyms": [
+        {"pattern": "Model", "kind": "exact", "priority": 10},
+        {"pattern": "Modelo", "kind": "exact", "priority": 20},
+        {"pattern": "Modèle", "kind": "exact", "priority": 30},
+        {"pattern": "Modell", "kind": "exact", "priority": 40},
+        {"pattern": "Modello", "kind": "exact", "priority": 50},
+        {"pattern": "Модель", "kind": "exact", "priority": 60},
+        {"pattern": "型号", "kind": "exact", "priority": 70},
+        {"pattern": "モデル", "kind": "exact", "priority": 80},
+        {"pattern": "ModelNumber", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_SerialNumber",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Serial number",
+        "es": "Número de serie",
+        "fr": "Numéro de série",
+        "de": "Seriennummer",
+        "it": "Numero di serie",
+        "pt": "Número de série",
+        "ru": "Серийный номер",
+        "zh": "序列号",
+        "ja": "シリアル番号"
+      },
+      "synonyms": [
+        {"pattern": "SerialNumber", "kind": "exact", "priority": 10},
+        {"pattern": "Serial", "kind": "exact", "priority": 20},
+        {"pattern": "NúmeroDeSerie", "kind": "exact", "priority": 30},
+        {"pattern": "NumeroDeSerie", "kind": "exact", "priority": 40},
+        {"pattern": "Seriennummer", "kind": "exact", "priority": 50},
+        {"pattern": "NumeroDiSerie", "kind": "exact", "priority": 60},
+        {"pattern": "СерийныйНомер", "kind": "exact", "priority": 70},
+        {"pattern": "序列号", "kind": "exact", "priority": 80},
+        {"pattern": "シリアル番号", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Material",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Material",
+        "es": "Material",
+        "fr": "Matériau",
+        "de": "Material",
+        "it": "Materiale",
+        "pt": "Material",
+        "ru": "Материал",
+        "zh": "材料",
+        "ja": "材料"
+      },
+      "synonyms": [
+        {"pattern": "Material", "kind": "exact", "priority": 10},
+        {"pattern": "MATERIAL", "kind": "exact", "priority": 20, "case_sensitive": true},
+        {"pattern": "Materiau", "kind": "exact", "priority": 30},
+        {"pattern": "Matériau", "kind": "exact", "priority": 40},
+        {"pattern": "Materiale", "kind": "exact", "priority": 50},
+        {"pattern": "Werkstoff", "kind": "exact", "priority": 60},
+        {"pattern": "Материал", "kind": "exact", "priority": 70},
+        {"pattern": "材料", "kind": "exact", "priority": 80},
+        {"pattern": "材質", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_StructuralMaterial",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Structural material",
+        "es": "Material estructural",
+        "fr": "Matériau structurel",
+        "de": "Tragwerkstoff",
+        "it": "Materiale strutturale",
+        "pt": "Material estrutural",
+        "ru": "Несущий материал",
+        "zh": "结构材料",
+        "ja": "構造材料"
+      },
+      "synonyms": [
+        {"pattern": "StructuralMaterial", "kind": "exact", "priority": 10},
+        {"pattern": "MaterialEstructural", "kind": "exact", "priority": 20},
+        {"pattern": "MateriauStructurel", "kind": "exact", "priority": 30},
+        {"pattern": "Tragwerkstoff", "kind": "exact", "priority": 40},
+        {"pattern": "MaterialeStrutturale", "kind": "exact", "priority": 50},
+        {"pattern": "MaterialEstrutural", "kind": "exact", "priority": 60},
+        {"pattern": "НесущийМатериал", "kind": "exact", "priority": 70},
+        {"pattern": "结构材料", "kind": "exact", "priority": 80},
+        {"pattern": "構造材料", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Finish",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Finish",
+        "es": "Acabado",
+        "fr": "Finition",
+        "de": "Oberfläche",
+        "it": "Finitura",
+        "pt": "Acabamento",
+        "ru": "Отделка",
+        "zh": "饰面",
+        "ja": "仕上げ"
+      },
+      "synonyms": [
+        {"pattern": "Finish", "kind": "exact", "priority": 10},
+        {"pattern": "Acabado", "kind": "exact", "priority": 20},
+        {"pattern": "Finition", "kind": "exact", "priority": 30},
+        {"pattern": "Oberfläche", "kind": "exact", "priority": 40},
+        {"pattern": "Finitura", "kind": "exact", "priority": 50},
+        {"pattern": "Acabamento", "kind": "exact", "priority": 60},
+        {"pattern": "Отделка", "kind": "exact", "priority": 70},
+        {"pattern": "饰面", "kind": "exact", "priority": 80},
+        {"pattern": "仕上げ", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Color",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Color",
+        "es": "Color",
+        "fr": "Couleur",
+        "de": "Farbe",
+        "it": "Colore",
+        "pt": "Cor",
+        "ru": "Цвет",
+        "zh": "颜色",
+        "ja": "色"
+      },
+      "synonyms": [
+        {"pattern": "Color", "kind": "exact", "priority": 10},
+        {"pattern": "Colour", "kind": "exact", "priority": 20},
+        {"pattern": "Couleur", "kind": "exact", "priority": 30},
+        {"pattern": "Farbe", "kind": "exact", "priority": 40},
+        {"pattern": "Colore", "kind": "exact", "priority": 50},
+        {"pattern": "Cor", "kind": "exact", "priority": 60},
+        {"pattern": "Цвет", "kind": "exact", "priority": 70},
+        {"pattern": "颜色", "kind": "exact", "priority": 80},
+        {"pattern": "色", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_FireRating",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Fire rating",
+        "es": "Clasificación al fuego",
+        "fr": "Classement au feu",
+        "de": "Feuerwiderstand",
+        "it": "Classificazione al fuoco",
+        "pt": "Classificação ao fogo",
+        "ru": "Огнестойкость",
+        "zh": "耐火等级",
+        "ja": "耐火等級"
+      },
+      "synonyms": [
+        {"pattern": "FireRating", "kind": "exact", "priority": 10},
+        {"pattern": "Feuerwiderstand", "kind": "exact", "priority": 20},
+        {"pattern": "FireResistance", "kind": "exact", "priority": 30},
+        {"pattern": "Feuerwiderstandsklasse", "kind": "exact", "priority": 40},
+        {"pattern": "ClassificationAuFeu", "kind": "exact", "priority": 50},
+        {"pattern": "ClassificazioneAlFuoco", "kind": "exact", "priority": 60},
+        {"pattern": "Огнестойкость", "kind": "exact", "priority": 70},
+        {"pattern": "耐火等级", "kind": "exact", "priority": 80},
+        {"pattern": "耐火等級", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_LoadBearing",
+      "value_type_hint": "boolean",
+      "default_unit": null,
+      "description": {
+        "en": "Load bearing",
+        "es": "Portante",
+        "fr": "Porteur",
+        "de": "Tragend",
+        "it": "Portante",
+        "pt": "Portante",
+        "ru": "Несущий",
+        "zh": "承重",
+        "ja": "耐力"
+      },
+      "synonyms": [
+        {"pattern": "LoadBearing", "kind": "exact", "priority": 10},
+        {"pattern": "IsLoadBearing", "kind": "exact", "priority": 20},
+        {"pattern": "Tragend", "kind": "exact", "priority": 30},
+        {"pattern": "Porteur", "kind": "exact", "priority": 40},
+        {"pattern": "Portante", "kind": "exact", "priority": 50},
+        {"pattern": "Несущий", "kind": "exact", "priority": 60},
+        {"pattern": "承重", "kind": "exact", "priority": 70},
+        {"pattern": "耐力", "kind": "exact", "priority": 80},
+        {"pattern": "Structural", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_IsExternal",
+      "value_type_hint": "boolean",
+      "default_unit": null,
+      "description": {
+        "en": "Is external",
+        "es": "Es exterior",
+        "fr": "Est extérieur",
+        "de": "Außen",
+        "it": "È esterno",
+        "pt": "É externo",
+        "ru": "Внешний",
+        "zh": "外部",
+        "ja": "外部"
+      },
+      "synonyms": [
+        {"pattern": "IsExternal", "kind": "exact", "priority": 10},
+        {"pattern": "External", "kind": "exact", "priority": 20},
+        {"pattern": "Außenwand", "kind": "exact", "priority": 30},
+        {"pattern": "Exterior", "kind": "exact", "priority": 40},
+        {"pattern": "Esterno", "kind": "exact", "priority": 50},
+        {"pattern": "Externo", "kind": "exact", "priority": 60},
+        {"pattern": "Внешний", "kind": "exact", "priority": 70},
+        {"pattern": "外部", "kind": "exact", "priority": 80},
+        {"pattern": "外", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_AcousticRating",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Acoustic rating",
+        "es": "Clasificación acústica",
+        "fr": "Classement acoustique",
+        "de": "Schallschutz",
+        "it": "Classificazione acustica",
+        "pt": "Classificação acústica",
+        "ru": "Звукоизоляция",
+        "zh": "隔音等级",
+        "ja": "遮音等級"
+      },
+      "synonyms": [
+        {"pattern": "AcousticRating", "kind": "exact", "priority": 10},
+        {"pattern": "Schallschutz", "kind": "exact", "priority": 20},
+        {"pattern": "ClassementAcoustique", "kind": "exact", "priority": 30},
+        {"pattern": "ClasificacionAcustica", "kind": "exact", "priority": 40},
+        {"pattern": "ClassificazioneAcustica", "kind": "exact", "priority": 50},
+        {"pattern": "ClassificacaoAcustica", "kind": "exact", "priority": 60},
+        {"pattern": "Звукоизоляция", "kind": "exact", "priority": 70},
+        {"pattern": "隔音等级", "kind": "exact", "priority": 80},
+        {"pattern": "遮音等級", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_ThermalResistance",
+      "value_type_hint": "number",
+      "default_unit": "m2K/W",
+      "description": {
+        "en": "Thermal resistance",
+        "es": "Resistencia térmica",
+        "fr": "Résistance thermique",
+        "de": "Wärmewiderstand",
+        "it": "Resistenza termica",
+        "pt": "Resistência térmica",
+        "ru": "Тепловое сопротивление",
+        "zh": "热阻",
+        "ja": "熱抵抗"
+      },
+      "synonyms": [
+        {"pattern": "ThermalResistance", "kind": "exact", "priority": 10},
+        {"pattern": "Wärmewiderstand", "kind": "exact", "priority": 20},
+        {"pattern": "ResistenciaTermicaES", "kind": "exact", "priority": 30},
+        {"pattern": "ResistanceThermique", "kind": "exact", "priority": 40},
+        {"pattern": "ResistenzaTermica", "kind": "exact", "priority": 50},
+        {"pattern": "ResistenciaTermicaPT", "kind": "exact", "priority": 60},
+        {"pattern": "ТепловоеСопротивление", "kind": "exact", "priority": 70},
+        {"pattern": "热阻", "kind": "exact", "priority": 80},
+        {"pattern": "熱抵抗", "kind": "exact", "priority": 90},
+        {"pattern": "RValue", "kind": "exact", "priority": 100}
+      ]
+    },
+    {
+      "name": "_UValue",
+      "value_type_hint": "number",
+      "default_unit": "W/m2K",
+      "description": {
+        "en": "U-value (heat transfer coefficient)",
+        "es": "Valor U",
+        "fr": "Coefficient U",
+        "de": "U-Wert",
+        "it": "Valore U",
+        "pt": "Valor U",
+        "ru": "Коэффициент теплопередачи",
+        "zh": "U值",
+        "ja": "U値"
+      },
+      "synonyms": [
+        {"pattern": "UValue", "kind": "exact", "priority": 10},
+        {"pattern": "U-Value", "kind": "exact", "priority": 20},
+        {"pattern": "U-Wert", "kind": "exact", "priority": 30},
+        {"pattern": "ValorU", "kind": "exact", "priority": 40},
+        {"pattern": "CoefficientU", "kind": "exact", "priority": 50},
+        {"pattern": "ValoreU", "kind": "exact", "priority": 60},
+        {"pattern": "КоэффициентТеплопередачи", "kind": "exact", "priority": 70},
+        {"pattern": "U值", "kind": "exact", "priority": 80},
+        {"pattern": "U値", "kind": "exact", "priority": 90},
+        {"pattern": "ThermalTransmittance", "kind": "exact", "priority": 100}
+      ]
+    },
+    {
+      "name": "_Level",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Level",
+        "es": "Nivel",
+        "fr": "Niveau",
+        "de": "Ebene",
+        "it": "Livello",
+        "pt": "Nível",
+        "ru": "Уровень",
+        "zh": "标高",
+        "ja": "レベル"
+      },
+      "synonyms": [
+        {"pattern": "Level", "kind": "exact", "priority": 10},
+        {"pattern": "Nivel", "kind": "exact", "priority": 20},
+        {"pattern": "Niveau", "kind": "exact", "priority": 30},
+        {"pattern": "Ebene", "kind": "exact", "priority": 40},
+        {"pattern": "Livello", "kind": "exact", "priority": 50},
+        {"pattern": "Nível", "kind": "exact", "priority": 60},
+        {"pattern": "Уровень", "kind": "exact", "priority": 70},
+        {"pattern": "标高", "kind": "exact", "priority": 80},
+        {"pattern": "レベル", "kind": "exact", "priority": 90},
+        {"pattern": "BaseLevel", "kind": "exact", "priority": 100}
+      ]
+    },
+    {
+      "name": "_Storey",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Storey",
+        "es": "Planta",
+        "fr": "Étage",
+        "de": "Geschoss",
+        "it": "Piano",
+        "pt": "Andar",
+        "ru": "Этаж",
+        "zh": "楼层",
+        "ja": "階"
+      },
+      "synonyms": [
+        {"pattern": "Storey", "kind": "exact", "priority": 10},
+        {"pattern": "Story", "kind": "exact", "priority": 20},
+        {"pattern": "Floor", "kind": "exact", "priority": 30},
+        {"pattern": "Planta", "kind": "exact", "priority": 40},
+        {"pattern": "Étage", "kind": "exact", "priority": 50},
+        {"pattern": "Geschoss", "kind": "exact", "priority": 60},
+        {"pattern": "Piano", "kind": "exact", "priority": 70},
+        {"pattern": "Этаж", "kind": "exact", "priority": 80},
+        {"pattern": "楼层", "kind": "exact", "priority": 90},
+        {"pattern": "階", "kind": "exact", "priority": 100}
+      ]
+    },
+    {
+      "name": "_Zone",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Zone",
+        "es": "Zona",
+        "fr": "Zone",
+        "de": "Zone",
+        "it": "Zona",
+        "pt": "Zona",
+        "ru": "Зона",
+        "zh": "区域",
+        "ja": "ゾーン"
+      },
+      "synonyms": [
+        {"pattern": "Zone", "kind": "exact", "priority": 10},
+        {"pattern": "Zona", "kind": "exact", "priority": 20},
+        {"pattern": "Зона", "kind": "exact", "priority": 30},
+        {"pattern": "区域", "kind": "exact", "priority": 40},
+        {"pattern": "ゾーン", "kind": "exact", "priority": 50},
+        {"pattern": "Bereich", "kind": "exact", "priority": 60},
+        {"pattern": "Sector", "kind": "exact", "priority": 70},
+        {"pattern": "Section", "kind": "exact", "priority": 80},
+        {"pattern": "Area", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Discipline",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Discipline",
+        "es": "Disciplina",
+        "fr": "Discipline",
+        "de": "Fachgebiet",
+        "it": "Disciplina",
+        "pt": "Disciplina",
+        "ru": "Дисциплина",
+        "zh": "专业",
+        "ja": "分野"
+      },
+      "synonyms": [
+        {"pattern": "Discipline", "kind": "exact", "priority": 10},
+        {"pattern": "Disciplina", "kind": "exact", "priority": 20},
+        {"pattern": "Fachgebiet", "kind": "exact", "priority": 30},
+        {"pattern": "Дисциплина", "kind": "exact", "priority": 40},
+        {"pattern": "专业", "kind": "exact", "priority": 50},
+        {"pattern": "分野", "kind": "exact", "priority": 60},
+        {"pattern": "Trade", "kind": "exact", "priority": 70},
+        {"pattern": "Department", "kind": "exact", "priority": 80},
+        {"pattern": "Gewerk", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Uniformat",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Uniformat classification code",
+        "es": "Código Uniformat",
+        "fr": "Code Uniformat",
+        "de": "Uniformat-Code",
+        "it": "Codice Uniformat",
+        "pt": "Código Uniformat",
+        "ru": "Код Uniformat",
+        "zh": "Uniformat分类",
+        "ja": "Uniformat分類"
+      },
+      "synonyms": [
+        {"pattern": "Uniformat", "kind": "exact", "priority": 10},
+        {"pattern": "UniformatCode", "kind": "exact", "priority": 20},
+        {"pattern": "UniformatII", "kind": "exact", "priority": 30},
+        {"pattern": "Codigo_Uniformat", "kind": "exact", "priority": 40},
+        {"pattern": "Code_Uniformat", "kind": "exact", "priority": 50},
+        {"pattern": "Uniformat_Code", "kind": "exact", "priority": 60},
+        {"pattern": "uniformat", "kind": "exact", "priority": 70},
+        {"pattern": "UniformatClass", "kind": "exact", "priority": 80},
+        {"pattern": "UF_Code", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_MasterFormat",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "MasterFormat division code",
+        "es": "Código MasterFormat",
+        "fr": "Code MasterFormat",
+        "de": "MasterFormat-Code",
+        "it": "Codice MasterFormat",
+        "pt": "Código MasterFormat",
+        "ru": "Код MasterFormat",
+        "zh": "MasterFormat分类",
+        "ja": "MasterFormat分類"
+      },
+      "synonyms": [
+        {"pattern": "MasterFormat", "kind": "exact", "priority": 10},
+        {"pattern": "MasterFormatCode", "kind": "exact", "priority": 20},
+        {"pattern": "MF_Code", "kind": "exact", "priority": 30},
+        {"pattern": "Codigo_MasterFormat", "kind": "exact", "priority": 40},
+        {"pattern": "Code_MasterFormat", "kind": "exact", "priority": 50},
+        {"pattern": "Codice_MasterFormat", "kind": "exact", "priority": 60},
+        {"pattern": "MasterFormat_Code", "kind": "exact", "priority": 70},
+        {"pattern": "Division", "kind": "exact", "priority": 80},
+        {"pattern": "CSI_Code", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_OmniClass",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "OmniClass classification",
+        "es": "Clasificación OmniClass",
+        "fr": "Classification OmniClass",
+        "de": "OmniClass-Klassifikation",
+        "it": "Classificazione OmniClass",
+        "pt": "Classificação OmniClass",
+        "ru": "Классификация OmniClass",
+        "zh": "OmniClass分类",
+        "ja": "OmniClass分類"
+      },
+      "synonyms": [
+        {"pattern": "OmniClass", "kind": "exact", "priority": 10},
+        {"pattern": "OmniClassCode", "kind": "exact", "priority": 20},
+        {"pattern": "OmniClass_Number", "kind": "exact", "priority": 30},
+        {"pattern": "Codigo_OmniClass", "kind": "exact", "priority": 40},
+        {"pattern": "Code_OmniClass", "kind": "exact", "priority": 50},
+        {"pattern": "Codice_OmniClass", "kind": "exact", "priority": 60},
+        {"pattern": "OmniClass_Title", "kind": "exact", "priority": 70},
+        {"pattern": "OC_Code", "kind": "exact", "priority": 80},
+        {"pattern": "OmniClassNumber", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_Uniclass",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "Uniclass classification",
+        "es": "Clasificación Uniclass",
+        "fr": "Classification Uniclass",
+        "de": "Uniclass-Klassifikation",
+        "it": "Classificazione Uniclass",
+        "pt": "Classificação Uniclass",
+        "ru": "Классификация Uniclass",
+        "zh": "Uniclass分类",
+        "ja": "Uniclass分類"
+      },
+      "synonyms": [
+        {"pattern": "Uniclass", "kind": "exact", "priority": 10},
+        {"pattern": "UniclassCode", "kind": "exact", "priority": 20},
+        {"pattern": "Uniclass2", "kind": "exact", "priority": 30},
+        {"pattern": "Uniclass_Code", "kind": "exact", "priority": 40},
+        {"pattern": "Code_Uniclass", "kind": "exact", "priority": 50},
+        {"pattern": "Codice_Uniclass", "kind": "exact", "priority": 60},
+        {"pattern": "UniclassPr", "kind": "exact", "priority": 70},
+        {"pattern": "UniclassEf", "kind": "exact", "priority": 80},
+        {"pattern": "UC_Code", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_NRM",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "NRM (UK) element code",
+        "es": "Código NRM",
+        "fr": "Code NRM",
+        "de": "NRM-Code",
+        "it": "Codice NRM",
+        "pt": "Código NRM",
+        "ru": "Код NRM",
+        "zh": "NRM分类",
+        "ja": "NRM分類"
+      },
+      "synonyms": [
+        {"pattern": "NRM", "kind": "exact", "priority": 10},
+        {"pattern": "NRM1", "kind": "exact", "priority": 20},
+        {"pattern": "NRM2", "kind": "exact", "priority": 30},
+        {"pattern": "NRM_Code", "kind": "exact", "priority": 40},
+        {"pattern": "Code_NRM", "kind": "exact", "priority": 50},
+        {"pattern": "Codigo_NRM", "kind": "exact", "priority": 60},
+        {"pattern": "Codice_NRM", "kind": "exact", "priority": 70},
+        {"pattern": "NRMElement", "kind": "exact", "priority": 80},
+        {"pattern": "NRM_Element", "kind": "exact", "priority": 90}
+      ]
+    },
+    {
+      "name": "_DIN276",
+      "value_type_hint": "string",
+      "default_unit": null,
+      "description": {
+        "en": "DIN 276 cost group",
+        "es": "Grupo de costos DIN 276",
+        "fr": "Groupe de coûts DIN 276",
+        "de": "DIN 276 Kostengruppe",
+        "it": "Gruppo di costo DIN 276",
+        "pt": "Grupo de custos DIN 276",
+        "ru": "Код DIN 276",
+        "zh": "DIN276分类",
+        "ja": "DIN276分類"
+      },
+      "synonyms": [
+        {"pattern": "DIN276", "kind": "exact", "priority": 10},
+        {"pattern": "DIN_276", "kind": "exact", "priority": 20},
+        {"pattern": "Kostengruppe", "kind": "exact", "priority": 30},
+        {"pattern": "KG", "kind": "exact", "priority": 40},
+        {"pattern": "DIN276_Code", "kind": "exact", "priority": 50},
+        {"pattern": "Code_DIN276", "kind": "exact", "priority": 60},
+        {"pattern": "Codigo_DIN276", "kind": "exact", "priority": 70},
+        {"pattern": "Codice_DIN276", "kind": "exact", "priority": 80},
+        {"pattern": "DIN276Element", "kind": "exact", "priority": 90}
+      ]
+    }
+  ]
+}

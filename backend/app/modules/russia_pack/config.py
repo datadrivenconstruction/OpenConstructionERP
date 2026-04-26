@@ -125,52 +125,6 @@ PACK_CONFIG: dict[str, Any] = {
             "note": "Export and certain international services",
         },
     ],
-    # ── Payment and acceptance forms ─────────────────────────────────────────
-    "payment_templates": [
-        {
-            "code": "KS_2",
-            "name": "Акт о приёмке выполненных работ (форма КС-2)",
-            "name_en": "Act of Acceptance of Completed Works (KS-2)",
-            "description": (
-                "Itemised acceptance act listing completed work items, "
-                "quantities, and amounts for a reporting period"
-            ),
-            "fields": [
-                "act_number",
-                "reporting_period",
-                "contract_number",
-                "contractor_name",
-                "object_name",
-                "work_items",
-                "total_amount",
-                "signatures",
-            ],
-        },
-        {
-            "code": "KS_3",
-            "name": "Справка о стоимости выполненных работ (форма КС-3)",
-            "name_en": "Certificate of Cost of Completed Works (KS-3)",
-            "description": (
-                "Summary certificate of total cost for the period, "
-                "cumulative total, and payment schedule"
-            ),
-            "fields": [
-                "certificate_number",
-                "reporting_period",
-                "contract_sum",
-                "completed_from_start",
-                "completed_this_period",
-                "nds_amount",
-                "total_with_nds",
-            ],
-        },
-        {
-            "code": "KS_6A",
-            "name": "Журнал учёта выполненных работ (форма КС-6а)",
-            "name_en": "Work Execution Journal (KS-6a)",
-            "description": "Cumulative log of all work performed on the object",
-        },
-    ],
     # ── Regional indices source ──────────────────────────────────────────────
     "index_sources": [
         {

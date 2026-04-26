@@ -205,7 +205,7 @@ export function AssetsPage() {
             })}
             action={
               <Button variant="secondary" onClick={() => navigate('/bim')}>
-                {t('assets.cta.open_bim', { defaultValue: 'Open BIM Viewer' })}
+                {t('assets.cta.open_bim', { defaultValue: 'Open CAD-BIM Viewer' })}
               </Button>
             }
           />

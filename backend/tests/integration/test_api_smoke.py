@@ -34,22 +34,60 @@ async def client():
 
 @pytest_asyncio.fixture
 async def auth_headers(client):
-    """Get auth headers — registers + logs in a test user."""
-    # Register
-    await client.post(
+    """Get auth headers — registers + promotes to admin + logs in a test user.
+
+    The fixture has to survive two run-orders:
+
+    1. Single-test invocation (clean DB) — the registrant IS the bootstrap
+       admin and would already have full permissions.
+    2. Multi-test invocation in the same pytest session — the shared
+       session-scoped SQLite already contains a prior admin (the user
+       registered by ``test_register_and_login``), so a fresh
+       ``/auth/register`` call demotes us to ``viewer`` per BUG-327/386.
+       The smoke tests subsequently expect 201/200 on protected mutations
+       (projects.create, boq.create, schedule.create), so we promote
+       directly via the ORM before logging in. This mirrors what the
+       other module-scoped suites already do.
+    """
+    import uuid
+
+    from sqlalchemy import update as sa_update
+
+    from app.database import async_session_factory
+    from app.modules.users.models import User
+
+    # Random email per test to dodge the 409 "already registered" path.
+    # Re-using ``test@smoke.io`` produced flaky 401s when the prior
+    # registration had returned an inactive ``viewer`` row that login
+    # then rejected.
+    unique = uuid.uuid4().hex[:8]
+    email = f"smoke-{unique}@smoke.io"
+    password = f"SmokeTest{unique}9!"
+
+    reg = await client.post(
         "/api/v1/users/auth/register",
         json={
-            "email": "test@smoke.io",
-            "password": "testtest123",
+            "email": email,
+            "password": password,
             "full_name": "Smoke Tester",
         },
     )
-    # Login
+    assert reg.status_code == 201, f"Registration failed: {reg.text}"
+
+    async with async_session_factory() as session:
+        await session.execute(
+            sa_update(User)
+            .where(User.email == email.lower())
+            .values(role="admin", is_active=True)
+        )
+        await session.commit()
+
     resp = await client.post(
         "/api/v1/users/auth/login",
-        json={"email": "test@smoke.io", "password": "testtest123"},
+        json={"email": email, "password": password},
     )
     token = resp.json().get("access_token", "")
+    assert token, f"Login failed: {resp.text}"
     return {"Authorization": f"Bearer {token}"}
 
 

@@ -10,7 +10,7 @@ import { projectsApi, type CreateProjectData, type Project } from './api';
 
 // ── Regions (grouped by continent) ────────────────────────────────────────
 
-interface OptionGroup {
+export interface OptionGroup {
   group: string;
   options: { value: string; label: string }[];
 }
@@ -102,7 +102,7 @@ const STANDARD_GROUPS: OptionGroup[] = [
 
 // ── Currencies (all major construction market currencies) ─────────────────
 
-const CURRENCY_GROUPS: OptionGroup[] = [
+export const CURRENCY_GROUPS: OptionGroup[] = [
   {
     group: 'Europe',
     options: [

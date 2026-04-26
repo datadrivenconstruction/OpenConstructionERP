@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { OnboardingTour, ONBOARDING_STORAGE_KEY, DEFAULT_TOUR_STEPS } from './OnboardingTour';
 import type { TourStep } from './OnboardingTour';
 
@@ -35,7 +36,13 @@ const THREE_STEPS: TourStep[] = [
 function renderTour(
   props: Partial<React.ComponentProps<typeof OnboardingTour>> = {},
 ) {
-  return render(<OnboardingTour {...props} />);
+  // OnboardingTour calls useLocation() (BUG-UI03 route-aware suppression),
+  // so render needs a Router context — MemoryRouter at "/" by default.
+  return render(
+    <MemoryRouter>
+      <OnboardingTour {...props} />
+    </MemoryRouter>,
+  );
 }
 
 /* ── Setup ───────────────────────────────────────────────────────────────── */

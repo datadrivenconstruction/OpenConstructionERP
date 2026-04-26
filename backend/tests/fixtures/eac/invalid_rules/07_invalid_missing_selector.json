@@ -1,0 +1,6 @@
+{
+  "schema_version": "2.0",
+  "name": "Missing selector",
+  "output_mode": "boolean",
+  "_invalid_reason": "required field selector is absent"
+}

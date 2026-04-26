@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Walls without legacy Phase property",
+  "output_mode": "boolean",
+  "tags": ["walls", "deprecated"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "exact", "pset_name": "Pset_Legacy", "name": "Phase"},
+    "constraint": {"operator": "not_exists"}
+  }
+}

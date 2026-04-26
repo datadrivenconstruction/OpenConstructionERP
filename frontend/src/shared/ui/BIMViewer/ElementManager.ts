@@ -132,6 +132,10 @@ export interface BIMElementData {
   validation_results?: BIMValidationSummary[];
   /** Worst-severity rollup: 'error' > 'warning' > 'pass' > 'unchecked'. */
   validation_status?: 'pass' | 'warning' | 'error' | 'unchecked';
+  /** True when this element's geometry is a synthesized placeholder box
+   *  (text-IFC fallback path, DDC cad2data not installed). The viewer
+   *  shows a non-blocking warning banner when ANY element has this set. */
+  is_placeholder?: boolean;
 }
 
 export interface BIMModelData {
@@ -373,118 +377,149 @@ export class ElementManager {
    *   - ``model/vnd.collada+xml`` -> ColladaLoader (legacy fallback)
    *
    * Falls back to ColladaLoader if the Content-Type is ambiguous.
+   *
+   * If `cache` callbacks are provided, the buffer is consulted via
+   * `cache.lookup(url)` before any network IO; on miss, the freshly fetched
+   * buffer is written back via `cache.store(url, buffer, format)` so the
+   * next mount can skip the round-trip entirely (RFC 19 §UX-1).
    */
   async loadGeometry(
     geometryUrl: string,
     onProgress?: (fraction: number) => void,
+    cache?: {
+      lookup: (url: string) =>
+        | { buffer: ArrayBuffer; format: 'glb' | 'dae' }
+        | null;
+      store: (url: string, buffer: ArrayBuffer, format: 'glb' | 'dae') => void;
+    },
   ): Promise<void> {
-    // Auto-detect format via Content-Type header. GLB preferred (smaller +
-    // faster parsing). Node names are patched into the GLB by the backend so
-    // mesh-to-element matching works with both formats. The positional
-    // fallback inside processLoadedScene handles low-match cases, so the
-    // previous GLB→DAE retry path (which double-loaded geometry and doubled
-    // upload wait) is gone.
-    let format: 'glb' | 'dae' | 'unknown' = 'unknown';
+    // 1. Cache hit fast-path — parse the cached buffer in-process, no network.
+    const hit = cache?.lookup(geometryUrl);
+    if (hit) {
+      // Signal completion to the progress UI so the spinner doesn't linger.
+      onProgress?.(1);
+      return this.parseGeometryBuffer(hit.buffer, hit.format);
+    }
+
+    // 2. Cache miss — fetch the bytes ourselves so we can both parse them
+    //    AND keep them around for the next visit. Using fetch rather than
+    //    the loader's internal XHR loses ColladaLoader's per-resource path
+    //    resolution, but for the GLB/DAE artefacts the backend serves the
+    //    geometry is self-contained (binary GLB or single-file DAE).
+    let format: 'glb' | 'dae' = 'glb';
     try {
-      const resp = await fetch(geometryUrl, { method: 'HEAD' });
-      if (resp.ok) {
-        const ct = resp.headers.get('content-type') || '';
-        if (ct.includes('gltf-binary') || ct.includes('gltf+json')) {
-          format = 'glb';
-        } else if (ct.includes('collada') || ct.includes('xml') || ct.includes('dae')) {
+      const headResp = await fetch(geometryUrl, { method: 'HEAD' });
+      if (headResp.ok) {
+        const ct = headResp.headers.get('content-type') || '';
+        if (ct.includes('collada') || ct.includes('xml') || ct.includes('dae')) {
           format = 'dae';
         }
       }
     } catch {
-      // HEAD failed — default to GLB loader (it falls back to DAE on error)
+      // HEAD failed — keep the GLB default. parseGeometryBuffer falls back
+      // to DAE if GLB parsing fails.
     }
 
-    if (format === 'dae') {
-      return this.loadDAEGeometry(geometryUrl, onProgress);
+    const resp = await fetch(geometryUrl);
+    if (!resp.ok) {
+      throw new Error(`Failed to fetch geometry: ${resp.status}`);
     }
-    await this.loadGLBGeometry(geometryUrl, onProgress);
+    const total = Number(resp.headers.get('content-length')) || 0;
+    const reader = resp.body?.getReader();
+    if (!reader) {
+      // Browsers without ReadableStream support — fall back to a single-shot
+      // arrayBuffer() call. We still report final progress so the bar fills.
+      const buffer = await resp.arrayBuffer();
+      onProgress?.(0.95);
+      await this.parseGeometryBuffer(buffer, format);
+      cache?.store(geometryUrl, buffer, format);
+      return;
+    }
+    const chunks: Uint8Array[] = [];
+    let received = 0;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (value) {
+        chunks.push(value);
+        received += value.byteLength;
+        if (onProgress && total > 0) {
+          onProgress(Math.min(0.95, received / total));
+        }
+      }
+    }
+    // Concatenate chunks into a single ArrayBuffer.
+    const buffer = new ArrayBuffer(received);
+    const view = new Uint8Array(buffer);
+    let offset = 0;
+    for (const c of chunks) {
+      view.set(c, offset);
+      offset += c.byteLength;
+    }
+    await this.parseGeometryBuffer(buffer, format);
+    cache?.store(geometryUrl, buffer, format);
   }
 
   /**
-   * Load GLB/glTF geometry and bind meshes to BIM elements.
-   *
-   * GLTFLoader output (``gltf.scene``) is a THREE.Group just like
-   * ColladaLoader's -- the downstream mesh processing (traverse,
-   * match, batch) is identical.
+   * Parse an in-memory geometry buffer and bind it to elements.
+   * Used by both the cache-hit fast-path and the post-fetch slow-path.
    */
-  private loadGLBGeometry(
-    geometryUrl: string,
-    onProgress?: (fraction: number) => void,
+  private async parseGeometryBuffer(
+    buffer: ArrayBuffer,
+    format: 'glb' | 'dae',
   ): Promise<void> {
+    if (format === 'glb') {
+      try {
+        await this.parseGLBBuffer(buffer);
+        return;
+      } catch (err) {
+        if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
+          console.warn('[BIM] GLB parse failed, falling back to DAE:', err);
+        }
+        // Fallthrough to DAE parsing.
+      }
+    }
+    await this.parseDAEBuffer(buffer);
+  }
+
+  /** Parse a GLB ArrayBuffer using GLTFLoader.parse() (no network). */
+  private parseGLBBuffer(buffer: ArrayBuffer): Promise<void> {
     return new Promise((resolve, reject) => {
       const loader = new GLTFLoader();
-      loader.load(
-        geometryUrl,
+      // GLTFLoader.parse signature: (data, path, onLoad, onError)
+      loader.parse(
+        buffer,
+        '',
         (gltf) => {
           if (!gltf || !gltf.scene) {
             reject(new Error('GLTFLoader returned empty result'));
             return;
           }
-          this.processLoadedScene(gltf.scene, onProgress, true);
+          this.processLoadedScene(gltf.scene, undefined, true);
           resolve();
         },
-        (xhr: ProgressEvent) => {
-          if (!onProgress) return;
-          if (xhr.lengthComputable && xhr.total > 0) {
-            const fraction = Math.min(0.95, xhr.loaded / xhr.total);
-            onProgress(fraction);
-          } else {
-            onProgress(0.5);
-          }
-        },
-        (error) => {
-          if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) console.warn('GLB load failed, falling back to DAE:', error);
-          // Fallback: try the DAE loader in case the file is actually COLLADA
-          this.loadDAEGeometry(geometryUrl, onProgress).then(resolve, reject);
-        },
+        (error) => reject(error instanceof Error ? error : new Error(String(error))),
       );
     });
   }
 
-  /**
-   * Load the DAE/COLLADA geometry blob and bind every mesh to its
-   * BIM element by stable_id / mesh_ref / element name.
-   *
-   * Kept as a public method for backward compatibility with models
-   * uploaded before the GLB optimization was added.
-   */
-  loadDAEGeometry(
-    geometryUrl: string,
-    onProgress?: (fraction: number) => void,
-  ): Promise<void> {
+  /** Parse a DAE/COLLADA ArrayBuffer using ColladaLoader.parse() (no network). */
+  private parseDAEBuffer(buffer: ArrayBuffer): Promise<void> {
     return new Promise((resolve, reject) => {
-      const loader = new ColladaLoader();
-      loader.load(
-        geometryUrl,
-        (collada) => {
-          if (!collada || !collada.scene) {
-            reject(new Error('ColladaLoader returned empty result'));
-            return;
-          }
-          this.processLoadedScene(collada.scene, onProgress);
-          resolve();
-        },
-        (event: ProgressEvent) => {
-          if (!onProgress) return;
-          if (event.lengthComputable && event.total > 0) {
-            const fraction = Math.min(0.95, event.loaded / event.total);
-            onProgress(fraction);
-          } else {
-            onProgress(0.5);
-          }
-        },
-        (error) => {
-          if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
-            console.warn('Failed to load DAE geometry:', error);
-          }
-          reject(error);
-        },
-      );
+      try {
+        const loader = new ColladaLoader();
+        const text = new TextDecoder('utf-8').decode(new Uint8Array(buffer));
+        const collada = loader.parse(text, '');
+        if (!collada || !collada.scene) {
+          reject(new Error('ColladaLoader returned empty result'));
+          return;
+        }
+        this.processLoadedScene(collada.scene);
+        resolve();
+      } catch (err) {
+        reject(err instanceof Error ? err : new Error(String(err)));
+      }
     });
   }
 
@@ -536,11 +571,34 @@ export class ElementManager {
     this.daeGroup = new THREE.Group();
     this.daeGroup.name = 'bim_dae_geometry';
 
-    // DDC converters (RVT/IFC/DWG/DGN) ALWAYS output Z_UP geometry.
-    // trimesh does NOT convert Z_UP→Y_UP when generating GLB.
-    // Always apply -90° X rotation to bring the model upright in
-    // Three.js Y_UP coordinate system.
-    scene.rotation.x = -Math.PI / 2;
+    // Up-axis handling — must branch by loader, otherwise the model ends up
+    // upside-down + laterally mirrored (regression of fix 1f0530f / 1f80522).
+    //
+    //  - GLB path: trimesh does NOT convert Z_UP→Y_UP when exporting GLB
+    //    from our Z_UP DAE source. GLTFLoader does no auto-rotation either,
+    //    so we apply -90° X here.
+    //  - DAE path: ColladaLoader inspects <up_axis> in the COLLADA <asset>
+    //    block and pre-rotates Z_UP scenes to Y_UP itself.  Applying our
+    //    own rotation on top of that flips the model back over.  Skip it.
+    //
+    // Y_UP DAE corner case: a DAE that already declares Y_UP arrives
+    // un-rotated by ColladaLoader. We detect that via a bbox heuristic
+    // (Y extent > Z extent) and also skip rotation in that case — the
+    // model is already upright in Three.js coordinates.
+    if (_isGLB) {
+      scene.rotation.x = -Math.PI / 2;
+    } else {
+      const bbox = new THREE.Box3().setFromObject(scene);
+      const sizeY = Math.max(0, bbox.max.y - bbox.min.y);
+      const sizeZ = Math.max(0, bbox.max.z - bbox.min.z);
+      if (Number.isFinite(sizeY) && Number.isFinite(sizeZ) && sizeZ > sizeY) {
+        // Bbox extends more in Z than Y → ColladaLoader did NOT pre-rotate
+        // (some DAE writers omit <up_axis>, leaving the loader's default).
+        // Apply the rotation ourselves.
+        scene.rotation.x = -Math.PI / 2;
+      }
+      // else: ColladaLoader already brought the scene to Y_UP — leave alone.
+    }
     scene.updateMatrixWorld(true);
 
     // Build lookups: by stable_id / mesh_ref / element name.
@@ -1567,6 +1625,25 @@ export class ElementManager {
    * is assigned to each unique key via a simple hash-to-hue mapping.
    * Used to implement "color by storey" and "color by type" modes.
    */
+  /**
+   * Compute the (key → CSS hex) mapping that `colorBy()` would apply for a
+   * given key function, without touching any meshes.  Used by the legend
+   * overlay so swatches stay in lock-step with the live colouring.
+   */
+  static buildColorByPalette(
+    elements: readonly BIMElementData[],
+    keyFn: (el: BIMElementData) => string,
+  ): Array<{ key: string; hex: string }> {
+    const keys = new Set<string>();
+    for (const el of elements) keys.add(keyFn(el));
+    const keyList = Array.from(keys).sort();
+    return keyList.map((key, i) => {
+      const hue = (i * 137.5) % 360;
+      const color = new THREE.Color().setHSL(hue / 360, 0.55, 0.55);
+      return { key, hex: `#${color.getHexString()}` };
+    });
+  }
+
   colorBy(keyFn: (el: BIMElementData) => string): void {
     // Collect unique keys for stable color assignment
     const keys = new Set<string>();

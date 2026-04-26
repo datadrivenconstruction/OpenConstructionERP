@@ -238,8 +238,47 @@ async def _log_activity(
         _log.debug("Activity log write failed (non-critical)", exc_info=True)
 
 
+_CONFIDENCE_LABELS = {"high": 0.9, "medium": 0.6, "med": 0.6, "low": 0.3}
+
+
+def _coerce_confidence(raw: object) -> float | None:
+    """Best-effort coerce a stored confidence value to float (0.0-1.0).
+
+    Some legacy / seed rows persisted ``confidence`` as a label
+    (``'high'``/``'medium'``/``'low'``) rather than the numeric 0–1
+    contract.  The PATCH endpoint must keep responding 200 for those
+    rows or the whole grid stops saving — so we map known labels to
+    representative floats and drop anything else to ``None``.
+    """
+    if raw is None or raw == "":
+        return None
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    text = str(raw).strip().lower()
+    if text in _CONFIDENCE_LABELS:
+        return _CONFIDENCE_LABELS[text]
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
 def _position_to_response(position: object) -> PositionResponse:
     """Build a PositionResponse from a Position ORM object."""
+    # Issue #79: read back the CostItem linkage stored under
+    # ``metadata.cost_item_id``.  Older rows that pre-date the linkage
+    # simply return None.  We tolerate any non-UUID string defensively
+    # — bad data should not break the GET response.
+    raw_meta = getattr(position, "metadata_", None)  # type: ignore[attr-defined]
+    cost_item_id_val: uuid.UUID | None = None
+    if isinstance(raw_meta, dict):
+        raw_cid = raw_meta.get("cost_item_id")
+        if raw_cid:
+            try:
+                cost_item_id_val = uuid.UUID(str(raw_cid))
+            except (ValueError, TypeError):
+                cost_item_id_val = None
+
     return PositionResponse(
         id=position.id,  # type: ignore[attr-defined]
         boq_id=position.boq_id,  # type: ignore[attr-defined]
@@ -252,15 +291,14 @@ def _position_to_response(position: object) -> PositionResponse:
         total=float(position.total),  # type: ignore[attr-defined]
         classification=position.classification,  # type: ignore[attr-defined]
         source=position.source,  # type: ignore[attr-defined]
-        confidence=(
-            float(position.confidence) if position.confidence else None  # type: ignore[attr-defined]
-        ),
+        confidence=_coerce_confidence(position.confidence),  # type: ignore[attr-defined]
         cad_element_ids=position.cad_element_ids,  # type: ignore[attr-defined]
         validation_status=position.validation_status,  # type: ignore[attr-defined]
         metadata=position.metadata_,  # type: ignore[attr-defined]
         sort_order=position.sort_order,  # type: ignore[attr-defined]
         created_at=position.created_at,  # type: ignore[attr-defined]
         updated_at=position.updated_at,  # type: ignore[attr-defined]
+        cost_item_id=cost_item_id_val,
         # BUG-CONCURRENCY01: surface the row's optimistic-concurrency
         # token so clients can echo it on the next PATCH.
         version=int(getattr(position, "version", 0) or 0),  # type: ignore[attr-defined]
@@ -1397,6 +1435,10 @@ async def bulk_add_positions(
             except (ValueError, TypeError):
                 unit_rate = 0.0
 
+            # Issue #79: forward an optional ``cost_item_id`` per row so
+            # bulk imports can carry CostItem linkage too.  Pydantic does
+            # the UUID parsing; the service validates the target.
+            raw_cost_item_id = item.get("cost_item_id")
             pos_data = PositionCreate(
                 boq_id=boq_id,
                 ordinal=ordinal,
@@ -1407,6 +1449,7 @@ async def bulk_add_positions(
                 source=item.get("source", "takeoff"),
                 classification=item.get("classification", {}),
                 metadata=item.get("metadata", {}),
+                cost_item_id=raw_cost_item_id if raw_cost_item_id else None,
             )
             position = await service.add_position(pos_data)
             results.append(_position_to_response(position))

@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0",
+  "name": "Aggregate volume of external walls",
+  "description": "Sum the Volume of every IfcWall whose IsExternal property is true.",
+  "output_mode": "aggregate",
+  "result_unit": "m3",
+  "tags": ["walls", "qto", "envelope"],
+  "selector": {
+    "kind": "and",
+    "children": [
+      {"kind": "category", "values": ["Walls"]},
+      {"kind": "psets_present", "values": ["Pset_WallCommon"]}
+    ]
+  },
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "alias", "alias_id": "alias_is_external"},
+    "constraint": {"operator": "eq", "value": true},
+    "treat_missing_as_fail": true
+  },
+  "formula": "Volume",
+  "metadata": {"source": "fixture", "category": "qto"}
+}

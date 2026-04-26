@@ -85,8 +85,8 @@ describe('evaluateFormula', () => {
     expect(evaluateFormula('42')).toBe(42);
   });
 
-  it('rounds result to 2 decimal places: 10/3 → 3.33', () => {
-    expect(evaluateFormula('10/3')).toBe(3.33);
+  it('rounds result to 4 decimal places: 10/3 → 3.3333 (Issue #90 quantity precision)', () => {
+    expect(evaluateFormula('10/3')).toBe(3.3333);
   });
 
   it('evaluates addition with spaces: 10 + 5 → 15', () => {

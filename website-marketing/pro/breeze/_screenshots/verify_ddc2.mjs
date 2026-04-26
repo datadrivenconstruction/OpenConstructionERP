@@ -1,0 +1,13 @@
+import { chromium } from '../../../../frontend/node_modules/playwright/index.mjs';
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+const page = await ctx.newPage();
+await page.goto('https://openconstructionerp.com/?lang=de&nocache=' + Date.now(), { waitUntil: 'networkidle' });
+await page.evaluate(() => { const cb = document.querySelector('.cookie-banner'); if (cb) cb.style.display = 'none'; document.querySelectorAll('.reveal').forEach(el => { el.style.opacity = '1'; el.style.transform = 'none'; }); });
+const ddc = await page.locator('#ddc').boundingBox();
+await page.evaluate((y) => window.scrollTo(0, y), ddc.y + 580);
+await page.waitForTimeout(2200);
+await page.screenshot({ path: './ddc-section-2.png', fullPage: false });
+console.log('OK');
+await ctx.close();
+await browser.close();

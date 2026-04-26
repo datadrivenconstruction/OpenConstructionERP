@@ -365,6 +365,8 @@ export interface PositionResource {
   unit_rate: number;
   total: number;
   waste_pct?: number; // material waste/loss factor (%), e.g. 3 means +3%
+  /** ISO 4217 currency code (RFC 37 / Issue #93). Absent ⇒ project base currency. */
+  currency?: string;
 }
 
 export interface PositionComment {

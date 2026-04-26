@@ -1039,7 +1039,15 @@ async def _process_cad_in_background(
                 return
 
             if element_count > 0:
+                # Top-level geometry_quality drives the placeholder banner.
+                # Stamp it onto each element's properties so the frontend
+                # viewer can self-detect placeholders without an extra API
+                # round-trip for the model metadata.
+                result_quality = result.get("geometry_quality") or result.get("geometry_type")
                 for elem_data in result["elements"]:
+                    el_props = dict(elem_data.get("properties", {}) or {})
+                    if elem_data.get("is_placeholder") or result_quality == "placeholder":
+                        el_props["is_placeholder"] = True
                     el = BIMElement(
                         model_id=model_uuid,
                         stable_id=elem_data["stable_id"],
@@ -1047,7 +1055,7 @@ async def _process_cad_in_background(
                         name=elem_data.get("name"),
                         storey=elem_data.get("storey"),
                         discipline=elem_data.get("discipline"),
-                        properties=elem_data.get("properties", {}),
+                        properties=el_props,
                         quantities=elem_data.get("quantities", {}),
                         geometry_hash=elem_data.get("geometry_hash"),
                         bounding_box=elem_data.get("bounding_box"),
@@ -1066,6 +1074,12 @@ async def _process_cad_in_background(
                 model.metadata_ = {
                     **(model.metadata_ or {}),
                     "geometry_type": result.get("geometry_type", "unknown"),
+                    # geometry_quality drives the frontend's "placeholder
+                    # geometry" banner — set to "placeholder" when DDC
+                    # cad2data is unavailable and we synthesized boxes.
+                    "geometry_quality": result.get(
+                        "geometry_quality", result.get("geometry_type", "unknown"),
+                    ),
                 }
                 logger.info(
                     "Background CAD processed: %d elements, %d storeys → model %s ready",

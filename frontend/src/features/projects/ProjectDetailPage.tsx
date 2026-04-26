@@ -1369,6 +1369,14 @@ export function ProjectDetailPage() {
                   >
                     <Pencil size={14} />
                   </button>
+                  <button
+                    onClick={() => navigate(`/projects/${project.id}/settings`)}
+                    className="flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-xs text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary transition-colors"
+                    title={t('project.settings.title', { defaultValue: 'Project Settings' })}
+                  >
+                    <ClipboardList size={13} />
+                    {t('project.settings.link', { defaultValue: 'Settings' })}
+                  </button>
                 </div>
                 {project.description && (
                   <p className="mt-2 text-sm text-content-secondary max-w-2xl leading-relaxed">

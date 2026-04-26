@@ -30,8 +30,8 @@ describe('evaluateFormula', () => {
     expect(evaluateFormula('1 / 0')).toBeNull();
   });
 
-  it('should round to 2 decimal places', () => {
-    expect(evaluateFormula('10 / 3')).toBe(3.33);
+  it('should round to 4 decimal places (Issue #90 — quantities need >2dp precision)', () => {
+    expect(evaluateFormula('10 / 3')).toBe(3.3333);
   });
 
   it('should reject expressions with invalid characters', () => {
@@ -108,10 +108,10 @@ describe('getColumnDefs', () => {
     expect(descCol?.minWidth).toBe(260);
   });
 
-  it('should use a number cell editor for quantity', () => {
+  it('should use the formula cell editor for quantity (Issue #90)', () => {
     const defs = getColumnDefs(context);
     const qtyCol = defs.find((d) => d.field === 'quantity');
-    expect(qtyCol?.cellEditor).toBe('agNumberCellEditor');
+    expect(qtyCol?.cellEditor).toBe('formulaCellEditor');
   });
 
   it('should have a cell editor for unit', () => {

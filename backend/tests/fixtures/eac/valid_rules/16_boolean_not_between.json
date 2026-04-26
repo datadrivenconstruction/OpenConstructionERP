@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Reject walls outside 0.1..0.6 m thickness",
+  "output_mode": "boolean",
+  "tags": ["walls", "data-quality"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "alias", "alias_id": "alias_thickness"},
+    "constraint": {"operator": "not_between", "min": 0.1, "max": 0.6, "inclusive": true}
+  }
+}
