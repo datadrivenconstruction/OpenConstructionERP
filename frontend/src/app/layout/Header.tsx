@@ -113,61 +113,6 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           <span className="hidden lg:inline">GitHub</span>
         </a>
 
-        {/* Report Issue — bug report download + contact form + direct POST */}
-        <button
-          onClick={() => {
-            // Variant A: Download JSON file
-            const blob = exportErrorReport();
-            const blobUrl = URL.createObjectURL(blob);
-            const dl = document.createElement('a');
-            dl.href = blobUrl;
-            dl.download = `openconstructionerp-report-${new Date().toISOString().slice(0, 10)}.json`;
-            dl.click();
-            URL.revokeObjectURL(blobUrl);
-
-            // Variant B: Open form with URL params
-            const params = new URLSearchParams({
-              report: 'true',
-              app_version: APP_VERSION,
-              error_count: String(getErrorCount()),
-              platform: navigator.userAgent.includes('Win') ? 'Windows' : navigator.userAgent.includes('Mac') ? 'macOS' : 'Linux',
-            });
-            window.open(`https://openconstructionerp.com/contact.html?${params}`, '_blank');
-
-            // Variant C: Direct POST (best-effort, non-blocking)
-            const reportBlob = exportErrorReport();
-            reportBlob.text().then((text) => {
-              const data = JSON.parse(text);
-              fetch('https://formsubmit.co/ajax/info@datadrivenconstruction.io', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-                body: JSON.stringify({
-                  _subject: 'Bug Report from OpenConstructionERP App',
-                  'App Version': data.app_version || APP_VERSION,
-                  'Error Count': data.total_errors || 0,
-                  Platform: data.platform || '',
-                  Locale: data.locale || '',
-                  'Session Minutes': data.session_duration_minutes || 0,
-                  'Pages Visited': (data.pages_visited || []).join(', '),
-                  Errors: JSON.stringify(data.entries?.slice(0, 10) || [], null, 2),
-                }),
-              }).catch(() => { /* silent — form is primary channel */ });
-            }).catch(() => {});
-          }}
-          className={clsx(
-            'hidden lg:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
-            'text-xs font-medium',
-            'text-content-tertiary border border-border-light',
-            'transition-all duration-fast ease-oe',
-            'hover:bg-surface-secondary hover:text-content-secondary',
-          )}
-          title={t('feedback.report_issue', { defaultValue: 'Report Issue' })}
-          aria-label={t('feedback.report_issue', { defaultValue: 'Report Issue' })}
-        >
-          <Bug size={14} />
-          <span className="hidden lg:inline">{t('feedback.report_issue', { defaultValue: 'Report Issue' })}</span>
-        </button>
-
         {/* Search — opens CommandPalette */}
         <button
           onClick={openCommandPalette}
@@ -215,27 +160,89 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {/* Notification bell */}
         <NotificationBell />
 
-        {/* Email issues — direct mailto so the user can write without
-             leaving to GitHub and without needing an account. */}
-        <a
-          href="mailto:info@datadrivenconstruction.io?subject=OpenConstructionERP%20Issue%20Report"
-          className={clsx(
-            'hidden sm:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
-            'text-xs font-medium',
-            'text-content-tertiary border border-border-light',
-            'transition-all duration-fast ease-oe',
-            'hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-400 hover:border-amber-500/40',
-          )}
-          title={t('header.email_issue', { defaultValue: 'Email an issue to the team' })}
-          aria-label={t('header.email_issue', { defaultValue: 'Email an issue to the team' })}
-        >
-          {/* mail icon */}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <rect width="20" height="16" x="2" y="4" rx="2" />
-            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-          </svg>
-          <span className="hidden lg:inline">{t('header.email_issues', { defaultValue: 'Email Issues' })}</span>
-        </a>
+        {/* Issue tools — hidden by default behind a "More" details popover so
+             dev-style buttons (Report Issue / Email Issues) don't clutter
+             the production header chrome. */}
+        <details className="relative hidden sm:block group">
+          <summary
+            className={clsx(
+              'flex h-8 w-8 items-center justify-center rounded-lg cursor-pointer list-none',
+              'text-content-tertiary transition-colors',
+              'hover:bg-surface-secondary hover:text-content-secondary',
+              'group-open:bg-surface-secondary group-open:text-content-secondary',
+            )}
+            title={t('common.more', { defaultValue: 'More' })}
+            aria-label={t('common.more', { defaultValue: 'More' })}
+          >
+            <span className="text-base leading-none font-bold select-none">⋯</span>
+          </summary>
+          <div
+            role="menu"
+            className="absolute right-0 top-full mt-1.5 w-56 rounded-xl border border-border-light bg-surface-elevated shadow-lg animate-scale-in py-1 z-40"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                // Variant A: Download JSON file
+                const blob = exportErrorReport();
+                const blobUrl = URL.createObjectURL(blob);
+                const dl = document.createElement('a');
+                dl.href = blobUrl;
+                dl.download = `openconstructionerp-report-${new Date().toISOString().slice(0, 10)}.json`;
+                dl.click();
+                URL.revokeObjectURL(blobUrl);
+
+                // Variant B: Open form with URL params
+                const params = new URLSearchParams({
+                  report: 'true',
+                  app_version: APP_VERSION,
+                  error_count: String(getErrorCount()),
+                  platform: navigator.userAgent.includes('Win') ? 'Windows' : navigator.userAgent.includes('Mac') ? 'macOS' : 'Linux',
+                });
+                window.open(`https://openconstructionerp.com/contact.html?${params}`, '_blank');
+
+                // Variant C: Direct POST (best-effort, non-blocking)
+                const reportBlob = exportErrorReport();
+                reportBlob.text().then((text) => {
+                  const data = JSON.parse(text);
+                  fetch('https://formsubmit.co/ajax/info@datadrivenconstruction.io', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                    body: JSON.stringify({
+                      _subject: 'Bug Report from OpenConstructionERP App',
+                      'App Version': data.app_version || APP_VERSION,
+                      'Error Count': data.total_errors || 0,
+                      Platform: data.platform || '',
+                      Locale: data.locale || '',
+                      'Session Minutes': data.session_duration_minutes || 0,
+                      'Pages Visited': (data.pages_visited || []).join(', '),
+                      Errors: JSON.stringify(data.entries?.slice(0, 10) || [], null, 2),
+                    }),
+                  }).catch(() => { /* silent — form is primary channel */ });
+                }).catch(() => {});
+              }}
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+              title={t('feedback.report_issue', { defaultValue: 'Report Issue' })}
+            >
+              <Bug size={14} className="text-content-tertiary" />
+              {t('feedback.report_issue', { defaultValue: 'Report Issue' })}
+            </button>
+            <a
+              role="menuitem"
+              href="mailto:info@datadrivenconstruction.io?subject=OpenConstructionERP%20Issue%20Report"
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+              title={t('header.email_issue', { defaultValue: 'Email an issue to the team' })}
+            >
+              {/* mail icon */}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-content-tertiary">
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+              {t('header.email_issues', { defaultValue: 'Email Issues' })}
+            </a>
+          </div>
+        </details>
 
         {/* Documentation link */}
         <a

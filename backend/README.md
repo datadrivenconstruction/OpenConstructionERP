@@ -17,9 +17,11 @@ Professional BOQ, 4D scheduling, 5D cost model, AI-powered estimation, CAD/BIM t
 ## Quick Start
 
 ```bash
-pip install openconstructionerp
+pip install --upgrade openconstructionerp
 openestimate                 # welcome screen + o-to-open-browser + server
 ```
+
+> **Requires Python 3.12+.** Check with `python --version`.
 
 That's the whole first run. The bare `openestimate` command:
 

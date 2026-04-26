@@ -1,4 +1,4 @@
-.PHONY: help dev stop test lint format migrate seed build
+.PHONY: help dev dev-backend dev-frontend dev-unix stop test lint format migrate seed build
 
 # ─── Variables ──────────────────────────────────────────────────────────────
 BACKEND_DIR = backend
@@ -34,8 +34,18 @@ dev-backend: infra ## Start backend dev server
 dev-frontend: ## Start frontend dev server
 	cd $(FRONTEND_DIR) && npm run dev
 
-dev: ## Start backend + frontend (SQLite, no Docker needed)
-	@echo "Starting OpenConstructionERP (local dev)..."
+dev: ## Show how to start dev (cross-platform: two terminals)
+	@echo "OpenConstructionERP local dev needs two terminals (cross-platform safe):"
+	@echo "  Terminal 1:  make dev-backend   (http://localhost:8000)"
+	@echo "  Terminal 2:  make dev-frontend  (http://localhost:5173)"
+	@echo ""
+	@echo "Linux/macOS users may also try the POSIX-only shortcut: make dev-unix"
+
+# POSIX-only: backgrounds the backend with `&` (bash job control).
+# Does NOT work in Windows cmd.exe or MSYS2 make — use `make dev-backend`
+# and `make dev-frontend` in two terminals instead.
+dev-unix: infra ## Start backend (background) + frontend — POSIX shells only
+	@echo "Starting OpenConstructionERP (POSIX dev)..."
 	@echo "  Backend:  http://localhost:8000"
 	@echo "  Frontend: http://localhost:5173"
 	@echo ""
@@ -83,8 +93,8 @@ migrate-new: ## Create new migration (usage: make migrate-new MSG="add users tab
 migrate-down: ## Rollback last migration
 	cd $(BACKEND_DIR) && alembic downgrade -1
 
-seed: ## Load seed data (CWICR, classifications, demo)
-	cd $(BACKEND_DIR) && python -m app.scripts.seed_demo_showcase
+seed: ## Load seed data (cost catalog). Demo projects are auto-created on first backend startup.
+	cd $(BACKEND_DIR) && python -m app.scripts.seed_catalog
 
 db-reset: ## Drop and recreate database (DESTRUCTIVE)
 	$(DOCKER_COMPOSE) exec postgres psql -U oe -c "DROP DATABASE IF EXISTS openestimate;"
@@ -102,7 +112,7 @@ module-test: ## Test specific module (usage: make module-test NAME=oe_boq)
 # ─── Setup (first time) ──────────────────────────────────────────────────
 setup: ## First-time setup: install backend + frontend dependencies
 	@echo "Installing backend dependencies..."
-	cd $(BACKEND_DIR) && pip install -r requirements.txt
+	cd $(BACKEND_DIR) && pip install -e .[server]
 	@echo ""
 	@echo "Installing frontend dependencies..."
 	cd $(FRONTEND_DIR) && npm install

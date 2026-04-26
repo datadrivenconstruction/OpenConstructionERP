@@ -2,11 +2,16 @@
 #
 # ⚠️  EVALUATION / LOCAL-DEMO ONLY — NOT FOR PRODUCTION
 #
-# This file bakes in demo credentials (``oe-quickstart-2024``) and a
-# throw-away JWT secret so newcomers can ``docker compose up`` without
-# editing anything. Any real deployment MUST use docker-compose.prod.yml
-# which requires POSTGRES_PASSWORD and JWT_SECRET to be supplied via
-# environment variables.
+# Both POSTGRES_PASSWORD and JWT_SECRET MUST be supplied via env vars
+# (or a `.env` file beside this compose file). Compose fails fast with
+# a readable error if they are missing — instead of silently shipping
+# globally-shared defaults that anyone could use to forge JWTs (BUG-D03).
+# Generate them once with:
+#
+#   echo "POSTGRES_PASSWORD=$(openssl rand -base64 24)" >  .env
+#   echo "JWT_SECRET=$(openssl rand -hex 32)"           >> .env
+#
+# Any real deployment SHOULD use docker-compose.prod.yml.
 #
 # Zero-config, all-in-one deployment. Just run:
 #   docker compose -f docker-compose.quickstart.yml up --build
@@ -26,7 +31,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: oe
-      POSTGRES_PASSWORD: oe-quickstart-2024
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set — generate with: openssl rand -base64 24}
       POSTGRES_DB: openestimate
     volumes:
       - pg_data:/var/lib/postgresql/data
@@ -50,10 +55,10 @@ services:
       - "8080:8080"
     environment:
       # Override SQLite default with PostgreSQL
-      DATABASE_URL: postgresql+asyncpg://oe:oe-quickstart-2024@postgres:5432/openestimate
-      DATABASE_SYNC_URL: postgresql://oe:oe-quickstart-2024@postgres:5432/openestimate
-      # Security
-      JWT_SECRET: oe-quickstart-change-me-in-production
+      DATABASE_URL: postgresql+asyncpg://oe:${POSTGRES_PASSWORD}@postgres:5432/openestimate
+      DATABASE_SYNC_URL: postgresql://oe:${POSTGRES_PASSWORD}@postgres:5432/openestimate
+      # Security — required, no default. Compose fails fast if blank.
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set — generate with: openssl rand -hex 32}
       # Frontend serving
       SERVE_FRONTEND: "true"
       ALLOWED_ORIGINS: "http://localhost:8080,http://localhost"

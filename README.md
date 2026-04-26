@@ -9,7 +9,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [▶ Watch the 12-min walkthrough](https://www.youtube.com/watch?v=X06cIaroAeI) · [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.5.0-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.5.0)
+[![Version](https://img.shields.io/badge/version-2.5.2-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.5.2)
 [![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi)](https://pypi.org/project/openconstructionerp/)
 [![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp)
 [![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers)
@@ -196,10 +196,10 @@ Construction cost estimation software is expensive, closed-source, and locked to
 <tr>
 <th align="left">Capability</th>
 <th align="center">OpenConstructionERP</th>
-<th align="center">RIB iTWO</th>
-<th align="center">Exactal CostX</th>
-<th align="center">Sage Estimating</th>
-<th align="center">Bluebeam</th>
+<th align="center">Enterprise BIM Suites</th>
+<th align="center">CAD Takeoff Software</th>
+<th align="center">Legacy Estimating Tools</th>
+<th align="center">PDF Markup Tools</th>
 </tr>
 <tr><td><b>License</b></td><td align="center">AGPL-3.0 (free)</td><td align="center">Proprietary</td><td align="center">Proprietary</td><td align="center">Proprietary</td><td align="center">Proprietary</td></tr>
 <tr><td><b>Self-hosted / offline</b></td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#9888; partial</td><td align="center">&#10006;</td></tr>
@@ -219,7 +219,7 @@ Construction cost estimation software is expensive, closed-source, and locked to
 <tr><td><b>BIM requirements (IDS/COBie)</b></td><td align="center">&#10004; import + export</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
 </table>
 
-<sub>Product names are trademarks of their respective owners. This comparison is based on publicly available information as of Q1 2026. Pricing is approximate (per-seat, list price) and may vary by region. OpenConstructionERP is not affiliated with any of the listed vendors.</sub>
+<sub>Comparison reflects typical category capabilities based on publicly available information as of Q1 2026. Pricing is approximate (per-seat, list price) and varies by vendor and region. OpenConstructionERP is an independent open-source project and is not affiliated with any commercial vendor in the categories above.</sub>
 
 ---
 
@@ -474,19 +474,32 @@ Get productive in under 10 minutes:
 
 > 👀 **Prefer to see it first?** [▶ Watch the 12-minute walkthrough on YouTube](https://www.youtube.com/watch?v=X06cIaroAeI) — onboarding → BoQ → BIM → DWG → PDF → AI → dashboard.
 
-### Fastest: One-Line Install
+> **Requires Python 3.12+** (any path below). Check with `python --version`.
+
+### Recommended: pip install (1 command, full app)
+
+```bash
+pip install --upgrade openconstructionerp
+openestimate
+```
+
+That's it. Installs backend + pre-built React frontend in one wheel (~7.4 MB), opens your browser at **http://localhost:8080**, creates a SQLite database, and seeds the three demo accounts on first boot. No Docker, no Node.js, no extra services. [PyPI package](https://pypi.org/project/openconstructionerp/).
+
+If something looks off, run `openestimate doctor` for a per-check OK/WARN/ERROR report.
+
+### Alternative 1: One-line installer (auto-detects Docker / uv / pip)
 
 ```bash
 # Linux / macOS
-curl -sSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.sh | bash
 
 # Windows (PowerShell)
 irm https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.ps1 | iex
 ```
 
-Auto-detects Docker / Python / uv → installs and runs at **http://localhost:8080**
+Picks Docker if installed, otherwise uv, otherwise pip. Runs at **http://localhost:8080**.
 
-### Option 1: Docker (recommended)
+### Alternative 2: Docker compose
 
 ```bash
 git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
@@ -496,14 +509,14 @@ make quickstart
 
 Open **http://localhost:8080** — builds everything in ~2 minutes.
 
-### Option 2: Local Development (no Docker)
+### Alternative 3: Local development (clone + npm + uvicorn)
 
 ```bash
 git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
 cd OpenConstructionERP
 
 # Install dependencies
-cd backend && pip install -r requirements.txt && cd ..
+pip install -e ./backend[server]
 cd frontend && npm install && cd ..
 
 # Start (Linux/macOS)
@@ -514,30 +527,17 @@ make dev
 # Terminal 2: cd frontend && npm run dev
 ```
 
-Open **http://localhost:5173** — requires Python 3.12+ and Node.js 20+. Uses SQLite by default — zero configuration needed.
-
-### Option 3: pip install (full app — backend + frontend)
-
-```bash
-pip install openconstructionerp
-openconstructionerp serve --open
-```
-
-One command installs everything. Opens browser at **http://localhost:8080** with full UI. Uses SQLite — zero config. [PyPI package](https://pypi.org/project/openconstructionerp/) (2.6 MB, includes pre-built frontend).
+Open **http://localhost:5173** — for hacking on the codebase. Requires Python 3.12+ and Node.js 20+.
 
 ### Demo Accounts
 
-Three demo accounts are created automatically on first start. **Passwords are
-randomly generated per installation and printed to the container logs** on
-first boot — look for the `=== DEMO ACCOUNTS ===` banner in `docker compose
-logs backend` (or in the stdout of `make dev`). You can override them with
-environment variables before the first start.
+Three demo accounts are created automatically on first start. The default password is `DemoPass1234!` for all three — override with `DEMO_ADMIN_PASSWORD` / `DEMO_ESTIMATOR_PASSWORD` / `DEMO_MANAGER_PASSWORD` env vars before the first boot if you need a custom one (e.g. for any internet-exposed deployment).
 
-| Account | Email | Password source | Role |
-|---------|-------|-----------------|------|
-| Admin | `demo@openestimator.io` | `DEMO_ADMIN_PASSWORD` env var, or generated | Full access |
-| Estimator | `estimator@openestimator.io` | `DEMO_ESTIMATOR_PASSWORD` env var, or generated | Estimator |
-| Manager | `manager@openestimator.io` | `DEMO_MANAGER_PASSWORD` env var, or generated | Manager |
+| Account | Email | Password | Role |
+|---------|-------|----------|------|
+| Admin | `demo@openestimator.io` | `DemoPass1234!` | Full access |
+| Estimator | `estimator@openestimator.io` | `DemoPass1234!` | Estimator |
+| Manager | `manager@openestimator.io` | `DemoPass1234!` | Manager |
 
 > Demo accounts include 5 pre-loaded projects from Berlin, London, New York, Paris, and Dubai with complete BOQs, schedules, and cost models.
 >
@@ -669,13 +669,11 @@ tender-submission use. See [NOTICE](NOTICE) and [TERMS.md](TERMS.md) §4.
 ## Trademarks
 
 All product names, logos, and trademarks referenced in this repository
-are property of their respective owners. Comparative references to
-commercial products (e.g., RIB iTWO, Exactal CostX, Sage Estimating,
-Bluebeam) reflect publicly available feature information at the time of
-publication and are used for fair comparative purposes. OpenConstructionERP
-is an independent project and is not affiliated with, endorsed by, or
-sponsored by any of the trademark owners named. Full attributions in
-[NOTICE](NOTICE).
+are property of their respective owners. Any comparative references to
+commercial categories or products are made for fair comparative purposes
+based on publicly available information. OpenConstructionERP is an
+independent project and is not affiliated with, endorsed by, or sponsored
+by any third-party trademark owners. Full attributions in [NOTICE](NOTICE).
 
 ## Export control
 

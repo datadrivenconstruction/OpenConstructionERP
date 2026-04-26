@@ -613,6 +613,29 @@ def cmd_serve(args: argparse.Namespace) -> None:
 def cmd_init_db(args: argparse.Namespace) -> None:
     """Initialise data directory and create the SQLite database."""
     data_dir = Path(args.data_dir).expanduser().resolve()
+    db_path = data_dir / "openestimate.db"
+    reset = bool(getattr(args, "reset", False))
+
+    # Honour --reset BEFORE _setup_env touches the directory so the user
+    # gets a guaranteed-fresh DB. We also wipe the SQLite WAL siblings,
+    # otherwise re-opening the same path can resurrect old pages.
+    if reset and db_path.exists():
+        for suffix in ("", "-shm", "-wal"):
+            sibling = db_path.with_name(db_path.name + suffix)
+            try:
+                sibling.unlink()
+            except FileNotFoundError:
+                pass
+            except OSError as exc:
+                logger.warning("init-db --reset: could not delete %s: %s", sibling, exc)
+        print(_amber(f"Reset: deleted previous DB at {db_path}"))
+    elif db_path.exists():
+        # Friendly warning, non-blocking — matches the spec.
+        print(
+            _yellow(f"Existing database at {db_path} — re-using.")
+            + _dim(" Use --reset to start fresh.")
+        )
+
     print(_u("Initialising data directory at ", "Initialising data directory at ")
           + f"{_bold(str(data_dir))}"
           + _u("…", "..."))
@@ -929,12 +952,22 @@ def main() -> None:
         default=str(DEFAULT_DATA_DIR),
         help=f"Data directory (default: {DEFAULT_DATA_DIR})",
     )
+    init_db_p.add_argument(
+        "--reset",
+        action="store_true",
+        help="Delete the existing openestimate.db (and -shm/-wal) before init",
+    )
     # Legacy alias — same args, same handler.
     init_p = subparsers.add_parser("init", help="Alias for init-db")
     init_p.add_argument(
         "--data-dir",
         default=str(DEFAULT_DATA_DIR),
         help=f"Data directory (default: {DEFAULT_DATA_DIR})",
+    )
+    init_p.add_argument(
+        "--reset",
+        action="store_true",
+        help="Delete the existing openestimate.db (and -shm/-wal) before init",
     )
 
     # doctor

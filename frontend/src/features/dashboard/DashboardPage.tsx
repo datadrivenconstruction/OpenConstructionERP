@@ -41,7 +41,7 @@ import {
   Percent,
   CircleDashed,
 } from 'lucide-react';
-import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint, ActivityFeed as CrossModuleActivityFeed } from '@/shared/ui';
+import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint, ActivityFeed as CrossModuleActivityFeed, EmptyState } from '@/shared/ui';
 import BIMCoverageCard from './BIMCoverageCard';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 
@@ -1964,88 +1964,37 @@ export function DashboardPage() {
 function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const addToast = useToastStore((s) => s.addToast);
-
-  const installDemoMutation = useMutation({
-    mutationFn: () => apiPost<DemoInstallResult>('/demo/install/residential-berlin'),
-    onSuccess: (result) => {
-      void queryClient.invalidateQueries({ queryKey: ['projects'] });
-      navigate(`/projects/${result.project_id}`);
-    },
-    onError: (err: Error) => {
-      addToast({ type: 'error', title: t('demo.install_failed', { defaultValue: 'Failed to install demo' }), message: err.message });
-    },
-  });
+  // BUG-UI01: install-demo mutation removed alongside the 3-tile empty
+  // state. Demo installation now lives under Settings → Demo data.
 
   if (!projects || projects.length === 0) {
+    // BUG-UI01: clean centered empty-state for fresh tenants. The earlier
+    // 3-tile grid felt like a chooser; the user just wants a clear
+    // "create your first project" CTA with the demo path as a secondary hint.
     return (
-      <div className="px-6 py-8">
-        <div className="text-center mb-6">
-          <p className="text-sm font-semibold text-content-primary">
-            {t('dashboard.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
-          </p>
-          <p className="mt-1 text-xs text-content-tertiary">
-            {t('dashboard.welcome_desc', { defaultValue: 'Start by installing a demo project or creating your own.' })}
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {/* Install Demo Project */}
-          <button
-            onClick={() => installDemoMutation.mutate()}
-            disabled={installDemoMutation.isPending}
-            className="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30 disabled:opacity-60"
-          >
-            <span className="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold">1</span>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110">
-              {installDemoMutation.isPending ? (
-                <Loader2 size={20} className="animate-spin" strokeWidth={1.5} />
-              ) : (
-                <Download size={20} strokeWidth={1.5} />
-              )}
+      <div className="flex h-full min-h-[60vh] items-center justify-center px-6 py-8">
+        <EmptyState
+          icon={<FolderPlus size={28} strokeWidth={1.5} />}
+          title={t('dashboard.empty.title', {
+            defaultValue: "Welcome — let's start with your first project",
+          })}
+          description={t('dashboard.empty.desc', {
+            defaultValue: 'Projects organise your BOQs, schedules, and reports.',
+          })}
+          action={
+            <div className="flex flex-col items-center gap-3">
+              <Button onClick={() => navigate('/projects/new')}>
+                <FolderPlus size={16} strokeWidth={1.75} />
+                {t('dashboard.empty.cta_create', { defaultValue: 'Create project' })}
+              </Button>
+              <p className="text-xs text-content-tertiary">
+                {t('dashboard.empty.demo_hint', {
+                  defaultValue: 'Or load a demo project from Settings → Demo data',
+                })}
+              </p>
             </div>
-            <span className="text-sm font-medium text-content-primary">
-              {t('dashboard.install_demo', { defaultValue: 'Install Demo Project' })}
-            </span>
-            <span className="text-[11px] leading-snug text-content-tertiary">
-              {t('dashboard.install_demo_desc', { defaultValue: 'Pre-built residential project with realistic data' })}
-            </span>
-          </button>
-
-          {/* Create First Project */}
-          <button
-            onClick={() => navigate('/projects/new')}
-            className="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
-          >
-            <span className="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold">2</span>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110">
-              <FolderPlus size={20} strokeWidth={1.5} />
-            </div>
-            <span className="text-sm font-medium text-content-primary">
-              {t('dashboard.create_first_project', { defaultValue: 'Create First Project' })}
-            </span>
-            <span className="text-[11px] leading-snug text-content-tertiary">
-              {t('dashboard.create_first_project_desc', { defaultValue: 'Set up a new estimation from scratch' })}
-            </span>
-          </button>
-
-          {/* Import Existing BOQ */}
-          <button
-            onClick={() => navigate('/ai-estimate')}
-            className="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
-          >
-            <span className="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold">3</span>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110">
-              <Upload size={20} strokeWidth={1.5} />
-            </div>
-            <span className="text-sm font-medium text-content-primary">
-              {t('dashboard.import_existing_boq', { defaultValue: 'Import Existing BOQ' })}
-            </span>
-            <span className="text-[11px] leading-snug text-content-tertiary">
-              {t('dashboard.import_existing_boq_desc', { defaultValue: 'Use AI to estimate from an existing document' })}
-            </span>
-          </button>
-        </div>
+          }
+        />
       </div>
     );
   }

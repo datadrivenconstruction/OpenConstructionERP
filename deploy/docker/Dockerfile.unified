@@ -13,7 +13,10 @@
 #     openconstructionerp
 
 # ── Stage 1: Build frontend ──────────────────────────────────────────
-FROM node:20-alpine AS frontend-build
+# Pinned to node:22-alpine — rollup-plugin-visualizer 7.x already
+# emits an EBADENGINE warning on node:20, and 8.x (already published)
+# requires node>=22 outright (BUG-B04).
+FROM node:22-alpine AS frontend-build
 
 WORKDIR /build
 COPY frontend/package.json frontend/package-lock.json ./
@@ -66,8 +69,13 @@ ENV PYTHONUNBUFFERED=1 \
     VECTOR_DATA_DIR=/data/vectors \
     APP_ENV=development \
     APP_DEBUG=false \
-    JWT_SECRET=change-me-in-production \
     ALLOWED_ORIGINS=*
+
+# JWT_SECRET is intentionally NOT set here — the application config
+# requires it via env var at runtime. Setting a default in the image
+# would bake a globally-shared signing key into every container
+# pulled from the registry (BUG-D03). Pass `-e JWT_SECRET=$(openssl
+# rand -hex 32)` to ``docker run`` or supply via compose .env.
 
 EXPOSE 8080
 VOLUME ["/data"]

@@ -226,7 +226,7 @@ function FinanceSummaryCards({ projectId }: { projectId: string }) {
   const { data: budgets } = useQuery({
     queryKey: ['finance-budgets', projectId],
     queryFn: () =>
-      apiGet<BudgetLine[]>(`/v1/finance/budgets?project_id=${projectId}`),
+      apiGet<BudgetLine[]>(`/v1/finance/budgets/?project_id=${projectId}`),
     select: (d): BudgetLine[] => normalizeListResponse(d),
   });
 
@@ -816,7 +816,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
     queryKey: ['finance-budgets', projectId],
     queryFn: () =>
       apiGet<BudgetLine[]>(
-        `/v1/finance/budgets?project_id=${projectId}`,
+        `/v1/finance/budgets/?project_id=${projectId}`,
       ),
     select: (d): BudgetLine[] => normalizeListResponse(d),
   });
