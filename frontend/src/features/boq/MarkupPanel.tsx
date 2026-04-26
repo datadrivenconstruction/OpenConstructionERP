@@ -182,18 +182,21 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
     [handleCommitEdit],
   );
 
-  // Cascading calculation for preview
+  // Cascading calculation for preview. Defensive against malformed server
+  // payloads — Apply-Regional-Template used to crash the panel when a markup
+  // came back without a numeric percentage (Bug 3).
   let running = directCost;
-  const calculated = markups
-    .filter((m) => m.is_active !== false)
+  const calculated = (Array.isArray(markups) ? markups : [])
+    .filter((m) => m && m.is_active !== false)
     .map((m) => {
       let amount = 0;
+      const pct = typeof m.percentage === 'number' && Number.isFinite(m.percentage) ? m.percentage : 0;
       if (m.markup_type === 'fixed') {
-        amount = m.fixed_amount ?? 0;
+        amount = typeof m.fixed_amount === 'number' && Number.isFinite(m.fixed_amount) ? m.fixed_amount : 0;
       } else if (m.apply_to === 'cumulative') {
-        amount = running * (m.percentage / 100);
+        amount = running * (pct / 100);
       } else {
-        amount = directCost * (m.percentage / 100);
+        amount = directCost * (pct / 100);
       }
       running += amount;
       return { id: m.id, amount };

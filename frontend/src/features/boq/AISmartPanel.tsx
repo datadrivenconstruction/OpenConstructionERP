@@ -244,9 +244,11 @@ export function AISmartPanel({
   );
 
   /* ── Render ──────────────────────────────────────────────────────── */
+  // Bug 13: offset by app header height (52px = --oe-header-height) so the panel
+  // does not cover the top app header / toolbar.
   return (
     <div
-      className={`fixed right-0 top-0 z-50 h-full w-[400px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
+      className={`fixed right-0 top-[52px] z-50 h-[calc(100%-52px)] w-[400px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
     >

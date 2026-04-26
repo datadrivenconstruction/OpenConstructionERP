@@ -155,8 +155,10 @@ export function BOQToolbar({
     onExport(format);
   };
 
+  // Bug 7: stick BELOW the app header (52px / --oe-header-height) — using top-0 collides
+  // with the sticky header (z-30), pushing the toolbar out of view when scrolling.
   return (
-    <div className="sticky top-0 z-20 bg-surface-primary flex flex-wrap items-center gap-x-1.5 gap-y-2 px-1 py-2 border-b border-border-light mb-3">
+    <div className="sticky top-[52px] z-20 bg-surface-primary flex flex-wrap items-center gap-x-1.5 gap-y-2 px-1 py-2 border-b border-border-light mb-3">
       {/* ── Row-group: Quality + Undo/Redo ─────────────────────────────── */}
       <div className="flex items-center gap-1.5">
         {hasPositions && qualityScoreRing}
@@ -211,7 +213,11 @@ export function BOQToolbar({
             onClick={onPasteFromExcel}
             title={t('boq.paste_from_excel', { defaultValue: 'Paste from Excel' })}
             aria-label={t('boq.paste_from_excel', { defaultValue: 'Paste from Excel' })}
-          />
+          >
+            <span className="hidden xl:inline">
+              {t('boq.paste_from_excel_short', { defaultValue: 'Paste' })}
+            </span>
+          </Button>
         )}
         <div ref={exportRef} className="relative">
           <Button variant="ghost" size="sm" icon={<Download size={15} />} onClick={() => setShowExportMenu((prev) => !prev)} aria-expanded={showExportMenu} aria-haspopup="true">
@@ -261,7 +267,7 @@ export function BOQToolbar({
               <ChevronDown size={12} className={`transition-transform ${gridSettingsOpen ? 'rotate-180' : ''}`} />
             </Button>
             {gridSettingsOpen && (
-              <div role="menu" className="absolute left-0 top-full mt-1 z-50 w-52 rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in">
+              <div role="menu" className="absolute left-0 top-full mt-1 z-50 w-64 rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in">
                 {onManageColumns && (
                   <button
                     role="menuitem"
@@ -409,17 +415,19 @@ export function BOQToolbar({
 
         {/* ── AI Tools (visually grouped) ───────────────────────────────── */}
         <div className="flex items-center gap-1 rounded-xl bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border border-violet-200/50 dark:border-violet-800/30 px-2 py-1">
-          <div className="flex items-center gap-1 mr-1 hidden lg:flex">
+          {/* Decorative section label (NOT a button) — marked pointer-events-none so the sparkle
+              icon can't be mistaken for an interactive control. Real AI actions are the buttons below. */}
+          <div className="flex items-center gap-1 mr-1 hidden lg:flex pointer-events-none select-none" aria-hidden="true">
             <Sparkles size={12} className="text-violet-500" />
             <span className="text-2xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider">AI</span>
           </div>
 
           {/* Cost Finder — search cost database */}
-          <div className="relative group/cf">
+          <div className="relative group/cf border-l-2 border-blue-400 dark:border-blue-500 pl-1">
             <Button
               variant={costFinderOpen ? 'primary' : 'ghost'}
               size="sm"
-              icon={<SearchCheck size={15} className={costFinderOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
+              icon={<SearchCheck size={15} className={costFinderOpen ? '' : 'text-blue-600 dark:text-blue-400'} />}
               onClick={onToggleCostFinder}
             >
               <span className="hidden xl:inline">{t('boq.cost_finder_short', { defaultValue: 'Find Costs' })}</span>
@@ -431,18 +439,16 @@ export function BOQToolbar({
           </div>
 
           {/* AI Chat — generate positions */}
-          <div className="relative group/chat">
-            <button
+          <div className="relative group/chat border-l-2 border-violet-400 dark:border-violet-500 pl-1">
+            <Button
+              variant={aiChatOpen ? 'primary' : 'ghost'}
+              size="sm"
+              icon={<Sparkles size={15} className={aiChatOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
               onClick={onToggleAiChat}
-              className={`h-7 w-7 flex items-center justify-center rounded-md transition-colors ${
-                aiChatOpen
-                  ? 'bg-violet-600 text-white'
-                  : 'text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30'
-              }`}
-              title={t('boq.ai_assistant_short', { defaultValue: 'AI Generate' })}
+              title={t('boq.ai_assistant_short', { defaultValue: 'AI Chat' })}
             >
-              <Sparkles size={14} />
-            </button>
+              <span className="hidden xl:inline">{t('boq.ai_chat_short', { defaultValue: 'AI Chat' })}</span>
+            </Button>
             <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-lg bg-gray-900 text-white text-2xs p-2.5 shadow-lg opacity-0 invisible group-hover/chat:opacity-100 group-hover/chat:visible transition-all z-50 pointer-events-none">
               <p className="font-semibold mb-1">{t('boq.ai_chat_tip_title', { defaultValue: 'AI Position Generator' })}</p>
               <p className="text-gray-300">{t('boq.ai_assistant_tooltip', { defaultValue: 'Describe what you need in plain text — AI creates BOQ positions with realistic pricing.' })}</p>
@@ -450,11 +456,11 @@ export function BOQToolbar({
           </div>
 
           {/* Smart AI — analysis tools */}
-          <div className="relative group/smart">
+          <div className="relative group/smart border-l-2 border-fuchsia-400 dark:border-fuchsia-500 pl-1">
             <Button
               variant={smartPanelOpen ? 'primary' : 'ghost'}
               size="sm"
-              icon={<Brain size={15} className={smartPanelOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
+              icon={<Brain size={15} className={smartPanelOpen ? '' : 'text-fuchsia-600 dark:text-fuchsia-400'} />}
               onClick={onToggleSmartPanel}
             >
               <span className="hidden xl:inline">{t('boq.ai_smart_short', { defaultValue: 'Analyze' })}</span>

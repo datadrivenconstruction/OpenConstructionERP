@@ -141,22 +141,6 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           <Search size={17} />
         </button>
 
-        {/* Keyboard shortcuts hint */}
-        <button
-          onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }))}
-          className={clsx(
-            'hidden sm:flex h-8 w-8 items-center justify-center rounded-lg',
-            'text-content-tertiary transition-colors',
-            'hover:bg-surface-secondary hover:text-content-secondary',
-          )}
-          title={t('common.keyboard_shortcuts', 'Keyboard shortcuts') + ' (?)'}
-          aria-label={t('common.keyboard_shortcuts', 'Keyboard shortcuts')}
-        >
-          <kbd className="text-2xs font-mono font-medium bg-surface-primary border border-border-light rounded px-1.5 py-0.5">
-            ?
-          </kbd>
-        </button>
-
         {/* Notification bell */}
         <NotificationBell />
 
@@ -194,10 +178,11 @@ export function Header({ title, onMenuClick }: HeaderProps) {
                 URL.revokeObjectURL(blobUrl);
 
                 // Variant B: Open form with URL params
+                // Internal-only: log error count for self-debugging (not exposed to URL).
+                console.info('[Feedback] Report submitted with error count:', getErrorCount());
                 const params = new URLSearchParams({
                   report: 'true',
                   app_version: APP_VERSION,
-                  error_count: String(getErrorCount()),
                   platform: navigator.userAgent.includes('Win') ? 'Windows' : navigator.userAgent.includes('Mac') ? 'macOS' : 'Linux',
                 });
                 window.open(`https://openconstructionerp.com/contact.html?${params}`, '_blank');
@@ -277,10 +262,11 @@ export function Header({ title, onMenuClick }: HeaderProps) {
               URL.revokeObjectURL(blobUrl);
             }
             // Variant B: Open feedback form with params
+            // Internal-only: log error count for self-debugging (not exposed to URL).
+            console.info('[Feedback] Form opened with error count:', getErrorCount());
             const params = new URLSearchParams({
               feedback: 'true',
               app_version: APP_VERSION,
-              error_count: String(getErrorCount()),
             });
             window.open(`https://openconstructionerp.com/contact.html?${params}`, '_blank');
           }}

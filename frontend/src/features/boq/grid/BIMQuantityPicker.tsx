@@ -298,13 +298,14 @@ export function BIMQuantityPicker({
                 {/* Element header */}
                 <button
                   onClick={() => toggleElement(element.id)}
+                  title={`${element.name || element.element_type} (${element.element_type})`}
                   className="w-full flex items-center gap-1.5 px-3 py-1.5 text-left
                              hover:bg-surface-secondary/60 transition-colors"
                 >
                   <span className="text-[10px] text-content-quaternary shrink-0">
                     {expandedElements.has(element.id) ? '\u25BC' : '\u25B6'}
                   </span>
-                  <span className="text-[11px] font-medium text-content-secondary truncate">
+                  <span className="text-[11px] font-medium text-content-secondary truncate min-w-0 flex-1">
                     {element.name || element.element_type}
                   </span>
                   <span className="text-[9px] text-content-quaternary font-mono shrink-0">
