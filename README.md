@@ -9,7 +9,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [▶ Watch the 12-min walkthrough](https://www.youtube.com/watch?v=X06cIaroAeI) · [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.5.2-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.5.2)
+[![Version](https://img.shields.io/badge/version-2.5.5-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.5.5)
 [![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi)](https://pypi.org/project/openconstructionerp/)
 [![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp)
 [![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers)
@@ -484,6 +484,14 @@ openestimate
 ```
 
 That's it. Installs backend + pre-built React frontend in one wheel (~7.4 MB), opens your browser at **http://localhost:8080**, creates a SQLite database, and seeds the three demo accounts on first boot. No Docker, no Node.js, no extra services. [PyPI package](https://pypi.org/project/openconstructionerp/).
+
+> **Ubuntu / Debian users:** on Ubuntu 23.04+ (including Ubuntu 26) and Debian 12+, `pip install` directly to the system Python fails with `error: externally-managed-environment` (PEP 668). Use a venv:
+> ```bash
+> sudo apt install -y python3.12 python3.12-venv
+> python3.12 -m venv venv && source venv/bin/activate
+> pip install --upgrade openconstructionerp
+> ```
+> Full Linux guide with system deps and troubleshooting: [docs/INSTALL_LINUX.md](docs/INSTALL_LINUX.md).
 
 If something looks off, run `openestimate doctor` for a per-check OK/WARN/ERROR report.
 
