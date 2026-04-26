@@ -42,12 +42,14 @@ Endpoints:
     POST   /boqs/{boq_id}/check-anomalies   — AI: detect pricing anomalies
 """
 
+import asyncio
 import csv
 import io
 import logging
 import random
 import tempfile
 import uuid
+import zipfile
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
@@ -57,6 +59,8 @@ from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Upload
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+from app.core.csv_safety import neutralise_formula
+from app.core.file_signature import detect as detect_signature
 from app.core.upload_guards import reject_if_xlsx_bomb
 from app.dependencies import (
     CurrentUserId,
@@ -257,6 +261,9 @@ def _position_to_response(position: object) -> PositionResponse:
         sort_order=position.sort_order,  # type: ignore[attr-defined]
         created_at=position.created_at,  # type: ignore[attr-defined]
         updated_at=position.updated_at,  # type: ignore[attr-defined]
+        # BUG-CONCURRENCY01: surface the row's optimistic-concurrency
+        # token so clients can echo it on the next PATCH.
+        version=int(getattr(position, "version", 0) or 0),  # type: ignore[attr-defined]
     )
 
 
@@ -1416,6 +1423,34 @@ async def bulk_add_positions(
     return results
 
 
+@router.get(
+    "/positions/{position_id}",
+    response_model=PositionResponse,
+    summary="Get position by id",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_position(
+    position_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> PositionResponse:
+    """Return a single BOQ position by id (BUG-API14).
+
+    Previously this verb-path combination was unhandled and FastAPI fell
+    through to a route that returned ``200 {}`` — a confusing 200-with-
+    empty-body which masked race-condition fallout from BUG-CONCURRENCY01.
+    Now it returns the full :class:`PositionResponse` or 404.
+    """
+    # IDOR guard: load position → derive boq_id → verify ownership chain
+    existing = await service.position_repo.get_by_id(position_id)
+    if existing is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
+    await _verify_boq_owner(session, existing.boq_id, user_id, payload)
+    return _position_to_response(existing)
+
+
 @router.patch(
     "/positions/{position_id}",
     response_model=PositionResponse,
@@ -1436,7 +1471,10 @@ async def update_position(
     if existing is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
     await _verify_boq_owner(session, existing.boq_id, user_id, payload)
-    position = await service.update_position(position_id, data)
+    # Pass actor_id through so the audit log records who made the change
+    # (BUG-AUDIT01).  Without it the service falls back to anonymous and
+    # the FK to ``oe_users_user`` would fail.
+    position = await service.update_position(position_id, data, actor_id=user_id)
     return _position_to_response(position)
 
 
@@ -2080,6 +2118,17 @@ def _fmt_number(value: Any) -> str:
     return text if text else "0"
 
 
+# BUG-EXPORT-TRAILING-SLASH: every export route is registered under both
+# the trailing-slash and bare forms because the app sets
+# ``redirect_slashes=False`` (see ``app/main.py``) — without these aliases,
+# REST-style GETs without the slash return 404. ``include_in_schema=False``
+# keeps OpenAPI clean (one canonical path).
+@router.get(
+    "/boqs/{boq_id}/export/csv",
+    summary="Export BOQ as CSV (no-slash alias)",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+    include_in_schema=False,
+)
 @router.get(
     "/boqs/{boq_id}/export/csv/",
     summary="Export BOQ as CSV",
@@ -2127,31 +2176,41 @@ async def export_boq_csv(
         classification = getattr(pos, "classification", {}) or {}
         metadata_ = getattr(pos, "metadata", None) or getattr(pos, "metadata_", None) or {}
         cad_ids = getattr(pos, "cad_element_ids", []) or []
+        # ``neutralise_formula`` defends against CSV formula injection (BUG-CSV-INJECTION):
+        # a description like ``=cmd|'/c calc'!A0`` would otherwise be executed by Excel
+        # when the downloaded CSV is opened. Numeric strings from ``_fmt_number`` are
+        # already digits-only so we leave them alone.
         return [
-            pos.ordinal,
-            pos.description,
-            pos.unit,
+            neutralise_formula(pos.ordinal),
+            neutralise_formula(pos.description),
+            neutralise_formula(pos.unit),
             _fmt_number(getattr(pos, "quantity", 0.0)),
             _fmt_number(getattr(pos, "unit_rate", 0.0)),
             _fmt_number(getattr(pos, "total", 0.0)),
-            _get_classification_code(classification),
-            _json.dumps(classification, ensure_ascii=False) if classification else "",
-            getattr(pos, "source", "") or "",
+            neutralise_formula(_get_classification_code(classification)),
+            neutralise_formula(
+                _json.dumps(classification, ensure_ascii=False) if classification else ""
+            ),
+            neutralise_formula(getattr(pos, "source", "") or ""),
             _fmt_number(getattr(pos, "confidence", None))
             if getattr(pos, "confidence", None) is not None
             else "",
-            getattr(pos, "wbs_code", "") or getattr(pos, "wbs_id", "") or "",
-            ",".join(str(x) for x in cad_ids) if isinstance(cad_ids, list) else "",
-            _json.dumps(metadata_, ensure_ascii=False) if metadata_ else "",
+            neutralise_formula(
+                getattr(pos, "wbs_code", "") or getattr(pos, "wbs_id", "") or ""
+            ),
+            neutralise_formula(
+                ",".join(str(x) for x in cad_ids) if isinstance(cad_ids, list) else ""
+            ),
+            neutralise_formula(_json.dumps(metadata_, ensure_ascii=False) if metadata_ else ""),
         ]
 
     # Section positions
     for section in structured.sections:
-        # Section header row
+        # Section header row — section ordinal/description are user-controlled.
         writer.writerow(
             [
-                section.ordinal,
-                section.description,
+                neutralise_formula(section.ordinal),
+                neutralise_formula(section.description),
                 "",
                 "",
                 "",
@@ -2177,10 +2236,24 @@ async def export_boq_csv(
         ["", "Direct Cost", "", "", "", _fmt_number(structured.direct_cost), "", "", "", "", "", "", ""]
     )
 
-    # Markup rows
+    # Markup rows — markup.name is user-controlled.
     for markup in structured.markups:
         writer.writerow(
-            ["", f"  {markup.name}", "", "", "", _fmt_number(markup.amount), "", "", "", "", "", "", ""]
+            [
+                "",
+                neutralise_formula(f"  {markup.name}"),
+                "",
+                "",
+                "",
+                _fmt_number(markup.amount),
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+            ]
         )
 
     # Grand total row (includes markups)
@@ -2217,6 +2290,12 @@ async def export_boq_csv(
     )
 
 
+@router.get(
+    "/boqs/{boq_id}/export/excel",
+    summary="Export BOQ as Excel (no-slash alias)",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+    include_in_schema=False,
+)
 @router.get(
     "/boqs/{boq_id}/export/excel/",
     summary="Export BOQ as Excel",
@@ -2311,11 +2390,13 @@ async def export_boq_excel(
         # Subtotal label uses the section's original ordinal + description so
         # the roundtrip preserves the hierarchy key (BUG-150 — the prior
         # version sometimes wrote an empty-ordinal "Subtotal:  " row when the
-        # section object was missing).
+        # section object was missing). Neutralise against CSV formula
+        # injection — the embedded user-controlled ordinal/description must
+        # not be parsed by Excel as a formula.
         full_label = f"Subtotal: {sec_ordinal} {sec_desc}".strip().rstrip(":")
         if full_label == "Subtotal":
             full_label = "Subtotal"
-        label_cell = ws.cell(row=row, column=2, value=full_label)
+        label_cell = ws.cell(row=row, column=2, value=neutralise_formula(full_label))
         label_cell.font = subtotal_font
         label_cell.fill = light_gray_fill
         total_cell = ws.cell(row=row, column=6, value=subtotal)
@@ -2334,22 +2415,28 @@ async def export_boq_excel(
                 s_ord, s_desc, s_sub = section_map[current_section_id]
                 current_row = _write_subtotal(current_row, s_ord, s_desc, s_sub)
 
-        # Section header rows (unit="section")
+        # Section header rows (unit="section"). All user-controlled string
+        # cells are routed through ``neutralise_formula`` to defend against
+        # CSV formula injection (BUG-CSV-INJECTION).
         if pos.unit in ("", "section"):
             current_section_id = str(pos.id)
             for c in range(1, len(headers) + 1):
                 ws.cell(row=current_row, column=c).fill = gray_fill
-            ws.cell(row=current_row, column=1, value=pos.ordinal).font = section_font
-            desc_cell = ws.cell(row=current_row, column=2, value=pos.description)
+            ws.cell(
+                row=current_row, column=1, value=neutralise_formula(pos.ordinal)
+            ).font = section_font
+            desc_cell = ws.cell(
+                row=current_row, column=2, value=neutralise_formula(pos.description)
+            )
             desc_cell.font = section_font
             desc_cell.fill = gray_fill
             current_row += 1
             continue
 
-        # Regular position row
-        ws.cell(row=current_row, column=1, value=pos.ordinal)
-        ws.cell(row=current_row, column=2, value=pos.description)
-        ws.cell(row=current_row, column=3, value=pos.unit)
+        # Regular position row — user-controlled strings neutralised on output.
+        ws.cell(row=current_row, column=1, value=neutralise_formula(pos.ordinal))
+        ws.cell(row=current_row, column=2, value=neutralise_formula(pos.description))
+        ws.cell(row=current_row, column=3, value=neutralise_formula(pos.unit))
 
         # Pass Decimal to openpyxl so Excel stores as number (enables SUM,
         # sorting, and avoids the 'Number stored as text' warning triangle).
@@ -2385,40 +2472,59 @@ async def export_boq_excel(
         ws.cell(
             row=current_row,
             column=7,
-            value=_get_classification_code(classification_),
+            value=neutralise_formula(_get_classification_code(classification_)),
         )
         ws.cell(
             row=current_row,
             column=8,
-            value=_json.dumps(classification_, ensure_ascii=False) if classification_ else "",
+            value=neutralise_formula(
+                _json.dumps(classification_, ensure_ascii=False) if classification_ else ""
+            ),
         )
-        ws.cell(row=current_row, column=9, value=getattr(pos, "source", "") or "")
+        ws.cell(
+            row=current_row,
+            column=9,
+            value=neutralise_formula(getattr(pos, "source", "") or ""),
+        )
         conf = getattr(pos, "confidence", None)
         ws.cell(row=current_row, column=10, value=float(conf) if conf is not None else None)
         ws.cell(
             row=current_row,
             column=11,
-            value=getattr(pos, "wbs_code", "") or getattr(pos, "wbs_id", "") or "",
+            value=neutralise_formula(
+                getattr(pos, "wbs_code", "") or getattr(pos, "wbs_id", "") or ""
+            ),
         )
         ws.cell(
             row=current_row,
             column=12,
-            value=",".join(str(x) for x in cad_ids) if isinstance(cad_ids, list) else "",
+            value=neutralise_formula(
+                ",".join(str(x) for x in cad_ids) if isinstance(cad_ids, list) else ""
+            ),
         )
         ws.cell(
             row=current_row,
             column=13,
-            value=_json.dumps(pos_meta_raw, ensure_ascii=False) if pos_meta_raw else "",
+            value=neutralise_formula(
+                _json.dumps(pos_meta_raw, ensure_ascii=False) if pos_meta_raw else ""
+            ),
         )
 
         # ── Custom column values ─────────────────────────────────────────
+        # Custom-column text values are user-controlled and must be
+        # neutralised before being written. ``number`` columns are recast
+        # to ``float`` below, so they bypass ``neutralise_formula``.
         if custom_columns:
             custom_fields = pos_meta_raw.get("custom_fields", {}) if isinstance(pos_meta_raw, dict) else {}
             for offset, col_def in enumerate(custom_columns):
                 col_name = col_def.get("name", "")
                 col_type = col_def.get("column_type", "text")
                 value = custom_fields.get(col_name, "") if isinstance(custom_fields, dict) else ""
-                cell = ws.cell(row=current_row, column=n_standard + 1 + offset, value=value)
+                cell = ws.cell(
+                    row=current_row,
+                    column=n_standard + 1 + offset,
+                    value=neutralise_formula(value),
+                )
                 if col_type == "number" and value not in (None, ""):
                     try:
                         cell.value = float(value)
@@ -2486,6 +2592,12 @@ async def export_boq_excel(
     )
 
 
+@router.get(
+    "/boqs/{boq_id}/export/pdf",
+    summary="Export BOQ as PDF (no-slash alias)",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+    include_in_schema=False,
+)
 @router.get(
     "/boqs/{boq_id}/export/pdf/",
     summary="Export BOQ as PDF",
@@ -2584,6 +2696,12 @@ async def export_boq_pdf(
     )
 
 
+@router.get(
+    "/boqs/{boq_id}/export/gaeb",
+    summary="Export BOQ as GAEB XML 3.3 (no-slash alias)",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+    include_in_schema=False,
+)
 @router.get(
     "/boqs/{boq_id}/export/gaeb/",
     summary="Export BOQ as GAEB XML 3.3",
@@ -2909,6 +3027,48 @@ def _match_column(header: str) -> str | None:
     return None
 
 
+def _detect_file_format(content_head: bytes) -> Literal["xlsx", "csv", "parquet", "unknown"]:
+    """Identify an upload by its magic bytes (BUG-UPLOAD01).
+
+    File extensions are attacker-controlled — a ``.exe`` renamed to ``.xlsx``
+    would otherwise be handed to ``openpyxl`` (best case: a parse exception;
+    worst case: the bytes get persisted alongside trusted attachments).
+    Stdlib only — uses the existing ``app.core.file_signature.detect`` for
+    container types and a UTF-8 round-trip to confirm CSV is readable text.
+
+    Returns one of: ``"xlsx"``, ``"csv"``, ``"parquet"``, ``"unknown"``.
+    """
+    if not content_head:
+        return "unknown"
+    sig = detect_signature(content_head)
+    # XLSX is an OOXML zip: starts with the standard PK\x03\x04 local-file
+    # header. ``file_signature.detect`` returns ``"zip"`` for any zip
+    # container; we treat that as XLSX here because it's the only zip
+    # format the BOQ importer accepts.
+    if sig == "zip":
+        return "xlsx"
+    # Apache Parquet files begin (and end) with the ``PAR1`` magic.
+    if content_head[:4] == b"PAR1":
+        return "parquet"
+    # CSV has no magic — fall back to "is this valid UTF-8 / UTF-8-BOM /
+    # latin-1 text?". Reject anything that contains a NUL byte (binary
+    # garbage) or fails every common text codec. A short head is enough:
+    # a 512-byte sample misclassifies astoundingly rarely on real CSVs.
+    if b"\x00" in content_head:
+        return "unknown"
+    for encoding in ("utf-8-sig", "utf-8", "latin-1"):
+        try:
+            decoded = content_head.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+        # A CSV header row usually contains at least one ASCII separator
+        # (``,;\t|``) within the first kilobyte. A pure binary blob that
+        # happens to decode as latin-1 would lack any of those.
+        if any(sep in decoded for sep in (",", ";", "\t", "|", "\n")):
+            return "csv"
+    return "unknown"
+
+
 def _safe_float(value: Any, default: float = 0.0) -> float:
     """Parse a value to float, returning *default* on failure.
 
@@ -2939,6 +3099,32 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
         return float(text)
     except (ValueError, TypeError):
         return default
+
+
+def _parse_numeric_cell(value: Any) -> tuple[float | None, str | None]:
+    """Strict numeric parse for BOQ import (BUG-IMPORT02).
+
+    Returns ``(parsed, error)``. ``error`` is ``None`` on success.
+    Empty / ``None`` cells parse to ``0.0`` (the column was simply blank);
+    non-empty strings that cannot be coerced surface a row-numbered error
+    so callers can return a 400 with row + offending text rather than
+    silently zero-filling and crashing later in the rollup.
+    """
+    if value is None:
+        return 0.0, None
+    if isinstance(value, bool):
+        # ``bool`` is an ``int`` subclass — explicitly reject so True/False
+        # is not silently accepted as 1/0 in a numeric column.
+        return None, f"expected a number, got boolean {value!r}"
+    if isinstance(value, (int, float)):
+        return float(value), None
+    text = str(value).strip()
+    if not text:
+        return 0.0, None
+    parsed = _safe_float(text, default=float("nan"))
+    if parsed != parsed:  # NaN check — ``_safe_float`` returns NaN on miss
+        return None, f"expected a number, got {text!r}"
+    return parsed, None
 
 
 def _parse_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
@@ -3097,26 +3283,69 @@ async def import_boq_excel(
             detail="File too large. Maximum size is 10 MB.",
         )
 
+    # BUG-UPLOAD01: validate the actual file content, not just the
+    # extension. A .exe renamed to .xlsx would otherwise be handed to
+    # openpyxl (parse-time crash, but the bytes still hit our buffers and
+    # logs first). Stdlib magic-byte sniff against an explicit allow-list.
+    detected = _detect_file_format(content[:4096])
+    expected = "xlsx" if filename.endswith(".xlsx") else "csv"
+    if detected != expected:
+        # Special-case: a CSV uploaded with a .xlsx extension (or vice
+        # versa) is a user error, not an attack. Reject with a clear hint
+        # rather than the generic "format mismatch" string. Anything that
+        # detects as ``unknown`` is treated as suspicious.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"File content does not match its extension. Detected "
+                f"{detected!r}, expected {expected!r}. "
+                "Please upload a real .xlsx or .csv file."
+            ),
+        )
+
     # Zip-bomb guard: reject .xlsx whose uncompressed sheets exceed 50 MB.
     reject_if_xlsx_bomb(content)
 
-    # Parse rows based on file type
+    # BUG-PERF01: openpyxl's ``load_workbook`` and ``csv.reader`` are
+    # synchronous and can spend seconds on a 10K-row import. Running them
+    # on the event-loop thread starves every concurrent request. Defer to
+    # the default thread executor so the loop stays responsive.
     import_meta: dict[str, Any] = {}
     try:
         if filename.endswith(".xlsx"):
-            rows, import_meta = _parse_rows_from_excel(content)
+            rows, import_meta = await asyncio.to_thread(
+                _parse_rows_from_excel, content
+            )
         else:
-            rows = _parse_rows_from_csv(content)
+            rows = await asyncio.to_thread(_parse_rows_from_csv, content)
     except ValueError as exc:
+        # ValueError covers the curated parse errors raised by our
+        # ``_parse_rows_from_*`` helpers (missing header row, undecodable
+        # text). Surface the message — it's already user-safe.
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to parse file: {exc}",
+            detail=f"Could not parse file: {exc}",
+        )
+    except (zipfile.BadZipFile, KeyError) as exc:
+        # BUG-UPLOAD02: openpyxl raises ``BadZipFile`` (zip header
+        # corruption) and ``KeyError`` (missing sheet xml entries) on
+        # malformed xlsx. Without this catch the request returns 500 with
+        # a full traceback — a footgun for log-exposed deployments.
+        logger.warning(
+            "Malformed xlsx upload (%s): %s", type(exc).__name__, exc
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Could not parse file: the xlsx archive is corrupt or truncated.",
         )
     except Exception as exc:
+        # BUG-UPLOAD02: log the full traceback for ops, return a sanitised
+        # message to the client. ``_log.exception`` honours structlog's
+        # processor chain when configured.
         logger.exception("Unexpected error parsing import file: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Failed to parse file. Please check the format and try again.",
+            detail="Could not parse file: unexpected format error.",
         )
 
     if not rows:
@@ -3184,11 +3413,37 @@ async def import_boq_excel(
 
             # Parse unit
             unit_raw = str(row.get("unit", "")).strip()
-            # Parse numeric fields
+            # Parse numeric fields with strict per-row validation
+            # (BUG-IMPORT02). A non-empty cell that can't be coerced to a
+            # number used to silently default to 0.0 — the bad value would
+            # then crash later in the cost rollup. We now surface the
+            # offending row + column to the user.
             quantity_raw = row.get("quantity")
             unit_rate_raw = row.get("unit_rate")
-            quantity = _safe_float(quantity_raw, default=0.0)
-            unit_rate = _safe_float(unit_rate_raw, default=0.0)
+            quantity, q_err = _parse_numeric_cell(quantity_raw)
+            unit_rate, r_err = _parse_numeric_cell(unit_rate_raw)
+            if q_err is not None:
+                errors.append(
+                    {
+                        "row": row_idx,
+                        "ordinal": str(row.get("ordinal", "")).strip() or str(auto_ordinal),
+                        "error": f"Invalid quantity at row {row_idx}: {q_err}",
+                        "data": {k: str(v)[:100] for k, v in row.items()},
+                    }
+                )
+                continue
+            if r_err is not None:
+                errors.append(
+                    {
+                        "row": row_idx,
+                        "ordinal": str(row.get("ordinal", "")).strip() or str(auto_ordinal),
+                        "error": f"Invalid unit_rate at row {row_idx}: {r_err}",
+                        "data": {k: str(v)[:100] for k, v in row.items()},
+                    }
+                )
+                continue
+            assert quantity is not None  # narrowed: q_err was None
+            assert unit_rate is not None
 
             # Section detection (ENH-087): a row with a description but no
             # unit, no quantity, no unit_rate is very likely a section header
@@ -3344,6 +3599,21 @@ async def import_boq_excel(
         skipped,
         len(errors),
     )
+
+    # BUG-IMPORT02: when every parseable row failed validation (no
+    # ``imported`` rows but errors collected), surface a 400 with the
+    # first row's diagnostic so the client can show "row 2: invalid
+    # quantity" rather than a confusing 200 with imported=0. Partial
+    # successes still return 200 with the per-row error list intact.
+    if imported == 0 and errors:
+        first = errors[0]
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Import failed at row {first.get('row', '?')}: "
+                f"{first.get('error', 'unknown error')}"
+            ),
+        )
 
     return {
         "imported": imported,
@@ -3951,6 +4221,12 @@ async def smart_import(
 
     # ── 1. Extract text/data based on file type ────────────────────────
     if ext in ("xlsx", "xls"):
+        # BUG-UPLOAD01b: smart-import path used to skip the xlsx-bomb
+        # guard that import_boq_excel calls — same DoS surface via this
+        # endpoint. Apply the same defence here before parsing.
+        from app.core.upload_guards import reject_if_xlsx_bomb
+
+        reject_if_xlsx_bomb(content)
         extracted = _extract_from_excel_for_smart(content)
     elif ext == "csv":
         extracted = _extract_from_csv_for_smart(content)

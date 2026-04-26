@@ -5,6 +5,36 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.2] — 2026-04-26
+
+QA-report stability sweep. Triaged a 65-bug audit; ~70% were already-fixed or false-positive. Real fixes shipped:
+
+### Security
+- `docker-compose.quickstart.yml`: `JWT_SECRET` and `POSTGRES_PASSWORD` now required via env (or `.env`) — compose fails fast instead of shipping globally-shared defaults.
+- `Dockerfile.unified`: removed baked-in `JWT_SECRET=change-me-in-production` ENV — must be supplied at `docker run` time.
+- `registration_mode` default flipped `open` → `admin-approve`. First registrant still becomes admin (bootstrap path); subsequent self-registrations need approval. Self-hosters who want open registration set `OE_REGISTRATION_MODE=open` in `.env`.
+
+### Fixed
+- `_resolve_demo_password` default is now the documented `DemoPass1234!` instead of a random token — the CLI banner, README, and seed all advertised that string but the actual default was random, so demo logins silently failed on fresh installs.
+- BOQ position parent_id validation returns 422 (FastAPI convention) instead of 400 across self-cycle / missing-parent / cross-BOQ cases.
+- `smart_import` xlsx path now calls `reject_if_xlsx_bomb` — the bomb guard previously only ran in `import_boq_excel`, leaving a DoS vector via this endpoint.
+- Reporting page no longer logs 50× console 404 — `/v1/reporting/kpi` → `/v1/reporting/kpi/`.
+- Finance page no longer 422s on every load — `/v1/finance/budgets` → `/v1/finance/budgets/`.
+- BIM Asset Register page no longer 404s — `/v1/bim_hub/assets/?` was hitting `/{model_id}` route, removed the trailing slash.
+- Onboarding tour no longer blocks first-time project creation — auto-start is now skipped on `/projects/new`, `/onboarding`, `/setup`, `/login`, `/register`.
+- Empty-dashboard for new users replaced with proper EmptyState (FolderPlus + Create-project CTA).
+- `?lang=` URL parameter now honoured at i18n init (validated against supported locales, persisted to localStorage).
+
+### Build / Install
+- `backend/requirements.txt` reduced from 236-line freeze (torch, openai, anthropic, playwright, pyinstaller, etc.) to a 4-line `-e .[server]` shim. Saves GBs on `pip install -r`.
+- `Makefile` `dev` target split: `dev-backend`, `dev-frontend` for two-terminal Windows workflow; `dev-unix` keeps the POSIX-only `&` form.
+- `openestimate init-db --reset` flag added — deletes existing DB before init. Without it, prints a warning if a previous DB is present at the data dir.
+- `pyproject.toml` upper version bounds added on pandas/pyarrow/pydantic/sqlalchemy/alembic/fastapi/uvicorn/duckdb/httpx — prevents pip from resolving breaking-major releases.
+- `Dockerfile.unified` base image bumped `node:20-alpine` → `node:22-alpine` (rollup-plugin-visualizer 8.x requires node>=22).
+
+### UI
+- Header: dev-tool buttons "Report Issue" + "Email Issues" moved into a `⋯` "More" popover.
+
 ## [2.5.1] — 2026-04-26
 
 Hotfix release for installer regression on Windows (issue #87).

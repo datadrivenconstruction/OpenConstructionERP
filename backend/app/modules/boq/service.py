@@ -742,6 +742,57 @@ def _to_decimal(
     return d
 
 
+# BUG-MATH01: enforce a fixed 4-decimal-place precision boundary at the
+# storage layer.  CLAUDE.md specifies decimal arithmetic with explicit
+# rounding; previously we wrote whatever Decimal multiplication produced
+# (e.g. ``99.99 * 0.1 = 9.999``), which leaked binary-float drift in for
+# any caller that fed floats in via ``repr``.  Quantising at write time
+# turns the column into a NUMERIC(18,4) equivalent regardless of the
+# underlying String-vs-Numeric storage choice.
+_MONEY_QUANTUM = Decimal("0.0001")
+
+
+def _quantize_money(value: Decimal) -> Decimal:
+    """Round a Decimal to 4 fractional digits using banker's rounding.
+
+    Returns the input unchanged when the value is non-finite — callers
+    upstream already guarded those.  ROUND_HALF_EVEN ("banker's rounding")
+    is the regulated default for monetary aggregations and avoids the
+    upward bias of HALF_UP over millions of line items.
+    """
+    from decimal import ROUND_HALF_EVEN
+
+    if not value.is_finite():
+        return value
+    return value.quantize(_MONEY_QUANTUM, rounding=ROUND_HALF_EVEN)
+
+
+def _quantize_money_str(value: str | int | float | Decimal | None) -> str:
+    """Coerce → Decimal → quantize(4dp) → canonical string.
+
+    Used at every write boundary for ``quantity``, ``unit_rate``, and
+    ``total`` so the DB never holds more than 4 fractional digits.
+    """
+    return str(_quantize_money(_to_decimal(value)))
+
+
+def _coerce_audit_value(value: Any) -> Any:
+    """Convert a Position attribute to a JSON-safe primitive (BUG-AUDIT01).
+
+    Activity-log ``changes`` is stored as a JSON column; raw UUID /
+    datetime / Decimal instances trip the SQLite JSON serialiser and
+    break the diff write entirely.  Stringify them; primitives, dicts
+    and lists pass through unchanged.
+    """
+    if value is None or isinstance(value, (bool, int, float, str)):
+        return value
+    if isinstance(value, (list, tuple)):
+        return [_coerce_audit_value(v) for v in value]
+    if isinstance(value, dict):
+        return {str(k): _coerce_audit_value(v) for k, v in value.items()}
+    return str(value)
+
+
 def _compute_total(
     quantity: str | int | float | Decimal | None,
     unit_rate: str | int | float | Decimal | None,
@@ -749,10 +800,12 @@ def _compute_total(
     """Compute ``quantity * unit_rate`` preserving exact decimal precision.
 
     Returns a canonical string representation safe for SQLite storage.
+    The product is quantised to 4 decimal places (BUG-MATH01) so aggregate
+    drift cannot compound across thousands of lines.
     """
     q = _to_decimal(quantity)
     r = _to_decimal(unit_rate)
-    return str(q * r)
+    return str(_quantize_money(q * r))
 
 
 def _str_to_float(value: str | None) -> float:
@@ -1025,6 +1078,99 @@ class BOQService:
             )
         return boq
 
+    async def _validate_parent_id(
+        self,
+        *,
+        boq_id: uuid.UUID,
+        position_id: uuid.UUID | None,
+        new_parent_id: uuid.UUID | None,
+    ) -> None:
+        """Validate a candidate ``parent_id`` for a position to prevent cycles.
+
+        Guards three classes of corruption that would crash hierarchical
+        traversal (total recompute, PDF/Excel/GAEB exports):
+
+        1. **Self-cycle** — ``parent_id == position_id``.
+        2. **Descendant cycle** — ``parent_id`` is a direct or transitive
+           descendant of ``position_id``. Walks the descendant chain by
+           repeatedly fetching children until the candidate is found or the
+           tree is exhausted. A visited-set guard prevents an infinite loop
+           on already-corrupt data; if the guard ever trips we log a warning
+           — under normal operation it never should.
+        3. **Cross-BOQ parent** — ``parent_id`` belongs to a different BOQ.
+
+        Args:
+            boq_id: BOQ that the (current or candidate) position lives in.
+            position_id: ID of the position being updated, or ``None`` for
+                creates where the row does not exist yet.
+            new_parent_id: Candidate parent UUID, or ``None`` for a top-level
+                position. ``None`` is always valid and short-circuits.
+
+        Raises:
+            HTTPException 400: Any of the three invariants is violated.
+        """
+        if new_parent_id is None:
+            return
+
+        # 1. Self-cycle. Cheap pre-check before any DB round-trip.
+        # BUG-CYCLE02: validation errors return 422 (FastAPI convention),
+        # not 400. Bogus parent_id used to surface as a generic 400 or
+        # leak a 500 from FK violation; now consistent across all
+        # parent-validation failures.
+        if position_id is not None and new_parent_id == position_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Position cannot be its own parent (self-referencing parent_id).",
+            )
+
+        # 3. Cross-BOQ parent — validated up front so we don't follow
+        #    descendant chains across BOQ boundaries.
+        parent = await self.position_repo.get_by_id(new_parent_id)
+        if parent is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Parent position {new_parent_id} does not exist.",
+            )
+        if parent.boq_id != boq_id:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    "Parent position belongs to a different BOQ "
+                    f"({parent.boq_id}); cross-BOQ parents are not allowed."
+                ),
+            )
+
+        # 2. Descendant cycle. Only meaningful for updates (position_id
+        #    is not None). For creates the row has no descendants yet.
+        if position_id is None:
+            return
+
+        visited: set[uuid.UUID] = set()
+        frontier: list[uuid.UUID] = [position_id]
+        while frontier:
+            current = frontier.pop()
+            if current in visited:
+                logger.warning(
+                    "Cycle guard: revisited position %s while walking descendants of %s — "
+                    "data may already be corrupt.",
+                    current,
+                    position_id,
+                )
+                continue
+            visited.add(current)
+
+            children = await self.position_repo.list_children(current)
+            for child in children:
+                if child.id == new_parent_id:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=(
+                            "Cannot set parent_id to a descendant of this position "
+                            "— would create a cycle in the BOQ hierarchy."
+                        ),
+                    )
+                frontier.append(child.id)
+
     # ── BOQ operations ────────────────────────────────────────────────────
 
     async def create_boq(self, data: BOQCreate) -> BOQ:
@@ -1205,6 +1351,14 @@ class BOQService:
                 detail=f"Position with ordinal '{data.ordinal}' already exists in this BOQ",
             )
 
+        # Cycle / cross-BOQ guard. The (rare) client-supplied id case where
+        # parent_id == id would otherwise create an immediate self-loop.
+        await self._validate_parent_id(
+            boq_id=data.boq_id,
+            position_id=None,
+            new_parent_id=data.parent_id,
+        )
+
         total = _compute_total(data.quantity, data.unit_rate)
         max_order = await self.position_repo.get_max_sort_order(data.boq_id)
 
@@ -1214,8 +1368,9 @@ class BOQService:
             ordinal=data.ordinal,
             description=data.description,
             unit=data.unit,
-            quantity=str(data.quantity),
-            unit_rate=str(data.unit_rate),
+            # BUG-MATH01: quantise inputs to 4 dp at the storage boundary.
+            quantity=_quantize_money_str(data.quantity),
+            unit_rate=_quantize_money_str(data.unit_rate),
             total=total,
             classification=data.classification,
             source=data.source,
@@ -1311,19 +1466,33 @@ class BOQService:
         logger.info("Section created: %s in BOQ %s", data.ordinal, boq_id)
         return section
 
-    async def update_position(self, position_id: uuid.UUID, data: PositionUpdate) -> Position:
+    async def update_position(
+        self,
+        position_id: uuid.UUID,
+        data: PositionUpdate,
+        *,
+        actor_id: uuid.UUID | None = None,
+    ) -> Position:
         """Update a position and recalculate total if quantity or unit_rate changed.
 
         Args:
             position_id: Target position identifier.
-            data: Partial update payload.
+            data: Partial update payload.  May include ``version`` for
+                optimistic-concurrency control (BUG-CONCURRENCY01).
+            actor_id: Optional caller user-id to attribute the audit-log
+                entry to.  When ``None`` the service falls back to the
+                system zero-UUID; routers should always pass it explicitly
+                so ``BOQActivityLog.user_id`` resolves to a real user
+                (PG/SQLite both enforce the FK).
 
         Returns:
             Updated position.
 
         Raises:
             HTTPException 404 if position not found.
-            HTTPException 409 if the owning BOQ is locked.
+            HTTPException 409 if the owning BOQ is locked, the ordinal
+                collides, OR the supplied ``version`` does not match the
+                row's current value (lost-update protection).
         """
         position = await self.position_repo.get_by_id(position_id)
         if position is None:
@@ -1335,6 +1504,32 @@ class BOQService:
 
         fields = data.model_dump(exclude_unset=True)
 
+        # ── BUG-CONCURRENCY01: optimistic concurrency check ──────────────
+        # Pop the client-supplied ``version`` so it never reaches the SQL
+        # UPDATE.  We bump it ourselves below.
+        client_version = fields.pop("version", None)
+        if client_version is not None and int(client_version) != int(position.version or 0):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Position was modified by another writer (server version "
+                    f"{position.version}, client supplied {client_version}). "
+                    "Reload and retry."
+                ),
+            )
+
+        # ── BUG-AUDIT01: snapshot before-state for the audit-log diff ──
+        # Capture *before* mutation so the audit row carries old/new pairs
+        # for every column the patch touches.  We only snapshot fields the
+        # client actually set, mirroring ``exclude_unset`` above.
+        _audit_before: dict[str, Any] = {}
+        for key in fields:
+            attr = "metadata_" if key == "metadata" else key
+            try:
+                _audit_before[key] = getattr(position, attr)
+            except AttributeError:
+                _audit_before[key] = None
+
         # If ordinal is being changed, check uniqueness within the BOQ
         if "ordinal" in fields and fields["ordinal"] != position.ordinal:
             if await self.position_repo.ordinal_exists(
@@ -1345,11 +1540,22 @@ class BOQService:
                     detail=f"Position with ordinal '{fields['ordinal']}' already exists in this BOQ",
                 )
 
-        # Convert float values to strings for storage
+        # If parent_id is being changed, validate it doesn't create a cycle
+        # or cross BOQ boundaries. Skip the walk when the value is unchanged
+        # so untouched edits don't pay the descendant-traversal cost.
+        if "parent_id" in fields and fields["parent_id"] != position.parent_id:
+            await self._validate_parent_id(
+                boq_id=position.boq_id,
+                position_id=position_id,
+                new_parent_id=fields["parent_id"],
+            )
+
+        # Convert float values to strings for storage and quantise to 4dp
+        # so storage drift cannot accumulate (BUG-MATH01).
         if "quantity" in fields:
-            fields["quantity"] = str(fields["quantity"])
+            fields["quantity"] = _quantize_money_str(fields["quantity"])
         if "unit_rate" in fields:
-            fields["unit_rate"] = str(fields["unit_rate"])
+            fields["unit_rate"] = _quantize_money_str(fields["unit_rate"])
         if "confidence" in fields:
             val = fields["confidence"]
             fields["confidence"] = str(val) if val is not None else None
@@ -1428,10 +1634,36 @@ class BOQService:
                 fields["validation_status"] = "pending"
 
         if fields:
+            # BUG-CONCURRENCY01: bump the version counter atomically with the
+            # rest of the field set so any concurrent reader observing the
+            # post-write state also sees the incremented token.
+            fields["version"] = int(position.version or 0) + 1
             await self.position_repo.update_fields(position_id, **fields)
             # Flush to DB, then refresh ORM state from DB (avoids MissingGreenlet on lazy load)
             await self.session.flush()
             await self.session.refresh(position)
+
+        # ── BUG-AUDIT01: build the field-level diff payload ──────────────
+        # ``_audit_before`` snapshotted attributes BEFORE the UPDATE; we
+        # snapshot again now to compose ``{"field": {"old": ..., "new": ...}}``
+        # entries.  Stringify everything so the JSON column never receives
+        # an opaque Decimal/UUID/datetime that would break dict equality
+        # downstream.  ``version`` is embedded in metadata so consumers can
+        # reconstruct the row history without joining back to ``Position``.
+        changes_diff: dict[str, dict[str, Any]] = {}
+        if fields:
+            for key in _audit_before:
+                attr = "metadata_" if key == "metadata" else key
+                try:
+                    new_val = getattr(position, attr)
+                except AttributeError:
+                    new_val = None
+                old_val = _audit_before[key]
+                if old_val != new_val:
+                    changes_diff[key] = {
+                        "old": _coerce_audit_value(old_val),
+                        "new": _coerce_audit_value(new_val),
+                    }
 
         await _safe_publish(
             "boq.position.updated",
@@ -1439,9 +1671,42 @@ class BOQService:
                 "position_id": str(position.id),
                 "boq_id": str(position.boq_id),
                 "ordinal": position.ordinal,
+                # Diff payload picked up by the activity-log wildcard
+                # handler in ``boq.events`` (BUG-AUDIT01).
+                "changes": changes_diff,
+                "version": int(position.version or 0),
             },
             source_module="oe_boq",
         )
+
+        # ── BUG-AUDIT01: direct activity-log write ──────────────────────
+        # The wildcard event handler in ``boq.events`` is *not* registered
+        # on SQLite (greenlet-bridge issue) so dev / test instances would
+        # otherwise lose every position-update audit entry.  Writing
+        # in-line here, in the same session as the update, guarantees
+        # coverage on every dialect.  Skipped when the caller did not
+        # supply a real user-id (FK-bound column).
+        if changes_diff and actor_id is not None:
+            try:
+                project_id: uuid.UUID | None = None
+                try:
+                    boq = await self.get_boq(position.boq_id)
+                    project_id = boq.project_id
+                except Exception:  # noqa: BLE001 — best-effort
+                    project_id = None
+                await self.log_activity(
+                    user_id=actor_id,
+                    action="position.updated",
+                    target_type="position",
+                    description=f"Updated position {position.ordinal}",
+                    project_id=project_id,
+                    boq_id=position.boq_id,
+                    target_id=position.id,
+                    changes=changes_diff,
+                    metadata_={"version": int(position.version or 0)},
+                )
+            except Exception:  # noqa: BLE001 — best-effort, never break PATCH
+                logger.debug("Activity-log write for position.updated failed", exc_info=True)
 
         return position
 

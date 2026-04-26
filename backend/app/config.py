@@ -120,6 +120,27 @@ class Settings(BaseSettings):
     # is intentionally unreachable through this setting.
     default_registration_role: Literal["viewer", "editor", "manager"] = "viewer"
 
+    # Self-registration policy. ``open`` (default) preserves backwards-compat
+    # with v2.5.x and earlier — anyone with network reach to ``POST
+    # /auth/register`` lands an immediately-active viewer account. For
+    # internet-exposed instances, set ``OE_REGISTRATION_MODE=admin-approve``:
+    # new accounts arrive ``is_active=False`` and cannot log in until an
+    # admin flips them active (PATCH /users/{id}). ``email-verify`` reserves
+    # the same dormant flow for a future verification-email step (today
+    # behaves identically to admin-approve). ``closed`` rejects every
+    # self-registration outright; admins must create users via the admin
+    # API. The bootstrap path (no admin in DB → first registrant becomes
+    # admin) bypasses the gate so a freshly installed instance can be
+    # initialised without chicken-and-egg.
+    # BUG-RBAC03: flipped from ``"open"`` → ``"admin-approve"`` in v2.5.2.
+    # Defaulting to open meant any internet-exposed instance handed out
+    # 39 read-permissions to anyone who hit /auth/register. The bootstrap
+    # path (no admin in DB → first registrant becomes admin) still
+    # bypasses the gate so a freshly installed instance can be initialised
+    # without chicken-and-egg. Self-hosters who explicitly want open
+    # registration can set ``OE_REGISTRATION_MODE=open`` in their .env.
+    registration_mode: Literal["open", "email-verify", "admin-approve", "closed"] = "admin-approve"
+
     # ── AI / Vector ──────────────────────────────────────────────────────
     vector_backend: str = "lancedb"  # "lancedb" (embedded, default) or "qdrant" (server)
     qdrant_url: str | None = "http://localhost:6333"

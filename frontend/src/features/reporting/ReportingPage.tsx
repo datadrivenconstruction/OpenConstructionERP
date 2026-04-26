@@ -228,7 +228,7 @@ export function ReportingPage() {
         projs.map(async (p) => {
           try {
             const kpi = await apiGet<KPISnapshot | null>(
-              `/v1/reporting/kpi?project_id=${p.id}`,
+              `/v1/reporting/kpi/?project_id=${p.id}`,
             );
             if (kpi) kpis[p.id] = kpi;
           } catch {

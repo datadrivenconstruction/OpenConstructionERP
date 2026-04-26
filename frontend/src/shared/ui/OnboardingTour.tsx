@@ -1,7 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { X, ArrowLeft, ArrowRight, MapPin } from 'lucide-react';
 import clsx from 'clsx';
+
+/* Routes where the auto-start tour must NOT mount on top of the page —
+ * the spotlight overlay/tooltip would block form inputs and primary CTAs.
+ * The tour can still be opened manually from the Help menu on these pages. */
+const AUTO_START_BLOCKED_PREFIXES = [
+  '/projects/new',
+  '/onboarding',
+  '/setup',
+  '/login',
+  '/register',
+];
 
 /* ── Constants ──────────────────────────────────────────────────────────── */
 
@@ -163,9 +175,19 @@ export function OnboardingTour({
   forceShow = false,
 }: OnboardingTourProps) {
   const { t } = useTranslation();
+  const location = useLocation();
+
+  // BUG-UI03: Don't auto-start on routes where the overlay would block
+  // primary form inputs (e.g. /projects/new). `forceShow` still bypasses
+  // this — manual launches from the Help menu always render.
+  const isBlockedRoute = AUTO_START_BLOCKED_PREFIXES.some((prefix) =>
+    location.pathname.startsWith(prefix),
+  );
 
   // Determine if tour should auto-start
-  const shouldStart = forceShow || localStorage.getItem(ONBOARDING_STORAGE_KEY) === null;
+  const shouldStart =
+    forceShow ||
+    (!isBlockedRoute && localStorage.getItem(ONBOARDING_STORAGE_KEY) === null);
 
   const [active, setActive] = useState(shouldStart);
   const [currentStep, setCurrentStep] = useState(0);

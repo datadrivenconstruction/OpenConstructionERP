@@ -43,6 +43,7 @@ _INSTANCE_ID = str(_instance_uuid.uuid4())
 _BUILD_HASH = _hashlib.sha256(f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()).hexdigest()[:16]
 
 from datetime import UTC
+from pathlib import Path
 
 import structlog
 from fastapi import Depends, FastAPI, HTTPException, status
@@ -348,15 +349,87 @@ async def _auto_backfill_vector_collections() -> None:
         logger.warning("Vector auto-backfill skipped: %s", exc)
 
 
+def _resolve_demo_password(env_var: str) -> tuple[str, bool]:
+    """Resolve the password for one demo account.
+
+    Returns ``(password, was_generated)``. If the operator set the matching
+    environment variable explicitly we honour it as-is. Otherwise we use
+    the documented default ``DemoPass1234!`` so the CLI banner, README,
+    and onboarding docs all line up — every surface previously advertised
+    that string anyway, but the underlying default was a random token,
+    so demo logins silently failed on a fresh install (BUG-D01). For any
+    internet-exposed deployment the operator MUST set the per-account env
+    vars; the startup banner and ``openestimate doctor`` will warn when
+    the default is in use against a non-localhost origin.
+    """
+    env_value = os.environ.get(env_var)
+    if env_value:
+        return env_value, False
+    return "DemoPass1234!", True
+
+
+def _persist_demo_credentials(creds: dict[str, str]) -> Path | None:
+    """Write generated demo credentials to a 0600 file.
+
+    Falls back to ``~/.openestimator/.demo_credentials.json`` when the CLI
+    didn't expose a data directory. Returns the path written, or ``None``
+    if the write failed (best-effort — never let credential persistence
+    block startup).
+    """
+    import json as _json
+    import stat as _stat
+
+    target_dir = os.environ.get("OE_CLI_DATA_DIR")
+    if target_dir:
+        base = Path(target_dir)
+    else:
+        base = Path.home() / ".openestimator"
+    try:
+        base.mkdir(parents=True, exist_ok=True)
+        path = base / ".demo_credentials.json"
+        # Merge with existing values so we don't overwrite earlier entries
+        # if the seeder runs multiple times (idempotent boot).
+        existing: dict[str, str] = {}
+        if path.exists():
+            try:
+                existing = _json.loads(path.read_text(encoding="utf-8")) or {}
+            except (OSError, ValueError):
+                existing = {}
+        existing.update(creds)
+        path.write_text(
+            _json.dumps(existing, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
+        try:
+            path.chmod(_stat.S_IRUSR | _stat.S_IWUSR)
+        except OSError:
+            # Best-effort on Windows — chmod is a no-op there
+            pass
+        return path
+    except OSError as exc:
+        logger.warning("Could not persist demo credentials: %s", exc)
+        return None
+
+
 async def _seed_demo_account() -> None:
     """Create demo user + 5 demo projects if they don't exist yet.
 
-    Idempotent — safe to call on every startup.  Creates:
-    - demo@openestimator.io / DemoPass1234!  (role=admin)
-    - 5 projects: residential-berlin, office-london, medical-us,
-      school-paris, warehouse-dubai (each with 2 BOQs: detailed + budget)
+    Idempotent — safe to call on every startup. Creates:
 
-    Disable with SEED_DEMO=false in production.
+    * demo@openestimator.io        (role=viewer — read-only walkthrough)
+    * estimator@openestimator.io   (role=estimator)
+    * manager@openestimator.io     (role=manager)
+
+    Each password is read from the environment if set
+    (``DEMO_USER_PASSWORD``, ``DEMO_ESTIMATOR_PASSWORD``,
+    ``DEMO_MANAGER_PASSWORD``), otherwise generated per-installation via
+    ``secrets.token_urlsafe(16)``. Generated values are written to
+    ``~/.openestimator/.demo_credentials.json`` (chmod 600) and printed
+    once to the startup log. Operators who want a stable password for
+    their team can set the env vars; everyone else gets a unique secret
+    they can recover from the credentials file.
+
+    Disable demo creation entirely with ``SEED_DEMO=false`` in production.
     """
     if os.environ.get("SEED_DEMO", "true").lower() in ("false", "0", "no"):
         return
@@ -368,63 +441,94 @@ async def _seed_demo_account() -> None:
     from app.modules.users.models import User
     from app.modules.users.service import hash_password
 
-    try:
-        async with async_session_factory() as session:
-            # 1. Create demo user if missing
-            demo = (
-                await session.execute(select(User).where(User.email == "demo@openestimator.io"))
-            ).scalar_one_or_none()
+    # Email → env-var-name mapping. Order matters for stable banner output.
+    demo_account_specs: list[dict[str, str]] = [
+        {
+            "email": "demo@openestimator.io",
+            "env_var": "DEMO_USER_PASSWORD",
+            "full_name": "Demo User",
+            "role": "viewer",
+        },
+        {
+            "email": "estimator@openestimator.io",
+            "env_var": "DEMO_ESTIMATOR_PASSWORD",
+            "full_name": "Sarah Chen",
+            "role": "estimator",
+        },
+        {
+            "email": "manager@openestimator.io",
+            "env_var": "DEMO_MANAGER_PASSWORD",
+            "full_name": "Thomas Müller",
+            "role": "manager",
+        },
+    ]
 
-            if demo is None:
-                # Demo user is intentionally `viewer` so the admin bootstrap
-                # still fires for the first real registrant on a freshly
-                # provisioned install. The demo login still works for the
-                # hands-on walkthrough — just in read-only mode.
-                demo = User(
+    # Track generated credentials so we can persist + print them once.
+    generated_creds: dict[str, str] = {}
+
+    try:
+        from app.modules.users.service import verify_password
+
+        async with async_session_factory() as session:
+            demo: User | None = None
+            for acct in demo_account_specs:
+                exists = (
+                    await session.execute(select(User).where(User.email == acct["email"]))
+                ).scalar_one_or_none()
+                if exists is not None:
+                    if acct["email"] == "demo@openestimator.io":
+                        demo = exists
+                    # If operator set the env-var explicitly and the stored
+                    # hash no longer matches that password, sync the hash so
+                    # the documented credential always works after a restart.
+                    env_value = os.environ.get(acct["env_var"])
+                    if env_value and not verify_password(env_value, exists.hashed_password):
+                        exists.hashed_password = hash_password(env_value)
+                        logger.info("Demo user password synced from env: %s", acct["email"])
+                    continue
+
+                password, was_generated = _resolve_demo_password(acct["env_var"])
+                if was_generated:
+                    generated_creds[acct["email"]] = password
+
+                user = User(
                     id=uuid.uuid4(),
-                    email="demo@openestimator.io",
-                    hashed_password=hash_password("DemoPass1234!"),
-                    full_name="Demo User",
-                    role="viewer",
+                    email=acct["email"],
+                    hashed_password=hash_password(password),
+                    full_name=acct["full_name"],
+                    role=acct["role"],
                     locale="en",
                     is_active=True,
                     metadata_={},
                 )
-                session.add(demo)
+                session.add(user)
                 await session.flush()
-                logger.info("Demo user created: demo@openestimator.io")
+                if acct["email"] == "demo@openestimator.io":
+                    demo = user
+                logger.info(
+                    "Demo user created: %s (password source: %s)",
+                    acct["email"],
+                    "env" if not was_generated else "generated",
+                )
 
-            # Create additional demo accounts (estimator + manager)
-            demo_accounts = [
-                {
-                    "email": "estimator@openestimator.io",
-                    "password": "DemoPass1234!",
-                    "full_name": "Sarah Chen",
-                    "role": "estimator",
-                },
-                {
-                    "email": "manager@openestimator.io",
-                    "password": "DemoPass1234!",
-                    "full_name": "Thomas Müller",
-                    "role": "manager",
-                },
-            ]
-            for acct in demo_accounts:
-                exists = (await session.execute(select(User).where(User.email == acct["email"]))).scalar_one_or_none()
-                if exists is None:
-                    session.add(
-                        User(
-                            id=uuid.uuid4(),
-                            email=acct["email"],
-                            hashed_password=hash_password(acct["password"]),
-                            full_name=acct["full_name"],
-                            role=acct["role"],
-                            locale="en",
-                            is_active=True,
-                            metadata_={},
-                        )
-                    )
-                    logger.info("Demo user created: %s", acct["email"])
+            # Persist generated passwords + print once. Operators who set
+            # env vars never see this banner; new installs get a one-time
+            # log line with the location.
+            if generated_creds:
+                creds_path = _persist_demo_credentials(generated_creds)
+                logger.warning(
+                    "Demo credentials generated for %d account(s). "
+                    "Saved to %s — recover the passwords from there or "
+                    "set DEMO_USER_PASSWORD / DEMO_ESTIMATOR_PASSWORD / "
+                    "DEMO_MANAGER_PASSWORD before next boot to override.",
+                    len(generated_creds),
+                    creds_path or "(persistence failed — check logs)",
+                )
+                # Log each generated password ONCE so a fresh log capture
+                # can reconstruct them. Subsequent boots find the user
+                # row already present and skip this branch entirely.
+                for email, pw in generated_creds.items():
+                    logger.warning("  %s: %s", email, pw)
 
             # 2. Install 5 demo projects if user has none
             count = (
@@ -630,6 +734,7 @@ def create_app() -> FastAPI:
 
     # ── Global exception handler — return JSON for unhandled errors ────
     from fastapi import Request
+    from fastapi.exceptions import RequestValidationError
     from fastapi.responses import JSONResponse
 
     @app.exception_handler(Exception)
@@ -638,6 +743,69 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=500,
             content={"detail": "Internal server error"},
+        )
+
+    # BUG-API02: sanitise FastAPI's default RequestValidationError response.
+    #
+    # Out of the box FastAPI returns 422 with a body that exposes the path
+    # parameter name and its expected Pydantic type, e.g.
+    #   {"detail":[{"type":"uuid_parsing","loc":["path","user_id"],"input":"abc"}]}
+    # An unauthenticated probe can read those bodies to enumerate the route
+    # surface (param names + types). For path-param validation failures —
+    # which mostly mean "the URL was malformed" — we collapse the response
+    # to a generic 400 with no schema details.
+    #
+    # Body / query-param validation errors keep the legacy 422 + detail
+    # behaviour because those are real client-error feedback (e.g. POST
+    # /users/ with role="god" must surface "role: invalid value" so the
+    # admin UI can show a useful message).  When ``app_debug`` is on, the
+    # full Pydantic detail is preserved everywhere so developers can still
+    # see what they broke.
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
+        errors = exc.errors()
+        path_only = bool(errors) and all(
+            (err.get("loc") or [None])[0] == "path" for err in errors
+        )
+
+        if path_only and not settings.app_debug:
+            # No detail leak — just acknowledge the URL is malformed.
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Invalid request"},
+            )
+
+        # Body / query / header validation: keep informative detail so
+        # client UIs can render per-field errors.  In production we still
+        # strip the raw input echo (Pydantic includes the offending value
+        # in ``input`` which can echo PII / tokens).
+        # ``ctx.error`` is a raw ``ValueError`` instance for ``value_error``
+        # entries — not JSON-serialisable — so always coerce to ``str``
+        # before emitting (regression seen with custom ``field_validator``
+        # raises in BUG-MATH03 unit-catalogue checks).
+        def _scrub(err: dict) -> dict:
+            out = dict(err)
+            ctx = out.get("ctx")
+            if isinstance(ctx, dict) and "error" in ctx and not isinstance(
+                ctx["error"], (str, int, float, bool, type(None))
+            ):
+                ctx = dict(ctx)
+                ctx["error"] = str(ctx["error"])
+                out["ctx"] = ctx
+            return out
+
+        if settings.app_debug:
+            safe_errors = [_scrub(e) for e in errors]
+        else:
+            safe_errors = [
+                {k: v for k, v in _scrub(err).items() if k != "input"}
+                for err in errors
+            ]
+        return JSONResponse(
+            status_code=422,
+            content={"detail": safe_errors},
         )
 
     # ── System Routes ───────────────────────────────────────────────────
@@ -1356,6 +1524,18 @@ def create_app() -> FastAPI:
         except Exception:
             logger.debug("Procurement Tenders alias not available (non-fatal)")
 
+        # 4D module (Section 6) — mount schedules + EAC schedule links at /api/v2
+        try:
+            from app.modules.schedule.router_4d import (
+                eac_schedule_links_router,
+                schedules_v2_router,
+            )
+
+            app.include_router(schedules_v2_router, prefix="/api/v2")
+            app.include_router(eac_schedule_links_router, prefix="/api/v2")
+        except Exception:
+            logger.debug("4D /api/v2 routers not available (non-fatal)")
+
         # Register cross-module event handlers (dataflow wiring)
         from app.core.event_handlers import register_event_handlers
 
@@ -1496,7 +1676,17 @@ def create_app() -> FastAPI:
         if _cli_host and _cli_port:
             _url = f"http://{_cli_host}:{_cli_port}"
             logger.info("OpenConstructionERP is ready at %s", _url)
-            logger.info("Demo login: demo@openestimator.io / DemoPass1234!")
+            # Demo passwords are now per-installation (BUG-D01 fix). The
+            # actual values were either supplied via DEMO_*_PASSWORD env
+            # vars or generated in ``_seed_demo_account`` and persisted to
+            # ``~/.openestimator/.demo_credentials.json``. Pointing the
+            # operator at that file beats baking a fixed password into
+            # every running instance.
+            logger.info(
+                "Demo login: demo@openestimator.io "
+                "(password from DEMO_USER_PASSWORD env var or "
+                "~/.openestimator/.demo_credentials.json)"
+            )
             if _cli_data_dir:
                 logger.info("Data directory: %s", _cli_data_dir)
             logger.info("Press Ctrl+C to stop. Docs: https://openconstructionerp.com/docs")

@@ -51,16 +51,63 @@ export function applyModuleTranslations(
   }
 }
 
+/**
+ * Resolve the initial UI language.
+ *
+ * Priority chain (first match wins):
+ *   1. ``?lang=`` URL query param (validated against ``SUPPORTED_LANGUAGES``).
+ *      If valid we also persist it to ``localStorage`` so the choice survives
+ *      a refresh after the param is dropped from the URL.
+ *   2. ``localStorage`` (``i18nextLng`` key) — last user choice.
+ *   3. ``navigator.language`` — best-effort browser default.
+ *   4. ``'en'`` — final fallback.
+ *
+ * SSR-safe: every ``window`` / ``localStorage`` / ``navigator`` access is
+ * guarded so the function returns ``'en'`` when called outside a browser.
+ */
+function resolveInitialLanguage(): string {
+  const supported = SUPPORTED_LANGUAGES.map((l) => l.code);
+  const isValid = (code: string | null | undefined): code is string =>
+    !!code && supported.includes(code);
+
+  if (typeof window === 'undefined') return 'en';
+
+  // 1. URL ?lang= param wins — useful for shareable localised links.
+  try {
+    const urlLang = new URLSearchParams(window.location.search).get('lang');
+    if (isValid(urlLang)) {
+      try {
+        window.localStorage.setItem('i18nextLng', urlLang);
+      } catch {
+        // localStorage unavailable (private browsing) — non-fatal.
+      }
+      return urlLang;
+    }
+  } catch {
+    // URL parsing failure — fall through to next source.
+  }
+
+  // 2. Stored preference from a previous session.
+  try {
+    const stored = window.localStorage.getItem('i18nextLng');
+    if (isValid(stored)) return stored;
+  } catch {
+    // localStorage unavailable — fall through.
+  }
+
+  // 3. Browser locale (strip region: "de-CH" → "de").
+  const browserLang = (navigator.language || 'en').split('-')[0];
+  if (isValid(browserLang)) return browserLang;
+
+  // 4. Final fallback.
+  return 'en';
+}
+
 i18n
   .use(initReactI18next)
   .init({
     resources: fallbackResources,
-    lng: localStorage.getItem('i18nextLng') || (() => {
-      // Auto-detect browser language for first-time users
-      const browserLang = (navigator.language || 'en').split('-')[0];
-      const supported = SUPPORTED_LANGUAGES.map((l) => l.code);
-      return supported.includes(browserLang ?? '') ? browserLang : 'en';
-    })(),
+    lng: resolveInitialLanguage(),
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,

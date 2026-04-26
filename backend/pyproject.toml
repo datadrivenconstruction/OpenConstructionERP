@@ -1,6 +1,6 @@
 [project]
 name = "openconstructionerp"
-version = "2.5.1"
+version = "2.5.2"
 description = "Open-source construction cost estimation — BOQ, 4D/5D, AI, CAD/BIM takeoff. After install, run: openestimate"
 license = "AGPL-3.0-or-later"
 requires-python = ">=3.12"
@@ -32,16 +32,16 @@ classifiers = [
 
 dependencies = [
     # Web framework
-    "fastapi>=0.115.0",
-    "uvicorn[standard]>=0.32.0",
+    "fastapi>=0.115.0,<1",
+    "uvicorn[standard]>=0.32.0,<1",
     "python-multipart>=0.0.26",  # CVE-2026-40347: request smuggling via malformed multipart
     # Database (SQLite — works out of the box, no external DB needed)
-    "sqlalchemy[asyncio]>=2.0.36",
+    "sqlalchemy[asyncio]>=2.0.36,<2.1",
     "aiosqlite>=0.20.0",
-    "alembic>=1.14.0",
+    "alembic>=1.14.0,<2",
     # Validation & serialization
-    "pydantic>=2.10.0",
-    "pydantic-settings>=2.6.0",
+    "pydantic>=2.10.0,<3",
+    "pydantic-settings>=2.6.0,<3",
     "email-validator>=2.1.0",
     # Auth
     "python-jose[cryptography]>=3.3.0",
@@ -51,7 +51,7 @@ dependencies = [
     "reportlab>=4.0.0",
     "pdfplumber>=0.11.0",
     # Utilities
-    "httpx>=0.28.0",
+    "httpx>=0.28.0,<1",
     "orjson>=3.10.0",
     "python-dateutil>=2.9.0",
     "structlog>=24.4.0",
@@ -65,8 +65,8 @@ dependencies = [
     # after a fresh-install bug where load-cwicr returned HTTP 500 with
     # "ModuleNotFoundError: No module named 'pandas'" on the headline
     # quickstart command. pyarrow is the parquet engine pandas needs.
-    "pandas>=2.2.0",
-    "pyarrow>=18.0.0",
+    "pandas>=2.2.0,<3",
+    "pyarrow>=18.0.0,<25",
     # 3D geometry — DAE->GLB conversion for 8.8x faster BIM viewer loading.
     # Degrades gracefully: if missing, the viewer falls back to raw DAE.
     "trimesh>=4.0.0",
@@ -78,7 +78,7 @@ dependencies = [
     # lived in [analytics] as optional; fallback path through pure-pyarrow
     # still exists for row-level reads but isn't sufficient for the
     # dashboard workflow.
-    "duckdb>=1.2.0",
+    "duckdb>=1.2.0,<2",
     # Fuzzy autocomplete for attribute-value suggestions (T03). Small
     # wheel, no deps; much faster than pure-Python ratio loops.
     "rapidfuzz>=3.0.0",

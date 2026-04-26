@@ -1021,7 +1021,10 @@ export async function listTrackedAssets(
   });
   if (opts?.search) params.set('search', opts.search);
   if (opts?.operationalStatus) params.set('operational_status', opts.operationalStatus);
-  return apiGet<AssetListResponse>(`/v1/bim_hub/assets/?${params.toString()}`);
+  // BUG-UI07: backend route is `/assets` (no trailing slash). With the
+  // trailing slash FastAPI dispatches to `/{model_id}` instead, returning
+  // 404 for "assets" as a UUID. Verified against /openapi.json.
+  return apiGet<AssetListResponse>(`/v1/bim_hub/assets?${params.toString()}`);
 }
 
 /** Patch asset-info on a BIMElement. Partial merge — unspecified keys
@@ -1037,8 +1040,9 @@ export async function updateElementAssetInfo(
     asset_info: assetInfo,
   };
   if (isTrackedAsset !== undefined) body.is_tracked_asset = isTrackedAsset;
+  // BUG-UI07: backend route has no trailing slash — see listTrackedAssets above.
   return apiPatch<AssetSummary, typeof body>(
-    `/v1/bim_hub/assets/${encodeURIComponent(elementId)}/asset-info/`,
+    `/v1/bim_hub/assets/${encodeURIComponent(elementId)}/asset-info`,
     body,
   );
 }
