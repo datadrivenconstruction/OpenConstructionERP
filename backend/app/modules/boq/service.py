@@ -1638,10 +1638,32 @@ class BOQService:
             # rest of the field set so any concurrent reader observing the
             # post-write state also sees the incremented token.
             fields["version"] = int(position.version or 0) + 1
-            await self.position_repo.update_fields(position_id, **fields)
-            # Flush to DB, then refresh ORM state from DB (avoids MissingGreenlet on lazy load)
-            await self.session.flush()
-            await self.session.refresh(position)
+            # Bug 1 (v2.5.4): wrap the DB write in a defensive try/except so
+            # any unexpected SQLAlchemy/IntegrityError surfaces as a 422 with
+            # a useful detail instead of a bare 500. Common trigger: undo
+            # replay against a position whose parent_id, ordinal, or numeric
+            # field is no longer valid relative to current DB state.
+            try:
+                await self.position_repo.update_fields(position_id, **fields)
+                # Flush to DB, then refresh ORM state from DB (avoids MissingGreenlet on lazy load)
+                await self.session.flush()
+                await self.session.refresh(position)
+            except HTTPException:
+                raise
+            except Exception as exc:  # noqa: BLE001 — surface any DB failure as 422
+                logger.exception(
+                    "update_position DB write failed for %s; fields=%s",
+                    position_id,
+                    {k: type(v).__name__ for k, v in fields.items()},
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=(
+                        "Position update could not be applied. The row may have "
+                        "been deleted or modified concurrently — reload and retry. "
+                        f"({type(exc).__name__})"
+                    ),
+                ) from exc
 
         # ── BUG-AUDIT01: build the field-level diff payload ──────────────
         # ``_audit_before`` snapshotted attributes BEFORE the UPDATE; we
