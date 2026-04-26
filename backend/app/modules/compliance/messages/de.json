@@ -1,0 +1,16 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Compliance-DSL-Fehler",
+      "syntax_error": "Compliance-DSL-Syntaxfehler: {detail}",
+      "type_error": "Compliance-DSL-Typfehler: {detail}",
+      "validation_failed": "Compliance-DSL-Validierung fehlgeschlagen: {detail}",
+      "not_found": "Compliance-DSL-Regel nicht gefunden",
+      "duplicate_rule_id": "Eine Regel mit der ID '{rule_id}' existiert bereits",
+      "access_denied": "Nur der Eigentümer der Regel kann diese Aktion ausführen",
+      "compiled": "Regel '{rule_id}' erfolgreich kompiliert und registriert",
+      "deleted": "Regel '{rule_id}' gelöscht",
+      "evaluation_failed": "Regel '{rule_id}' konnte nicht ausgewertet werden: {detail}"
+    }
+  }
+}

@@ -54,6 +54,10 @@ from app.modules.dashboards.schemas import (
     DashboardPresetListResponse,
     DashboardPresetOut,
     DashboardPresetUpdate,
+    IntegrityColumnOut,
+    IntegrityReportOut,
+    IntegrityReportRequest,
+    IntegritySampleValueOut,
     QuickInsightChartOut,
     QuickInsightsOut,
     SmartValueOut,
@@ -97,7 +101,7 @@ async def module_health() -> dict[str, str]:
 
 
 _MAX_UPLOAD_BYTES = 200 * 1024 * 1024  # 200 MB safety cap per file
-_MAX_UPLOAD_COUNT = 16                 # per POST
+_MAX_UPLOAD_COUNT = 16  # per POST
 
 
 @router.post(
@@ -124,8 +128,7 @@ async def create_snapshot(
     count is capped at 16 to protect the conversion process.
     """
     if not files:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                            detail="At least one file is required.")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="At least one file is required.")
     if len(files) > _MAX_UPLOAD_COUNT:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
@@ -155,7 +158,8 @@ async def create_snapshot(
     tenant_id = _tenant_id_from_payload(payload)
 
     service = SnapshotService(
-        repo=SnapshotRepository(session), pool=get_duckdb_pool(),
+        repo=SnapshotRepository(session),
+        pool=get_duckdb_pool(),
     )
 
     try:
@@ -174,10 +178,7 @@ async def create_snapshot(
 
     await session.commit()
 
-    source_files = [
-        SnapshotSourceFileOut.model_validate(sf)
-        for sf in await service.list_source_files(row.id)
-    ]
+    source_files = [SnapshotSourceFileOut.model_validate(sf) for sf in await service.list_source_files(row.id)]
     return _row_to_detail_out(row, source_files)
 
 
@@ -196,7 +197,10 @@ async def list_snapshots(
     tenant_id = _tenant_id_from_payload(payload)
     service = SnapshotService(repo=SnapshotRepository(session))
     rows, total = await service.list_for_project(
-        project_id, tenant_id=tenant_id, limit=limit, offset=offset,
+        project_id,
+        tenant_id=tenant_id,
+        limit=limit,
+        offset=offset,
     )
     items = [SnapshotSummaryOut.model_validate(r) for r in rows]
     return SnapshotListResponse(total=total, items=items)
@@ -221,10 +225,7 @@ async def get_snapshot(
     except SnapshotError as exc:
         return _error_response(exc, locale)
 
-    source_files = [
-        SnapshotSourceFileOut.model_validate(sf)
-        for sf in await service.list_source_files(row.id)
-    ]
+    source_files = [SnapshotSourceFileOut.model_validate(sf) for sf in await service.list_source_files(row.id)]
     return _row_to_detail_out(row, source_files)
 
 
@@ -241,7 +242,8 @@ async def delete_snapshot(
 ) -> None:
     tenant_id = _tenant_id_from_payload(payload)
     service = SnapshotService(
-        repo=SnapshotRepository(session), pool=get_duckdb_pool(),
+        repo=SnapshotRepository(session),
+        pool=get_duckdb_pool(),
     )
     try:
         await service.delete(snapshot_id, tenant_id=tenant_id)
@@ -310,7 +312,9 @@ async def get_quick_insights(
     df = await _load_quick_insights_dataframe(row.project_id, snapshot_id)
     if df is None or df.empty:
         return QuickInsightsOut(
-            snapshot_id=snapshot_id, charts=[], total_candidates=0,
+            snapshot_id=snapshot_id,
+            charts=[],
+            total_candidates=0,
         )
 
     from app.modules.dashboards.insights import generate_quick_insights
@@ -324,7 +328,8 @@ async def get_quick_insights(
 
 
 async def _load_quick_insights_dataframe(
-    project_id: uuid.UUID, snapshot_id: uuid.UUID,
+    project_id: uuid.UUID,
+    snapshot_id: uuid.UUID,
 ):
     """Read the snapshot's entities Parquet into a wide-form DataFrame.
 
@@ -340,7 +345,9 @@ async def _load_quick_insights_dataframe(
 
     try:
         path = await resolve_local_parquet_path(
-            project_id, snapshot_id, "entities",
+            project_id,
+            snapshot_id,
+            "entities",
         )
     except FileNotFoundError:
         return None
@@ -349,12 +356,11 @@ async def _load_quick_insights_dataframe(
     df = table.to_pandas()
     if "attributes" in df.columns and len(df) > 0:
         first_non_null = next(
-            (a for a in df["attributes"] if isinstance(a, dict)), None,
+            (a for a in df["attributes"] if isinstance(a, dict)),
+            None,
         )
         if first_non_null is not None:
-            attr_keys = {
-                k for row in df["attributes"] if isinstance(row, dict) for k in row
-            }
+            attr_keys = {k for row in df["attributes"] if isinstance(row, dict) for k in row}
             for k in attr_keys:
                 df[k] = df["attributes"].apply(
                     lambda d, key=k: d.get(key) if isinstance(d, dict) else None,
@@ -500,10 +506,7 @@ async def get_cascade_row_count(
     selected: Annotated[
         str,
         Query(
-            description=(
-                "JSON-encoded {column: [values]} map. Empty arrays mean "
-                "'no filter on that column'."
-            ),
+            description=("JSON-encoded {column: [values]} map. Empty arrays mean 'no filter on that column'."),
             max_length=8000,
         ),
     ] = "{}",
@@ -557,7 +560,9 @@ async def get_cascade_row_count(
         ) from exc
 
     return CascadeRowCountOut(
-        snapshot_id=snapshot_id, matched=matched, total=total,
+        snapshot_id=snapshot_id,
+        matched=matched,
+        total=total,
     )
 
 
@@ -659,7 +664,9 @@ async def get_preset(
     )
     try:
         row = await service.get(
-            preset_id, owner_id=user_id, tenant_id=tenant_id,
+            preset_id,
+            owner_id=user_id,
+            tenant_id=tenant_id,
         )
     except PresetError as exc:
         _raise_preset_http(exc, locale)
@@ -718,7 +725,9 @@ async def delete_preset(
     )
     try:
         await service.delete(
-            preset_id, owner_id=user_id, tenant_id=tenant_id,
+            preset_id,
+            owner_id=user_id,
+            tenant_id=tenant_id,
         )
     except PresetError as exc:
         _raise_preset_http(exc, locale)
@@ -743,7 +752,9 @@ async def share_preset(
     )
     try:
         row = await service.toggle_share(
-            preset_id, owner_id=user_id, tenant_id=tenant_id,
+            preset_id,
+            owner_id=user_id,
+            tenant_id=tenant_id,
         )
     except PresetError as exc:
         _raise_preset_http(exc, locale)
@@ -889,12 +900,16 @@ async def import_preview(
     pool = get_duckdb_pool()
     try:
         schema_rows = await pool.execute(
-            snapshot_id, row.project_id, "DESCRIBE entities", parameters=[],
+            snapshot_id,
+            row.project_id,
+            "DESCRIBE entities",
+            parameters=[],
         )
     except Exception as exc:
         logger.warning(
             "dashboards.import.schema_lookup_failed snapshot_id=%s: %s",
-            snapshot_id, type(exc).__name__,
+            snapshot_id,
+            type(exc).__name__,
         )
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -943,6 +958,101 @@ async def import_commit(
         _raise_rows_http(exc, locale)
 
     return SnapshotImportCommitOut(**result)
+
+
+# ── Dataset Integrity Overview (T07) ───────────────────────────────────────
+
+
+@router.post(
+    "/integrity-report",
+    response_model=IntegrityReportOut,
+    summary="Per-column data-quality report for a snapshot",
+)
+async def post_integrity_report(
+    body: IntegrityReportRequest,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    locale: Annotated[str, Query()] = "en",
+) -> IntegrityReportOut:
+    """Compute the dataset-integrity report for ``snapshot_id``.
+
+    Returns null counts, dtype mismatches, IQR outliers and a per-column
+    issue list — the panel surfaces these as a "did this upload land
+    cleanly?" dashboard before the user starts slicing charts.
+
+    Both ``snapshot_id`` and ``project_id`` are required in the body so
+    we can namespace the read by project without round-tripping the
+    snapshot detail endpoint.
+    """
+    tenant_id = _tenant_id_from_payload(payload)
+    service = SnapshotService(repo=SnapshotRepository(session))
+    try:
+        row = await service.get(body.snapshot_id, tenant_id=tenant_id)
+    except SnapshotError as exc:
+        _raise_http(exc, locale)
+
+    # Defence in depth — the body's project_id must agree with the
+    # owning row, otherwise a caller could request integrity for a
+    # snapshot in a project they don't own.
+    if str(row.project_id) != str(body.project_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=messages.translate(
+                "integrity.project_mismatch",
+                locale=locale,
+            ),
+        )
+
+    df = await _load_quick_insights_dataframe(row.project_id, body.snapshot_id)
+    from app.modules.dashboards.integrity import compute_integrity_report
+
+    if df is None:
+        # Snapshot has no on-disk parquet — return an empty report
+        # rather than 404; this keeps the UI consistent for in-flight
+        # / freshly-deleted snapshots.
+        report = compute_integrity_report(
+            df=None,  # type: ignore[arg-type]
+            snapshot_id=str(body.snapshot_id),
+            project_id=str(body.project_id),
+        )
+    else:
+        report = compute_integrity_report(
+            df=df,
+            snapshot_id=str(body.snapshot_id),
+            project_id=str(body.project_id),
+        )
+
+    columns = [
+        IntegrityColumnOut(
+            name=c.name,
+            dtype=c.dtype,
+            inferred_type=c.inferred_type,
+            row_count=c.row_count,
+            null_count=c.null_count,
+            null_pct=c.null_pct,
+            unique_count=c.unique_count,
+            completeness=c.completeness,
+            sample_values=[IntegritySampleValueOut(value=s["value"], count=s["count"]) for s in c.sample_values],
+            zero_pct=c.zero_pct,
+            outlier_count=c.outlier_count,
+            min_value=c.min_value,
+            max_value=c.max_value,
+            mean_value=c.mean_value,
+            issues=list(c.issues),
+        )
+        for c in report.columns
+    ]
+
+    return IntegrityReportOut(
+        snapshot_id=body.snapshot_id,
+        project_id=body.project_id,
+        row_count=report.row_count,
+        column_count=report.column_count,
+        completeness_score=report.completeness_score,
+        schema_hash=report.schema_hash,
+        columns=columns,
+        issue_summary=report.issue_summary,
+    )
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────

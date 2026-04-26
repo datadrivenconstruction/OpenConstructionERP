@@ -1,0 +1,16 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Ошибка Compliance DSL",
+      "syntax_error": "Синтаксическая ошибка Compliance DSL: {detail}",
+      "type_error": "Ошибка типа Compliance DSL: {detail}",
+      "validation_failed": "Ошибка валидации Compliance DSL: {detail}",
+      "not_found": "Правило Compliance DSL не найдено",
+      "duplicate_rule_id": "Правило с идентификатором '{rule_id}' уже существует",
+      "access_denied": "Только владелец правила может выполнить это действие",
+      "compiled": "Правило '{rule_id}' успешно скомпилировано и зарегистрировано",
+      "deleted": "Правило '{rule_id}' удалено",
+      "evaluation_failed": "Правило '{rule_id}' не может быть выполнено: {detail}"
+    }
+  }
+}

@@ -15,6 +15,8 @@ export { DataTable } from './DataTable';
 export type { DataTableProps } from './DataTable';
 export { ExportButton } from './ExportButton';
 export type { ExportButtonProps } from './ExportButton';
+export { IntegrityOverview } from './IntegrityOverview';
+export type { IntegrityOverviewProps } from './IntegrityOverview';
 export {
   listSnapshots,
   getSnapshot,
@@ -33,6 +35,7 @@ export {
   shareDashboardPreset,
   getSnapshotRows,
   buildSnapshotExportUrl,
+  getIntegrityReport,
 } from './api';
 export type {
   Snapshot,
@@ -59,4 +62,10 @@ export type {
   SnapshotRowsResponse,
   SnapshotRowsQuery,
   ExportFormat,
+  IntegrityIssueCode,
+  IntegrityInferredType,
+  IntegritySampleValue,
+  IntegrityColumn,
+  IntegrityReport,
+  GetIntegrityReportInput,
 } from './api';

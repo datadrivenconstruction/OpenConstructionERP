@@ -27,5 +27,15 @@
   "rows.query.invalid": "Запрос строк некорректен.",
   "export.format.unsupported": "Неподдерживаемый формат экспорта. Поддерживаются: {supported}.",
   "import.staging.not_found": "Подготовленный импорт не найден или истёк — загрузите файл заново.",
-  "import.schema.mismatch": "Загруженный файл несовместим со схемой снапшота."
+  "import.schema.mismatch": "Загруженный файл несовместим со схемой снапшота.",
+  "integrity.project_mismatch": "Снапшот не принадлежит указанному проекту.",
+  "integrity.empty_snapshot": "В снапшоте пока нет строк для анализа.",
+  "integrity.issue.all_null": "Все значения отсутствуют.",
+  "integrity.issue.high_null_pct": "Более 30% значений отсутствуют.",
+  "integrity.issue.constant": "Колонка содержит только одно значение на всех строках.",
+  "integrity.issue.dtype_mismatch": "Определённый тип не совпадает с сохранённым типом колонки.",
+  "integrity.issue.outliers_present": "Найдены численные выбросы (правило 1.5·IQR).",
+  "integrity.issue.high_zero_pct": "Более 50% численных значений строго равны нулю.",
+  "integrity.issue.low_cardinality_string": "Строковая колонка с очень малым числом различных значений — подумайте о категоризации.",
+  "integrity.issue.uuid_like": "Значения похожи на UUID — обычно непригодны для фильтрации."
 }
