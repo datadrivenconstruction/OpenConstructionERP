@@ -5,6 +5,34 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.3] — 2026-04-26
+
+BOQ-editor stability + UX sweep. User reported 23 bugs on a single project's BOQ page (`/boq/{id}`); 21 fixed in this release, the remaining 2 (Undo replay 500 on stale parent_id; description-cell crash on newly-added rows) need a reproducible repro and are tracked separately.
+
+### Fixed (data integrity)
+- **Silent data loss on save failure** — Quantity edits whose server response 500'd were left in the grid as if accepted; the optimistic cache update is now rolled back via `invalidateAll()` in `updateMutation.onError` (Bug 5).
+- **Apply Regional Template crash** — markup cascade calculation was unguarded against null/non-numeric `percentage` and `fixed_amount`; added `Number.isFinite` checks + array guard (Bug 3).
+- **Import freeze (~30 s)** — XLSX/PDF/CAD imports could hang the UI with no signal. Added an immediate "Importing X… (up to 60 s)" toast and a 90 s `AbortController` timeout that surfaces a friendly message instead of an apparent hang (Bug 2).
+
+### Fixed (UX)
+- Lock Estimate now confirms before locking (it's irreversible without admin unlock) — Bug 8.
+- Esc closes the AI Features Setup modal — standard modal behaviour (Bug 10).
+- Right-click Actions menu flips when it would overflow the viewport (Bug 11).
+- Grid Settings dropdown widened from `w-52` → `w-64` so "Manage Columns" / "Renumber Positions" no longer truncate (Bug 12).
+- Footer rows (Direct Cost / Net Total / VAT / Gross Total) no longer show a stray `0` in the Quantity column — totals don't have a quantity (Bug 15).
+- Paste-from-Excel button has a visible `Paste` label at xl breakpoints (Bug 16).
+- BIM Quantity picker element names get a native browser tooltip with the full text + `IfcWallStandardCase` hint when truncated (Bug 21).
+- Toolbar now sticks at `top-[52px]` (under the app header) instead of colliding with it (Bug 7).
+- Right-side AI Smart / AI Cost Finder panels offset by `top-[52px]` so they no longer cover the toolbar's Import/Export/Lock buttons (Bug 13).
+- "AI" group label in the toolbar is decorative — marked `pointer-events-none aria-hidden` (Bug 6).
+- Unit column display now matches the editor (raw lowercase code: `m`, `m2`, `m3`) — `uppercase` CSS removed (Bug 9).
+- Three AI buttons in the toolbar (Find Costs / AI Chat / Analyze) get coloured left borders + a visible label on the previously icon-only middle one (Bug 18).
+- Adding an empty position toasts a one-line hint that Quality Score will dip until quantity/rate are filled (Bug 19).
+- Version History empty state explicitly directs the user to the label-input + Save button instead of just saying "No snapshots yet" (Bug 20).
+- AI Cost Finder demotes the CWICR `code` token to a small grey badge with a `title=` tooltip — internal IDs no longer dominate the row (Bug 22).
+- Feedback URL no longer leaks `error_count=N` query param; the count is logged to console for self-debugging instead (Bug 23).
+- Header's duplicate keyboard-shortcuts trigger removed; the BOQ toolbar's Keyboard icon is the single entry point (Bug 17).
+
 ## [2.5.2] — 2026-04-26
 
 QA-report stability sweep. Triaged a 65-bug audit; ~70% were already-fixed or false-positive. Real fixes shipped:

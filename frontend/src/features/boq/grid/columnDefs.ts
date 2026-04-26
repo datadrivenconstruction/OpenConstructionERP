@@ -149,7 +149,9 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
         values: ['m', 'm2', 'm3', 'kg', 'pcs', 'lsum', 'hr', 't', 'l', 'set', 'pair', 'ea', 'lot'],
       },
       cellRenderer: 'unitCellRenderer',
-      cellClass: 'text-center text-2xs font-mono uppercase',
+      // Bug 9: cell renderer & editor must show identical labels. Removed `uppercase` —
+      // editor dropdown shows raw codes ("m", "m2"), so renderer must too. No transform either side.
+      cellClass: 'text-center text-2xs font-mono',
       cellStyle: { display: 'flex', justifyContent: 'center', alignItems: 'center' },
     },
     {

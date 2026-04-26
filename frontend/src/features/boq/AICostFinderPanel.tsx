@@ -160,9 +160,11 @@ export function AICostFinderPanel({
   );
 
   /* ── Render ────────────────────────────────────────────────────── */
+  // Bug 13: offset by app header height (52px = --oe-header-height) so the panel
+  // does not cover the top app header / toolbar.
   return (
     <div
-      className={`fixed right-0 top-0 z-50 h-full w-[380px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
+      className={`fixed right-0 top-[52px] z-50 h-[calc(100%-52px)] w-[380px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
@@ -353,12 +355,17 @@ function ResultCard({
             {item.description}
           </p>
           <div className="flex items-center gap-2 mt-1 text-xs text-text-muted">
-            <span className="font-mono">{item.code}</span>
-            <span className="text-text-muted">|</span>
             <span>{item.unit}</span>
             <span className="text-text-muted">|</span>
             <span className="font-semibold text-text-primary">
               {fmtWithCurrency(item.rate, locale, currencyCode)}
+            </span>
+            <span className="text-text-muted">|</span>
+            <span
+              className="font-mono text-2xs text-content-quaternary truncate max-w-[80px]"
+              title={item.code}
+            >
+              {item.code}
             </span>
           </div>
           <div className="text-[10px] text-text-muted mt-0.5">
