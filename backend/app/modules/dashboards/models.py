@@ -15,7 +15,15 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import JSON, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -111,3 +119,59 @@ class SnapshotSourceFile(Base):
     converter_notes: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=False, default=dict,
     )
+
+
+class DashboardPreset(Base):
+    """A saved bundle of charts + filters (T05).
+
+    Two kinds of rows live in this table:
+
+    * ``kind="preset"`` — private to ``owner_id``; never visible to
+      other users even on the same project.
+    * ``kind="collection"`` — when ``shared_with_project=True`` AND
+      ``project_id`` is set, every user with project access can list
+      and load it. The owner remains the only user who can edit it.
+
+    ``project_id`` is nullable to support "global" presets that follow
+    the user across projects (e.g. a personal "always show element
+    counts" template). ``config_json`` is opaque from the DB's
+    perspective — typical content is
+    ``{"snapshot_id": "...", "filters": {...}, "charts": [{...}]}``.
+    """
+
+    __tablename__ = "oe_dashboards_preset"
+
+    tenant_id: Mapped[str | None] = mapped_column(
+        String(36), nullable=True, index=True,
+    )
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(), nullable=True, index=True,
+    )
+    owner_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), nullable=False, index=True,
+    )
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    # 'preset' (private) or 'collection' (shared with project).
+    kind: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="preset",
+    )
+    config_json: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=dict,
+    )
+    shared_with_project: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False,
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "kind IN ('preset', 'collection')",
+            name="ck_oe_dashboards_preset_kind",
+        ),
+    )
+
+    def __repr__(self) -> str:  # pragma: no cover — debug only
+        return (
+            f"DashboardPreset(id={self.id}, owner_id={self.owner_id}, "
+            f"name={self.name!r}, kind={self.kind})"
+        )

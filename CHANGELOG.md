@@ -5,6 +5,21 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.1] — 2026-04-26
+
+Patch release on top of v2.6.0 — bundles a prod-deploy migration fix and three Dashboards features (T04 Cascade Filter Engine, T05 Presets & Collections, T06 Tabular Data I/O) that were nearly complete at the v2.6.0 cut.
+
+### Fixed
+- **Alembic v270 migration crashed on empty DB** — `inspector.get_columns("oe_boq_position")` raised `NoSuchTableError` when the migration ran ahead of the ORM `create_all()` boot path. Now `get_table_names()`-guarded with a logged WARNING when the table is missing. Discovered during the v2.6.0 prod deploy: prod was actually missing `alembic_version` entirely (schema present but never stamped); fixed via `alembic stamp head` followed by `alembic upgrade head` clean no-op.
+
+### Added — Dashboards (T04 + T05 + T06)
+- **Cascade Filter Engine (T04)** — `POST /api/v1/dashboards/snapshots/{id}/cascade-values` returns distinct values of a target column whose row-set is consistent with the user's other-column selections, optional fuzzy `q`. `GET /api/v1/dashboards/snapshots/{id}/row-count` returns the live filtered row count. `CascadeFilterPanel.tsx` is a vertical stack of debounced per-column pickers with chip multi-select, per-column Clear, and a top-level Reset all.
+- **Presets & Collections (T05)** — new `oe_dashboards_preset` table (alembic `v290_dashboards_presets`), service publishing `dashboard.saved` / `dashboard.deleted` events. Endpoints: `POST/GET/PATCH/DELETE /api/v1/dashboards/presets`, `POST /presets/{id}/share`. `PresetPicker.tsx` exposes "My presets" + "Shared collections" with a Save-current modal; `QuickInsightPanel.tsx`'s pin button now creates a real preset (was a no-op stub in v2.6.0).
+- **Tabular Data I/O (T06)** — `rows_io.py` provides paginated DuckDB row reads + CSV/XLSX/Parquet exports + a two-step import staging area. Endpoints: `GET /snapshots/{id}/rows`, `GET /snapshots/{id}/export`, `POST /snapshots/{id}/import`, `POST /snapshots/{id}/import/commit`. `DataTable.tsx` renders the rows endpoint with click-to-sort headers; `ExportButton.tsx` triggers downloads with the auth token attached. Import UI deferred to a follow-up — the staging endpoints exist and are tested, but the snapshot-write path waits on T10 federation.
+
+### Tests
+- 16 + 16 + 10 + 7 + 6 + 5 + 12 = 72 new tests across the four agents, all passing. Backend ruff clean; frontend tsc + vitest clean.
+
 ## [2.6.0] — 2026-04-26
 
 Major feature release. RFC 37 multi-currency / VAT / compound positions, BIM Viewer UX overhaul, IDS / SARIF interop, EAC engine API completeness, dashboards Quick-Insight + Smart-Autocomplete, security hardening, Linux install guide.

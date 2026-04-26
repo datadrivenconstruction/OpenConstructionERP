@@ -20,5 +20,12 @@
   "filter.operator.unsupported": "Filter operator '{op}' is not supported.",
   "import.csv.encoding_unknown": "Could not detect the encoding of the uploaded file.",
   "import.column.missing": "The file is missing a required column: {column}.",
-  "export.no_rows": "There is nothing to export — the query returned zero rows."
+  "export.no_rows": "There is nothing to export — the query returned zero rows.",
+  "preset.not_found": "Dashboard preset not found.",
+  "preset.access_denied": "Only the preset owner can perform this action.",
+  "preset.validation_failed": "Preset payload failed validation.",
+  "rows.query.invalid": "The rows query is invalid.",
+  "export.format.unsupported": "Unsupported export format. Supported: {supported}.",
+  "import.staging.not_found": "Staged import not found or expired — please re-upload.",
+  "import.schema.mismatch": "The uploaded file is not compatible with the snapshot schema."
 }
