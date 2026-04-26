@@ -2367,14 +2367,26 @@ export function BOQEditorPage() {
     [boq?.positions, t, addToast],
   );
 
-  /** Handle formula applied from AG Grid quantity editor */
+  /** Handle formula applied from AG Grid quantity editor.
+   *
+   * Issue #90: when ``formula`` is non-empty we persist it under
+   * ``metadata.formula`` so the ƒx badge + round-trip edit work. When it's
+   * empty (the user replaced an existing formula with a plain number) we
+   * strip the key so a stale formula doesn't outlive its source. */
   const handleGridFormulaApplied = useCallback(
     (positionId: string, formula: string, _result: number) => {
       const pos = boq?.positions.find((p) => p.id === positionId);
       if (!pos) return;
+      const existingMeta = (pos.metadata ?? {}) as Record<string, unknown>;
+      const nextMeta = { ...existingMeta };
+      if (formula) {
+        nextMeta.formula = formula;
+      } else {
+        delete nextMeta.formula;
+      }
       updateMutation.mutate({
         id: positionId,
-        data: { metadata: { ...pos.metadata, formula } },
+        data: { metadata: nextMeta },
       });
     },
     [boq?.positions, updateMutation],

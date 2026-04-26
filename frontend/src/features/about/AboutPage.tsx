@@ -2,7 +2,7 @@
  * AboutPage — Application info, author, license, consulting services.
  */
 
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   Mail, Shield, BookOpen, Users, Award,
   Code2, Building2, Briefcase, Globe, ExternalLink,
@@ -287,14 +287,84 @@ export function AboutPage() {
               <p className="text-sm text-oe-blue font-medium">
                 {t('about.founder_role', { defaultValue: 'Consultant for Automation & Data in Construction' })}
               </p>
-              <p className="mt-3 text-sm text-content-secondary leading-relaxed">
-                {t('about.founder_bio', { defaultValue: 'Consultant specializing in automation, data engineering, and AI for the construction industry. Author of open-source tools — CWICR (construction cost database, 55,000+ items, 11 regional databases, 9 languages), cad2data (CAD/BIM data extraction pipeline for RVT, IFC, DWG, DGN), and DDC Community Toolkit. Creator of OpenConstructionERP. Founder of Data Driven Construction — bringing modern technology, AI, and open data standards to the global construction industry.' })}
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Badge variant="blue" size="sm">Automation & Data</Badge>
-                <Badge variant="blue" size="sm">CWICR & cad2data author</Badge>
-                <Badge variant="blue" size="sm">AI & construction</Badge>
-                <Badge variant="blue" size="sm">Open-source advocate</Badge>
+              <div className="mt-3 space-y-3 text-sm text-content-secondary leading-relaxed">
+                <p>
+                  {t('about.founder_bio_p1', {
+                    defaultValue:
+                      'Over the past ten years, I have been deeply involved in resource management for construction projects. This journey inevitably led me to study the history of the technologies that have shaped the industry — from the earliest attempts at design automation to modern ERP platforms (the series of articles "The Lobbyists\' Wars and the Development of BIM" and "The History of the BIM Map"). Without understanding where we came from, it is impossible to see where we are going.',
+                  })}
+                </p>
+                <p>
+                  <Trans
+                    i18nKey="about.founder_bio_p2"
+                    defaults='Over the years, dozens of articles have come off my desk, read by millions of professionals around the world. At the same time, I&rsquo;ve consulted with major construction and consulting firms, developers, and software vendors themselves on data management in projects — helping them navigate processes where data is not a byproduct but the foundation for decision-making. This work gave me a rare opportunity to see the industry from both sides: through the eyes of those who create the tools and through the eyes of those who use them in real projects every day. Many of these observations and reflections are collected in my book <book>Data-Driven Construction</book>, which is now available in 16 languages — <books>datadrivenconstruction.io/books</books>.'
+                    components={{
+                      book: (
+                        <a
+                          href="https://datadrivenconstruction.io/books"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-oe-blue hover:underline italic font-medium"
+                        />
+                      ),
+                      books: (
+                        <a
+                          href="https://datadrivenconstruction.io/books"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-oe-blue hover:underline"
+                        />
+                      ),
+                    }}
+                  />
+                </p>
+                <p>
+                  <Trans
+                    i18nKey="about.founder_bio_p3"
+                    defaults='Two other things have kept me busy: helping non-developers get into proprietary formats that were never meant to be opened, and finding a cleaner way to describe construction work through a resource model. These efforts have resulted in free tools — <cad>DDC CAD/BIM data converters</cad> (Revit, IFC, DWG, DGN → structured data), <gh>available on GitHub</gh>, and the multilingual <cwicr>CWICR database</cwicr> of construction works and resources — over 55,000 items in 11 languages, published as <cwicr>OpenConstructionEstimate-DDC-CWICR</cwicr>. All of this was a necessary step toward an idea I&rsquo;ve been pursuing for the past decade — an open-source modular ERP for the construction industry.'
+                    components={{
+                      cad: (
+                        <a
+                          href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-oe-blue hover:underline font-medium"
+                        />
+                      ),
+                      gh: (
+                        <a
+                          href="https://github.com/datadrivenconstruction"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-oe-blue hover:underline"
+                        />
+                      ),
+                      cwicr: (
+                        <a
+                          href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-oe-blue hover:underline font-medium"
+                        />
+                      ),
+                    }}
+                  />
+                </p>
+                <p>
+                  {t('about.founder_bio_p4', {
+                    defaultValue:
+                      "The recent generation of AI tooling finally made it feasible to consolidate that work — methodology, data models, and prior implementations — into a single platform. It's now public and open source.",
+                  })}
+                </p>
+                <p className="border-l-2 border-oe-blue/40 pl-3 italic text-content-primary">
+                  {t('about.founder_bio_p5', {
+                    defaultValue:
+                      'Progress is born from dialogue — from the clash of perspectives and openness to new approaches. I would be grateful if you would be willing to participate in this conversation on the inevitable Uberization of the construction industry and the transparency of cost and time estimation processes for construction projects.',
+                  })}
+                </p>
+                <p className="text-content-primary font-medium">
+                  {t('about.founder_bio_signoff', { defaultValue: '— Artem Boiko' })}
+                </p>
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <a

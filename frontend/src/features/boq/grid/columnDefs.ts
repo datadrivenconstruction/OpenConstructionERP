@@ -175,12 +175,27 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       field: 'quantity',
       width: 110,
       editable: (params) => !params.data?._isSection && !params.data?._isFooter && !params.data?._isResource,
-      cellEditor: 'agNumberCellEditor',
-      cellEditorParams: { min: 0, precision: 4 },
+      // Issue #90: Excel-style formulas in Qty (=2*PI()^2*3, =sqrt(144),
+      // 12.5 x 4, …). The editor is CSP-safe (no eval); the resolved
+      // numeric value goes into the column and the source formula is
+      // persisted in metadata.formula via onFormulaApplied.
+      cellEditor: 'formulaCellEditor',
+      cellEditorPopup: true,
+      cellEditorPopupPosition: 'over',
       cellRenderer: 'quantityCellRenderer',
       valueParser: (params) => {
         const val = parseFloat(params.newValue);
         return isNaN(val) ? params.oldValue : val;
+      },
+      // Surface the source formula in the AG Grid tooltip — much easier to
+      // see than a tiny badge alone (Issue #90 follow-up).
+      tooltipValueGetter: (params) => {
+        const meta = params.data?.metadata as Record<string, unknown> | undefined;
+        const f = meta?.formula;
+        if (typeof f === 'string' && f) {
+          return `Formula: ${f}\nClick to edit.`;
+        }
+        return undefined;
       },
       cellClass: 'text-right tabular-nums text-xs',
       headerClass: 'ag-right-aligned-header',
