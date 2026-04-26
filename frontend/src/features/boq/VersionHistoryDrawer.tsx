@@ -241,7 +241,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
               </p>
               <p className="text-xs text-content-tertiary">
                 {t('boq.snapshot_hint', {
-                  defaultValue: 'Save a snapshot to create a restore point for your BOQ.',
+                  defaultValue: 'Type a label above and click Save to create your first snapshot.',
                 })}
               </p>
             </div>

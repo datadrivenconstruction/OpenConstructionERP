@@ -295,6 +295,10 @@ export function BOQEditorPage() {
     },
     onSuccess: () => invalidateAll(),
     onError: (err: Error) => {
+      // Roll back the optimistic cache mutation by re-fetching server truth.
+      // Without this the grid keeps the user's edited value while the server
+      // never accepted it — silent data loss (Bug 5).
+      invalidateAll();
       addToast({ type: 'error', title: t('boq.update_failed', { defaultValue: 'Failed to update position' }), message: err.message });
     },
   });
@@ -362,8 +366,16 @@ export function BOQEditorPage() {
   });
 
   const handleLock = useCallback(() => {
+    // Lock is irreversible without admin unlock — confirm before mutating (Bug 8).
+    const ok = window.confirm(
+      t('boq.lock_confirm', {
+        defaultValue:
+          'Lock this estimate?\n\nLocked estimates cannot be edited. Unlocking requires admin privileges.',
+      }),
+    );
+    if (!ok) return;
     lockMutation.mutate();
-  }, [lockMutation]);
+  }, [lockMutation, t]);
 
   const unlockMutation = useMutation({
     mutationFn: () => apiPost(`/v1/boq/boqs/${boqId}/unlock/`, {}),
@@ -1236,8 +1248,14 @@ export function BOQEditorPage() {
         unit_rate: 0,
         parent_id: parentId,
       });
+      addToast({
+        type: 'info',
+        title: t('boq.empty_position_quality_hint', {
+          defaultValue: 'Empty position lowers Quality Score until quantity & rate are filled',
+        }),
+      });
     },
-    [boqId, boq, grouped, addMutation],
+    [boqId, boq, grouped, addMutation, addToast, t],
   );
   // Keep ref in sync for keyboard shortcut access
   addPositionRef.current = handleAddPosition;
@@ -1253,7 +1271,7 @@ export function BOQEditorPage() {
             percentage: m.percentage,
             amount: m.amount,
           }));
-          exportBOQToExcel({
+          await exportBOQToExcel({
             boqTitle: boq?.name ?? 'BOQ',
             projectName: project?.name,
             classificationStandard: project?.classification_standard,
@@ -1831,6 +1849,16 @@ export function BOQEditorPage() {
   const [showVectorSetup, setShowVectorSetup] = useState(false);
   const [vectorIndexing, setVectorIndexing] = useState(false);
 
+  // Esc closes the AI Features Setup modal — standard modal behaviour (Bug 10).
+  useEffect(() => {
+    if (!showVectorSetup) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowVectorSetup(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [showVectorSetup]);
+
   const { data: vectorStatus } = useQuery({
     queryKey: ['vector-status'],
     queryFn: () => apiGet<{
@@ -2127,12 +2155,30 @@ export function BOQEditorPage() {
       const form = new FormData();
       form.append('file', file);
 
+      // Tell the user *immediately* that the import is in flight — the server
+      // can take 30+ seconds for large XLSX/PDF/CAD files, and without this
+      // toast the UI looks frozen (Bug 2).
+      addToast({
+        type: 'info',
+        title: t('boq.import_started', { defaultValue: 'Importing {{name}}…', name: file.name }),
+        message: t('boq.import_started_hint', {
+          defaultValue: 'Large files (PDF / CAD / 1000+ rows) may take up to 60 seconds.',
+        }),
+      });
+
+      // Abort if the server doesn't respond within 90 seconds. Without a timeout
+      // the fetch hangs and the user thinks the page froze (Bug 2).
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 90_000);
+
       try {
         const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/smart/`, {
           method: 'POST',
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           body: form,
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         if (!res.ok) {
           const body = await res.json().catch(() => ({ detail: res.statusText }));
@@ -2168,10 +2214,16 @@ export function BOQEditorPage() {
 
         invalidateAll();
       } catch (err) {
+        clearTimeout(timeoutId);
+        const isTimeout = err instanceof DOMException && err.name === 'AbortError';
         addToast({
           type: 'error',
           title: t('boq.import_failed', { defaultValue: 'Import failed' }),
-          message: err instanceof Error ? err.message : 'Unknown error',
+          message: isTimeout
+            ? t('boq.import_timeout', {
+                defaultValue: 'Server did not respond within 90 seconds. The file may be too large — try splitting it.',
+              })
+            : err instanceof Error ? err.message : 'Unknown error',
         });
       } finally {
         setIsImporting(false);

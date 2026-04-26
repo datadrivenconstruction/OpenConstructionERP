@@ -1853,6 +1853,9 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
 export function QuantityCellRenderer(params: ICellRendererParams) {
   const { data, value, context } = params;
   if (!data || data._isSection || data._isFooter) {
+    // Footer rows (Direct Cost / Net Total / VAT / Gross Total) must not
+    // display a numeric Qty — totals don't have a meaningful quantity (Bug 15).
+    if (data?._isFooter) return <span />;
     return <span className="text-right text-xs tabular-nums">{value != null ? value : ''}</span>;
   }
 
@@ -1907,8 +1910,10 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
 
 export function UnitCellRenderer(params: ICellRendererParams) {
   const { data, value } = params;
+  // Bug 9: render the raw unit code (e.g. "m2") with NO casing transform — must match
+  // the agSelectCellEditor dropdown which lists lowercase values.
   if (!data || data._isSection || data._isFooter) {
-    return <span className="text-center text-2xs font-mono uppercase">{value ?? ''}</span>;
+    return <span className="text-center text-2xs font-mono">{value ?? ''}</span>;
   }
 
   const meta = (data.metadata ?? {}) as Record<string, unknown>;
@@ -1917,7 +1922,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
 
   // No source indicator needed
   if (!bimSource && !pdfSource) {
-    return <span className="text-center text-2xs font-mono uppercase w-full block">{value ?? ''}</span>;
+    return <span className="text-center text-2xs font-mono w-full block">{value ?? ''}</span>;
   }
 
   if (pdfSource) {
@@ -1926,7 +1931,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
     const shortLabel = (parts[parts.length - 1] ?? pdfSource).trim();
     return (
       <div className="flex flex-col items-center justify-center h-full w-full gap-0">
-        <span className="text-2xs font-mono uppercase leading-tight">{value ?? ''}</span>
+        <span className="text-2xs font-mono leading-tight">{value ?? ''}</span>
         <span
           className="text-[7px] leading-none font-medium text-rose-600 dark:text-rose-400 truncate max-w-full"
           title={pdfSource}
@@ -1944,7 +1949,7 @@ export function UnitCellRenderer(params: ICellRendererParams) {
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full gap-0">
-      <span className="text-2xs font-mono uppercase leading-tight">{value ?? ''}</span>
+      <span className="text-2xs font-mono leading-tight">{value ?? ''}</span>
       <span
         className="text-[7px] leading-none font-medium text-emerald-600 dark:text-emerald-400 truncate max-w-full"
         title={bimSource}
