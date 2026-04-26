@@ -16,7 +16,7 @@
 
 1. **LIGHTWEIGHT & SIMPLE** — минимум зависимостей, быстрый старт (`docker compose up` или `pip install openestimate`). Никаких тяжёлых фреймворков. Core должен запускаться на VPS с 2GB RAM.
 2. **i18n EVERYWHERE** — 20 языков вшиты в ядро. Все строки UI, validation messages, cost database labels — через i18n. Новый язык = JSON-файл. Zero hardcoded strings.
-3. **CAD-agnostic через конвертацию** — мы НЕ используем IfcOpenShell, BCF, нативный IFC. Все CAD-форматы (DWG, DGN, RVT, IFC) конвертируются в наш canonical формат через DDC cad2data pipeline.
+3. **CAD-agnostic через конвертацию** — мы НЕ используем IfcOpenShell и нативный IFC parsing. Все CAD-форматы (DWG, DGN, RVT, IFC) конвертируются в наш canonical формат через DDC cad2data pipeline. **BCF (BIM Collaboration Format) — разрешён** (как I/O формат для issues / validation reports / viewpoints), потому что это XML over data, без runtime-зависимости на IfcOpenShell.
 4. **Data validation as first-class citizen** — каждый импорт проходит validation pipeline с configurable rule sets (DIN, NRM, MasterFormat, custom). Validation НЕ optional — это часть core workflow.
 5. **Modules = plugins** — скачал → положил в папку → перезагрузил → работает. Как npm install. Каждый модуль = zip с manifest. Marketplace для поиска и установки.
 6. **Open data standards** — GAEB XML 3.3, DIN 276, NRM, MasterFormat нативно. Проприетарные форматы — через модули.
@@ -99,13 +99,15 @@ openestimate/
 │   │   │   ├── permissions.py   # RBAC engine
 │   │   │   └── validation/      # Validation framework
 │   │   │       ├── engine.py    # Rule engine (configurable)
-│   │   │       ├── rules/       # Built-in rule sets
-│   │   │       │   ├── din276.py
-│   │   │       │   ├── nrm.py
-│   │   │       │   ├── masterformat.py
-│   │   │       │   ├── gaeb.py
-│   │   │       │   └── custom.py
-│   │   │       └── schemas.py   # Validation result models
+│   │   │       ├── rules/       # Built-in rule registry
+│   │   │       │   └── __init__.py  # All rules colocated in one file
+│   │   │       │                    # (boq_quality, din276, gaeb, nrm,
+│   │   │       │                    # masterformat, onorm, dpgf, cpwd,
+│   │   │       │                    # birimfiyat, gbt50500, gesn,
+│   │   │       │                    # sekisan, sinapi). Third-party
+│   │   │       │                    # rules register via rule_registry.
+│   │   │       └── messages/    # i18n templates: en.json / de.json / ru.json
+│   │   │                        # (+ __init__.py with translate())
 │   │   │
 │   │   └── modules/             # Business modules (each = self-contained)
 │   │       ├── projects/        # Project management
@@ -493,7 +495,7 @@ Storage (PostgreSQL + files in MinIO)
 - Код — на английском (переменные, комменты, docs)
 - Обсуждение — на русском (если я пишу на русском)
 - Технические термины — оставляй на английском (не переводи "validation", "canonical format", "hook")
-- Будь конкретен: вместо "нужно добавить validation" → "добавлю ValidationRule `din276_cost_group_hierarchy` в `backend/app/core/validation/rules/din276.py`"
+- Будь конкретен: вместо "нужно добавить validation" → "добавлю ValidationRule `DIN276CostGroupHierarchy` в `backend/app/core/validation/rules/__init__.py` (все rule-классы колокированы в одном файле)"
 
 ### Команды для разработки
 
@@ -633,7 +635,7 @@ ALLOWED_ORIGINS=http://localhost:5173
 ## Важные ограничения
 
 1. **НЕ используем IfcOpenShell** — весь BIM/CAD через DDC cad2data pipeline
-2. **НЕ используем BCF** — своя система issues/comments/collaboration
+2. **BCF — разрешён как I/O формат** (issues / viewpoints / validation reports). Hand-rolled XML или AGPL-совместимая библиотека (без IfcOpenShell-зависимости). Решение пересмотрено 2026-04-26.
 3. **НЕ используем natively IFC** — IFC это просто ещё один CAD формат для конвертации в canonical
 4. **НЕ монолитная архитектура** — каждая функция = модуль с manifest
 5. **НЕ optional validation** — validation pipeline обязателен в workflow

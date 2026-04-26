@@ -2,8 +2,10 @@
 
 Endpoints:
     POST  /validation/run                    — Run validation on a BOQ
+    POST  /validation/import-ids             — Import IDS rules (multipart upload)
     GET   /validation/reports?project_id=X   — List validation reports
     GET   /validation/reports/{report_id}    — Get single report
+    GET   /validation/reports/{id}/sarif     — Export report as SARIF v2.1.0 JSON
     DELETE /validation/reports/{report_id}   — Delete report
     GET   /validation/rule-sets              — List available rule sets
 """
@@ -12,12 +14,16 @@ import logging
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.validation.engine import rule_registry
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.validation.bim_validation_service import BIMValidationService
+from app.modules.validation.ids_importer import IDSImportError, parse_ids
 from app.modules.validation.models import ValidationReport
+from app.modules.validation.sarif_exporter import report_to_sarif
 from app.modules.validation.schemas import (
     CheckBIMModelRequest,
     RunValidationRequest,
@@ -286,6 +292,84 @@ async def delete_report(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Validation report {report_id} not found",
         )
+
+
+# ── POST /import-ids — Import buildingSMART IDS rules ─────────────────────
+
+
+@router.post(
+    "/import-ids",
+    dependencies=[Depends(RequirePermission("validation.create"))],
+)
+async def import_ids(
+    file: UploadFile = File(..., description="An IDS XML file (.ids or .xml)"),
+    rule_set: str = Query(
+        default="ids_custom",
+        description="Rule set name to register the imported rules under.",
+    ),
+) -> dict[str, Any]:
+    """Parse an IDS file and register one ValidationRule per <specification>.
+
+    The rules are added to the in-process rule registry under ``rule_set``
+    (default ``ids_custom``) so subsequent ``/validation/run`` calls can
+    apply them.  Returns the count and the list of generated rule ids.
+    """
+    try:
+        payload = await file.read()
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to read upload: {exc}",
+        ) from exc
+
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Empty file",
+        )
+
+    try:
+        rules = parse_ids(payload)
+    except IDSImportError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
+
+    rule_ids: list[str] = []
+    for rule in rules:
+        rule_registry.register(rule, rule_sets=[rule_set, "IDS"])
+        rule_ids.append(rule.rule_id)
+
+    return {
+        "rules_created": len(rule_ids),
+        "rule_ids": rule_ids,
+        "rule_set": rule_set,
+        "filename": file.filename,
+    }
+
+
+# ── GET /reports/{id}/sarif — Export report as SARIF v2.1.0 ───────────────
+
+
+@router.get(
+    "/reports/{report_id}/sarif",
+    dependencies=[Depends(RequirePermission("validation.read"))],
+)
+async def export_report_sarif(
+    report_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> JSONResponse:
+    """Export a validation report as SARIF v2.1.0 JSON.
+
+    The response carries the ``application/sarif+json`` media type so
+    downstream tooling (GitHub Code Scanning, Azure DevOps, VS Code SARIF
+    Viewer) can ingest it directly.
+    """
+    report = await _require_report_access(session, report_id, user_id)
+    sarif_doc = report_to_sarif(report)
+    return JSONResponse(content=sarif_doc, media_type="application/sarif+json")
 
 
 # ── GET /rule-sets — List available rule sets ─────────────────────────────

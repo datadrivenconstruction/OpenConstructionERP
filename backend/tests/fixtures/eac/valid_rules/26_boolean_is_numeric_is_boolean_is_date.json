@@ -1,0 +1,28 @@
+{
+  "schema_version": "2.0",
+  "name": "Type checks: numeric, boolean, date",
+  "description": "Demonstrates is_numeric, is_boolean, is_date constraint operators.",
+  "output_mode": "boolean",
+  "tags": ["data-quality", "types"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "and",
+    "children": [
+      {
+        "kind": "triplet",
+        "attribute": {"kind": "exact", "pset_name": "Pset_WallCommon", "name": "FireRating"},
+        "constraint": {"operator": "is_numeric"}
+      },
+      {
+        "kind": "triplet",
+        "attribute": {"kind": "exact", "pset_name": "Pset_WallCommon", "name": "IsExternal"},
+        "constraint": {"operator": "is_boolean"}
+      },
+      {
+        "kind": "triplet",
+        "attribute": {"kind": "exact", "pset_name": "Pset_WallCommon", "name": "InstalledOn"},
+        "constraint": {"operator": "is_date"}
+      }
+    ]
+  }
+}

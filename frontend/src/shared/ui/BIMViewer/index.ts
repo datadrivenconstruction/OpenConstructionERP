@@ -17,6 +17,7 @@ export {
   addViewpoint,
   listViewpoints,
   removeViewpoint,
+  renameViewpoint,
   getViewpoint,
 } from './SavedViewsStore';
 export type { Viewpoint } from './SavedViewsStore';

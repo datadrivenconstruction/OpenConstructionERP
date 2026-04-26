@@ -58,7 +58,7 @@ export default defineConfig({
       'jspdf-autotable',
       'maplibre-gl',
       'react-map-gl/maplibre',
-      'xlsx',
+      'exceljs',
       'yjs',
       'y-websocket',
       'y-webrtc',
@@ -81,6 +81,7 @@ export default defineConfig({
           if (id.includes('node_modules/pdfjs-dist')) return 'vendor-pdf';
           if (id.includes('node_modules/yjs') || id.includes('node_modules/y-webrtc')) return 'vendor-collab';
           if (id.includes('node_modules/jspdf') || id.includes('node_modules/html2canvas')) return 'vendor-charts';
+          if (id.includes('node_modules/exceljs')) return 'vendor-exceljs';
           // i18n fallback translations — separate chunk (~2MB of translation data)
           if (id.includes('i18n-fallbacks')) return 'i18n-data';
         },

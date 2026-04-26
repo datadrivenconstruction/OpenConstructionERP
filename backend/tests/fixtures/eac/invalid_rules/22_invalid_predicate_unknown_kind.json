@@ -1,0 +1,11 @@
+{
+  "schema_version": "2.0",
+  "name": "Predicate has unknown kind",
+  "output_mode": "boolean",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "xor",
+    "children": []
+  },
+  "_invalid_reason": "predicate.kind must be one of and|or|not|triplet"
+}

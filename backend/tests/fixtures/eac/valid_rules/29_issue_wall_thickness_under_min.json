@@ -1,0 +1,21 @@
+{
+  "schema_version": "2.0",
+  "name": "Issue: thin walls",
+  "description": "Wall thinner than 100mm raises a coordination issue.",
+  "output_mode": "issue",
+  "tags": ["walls", "issues"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "alias", "alias_id": "alias_thickness"},
+    "constraint": {"operator": "gte", "value": 0.1}
+  },
+  "issue_template": {
+    "title": "Wall ${Mark} thinner than minimum",
+    "description": "Wall ${Mark} (${Volume} m3) has thickness ${Thickness}mm which is below the project minimum of 100mm.",
+    "topic_type": "issue",
+    "priority": "high",
+    "stage": "design_review",
+    "labels": ["walls", "thickness", "min-100mm"]
+  }
+}

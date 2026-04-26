@@ -1,0 +1,23 @@
+{
+  "schema_version": "2.0",
+  "name": "Wall Comments null XOR Description not null",
+  "description": "Combinator demonstrating is_null and is_not_null in one rule.",
+  "output_mode": "boolean",
+  "tags": ["walls", "data-quality"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "and",
+    "children": [
+      {
+        "kind": "triplet",
+        "attribute": {"kind": "exact", "pset_name": null, "name": "Comments"},
+        "constraint": {"operator": "is_null"}
+      },
+      {
+        "kind": "triplet",
+        "attribute": {"kind": "exact", "pset_name": null, "name": "Description"},
+        "constraint": {"operator": "is_not_null"}
+      }
+    ]
+  }
+}

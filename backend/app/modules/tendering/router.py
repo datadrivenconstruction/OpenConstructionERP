@@ -170,6 +170,40 @@ def _package_with_bids(package: object) -> PackageWithBidsResponse:
     )
 
 
+# ── Root listing (BUG-TENDER01) ─────────────────────────────────────────────
+
+
+@router.get("/", response_model=list[PackageResponse])
+async def list_tenders_root(
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    project_id: uuid.UUID | None = Query(
+        default=None,
+        description="Optional project filter. When omitted returns an empty list "
+        "(cross-tenant enumeration is forbidden).",
+    ),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=100),
+) -> list[PackageResponse]:
+    """List tender packages.
+
+    Convenience root alias of ``GET /packages/`` so clients can probe
+    ``/api/v1/tendering/`` without having to know the inner ``packages``
+    sub-prefix. ``project_id`` is still required to return data — when omitted
+    we return ``[]`` rather than 422 to keep the route discoverable for
+    smoke probes.
+    """
+    if project_id is None:
+        return []
+    await _verify_tender_project_owner(session, project_id, user_id, payload)
+    packages, _ = await service.list_packages(
+        project_id=project_id, offset=offset, limit=limit
+    )
+    return [_package_to_response(p) for p in packages]
+
+
 # ── Package Endpoints ────────────────────────────────────────────────────────
 
 

@@ -73,7 +73,9 @@ import {
   type FullGridContext,
 } from './grid/cellRenderers';
 import { countComments } from './CommentDrawer';
-import { fmtWithCurrency, getUnitsForLocale } from './boqHelpers';
+import { fmtWithCurrency, getUnitsForLocale, saveCustomUnit } from './boqHelpers';
+import { RESOURCE_TYPES, getResourceTypeLabel } from './boqResourceTypes';
+import { CURRENCY_GROUPS } from '@/features/projects/CreateProjectPage';
 import { useToastStore } from '@/stores/useToastStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
 
@@ -172,6 +174,10 @@ interface ResourceRow {
   _resourceUnit: string;
   _resourceQty: number;
   _resourceRate: number;
+  /** Optional ISO 4217 code for foreign-currency resources (RFC 37 / #93). */
+  _resourceCurrency?: string;
+  /** Optional resource code (e.g. CWICR id) — used by inline editor. */
+  _resourceCode?: string;
   id: string;
   // Fields needed for GridRow compatibility
   description: string;
@@ -207,6 +213,8 @@ export interface ManualResource {
   unit: string;
   quantity: number;
   unit_rate: number;
+  /** Optional ISO 4217 code for foreign-currency resources (RFC 37 / #93). */
+  currency?: string;
 }
 
 export interface BOQGridProps {
@@ -226,6 +234,11 @@ export interface BOQGridProps {
   highlightPositionId?: string;
   currencySymbol: string;
   currencyCode: string;
+  /**
+   * Optional FX rate template (RFC 37 / #93). Used by per-resource currency
+   * picker. Each entry maps a foreign currency to a rate-to-base.
+   */
+  fxRates?: { currency: string; rate: number; label?: string }[];
   locale: string;
   footerRows: FooterRow[];
   onSelectionChanged?: (selectedIds: string[]) => void;
@@ -269,7 +282,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onSelectSuggestion: _onSelectSuggestion,
   onSaveToDatabase,
   onAddComment,
-  onFormulaApplied: _onFormulaApplied,
+  onFormulaApplied,
   onReorderSections,
   onReorderPositions,
   onDeleteSection,
@@ -278,6 +291,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   highlightPositionId,
   currencySymbol,
   currencyCode,
+  fxRates,
   locale,
   footerRows,
   onSelectionChanged,
@@ -375,6 +389,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     unit: string;
     quantity: string;
     unitRate: string;
+    /** ISO 4217 — empty string = use project base currency. */
+    currency: string;
   }
   const [manualResourceDialog, setManualResourceDialog] = useState<ManualResourceDialogState | null>(null);
   const manualResNameRef = useRef<HTMLInputElement>(null);
@@ -423,6 +439,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     () => ({
       currencySymbol,
       currencyCode,
+      fxRates: fxRates ?? [],
       locale,
       fmt,
       t,
@@ -442,6 +459,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       onAddManualResource: (positionId: string) => {
         setManualResourceDialog({
           positionId, name: '', type: 'material', unit: 'm²', quantity: '1', unitRate: '0',
+          currency: '', // empty ⇒ use project base currency
         });
         setTimeout(() => manualResNameRef.current?.focus(), 50);
       },
@@ -454,13 +472,16 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       onHighlightBIMElements,
       onDeleteSection: onDeleteSection ?? (() => {}),
       onReorderSections: onReorderSections ?? (() => {}),
+      // Issue #90: FormulaCellEditor reads onFormulaApplied via context
+      // because the Quantity column doesn't supply cellEditorParams.
+      onFormulaApplied,
     }) as FullGridContext,
-    [currencySymbol, currencyCode, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition,
+    [currencySymbol, currencyCode, fxRates, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource,
      onSaveResourceToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition,
      onDeletePosition, onSaveToDatabase, onAddComment,
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion, bimModelId,
-     onUpdatePosition, onHighlightBIMElements, onDeleteSection, onReorderSections],
+     onUpdatePosition, onHighlightBIMElements, onDeleteSection, onReorderSections, onFormulaApplied],
   );
 
   /* ── Column defs (standard + custom) ─────────────────────────────── */
@@ -497,6 +518,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     const resources = (pos.metadata?.resources ?? []) as Array<{
       name: string; code?: string; type: string;
       unit: string; quantity: number; unit_rate: number; total?: number;
+      currency?: string;
     }>;
     if (resources.length === 0) return;
 
@@ -514,6 +536,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         _resourceUnit: r.unit,
         _resourceQty: r.quantity,
         _resourceRate: r.unit_rate,
+        _resourceCurrency: r.currency,
+        _resourceCode: r.code,
         id: `${pos.id}_res_${i}`,
         description: r.name,
         ordinal: '',
@@ -1177,11 +1201,21 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   /* ── Manual resource dialog submit ────────────────────────────── */
   const handleManualResourceSubmit = useCallback(() => {
     if (!manualResourceDialog) return;
-    const { positionId, name, type, unit, quantity, unitRate } = manualResourceDialog;
+    const { positionId, name, type, unit, quantity, unitRate, currency } = manualResourceDialog;
     if (!name.trim()) return;
     const qty = parseFloat(quantity.replace(',', '.')) || 1;
     const rate = parseFloat(unitRate.replace(',', '.')) || 0;
-    onAddManualResource?.(positionId, { name: name.trim(), type, unit, quantity: qty, unit_rate: rate });
+    const trimmedUnit = unit.trim();
+    // Persist user-typed units so they show up next time anywhere in the app.
+    if (trimmedUnit) saveCustomUnit(trimmedUnit);
+    onAddManualResource?.(positionId, {
+      name: name.trim(),
+      type,
+      unit: trimmedUnit,
+      quantity: qty,
+      unit_rate: rate,
+      ...(currency ? { currency } : {}),
+    });
     setManualResourceDialog(null);
     // Auto-expand the position's resources
     setExpandedPositions((prev) => new Set(prev).add(positionId));
@@ -1192,15 +1226,16 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
   /* ── Context menu action handlers ─────────────────────────────── */
 
-  const RESOURCE_TYPES = [
-    { value: 'material', label: 'Material' },
-    { value: 'labor', label: 'Labor' },
-    { value: 'equipment', label: 'Equipment' },
-    { value: 'subcontractor', label: 'Subcontractor' },
-    { value: 'other', label: 'Other' },
-  ];
-
   const COMMON_UNITS = getUnitsForLocale();
+
+  /** Flatten the project currency catalog so the dialog dropdown has every option. */
+  const ALL_CURRENCY_OPTIONS = useMemo(
+    () =>
+      CURRENCY_GROUPS.flatMap((g) => g.options).filter(
+        (o) => o.value !== '__custom__',
+      ),
+    [],
+  );
 
   return (
     <div
@@ -1259,7 +1294,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           animateRows
           singleClickEdit
           enterNavigatesVertically
-          enterNavigatesVerticallyAfterEdit
+          // Issue #91: after committing an edit (Unit / Quantity / etc.),
+          // Enter should advance to the next column on the SAME row so the
+          // user can keep filling in the row left-to-right. The previous
+          // ``...AfterEdit`` setting jumped down — on the last data row
+          // that landed on the footer ("Resumen"), forcing the user to
+          // navigate back. Cells that DO want vertical-after-edit (rare)
+          // can still call ``api.tabToNextRow()`` from a custom editor.
+          enterNavigatesVerticallyAfterEdit={false}
           tabToNextCell={tabToNextCell}
           stopEditingWhenCellsLoseFocus
           suppressContextMenu
@@ -1500,7 +1542,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   className="w-full h-8 rounded-md border border-border-medium bg-surface-primary px-2 text-xs text-content-primary outline-none focus:border-oe-blue"
                 >
                   {RESOURCE_TYPES.map((rt) => (
-                    <option key={rt.value} value={rt.value}>{rt.label}</option>
+                    <option key={rt.value} value={rt.value}>
+                      {getResourceTypeLabel(rt.value, t)}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -1521,7 +1565,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
               </div>
             </div>
 
-            {/* Quantity + Rate row */}
+            {/* Quantity + Rate + Currency row */}
             <div className="flex gap-2 mb-3">
               <div className="flex-1">
                 <label className="block text-[11px] font-medium text-content-secondary mb-1">
@@ -1545,6 +1589,46 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   onKeyDown={(e) => { if (e.key === 'Enter') handleManualResourceSubmit(); }}
                   className="w-full h-8 rounded-md border border-border-medium bg-surface-primary px-2 text-xs text-content-primary tabular-nums text-right outline-none focus:border-oe-blue"
                 />
+              </div>
+              <div className="w-24">
+                <label className="block text-[11px] font-medium text-content-secondary mb-1">
+                  {t('boq.resource_currency', { defaultValue: 'Currency' })}
+                </label>
+                <select
+                  value={manualResourceDialog.currency || currencyCode}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setManualResourceDialog({
+                      ...manualResourceDialog,
+                      currency: v === currencyCode ? '' : v,
+                    });
+                  }}
+                  className="w-full h-8 rounded-md border border-border-medium bg-surface-primary px-2 text-xs text-content-primary outline-none focus:border-oe-blue"
+                  title={t('boq.resource_currency_hint', {
+                    defaultValue: 'Currency for this resource. Defaults to project base currency.',
+                  })}
+                >
+                  {/* Base currency always first */}
+                  <option value={currencyCode}>{currencyCode}</option>
+                  {/* Project FX template currencies */}
+                  {(fxRates ?? [])
+                    .filter((fx) => fx.currency !== currencyCode)
+                    .map((fx) => (
+                      <option key={`fx-${fx.currency}`} value={fx.currency}>
+                        {fx.currency}
+                      </option>
+                    ))}
+                  {/* All other ISO currencies (collapsed list) */}
+                  {ALL_CURRENCY_OPTIONS
+                    .filter(
+                      (c) =>
+                        c.value !== currencyCode &&
+                        !(fxRates ?? []).some((fx) => fx.currency === c.value),
+                    )
+                    .map((c) => (
+                      <option key={`all-${c.value}`} value={c.value}>{c.value}</option>
+                    ))}
+                </select>
               </div>
             </div>
 

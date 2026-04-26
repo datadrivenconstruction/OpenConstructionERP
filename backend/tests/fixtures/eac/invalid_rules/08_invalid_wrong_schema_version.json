@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.5",
+  "name": "Wrong schema_version (not '2.0')",
+  "output_mode": "boolean",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "_invalid_reason": "schema_version must be the const '2.0'"
+}

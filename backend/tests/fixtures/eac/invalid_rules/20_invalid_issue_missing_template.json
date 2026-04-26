@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Issue mode missing issue_template",
+  "output_mode": "issue",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "exact", "name": "Mark"},
+    "constraint": {"operator": "exists"}
+  },
+  "_invalid_reason": "output_mode=issue requires a non-null issue_template"
+}

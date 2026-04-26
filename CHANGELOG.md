@@ -5,6 +5,79 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] — 2026-04-26
+
+Major feature release. RFC 37 multi-currency / VAT / compound positions, BIM Viewer UX overhaul, IDS / SARIF interop, EAC engine API completeness, dashboards Quick-Insight + Smart-Autocomplete, security hardening, Linux install guide.
+
+### Added — RFC 37 multi-currency, VAT, compound positions
+- **Multi-currency BOQ resources (Issue #88)** — per-resource `currency` on compound-position rows. Project Settings page exposes a per-project FX rate table (code, label, rate-to-base) so foreign-priced labour, materials, equipment roll up cleanly into the project's base currency. Inline currency picker on every resource row in the BOQ grid; `⚠ no FX` pill renders when a resource currency has no rate configured. Resource total displayed in resource currency with base-currency tooltip (`qty × rate × fx`).
+- **Per-project VAT override (Issue #89)** — `Project.default_vat_rate` column. When seeding a fresh BOQ's default markups, the project's VAT override (if set) replaces the regional default. Settings UI shows live "Effective: X%" badge with regional fallback.
+- **Compound position editing (Issue #93)** — resource type / unit / currency are now first-class editable fields in the BOQ grid. Resource type rendered as a badge-styled `<select>` covering material / labour / equipment / subcontractor / other (i18n-keyed). Unit cell uses a project-aware datalist with free-form input persisted via `saveCustomUnit`. Project Settings exposes a chip list of custom units for the project.
+- **CWICR cost link (Issue #79)** — `Position.cost_item_id` plumbed through `PositionCreate` / `PositionUpdate` / `PositionResponse`. Backend rejects unknown / inactive cost-item IDs with 422; metadata-preserving on PATCH. Bulk-positions endpoint forwards optional per-row `cost_item_id`.
+
+### Added — BIM Viewer UX
+- **Geometry session cache** — Zustand LRU keyed by `modelId` (4 entries / 200 MB cap). Returning to `/bim/{id}` from another route no longer re-downloads or re-parses the GLB / DAE — the parsed scene is restored from cache. ~5× faster on second visit.
+- **Color-mode legend** — overlay listing each colour swatch + meaning across Storey / Type / Validation / BOQ-link coverage / Document coverage modes (gradient bar with min/max for the 5D-rate continuous mode). Capped at 12 swatches (+N more).
+- **Persistent measurement list** — completed measurements now land in the Tools panel with focus / hide / rename / delete per row, plus a top-level "Clear all measurements" button. Stop measuring no longer wipes the user's work; Esc cancels the active mode without deleting completed entries.
+- **Saved Views: rename + delete** — pencil + trash icons per row, inline edit with Enter / Esc.
+- **Asset Card panel fix** — store wiring repaired (`assetCardEnabled` + setter were missing in `useBIMViewerStore`), glass effect dropped for solid surface, asset registration now resolves stub IDs through `ensureBIMElement` so PATCH always lands on a real DB UUID.
+- **BIM volumetric quantity auto-suggest (Task #136)** — when linking BIM elements to a new BOQ position, the Quantity input pre-fills from the most relevant geometric parameter for the position's unit (volume / area / length / mass / count) with a confidence badge and partial-coverage warning.
+- **Properties tab** is now a real local tab inside the right panel — no longer a disguised navigation to `/data-explorer`.
+- **Rules button** opens in a new tab instead of unloading the viewer.
+- **Saved Views Save button** no longer clipped past the panel edge.
+- **4D Schedule placeholder** removed (was a no-op button).
+- **Issue #53 — placeholder geometry banner**. When the IFC text fallback synthesizes generic boxes (DDC `cad2data` not installed), elements are tagged `is_placeholder: true` and the viewer shows an amber dismissable banner pointing to `docs/INSTALL_DDC.md`. No more silent placeholder-as-real-geometry.
+- **Issue #53 — DAE double-rotation regression**. `ColladaLoader` already pre-rotates Z_UP DAEs; the unconditional `scene.rotation.x = -π/2` flipped models upside-down. Now branched on `_isGLB` with a Y-vs-Z bbox heuristic for un-rotated DAE inputs.
+
+### Added — Validation interop
+- **IDS importer (Task #224)** — `POST /api/v1/validation/import-ids` (multipart). Parses buildingSMART IDS XML via `defusedxml`, registers each `<specification>` as a `ValidationRule` under the `ids_custom` rule set. No IfcOpenShell dependency.
+- **SARIF v2.1.0 exporter** — `GET /api/v1/validation/reports/{id}/sarif` returning `application/sarif+json`. Severity error / warning / info → SARIF error / warning / note. Element refs map to logical locations.
+
+### Added — EAC §1.7 Engine API completeness
+- New endpoints: `POST /rules:compile`, `GET /runs/{id}/status`, `POST /runs/{id}:cancel`, `POST /runs/{id}:rerun`, `GET /runs/{a}:diff/{b}`.
+- Cooperative cancellation via in-process token registry + persisted `EacRun.status='cancelled'` for cross-worker visibility.
+- New events: `eac.run.cancelled`, `eac.run.rerun_started`.
+
+### Added — Dashboards (T02 + T03)
+- **Quick-Insight Panel** — `GET /api/v1/dashboards/snapshots/{id}/quick-insights` runs rule-based heuristics over the snapshot (histograms, bars, lines, scatters, donuts) ranked by interestingness with chart-type diversity. `QuickInsightPanel.tsx` renders the result grid with refresh + per-card pin buttons.
+- **Smart Value Autocomplete** — `GET /api/v1/dashboards/snapshots/{id}/values?column=...&q=...` powered by DuckDB + rapidfuzz fuzzy reranking. `SmartValueAutocomplete.tsx` is a debounced (250 ms) ARIA combobox with keyboard nav.
+
+### Added — Event bus adoption (v2.4.0 slice E)
+Five previously silent modules now emit events for downstream audit / analytics / notifications:
+- `punchlist` — item created / updated / deleted / status_changed
+- `procurement` — po created / updated / issued, gr created / confirmed
+- `reporting` — kpi_snapshot / template / report_generated
+- `notifications` — created / read / bulk_read / deleted
+- `tendering` — package created / updated, bid created / updated (re-enabled commented-out publishes)
+
+### Security
+- **XML XXE pinning** — `backend/app/modules/schedule/router.py` now imports `defusedxml` exclusively for user-XML parsing; regression tests pin against billion-laughs and external-entity payloads.
+- **Punchlist photo upload size cap** — 25 MB limit enforced via `Content-Length` pre-check then body-size fallback; HTTP 413 instead of OOM.
+- **CSP source-of-truth** — duplicate `Content-Security-Policy` removed from `deploy/docker/nginx.conf`; backend middleware is now authoritative.
+- **CodeQL noise reduction** — `.github/codeql/codeql-config.yml` adds `paths-ignore` for tests / dist / audit / alembic / demo seeds / marketing and `query-filters` for low-signal rules; expected ~80% alert reduction with zero behaviour change.
+
+### Documentation
+- **Linux install guide** — `docs/INSTALL_LINUX.md` covers PEP 668 externally-managed-environment trap on Ubuntu 23.04+ (incl. 26), Python 3.12 vs 3.13 wheel-coverage, system-deps for source build, port-collision recovery, optional systemd unit. README adds an Ubuntu/Debian pointer block.
+- **CLAUDE.md** validation-rules-tree fixed to match disk reality (one colocated `rules/__init__.py`, no per-standard files).
+
+### Test infrastructure
+- **Backend `shared_auth` fixture cascade fix** — three-layer cascade resolved: (1) `conftest.py` redirects `DATABASE_URL` to a per-session temp SQLite *before* `from app...` imports so tests no longer compete with the production DB; (2) `_auth_helpers.promote_to_admin` flips `is_active=True` (BUG-RBAC03); (3) login / API rate limits bumped for whole-suite runs to avoid spurious 429s. The five originally-failing test files (`test_api_smoke`, `test_boq_regression`, `test_boq_import_safety`, `test_boq_cycle_detection`, `test_boq_cost_item_link`) plus three adjacent suites pass cleanly together: 57/57 in 246 s.
+- `test_boq_cycle_detection` 400-vs-422 expectations aligned to the deliberate `service.py` BUG-CYCLE02 behaviour.
+
+## [2.5.6] — 2026-04-26
+
+Hotfix for Issue #92 (formula save broken on v2.5.5) plus a UX fix for Issue #91 (Enter-after-edit jumped to footer) and a toolbar polish.
+
+### Fixed
+- **BOQ Quantity save (Issue #92)** — three chained bugs caused every Quantity edit on v2.5.5 to come back as `0`:
+  1. Backend `PATCH /v1/boq/positions/{id}` returned `500` whenever the row's `confidence` column held a legacy label (`'high'` / `'medium'` / `'low'`) — `_position_to_response` did `float(position.confidence)` and crashed. Added `_coerce_confidence` that maps known labels to `0.9 / 0.6 / 0.3` and falls back to `None` for unknowns.
+  2. `onFormulaApplied` was destructured as `_onFormulaApplied` (unused) inside `BOQGrid`, so `metadata.formula` was never persisted even though the editor fired the callback. Wired through the AG Grid `gridContext`.
+  3. The popup editor's tail blur (fired when `stopEditing` unmounted the input) re-entered the commit path and double-PATCHed — sometimes with the editor's raw text, which the value-parser fell back to `oldValue` for, so the cell appeared to "revert". Added a `committedRef` idempotency guard so commit fires exactly once per Enter / Tab / Blur.
+- **BOQ Enter-after-edit (Issue #91)** — pressing Enter after editing Unit / Quantity / Unit-rate jumped focus down to the next row, and on the last data row landed on the footer ("Resumen") forcing the user to navigate back. Now Enter-after-edit advances right to the next column on the same row, matching how users actually fill BOQ data left-to-right (`enterNavigatesVerticallyAfterEdit={false}`).
+
+### Changed
+- BOQ toolbar AI section: removed the coloured `border-l-2` accent strips between the *Find Costs / AI Chat / Analyze* buttons.
+
 ## [2.5.5] — 2026-04-26
 
 Issue #90: Excel-style formulas in BOQ Quantity cells. Plus the v2.5.4 Undo defensive wrapper, an "About" copy edit, and three small marketing-page text updates.

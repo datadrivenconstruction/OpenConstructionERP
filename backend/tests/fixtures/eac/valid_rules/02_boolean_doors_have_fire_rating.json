@@ -1,0 +1,13 @@
+{
+  "schema_version": "2.0",
+  "name": "Doors have FireRating property",
+  "description": "Every door must declare Pset_DoorCommon.FireRating.",
+  "output_mode": "boolean",
+  "tags": ["doors", "compliance"],
+  "selector": {"kind": "ifc_class", "values": ["IfcDoor"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "exact", "pset_name": "Pset_DoorCommon", "name": "FireRating"},
+    "constraint": {"operator": "exists"}
+  }
+}

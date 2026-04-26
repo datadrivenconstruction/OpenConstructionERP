@@ -1,0 +1,13 @@
+{
+  "schema_version": "2.0",
+  "name": "clash_config method unknown",
+  "output_mode": "clash",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "clash_config": {
+    "set_a": {"kind": "ifc_class", "values": ["IfcWall"]},
+    "set_b": {"kind": "ifc_class", "values": ["IfcPipeSegment"]},
+    "method": "broad_phase",
+    "test": "min_distance"
+  },
+  "_invalid_reason": "clash_config.method must be one of exact|obb|sphere"
+}

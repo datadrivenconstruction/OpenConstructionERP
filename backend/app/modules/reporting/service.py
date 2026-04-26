@@ -1,4 +1,11 @@
-"""Reporting service — business logic for KPI snapshots, templates, and report generation."""
+"""Reporting service — business logic for KPI snapshots, templates, and report generation.
+
+Event publishing (slice E):
+    reporting.kpi_snapshot.created — new KPI snapshot row
+    reporting.template.created     — new custom template
+    reporting.template.scheduled   — cron schedule attached/cleared
+    reporting.report.generated     — new report rendered
+"""
 
 import logging
 import uuid
@@ -7,6 +14,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
 from app.modules.reporting.cron import CronParseError, next_occurrence
 from app.modules.reporting.models import GeneratedReport, KPISnapshot, ReportTemplate
 from app.modules.reporting.repository import (
@@ -22,6 +30,15 @@ from app.modules.reporting.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+_logger_ev = logging.getLogger(__name__ + ".events")
+
+
+async def _safe_publish(name: str, data: dict, source_module: str = "oe_reporting") -> None:
+    """Best-effort event publish — never blocks the caller on failure."""
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug("Event publish skipped: %s", name)
 
 # ── System report templates (seeded on first startup) ──────────────────────
 
@@ -154,6 +171,18 @@ class ReportingService:
             metadata_=data.metadata,
         )
         snapshot = await self.kpi_repo.create(snapshot)
+
+        await _safe_publish(
+            "reporting.kpi_snapshot.created",
+            {
+                "snapshot_id": str(snapshot.id),
+                "project_id": str(snapshot.project_id),
+                "snapshot_date": snapshot.snapshot_date,
+                "cpi": snapshot.cpi,
+                "spi": snapshot.spi,
+            },
+        )
+
         logger.info(
             "KPI snapshot created for project %s date %s",
             data.project_id,
@@ -189,6 +218,18 @@ class ReportingService:
             metadata_=data.metadata,
         )
         template = await self.template_repo.create(template)
+
+        await _safe_publish(
+            "reporting.template.created",
+            {
+                "template_id": str(template.id),
+                "name": template.name,
+                "report_type": template.report_type,
+                "is_system": False,
+                "created_by": user_id,
+            },
+        )
+
         logger.info("Report template created: %s (%s)", data.name, data.report_type)
         return template
 
@@ -240,6 +281,20 @@ class ReportingService:
             template.is_scheduled = data.is_scheduled
 
         await self.template_repo.update(template)
+
+        await _safe_publish(
+            "reporting.template.scheduled",
+            {
+                "template_id": str(template.id),
+                "schedule_cron": template.schedule_cron,
+                "is_scheduled": template.is_scheduled,
+                "next_run_at": template.next_run_at,
+                "project_id_scope": (
+                    str(template.project_id_scope) if template.project_id_scope else None
+                ),
+            },
+        )
+
         logger.info(
             "Report template %s scheduled: cron=%r is_scheduled=%s next_run=%s",
             template.id,
@@ -344,6 +399,19 @@ class ReportingService:
             metadata_=data.metadata,
         )
         report = await self.report_repo.create(report)
+
+        await _safe_publish(
+            "reporting.report.generated",
+            {
+                "report_id": str(report.id),
+                "project_id": str(report.project_id),
+                "report_type": report.report_type,
+                "format": report.format,
+                "template_id": (str(report.template_id) if report.template_id else None),
+                "generated_by": user_id,
+            },
+        )
+
         logger.info(
             "Report generated: %s (%s) for project %s",
             data.title,

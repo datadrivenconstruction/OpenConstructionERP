@@ -1,0 +1,14 @@
+import { chromium } from '../../../../frontend/node_modules/playwright/index.mjs';
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 });
+const page = await ctx.newPage();
+await page.goto('https://openconstructionerp.com/?lang=de&nocache=' + Date.now(), { waitUntil: 'networkidle' });
+await page.evaluate(() => { const cb = document.querySelector('.cookie-banner'); if (cb) cb.style.display = 'none'; });
+await page.waitForTimeout(800);
+await page.screenshot({ path: './root-hero.png', clip: { x: 0, y: 0, width: 1440, height: 900 } });
+await page.evaluate(() => document.querySelector('.ml-stage')?.scrollIntoView({ behavior: 'instant', block: 'center' }));
+await page.waitForTimeout(800);
+await page.screenshot({ path: './root-mlstage.png', clip: { x: 0, y: 0, width: 1440, height: 900 } });
+console.log('OK');
+await ctx.close();
+await browser.close();

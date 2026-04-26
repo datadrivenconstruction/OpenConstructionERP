@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ids:ids xmlns:ids="http://standards.buildingsmart.org/IDS"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://standards.buildingsmart.org/IDS IDS-1.0.xsd">
+  <ids:info>
+    <ids:title>Concrete walls</ids:title>
+    <ids:copyright>OpenConstructionERP test fixtures</ids:copyright>
+    <ids:version>1.0.0</ids:version>
+    <ids:description>All IfcWall instances must carry a Concrete material assignment.</ids:description>
+    <ids:author>fixtures@openconstructionerp.io</ids:author>
+    <ids:date>2026-04-25</ids:date>
+  </ids:info>
+  <ids:specifications>
+    <ids:specification name="Concrete walls" ifcVersion="IFC4" identifier="ids_05">
+      <ids:applicability minOccurs="1" maxOccurs="unbounded">
+        <ids:entity>
+          <ids:name>
+            <ids:simpleValue>IFCWALL</ids:simpleValue>
+          </ids:name>
+        </ids:entity>
+      </ids:applicability>
+      <ids:requirements>
+        <ids:material cardinality="required">
+          <ids:value>
+            <ids:simpleValue>Concrete</ids:simpleValue>
+          </ids:value>
+        </ids:material>
+      </ids:requirements>
+    </ids:specification>
+  </ids:specifications>
+</ids:ids>

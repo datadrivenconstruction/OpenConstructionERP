@@ -17,12 +17,17 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { X, Search, Plus, CheckCircle2, Loader2, Link2, Sparkles } from 'lucide-react';
+import { X, Search, Plus, CheckCircle2, Loader2, Link2, Sparkles, AlertTriangle, Sigma } from 'lucide-react';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { boqApi, type BOQ, type BOQWithPositions, type Position } from '@/features/boq/api';
 import { createLink, ensureBIMElement } from './api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { useToastStore } from '@/stores/useToastStore';
+import {
+  suggestQuantityFromBIM,
+  formatSuggestionBadge,
+  type QuantitySuggestion,
+} from '@/features/boq/suggestQuantityFromBIM';
 
 /** Matches a canonical 36-char UUID (8-4-4-4-12, hex + dashes). Anything else
  *  — notably our client-side `_unmatched_N` stubs and Revit numeric ids —
@@ -80,29 +85,19 @@ interface AddToBOQModalProps {
 
 type Tab = 'existing' | 'new';
 
-/** Sum a numeric quantity across multiple elements. Missing or non-numeric
- *  values are treated as zero. */
-function sumQuantity(elements: BIMElementData[], key: string): number {
-  let total = 0;
-  for (const el of elements) {
-    const q = el.quantities?.[key];
-    if (typeof q === 'number' && Number.isFinite(q)) total += q;
-  }
-  return total;
-}
-
-/** Pick the most appropriate quantity/unit pair for a set of elements. */
-function pickDefaultQuantity(
-  elements: BIMElementData[],
-): { quantity: number; unit: string; source: string } {
-  // Preference order: volume → area → length → count
-  const vol = sumQuantity(elements, 'volume_m3') || sumQuantity(elements, 'volume');
-  if (vol > 0) return { quantity: vol, unit: 'm³', source: 'volume_m3' };
-  const area = sumQuantity(elements, 'area_m2') || sumQuantity(elements, 'area');
-  if (area > 0) return { quantity: area, unit: 'm²', source: 'area_m2' };
-  const len = sumQuantity(elements, 'length_m') || sumQuantity(elements, 'length');
-  if (len > 0) return { quantity: len, unit: 'm', source: 'length_m' };
-  return { quantity: elements.length, unit: 'pcs', source: 'count' };
+/** Pick the most appropriate quantity/unit pair for a set of elements.
+ *  Thin wrapper over `suggestQuantityFromBIM` — used for the *initial*
+ *  default before the user picks a unit.  Once the unit changes the
+ *  modal re-runs the suggester directly. */
+function pickInitialQuantity(elements: BIMElementData[]): {
+  quantity: number;
+  unit: string;
+  suggestion: QuantitySuggestion;
+} {
+  // Empty unit → suggester falls back to volume → area → length → count
+  // and picks an inferredUnit that we use as the form's initial unit.
+  const s = suggestQuantityFromBIM(elements, '');
+  return { quantity: s.value, unit: s.inferredUnit || 'pcs', suggestion: s };
 }
 
 /** Build a default description from the element set. */
@@ -154,12 +149,35 @@ export default function AddToBOQModal({
   const targetBoqRef = useRef<HTMLSelectElement>(null);
 
   // ── New position form state ─────────────────────────────────────────
-  const defaultQty = useMemo(() => pickDefaultQuantity(elements), [elements]);
+  const defaultQty = useMemo(() => pickInitialQuantity(elements), [elements]);
   const [description, setDescription] = useState(() => buildDefaultDescription(elements));
   const [unit, setUnit] = useState(defaultQty.unit);
   const [quantity, setQuantity] = useState(defaultQty.quantity.toFixed(3));
   const [unitRate, setUnitRate] = useState('0');
   const [ordinal, setOrdinal] = useState('');
+  // Tracks whether the user has manually edited the quantity field; if so
+  // we DON'T overwrite it when the unit changes — they typed it for a reason.
+  const [userEditedQty, setUserEditedQty] = useState(false);
+
+  // Re-run the suggester whenever the unit changes so the badge + auto-fill
+  // stay in sync with the BOQ position the user is targetting.  The
+  // suggestion drives:
+  //   1. the value pre-filled into the Quantity input (unless the user
+  //      has manually edited it — `userEditedQty` blocks the overwrite),
+  //   2. the badge under the Quantity input,
+  //   3. the low-confidence warning icon.
+  const quantitySuggestion = useMemo<QuantitySuggestion>(
+    () => suggestQuantityFromBIM(elements, unit),
+    [elements, unit],
+  );
+
+  // Auto-update the Quantity input when (elements / unit) change AND the
+  // user hasn't typed in it yet.  Use the raw suggestion value, formatted
+  // to 3 decimals like the original behaviour.
+  useEffect(() => {
+    if (userEditedQty) return;
+    setQuantity(quantitySuggestion.value.toFixed(3));
+  }, [quantitySuggestion, userEditedQty]);
 
   // Re-seed when the elements list changes (opening the modal from a new
   // element).  This also clears any transient UI state that would
@@ -167,7 +185,7 @@ export default function AddToBOQModal({
   // mounted between sessions — tab, search box, ordinal override, and
   // unit-rate field all reset to the defaults for the new element(s).
   useEffect(() => {
-    const d = pickDefaultQuantity(elements);
+    const d = pickInitialQuantity(elements);
     setDescription(buildDefaultDescription(elements));
     setUnit(d.unit);
     setQuantity(d.quantity.toFixed(3));
@@ -176,6 +194,7 @@ export default function AddToBOQModal({
     setOrdinal('');
     setUnitRate('0');
     setUserSelectedBOQId(null);
+    setUserEditedQty(false);
   }, [elements]);
 
   // Focus the Target BOQ select as soon as the modal mounts — it's Step 1
@@ -570,7 +589,10 @@ export default function AddToBOQModal({
                   <input
                     type="text"
                     value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
+                    onChange={(e) => {
+                      setQuantity(e.target.value);
+                      setUserEditedQty(true);
+                    }}
                     className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue tabular-nums"
                   />
                 </div>
@@ -584,6 +606,21 @@ export default function AddToBOQModal({
                   />
                 </div>
               </div>
+
+              {/* BIM-quantity suggestion badge — shows the source of the
+                  pre-filled Quantity value (Σ volume / area / length / count
+                  / mass), the inferred unit, and the share of contributing
+                  elements.  Low-confidence suggestions (computed mass from
+                  density, or no field found) get an amber warning icon. */}
+              <BIMQuantitySuggestionBadge
+                suggestion={quantitySuggestion}
+                userEdited={userEditedQty}
+                onResetToSuggestion={() => {
+                  setQuantity(quantitySuggestion.value.toFixed(3));
+                  setUserEditedQty(false);
+                }}
+                t={t}
+              />
 
               <div>
                 <div className="flex items-center justify-between mb-0.5">
@@ -776,6 +813,101 @@ function TabButton({
     >
       {label}
     </button>
+  );
+}
+
+/* ── BIM-quantity suggestion badge ─────────────────────────────────────── */
+
+/** Renders the auto-suggested quantity provenance ("Σ volume = 17.40 m³ from
+ *  3 elements").  Three visual states:
+ *
+ *   - high confidence    → emerald icon + emerald-tinted border
+ *   - medium confidence  → blue icon + blue-tinted border (some elements
+ *                          missing the field — partial sum)
+ *   - low confidence     → amber AlertTriangle + amber-tinted border + tooltip
+ *
+ *  When the user has manually edited the Quantity input the badge fades
+ *  and exposes a small "use suggestion" button to revert. */
+function BIMQuantitySuggestionBadge({
+  suggestion,
+  userEdited,
+  onResetToSuggestion,
+  t,
+}: {
+  suggestion: QuantitySuggestion;
+  userEdited: boolean;
+  onResetToSuggestion: () => void;
+  t: (k: string, opts?: Record<string, unknown>) => string;
+}) {
+  if (suggestion.source === 'no_elements') return null;
+
+  const isLow = suggestion.confidence === 'low';
+  const isMedium = suggestion.confidence === 'medium';
+  const tone = isLow
+    ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-300/60 dark:border-amber-700/40 text-amber-800 dark:text-amber-300'
+    : isMedium
+      ? 'bg-oe-blue/5 border-oe-blue/30 text-oe-blue'
+      : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-300/60 dark:border-emerald-700/40 text-emerald-800 dark:text-emerald-300';
+
+  const icon = isLow ? (
+    <AlertTriangle size={11} className="shrink-0" />
+  ) : (
+    <Sigma size={11} className="shrink-0" />
+  );
+
+  const label = formatSuggestionBadge(suggestion);
+
+  // Low-confidence tooltip explains *why* it's low so the estimator
+  // knows what to verify before accepting.
+  const lowTooltip =
+    suggestion.source === 'computed_mass_from_density'
+      ? t('bim.qty_low_density', {
+          defaultValue:
+            'Mass was computed from volume × material density — verify the density value before accepting.',
+        })
+      : suggestion.source === 'unit_unknown'
+      ? t('bim.qty_low_unit', {
+          defaultValue:
+            'Unit not recognised — falling back to element count. Pick a known unit (m³ / m² / m / kg / pcs / lsum) for a better suggestion.',
+        })
+      : suggestion.value === 0
+      ? t('bim.qty_low_missing', {
+          defaultValue:
+            'No matching geometric field found on these elements. Check the BIM model has the expected quantity properties.',
+        })
+      : t('bim.qty_low_generic', {
+          defaultValue: 'Low-confidence suggestion — verify before accepting.',
+        });
+
+  return (
+    <div
+      className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md border text-[11px] ${tone} ${userEdited ? 'opacity-60' : ''}`}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+        <span title={isLow ? lowTooltip : undefined} className="inline-flex">
+          {icon}
+        </span>
+        <span className="font-medium truncate" title={label}>
+          {label}
+        </span>
+        {userEdited && (
+          <span className="text-[10px] italic text-content-tertiary shrink-0">
+            {t('bim.qty_edited_marker', { defaultValue: '(edited)' })}
+          </span>
+        )}
+      </div>
+      {userEdited && suggestion.value > 0 && (
+        <button
+          type="button"
+          onClick={onResetToSuggestion}
+          className="text-[10px] font-medium underline hover:no-underline shrink-0"
+        >
+          {t('bim.qty_use_suggestion', { defaultValue: 'Use suggestion' })}
+        </button>
+      )}
+    </div>
   );
 }
 

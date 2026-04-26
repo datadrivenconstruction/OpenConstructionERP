@@ -1,0 +1,13 @@
+{
+  "schema_version": "2.0",
+  "name": "Wall thickness 100..400 mm",
+  "description": "Wall thickness must lie between 0.1 and 0.4 metres inclusive.",
+  "output_mode": "boolean",
+  "tags": ["walls", "geometry"],
+  "selector": {"kind": "category", "values": ["Walls"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "alias", "alias_id": "alias_thickness"},
+    "constraint": {"operator": "between", "min": 0.1, "max": 0.4, "inclusive": true}
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "schema_version": "2.0",
+  "name": "Empty AND combinator children",
+  "output_mode": "boolean",
+  "selector": {"kind": "and", "children": []},
+  "_invalid_reason": "and combinator requires at least one child (minItems=1)"
+}

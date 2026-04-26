@@ -1,0 +1,6 @@
+{
+  "schema_version": "2.0",
+  "output_mode": "boolean",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "_invalid_reason": "required field name is absent"
+}

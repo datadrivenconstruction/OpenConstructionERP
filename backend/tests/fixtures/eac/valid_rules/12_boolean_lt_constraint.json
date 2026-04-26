@@ -1,0 +1,13 @@
+{
+  "schema_version": "2.0",
+  "name": "Wall thickness less than 0.5 m",
+  "description": "Reject overly thick walls (>=0.5m suggests modelling error).",
+  "output_mode": "boolean",
+  "tags": ["walls", "geometry", "data-quality"],
+  "selector": {"kind": "category", "values": ["Walls"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "alias", "alias_id": "alias_thickness"},
+    "constraint": {"operator": "lt", "value": 0.5}
+  }
+}

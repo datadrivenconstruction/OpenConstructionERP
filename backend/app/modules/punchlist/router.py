@@ -16,11 +16,10 @@ import logging
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
-from app.modules.documents.service import MAX_PHOTO_SIZE
 from app.modules.punchlist.schemas import (
     PinToSheetRequest,
     PunchItemCreate,
@@ -36,6 +35,12 @@ logger = logging.getLogger(__name__)
 
 # Directory for storing uploaded punch list photos
 PHOTOS_DIR = Path("uploads/punchlist/photos")
+
+# Max photo upload size for punch list. Lower than the generic
+# documents-module 50MB cap because punch photos are mobile-captured
+# site snapshots, not engineering drawings — 25MB is plenty and keeps
+# memory pressure predictable on the worker pool.
+MAX_PUNCHLIST_PHOTO_BYTES = 25 * 1024 * 1024  # 25 MB
 
 
 def _get_service(session: SessionDep) -> PunchListService:
@@ -258,6 +263,7 @@ async def pin_to_sheet(
 async def upload_photo(
     item_id: uuid.UUID,
     file: UploadFile = File(...),
+    content_length: int | None = Header(default=None),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("punchlist.update")),
     service: PunchListService = Depends(_get_service),
@@ -271,6 +277,15 @@ async def upload_photo(
             detail=f"Unsupported file type: {file.content_type}. Allowed: {', '.join(allowed_types)}",
         )
 
+    # Early rejection based on Content-Length — refuse oversize uploads
+    # *before* reading the body into memory. This stops a hostile client
+    # from OOM'ing the server with a multi-GB POST.
+    if content_length is not None and content_length > MAX_PUNCHLIST_PHOTO_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="Photo exceeds 25 MB limit",
+        )
+
     # Ensure upload directory exists
     PHOTOS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -280,6 +295,12 @@ async def upload_photo(
     filepath = PHOTOS_DIR / filename
 
     # Read into memory, enforce size cap before writing.
+    # NOTE: this is a fall-back for clients that omit Content-Length or
+    # send it incorrectly. Streaming chunked-read with a running total
+    # would be stricter (no full body in RAM) but Starlette's UploadFile
+    # buffers to a SpooledTemporaryFile that rolls over to disk past
+    # ~1MB, so the practical memory footprint is bounded. Acceptable
+    # but suboptimal — see fix-D9 notes.
     try:
         content = await file.read()
     except Exception:
@@ -289,10 +310,10 @@ async def upload_photo(
             detail="Unable to read uploaded photo",
         )
 
-    if len(content) > MAX_PHOTO_SIZE:
+    if len(content) > MAX_PUNCHLIST_PHOTO_BYTES:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"Photo too large. Maximum size is {MAX_PHOTO_SIZE // (1024 * 1024)}MB.",
+            detail="Photo exceeds 25 MB limit",
         )
 
     try:

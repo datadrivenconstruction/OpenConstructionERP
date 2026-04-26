@@ -1,0 +1,19 @@
+{
+  "schema_version": "2.0",
+  "name": "Sum volume of named-group walls in W-Family above 0.5m3",
+  "description": "Aggregate volume of walls belonging to a saved selection 'critical_walls' AND of family 'W-Family' AND of type 'CIP' AND volume >= 0.5m3 (geometry_filter).",
+  "output_mode": "aggregate",
+  "result_unit": "m3",
+  "tags": ["walls", "qto", "geometry_filter", "named_group", "family", "type"],
+  "selector": {
+    "kind": "and",
+    "children": [
+      {"kind": "named_group", "values": ["critical_walls"]},
+      {"kind": "family", "values": ["W-Family"]},
+      {"kind": "type", "values": ["CIP"]},
+      {"kind": "geometry_filter", "min_volume_m3": 0.5, "max_volume_m3": 100, "spatial": {"zone": "core"}}
+    ]
+  },
+  "predicate": null,
+  "formula": "Volume"
+}

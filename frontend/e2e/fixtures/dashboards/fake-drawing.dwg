@@ -1,0 +1,4 @@
+NOT A REAL DWG — used to exercise the "unsupported format" 422 path
+of the dashboards snapshot uploader. The backend's cad2data_bridge
+rejects DWG/DGN with a SnapshotUnsupportedFormatError until the
+real converter ships.

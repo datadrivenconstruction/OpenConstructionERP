@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Reference to alias that does not exist",
+  "output_mode": "boolean",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "alias", "alias_id": "alias_does_not_exist_xyz"},
+    "constraint": {"operator": "exists"}
+  },
+  "_invalid_reason": "alias_id must resolve to an existing EacParameterAlias row (FR-1.10)"
+}

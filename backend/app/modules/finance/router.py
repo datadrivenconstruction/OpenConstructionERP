@@ -286,6 +286,57 @@ async def create_invoice(
     return _invoice_to_response(invoice, names)
 
 
+# ── /invoices alias collection (BUG-API12) ─────────────────────────────────
+#
+# Frontend and external clients expect ``/api/v1/finance/invoices`` (without
+# trailing slash) and ``/api/v1/finance/invoices/`` to behave like the root
+# ``/``. Without an explicit alias FastAPI matches the ``/{invoice_id}``
+# parametric route below and returns 422 on the literal string "invoices"
+# (UUID parse error). Declared BEFORE ``/{invoice_id}`` so the static path
+# wins.
+
+
+@router.get(
+    "/invoices/",
+    response_model=InvoiceListResponse,
+    summary="List invoices (alias of GET /)",
+    description="Alias of ``GET /api/v1/finance/`` — returns the same paginated "
+    "list. Provided so that clients hitting ``/api/v1/finance/invoices`` get a "
+    "sensible 200 instead of a UUID-parse 422.",
+)
+async def list_invoices_alias(
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    project_id: uuid.UUID | None = Query(default=None),
+    direction: str | None = Query(default=None),
+    status: str | None = Query(default=None),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=100),
+    _perm: None = Depends(RequirePermission("finance.read")),
+    service: FinanceService = Depends(_get_service),
+) -> InvoiceListResponse:
+    """List invoices (alias of ``GET /``).
+
+    Replicates the behaviour of ``list_invoices`` inline (rather than calling
+    it through Python) so that FastAPI dependency wiring resolves cleanly.
+    """
+    await _require_project_access(session, project_id, user_id)
+    items, total = await service.list_invoices(
+        project_id=project_id,
+        direction=direction,
+        invoice_status=status,
+        offset=offset,
+        limit=limit,
+    )
+    names = await _fetch_counterparty_names(session, (i.contact_id for i in items))
+    return InvoiceListResponse(
+        items=[_invoice_to_response(i, names) for i in items],
+        total=total,
+        offset=offset,
+        limit=limit,
+    )
+
+
 # ── Export invoices as Excel ────────────────────────────────────────────────
 
 

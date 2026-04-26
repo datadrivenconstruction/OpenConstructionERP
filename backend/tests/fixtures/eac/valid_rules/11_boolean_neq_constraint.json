@@ -1,0 +1,13 @@
+{
+  "schema_version": "2.0",
+  "name": "Wall material not 'Unknown'",
+  "description": "Reject walls whose Material attribute equals the placeholder 'Unknown'.",
+  "output_mode": "boolean",
+  "tags": ["walls", "data-quality"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "exact", "pset_name": "Pset_WallCommon", "name": "Material"},
+    "constraint": {"operator": "neq", "value": "Unknown"}
+  }
+}

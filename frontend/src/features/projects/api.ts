@@ -12,6 +12,14 @@ export interface ProjectAddress {
   lng?: number | null;
 }
 
+/** RFC 37 §3 — single FX rate row attached to a project.
+ *  Rate stored as a Decimal-precise string (SQLite parity). */
+export interface ProjectFxRate {
+  code: string;
+  rate: string;
+  label?: string | null;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -25,6 +33,12 @@ export interface Project {
   owner_id: string;
   address?: ProjectAddress | null;
   metadata: Record<string, unknown>;
+  /** RFC 37 #88 — additional currencies + FX rate to project.currency. */
+  fx_rates?: ProjectFxRate[];
+  /** RFC 37 #89 — per-project VAT override (percentage string, e.g. "21"). */
+  default_vat_rate?: string | null;
+  /** RFC 37 #93 — project-scoped custom units (synced across browsers). */
+  custom_units?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -39,6 +53,13 @@ export interface CreateProjectData {
   regional_factor?: number;
   /** Optional postal address — used to anchor the project map + weather. */
   address?: ProjectAddress | null;
+}
+
+/** Patch payload — every field is optional; only included keys are updated. */
+export interface UpdateProjectData extends Partial<CreateProjectData> {
+  fx_rates?: ProjectFxRate[];
+  default_vat_rate?: string | null;
+  custom_units?: string[];
 }
 
 /* ── Unified Project Dashboard types ─────────────────────────────────── */
@@ -122,7 +143,7 @@ export const projectsApi = {
   list: () => apiGet<Project[]>('/v1/projects/'),
   get: (id: string) => apiGet<Project>(`/v1/projects/${id}`),
   create: (data: CreateProjectData) => apiPost<Project>('/v1/projects/', data),
-  update: (id: string, data: Partial<CreateProjectData>) =>
+  update: (id: string, data: UpdateProjectData) =>
     apiPatch<Project>(`/v1/projects/${id}`, data),
   archive: (id: string) => apiDelete(`/v1/projects/${id}`),
   restore: (id: string) => apiPost<Project>(`/v1/projects/${id}/restore/`, {}),

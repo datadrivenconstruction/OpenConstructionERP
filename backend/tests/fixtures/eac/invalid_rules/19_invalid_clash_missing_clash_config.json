@@ -1,0 +1,7 @@
+{
+  "schema_version": "2.0",
+  "name": "Clash mode missing clash_config",
+  "output_mode": "clash",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "_invalid_reason": "output_mode=clash requires a non-null clash_config"
+}

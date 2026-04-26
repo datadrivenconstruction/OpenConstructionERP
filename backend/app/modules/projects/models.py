@@ -67,6 +67,37 @@ class Project(Base):
     )
     work_calendar_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
+    # ── v2.6.0 — multi-currency + per-project VAT (RFC 37, Issues #88/#89/#93) ──
+    # ``fx_rates`` holds extra currencies the project uses alongside ``currency``
+    # (the base). Shape:
+    #     [{"code": "USD", "rate": "1200.50", "label": "US Dollar"}]
+    # ``rate`` is a decimal-string giving how many BASE units per 1 unit of the
+    # foreign currency. Empty list = single-currency project (existing
+    # behaviour).
+    fx_rates: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+    # ``default_vat_rate`` overrides the regional template's VAT row when a new
+    # BOQ is seeded. Stored as a decimal-string percentage (e.g. ``"21"`` for
+    # 21%). NULL means "use regional default" — preserves pre-2.6 behaviour
+    # for projects that never set it.
+    default_vat_rate: Mapped[str | None] = mapped_column(
+        String(10), nullable=True,
+    )
+    # ``custom_units`` lets a project carry unit codes not in the canonical
+    # frontend list (Issue #93 item 3). Plain list of strings — order matters
+    # because the UI shows custom units after the canonical set in the order
+    # the user added them.
+    custom_units: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

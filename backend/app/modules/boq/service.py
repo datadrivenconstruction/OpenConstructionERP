@@ -841,6 +841,73 @@ def _is_section(position: Position) -> bool:
     return unit in ("", "section") and qty == 0.0 and rate == 0.0
 
 
+def _resource_total_in_base(
+    resources: list[dict[str, Any]],
+    fx_rates_map: dict[str, str] | None,
+    base_currency: str,
+) -> float:
+    """Sum resource subtotals in the project's BASE currency.
+
+    Issue #88 — each resource dict may carry an optional ``currency``. When
+    present and different from ``base_currency``, the row's contribution is
+    converted via ``fx_rates_map[currency]`` (units of base per 1 unit of
+    foreign). Missing currency → treated as base. Missing rate for a
+    foreign currency → resource is summed in its own units anyway, but
+    the caller is expected to surface a "missing FX rate" warning at UI
+    time (this function silently skips the conversion to keep the rollup
+    deterministic and never zero out a row).
+
+    Pure function — no DB I/O — so it's cheap to call from update_position
+    and reusable from snapshot/export paths.
+    """
+    if not resources:
+        return 0.0
+    base = (base_currency or "").upper()
+    total = 0.0
+    for r in resources:
+        if not isinstance(r, dict):
+            continue
+        try:
+            qty = float(r.get("quantity", 0) or 0)
+            rate = float(r.get("unit_rate", 0) or 0)
+        except (TypeError, ValueError):
+            continue
+        sub = qty * rate
+        code = str(r.get("currency") or "").strip().upper()
+        if code and code != base and fx_rates_map:
+            fx = fx_rates_map.get(code)
+            if fx:
+                try:
+                    sub = sub * float(fx)
+                except (TypeError, ValueError):
+                    pass
+        total += sub
+    return total
+
+
+def _project_fx_map(project: object | None) -> dict[str, str]:
+    """Project the ``Project.fx_rates`` JSON list into ``{code: rate}``.
+
+    Defensive against missing attribute / malformed entries — returns an
+    empty dict in any error path so callers can pass it through
+    ``_resource_total_in_base`` without further guards.
+    """
+    if project is None:
+        return {}
+    raw = getattr(project, "fx_rates", None)
+    if not isinstance(raw, list):
+        return {}
+    out: dict[str, str] = {}
+    for entry in raw:
+        if not isinstance(entry, dict):
+            continue
+        code = str(entry.get("code") or "").strip().upper()
+        rate = str(entry.get("rate") or "").strip()
+        if code and rate:
+            out[code] = rate
+    return out
+
+
 def _build_position_response(pos: Position) -> PositionResponse:
     """Build a PositionResponse from a Position ORM instance."""
     return PositionResponse(
@@ -1341,6 +1408,8 @@ class BOQService:
         Raises:
             HTTPException 404 if the target BOQ doesn't exist.
             HTTPException 409 if the BOQ is locked.
+            HTTPException 422 if ``cost_item_id`` was supplied but does not
+                reference an active CostItem (Issue #79).
         """
         await self._ensure_not_locked(data.boq_id)
 
@@ -1359,6 +1428,37 @@ class BOQService:
             new_parent_id=data.parent_id,
         )
 
+        # Issue #79: validate and stamp ``metadata.cost_item_id`` so a position
+        # created with ``source='cwicr'`` (or any source) can carry a typed
+        # link back to the cost database.  No DB migration — we piggyback
+        # on the existing JSON metadata column.
+        merged_metadata: dict[str, Any] = (
+            dict(data.metadata) if isinstance(data.metadata, dict) else {}
+        )
+        if data.cost_item_id is not None:
+            try:
+                cost_repo = CostItemRepository(self.session)
+                cost_item = await cost_repo.get_by_id(data.cost_item_id)
+            except HTTPException:
+                raise
+            except Exception as exc:  # noqa: BLE001 — surface any DB failure as 422
+                logger.exception(
+                    "add_position cost_item lookup failed for %s", data.cost_item_id
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=(
+                        "cost_item_id does not reference an active CostItem "
+                        f"({type(exc).__name__})"
+                    ),
+                ) from exc
+            if cost_item is None or not getattr(cost_item, "is_active", False):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="cost_item_id does not reference an active CostItem",
+                )
+            merged_metadata["cost_item_id"] = str(data.cost_item_id)
+
         total = _compute_total(data.quantity, data.unit_rate)
         max_order = await self.position_repo.get_max_sort_order(data.boq_id)
 
@@ -1376,7 +1476,7 @@ class BOQService:
             source=data.source,
             confidence=str(data.confidence) if data.confidence is not None else None,
             cad_element_ids=data.cad_element_ids,
-            metadata_=data.metadata,
+            metadata_=merged_metadata,
             sort_order=max_order + 1,
         )
         position = await self.position_repo.create(position)
@@ -1503,6 +1603,50 @@ class BOQService:
         await self._ensure_not_locked(position.boq_id)
 
         fields = data.model_dump(exclude_unset=True)
+
+        # ── Issue #79: cost_item_id linkage ─────────────────────────────
+        # The client doesn't see ``metadata.cost_item_id`` directly — they
+        # send a top-level ``cost_item_id`` field.  Pop it out, validate
+        # the target exists, then merge into ``metadata`` so the existing
+        # JSON-column write path persists it without a schema migration.
+        client_cost_item_id = fields.pop("cost_item_id", None)
+        if client_cost_item_id is not None:
+            try:
+                cost_repo = CostItemRepository(self.session)
+                cost_item = await cost_repo.get_by_id(client_cost_item_id)
+            except HTTPException:
+                raise
+            except Exception as exc:  # noqa: BLE001 — surface any DB failure as 422
+                logger.exception(
+                    "update_position cost_item lookup failed for %s",
+                    client_cost_item_id,
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=(
+                        "cost_item_id does not reference an active CostItem "
+                        f"({type(exc).__name__})"
+                    ),
+                ) from exc
+            if cost_item is None or not getattr(cost_item, "is_active", False):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="cost_item_id does not reference an active CostItem",
+                )
+            # Merge into the metadata field that the rest of the function
+            # already knows how to persist.  Preserve any other keys the
+            # caller patched (or, when they didn't touch metadata, the
+            # existing stored values).
+            base_meta: dict[str, Any]
+            if "metadata" in fields and isinstance(fields["metadata"], dict):
+                base_meta = dict(fields["metadata"])
+            else:
+                existing_meta = (
+                    position.metadata_ if isinstance(position.metadata_, dict) else {}
+                )
+                base_meta = dict(existing_meta)
+            base_meta["cost_item_id"] = str(client_cost_item_id)
+            fields["metadata"] = base_meta
 
         # ── BUG-CONCURRENCY01: optimistic concurrency check ──────────────
         # Pop the client-supplied ``version`` so it never reaches the SQL
@@ -2031,6 +2175,11 @@ class BOQService:
 
         Deletes existing markups and creates the standard set.
 
+        Issue #89 — when the owning Project has ``default_vat_rate`` set,
+        the seeded VAT/tax markup row uses that percentage instead of the
+        regional template's default. Other markup rows (overhead, profit,
+        contingency) keep their regional defaults.
+
         Args:
             boq_id: Target BOQ identifier.
             region: Region code — "DACH", "UK", "US", "RU", "GULF", or "DEFAULT".
@@ -2048,23 +2197,46 @@ class BOQService:
         region_key = region.upper()
         template = DEFAULT_MARKUP_TEMPLATES.get(region_key, DEFAULT_MARKUP_TEMPLATES["DEFAULT"])
 
+        # Resolve the project's per-project VAT override, if any. Loaded
+        # via the BOQ → Project chain so we don't need a project_id arg
+        # (keeps backwards compat with the existing public signature).
+        # ``default_vat_rate`` is a decimal-string percentage (e.g. ``"21"``).
+        project_vat_override: str | None = None
+        try:
+            boq = await self.boq_repo.get_by_id(boq_id)
+            if boq is not None and getattr(boq, "project_id", None):
+                from app.modules.projects.repository import ProjectRepository
+
+                project = await ProjectRepository(self.session).get_by_id(boq.project_id)
+                if project is not None:
+                    raw = getattr(project, "default_vat_rate", None)
+                    if raw is not None and str(raw).strip() != "":
+                        project_vat_override = str(raw).strip()
+        except Exception:  # noqa: BLE001 — best-effort, never break seeding
+            logger.debug("default_vat_rate lookup failed for boq %s", boq_id, exc_info=True)
+            project_vat_override = None
+
         # Remove existing markups
         await self.markup_repo.delete_all_for_boq(boq_id)
 
-        # Create new markups from template
+        # Create new markups from template, swapping in the override on tax rows
         new_markups: list[BOQMarkup] = []
         for entry in template:
+            percentage = str(entry["percentage"])
+            is_tax_override = bool(project_vat_override) and entry.get("category") == "tax"
+            if is_tax_override:
+                percentage = project_vat_override  # type: ignore[assignment]
             markup = BOQMarkup(
                 boq_id=boq_id,
                 name=str(entry["name"]),
                 markup_type=str(entry.get("markup_type", "percentage")),
                 category=str(entry["category"]),
-                percentage=str(entry["percentage"]),
+                percentage=percentage,
                 fixed_amount=str(entry.get("fixed_amount", "0")),
                 apply_to=str(entry.get("apply_to", "direct_cost")),
                 sort_order=int(entry["sort_order"]),  # type: ignore[arg-type]
                 is_active=True,
-                metadata_={},
+                metadata_={"vat_override": True} if is_tax_override else {},
             )
             new_markups.append(markup)
 

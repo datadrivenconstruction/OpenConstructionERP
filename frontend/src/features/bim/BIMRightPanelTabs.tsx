@@ -28,6 +28,9 @@ interface BIMRightPanelTabsProps {
   elements: BIMElementData[];
   savedGroups: BIMElementGroup[];
   projectId: string;
+  /** ID of the single selected element. The Properties tab uses this to show
+   *  the element's key/value properties. */
+  selectedElementId?: string | null;
   onClose: () => void;
   onIsolateGroup: (g: BIMElementGroup) => void;
   onHighlightGroup: (g: BIMElementGroup | null) => void;
@@ -43,6 +46,7 @@ export default function BIMRightPanelTabs({
   elements,
   savedGroups,
   projectId,
+  selectedElementId,
   onClose,
   onIsolateGroup,
   onHighlightGroup,
@@ -163,9 +167,10 @@ export default function BIMRightPanelTabs({
       {/* Tab body */}
       <div className="flex-1 min-h-0 overflow-y-auto">
         {activeTab === 'properties' && (
-          <BIMLinkedBOQPanel
+          <PropertiesTabContent
             modelId={modelId}
             elements={elements}
+            selectedElementId={selectedElementId ?? null}
             onHighlightElements={onHighlightBOQElements}
             onClose={onClose}
           />
@@ -203,6 +208,103 @@ export default function BIMRightPanelTabs({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * PropertiesTabContent — what the right-panel "Properties" tab actually
+ * renders.
+ *
+ * Originally this slot rendered the Linked-BOQ list directly, which made
+ * the tab label feel like a misnomer ("Properties" → BOQ links).  RFC 19
+ * §UX-3: when the user has a single element selected the tab shows the
+ * element's key/value properties up top; the Linked-BOQ list stays below
+ * because it's the panel's primary integration view.  When nothing is
+ * selected we fall back to the Linked-BOQ list alone — same behaviour as
+ * before.
+ *
+ * Properties come from `selectedElement.properties` (already fetched by
+ * BIMViewer) — no extra round-trip; if the element has no inline props we
+ * show a friendly placeholder rather than fetching async (the BIMViewer's
+ * own properties panel already handles the parquet round-trip for us).
+ */
+function PropertiesTabContent({
+  modelId,
+  elements,
+  selectedElementId,
+  onHighlightElements,
+  onClose,
+}: {
+  modelId: string;
+  elements: BIMElementData[];
+  selectedElementId: string | null;
+  onHighlightElements: (ids: string[]) => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const selected = selectedElementId
+    ? elements.find((e) => e.id === selectedElementId)
+    : null;
+
+  const propEntries = selected?.properties
+    ? Object.entries(selected.properties as Record<string, unknown>)
+        .filter(([, v]) => v !== null && v !== undefined && v !== '')
+        .sort(([a], [b]) => a.localeCompare(b))
+    : [];
+
+  return (
+    <div className="flex flex-col">
+      {selected ? (
+        <section className="px-3 py-2 border-b border-border-light">
+          <h3 className="text-[11px] font-semibold uppercase tracking-wide text-content-tertiary mb-2">
+            {t('bim.properties_tab_element', { defaultValue: 'Element properties' })}
+          </h3>
+          <div className="text-xs text-content-primary mb-1.5 truncate" title={selected.name ?? selected.id}>
+            <span className="font-semibold">{selected.name || selected.element_type || selected.id}</span>
+            {selected.element_type && selected.name ? (
+              <span className="ml-1 text-content-tertiary">· {selected.element_type}</span>
+            ) : null}
+          </div>
+          {propEntries.length > 0 ? (
+            <dl
+              className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-[11px]"
+              data-testid="properties-tab-list"
+            >
+              {propEntries.map(([k, v]) => (
+                <div key={k} className="contents">
+                  <dt className="text-content-tertiary truncate" title={k}>{k}</dt>
+                  <dd className="text-content-primary truncate" title={String(v)}>{String(v)}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <p
+              className="text-[11px] text-content-tertiary italic"
+              data-testid="properties-tab-empty"
+            >
+              {t('bim.properties_tab_loading', {
+                defaultValue:
+                  'No inline properties — open the element panel for full details.',
+              })}
+            </p>
+          )}
+        </section>
+      ) : (
+        <section className="px-3 py-2 border-b border-border-light">
+          <p className="text-[11px] text-content-tertiary italic">
+            {t('bim.properties_tab_no_selection', {
+              defaultValue: 'Select an element in the viewer to see its properties.',
+            })}
+          </p>
+        </section>
+      )}
+      <BIMLinkedBOQPanel
+        modelId={modelId}
+        elements={elements}
+        onHighlightElements={onHighlightElements}
+        onClose={onClose}
+      />
     </div>
   );
 }

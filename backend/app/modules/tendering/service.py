@@ -58,6 +58,19 @@ class TenderingService:
             metadata_=data.metadata,
         )
         package = await self.repo.create_package(package)
+
+        await _safe_publish(
+            "tendering.package.created",
+            {
+                "package_id": str(package.id),
+                "project_id": str(package.project_id),
+                "boq_id": str(package.boq_id) if package.boq_id else None,
+                "name": package.name,
+                "deadline": package.deadline,
+            },
+            source_module="oe_tendering",
+        )
+
         logger.info("Tender package created: %s", package.name)
         return package
 
@@ -96,14 +109,14 @@ class TenderingService:
 
         await self.repo.update_package_fields(package_id, **fields)
 
-        # await _safe_publish(
-        # "tendering.package.updated",
-        # {
-        # "package_id": str(package_id),
-        # "updated_fields": list(fields.keys()),
-        # },
-        # source_module="oe_tendering",
-        # )
+        await _safe_publish(
+            "tendering.package.updated",
+            {
+                "package_id": str(package_id),
+                "updated_fields": list(fields.keys()),
+            },
+            source_module="oe_tendering",
+        )
 
         logger.info("Tender package updated: %s (fields=%s)", package_id, list(fields.keys()))
 
@@ -133,15 +146,18 @@ class TenderingService:
         )
         bid = await self.repo.create_bid(bid)
 
-        # await _safe_publish(
-        # "tendering.bid.created",
-        # {
-        # "bid_id": str(bid.id),
-        # "package_id": str(package_id),
-        # "company_name": bid.company_name,
-        # },
-        # source_module="oe_tendering",
-        # )
+        await _safe_publish(
+            "tendering.bid.created",
+            {
+                "bid_id": str(bid.id),
+                "package_id": str(package_id),
+                "company_name": bid.company_name,
+                "total_amount": bid.total_amount,
+                "currency": bid.currency,
+                "status": bid.status,
+            },
+            source_module="oe_tendering",
+        )
 
         logger.info("Bid created: %s for package %s", bid.company_name, package_id)
         return bid
@@ -182,14 +198,14 @@ class TenderingService:
 
         await self.repo.update_bid_fields(bid_id, **fields)
 
-        # await _safe_publish(
-        # "tendering.bid.updated",
-        # {
-        # "bid_id": str(bid_id),
-        # "updated_fields": list(fields.keys()),
-        # },
-        # source_module="oe_tendering",
-        # )
+        await _safe_publish(
+            "tendering.bid.updated",
+            {
+                "bid_id": str(bid_id),
+                "updated_fields": list(fields.keys()),
+            },
+            source_module="oe_tendering",
+        )
 
         logger.info("Bid updated: %s (fields=%s)", bid_id, list(fields.keys()))
         return await self.get_bid(bid_id)

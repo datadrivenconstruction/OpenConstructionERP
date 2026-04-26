@@ -289,6 +289,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
             "glb_path": str(glb_path) if glb_path else None,
             "bounding_box": None,
             "geometry_type": "real" if has_geometry else "placeholder",
+            "geometry_quality": "real" if has_geometry else "placeholder",
             "raw_elements": csv_raw_rows,
         }
     except Exception as e:
@@ -660,6 +661,14 @@ def _excel_elements_to_bim_result(
     if geometry_path and geometry_path.exists():
         glb_path = _convert_dae_to_glb(geometry_path, output_dir)
 
+    is_real = bool(real_dae_path and real_dae_path.exists())
+    if not is_real:
+        # When DDC produced an Excel pass but no real .dae, we generated
+        # placeholder boxes — tag the elements so downstream consumers can
+        # warn the user.
+        for elem in elements:
+            elem["is_placeholder"] = True
+
     return {
         "elements": elements,
         "storeys": sorted(storeys_set),
@@ -669,7 +678,8 @@ def _excel_elements_to_bim_result(
         "geometry_path": str(geometry_path) if geometry_path else None,
         "glb_path": str(glb_path) if glb_path else None,
         "bounding_box": bounding_box,
-        "geometry_type": "real" if (real_dae_path and real_dae_path.exists()) else "placeholder",
+        "geometry_type": "real" if is_real else "placeholder",
+        "geometry_quality": "real" if is_real else "placeholder",
         # Full DDC dataframe (all 1000+ columns) for Parquet cold storage.
         # The hot table only keeps ~12 indexed fields; analytical queries
         # run against the Parquet via DuckDB.
@@ -1088,6 +1098,14 @@ def process_ifc_file(
         len(elements), len(storeys_set), len(disciplines_set),
     )
 
+    # Tag every element with `is_placeholder=True` so downstream consumers
+    # (frontend viewer, validation rules) can distinguish synthesized boxes
+    # from real DDC-converted geometry. This branch is reached ONLY when
+    # the DDC cad2data binary is unavailable AND the input is a text-IFC,
+    # so every element here has a placeholder bounding box.
+    for elem in elements:
+        elem["is_placeholder"] = True
+
     return {
         "elements": elements,
         "storeys": sorted(storeys_set),
@@ -1097,6 +1115,10 @@ def process_ifc_file(
         "geometry_path": str(geometry_path) if geometry_path else None,
         "bounding_box": bounding_box,
         "geometry_type": "placeholder",
+        # Top-level quality flag — read by the bim_hub router and copied
+        # into BIMModel.metadata_ so the frontend can show a "placeholder
+        # geometry" banner without having to inspect every element.
+        "geometry_quality": "placeholder",
     }
 
 
@@ -1700,4 +1722,5 @@ def _empty_result() -> dict[str, Any]:
         "status": "error",
         "error_message": "No elements could be extracted. The converter may not support this file format.",
         "geometry_type": "unknown",
+        "geometry_quality": "unknown",
     }

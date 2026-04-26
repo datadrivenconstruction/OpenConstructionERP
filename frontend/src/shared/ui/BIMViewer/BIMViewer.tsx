@@ -19,6 +19,7 @@ import {
   Maximize2,
   Loader2,
   AlertCircle,
+  AlertTriangle,
   Link2,
   Link2Off,
   Plus,
@@ -61,6 +62,8 @@ import { use4dTimeline } from './use4dTimeline';
 import { resolveElementStatus } from './4dStatus';
 import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
+import { useBIMGeometryCache } from '@/stores/useBIMGeometryCache';
+import { useBIMMeasurementsStore } from '@/stores/useBIMMeasurementsStore';
 import { useToastStore } from '@/stores/useToastStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -469,6 +472,24 @@ export function BIMViewer({
    *  previous spinner gave the user no signal anything was happening. */
   const [geometryProgress, setGeometryProgress] = useState<number | null>(null);
 
+  /** "Placeholder geometry" banner dismissal. Session-scoped (resets on
+   *  next page load). The banner appears when ANY loaded element carries
+   *  ``properties.is_placeholder === true`` — produced by the text-IFC
+   *  fallback path when DDC cad2data is unavailable (issue #53 H1). */
+  const [placeholderBannerDismissed, setPlaceholderBannerDismissed] = useState(false);
+  const isPlaceholderGeometry = useMemo(() => {
+    if (!elements || elements.length === 0) return false;
+    // Cheap check — bail at the first match. Loaded element lists are
+    // typically several hundred to a few thousand entries; this stays
+    // O(N) but short-circuits.
+    for (const el of elements) {
+      if (el.is_placeholder === true) return true;
+      const flag = (el.properties as Record<string, unknown> | undefined)?.is_placeholder;
+      if (flag === true || flag === 'true' || flag === 1) return true;
+    }
+    return false;
+  }, [elements]);
+
   /** Context menu state -- null when closed. */
   const [contextMenu, setContextMenu] = useState<BIMContextMenuState | null>(null);
   /** Set of element IDs that the user has manually hidden via the context
@@ -662,6 +683,12 @@ export function BIMViewer({
 
     const measureMgr = new MeasureManager(scene, elementMgr, {
       onMeasurementsChanged: (count) => setMeasureCount(count),
+      onMeasurementAdded: (m) => {
+        // Mirror the new measurement into the Tools-panel store so the user
+        // can manage it (rename / hide / delete) after they leave measure
+        // mode. RFC 19 §UX-10.
+        useBIMMeasurementsStore.getState().add({ id: m.id, distance: m.distance });
+      },
       onMiss: () => {
         useToastStore.getState().addToast({
           type: 'info',
@@ -739,6 +766,11 @@ export function BIMViewer({
       elementMgrRef.current.clear();
       elementMgrRef.current.loadElements(elements, { skipPlaceholders: !showBoundingBoxes });
       lastLoadedModelIdRef.current = modelId;
+      // Drop any leftover measurement view-state — the underlying THREE
+      // objects were removed with the previous scene and the model swap
+      // gives every measurement a stale anchor.
+      useBIMMeasurementsStore.getState().clear();
+      measureMgrRef.current?.clearAll();
     } else {
       // Same model, data refreshed (e.g. new BOQ links).  Update in place.
       elementMgrRef.current.updateElementData(elements);
@@ -762,13 +794,34 @@ export function BIMViewer({
       // Reset progress state at the start of every load.  null →
       // hide overlay; 0 → start animating in.
       setGeometryProgress(0);
+      // Per-modelId geometry cache (RFC 19 §UX-1). Hits skip the network
+      // round-trip entirely; misses populate the cache for the next mount.
+      const cacheStore = useBIMGeometryCache.getState();
       mgr
-        .loadGeometry(geometryUrl, (fraction) => {
-          // ColladaLoader fires this on every XHR progress event,
-          // typically every few KB.  We clamp to [0, 1] defensively
-          // and let the React render schedule batch updates.
-          setGeometryProgress(Math.max(0, Math.min(1, fraction)));
-        })
+        .loadGeometry(
+          geometryUrl,
+          (fraction) => {
+            // ColladaLoader fires this on every XHR progress event,
+            // typically every few KB.  We clamp to [0, 1] defensively
+            // and let the React render schedule batch updates.
+            setGeometryProgress(Math.max(0, Math.min(1, fraction)));
+          },
+          {
+            lookup: (url) => {
+              const hit = cacheStore.get(modelId, url);
+              if (!hit) return null;
+              return { buffer: hit.buffer, format: hit.format };
+            },
+            store: (url, buffer, format) => {
+              useBIMGeometryCache.getState().put(modelId, {
+                buffer,
+                format,
+                url,
+                cachedAt: Date.now(),
+              });
+            },
+          },
+        )
         .then(() => {
           // Final 100% tick is emitted by ElementManager itself
           // (after parsing finishes); hide the overlay one frame
@@ -1050,6 +1103,8 @@ export function BIMViewer({
 
   // Expose a tiny camera bridge on `window.__oeBim` so sibling right-panel
   // tabs can snapshot/restore the camera without a direct SceneManager handle.
+  // Also surfaces measure-tool actions (remove / clear / setVisible / focus)
+  // so the Tools panel measurement list can drive the in-scene THREE objects.
   useEffect(() => {
     const w = window as unknown as {
       __oeBim?: {
@@ -1058,11 +1113,20 @@ export function BIMViewer({
           pos: { x: number; y: number; z: number },
           target: { x: number; y: number; z: number },
         ) => void;
+        removeMeasurement: (id: string) => void;
+        clearMeasurements: () => void;
+        setMeasurementVisible: (id: string, visible: boolean) => void;
+        focusMeasurement: (id: string) => void;
       };
     };
     w.__oeBim = {
       getViewpoint: () => sceneRef.current?.getViewpoint() ?? null,
       setViewpoint: (pos, target) => sceneRef.current?.setViewpoint(pos, target),
+      removeMeasurement: (id) => measureMgrRef.current?.removeMeasurement(id),
+      clearMeasurements: () => measureMgrRef.current?.clearAll(),
+      setMeasurementVisible: (id, visible) =>
+        measureMgrRef.current?.setMeasurementVisible(id, visible),
+      focusMeasurement: (id) => measureMgrRef.current?.focusMeasurement(id),
     };
     return () => {
       if (w.__oeBim) delete w.__oeBim;
@@ -1491,10 +1555,25 @@ export function BIMViewer({
       // Also ignore when modifier keys are held (Ctrl/Cmd combos are browser shortcuts)
       if (e.ctrlKey || e.metaKey || e.altKey) return;
 
-      // MeasureManager consumes Escape while active so pending points are
-      // cancelled before the global deselect path runs.
-      if (measureMgrRef.current?.handleKeyDown(e)) {
+      // Measure tool gets first crack at Escape so an in-progress point
+      // is cancelled (and the tool flipped off) before the global deselect
+      // path runs.  We DO NOT delegate the on/off flip to the
+      // MeasureManager itself: it can't reach into the React store, and
+      // when it disabled itself unilaterally the toolbar still showed
+      // "Stop measuring" because `measureActive` stayed true (RFC 19 §UX-8).
+      if (measureMgrRef.current?.active && e.key === 'Escape') {
         e.preventDefault();
+        if (measureMgrRef.current.state === 'awaiting-second') {
+          // Mid-measurement — just drop the pending point. Tool stays on.
+          // Note: we deliberately DO NOT call clearAll() here — Escape
+          // cancels the in-progress click only, completed measurements
+          // survive (RFC 19 §UX-9).
+          measureMgrRef.current.cancelPending();
+        } else {
+          // No pending point — leave measure mode entirely. Completed
+          // measurements stay rendered + listed in the Tools panel.
+          setMeasureActive(false);
+        }
         return;
       }
 
@@ -1697,6 +1776,57 @@ export function BIMViewer({
   return (
     <div ref={containerRef} className={clsx('relative w-full h-full min-h-[400px] bg-surface-secondary rounded-lg overflow-hidden', className)}>
       <canvas ref={canvasRef} className="w-full h-full block" />
+
+      {/* Placeholder geometry warning — shown when the backend used the
+          text-IFC fallback (DDC cad2data unavailable) and the on-screen
+          model is a grid of 0.3×3.0×1.0 m boxes rather than the real
+          geometry.  The banner is non-blocking (pointer-events: none on
+          the wrapper, re-enabled on its own buttons) so the user can
+          still rotate/select underneath.  Issue #53 H1. */}
+      {isPlaceholderGeometry && !placeholderBannerDismissed && (
+        <div
+          data-testid="bim-placeholder-banner"
+          className="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex justify-center px-2 max-w-[90%]"
+        >
+          <div
+            className="pointer-events-auto flex items-start gap-3 rounded-lg border border-amber-300/80 bg-amber-50/95 px-4 py-2.5 text-amber-900 shadow-md backdrop-blur-sm dark:border-amber-500/60 dark:bg-amber-950/90 dark:text-amber-100"
+            role="status"
+            aria-live="polite"
+          >
+            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+            <div className="text-xs leading-relaxed">
+              <span className="font-semibold">
+                {t('bim.placeholder_banner.title', {
+                  defaultValue: 'Geometry shown is a placeholder.',
+                })}
+              </span>{' '}
+              <span>
+                {t('bim.placeholder_banner.body', {
+                  defaultValue:
+                    'Install DDC cad2data converter to view real IFC geometry.',
+                })}
+              </span>{' '}
+              <a
+                href="/docs/INSTALL_DDC.md"
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-200"
+              >
+                {t('bim.placeholder_banner.learn_more', { defaultValue: 'Learn more →' })}
+              </a>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPlaceholderBannerDismissed(true)}
+              aria-label={t('bim.placeholder_banner.dismiss', { defaultValue: 'Dismiss' })}
+              data-testid="bim-placeholder-banner-dismiss"
+              className="ml-1 rounded p-0.5 text-amber-700/80 hover:bg-amber-200/60 hover:text-amber-900 dark:text-amber-300/80 dark:hover:bg-amber-900/40 dark:hover:text-amber-100"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Loading overlay — covers the canvas while either the
           element list is being fetched OR the DAE/COLLADA geometry
@@ -1903,7 +2033,10 @@ export function BIMViewer({
           {measureCount > 0 && (
             <button
               type="button"
-              onClick={() => measureMgrRef.current?.clearAll()}
+              onClick={() => {
+                measureMgrRef.current?.clearAll();
+                useBIMMeasurementsStore.getState().clear();
+              }}
               className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-oe-blue hover:bg-oe-blue/10 transition-colors"
             >
               {t('bim.measure_clear', { defaultValue: 'Clear' })}
@@ -2047,6 +2180,19 @@ export function BIMViewer({
           </div>
         </div>
       )}
+
+      {/* Color-mode legend (storey / category / validation / coverage).
+          Matches the active palette one-for-one so the user can decode the
+          3D scene at a glance. The 5D-cost gradient legend is rendered
+          separately above; here we handle the discrete-palette modes. */}
+      {(colorByMode === 'storey' ||
+        colorByMode === 'type' ||
+        colorByMode === 'validation' ||
+        colorByMode === 'boq_coverage' ||
+        colorByMode === 'document_coverage') &&
+        elements && elements.length > 0 && (
+          <ColorModeLegend mode={colorByMode} elements={elements} />
+        )}
 
       {/* Hidden elements badge + Show all button — bottom-right corner */}
       {(hiddenIds.size > 0 || isIsolated) && (
@@ -3407,6 +3553,109 @@ function InfoRow({ label, value }: { label: string; value?: string }) {
       <span className="text-[11px] text-content-primary font-medium text-end truncate min-w-0" title={value}>
         {value}
       </span>
+    </div>
+  );
+}
+
+/* ── Color-mode legend ─────────────────────────────────────────────────── */
+
+/**
+ * ColorModeLegend — small overlay surfacing what each mesh colour means
+ * for the currently-active discrete-palette colour mode.
+ *
+ * Field-based modes (storey, type) regenerate their swatches from the
+ * exact same golden-angle HSL algorithm `ElementManager.colorBy()` uses,
+ * so the legend stays in lock-step with the live scene without any extra
+ * coordination state.  Compliance modes use a fixed three-colour palette
+ * (red / amber / green) that mirrors the validation rules in
+ * `BIMViewer.tsx:912-942`.
+ *
+ * Anchored bottom-right at `bottom-12 end-3` so it sits one row above the
+ * Hidden / Isolated badge stack and never collides with it.
+ */
+function ColorModeLegend({
+  mode,
+  elements,
+}: {
+  mode: 'storey' | 'type' | 'validation' | 'boq_coverage' | 'document_coverage';
+  elements: BIMElementData[];
+}) {
+  const { t } = useTranslation();
+  const items: { label: string; hex: string }[] = (() => {
+    if (mode === 'storey') {
+      return ElementManager.buildColorByPalette(elements, (el) => el.storey || 'Unassigned')
+        .map(({ key, hex }) => ({ label: key, hex }));
+    }
+    if (mode === 'type') {
+      return ElementManager.buildColorByPalette(elements, (el) => el.element_type || 'Unknown')
+        .map(({ key, hex }) => ({ label: key, hex }));
+    }
+    if (mode === 'validation') {
+      return [
+        { label: t('bim.validation_pass', { defaultValue: 'Pass' }), hex: '#10b981' },
+        { label: t('bim.validation_warning', { defaultValue: 'Warning' }), hex: '#f59e0b' },
+        { label: t('bim.validation_error', { defaultValue: 'Error' }), hex: '#ef4444' },
+        { label: t('bim.validation_unchecked', { defaultValue: 'Unchecked' }), hex: '#9ca3af' },
+      ];
+    }
+    if (mode === 'boq_coverage') {
+      return [
+        { label: t('bim.coverage_linked', { defaultValue: 'Linked to BOQ' }), hex: '#10b981' },
+        { label: t('bim.coverage_not_linked', { defaultValue: 'Not linked' }), hex: '#ef4444' },
+      ];
+    }
+    // document_coverage
+    return [
+      { label: t('bim.coverage_doc_linked', { defaultValue: 'Has documents' }), hex: '#10b981' },
+      { label: t('bim.coverage_doc_none', { defaultValue: 'No documents' }), hex: '#ef4444' },
+    ];
+  })();
+
+  const titleByMode = {
+    storey: t('bim.legend_storey', { defaultValue: 'Storey' }),
+    type: t('bim.legend_type', { defaultValue: 'Category' }),
+    validation: t('bim.legend_validation', { defaultValue: 'Validation' }),
+    boq_coverage: t('bim.legend_boq_coverage', { defaultValue: 'BOQ coverage' }),
+    document_coverage: t('bim.legend_doc_coverage', { defaultValue: 'Document coverage' }),
+  } as const;
+
+  // Field-based palettes can be huge (one swatch per storey/category).
+  // Cap the visible list at 12 and indicate the overflow so the overlay
+  // never grows past a couple hundred px.
+  const MAX = 12;
+  const visible = items.slice(0, MAX);
+  const hiddenCount = Math.max(0, items.length - MAX);
+
+  return (
+    <div
+      className="absolute bottom-12 end-3 z-20 flex flex-col gap-1 rounded-lg bg-surface-primary/95 backdrop-blur-sm border border-border-light shadow-sm px-3 py-2 max-w-[220px]"
+      data-testid="bim-color-legend"
+    >
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-content-tertiary">
+        {titleByMode[mode]}
+      </span>
+      <ul className="flex flex-col gap-0.5">
+        {visible.map(({ label, hex }) => (
+          <li
+            key={`${label}-${hex}`}
+            className="flex items-center gap-1.5 text-[11px] text-content-secondary"
+          >
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-sm shrink-0 border border-black/10"
+              style={{ background: hex }}
+            />
+            <span className="truncate" title={label}>{label}</span>
+          </li>
+        ))}
+      </ul>
+      {hiddenCount > 0 && (
+        <span className="text-[10px] text-content-tertiary italic">
+          {t('bim.legend_more', {
+            defaultValue: '+{{count}} more',
+            count: hiddenCount,
+          })}
+        </span>
+      )}
     </div>
   );
 }

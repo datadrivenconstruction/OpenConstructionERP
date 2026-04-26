@@ -1,0 +1,22 @@
+{
+  "schema_version": "2.0",
+  "name": "Clash: walls vs pipes (OBB intersection)",
+  "description": "Detect intersecting bounding boxes between architecture walls and MEP pipes.",
+  "output_mode": "clash",
+  "tags": ["clash", "mep"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "clash_config": {
+    "set_a": {"kind": "and", "children": [
+      {"kind": "ifc_class", "values": ["IfcWall"]},
+      {"kind": "discipline", "values": ["Architecture"]}
+    ]},
+    "set_b": {"kind": "and", "children": [
+      {"kind": "ifc_class", "values": ["IfcPipeSegment"]},
+      {"kind": "discipline", "values": ["Mechanical"]}
+    ]},
+    "method": "obb",
+    "test": "intersection_volume",
+    "tolerance_m": 0.005,
+    "min_intersection_volume_m3": 0.0001
+  }
+}

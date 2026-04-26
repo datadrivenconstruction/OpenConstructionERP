@@ -166,6 +166,37 @@ export class MeasureManager {
     this.sceneManager.requestRender();
   }
 
+  /** Toggle whether a measurement is rendered (line + label hidden when
+   *  visible=false, but the entry remains in the list). */
+  setMeasurementVisible(id: string, visible: boolean): void {
+    const m = this.measurements.find((x) => x.id === id);
+    if (!m) return;
+    m.line.visible = visible;
+    m.labelEl.style.display = visible ? '' : 'none';
+    this.sceneManager.requestRender();
+  }
+
+  /** Frame the camera on a single measurement's bounding span. */
+  focusMeasurement(id: string): void {
+    const m = this.measurements.find((x) => x.id === id);
+    if (!m) return;
+    const box = new THREE.Box3();
+    box.expandByPoint(m.points[0]);
+    box.expandByPoint(m.points[1]);
+    // Fall back to the scene's zoomToFit-like behaviour by computing a
+    // sensible bounding sphere for the two points.
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const radius = Math.max(size.length() * 0.5, 1.0);
+    const camera = this.sceneManager.camera;
+    const offset = camera.position.clone().sub(center).normalize();
+    if (offset.lengthSq() < 1e-6) offset.set(1, 1, 1).normalize();
+    camera.position.copy(center.clone().add(offset.multiplyScalar(radius * 4)));
+    camera.lookAt(center);
+    camera.updateProjectionMatrix();
+    this.sceneManager.requestRender();
+  }
+
   /** Handle a global keydown — called by the React wrapper. */
   handleKeyDown(e: KeyboardEvent): boolean {
     if (!this._active) return false;

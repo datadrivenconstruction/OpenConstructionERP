@@ -1,0 +1,7 @@
+{
+  "schema_version": "2.0",
+  "name": "Empty selector values array",
+  "output_mode": "boolean",
+  "selector": {"kind": "ifc_class", "values": []},
+  "_invalid_reason": "ifc_class.values minItems=1; empty array forbidden"
+}

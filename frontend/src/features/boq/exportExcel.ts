@@ -1,4 +1,13 @@
-import * as XLSX from 'xlsx';
+/**
+ * BOQ → Excel export.
+ *
+ * Migrated from `xlsx` (SheetJS — unfixable HIGH npm audit advisories
+ * GHSA-4r6h-8v6p-xvw6 / GHSA-5pgg-2g8v-p4x9) to `exceljs`.  ExcelJS is
+ * heavy (~1MB), so the dependency is pulled in via a dynamic `import()`
+ * inside the export entry-point.  Importing this module is cheap; it
+ * only becomes expensive once the user actually clicks "Export".
+ */
+
 import {
   groupPositionsIntoSections,
   isSection,
@@ -33,6 +42,7 @@ export interface ExportOptions {
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
 const CURRENCY_FMT = '#,##0.00';
+const QTY_FMT = '#,##0.00';
 
 interface Resource {
   name: string;
@@ -50,63 +60,97 @@ function getResources(pos: Position): Resource[] {
   return (meta as Record<string, unknown>).resources as Resource[];
 }
 
-/* ── Build BOQ worksheet ──────────────────────────────────────────────── */
+/* ── Constants ────────────────────────────────────────────────────────── */
 
 const BOQ_COLUMNS = ['No.', 'Description', 'Unit', 'Quantity', 'Unit Rate', 'Total', 'Type', 'Code'];
 
-export function buildBOQSheet(options: ExportOptions): {
-  ws: XLSX.WorkSheet;
-  merges: XLSX.Range[];
+/** A single 2-D table of values; null for blank cells. */
+type Row = (string | number | null)[];
+
+/** A 1-based merge range using ExcelJS coordinates. */
+interface MergeRange {
+  topRow: number;
+  topCol: number;
+  bottomRow: number;
+  bottomCol: number;
+}
+
+/* ── BOQ sheet builder ────────────────────────────────────────────────── */
+
+/**
+ * Build the rows + merge ranges for the BOQ worksheet.  The result is
+ * library-agnostic: the values are plain JS, the merges use 1-based
+ * coordinates compatible with ExcelJS' `worksheet.mergeCells(...)`.
+ */
+export function buildBOQSheetData(options: ExportOptions): {
+  rows: Row[];
+  merges: MergeRange[];
+  /** Indices (0-based) of rows that contain numeric BOQ data and should
+   *  receive currency / quantity number formatting. */
+  numberFormatStartRow: number;
 } {
   const { positions, boqTitle, markupTotals, netTotal, vatRate, vatAmount, grossTotal } = options;
   const grouped = groupPositionsIntoSections(positions);
   const colCount = BOQ_COLUMNS.length;
   const itemCount = positions.filter((p) => !isSection(p)).length;
   const sectionCount = grouped.sections.length;
-  const dateStr = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  const dateStr = new Date().toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
-  const rows: (string | number | null)[][] = [];
-  const merges: XLSX.Range[] = [];
+  const rows: Row[] = [];
+  const merges: MergeRange[] = [];
+
+  // 0-based index helper; we convert to 1-based at merge time.
+  const merge = (r0: number, c0: number, r1: number, c1: number): void => {
+    merges.push({ topRow: r0 + 1, topCol: c0 + 1, bottomRow: r1 + 1, bottomCol: c1 + 1 });
+  };
 
   // ── Header block ──────────────────────────────────────────────────────
-  // Row 0: Title
   rows.push([`BILL OF QUANTITIES — ${boqTitle}`, ...Array(colCount - 1).fill(null)]);
-  merges.push({ s: { r: 0, c: 0 }, e: { r: 0, c: colCount - 1 } });
+  merge(0, 0, 0, colCount - 1);
 
-  // Row 1: Project info line
   const infoLine = [
     options.projectName ? `Project: ${options.projectName}` : null,
     options.classificationStandard ? `Standard: ${options.classificationStandard}` : null,
     options.region ? `Region: ${options.region}` : null,
-  ].filter(Boolean).join('  |  ');
+  ]
+    .filter(Boolean)
+    .join('  |  ');
   rows.push([infoLine || 'OpenConstructionERP', ...Array(colCount - 1).fill(null)]);
-  merges.push({ s: { r: 1, c: 0 }, e: { r: 1, c: colCount - 1 } });
+  merge(1, 0, 1, colCount - 1);
 
-  // Row 2: Date + stats
-  const statsLine = `Date: ${dateStr}  |  ${sectionCount} sections  |  ${itemCount} positions  |  Gross Total: ${options.currency}${grossTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const statsLine = `Date: ${dateStr}  |  ${sectionCount} sections  |  ${itemCount} positions  |  Gross Total: ${options.currency}${grossTotal.toLocaleString(
+    undefined,
+    { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+  )}`;
   rows.push([statsLine, ...Array(colCount - 1).fill(null)]);
-  merges.push({ s: { r: 2, c: 0 }, e: { r: 2, c: colCount - 1 } });
+  merge(2, 0, 2, colCount - 1);
 
-  // Row 3: Empty separator
+  // Empty separator row
   rows.push(Array(colCount).fill(null));
 
-  // Row 4: Column headers
+  // Column headers (row index 4 → first data row at index 5)
   rows.push([...BOQ_COLUMNS]);
+  const numberFormatStartRow = rows.length; // 0-based start for number formatting
 
   // ── Data rows ─────────────────────────────────────────────────────────
   for (const group of grouped.sections) {
     const sectionRowIdx = rows.length;
-    // Section header row
     rows.push([
       group.section.ordinal,
       group.section.description,
-      null, null, null,
+      null,
+      null,
+      null,
       group.subtotal,
-      null, null,
+      null,
+      null,
     ]);
-    merges.push({ s: { r: sectionRowIdx, c: 1 }, e: { r: sectionRowIdx, c: 4 } });
+    merge(sectionRowIdx, 1, sectionRowIdx, 4);
 
-    // Positions
     for (const child of group.children) {
       rows.push([
         child.ordinal,
@@ -115,9 +159,9 @@ export function buildBOQSheet(options: ExportOptions): {
         child.quantity,
         child.unit_rate,
         child.total,
-        null, null,
+        null,
+        null,
       ]);
-      // Resources
       for (const r of getResources(child)) {
         const rTotal = r.total ?? r.quantity * r.unit_rate;
         rows.push([
@@ -133,11 +177,18 @@ export function buildBOQSheet(options: ExportOptions): {
       }
     }
 
-    // Section subtotal row
-    rows.push([null, `Subtotal: ${group.section.description}`, null, null, null, group.subtotal, null, null]);
-    merges.push({ s: { r: rows.length - 1, c: 1 }, e: { r: rows.length - 1, c: 4 } });
+    rows.push([
+      null,
+      `Subtotal: ${group.section.description}`,
+      null,
+      null,
+      null,
+      group.subtotal,
+      null,
+      null,
+    ]);
+    merge(rows.length - 1, 1, rows.length - 1, 4);
 
-    // Section separator
     rows.push(Array(colCount).fill(null));
   }
 
@@ -147,14 +198,23 @@ export function buildBOQSheet(options: ExportOptions): {
     rows.push([pos.ordinal, pos.description, pos.unit, pos.quantity, pos.unit_rate, pos.total, null, null]);
     for (const r of getResources(pos)) {
       const rTotal = r.total ?? r.quantity * r.unit_rate;
-      rows.push([null, `    \u2514 ${r.name}`, r.unit, r.quantity, r.unit_rate, rTotal, r.type || '', r.code || '']);
+      rows.push([
+        null,
+        `    \u2514 ${r.name}`,
+        r.unit,
+        r.quantity,
+        r.unit_rate,
+        rTotal,
+        r.type || '',
+        r.code || '',
+      ]);
     }
   }
 
   // ── Summary block ─────────────────────────────────────────────────────
   rows.push(Array(colCount).fill(null));
   rows.push([null, 'COST SUMMARY', null, null, null, null, null, null]);
-  merges.push({ s: { r: rows.length - 1, c: 1 }, e: { r: rows.length - 1, c: 4 } });
+  merge(rows.length - 1, 1, rows.length - 1, 4);
 
   const directCost = positions.filter((p) => !isSection(p)).reduce((sum, p) => sum + p.total, 0);
   rows.push([null, 'Direct Cost', null, null, null, directCost, null, null]);
@@ -171,59 +231,42 @@ export function buildBOQSheet(options: ExportOptions): {
 
   rows.push(Array(colCount).fill(null));
   rows.push([null, 'GROSS TOTAL', null, null, null, grossTotal, null, null]);
-  merges.push({ s: { r: rows.length - 1, c: 1 }, e: { r: rows.length - 1, c: 4 } });
+  merge(rows.length - 1, 1, rows.length - 1, 4);
 
-  // ── Footer ────────────────────────────────────────────────────────────
+  // Footer
   rows.push(Array(colCount).fill(null));
-  rows.push([`Generated by OpenConstructionERP  |  ${dateStr}  |  openconstructionerp.com`, ...Array(colCount - 1).fill(null)]);
-  merges.push({ s: { r: rows.length - 1, c: 0 }, e: { r: rows.length - 1, c: colCount - 1 } });
+  rows.push([
+    `Generated by OpenConstructionERP  |  ${dateStr}  |  openconstructionerp.com`,
+    ...Array(colCount - 1).fill(null),
+  ]);
+  merge(rows.length - 1, 0, rows.length - 1, colCount - 1);
 
-  // ── Build worksheet ───────────────────────────────────────────────────
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [
-    { wch: 12 },  // No.
-    { wch: 50 },  // Description
-    { wch: 8 },   // Unit
-    { wch: 14 },  // Quantity
-    { wch: 14 },  // Unit Rate
-    { wch: 16 },  // Total
-    { wch: 12 },  // Type
-    { wch: 14 },  // Code
-  ];
-  ws['!merges'] = merges;
-
-  // Number format
-  for (let r = 4; r < rows.length; r++) {
-    for (const c of [3, 4, 5]) {
-      const cell = XLSX.utils.encode_cell({ r, c });
-      if (ws[cell] && typeof ws[cell].v === 'number') {
-        ws[cell].z = c === 3 ? '#,##0.00' : CURRENCY_FMT;
-      }
-    }
-  }
-
-  return { ws, merges };
+  return { rows, merges, numberFormatStartRow };
 }
 
-/* ── Build Summary worksheet ──────────────────────────────────────────── */
+/* ── Summary sheet builder ────────────────────────────────────────────── */
 
-export function buildSummarySheet(options: ExportOptions): XLSX.WorkSheet {
+export function buildSummarySheetData(options: ExportOptions): {
+  rows: Row[];
+  numberFormatStartRow: number;
+} {
   const { positions, markupTotals, netTotal, vatRate, vatAmount, grossTotal } = options;
   const grouped = groupPositionsIntoSections(positions);
-  const dateStr = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  const dateStr = new Date().toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
-  const rows: (string | number | null)[][] = [];
-
-  // Header
+  const rows: Row[] = [];
   rows.push(['COST BREAKDOWN BY SECTION', null, null]);
   rows.push([options.projectName ? `Project: ${options.projectName}` : options.boqTitle, null, null]);
   rows.push([`Date: ${dateStr}`, null, null]);
   rows.push([null, null, null]);
 
-  // Column headers
   rows.push(['Section', 'Positions', 'Subtotal']);
+  const numberFormatStartRow = rows.length;
 
-  // Section subtotals
   for (const group of grouped.sections) {
     rows.push([
       `${group.section.ordinal}  ${group.section.description}`.trim(),
@@ -232,7 +275,6 @@ export function buildSummarySheet(options: ExportOptions): XLSX.WorkSheet {
     ]);
   }
 
-  // Ungrouped
   const ungroupedItems = grouped.ungrouped.filter((p) => !isSection(p));
   if (ungroupedItems.length > 0) {
     const ungroupedTotal = ungroupedItems.reduce((sum, p) => sum + p.total, 0);
@@ -241,7 +283,6 @@ export function buildSummarySheet(options: ExportOptions): XLSX.WorkSheet {
 
   rows.push([null, null, null]);
 
-  // Summary
   const directCost = positions.filter((p) => !isSection(p)).reduce((sum, p) => sum + p.total, 0);
   rows.push(['Direct Cost', null, directCost]);
   for (const m of markupTotals) {
@@ -253,40 +294,96 @@ export function buildSummarySheet(options: ExportOptions): XLSX.WorkSheet {
   rows.push([null, null, null]);
   rows.push(['GROSS TOTAL', null, grossTotal]);
 
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{ wch: 45 }, { wch: 12 }, { wch: 18 }];
+  return { rows, numberFormatStartRow };
+}
 
-  // Number format
-  for (let r = 4; r < rows.length; r++) {
-    const cell2 = XLSX.utils.encode_cell({ r, c: 2 });
-    if (ws[cell2] && typeof ws[cell2].v === 'number') {
-      ws[cell2].z = CURRENCY_FMT;
+/* ── Build & download ─────────────────────────────────────────────────── */
+
+/** Build the workbook as a binary buffer (does NOT touch the DOM).  Used
+ *  by tests and by the download path. */
+export async function buildBOQWorkbookBuffer(options: ExportOptions): Promise<ArrayBuffer> {
+  // Lazy-load ExcelJS; ~1MB module that we never want in the main bundle.
+  const ExcelJS = (await import('exceljs')).default;
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'OpenConstructionERP — DataDrivenConstruction';
+  wb.company = 'DataDrivenConstruction (DDC)';
+  wb.created = new Date();
+  // ExcelJS exposes only a small set of standard properties; stuff the
+  // application identity into `keywords` so the marker survives a
+  // round-trip via `xlsx`-compatible readers.
+  wb.keywords = 'DDC-CWICR-OE/1.5';
+
+  // ── BOQ sheet ─────────────────────────────────────────────────────────
+  const boqSheet = wb.addWorksheet('BOQ');
+  const { rows: boqRows, merges, numberFormatStartRow } = buildBOQSheetData(options);
+
+  for (const row of boqRows) {
+    boqSheet.addRow(row);
+  }
+
+  for (const m of merges) {
+    boqSheet.mergeCells(m.topRow, m.topCol, m.bottomRow, m.bottomCol);
+  }
+
+  boqSheet.columns = [
+    { width: 12 }, // No.
+    { width: 50 }, // Description
+    { width: 8 }, // Unit
+    { width: 14 }, // Quantity
+    { width: 14 }, // Unit Rate
+    { width: 16 }, // Total
+    { width: 12 }, // Type
+    { width: 14 }, // Code
+  ];
+
+  // Number format for quantity / unit rate / total columns (1-based: 4, 5, 6)
+  for (let r = numberFormatStartRow + 1; r <= boqSheet.rowCount; r++) {
+    const row = boqSheet.getRow(r);
+    for (const c of [4, 5, 6]) {
+      const cell = row.getCell(c);
+      if (typeof cell.value === 'number') {
+        cell.numFmt = c === 4 ? QTY_FMT : CURRENCY_FMT;
+      }
     }
   }
 
-  return ws;
+  // ── Summary sheet ─────────────────────────────────────────────────────
+  const summarySheet = wb.addWorksheet('Summary');
+  const { rows: sumRows, numberFormatStartRow: sumNumStart } = buildSummarySheetData(options);
+  for (const row of sumRows) {
+    summarySheet.addRow(row);
+  }
+  summarySheet.columns = [{ width: 45 }, { width: 12 }, { width: 18 }];
+
+  for (let r = sumNumStart + 1; r <= summarySheet.rowCount; r++) {
+    const row = summarySheet.getRow(r);
+    const cell = row.getCell(3);
+    if (typeof cell.value === 'number') {
+      cell.numFmt = CURRENCY_FMT;
+    }
+  }
+
+  return await wb.xlsx.writeBuffer();
 }
 
 /* ── Main export function ─────────────────────────────────────────────── */
 
-export function exportBOQToExcel(options: ExportOptions): void {
-  const wb = XLSX.utils.book_new();
-  // Workbook metadata — DDC identity marker
-  wb.Props = {
-    Author: 'OpenConstructionERP — DataDrivenConstruction',
-    Company: 'DataDrivenConstruction (DDC)',
-    Application: 'DDC-CWICR-OE/1.5',
-    CreatedDate: new Date(),
-  };
-
-  const { ws: boqSheet } = buildBOQSheet(options);
-  XLSX.utils.book_append_sheet(wb, boqSheet, 'BOQ');
-
-  const summarySheet = buildSummarySheet(options);
-  XLSX.utils.book_append_sheet(wb, summarySheet, 'Summary');
+export async function exportBOQToExcel(options: ExportOptions): Promise<void> {
+  const buf = await buildBOQWorkbookBuffer(options);
 
   const safeName = options.boqTitle.replace(/[^a-zA-Z0-9_\- ]/g, '').trim() || 'BOQ';
   const filename = `${safeName}.xlsx`;
 
-  XLSX.writeFile(wb, filename);
+  const blob = new Blob([buf], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  // Defer revoke to next tick so Safari has a chance to start the download.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }

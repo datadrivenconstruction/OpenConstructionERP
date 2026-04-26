@@ -142,6 +142,22 @@ export function BOQEditorPage() {
   const currencySymbol = useMemo(() => getCurrencySymbol(project?.currency), [project?.currency]);
   const currencyCode = useMemo(() => getCurrencyCode(project?.currency), [project?.currency]);
   const locale = useMemo(() => getLocaleForRegion(project?.region), [project?.region]);
+  /**
+   * Project FX template (RFC 37 / Issue #93) — flatten to the shape BOQGrid
+   * expects (`currency` + numeric `rate`). The API returns `code` and a
+   * decimal-precise string, so coerce here once.
+   */
+  const fxRates = useMemo(
+    () =>
+      (project?.fx_rates ?? [])
+        .map((fx) => ({
+          currency: fx.code,
+          rate: Number(fx.rate),
+          label: fx.label ?? undefined,
+        }))
+        .filter((fx) => fx.currency && Number.isFinite(fx.rate)),
+    [project?.fx_rates],
+  );
 
   // Custom columns from BOQ metadata
   const boqCustomColumns = useMemo(() => {
@@ -2628,6 +2644,7 @@ export function BOQEditorPage() {
           highlightPositionId={newPositionId ?? bimScrollTargetId ?? undefined}
           currencySymbol={currencySymbol}
           currencyCode={currencyCode}
+          fxRates={fxRates}
           locale={locale}
           footerRows={boqFooterRows}
           onSelectionChanged={handleSelectionChanged}

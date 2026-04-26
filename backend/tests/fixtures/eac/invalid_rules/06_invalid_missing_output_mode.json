@@ -1,0 +1,6 @@
+{
+  "schema_version": "2.0",
+  "name": "Missing output_mode",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "_invalid_reason": "required field output_mode is absent"
+}

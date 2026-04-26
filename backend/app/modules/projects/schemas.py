@@ -8,9 +8,107 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
+_CURRENCY_CODE_RE = re.compile(r"^[A-Z]{3}$")
+_DECIMAL_RE = re.compile(r"^[0-9]+(\.[0-9]+)?$")
+_UNIT_CODE_RE = re.compile(r"^[A-Za-z0-9._/²³-]{1,20}$")
 
 # Valid date formats accepted by the platform (ISO 8601 preferred)
 _DATE_FORMATS = ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%d.%m.%Y", "%m/%d/%Y")
+
+
+def _validate_fx_rates(value: list[dict[str, Any]] | None) -> list[dict[str, Any]] | None:
+    """Validate the ``fx_rates`` JSON list shape (RFC 37, Issues #88/#93).
+
+    Each entry must be a dict with:
+
+    * ``code`` — 3-letter uppercase ISO 4217 currency code
+    * ``rate`` — positive decimal-string (units of base per 1 unit of foreign)
+    * ``label`` — optional human label (≤64 chars)
+
+    Duplicate codes within a single project are rejected — the UI relies on
+    unique codes for the per-resource dropdown. Stored on Project as JSON;
+    we keep the dict shape rather than a structured Pydantic submodel so it
+    survives round-trip through ``Project.fx_rates`` without coupling to a
+    SQLAlchemy relationship.
+    """
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        raise ValueError("fx_rates must be a list of {code, rate, label} dicts")
+    seen: set[str] = set()
+    cleaned: list[dict[str, Any]] = []
+    for entry in value:
+        if not isinstance(entry, dict):
+            raise ValueError("each fx_rates entry must be an object")
+        code = str(entry.get("code", "")).strip().upper()
+        rate = str(entry.get("rate", "")).strip()
+        label = str(entry.get("label") or "").strip()[:64]
+        if not _CURRENCY_CODE_RE.match(code):
+            raise ValueError(f"fx_rates: '{code}' is not a 3-letter currency code")
+        if code in seen:
+            raise ValueError(f"fx_rates: duplicate currency '{code}'")
+        if not _DECIMAL_RE.match(rate):
+            raise ValueError(f"fx_rates: '{rate}' is not a decimal number for {code}")
+        # Reject zero rates outright — division by zero would crash rollups
+        # and a literal 0 has no plausible business meaning either.
+        try:
+            from decimal import Decimal
+
+            if Decimal(rate) <= 0:
+                raise ValueError(f"fx_rates: rate for {code} must be positive")
+        except (ValueError, ArithmeticError) as exc:
+            raise ValueError(f"fx_rates: invalid rate for {code}: {exc}") from exc
+        seen.add(code)
+        cleaned.append({"code": code, "rate": rate, "label": label})
+    return cleaned
+
+
+def _validate_vat_rate(value: str | None) -> str | None:
+    """Validate ``default_vat_rate``: positive decimal string ≤100.
+
+    Empty string is treated as None so a UI that clears the field results
+    in the regional default being used again (matching the column's
+    nullable contract).
+    """
+    if value is None:
+        return None
+    cleaned = str(value).strip()
+    if cleaned == "":
+        return None
+    if not _DECIMAL_RE.match(cleaned):
+        raise ValueError("default_vat_rate must be a positive decimal (e.g. '21' or '8.25')")
+    from decimal import Decimal
+
+    rate = Decimal(cleaned)
+    if rate < 0 or rate > 100:
+        raise ValueError("default_vat_rate must be between 0 and 100")
+    return cleaned
+
+
+def _validate_custom_units(value: list[str] | None) -> list[str] | None:
+    """Validate ``custom_units`` list (Issue #93 item 3).
+
+    Each unit is a short alphanumeric token. Duplicates and ones already
+    matching well-known canonical units (m, m2, kg) are still allowed —
+    the frontend de-duplicates against its canonical list at render time.
+    """
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        raise ValueError("custom_units must be a list of strings")
+    seen: set[str] = set()
+    cleaned: list[str] = []
+    for entry in value:
+        s = str(entry).strip()
+        if not s:
+            continue
+        if not _UNIT_CODE_RE.match(s):
+            raise ValueError(f"custom_units: '{s}' is not a valid unit token (≤20 chars, no spaces)")
+        if s in seen:
+            continue
+        seen.add(s)
+        cleaned.append(s)
+    return cleaned
 
 
 def _validate_date_string(value: str | None, field_name: str) -> str | None:
@@ -124,6 +222,43 @@ class ProjectCreate(BaseModel):
     custom_fields: dict[str, Any] | None = None
     work_calendar_id: str | None = Field(default=None, max_length=36)
 
+    # ── v2.6.0 — multi-currency + per-project VAT (RFC 37) ───────────────
+    fx_rates: list[dict[str, Any]] | None = Field(
+        default=None,
+        description=(
+            "Additional currencies + decimal-string rates to base. Shape: "
+            "[{code: 'USD', rate: '1200.50', label: 'US Dollar'}]. Empty/null "
+            "means single-currency project."
+        ),
+    )
+    default_vat_rate: str | None = Field(
+        default=None,
+        max_length=10,
+        description=(
+            "Per-project VAT override as decimal-string percentage (e.g. '21'). "
+            "Null means use the regional template."
+        ),
+    )
+    custom_units: list[str] | None = Field(
+        default=None,
+        description="Project-scoped unit codes not in the canonical frontend list.",
+    )
+
+    @field_validator("fx_rates", mode="after")
+    @classmethod
+    def _check_fx_rates(cls, v: list[dict[str, Any]] | None) -> list[dict[str, Any]] | None:
+        return _validate_fx_rates(v)
+
+    @field_validator("default_vat_rate", mode="after")
+    @classmethod
+    def _check_vat_rate(cls, v: str | None) -> str | None:
+        return _validate_vat_rate(v)
+
+    @field_validator("custom_units", mode="after")
+    @classmethod
+    def _check_custom_units(cls, v: list[str] | None) -> list[str] | None:
+        return _validate_custom_units(v)
+
     @field_validator("planned_start_date", "planned_end_date", "actual_start_date", "actual_end_date")
     @classmethod
     def _validate_dates(cls, v: str | None, info: Any) -> str | None:
@@ -178,6 +313,26 @@ class ProjectUpdate(BaseModel):
     custom_fields: dict[str, Any] | None = None
     work_calendar_id: str | None = Field(default=None, max_length=36)
     status: str | None = None
+
+    # ── v2.6.0 — multi-currency + per-project VAT (RFC 37) ───────────────
+    fx_rates: list[dict[str, Any]] | None = None
+    default_vat_rate: str | None = Field(default=None, max_length=10)
+    custom_units: list[str] | None = None
+
+    @field_validator("fx_rates", mode="after")
+    @classmethod
+    def _check_fx_rates(cls, v: list[dict[str, Any]] | None) -> list[dict[str, Any]] | None:
+        return _validate_fx_rates(v)
+
+    @field_validator("default_vat_rate", mode="after")
+    @classmethod
+    def _check_vat_rate(cls, v: str | None) -> str | None:
+        return _validate_vat_rate(v)
+
+    @field_validator("custom_units", mode="after")
+    @classmethod
+    def _check_custom_units(cls, v: list[str] | None) -> list[str] | None:
+        return _validate_custom_units(v)
 
     @field_validator("planned_start_date", "planned_end_date", "actual_start_date", "actual_end_date")
     @classmethod
@@ -235,6 +390,23 @@ class ProjectResponse(BaseModel):
     contingency_pct: str | None = None
     custom_fields: dict[str, Any] | None = None
     work_calendar_id: str | None = None
+
+    # ── v2.6.0 — multi-currency + per-project VAT (RFC 37) ───────────────
+    fx_rates: list[dict[str, Any]] = Field(default_factory=list)
+    default_vat_rate: str | None = None
+    custom_units: list[str] = Field(default_factory=list)
+
+    # BUG-MATH04: defence-in-depth response strip — see BOQResponse for the
+    # full rationale. ``ProjectCreate`` rejects HTML in ``name`` outright
+    # (loud 422) and only strips dangerous tags from ``description``;
+    # benign tags stored before that fix or via non-HTTP paths are
+    # neutralised here on the way out.
+    @field_validator("name", "description", mode="after")
+    @classmethod
+    def _strip_html_on_response(cls, v: str) -> str:
+        from app.core.sanitize import sanitise_text
+
+        return sanitise_text(v) or ""
 
 
 # ── WBS schemas ──────────────────────────────────────────────────────────

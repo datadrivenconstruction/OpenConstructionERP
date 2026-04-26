@@ -46,6 +46,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, select
 
+from app.core.csv_safety import neutralise_formula
 from app.core.rate_limiter import upload_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.takeoff.models import CadExtractionSession
@@ -1324,10 +1325,15 @@ async def export_cad_group(
     all_sum_cols = [c for c in sum_columns_list if c != "count"]
     header = list(group_by_list) + all_sum_cols + ["Count"]
 
-    # Write header
+    # Write header — column names are user-supplied via the API, so they
+    # need formula-injection neutralisation too (BUG-CSV-INJECTION).
     bold_font = Font(bold=True)
     for col_idx, col_name in enumerate(header, 1):
-        cell = ws.cell(row=1, column=col_idx, value=col_name.replace("_", " ").title())
+        cell = ws.cell(
+            row=1,
+            column=col_idx,
+            value=neutralise_formula(col_name.replace("_", " ").title()),
+        )
         cell.font = bold_font
 
     # Write data rows
@@ -1339,7 +1345,7 @@ async def export_cad_group(
         col_idx = 1
         for gc in group_by_list:
             val = str(key_parts.get(gc, "")).replace("OST_", "")
-            ws.cell(row=row_idx, column=col_idx, value=val)
+            ws.cell(row=row_idx, column=col_idx, value=neutralise_formula(val))
             col_idx += 1
         for sc in all_sum_cols:
             ws.cell(row=row_idx, column=col_idx, value=round(sums.get(sc, 0), 4))
@@ -2647,7 +2653,10 @@ async def export_measurements(
         output = io.StringIO()
         writer = csv.DictWriter(output, fieldnames=list(rows[0].keys()))
         writer.writeheader()
-        writer.writerows(rows)
+        # Neutralise any string cell that would otherwise be parsed by Excel as
+        # a formula (BUG-CSV-INJECTION). Numeric values pass through unchanged.
+        safe_rows = [{k: neutralise_formula(v) for k, v in r.items()} for r in rows]
+        writer.writerows(safe_rows)
         csv_text = output.getvalue()
         return {"csv": csv_text, "count": len(rows)}
 

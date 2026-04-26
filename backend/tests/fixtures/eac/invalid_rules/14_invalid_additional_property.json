@@ -1,0 +1,8 @@
+{
+  "schema_version": "2.0",
+  "name": "Additional unexpected top-level property",
+  "output_mode": "boolean",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "secret_field": "this should be rejected",
+  "_invalid_reason": "additionalProperties=false at the root forbids unknown 'secret_field'"
+}

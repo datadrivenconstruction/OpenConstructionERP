@@ -6,6 +6,7 @@ Stateless service layer. Handles:
 - Photo management (add/remove photo paths)
 - Summary aggregation
 - PDF export of punch list items
+- Event publishing on create/update/delete/status-transition (slice E)
 """
 
 import logging
@@ -16,11 +17,21 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
 from app.modules.punchlist.models import PunchItem
 from app.modules.punchlist.repository import PunchListRepository
 from app.modules.punchlist.schemas import PunchItemCreate, PunchItemUpdate, PunchStatusTransition
 
 logger = logging.getLogger(__name__)
+_logger_ev = logging.getLogger(__name__ + ".events")
+
+
+async def _safe_publish(name: str, data: dict, source_module: str = "oe_punchlist") -> None:
+    """Best-effort event publish — never blocks the caller on failure."""
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug("Event publish skipped: %s", name)
 
 # Valid status transitions: current_status -> list of allowed next statuses
 VALID_TRANSITIONS: dict[str, list[str]] = {
@@ -69,6 +80,19 @@ class PunchListService:
             metadata_=data.metadata,
         )
         item = await self.repo.create(item)
+
+        await _safe_publish(
+            "punchlist.item.created",
+            {
+                "item_id": str(item.id),
+                "project_id": str(item.project_id),
+                "priority": item.priority,
+                "status": item.status,
+                "assigned_to": item.assigned_to,
+                "created_by": user_id,
+            },
+        )
+
         logger.info("Punch item created: %s for project %s", item.title[:40], data.project_id)
         return item
 
@@ -126,6 +150,15 @@ class PunchListService:
         await self.repo.update_fields(item_id, **fields)
         await self.session.refresh(item)
 
+        await _safe_publish(
+            "punchlist.item.updated",
+            {
+                "item_id": str(item_id),
+                "project_id": str(item.project_id),
+                "updated_fields": list(fields.keys()),
+            },
+        )
+
         logger.info("Punch item updated: %s (fields=%s)", item_id, list(fields.keys()))
         return item
 
@@ -133,8 +166,18 @@ class PunchListService:
 
     async def delete_item(self, item_id: uuid.UUID) -> None:
         """Delete a punch item."""
-        await self.get_item(item_id)  # Raises 404 if not found
+        item = await self.get_item(item_id)  # Raises 404 if not found
+        project_id = str(item.project_id)
         await self.repo.delete(item_id)
+
+        await _safe_publish(
+            "punchlist.item.deleted",
+            {
+                "item_id": str(item_id),
+                "project_id": project_id,
+            },
+        )
+
         logger.info("Punch item deleted: %s", item_id)
 
     # ── Status transition ─────────────────────────────────────────────────
@@ -165,6 +208,18 @@ class PunchListService:
                 update_fields["resolution_notes"] = transition.notes
             await self.repo.update_fields(item_id, **update_fields)
             await self.session.refresh(item)
+
+            await _safe_publish(
+                "punchlist.item.status_changed",
+                {
+                    "item_id": str(item_id),
+                    "project_id": str(item.project_id),
+                    "from_status": current,
+                    "to_status": "open",
+                    "user_id": user_id,
+                },
+            )
+
             logger.info("Punch item reopened: %s by %s", item_id, user_id)
             return item
 
@@ -213,6 +268,17 @@ class PunchListService:
 
         await self.repo.update_fields(item_id, **update_fields)
         await self.session.refresh(item)
+
+        await _safe_publish(
+            "punchlist.item.status_changed",
+            {
+                "item_id": str(item_id),
+                "project_id": str(item.project_id),
+                "from_status": current,
+                "to_status": target,
+                "user_id": user_id,
+            },
+        )
 
         logger.info(
             "Punch item transitioned: %s %s -> %s by %s",

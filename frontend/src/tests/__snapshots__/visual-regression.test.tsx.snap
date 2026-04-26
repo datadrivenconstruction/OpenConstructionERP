@@ -1574,166 +1574,91 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
           class="mt-4 !mt-0"
         >
           <div
-            class="px-6 py-8"
+            class="flex h-full min-h-[60vh] items-center justify-center px-6 py-8"
           >
             <div
-              class="text-center mb-6"
+              class="flex flex-col items-center justify-center py-16 px-6 text-center"
             >
+              <div
+                class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-secondary text-content-tertiary"
+              >
+                <svg
+                  class="lucide lucide-folder-plus"
+                  fill="none"
+                  height="28"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  viewBox="0 0 24 24"
+                  width="28"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 10v6"
+                  />
+                  <path
+                    d="M9 13h6"
+                  />
+                  <path
+                    d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+                  />
+                </svg>
+              </div>
+              <h3
+                class="text-lg font-semibold text-content-primary"
+              >
+                Welcome — let's start with your first project
+              </h3>
               <p
-                class="text-sm font-semibold text-content-primary"
+                class="mt-1.5 max-w-sm text-sm text-content-secondary"
               >
-                Welcome to OpenConstructionERP
+                Projects organise your BOQs, schedules, and reports.
               </p>
-              <p
-                class="mt-1 text-xs text-content-tertiary"
+              <div
+                class="mt-5"
               >
-                Start by installing a demo project or creating your own.
-              </p>
-            </div>
-            <div
-              class="grid grid-cols-1 gap-3 sm:grid-cols-3"
-            >
-              <button
-                class="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30 disabled:opacity-60"
-              >
-                <span
-                  class="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold"
-                >
-                  1
-                </span>
                 <div
-                  class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
+                  class="flex flex-col items-center gap-3"
                 >
-                  <svg
-                    class="lucide lucide-download"
-                    fill="none"
-                    height="20"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.5"
-                    viewBox="0 0 24 24"
-                    width="20"
-                    xmlns="http://www.w3.org/2000/svg"
+                  <button
+                    class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-8 px-3.5 text-sm gap-1.5 rounded-lg"
                   >
-                    <path
-                      d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
-                    />
-                    <polyline
-                      points="7 10 12 15 17 10"
-                    />
-                    <line
-                      x1="12"
-                      x2="12"
-                      y1="15"
-                      y2="3"
-                    />
-                  </svg>
-                </div>
-                <span
-                  class="text-sm font-medium text-content-primary"
-                >
-                  Install Demo Project
-                </span>
-                <span
-                  class="text-[11px] leading-snug text-content-tertiary"
-                >
-                  Pre-built residential project with realistic data
-                </span>
-              </button>
-              <button
-                class="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
-              >
-                <span
-                  class="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold"
-                >
-                  2
-                </span>
-                <div
-                  class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
-                >
-                  <svg
-                    class="lucide lucide-folder-plus"
-                    fill="none"
-                    height="20"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.5"
-                    viewBox="0 0 24 24"
-                    width="20"
-                    xmlns="http://www.w3.org/2000/svg"
+                    <span
+                      class="inline-flex items-center"
+                    >
+                      <svg
+                        class="lucide lucide-folder-plus"
+                        fill="none"
+                        height="16"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.75"
+                        viewBox="0 0 24 24"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 10v6"
+                        />
+                        <path
+                          d="M9 13h6"
+                        />
+                        <path
+                          d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+                        />
+                      </svg>
+                      Create project
+                    </span>
+                  </button>
+                  <p
+                    class="text-xs text-content-tertiary"
                   >
-                    <path
-                      d="M12 10v6"
-                    />
-                    <path
-                      d="M9 13h6"
-                    />
-                    <path
-                      d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
-                    />
-                  </svg>
+                    Or load a demo project from Settings → Demo data
+                  </p>
                 </div>
-                <span
-                  class="text-sm font-medium text-content-primary"
-                >
-                  Create First Project
-                </span>
-                <span
-                  class="text-[11px] leading-snug text-content-tertiary"
-                >
-                  Set up a new estimation from scratch
-                </span>
-              </button>
-              <button
-                class="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
-              >
-                <span
-                  class="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold"
-                >
-                  3
-                </span>
-                <div
-                  class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
-                >
-                  <svg
-                    class="lucide lucide-upload"
-                    fill="none"
-                    height="20"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.5"
-                    viewBox="0 0 24 24"
-                    width="20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
-                    />
-                    <polyline
-                      points="17 8 12 3 7 8"
-                    />
-                    <line
-                      x1="12"
-                      x2="12"
-                      y1="3"
-                      y2="15"
-                    />
-                  </svg>
-                </div>
-                <span
-                  class="text-sm font-medium text-content-primary"
-                >
-                  Import Existing BOQ
-                </span>
-                <span
-                  class="text-[11px] leading-snug text-content-tertiary"
-                >
-                  Use AI to estimate from an existing document
-                </span>
-              </button>
+              </div>
             </div>
           </div>
         </div>

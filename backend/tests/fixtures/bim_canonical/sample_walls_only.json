@@ -1,0 +1,38 @@
+{
+  "format_version": "1.0",
+  "source": {
+    "type": "rvt",
+    "filename": "sample_walls_only.rvt",
+    "converter": "ddc-cad2data/0.3.0"
+  },
+  "metadata": {
+    "project_name": "Walls fixture",
+    "units": "metric",
+    "coordinate_system": "Project Base Point",
+    "exported_at": "2026-04-25T08:00:00Z"
+  },
+  "elements": [
+    {"id": "wall_001", "category": "Walls", "ifc_class": "IfcWall", "classification": {"din276": "330", "masterformat": "04 20 00", "uniformat": "B2010"}, "geometry": {"type": "extrusion", "length_m": 12.5, "height_m": 3.0, "thickness_m": 0.24, "area_m2": 37.5, "volume_m3": 9.0}, "properties": {"Material": "Concrete C30/37", "FireRating": "F90", "IsExternal": true, "LoadBearing": true, "Mark": "W-001"}, "quantities": {"area": 37.5, "volume": 9.0, "length": 12.5}, "relations": {"level": "level_00", "zone": "zone_a", "parent": null}},
+    {"id": "wall_002", "category": "Walls", "ifc_class": "IfcWall", "classification": {"din276": "330", "masterformat": "04 20 00", "uniformat": "B2010"}, "geometry": {"type": "extrusion", "length_m": 8.0, "height_m": 3.0, "thickness_m": 0.24, "area_m2": 24.0, "volume_m3": 5.76}, "properties": {"Material": "Concrete C30/37", "FireRating": "F90", "IsExternal": true, "LoadBearing": true, "Mark": "W-002"}, "quantities": {"area": 24.0, "volume": 5.76, "length": 8.0}, "relations": {"level": "level_00", "zone": "zone_a", "parent": null}},
+    {"id": "wall_003", "category": "Walls", "ifc_class": "IfcWall", "classification": {"din276": "340", "masterformat": "04 20 00", "uniformat": "C1010"}, "geometry": {"type": "extrusion", "length_m": 6.0, "height_m": 3.0, "thickness_m": 0.12, "area_m2": 18.0, "volume_m3": 2.16}, "properties": {"Material": "Brick", "FireRating": "F30", "IsExternal": false, "LoadBearing": false, "Mark": "W-003"}, "quantities": {"area": 18.0, "volume": 2.16, "length": 6.0}, "relations": {"level": "level_00", "zone": "zone_a", "parent": null}},
+    {"id": "wall_004", "category": "Walls", "ifc_class": "IfcWall", "classification": {"din276": "340", "masterformat": "09 21 16", "uniformat": "C1010"}, "geometry": {"type": "extrusion", "length_m": 4.5, "height_m": 3.0, "thickness_m": 0.10, "area_m2": 13.5, "volume_m3": 1.35}, "properties": {"Material": "Drywall", "FireRating": "F30", "IsExternal": false, "LoadBearing": false, "Mark": "W-004"}, "quantities": {"area": 13.5, "volume": 1.35, "length": 4.5}, "relations": {"level": "level_00", "zone": "zone_b", "parent": null}},
+    {"id": "wall_005", "category": "Walls", "ifc_class": "IfcWall", "classification": {"din276": "330", "masterformat": "04 20 00", "uniformat": "B2010"}, "geometry": {"type": "extrusion", "length_m": 10.0, "height_m": 3.2, "thickness_m": 0.30, "area_m2": 32.0, "volume_m3": 9.6}, "properties": {"Material": "Concrete C30/37", "FireRating": "F120", "IsExternal": true, "LoadBearing": true, "Mark": "W-005"}, "quantities": {"area": 32.0, "volume": 9.6, "length": 10.0}, "relations": {"level": "level_01", "zone": "zone_a", "parent": null}},
+    {"id": "wall_006", "category": "Walls", "ifc_class": "IfcWall", "classification": {"din276": "340", "masterformat": "04 20 00", "uniformat": "C1010"}, "geometry": {"type": "extrusion", "length_m": 5.5, "height_m": 3.2, "thickness_m": 0.12, "area_m2": 17.6, "volume_m3": 2.112}, "properties": {"Material": "Brick", "FireRating": "F60", "IsExternal": false, "LoadBearing": true, "Mark": "W-006"}, "quantities": {"area": 17.6, "volume": 2.112, "length": 5.5}, "relations": {"level": "level_01", "zone": "zone_b", "parent": null}},
+    {"id": "wall_007", "category": "Walls", "ifc_class": "IfcWall", "classification": {"din276": "330", "masterformat": "04 20 00", "uniformat": "B2010"}, "geometry": {"type": "extrusion", "length_m": 7.5, "height_m": 3.2, "thickness_m": 0.24, "area_m2": 24.0, "volume_m3": 5.76}, "properties": {"Material": "Concrete C30/37", "FireRating": "F90", "IsExternal": true, "LoadBearing": true, "Mark": "W-007"}, "quantities": {"area": 24.0, "volume": 5.76, "length": 7.5}, "relations": {"level": "level_01", "zone": "zone_a", "parent": null}},
+    {"id": "wall_008", "category": "Walls", "ifc_class": "IfcWall", "classification": {"din276": "340", "masterformat": "09 21 16", "uniformat": "C1010"}, "geometry": {"type": "extrusion", "length_m": 3.0, "height_m": 3.2, "thickness_m": 0.10, "area_m2": 9.6, "volume_m3": 0.96}, "properties": {"Material": "Drywall", "FireRating": "F30", "IsExternal": false, "LoadBearing": false, "Mark": "W-008"}, "quantities": {"area": 9.6, "volume": 0.96, "length": 3.0}, "relations": {"level": "level_01", "zone": "zone_b", "parent": null}},
+    {"id": "wall_009", "category": "Walls", "ifc_class": "IfcWall", "classification": {"din276": "330", "masterformat": "04 22 00", "uniformat": "B2010"}, "geometry": {"type": "extrusion", "length_m": 9.0, "height_m": 3.0, "thickness_m": 0.20, "area_m2": 27.0, "volume_m3": 5.4}, "properties": {"Material": "CMU", "FireRating": "F60", "IsExternal": true, "LoadBearing": true, "Mark": "W-009"}, "quantities": {"area": 27.0, "volume": 5.4, "length": 9.0}, "relations": {"level": "level_00", "zone": "zone_b", "parent": null}},
+    {"id": "wall_010", "category": "Walls", "ifc_class": "IfcWall", "classification": {"din276": "340", "masterformat": "04 22 00", "uniformat": "C1010"}, "geometry": {"type": "extrusion", "length_m": 11.0, "height_m": 3.0, "thickness_m": 0.20, "area_m2": 33.0, "volume_m3": 6.6}, "properties": {"Material": "CMU", "FireRating": "F60", "IsExternal": false, "LoadBearing": true, "Mark": "W-010"}, "quantities": {"area": 33.0, "volume": 6.6, "length": 11.0}, "relations": {"level": "level_00", "zone": "zone_a", "parent": null}}
+  ],
+  "levels": [
+    {"id": "level_00", "name": "Ground floor", "elevation_m": 0.0},
+    {"id": "level_01", "name": "Level 01", "elevation_m": 3.2}
+  ],
+  "zones": [
+    {"id": "zone_a", "name": "Zone A"},
+    {"id": "zone_b", "name": "Zone B"}
+  ],
+  "spatial_structure": {
+    "site": {"id": "site_01", "name": "Default Site"},
+    "building": {"id": "bld_01", "name": "Building 1"}
+  }
+}

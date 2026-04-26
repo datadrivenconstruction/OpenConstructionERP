@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ids:ids xmlns:ids="http://standards.buildingsmart.org/IDS"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://standards.buildingsmart.org/IDS IDS-1.0.xsd">
+  <ids:info>
+    <ids:title>External doors named with EXT prefix</ids:title>
+    <ids:copyright>OpenConstructionERP test fixtures</ids:copyright>
+    <ids:version>1.0.0</ids:version>
+    <ids:description>All IfcDoor instances must have a Name attribute that starts with the literal string "EXT".</ids:description>
+    <ids:author>fixtures@openconstructionerp.io</ids:author>
+    <ids:date>2026-04-25</ids:date>
+  </ids:info>
+  <ids:specifications>
+    <ids:specification name="External door naming" ifcVersion="IFC4" identifier="ids_03">
+      <ids:applicability minOccurs="1" maxOccurs="unbounded">
+        <ids:entity>
+          <ids:name>
+            <ids:simpleValue>IFCDOOR</ids:simpleValue>
+          </ids:name>
+        </ids:entity>
+      </ids:applicability>
+      <ids:requirements>
+        <ids:attribute cardinality="required">
+          <ids:name>
+            <ids:simpleValue>Name</ids:simpleValue>
+          </ids:name>
+          <ids:value>
+            <xs:restriction base="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+              <xs:pattern value="EXT.*"/>
+            </xs:restriction>
+          </ids:value>
+        </ids:attribute>
+      </ids:requirements>
+    </ids:specification>
+  </ids:specifications>
+</ids:ids>

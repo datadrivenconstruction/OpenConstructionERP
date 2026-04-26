@@ -1,0 +1,13 @@
+{
+  "schema_version": "2.0",
+  "name": "Wall mark matches W-ddd pattern",
+  "description": "Wall Mark must follow the W-NNN naming convention.",
+  "output_mode": "boolean",
+  "tags": ["walls", "naming"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "exact", "pset_name": null, "name": "Mark"},
+    "constraint": {"operator": "matches", "pattern": "^W-[0-9]{3}$", "case_sensitive": false}
+  }
+}

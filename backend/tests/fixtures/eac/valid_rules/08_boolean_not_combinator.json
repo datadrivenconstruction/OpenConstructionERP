@@ -1,0 +1,16 @@
+{
+  "schema_version": "2.0",
+  "name": "Beams NOT load-bearing",
+  "description": "Predicate uses NOT to filter beams that are not load-bearing.",
+  "output_mode": "boolean",
+  "tags": ["beams"],
+  "selector": {"kind": "ifc_class", "values": ["IfcBeam"]},
+  "predicate": {
+    "kind": "not",
+    "child": {
+      "kind": "triplet",
+      "attribute": {"kind": "exact", "pset_name": "Pset_BeamCommon", "name": "LoadBearing"},
+      "constraint": {"operator": "eq", "value": true}
+    }
+  }
+}

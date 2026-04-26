@@ -10,6 +10,8 @@
   "snapshot.manifest.missing_keys": "Im Snapshot-Manifest fehlen erforderliche Schlüssel: {keys}.",
   "snapshot.parquet.missing_entities": "Der Snapshot enthält keine auswertbaren Elemente.",
   "snapshot.parquet.not_local": "Dieses Storage-Backend kann Parquet-Dateien noch nicht an DuckDB durchreichen. Stellen Sie STORAGE_BACKEND auf 'local' oder installieren Sie die DuckDB-httpfs-Erweiterung.",
+  "snapshot.format.unsupported": "Eine der hochgeladenen Dateien hat ein Format, das noch nicht unterstützt wird. Unterstützte Formate heute: {supported}.",
+  "snapshot.conversion.failed": "Die hochgeladenen Dateien konnten nicht in einen Snapshot konvertiert werden: {reason}.",
   "dashboard.scope.promote_admin_only": "Nur Administratoren können ein Dashboard auf Organisations-Scope heben.",
   "dashboard.yaml.invalid": "Dashboard-Spezifikation ist kein gültiges YAML: {reason}.",
   "dashboard.yaml.schema_violation": "Dashboard-Spezifikation entspricht nicht dem erwarteten Schema: {reason}.",

@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Walls with allowed fire rating",
+  "output_mode": "boolean",
+  "tags": ["walls", "fire"],
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "exact", "pset_name": "Pset_WallCommon", "name": "FireRating"},
+    "constraint": {"operator": "in", "values": ["F30", "F60", "F90", "F120"]}
+  }
+}

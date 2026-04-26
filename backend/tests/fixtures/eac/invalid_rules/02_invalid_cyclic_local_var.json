@@ -1,0 +1,13 @@
+{
+  "schema_version": "2.0",
+  "name": "Cyclic local variables a -> b -> a",
+  "output_mode": "aggregate",
+  "result_unit": "m3",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "formula": "a + b",
+  "local_variables": [
+    {"name": "a", "expression": "b * 2"},
+    {"name": "b", "expression": "a + 1"}
+  ],
+  "_invalid_reason": "local variable a references b which references a — cycle is rejected by the validator (FR-1.10)"
+}

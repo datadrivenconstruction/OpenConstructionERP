@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "Local variable name violates ident pattern",
+  "output_mode": "aggregate",
+  "result_unit": "m3",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "formula": "x",
+  "local_variables": [
+    {"name": "9-bad-name", "expression": "1"}
+  ],
+  "_invalid_reason": "local_variables[].name must match ^[A-Za-z_][A-Za-z0-9_]*$"
+}

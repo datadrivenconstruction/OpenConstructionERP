@@ -95,8 +95,7 @@ async def main() -> None:
         print(f"\nFound {len(cost_items)} active cost items")
 
         if not cost_items:
-            print("No cost items found. Run cost database import first.")
-            print("  e.g.: python -m app.scripts.seed_demo")
+            print("No cost items found. Import the cost database first.")
             return
 
         # 2. Aggregate components by (code, type)
@@ -215,7 +214,6 @@ async def main() -> None:
         if total == 0:
             print("\nNo components found in cost items.")
             print("Make sure cost items have 'components' with 'code', 'type', and 'unit_rate'.")
-            print("Run: python -m app.scripts.seed_demo  (for demo data)")
 
 
 if __name__ == "__main__":

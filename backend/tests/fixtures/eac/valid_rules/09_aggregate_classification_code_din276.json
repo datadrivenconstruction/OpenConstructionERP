@@ -1,0 +1,15 @@
+{
+  "schema_version": "2.0",
+  "name": "Sum DIN 276 KG 330 walls volume",
+  "description": "Aggregate volume of walls classified under DIN 276 KG 330.",
+  "output_mode": "aggregate",
+  "result_unit": "m3",
+  "tags": ["din276", "qto"],
+  "selector": {
+    "kind": "classification_code",
+    "system": "din276",
+    "values": ["330"]
+  },
+  "predicate": null,
+  "formula": "Volume"
+}

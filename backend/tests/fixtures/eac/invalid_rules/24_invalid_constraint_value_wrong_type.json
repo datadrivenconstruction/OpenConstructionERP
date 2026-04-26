@@ -1,0 +1,12 @@
+{
+  "schema_version": "2.0",
+  "name": "lt operator with non-numeric value",
+  "output_mode": "boolean",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "predicate": {
+    "kind": "triplet",
+    "attribute": {"kind": "alias", "alias_id": "alias_thickness"},
+    "constraint": {"operator": "lt", "value": [1, 2, 3]}
+  },
+  "_invalid_reason": "lt.value must be number or string, not array"
+}

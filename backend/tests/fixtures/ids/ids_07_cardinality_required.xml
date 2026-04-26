@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ids:ids xmlns:ids="http://standards.buildingsmart.org/IDS"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://standards.buildingsmart.org/IDS IDS-1.0.xsd">
+  <ids:info>
+    <ids:title>Required FireRating on doors</ids:title>
+    <ids:copyright>OpenConstructionERP test fixtures</ids:copyright>
+    <ids:version>1.0.0</ids:version>
+    <ids:description>FireRating on Pset_DoorCommon is REQUIRED for every applicable IfcDoor.</ids:description>
+    <ids:author>fixtures@openconstructionerp.io</ids:author>
+    <ids:date>2026-04-25</ids:date>
+  </ids:info>
+  <ids:specifications>
+    <ids:specification name="Door FireRating required" ifcVersion="IFC4" identifier="ids_07">
+      <ids:applicability minOccurs="1" maxOccurs="unbounded">
+        <ids:entity>
+          <ids:name>
+            <ids:simpleValue>IFCDOOR</ids:simpleValue>
+          </ids:name>
+        </ids:entity>
+      </ids:applicability>
+      <ids:requirements>
+        <ids:property cardinality="required" dataType="IFCLABEL">
+          <ids:propertySet>
+            <ids:simpleValue>Pset_DoorCommon</ids:simpleValue>
+          </ids:propertySet>
+          <ids:baseName>
+            <ids:simpleValue>FireRating</ids:simpleValue>
+          </ids:baseName>
+        </ids:property>
+      </ids:requirements>
+    </ids:specification>
+  </ids:specifications>
+</ids:ids>

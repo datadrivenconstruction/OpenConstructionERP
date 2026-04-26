@@ -4,8 +4,26 @@ Produces a professional multi-page PDF document with:
 - Cover page: project name, BOQ title, cost summary, date, status
 - BOQ table pages: sections, positions, subtotals, markups, totals
 - Running headers/footers with page numbering
+
+Security note (BUG-PDF01 / BUG-PDF02):
+    ReportLab's ``Paragraph`` parses a subset of HTML (``<b>``, ``<i>``,
+    ``<font color>``, ``<para>``, etc.). Passing a user-supplied string
+    that contains unknown HTML attributes (``onerror``, ``onclick``)
+    crashes ``paraparser`` with a ``ValueError``, which propagated as a
+    500 from the ``/export/pdf`` endpoint and made the entire reporting
+    feature DoSable by anyone with ``boq.update`` rights. Worse, valid
+    markup like ``<font color="white">hidden</font>`` rendered in the
+    output, allowing a malicious description to hide content in print.
+
+    The fix is to escape every user-controlled string with ``html.escape``
+    before handing it to ``Paragraph``. The helper below ``_safe_para``
+    does both: coerces non-strings, escapes, then constructs the
+    paragraph. Internal labels that legitimately use ReportLab markup
+    (``<b>Pos.</b>``, ``&nbsp;`` indentation) bypass it and continue to
+    use ``Paragraph`` directly.
 """
 
+import html
 import io
 from datetime import UTC, datetime
 from typing import Any
@@ -63,6 +81,29 @@ def _fmt(value: float, decimals: int = 2, currency: str = "") -> str:
         raw = f"{value:,.{decimals}f}"
         return raw.replace(",", "'")
     return f"{value:,.{decimals}f}"
+
+
+def _safe_para(text: Any, style: ParagraphStyle) -> "Paragraph":
+    """Construct a ``Paragraph`` from possibly-untrusted user input.
+
+    HTML metacharacters in ``text`` are escaped via ``html.escape`` so
+    ReportLab's paraparser sees inert characters, not markup. ``None``
+    becomes empty; other non-string values are rendered through ``str``
+    before escaping. Use this anywhere a value originated outside the
+    application's control (BOQ position descriptions, ordinals, units,
+    section titles, the ``prepared_by`` field, project names, etc.).
+
+    Internal labels that need ReportLab inline markup such as ``<b>...</b>``
+    or ``&nbsp;`` indentation construct ``Paragraph`` directly — that text
+    is checked into source and trusted.
+    """
+    if text is None:
+        rendered = ""
+    elif isinstance(text, str):
+        rendered = text
+    else:
+        rendered = str(text)
+    return Paragraph(html.escape(rendered, quote=True), style)
 
 
 def _fmt_currency(value: float, currency: str, decimals: int = 2) -> str:
@@ -340,8 +381,11 @@ def _build_cover_page(
     for label, value in info_rows:
         info_table_data.append(
             [
+                # Labels are first-party constants, values come from the
+                # project / BOQ records and may contain HTML — escape only
+                # the dynamic side.
                 Paragraph(label, styles["info_label"]),
-                Paragraph(str(value), styles["info_value"]),
+                _safe_para(value, styles["info_value"]),
             ]
         )
 
@@ -453,11 +497,16 @@ def _build_cover_page(
 
     # Prepared by
     if prepared_by:
+        # ``prepared_by`` is user-supplied; escape it before splicing into
+        # the cover-page paragraph or a payload like
+        # ``<font color="white">x</font>`` would render as styled text and
+        # ``<img onerror=...>`` would crash paraparser (BUG-PDF01).
         elements.append(
             Paragraph(
-                f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-                f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-                f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Prepared by: {prepared_by}",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Prepared by: "
+                + html.escape(prepared_by, quote=True),
                 styles["subtitle"],
             )
         )
@@ -506,8 +555,8 @@ def _build_boq_table(
         # Section header row
         table_data.append(
             [
-                Paragraph(section.ordinal, styles["section_header"]),
-                Paragraph(section.description, styles["section_header"]),
+                _safe_para(section.ordinal, styles["section_header"]),
+                _safe_para(section.description, styles["section_header"]),
                 "",
                 "",
                 "",
@@ -521,9 +570,9 @@ def _build_boq_table(
         for pos in section.positions:
             table_data.append(
                 [
-                    Paragraph(pos.ordinal, styles["cell"]),
-                    Paragraph(pos.description, styles["cell"]),
-                    Paragraph(pos.unit, styles["cell"]),
+                    _safe_para(pos.ordinal, styles["cell"]),
+                    _safe_para(pos.description, styles["cell"]),
+                    _safe_para(pos.unit, styles["cell"]),
                     Paragraph(_fv(pos.quantity), styles["cell_right"]),
                     Paragraph(_fv(pos.unit_rate), styles["cell_right"]),
                     Paragraph(_fv(pos.total), styles["cell_right"]),
@@ -565,9 +614,9 @@ def _build_boq_table(
         for pos in boq_data.positions:
             table_data.append(
                 [
-                    Paragraph(pos.ordinal, styles["cell"]),
-                    Paragraph(pos.description, styles["cell"]),
-                    Paragraph(pos.unit, styles["cell"]),
+                    _safe_para(pos.ordinal, styles["cell"]),
+                    _safe_para(pos.description, styles["cell"]),
+                    _safe_para(pos.unit, styles["cell"]),
                     Paragraph(_fv(pos.quantity), styles["cell_right"]),
                     Paragraph(_fv(pos.unit_rate), styles["cell_right"]),
                     Paragraph(_fv(pos.total), styles["cell_right"]),
@@ -966,8 +1015,8 @@ def generate_boq_pdf_simple(
     for section in boq_data.sections:
         table_data.append(
             [
-                Paragraph(section.ordinal, styles["cell"]),
-                Paragraph(section.description, styles["cell"]),
+                _safe_para(section.ordinal, styles["cell"]),
+                _safe_para(section.description, styles["cell"]),
                 Paragraph(str(len(section.positions)), styles["cell_right"]),
                 Paragraph(_fmt_currency(section.subtotal, currency), styles["cell_right"]),
             ]

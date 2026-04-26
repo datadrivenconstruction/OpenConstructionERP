@@ -1,0 +1,70 @@
+# BUG-B06 — Build context for the Celery worker image (compose `worker`).
+#
+# Compose builds with ``context: ./backend``, so the repo-root
+# .dockerignore is NOT consulted here. Keep this list in sync with
+# the relevant subset of the root file.
+
+# ── Python build / cache ────────────────────────────────────────────
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+**/.tox
+**/.coverage
+**/htmlcov
+.venv
+venv
+env
+build
+dist
+*.egg
+
+# ── Local databases & storage (NEVER ship in an image) ──────────────
+openestimate.db
+openestimate.db-journal
+openestimate.db-shm
+openestimate.db-wal
+openestimate.db.cleanup-backup-*
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+storage
+
+# ── Tests, fixtures, scratch ────────────────────────────────────────
+tests
+test-results
+coverage
+htmlcov
+.pytest_cache
+.ruff_cache
+
+# ── Secrets & dev config ────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ── Logs ────────────────────────────────────────────────────────────
+*.log
+logs
+log
+
+# ── VCS / IDE ───────────────────────────────────────────────────────
+.git
+.gitignore
+.vscode
+.idea
+
+# ── Docs ────────────────────────────────────────────────────────────
+docs
+*.md
+!README.md
+
+# ── OS artefacts ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini

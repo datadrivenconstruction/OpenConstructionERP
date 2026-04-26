@@ -129,6 +129,14 @@ class Position(Base):
     )
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
+    # ── BUG-CONCURRENCY01: optimistic concurrency token ─────────────────
+    # Bumped on every successful service-layer update.  Clients echo the
+    # last-read value on PATCH; mismatch returns 409 instead of allowing
+    # a lost write.  Default 0 for legacy rows so existing data is valid.
+    version: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+
     # Relationships
     boq: Mapped[BOQ] = relationship(back_populates="positions")
     children: Mapped[list["Position"]] = relationship(

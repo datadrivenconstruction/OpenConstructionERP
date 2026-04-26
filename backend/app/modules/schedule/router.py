@@ -1907,24 +1907,50 @@ async def schedule_stats(
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def critical_path_activities(
-    project_id: uuid.UUID = Query(..., description="Project to retrieve critical path for"),
+    project_id: uuid.UUID | None = Query(
+        default=None, description="Project to retrieve critical path for"
+    ),
+    schedule_id: uuid.UUID | None = Query(
+        default=None,
+        description="Schedule to retrieve critical path for (takes precedence over project_id)",
+    ),
     session: SessionDep = None,  # type: ignore[assignment]
     _user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> list[ActivityResponse]:
-    """Return only critical-path activities across all schedules in a project.
+    """Return only critical-path activities for a schedule or across a project.
 
-    Filters activities where is_critical=True, ordered by early_start.
+    Either ``schedule_id`` or ``project_id`` must be provided. ``schedule_id``
+    takes precedence — when supplied the project is inferred from the schedule.
+
+    Filters activities where ``is_critical=True``, ordered by early_start.
     Requires CPM calculation to have been run first.
     """
-    await verify_project_access(project_id, _user_id, session)
     from sqlalchemy import select
 
     from app.modules.schedule.models import Activity, Schedule
 
-    # Get all schedules for the project
-    sched_stmt = select(Schedule.id).where(Schedule.project_id == project_id)
-    sched_result = await session.execute(sched_stmt)
-    schedule_ids = [row[0] for row in sched_result.all()]
+    if project_id is None and schedule_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Either project_id or schedule_id must be provided.",
+        )
+
+    schedule_ids: list[uuid.UUID]
+    if schedule_id is not None:
+        # Load schedule, derive project_id from it, verify project access.
+        sched = await session.get(Schedule, schedule_id)
+        if sched is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Schedule {schedule_id} not found",
+            )
+        await verify_project_access(sched.project_id, _user_id, session)
+        schedule_ids = [schedule_id]
+    else:
+        await verify_project_access(project_id, _user_id, session)
+        sched_stmt = select(Schedule.id).where(Schedule.project_id == project_id)
+        sched_result = await session.execute(sched_stmt)
+        schedule_ids = [row[0] for row in sched_result.all()]
 
     if not schedule_ids:
         return []

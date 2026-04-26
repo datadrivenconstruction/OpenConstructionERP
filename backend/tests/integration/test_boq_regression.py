@@ -55,7 +55,16 @@ async def shared_client():
 
 @pytest_asyncio.fixture(scope="module")
 async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
-    """Module-scoped auth: register + login a unique user once."""
+    """Module-scoped auth: register + promote-to-admin + login.
+
+    Self-registration on a non-bootstrap install lands inactive in
+    ``admin-approve`` mode (the v2.5.2 default — see BUG-RBAC03), and
+    login returns the same generic "Invalid email or password" error
+    as a wrong password to avoid leaking activation status. Tests need
+    a working token regardless of registration policy, so we promote
+    via direct ORM write before logging in. Idempotent for the
+    bootstrap case (first user already lands as admin+active).
+    """
     import asyncio
 
     unique = uuid.uuid4().hex[:8]
@@ -72,6 +81,10 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
         },
     )
     assert reg.status_code == 201, f"Registration failed: {reg.text}"
+
+    from ._auth_helpers import promote_to_admin
+
+    await promote_to_admin(email)
 
     token = ""
     for attempt in range(3):
@@ -158,7 +171,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     # ── Step 3: Add section ──────────────────────────────────────────────
 
     resp = await client.post(
-        f"/api/v1/boq/boqs/{boq_id}/sections",
+        f"/api/v1/boq/boqs/{boq_id}/sections/",
         json={"ordinal": "01", "description": "Substructure / Foundation"},
         headers=auth,
     )
@@ -206,7 +219,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     position_ids = []
     for pos_data in positions_data:
         resp = await client.post(
-            f"/api/v1/boq/boqs/{boq_id}/positions",
+            f"/api/v1/boq/boqs/{boq_id}/positions/",
             json=pos_data,
             headers=auth,
         )
@@ -274,7 +287,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     markup_ids = []
     for m in markups:
         resp = await client.post(
-            f"/api/v1/boq/boqs/{boq_id}/markups",
+            f"/api/v1/boq/boqs/{boq_id}/markups/",
             json=m,
             headers=auth,
         )
@@ -285,7 +298,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
 
     # ── Step 7: Verify grand total with markups ──────────────────────────
 
-    resp = await client.get(f"/api/v1/boq/boqs/{boq_id}/structured", headers=auth)
+    resp = await client.get(f"/api/v1/boq/boqs/{boq_id}/structured/", headers=auth)
     assert resp.status_code == 200
 
     structured = resp.json()
@@ -406,7 +419,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
 
     # ── Step 11: Lock BOQ -- verify mutations blocked ────────────────────
 
-    resp = await client.post(f"/api/v1/boq/boqs/{boq_id}/lock", headers=auth)
+    resp = await client.post(f"/api/v1/boq/boqs/{boq_id}/lock/", headers=auth)
     assert resp.status_code == 200, f"Lock BOQ failed: {resp.text}"
     locked_boq = resp.json()
     assert locked_boq["is_locked"] is True
@@ -414,7 +427,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
 
     # Attempt to add a position -- should fail with 409
     resp = await client.post(
-        f"/api/v1/boq/boqs/{boq_id}/positions",
+        f"/api/v1/boq/boqs/{boq_id}/positions/",
         json={
             "boq_id": boq_id,
             "ordinal": "01.999",
@@ -431,7 +444,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
 
     # Attempt to add a markup -- should fail with 409
     resp = await client.post(
-        f"/api/v1/boq/boqs/{boq_id}/markups",
+        f"/api/v1/boq/boqs/{boq_id}/markups/",
         json={
             "name": "Blocked markup",
             "markup_type": "percentage",
@@ -450,7 +463,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
 
     try:
         resp = await client.post(
-            f"/api/v1/boq/boqs/{boq_id}/create-revision",
+            f"/api/v1/boq/boqs/{boq_id}/create-revision/",
             headers=auth,
         )
     except Exception:
@@ -498,7 +511,7 @@ async def test_boq_full_lifecycle(shared_client: AsyncClient, shared_auth: dict)
     wb_import.close()
 
     resp = await client.post(
-        f"/api/v1/boq/boqs/{revision_id}/import/excel",
+        f"/api/v1/boq/boqs/{revision_id}/import/excel/",
         files={
             "file": (
                 "import_test.xlsx",
@@ -557,7 +570,7 @@ async def test_export_data_integrity(shared_client: AsyncClient, shared_auth: di
     ]
     for i, (desc, unit, qty, rate) in enumerate(items, start=1):
         resp = await client.post(
-            f"/api/v1/boq/boqs/{bid}/positions",
+            f"/api/v1/boq/boqs/{bid}/positions/",
             json={
                 "boq_id": bid,
                 "ordinal": f"A.{i:03d}",
@@ -573,7 +586,7 @@ async def test_export_data_integrity(shared_client: AsyncClient, shared_auth: di
     expected_direct_cost = sum(q * r for _, _, q, r in items)
 
     # Get the authoritative grand total from structured API (includes markups)
-    resp = await client.get(f"/api/v1/boq/boqs/{bid}/structured", headers=auth)
+    resp = await client.get(f"/api/v1/boq/boqs/{bid}/structured/", headers=auth)
     assert resp.status_code == 200
     structured_data = resp.json()
     structured_grand = structured_data["grand_total"]
@@ -653,7 +666,7 @@ async def test_excel_export_quality(shared_client: AsyncClient, shared_auth: dic
 
     # Add section
     resp = await client.post(
-        f"/api/v1/boq/boqs/{bid}/sections",
+        f"/api/v1/boq/boqs/{bid}/sections/",
         json={"ordinal": "10", "description": "Structural Works"},
         headers=auth,
     )
@@ -662,7 +675,7 @@ async def test_excel_export_quality(shared_client: AsyncClient, shared_auth: dic
     # Add positions under section
     for i in range(1, 4):
         await client.post(
-            f"/api/v1/boq/boqs/{bid}/positions",
+            f"/api/v1/boq/boqs/{bid}/positions/",
             json={
                 "boq_id": bid,
                 "ordinal": f"10.{i:03d}",

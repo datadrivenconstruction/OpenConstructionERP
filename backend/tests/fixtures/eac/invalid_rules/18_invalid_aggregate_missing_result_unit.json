@@ -1,0 +1,8 @@
+{
+  "schema_version": "2.0",
+  "name": "Aggregate mode missing result_unit",
+  "output_mode": "aggregate",
+  "selector": {"kind": "ifc_class", "values": ["IfcWall"]},
+  "formula": "Volume",
+  "_invalid_reason": "output_mode=aggregate requires a non-null result_unit"
+}

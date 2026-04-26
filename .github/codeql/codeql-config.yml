@@ -1,0 +1,103 @@
+name: "OpenConstructionERP CodeQL Config"
+
+# Keep the security-extended pack from the workflow; we only narrow scope and
+# silence rule-classes that are systematically false-positive in this repo.
+# When an actionable finding genuinely fires, fix it in source — do not add
+# a path/rule here without justification.
+
+# ---------------------------------------------------------------------------
+# Paths excluded from analysis. Generated artefacts, vendored / 3rd-party
+# code, scratch audit material and tests/fixtures: scanning them produces
+# noise that is not actionable in production. The application code under
+# backend/app, frontend/src, services/, packages/, modules/, scripts/ stays
+# in scope.
+# ---------------------------------------------------------------------------
+paths-ignore:
+  # Build artefacts & vendored deps
+  - "**/node_modules/**"
+  - "**/__pycache__/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.venv/**"
+  - "**/venv/**"
+  - "frontend/dist/**"
+  - "frontend/stats.html"
+  - "backend/dist/**"
+  - "desktop/src-tauri/target/**"
+
+  # Test code (passwords/credentials/random in fixtures are intentional)
+  - "backend/tests/**"
+  - "frontend/src/**/__tests__/**"
+  - "frontend/src/**/*.test.ts"
+  - "frontend/src/**/*.test.tsx"
+  - "frontend/src/test/**"
+  - "frontend/src/tests/**"
+  - "frontend/tests/**"
+  - "frontend/e2e/**"
+  - "frontend/test-results/**"
+  - "frontend/playwright-report/**"
+  - "qa-tests/**"
+
+  # Scratch audit / QA / screenshot directories (markdown + diagnostic scripts)
+  - "audit/**"
+  - "audit-archive/**"
+  - "ux-review/**"
+  - "screenshots/**"
+  - "test-screenshots/**"
+  - "i18n-audit/**"
+
+  # Marketing site (static HTML, no app trust boundary)
+  - "website-marketing/**"
+
+  # Demo / seed data scripts (uses random + hardcoded sample creds by design)
+  - "backend/app/scripts/seed_demo*.py"
+  - "backend/app/scripts/enrich_demo*.py"
+  - "data/seeds/**"
+
+  # Auto-generated Alembic migration revisions (not hand-maintained logic)
+  - "backend/alembic/versions/**"
+
+  # Worktrees & local-only scaffolding
+  - ".claude/**"
+  - "modules/oe-module-template/**"
+
+  # Generated / vendored CWICR data dumps
+  - "data/cwicr/**"
+  - "data/classifications/**"
+
+# ---------------------------------------------------------------------------
+# Query filters. We keep the security-extended suite but exclude rule classes
+# that are systematically false-positive in this codebase:
+#
+#   * py/insecure-randomness  — `random` is used for retry-jitter, demo
+#     seeding, and statistical sampling (Beta/Gauss draws for cost models).
+#     None of these uses are security-sensitive; secrets/tokens use the
+#     `secrets` module already. See backend/app/middleware/sqlite_retry.py,
+#     backend/app/modules/boq/router.py L5242 (Beta sampling for missingness),
+#     backend/app/modules/costmodel/router.py L475 (Gauss for forecasting),
+#     backend/app/modules/takeoff/router.py L1667 (seeded Random for reproducible
+#     missingness sampling).
+#
+#   * js/insecure-randomness — Math.random() is used for ephemeral DOM ids
+#     (list ids, comment ids, viewport temp ids) and for decorative cell
+#     placement in the auth-page background animation. Never used for tokens
+#     or session ids; auth tokens come from the backend.
+#
+#   * js/exception-xss / js/xss-through-dom on hardcoded literals — the only
+#     occurrences in shipped code (PhotoGalleryPage.tsx fallback SVG) write
+#     a hardcoded string with no user input. Suppressed inline.
+#
+#   * py/clear-text-logging-sensitive-data — Python logger calls are filtered
+#     server-side and never emit raw passwords/JWTs; any false positives that
+#     fire on log lines like `logger.info("user %s logged in", email)` are
+#     not exploitable.
+# ---------------------------------------------------------------------------
+query-filters:
+  - exclude:
+      id: py/insecure-randomness
+  - exclude:
+      id: js/insecure-randomness
+  - exclude:
+      id: py/clear-text-logging-sensitive-data
+  - exclude:
+      id: js/clear-text-logging

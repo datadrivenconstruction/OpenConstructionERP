@@ -1,0 +1,15 @@
+{
+  "schema_version": "2.0",
+  "name": "Min distance between ducts and structural beams",
+  "description": "Ducts must be at least 50mm clear of any structural beam.",
+  "output_mode": "clash",
+  "tags": ["clash", "coordination"],
+  "selector": {"kind": "ifc_class", "values": ["IfcBeam"]},
+  "clash_config": {
+    "set_a": {"kind": "ifc_class", "values": ["IfcDuctSegment"]},
+    "set_b": {"kind": "ifc_class", "values": ["IfcBeam"]},
+    "method": "exact",
+    "test": "min_distance",
+    "min_distance_m": 0.05
+  }
+}

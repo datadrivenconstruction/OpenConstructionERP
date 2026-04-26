@@ -71,6 +71,66 @@ def _get_service(session: SessionDep) -> AIService:
     return AIService(session)
 
 
+# ── AI Providers (BUG-AI-PROVIDERS) ─────────────────────────────────────────
+
+
+_AI_PROVIDERS: list[dict[str, Any]] = [
+    {
+        "id": "anthropic",
+        "display_name": "Anthropic Claude",
+        "supports_streaming": True,
+        "model_choices": ["claude-sonnet", "claude-opus", "claude-haiku"],
+        "recommended": True,
+    },
+    {
+        "id": "openai",
+        "display_name": "OpenAI",
+        "supports_streaming": True,
+        "model_choices": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
+    },
+    {
+        "id": "gemini",
+        "display_name": "Google Gemini",
+        "supports_streaming": True,
+        "model_choices": ["gemini-flash", "gemini-pro"],
+    },
+    {
+        "id": "openrouter",
+        "display_name": "OpenRouter",
+        "supports_streaming": True,
+        "model_choices": [],
+    },
+    {"id": "mistral", "display_name": "Mistral AI", "supports_streaming": True, "model_choices": []},
+    {"id": "groq", "display_name": "Groq", "supports_streaming": True, "model_choices": []},
+    {"id": "deepseek", "display_name": "DeepSeek", "supports_streaming": True, "model_choices": []},
+    {"id": "together", "display_name": "Together AI", "supports_streaming": True, "model_choices": []},
+    {"id": "fireworks", "display_name": "Fireworks AI", "supports_streaming": True, "model_choices": []},
+    {"id": "perplexity", "display_name": "Perplexity", "supports_streaming": True, "model_choices": []},
+    {"id": "cohere", "display_name": "Cohere", "supports_streaming": True, "model_choices": []},
+    {"id": "ai21", "display_name": "AI21 Labs", "supports_streaming": False, "model_choices": []},
+    {"id": "xai", "display_name": "xAI Grok", "supports_streaming": True, "model_choices": []},
+]
+
+
+@router.get(
+    "/providers",
+    summary="List available AI providers",
+    description="Return the list of AI providers the platform can talk to. "
+    "Lets the frontend render provider toggles dynamically instead of "
+    "hard-coding the list.",
+)
+@router.get(
+    "/providers/",
+    summary="List available AI providers",
+    description="Return the list of AI providers the platform can talk to. "
+    "Lets the frontend render provider toggles dynamically instead of "
+    "hard-coding the list.",
+)
+async def list_ai_providers() -> list[dict[str, Any]]:
+    """Return the list of supported AI providers."""
+    return _AI_PROVIDERS
+
+
 # ── AI Settings ──────────────────────────────────────────────────────────────
 
 

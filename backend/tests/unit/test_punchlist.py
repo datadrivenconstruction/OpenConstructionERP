@@ -313,3 +313,78 @@ async def test_summary_aggregation() -> None:
     assert summary["by_status"]["open"] == 2
     assert summary["by_priority"]["high"] == 1
     assert summary["by_priority"]["low"] == 1
+
+
+# ── Photo upload size-cap (CodeQL D9 regression) ──────────────────────────
+
+
+class _StubUploadFile:
+    """Minimal UploadFile substitute for direct-call tests of upload_photo.
+
+    Starlette's UploadFile is heavyweight (SpooledTemporaryFile-backed);
+    for cap-check tests we just need an awaitable read() and the few
+    attributes the handler reads.
+    """
+
+    def __init__(self, content: bytes, content_type: str = "image/jpeg",
+                 filename: str = "photo.jpg") -> None:
+        self._content = content
+        self.content_type = content_type
+        self.filename = filename
+
+    async def read(self) -> bytes:
+        return self._content
+
+
+@pytest.mark.asyncio
+async def test_upload_photo_rejects_oversize_via_content_length() -> None:
+    """Content-Length above 25MB cap must 413 BEFORE the body is read."""
+    from fastapi import HTTPException
+    from app.modules.punchlist.router import MAX_PUNCHLIST_PHOTO_BYTES, upload_photo
+
+    # Sentinel content; should never be reached because Content-Length
+    # check fires first.
+    fake_file = _StubUploadFile(b"unused")
+
+    with pytest.raises(HTTPException) as exc_info:
+        await upload_photo(
+            item_id=uuid.uuid4(),
+            file=fake_file,  # type: ignore[arg-type]
+            content_length=MAX_PUNCHLIST_PHOTO_BYTES + 1,
+            user_id="u1",
+            _perm=None,
+            service=_make_service(),  # type: ignore[arg-type]
+        )
+
+    assert exc_info.value.status_code == 413
+    assert "25 MB" in exc_info.value.detail
+
+
+@pytest.mark.asyncio
+async def test_upload_photo_rejects_oversize_body_when_content_length_lies() -> None:
+    """If Content-Length is missing/lying, the post-read length check still fires."""
+    from fastapi import HTTPException
+    from app.modules.punchlist.router import MAX_PUNCHLIST_PHOTO_BYTES, upload_photo
+
+    # 25 MB + 1 byte payload, sent without a Content-Length header.
+    fake_file = _StubUploadFile(b"x" * (MAX_PUNCHLIST_PHOTO_BYTES + 1))
+
+    with pytest.raises(HTTPException) as exc_info:
+        await upload_photo(
+            item_id=uuid.uuid4(),
+            file=fake_file,  # type: ignore[arg-type]
+            content_length=None,
+            user_id="u1",
+            _perm=None,
+            service=_make_service(),  # type: ignore[arg-type]
+        )
+
+    assert exc_info.value.status_code == 413
+
+
+@pytest.mark.asyncio
+async def test_upload_photo_constant_is_25mb() -> None:
+    """Pin the cap to 25 MB exactly — protects against accidental drift."""
+    from app.modules.punchlist.router import MAX_PUNCHLIST_PHOTO_BYTES
+
+    assert MAX_PUNCHLIST_PHOTO_BYTES == 25 * 1024 * 1024

@@ -87,10 +87,12 @@ class TestBOQUpdate:
 
 class TestPositionCreate:
     def test_valid_creation(self):
+        # BUG-MATH02: quantity is now required.
         data = PositionCreate(
             boq_id=uuid.uuid4(),
             ordinal="01.01.0010",
             unit="m2",
+            quantity=1.0,
         )
         assert data.ordinal == "01.01.0010"
         assert data.unit == "m2"
@@ -100,23 +102,27 @@ class TestPositionCreate:
             boq_id=uuid.uuid4(),
             ordinal="01.01.0010",
             unit="m2",
+            quantity=1.0,
             description="",
         )
         assert data.description == ""
 
-    def test_quantity_defaults_to_zero(self):
-        data = PositionCreate(
-            boq_id=uuid.uuid4(),
-            ordinal="01.01.0010",
-            unit="m2",
-        )
-        assert data.quantity == 0.0
+    def test_quantity_required(self):
+        # BUG-MATH02: omitting quantity now fails validation.
+        with pytest.raises(ValidationError) as exc:
+            PositionCreate(
+                boq_id=uuid.uuid4(),
+                ordinal="01.01.0010",
+                unit="m2",
+            )  # type: ignore[call-arg]
+        assert "quantity" in str(exc.value).lower()
 
     def test_unit_rate_defaults_to_zero(self):
         data = PositionCreate(
             boq_id=uuid.uuid4(),
             ordinal="01.01.0010",
             unit="m2",
+            quantity=1.0,
         )
         assert data.unit_rate == 0.0
 
@@ -135,6 +141,7 @@ class TestPositionCreate:
                 boq_id=uuid.uuid4(),
                 ordinal="01.01.0010",
                 unit="m2",
+                quantity=1.0,
                 unit_rate=-5.0,
             )
 
@@ -143,6 +150,7 @@ class TestPositionCreate:
             boq_id=uuid.uuid4(),
             ordinal="01.01.0010",
             unit="m2",
+            quantity=1.0,
             confidence=0.85,
         )
         assert data.confidence == 0.85
@@ -153,6 +161,7 @@ class TestPositionCreate:
                 boq_id=uuid.uuid4(),
                 ordinal="01.01.0010",
                 unit="m2",
+                quantity=1.0,
                 confidence=1.5,
             )
 
@@ -161,6 +170,7 @@ class TestPositionCreate:
             boq_id=uuid.uuid4(),
             ordinal="01.01.0010",
             unit="m2",
+            quantity=1.0,
         )
         assert data.source == "manual"
 
@@ -169,6 +179,7 @@ class TestPositionCreate:
             boq_id=uuid.uuid4(),
             ordinal="01.01.0010",
             unit="m2",
+            quantity=1.0,
         )
         assert data.classification == {}
 

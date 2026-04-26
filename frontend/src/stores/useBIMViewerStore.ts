@@ -9,6 +9,26 @@ import { create } from 'zustand';
 
 export type BIMRightPanelTab = 'properties' | 'layers' | 'tools' | 'groups';
 
+const ASSET_CARD_KEY = 'oe_bim_asset_card_enabled';
+
+function readAssetCardEnabled(): boolean {
+  try {
+    const raw = localStorage.getItem(ASSET_CARD_KEY);
+    if (raw === null) return true;
+    return raw === '1';
+  } catch {
+    return true;
+  }
+}
+
+function writeAssetCardEnabled(enabled: boolean): void {
+  try {
+    localStorage.setItem(ASSET_CARD_KEY, enabled ? '1' : '0');
+  } catch {
+    /* ignore quota errors */
+  }
+}
+
 interface BIMViewerState {
   /** Per-category opacity (0..1). 1 means fully opaque (default). */
   categoryOpacity: Record<string, number>;
@@ -26,6 +46,10 @@ interface BIMViewerState {
   /** Whether the bounding-box dimension card is shown when an element
    *  is selected. Toggled from the top toolbar. */
   dimensionsVisible: boolean;
+  /** Whether the floating Asset-info card is shown when an element is
+   *  selected. Persisted to localStorage so the preference survives
+   *  page reloads. */
+  assetCardEnabled: boolean;
 
   setCategoryOpacity: (category: string, opacity: number) => void;
   setCategoryHidden: (category: string, hidden: boolean) => void;
@@ -35,6 +59,7 @@ interface BIMViewerState {
   setMeasureActive: (active: boolean) => void;
   setSummaryPanelOpen: (open: boolean) => void;
   setDimensionsVisible: (visible: boolean) => void;
+  setAssetCardEnabled: (enabled: boolean) => void;
 }
 
 export const useBIMViewerStore = create<BIMViewerState>((set) => ({
@@ -45,6 +70,7 @@ export const useBIMViewerStore = create<BIMViewerState>((set) => ({
   measureActive: false,
   summaryPanelOpen: true,
   dimensionsVisible: true,
+  assetCardEnabled: readAssetCardEnabled(),
 
   setCategoryOpacity: (category, opacity) =>
     set((state) => ({
@@ -66,4 +92,8 @@ export const useBIMViewerStore = create<BIMViewerState>((set) => ({
   setMeasureActive: (active) => set({ measureActive: active }),
   setSummaryPanelOpen: (open) => set({ summaryPanelOpen: open }),
   setDimensionsVisible: (visible) => set({ dimensionsVisible: visible }),
+  setAssetCardEnabled: (enabled) => {
+    writeAssetCardEnabled(enabled);
+    set({ assetCardEnabled: enabled });
+  },
 }));

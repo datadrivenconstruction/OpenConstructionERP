@@ -301,6 +301,12 @@ export const FormulaCellEditor = forwardRef(
       formula ? String(formula) : String(props.value ?? ''),
     );
     const [showHelp, setShowHelp] = useState(false);
+    // Single source of truth — what numeric value we will hand back to AG
+    // Grid. Updated only by commitFromInput / getValue so the formula
+    // metadata write and the quantity write stay consistent (no race that
+    // PATCHes the original value back over the formula result).
+    const lastParsedRef = useRef<number | null>(null);
+    const lastFormulaRef = useRef<string>('');
 
     const preview = useMemo(() => previewFor(value), [value]);
 
@@ -309,29 +315,159 @@ export const FormulaCellEditor = forwardRef(
       inputRef.current?.select();
     }, []);
 
+    // Resolve onFormulaApplied: prefer the editor-param prop, fall back to
+    // the grid context. AG Grid's column-defs don't pass cellEditorParams
+    // for the Quantity column, so the actual delivery channel is
+    // ``context.onFormulaApplied`` set in BOQGrid's gridContext.
+    const fireFormulaApplied = (
+      positionId: string | undefined,
+      f: string,
+      r: number,
+    ) => {
+      if (!positionId) return;
+      const ctxFn = (props.context as { onFormulaApplied?: (id: string, f: string, r: number) => void } | undefined)
+        ?.onFormulaApplied;
+      if (props.onFormulaApplied) {
+        props.onFormulaApplied(positionId, f, r);
+      } else if (ctxFn) {
+        ctxFn(positionId, f, r);
+      }
+    };
+
+    // Issue #90 follow-up (v2.5.6 hotfix): React 18 + ag-grid-react v32
+    // popup editors render in a DOM root that doesn't share the synthetic
+    // event delegation root, so JSX ``onKeyDown`` / ``onChange`` never
+    // fire. We attach NATIVE listeners through the ref. The flow is:
+    //
+    //   keydown(Enter) → parse → fire onFormulaApplied (metadata) →
+    //   stopEditing(false) → AG Grid calls getValue() → returns parsed →
+    //   AG Grid writes quantity → fires cellValueChanged → PATCH.
+    //
+    // We DO NOT call ``node.setDataValue`` here: doing so plus AG Grid's
+    // own getValue path resulted in two PATCHes (one with the parsed
+    // result, one with the editor's raw text after the parser fell back
+    // to oldValue). Single source of truth via ``lastParsedRef`` keeps it
+    // to one PATCH per commit.
+    const parseInput = (live: string): { parsed: number; formulaSrc: string } => {
+      const trimmed = live.trim();
+      let parsed: number;
+      let formulaSrc = '';
+      if (isFormula(trimmed)) {
+        const result = evaluateFormula(trimmed);
+        if (result !== null) {
+          parsed = result;
+          formulaSrc = trimmed;
+        } else {
+          parsed = parseFloat(trimmed.replace(',', '.')) || 0;
+        }
+      } else {
+        parsed = parseFloat(trimmed.replace(',', '.')) || 0;
+      }
+      return { parsed, formulaSrc };
+    };
+
+    // Idempotency guard: Enter→commitFromInput→stopEditing destroys the
+    // input, which fires a tail blur event that would otherwise re-enter
+    // commitFromInput and double-PATCH the formula. Track whether we've
+    // already committed and short-circuit subsequent calls.
+    const committedRef = useRef(false);
+
+    const commitFromInput = (cancelNavigation: boolean) => {
+      if (committedRef.current) return;
+      committedRef.current = true;
+
+      const live = inputRef.current?.value ?? value;
+      const { parsed, formulaSrc } = parseInput(live);
+      const hadStoredFormula = !!formula;
+      lastParsedRef.current = parsed;
+      lastFormulaRef.current = formulaSrc;
+
+      if (formulaSrc) {
+        fireFormulaApplied(props.data?.id, formulaSrc, parsed);
+      } else if (hadStoredFormula) {
+        // User replaced a stored formula with a plain number — clear it.
+        fireFormulaApplied(props.data?.id, '', parsed);
+      }
+
+      // ag-grid-react v32 + React 18 sometimes skips ``getValue()`` after
+      // ``stopEditing(false)`` on functional editors, so write the value
+      // directly *and* implement getValue. The check ``parsed !== old``
+      // ensures we don't fire a no-op cellValueChanged.
+      const colId = props.column?.getColId?.() ?? 'quantity';
+      const oldValue = props.node?.data?.[colId];
+      if (parsed !== oldValue) {
+        props.node?.setDataValue(colId, parsed);
+      }
+
+      props.api.stopEditing(cancelNavigation);
+    };
+
+    useEffect(() => {
+      const el = inputRef.current;
+      if (!el) return;
+
+      const handleInput = (ev: Event) => {
+        setValue((ev.target as HTMLInputElement).value);
+      };
+      const handleKeyDown = (ev: KeyboardEvent) => {
+        if (ev.key === 'Escape') {
+          if (showHelp) {
+            setShowHelp(false);
+            ev.stopPropagation();
+            return;
+          }
+          props.api.stopEditing(true);
+          return;
+        }
+        if (ev.key === 'Enter') {
+          ev.preventDefault();
+          ev.stopPropagation();
+          commitFromInput(false);
+          return;
+        }
+        if (ev.key === 'Tab') {
+          ev.preventDefault();
+          ev.stopPropagation();
+          commitFromInput(false);
+          props.api.tabToNextCell();
+        }
+      };
+      const handleBlur = () => {
+        // Blur (clicking outside the popup) should also commit, matching
+        // how AG Grid's native editors behave.
+        commitFromInput(false);
+      };
+
+      el.addEventListener('input', handleInput);
+      el.addEventListener('keydown', handleKeyDown);
+      el.addEventListener('blur', handleBlur);
+      return () => {
+        el.removeEventListener('input', handleInput);
+        el.removeEventListener('keydown', handleKeyDown);
+        el.removeEventListener('blur', handleBlur);
+      };
+      // commitFromInput closes over the latest props/value via the ref
+      // read inside it, so it doesn't need to be in the dep list.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showHelp]);
+
     useImperativeHandle(ref, () => ({
       getValue() {
-        const trimmed = value.trim();
-        const hadStoredFormula = !!formula;
-        if (isFormula(trimmed)) {
-          const result = evaluateFormula(trimmed);
-          if (result !== null) {
-            props.onFormulaApplied?.(props.data?.id, trimmed, result);
-            return result;
-          }
-          // Invalid formula on commit — fall through to numeric parse so
-          // the user's input isn't silently destroyed; AG Grid keeps the
-          // original cell value when getValue returns the same as oldValue.
+        // If the user already pressed Enter / blurred / Tab, commitFromInput
+        // already parsed and stored the canonical numeric value — return
+        // that so AG Grid's cellValueChanged fires with the SAME number we
+        // wrote via setDataValue (no double PATCH, no rollback to the
+        // pre-edit value).
+        if (lastParsedRef.current !== null) {
+          return lastParsedRef.current;
         }
-        // Plain number — strip a possible comma-decimal first.
-        const numeric = parseFloat(trimmed.replace(',', '.')) || 0;
-        // If this row used to have a stored formula and the user just typed
-        // a plain number, notify the host so it can clear metadata.formula —
-        // otherwise the ƒx badge would lie about the source of the value.
-        if (hadStoredFormula && !isFormula(trimmed)) {
-          props.onFormulaApplied?.(props.data?.id, '', numeric);
-        }
-        return numeric;
+        // Cold path: AG Grid called getValue without any prior commit
+        // (programmatic stopEditing, focus loss not via blur listener).
+        // Parse and return — but DO NOT fire onFormulaApplied here, since
+        // we can't tell if this is a real commit or a cancel-by-API call.
+        // commitFromInput is the only path that persists the formula.
+        const live = inputRef.current?.value ?? value;
+        return parseInput(live).parsed;
       },
       isCancelAfterEnd() {
         return false;
@@ -361,18 +497,11 @@ export const FormulaCellEditor = forwardRef(
           <input
             ref={inputRef}
             className="flex-1 min-w-0 h-full bg-transparent outline-none text-xs text-content-primary tabular-nums text-right pr-1"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') {
-                if (showHelp) {
-                  setShowHelp(false);
-                  e.stopPropagation();
-                  return;
-                }
-                props.api.stopEditing(true);
-              }
-            }}
+            // ``defaultValue`` (NOT ``value``) — the input is driven by the
+            // native ``input`` listener attached in useEffect above. React
+            // synthetic ``onChange`` doesn't fire inside AG Grid's popup
+            // editor, so the controlled-input pattern would deadlock.
+            defaultValue={value}
             placeholder="123  or  =2*PI()^2*3"
           />
           {/* Help toggle — opens the cheat-sheet popover */}
