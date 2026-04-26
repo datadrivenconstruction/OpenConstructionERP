@@ -109,8 +109,15 @@ def downgrade() -> None:
         with op.batch_alter_table(_TABLE) as batch_op:
             batch_op.drop_constraint(_IDEMP_UNIQUE, type_="unique")
 
-    if _has_index(inspector, _TABLE, _IDEMP_INDEX):
-        op.drop_index(_IDEMP_INDEX, table_name=_TABLE)
+    # Drop EVERY index that covers idempotency_key — both the one the
+    # upgrade()  created (``ix_eac_run_idempotency_key``) and any auto-
+    # generated index SQLAlchemy made from ``index=True`` on the model
+    # column (``ix_oe_eac_run_idempotency_key``). On SQLite, leaving an
+    # index pointing at the column makes ``DROP COLUMN`` fail with
+    # "error in index ... after drop column".
+    for idx in inspector.get_indexes(_TABLE):
+        if _IDEMP_COL in idx.get("column_names", []):
+            op.drop_index(idx["name"], table_name=_TABLE)
 
     if _has_column(inspector, _TABLE, _IDEMP_COL):
         op.drop_column(_TABLE, _IDEMP_COL)
