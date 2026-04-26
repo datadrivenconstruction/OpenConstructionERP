@@ -20,5 +20,12 @@
   "filter.operator.unsupported": "Filter-Operator '{op}' wird nicht unterstützt.",
   "import.csv.encoding_unknown": "Die Kodierung der hochgeladenen Datei konnte nicht erkannt werden.",
   "import.column.missing": "Der Datei fehlt eine erforderliche Spalte: {column}.",
-  "export.no_rows": "Es gibt nichts zu exportieren — die Abfrage lieferte keine Zeilen."
+  "export.no_rows": "Es gibt nichts zu exportieren — die Abfrage lieferte keine Zeilen.",
+  "preset.not_found": "Dashboard-Voreinstellung nicht gefunden.",
+  "preset.access_denied": "Nur der Eigentümer der Voreinstellung kann diese Aktion ausführen.",
+  "preset.validation_failed": "Voreinstellungs-Payload hat die Validierung nicht bestanden.",
+  "rows.query.invalid": "Die Zeilen-Abfrage ist ungültig.",
+  "export.format.unsupported": "Nicht unterstütztes Exportformat. Unterstützt: {supported}.",
+  "import.staging.not_found": "Vorbereiteter Import nicht gefunden oder abgelaufen — bitte erneut hochladen.",
+  "import.schema.mismatch": "Die hochgeladene Datei ist mit dem Snapshot-Schema nicht kompatibel."
 }

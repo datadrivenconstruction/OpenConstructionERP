@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -149,3 +149,138 @@ class SmartValuesOut(BaseModel):
     column: str
     query: str = ""
     items: list[SmartValueOut] = Field(default_factory=list)
+
+
+# ── Cascade Filter Engine (T04) ────────────────────────────────────────────
+
+
+class CascadeValuesRequest(BaseModel):
+    """Body for ``POST /snapshots/{id}/cascade-values``.
+
+    ``selected`` is a column → allowed-values map. An empty list under a
+    key means "no filter on that column" — the engine drops it before
+    generating SQL (DuckDB rejects ``WHERE col IN ()``).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    selected: dict[str, list[str]] = Field(default_factory=dict)
+    target_column: str = Field(..., min_length=1, max_length=200)
+    q: str = Field(default="", max_length=200)
+    limit: int = Field(default=50, ge=1, le=200)
+
+
+class CascadeValueOut(BaseModel):
+    """One distinct-value/count pair under the active selection."""
+
+    value: str
+    count: int = Field(..., ge=0)
+
+
+class CascadeValuesOut(BaseModel):
+    snapshot_id: uuid.UUID
+    target_column: str
+    q: str = ""
+    values: list[CascadeValueOut] = Field(default_factory=list)
+
+
+class CascadeRowCountOut(BaseModel):
+    """Response for ``GET /snapshots/{id}/row-count``.
+
+    ``matched`` is the number of rows consistent with the selection;
+    ``total`` is the snapshot's full entity count. The frontend pairs
+    these to render "X of Y rows match".
+    """
+
+    snapshot_id: uuid.UUID
+    matched: int = Field(..., ge=0)
+    total: int = Field(..., ge=0)
+
+
+# ── Dashboard Presets & Collections (T05) ──────────────────────────────────
+
+
+PresetKind = Literal["preset", "collection"]
+
+
+class DashboardPresetCreate(BaseModel):
+    """Request body for ``POST /v1/dashboards/presets``."""
+
+    name: str = Field(..., min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=2000)
+    kind: PresetKind = "preset"
+    project_id: uuid.UUID | None = None
+    config_json: dict[str, Any] = Field(default_factory=dict)
+    shared_with_project: bool = False
+
+
+class DashboardPresetUpdate(BaseModel):
+    """Request body for ``PATCH /v1/dashboards/presets/{id}``."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=2000)
+    kind: PresetKind | None = None
+    config_json: dict[str, Any] | None = None
+    shared_with_project: bool | None = None
+
+
+class DashboardPresetOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    tenant_id: str | None = None
+    project_id: uuid.UUID | None = None
+    owner_id: uuid.UUID
+    name: str
+    description: str | None = None
+    kind: PresetKind
+    config_json: dict[str, Any] = Field(default_factory=dict)
+    shared_with_project: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+
+class DashboardPresetListResponse(BaseModel):
+    total: int
+    items: list[DashboardPresetOut]
+
+
+# ── Tabular Data I/O (T06) ─────────────────────────────────────────────────
+
+
+class SnapshotRowsOut(BaseModel):
+    """Paginated row reader response."""
+
+    snapshot_id: uuid.UUID
+    columns: list[str]
+    rows: list[dict[str, Any]] = Field(default_factory=list)
+    total: int
+    limit: int
+    offset: int
+
+
+class SnapshotImportPreviewOut(BaseModel):
+    """Result of the dry-run import endpoint.
+
+    ``staging_id`` is an opaque token the caller passes back to
+    ``POST /import/commit`` to materialise the upload.
+    """
+
+    snapshot_id: uuid.UUID
+    staging_id: str
+    columns: list[str]
+    matched_columns: list[str]
+    missing_columns: list[str] = Field(default_factory=list)
+    extra_columns: list[str] = Field(default_factory=list)
+    total_rows: int
+    preview_rows: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class SnapshotImportCommitIn(BaseModel):
+    staging_id: str = Field(..., min_length=1, max_length=200)
+
+
+class SnapshotImportCommitOut(BaseModel):
+    snapshot_id: uuid.UUID
+    staging_id: str
+    rows_committed: int

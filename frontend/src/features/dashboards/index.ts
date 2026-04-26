@@ -4,6 +4,17 @@ export { QuickInsightPanel } from './QuickInsightPanel';
 export type { QuickInsightPanelProps } from './QuickInsightPanel';
 export { SmartValueAutocomplete, useDebouncedValue } from './SmartValueAutocomplete';
 export type { SmartValueAutocompleteProps } from './SmartValueAutocomplete';
+export { CascadeFilterPanel } from './CascadeFilterPanel';
+export type {
+  CascadeFilterPanelProps,
+  CascadeSelection,
+} from './CascadeFilterPanel';
+export { PresetPicker, PresetSaveModal } from './PresetPicker';
+export type { PresetPickerProps } from './PresetPicker';
+export { DataTable } from './DataTable';
+export type { DataTableProps } from './DataTable';
+export { ExportButton } from './ExportButton';
+export type { ExportButtonProps } from './ExportButton';
 export {
   listSnapshots,
   getSnapshot,
@@ -12,6 +23,16 @@ export {
   deleteSnapshot,
   getQuickInsights,
   getSmartValues,
+  getCascadeValues,
+  getCascadeRowCount,
+  listDashboardPresets,
+  getDashboardPreset,
+  createDashboardPreset,
+  updateDashboardPreset,
+  deleteDashboardPreset,
+  shareDashboardPreset,
+  getSnapshotRows,
+  buildSnapshotExportUrl,
 } from './api';
 export type {
   Snapshot,
@@ -26,4 +47,16 @@ export type {
   QuickInsightsResponse,
   SmartValue,
   SmartValuesResponse,
+  CascadeValue,
+  CascadeValuesRequest,
+  CascadeValuesResponse,
+  CascadeRowCountResponse,
+  DashboardPreset,
+  DashboardPresetKind,
+  DashboardPresetListResponse,
+  CreateDashboardPresetInput,
+  UpdateDashboardPresetInput,
+  SnapshotRowsResponse,
+  SnapshotRowsQuery,
+  ExportFormat,
 } from './api';

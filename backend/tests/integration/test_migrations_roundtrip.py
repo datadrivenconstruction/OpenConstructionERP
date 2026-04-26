@@ -60,6 +60,7 @@ ALEMBIC_INI = BACKEND_DIR / "alembic.ini"
 # Recent revisions we want to exercise (the v250+ wave).
 # Listed newest-first so the most recent failures surface first.
 RECENT_REVISIONS: list[str] = [
+    "v290_dashboards_presets",
     "v280_4d_schedule_eac",
     "v270_position_version_column",
     "eb1cef6f5fce",  # v262 merge node

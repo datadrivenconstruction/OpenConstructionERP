@@ -36,7 +36,12 @@ import { RefreshCw, Pin, BarChart3, LineChart as LineIcon, ScatterChart as Scatt
 import { Button, Card, EmptyState, Skeleton } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 
-import { getQuickInsights, type QuickInsightChart } from './api';
+import {
+  createDashboardPreset,
+  getQuickInsights,
+  type QuickInsightChart,
+} from './api';
+import { PresetPicker } from './PresetPicker';
 
 const CHART_HEIGHT = 200;
 const PIE_PALETTE = [
@@ -56,12 +61,19 @@ export interface QuickInsightPanelProps {
   onPinChart?: (chart: QuickInsightChart) => void;
   /** How many charts to request from the backend (default 6, max 24). */
   limit?: number;
+  /**
+   * Project the snapshot belongs to. When supplied, pinning a chart
+   * creates a preset on that project (T05). Without it the pin still
+   * shows a toast, but no preset is saved.
+   */
+  projectId?: string | null;
 }
 
 export function QuickInsightPanel({
   snapshotId,
   onPinChart,
   limit = 6,
+  projectId,
 }: QuickInsightPanelProps) {
   const { t } = useTranslation();
   const toast = useToastStore((s) => s.addToast);
@@ -80,23 +92,58 @@ export function QuickInsightPanel({
   }, [insightsQuery]);
 
   const handlePin = useCallback(
-    (chart: QuickInsightChart) => {
+    async (chart: QuickInsightChart) => {
       if (onPinChart) {
         onPinChart(chart);
         return;
       }
-      toast({
-        type: 'info',
-        title: t('dashboards.pin_unavailable_title', {
-          defaultValue: 'Pinning lands with Dashboards & Collections (T05)',
-        }),
-        message: t('dashboards.pin_unavailable_msg', {
-          defaultValue:
-            'The dashboards-collection endpoint is not wired yet — bookmark this snapshot to revisit the chart.',
-        }),
-      });
+      // T05: pinning a chart now creates a private preset.
+      try {
+        await createDashboardPreset({
+          name: chart.title.slice(0, 200),
+          description: t('dashboards.pin_default_description', {
+            defaultValue: 'Pinned from Quick Insights',
+          }),
+          kind: 'preset',
+          project_id: projectId ?? null,
+          config_json: {
+            snapshot_id: snapshotId,
+            charts: [chart],
+            filters: {},
+          },
+          shared_with_project: false,
+        });
+        toast({
+          type: 'success',
+          title: t('dashboards.pin_saved_title', {
+            defaultValue: 'Pinned to dashboard',
+          }),
+          message: t('dashboards.pin_saved_msg', {
+            defaultValue: 'Open the Presets dropdown to load it back.',
+          }),
+        });
+      } catch (err) {
+        toast({
+          type: 'error',
+          title: t('dashboards.pin_failed_title', {
+            defaultValue: 'Could not pin chart',
+          }),
+          message: err instanceof Error ? err.message : String(err),
+        });
+      }
     },
-    [onPinChart, toast, t],
+    [onPinChart, toast, t, projectId, snapshotId],
+  );
+
+  const dashboardSnapshot = useCallback(
+    () => ({
+      snapshot_id: snapshotId,
+      filters: {},
+      charts: charts,
+    }),
+    // Recomputed when the chart list changes — that's the whole point.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [snapshotId, insightsQuery.data?.charts],
   );
 
   const charts = insightsQuery.data?.charts ?? [];
@@ -116,18 +163,21 @@ export function QuickInsightPanel({
             })}
           </p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleRefresh}
-          disabled={insightsQuery.isFetching}
-          data-testid="quick-insights-refresh"
-        >
-          <RefreshCw
-            className={`mr-1 h-3 w-3 ${insightsQuery.isFetching ? 'animate-spin' : ''}`}
-          />
-          {t('common.refresh', { defaultValue: 'Refresh' })}
-        </Button>
+        <div className="flex items-center gap-1">
+          <PresetPicker projectId={projectId} snapshot={dashboardSnapshot} />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={insightsQuery.isFetching}
+            data-testid="quick-insights-refresh"
+          >
+            <RefreshCw
+              className={`mr-1 h-3 w-3 ${insightsQuery.isFetching ? 'animate-spin' : ''}`}
+            />
+            {t('common.refresh', { defaultValue: 'Refresh' })}
+          </Button>
+        </div>
       </div>
 
       <div className="p-3">

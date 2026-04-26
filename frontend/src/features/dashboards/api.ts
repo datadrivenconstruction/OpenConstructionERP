@@ -9,7 +9,7 @@
  *   GET    /v1/dashboards/snapshots/{snapshot_id}/manifest   — manifest.json
  */
 
-import { apiGet, apiDelete } from '@/shared/lib/api';
+import { apiGet, apiDelete, apiPatch, apiPost } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
@@ -238,4 +238,234 @@ export async function getSmartValues(
   return apiGet<SmartValuesResponse>(
     `/v1/dashboards/snapshots/${encodeURIComponent(snapshotId)}/values?${params.toString()}`,
   );
+}
+
+/* ── Cascade Filter Engine (T04) ────────────────────────────────────────── */
+
+export interface CascadeValue {
+  value: string;
+  count: number;
+}
+
+export interface CascadeValuesRequest {
+  /** Column → allowed values. Empty arrays are dropped server-side. */
+  selected: Record<string, string[]>;
+  target_column: string;
+  q?: string;
+  limit?: number;
+}
+
+export interface CascadeValuesResponse {
+  snapshot_id: string;
+  target_column: string;
+  q: string;
+  values: CascadeValue[];
+}
+
+export interface CascadeRowCountResponse {
+  snapshot_id: string;
+  matched: number;
+  total: number;
+}
+
+/**
+ * Distinct-values cascade. Pass the *other* filters' selections in
+ * `selected`; the response is the set of values for `target_column`
+ * whose row-set is consistent with those constraints.
+ *
+ * The endpoint is POST (not GET) because the request body can be
+ * arbitrarily large — multi-select chips on multiple columns blow past
+ * any reasonable URL length.
+ */
+export async function getCascadeValues(
+  snapshotId: string,
+  body: CascadeValuesRequest,
+): Promise<CascadeValuesResponse> {
+  const payload: CascadeValuesRequest = {
+    selected: body.selected ?? {},
+    target_column: body.target_column,
+    q: body.q ?? '',
+    limit: body.limit ?? 50,
+  };
+  return apiPost<CascadeValuesResponse, CascadeValuesRequest>(
+    `/v1/dashboards/snapshots/${encodeURIComponent(snapshotId)}/cascade-values`,
+    payload,
+  );
+}
+
+/**
+ * Live "X of Y rows match" counter for the cascade panel header.
+ *
+ * The selection is JSON-serialised into a single `selected` query
+ * param — keeps the GET request flat and cacheable. The backend
+ * decodes it before validating column names.
+ */
+export async function getCascadeRowCount(
+  snapshotId: string,
+  selected: Record<string, string[]>,
+): Promise<CascadeRowCountResponse> {
+  const params = new URLSearchParams({ selected: JSON.stringify(selected ?? {}) });
+  return apiGet<CascadeRowCountResponse>(
+    `/v1/dashboards/snapshots/${encodeURIComponent(snapshotId)}/row-count?${params.toString()}`,
+  );
+}
+
+/* ── Dashboard Presets & Collections (T05) ───────────────────────────────── */
+
+export type DashboardPresetKind = 'preset' | 'collection';
+
+export interface DashboardPreset {
+  id: string;
+  tenant_id: string | null;
+  project_id: string | null;
+  owner_id: string;
+  name: string;
+  description: string | null;
+  kind: DashboardPresetKind;
+  config_json: Record<string, unknown>;
+  shared_with_project: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DashboardPresetListResponse {
+  total: number;
+  items: DashboardPreset[];
+}
+
+export interface CreateDashboardPresetInput {
+  name: string;
+  description?: string | null;
+  kind?: DashboardPresetKind;
+  project_id?: string | null;
+  config_json?: Record<string, unknown>;
+  shared_with_project?: boolean;
+}
+
+export interface UpdateDashboardPresetInput {
+  name?: string;
+  description?: string | null;
+  kind?: DashboardPresetKind;
+  config_json?: Record<string, unknown>;
+  shared_with_project?: boolean;
+}
+
+export async function listDashboardPresets(opts?: {
+  projectId?: string | null;
+  kind?: DashboardPresetKind;
+  limit?: number;
+  offset?: number;
+}): Promise<DashboardPresetListResponse> {
+  const params = new URLSearchParams();
+  if (opts?.projectId) params.set('project_id', opts.projectId);
+  if (opts?.kind) params.set('kind', opts.kind);
+  if (opts?.limit) params.set('limit', String(opts.limit));
+  if (opts?.offset) params.set('offset', String(opts.offset));
+  const qs = params.toString();
+  return apiGet<DashboardPresetListResponse>(
+    `/v1/dashboards/presets${qs ? `?${qs}` : ''}`,
+  );
+}
+
+export async function getDashboardPreset(
+  presetId: string,
+): Promise<DashboardPreset> {
+  return apiGet<DashboardPreset>(
+    `/v1/dashboards/presets/${encodeURIComponent(presetId)}`,
+  );
+}
+
+export async function createDashboardPreset(
+  input: CreateDashboardPresetInput,
+): Promise<DashboardPreset> {
+  return apiPost<DashboardPreset, CreateDashboardPresetInput>(
+    `/v1/dashboards/presets`,
+    input,
+  );
+}
+
+export async function updateDashboardPreset(
+  presetId: string,
+  input: UpdateDashboardPresetInput,
+): Promise<DashboardPreset> {
+  return apiPatch<DashboardPreset, UpdateDashboardPresetInput>(
+    `/v1/dashboards/presets/${encodeURIComponent(presetId)}`,
+    input,
+  );
+}
+
+export async function deleteDashboardPreset(presetId: string): Promise<void> {
+  await apiDelete(`/v1/dashboards/presets/${encodeURIComponent(presetId)}`);
+}
+
+export async function shareDashboardPreset(
+  presetId: string,
+): Promise<DashboardPreset> {
+  return apiPost<DashboardPreset, undefined>(
+    `/v1/dashboards/presets/${encodeURIComponent(presetId)}/share`,
+  );
+}
+
+/* ── Tabular Data I/O (T06) ──────────────────────────────────────────────── */
+
+export interface SnapshotRowsResponse {
+  snapshot_id: string;
+  columns: string[];
+  rows: Array<Record<string, unknown>>;
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export type ExportFormat = 'csv' | 'xlsx' | 'parquet';
+
+export interface SnapshotRowsQuery {
+  columns?: string[];
+  filters?: Record<string, string[]>;
+  orderBy?: string; // "col:asc" | "col:desc"
+  limit?: number;
+  offset?: number;
+}
+
+function _rowsQueryParams(opts?: SnapshotRowsQuery): URLSearchParams {
+  const params = new URLSearchParams();
+  if (opts?.columns && opts.columns.length > 0) {
+    params.set('columns', opts.columns.join(','));
+  }
+  if (opts?.filters && Object.keys(opts.filters).length > 0) {
+    params.set('filters', JSON.stringify(opts.filters));
+  }
+  if (opts?.orderBy) params.set('order_by', opts.orderBy);
+  if (opts?.limit !== undefined) params.set('limit', String(opts.limit));
+  if (opts?.offset !== undefined) params.set('offset', String(opts.offset));
+  return params;
+}
+
+export async function getSnapshotRows(
+  snapshotId: string,
+  opts?: SnapshotRowsQuery,
+): Promise<SnapshotRowsResponse> {
+  const params = _rowsQueryParams(opts);
+  const qs = params.toString();
+  return apiGet<SnapshotRowsResponse>(
+    `/v1/dashboards/snapshots/${encodeURIComponent(snapshotId)}/rows${
+      qs ? `?${qs}` : ''
+    }`,
+  );
+}
+
+/**
+ * Trigger a download of the snapshot in the requested tabular format.
+ * Resolves to the URL we navigated to (handy for tests).
+ */
+export function buildSnapshotExportUrl(
+  snapshotId: string,
+  format: ExportFormat,
+  opts?: SnapshotRowsQuery,
+): string {
+  const params = _rowsQueryParams(opts);
+  params.set('format', format);
+  return `/api/v1/dashboards/snapshots/${encodeURIComponent(
+    snapshotId,
+  )}/export?${params.toString()}`;
 }
