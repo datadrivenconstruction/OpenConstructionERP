@@ -29,14 +29,22 @@ async def fetch_weather(lat: float, lon: float, api_key: str | None = None) -> d
     if not api_key:
         return None
 
-    url = (
-        f"https://api.openweathermap.org/data/2.5/weather"
-        f"?lat={lat}&lon={lon}&appid={api_key}&units=metric"
-    )
+    # Build URL from a hard-coded base + structured query params so the host
+    # is fixed at compile time. CodeQL's `py/partial-ssrf` flags any string
+    # interpolated URL even when inputs are typed `float` — passing values via
+    # `params=` makes the trust boundary explicit and silences the false
+    # positive without changing behaviour.
+    base_url = "https://api.openweathermap.org/data/2.5/weather"
+    params = {
+        "lat": float(lat),
+        "lon": float(lon),
+        "appid": api_key,
+        "units": "metric",
+    }
 
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.get(url)
+            resp = await client.get(base_url, params=params)
             if resp.status_code != 200:
                 logger.warning("OpenWeatherMap returned %d", resp.status_code)
                 return None

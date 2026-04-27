@@ -476,6 +476,33 @@ export default function TakeoffViewerModule({
     return () => window.removeEventListener('beforeunload', handler);
   }, [measurements.length]);
 
+  /* ── First-measurement-without-calibration warning ───────────────── */
+  // Fires exactly once per session: when the user creates their first
+  // measurement on an uncalibrated drawing, surface a toast that links
+  // back to the Calibrate tool. Without this, raw-pixel measurements
+  // (e.g. "22.98 km" on a unitless DWG/PDF) sail through silently.
+  const calibrationWarnShownRef = useRef(false);
+  useEffect(() => {
+    if (calibrationWarnShownRef.current) return;
+    if (isCalibrated) return;
+    if (measurements.length === 0) return;
+    // Only count "real" measurements, not annotations.
+    const hasRealMeasurement = measurements.some(
+      (m) => !ANNOTATION_TOOLS.includes(m.type as AnnotationToolType),
+    );
+    if (!hasRealMeasurement) return;
+    calibrationWarnShownRef.current = true;
+    addToast({
+      type: 'warning',
+      title: t('takeoff_viewer.calibration_warn_title', {
+        defaultValue: 'Drawing is not calibrated',
+      }),
+      message: t('takeoff_viewer.calibration_warn_msg', {
+        defaultValue: 'Measurements may be inaccurate. Use the Calibrate tool to set a real-world length.',
+      }),
+    });
+  }, [measurements, isCalibrated, addToast, t]);
+
   /* ── Render page to canvas ───────────────────────────────────────── */
 
   useEffect(() => {
@@ -1491,6 +1518,42 @@ export default function TakeoffViewerModule({
   const zoomIn = useCallback(() => setZoom((z) => Math.min(z * 1.25, 4)), []);
   const zoomOut = useCallback(() => setZoom((z) => Math.max(z / 1.25, 0.25)), []);
   const zoomFit = useCallback(() => setZoom(1), []);
+
+  // Mouse-wheel zoom on the canvas container. Native listener with
+  // `{ passive: false }` so we can preventDefault — React's synthetic
+  // onWheel binds passive in v17+ which silently ignores preventDefault.
+  // Zoom anchors at the cursor (CAD-standard): the world point under the
+  // cursor stays put while we rescale, by adjusting scrollLeft/Top.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+      const rect = container.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+
+      setZoom((prev) => {
+        const raw = prev * factor;
+        const next = Math.round(Math.max(0.25, Math.min(4, raw)) * 100) / 100;
+        if (next === prev) return prev;
+        const ratio = next / prev;
+        // Re-anchor scroll on next frame so the new canvas size is laid out.
+        requestAnimationFrame(() => {
+          if (containerRef.current) {
+            containerRef.current.scrollLeft = (container.scrollLeft + cx) * ratio - cx;
+            containerRef.current.scrollTop = (container.scrollTop + cy) * ratio - cy;
+          }
+        });
+        return next;
+      });
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, []);
 
   /* ── Page navigation ─────────────────────────────────────────────── */
 
@@ -2724,6 +2787,22 @@ export default function TakeoffViewerModule({
                   )}
                 </button>
               )}
+              {/* Uncalibrated warning — clickable shortcut to start calibration.
+                  Without this banner users would silently log measurements in
+                  raw pixel units (or whatever the PDF arrived in) and only
+                  notice the wrongness once values look implausible. */}
+              {!isCalibrated && !calibrationMode && !settingScale && (
+                <button
+                  onClick={handleStartCalibration}
+                  className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors border border-amber-300/50 dark:border-amber-700/50"
+                  title={t('takeoff_viewer.uncalibrated_hint', { defaultValue: 'Drawing is not calibrated — measurements may be inaccurate. Click to calibrate.' })}
+                  data-testid="uncalibrated-badge"
+                >
+                  <span className="font-semibold">Not calibrated</span>
+                  <span className="text-amber-500">·</span>
+                  <span>{t('takeoff_viewer.click_to_fix', { defaultValue: 'click to fix' })}</span>
+                </button>
+              )}
 
               {/* Legend toggle — shows/hides the color-coded group legend
                   card in the bottom-left of the canvas viewport. */}
@@ -3414,8 +3493,9 @@ export default function TakeoffViewerModule({
                                   </button>
                                   <button
                                     onClick={(e) => { e.stopPropagation(); deleteMeasurement(m.id); }}
-                                    className="opacity-0 group-hover/item:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"
+                                    className="opacity-40 group-hover/item:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"
                                     aria-label={t('takeoff_viewer.delete_measurement', { defaultValue: 'Delete measurement' })}
+                                    title={`${t('takeoff_viewer.delete_measurement', { defaultValue: 'Delete measurement' })} (Del)`}
                                   >
                                     <Trash2 size={12} />
                                   </button>
@@ -3686,8 +3766,9 @@ export default function TakeoffViewerModule({
                                   </div>
                                   <button
                                     onClick={() => deleteMeasurement(m.id)}
-                                    className="opacity-0 group-hover/item:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"
+                                    className="opacity-50 group-hover/item:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"
                                     aria-label={t('takeoff_viewer.delete_annotation', { defaultValue: 'Delete annotation' })}
+                                    title={`${t('takeoff_viewer.delete_annotation', { defaultValue: 'Delete annotation' })} (Del)`}
                                   >
                                     <Trash2 size={12} />
                                   </button>

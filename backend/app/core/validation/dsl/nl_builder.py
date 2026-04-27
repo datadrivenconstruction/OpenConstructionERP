@@ -455,8 +455,13 @@ _RU_REPLACEMENTS: tuple[tuple[str, str], ...] = (
 )
 
 
+# Bound the inner field length so the regex cannot exhibit polynomial
+# backtracking (CodeQL `py/polynomial-redos`). The inner class includes `\s`
+# AND the outer suffix is `\s+have` — without an explicit upper bound an
+# adversarial input like "must " + "a"*N + " havz" would force quadratic
+# scanning. 100 chars is well above any real DSL phrase length.
 _DE_V2_REORDER = re.compile(
-    r"\bmust\s+(?P<field>[a-zäöüß0-9_\s\-]+?)\s+have\b",
+    r"\bmust\s+(?P<field>[a-zäöüß0-9_\s\-]{1,100}?)\s+have\b",
     re.IGNORECASE,
 )
 

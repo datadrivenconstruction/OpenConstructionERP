@@ -183,11 +183,17 @@ async def delete_session(
 async def chat_message_similar(
     message_id: uuid.UUID,
     session: SessionDep,
-    _user_id: CurrentUserId,
+    user_id: CurrentUserId,
     limit: int = Query(default=5, ge=1, le=20),
     cross_project: bool = Query(default=True),
 ) -> dict[str, Any]:
-    """Return chat messages semantically similar to the given one."""
+    """Return chat messages semantically similar to the given one.
+
+    Verifies the requesting user owns the parent ``ChatSession``. If the
+    message exists but belongs to another user, the endpoint returns 404
+    (not 403) to avoid leaking the existence of message UUIDs the caller
+    is not allowed to see — same convention as ``verify_project_access``.
+    """
     from sqlalchemy import select
     from sqlalchemy.orm import selectinload
 
@@ -201,6 +207,11 @@ async def chat_message_similar(
     )
     row = (await session.execute(stmt)).scalar_one_or_none()
     if row is None:
+        raise HTTPException(status_code=404, detail="Chat message not found")
+    # IDOR guard: the message's session must belong to the current user.
+    # Treat ownership mismatch as 404 — never leak the existence of a
+    # message owned by a different account.
+    if row.session is None or str(row.session.user_id) != str(user_id):
         raise HTTPException(status_code=404, detail="Chat message not found")
     project_id = (
         str(row.session.project_id)

@@ -80,12 +80,22 @@ async def import_catalog_from_github(
             detail=f"Unknown region '{region}'. Valid regions: {', '.join(sorted(REGION_MAP))}",
         )
 
-    url = f"{_GITHUB_BASE}/{folder}/DDC_CWICR_{region}_Catalog.csv"
+    # Belt-and-braces: `folder` and `region` come from the static REGION_MAP
+    # only (already validated above), but URL-quote them anyway and verify the
+    # final URL still has the trusted host. This makes the trust boundary
+    # explicit and silences CodeQL's `py/partial-ssrf` finding.
+    from urllib.parse import quote, urlparse
+    url = f"{_GITHUB_BASE}/{quote(folder, safe='')}/DDC_CWICR_{quote(region, safe='')}_Catalog.csv"
+    if urlparse(url).netloc != "raw.githubusercontent.com":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Catalog source host is not allowed.",
+        )
     logger.info("Downloading catalog CSV: %s", url)
 
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "OpenEstimate/1.0"})
-        with urllib.request.urlopen(req, timeout=60) as resp:
+        with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 — host pinned above
             raw_bytes = resp.read()
     except Exception as exc:
         logger.error("Failed to download catalog CSV from %s: %s", url, exc)

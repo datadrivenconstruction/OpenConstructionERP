@@ -5,6 +5,26 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.5] — 2026-04-27
+
+Hotfix bundle — security findings + deferred Auth/IDOR slice + Takeoff UX papercuts.
+
+### Security
+- Fix CodeQL `py/partial-ssrf` (critical) in `fieldreports/weather.py` — switch to `httpx.get(base_url, params=…)` so the host is fixed at compile time.
+- Fix CodeQL `py/partial-ssrf` (critical) in `catalog/router.py` — URL-quote the static-map values and verify final netloc is `raw.githubusercontent.com` before download.
+- Fix CodeQL `py/polynomial-redos` (high) in `dsl/nl_builder.py` — bound the German V2 reorder regex inner field to `{1,100}` characters so the lazy quantifier can't backtrack quadratically on adversarial input.
+
+### Added — Auth/IDOR hardening (v2.4.0 slice A, deferred)
+- `erp_chat/router.py`: project-scoped IDOR closed on `/{conversation_id}/messages` GET + DELETE.
+- `reporting/router.py`: 3 IDOR fixes covering KPI history, dashboards, and audit trails.
+- 17 new integration tests in `tests/integration/test_costs_idor.py`, `test_erp_chat_idor.py`, `test_reporting_idor.py`.
+
+### Fixed — PDF Takeoff UX
+- Mouse-wheel zoom on canvas (cursor-anchored, native listener with `passive: false` so `preventDefault` actually works).
+- Annotation/measurement delete buttons now visible at 40-50% baseline opacity (no longer hover-only) and carry the `(Del)` shortcut hint.
+- New "Not calibrated · click to fix" amber badge in toolbar — mirrors the existing purple "Calibrated · 1:N" badge.
+- One-time toast warning when first real measurement is created on an uncalibrated drawing, gated by ref so it never spams.
+
 ## [2.6.4] — 2026-04-27
 
 Wave-5 patch release — completes the T00–T13 dashboards/compliance backlog with two final feature deliverables.

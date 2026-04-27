@@ -134,12 +134,56 @@ async def create_template(
 
 @router.get("/templates/scheduled/", response_model=list[ReportTemplateResponse])
 async def list_scheduled_templates(
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    session: SessionDep,
+    user_id: CurrentUserId,
     service: ReportingService = Depends(_get_service),
 ) -> list[ReportTemplateResponse]:
-    """List every template that has a cron schedule attached."""
+    """List every template that has a cron schedule attached.
+
+    IDOR-guarded: templates whose ``project_id_scope`` points at a
+    project the caller cannot access are filtered out — otherwise the
+    response would leak project UUIDs (and recipient email lists) for
+    every other tenant on the platform. Portfolio-wide templates
+    (``project_id_scope is None``) remain visible to all authenticated
+    callers since they are not bound to any single tenant's data.
+    """
+    from fastapi import HTTPException
+
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.reporting.models import ReportTemplate
+    from app.modules.users.repository import UserRepository
+
     templates = await service.list_scheduled_templates()
-    return [ReportTemplateResponse.model_validate(t) for t in templates]
+
+    # Admin bypass — admins can see every scheduled template.
+    try:
+        user_repo = UserRepository(session)
+        user = await user_repo.get_by_id(uuid.UUID(user_id))
+        if user is not None and getattr(user, "role", "") == "admin":
+            return [ReportTemplateResponse.model_validate(t) for t in templates]
+    except Exception:
+        logger.exception("Admin-role lookup failed during scheduled template list")
+
+    # Non-admins: include portfolio-wide templates and only those scoped
+    # to projects the caller owns. Re-using ``ProjectRepository.get_by_id``
+    # keeps the ownership check colocated with the project module.
+    proj_repo = ProjectRepository(session)
+    visible: list[ReportTemplate] = []
+    for tmpl in templates:
+        scope = getattr(tmpl, "project_id_scope", None)
+        if scope is None:
+            visible.append(tmpl)
+            continue
+        try:
+            project = await proj_repo.get_by_id(scope)
+        except HTTPException:
+            continue
+        if project is None:
+            continue
+        if str(getattr(project, "owner_id", "")) == str(user_id):
+            visible.append(tmpl)
+
+    return [ReportTemplateResponse.model_validate(t) for t in visible]
 
 
 @router.post(
@@ -154,7 +198,24 @@ async def schedule_template(
     _perm: None = Depends(RequirePermission("reporting.create")),
     service: ReportingService = Depends(_get_service),
 ) -> ReportTemplateResponse:
-    """Attach/replace/clear a cron schedule on an existing template."""
+    """Attach/replace/clear a cron schedule on an existing template.
+
+    IDOR-guarded: if the template is already scoped to a project, the
+    caller must have access to that project before they can re-schedule
+    it (otherwise a viewer could hijack another tenant's scheduled
+    template by re-pointing it at their own project, or silently clear
+    its schedule). Returns 404 to avoid leaking which template IDs exist.
+    """
+    # Existing-scope check: the current schedule may already be locked to
+    # a project the caller cannot see. Resolve the template first and gate
+    # on its existing project_id_scope so the caller cannot mutate a
+    # template they wouldn't otherwise be allowed to read.
+    template = await service.get_template(template_id)
+    if template.project_id_scope is not None:
+        await verify_project_access(template.project_id_scope, user_id, session)
+    # New-scope check: the *target* scope must also be one the caller can
+    # access. Without this gate, a caller with read access to project X
+    # could re-target a template they don't own to project Y they DO own.
     if data.project_id_scope is not None:
         await verify_project_access(data.project_id_scope, user_id, session)
     template = await service.schedule_template(template_id, data)
@@ -239,9 +300,21 @@ async def list_reports(
 @router.get("/reports/{report_id}", response_model=GeneratedReportResponse)
 async def get_report(
     report_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    session: SessionDep,
+    user_id: CurrentUserId,
     service: ReportingService = Depends(_get_service),
 ) -> GeneratedReportResponse:
-    """Get a single generated report."""
+    """Get a single generated report.
+
+    The caller must have access to the report's parent project. Reports
+    owned by another tenant return 404 (not 403) to avoid leaking the
+    existence of report UUIDs — same convention as
+    ``verify_project_access``.
+    """
+    # Resolve the report first so we know which project to gate on.
+    # ``service.get_report`` already raises 404 when the ID is unknown,
+    # which keeps "report missing" and "access denied" indistinguishable
+    # to the caller.
     report = await service.get_report(report_id)
+    await verify_project_access(report.project_id, user_id, session)
     return GeneratedReportResponse.model_validate(report)
