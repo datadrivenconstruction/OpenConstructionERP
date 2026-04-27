@@ -11,6 +11,37 @@
       "compiled": "Regel '{rule_id}' erfolgreich kompiliert und registriert",
       "deleted": "Regel '{rule_id}' gelöscht",
       "evaluation_failed": "Regel '{rule_id}' konnte nicht ausgewertet werden: {detail}"
+    },
+    "nl": {
+      "title": "Regel-Builder mit natürlicher Sprache",
+      "subtitle": "Beschreiben Sie Ihre Regel in einfachem Deutsch, Englisch oder Russisch — der Builder erzeugt gültiges DSL.",
+      "input_placeholder": "z. B. alle Wände müssen eine Brandschutzklasse haben",
+      "generate": "Erzeugen",
+      "save_as_rule": "Als Compliance-Regel speichern",
+      "preview_title": "DSL-Vorschau",
+      "no_dsl_yet": "Geben Sie einen Satz ein und drücken Sie auf Erzeugen.",
+      "patterns_title": "Unterstützte Muster",
+      "method_pattern": "Muster erkannt",
+      "method_ai": "KI-Fallback",
+      "method_fallback": "Keine Übereinstimmung",
+      "use_ai": "KI-Fallback verwenden",
+      "ai_unavailable": "KI-Fallback übersprungen — kein API-Key konfiguriert.",
+      "input_empty": "Eingabe ist leer.",
+      "input_too_long": "Eingabe überschreitet 2000 Zeichen.",
+      "no_match": "Kein Muster stimmt überein. Versuchen Sie eine der rechts gezeigten Formulierungen.",
+      "low_confidence": "Niedrige Konfidenz — prüfen Sie das erzeugte DSL vor dem Speichern.",
+      "saved": "Regel erfolgreich gespeichert.",
+      "save_failed": "Regel konnte nicht gespeichert werden: {detail}",
+      "pattern": {
+        "must_have": "Alle <Entität> müssen <Feld> haben",
+        "must_not_have": "Keine <Entität> darf <Feld> = <Wert> haben",
+        "value_equals": "Jede <Entität> muss <Feld> = <Wert> haben",
+        "value_greater_than": "Jede <Entität> muss <Feld> > <N> haben",
+        "value_less_than": "Jede <Entität> muss <Feld> < <N> haben",
+        "value_at_least": "Jede <Entität> muss <Feld> >= <N> haben",
+        "count_at_least": "Es müssen mindestens <N> <Entität> vorhanden sein",
+        "count_zero": "Keine <Entität> erlaubt"
+      }
     }
   }
 }

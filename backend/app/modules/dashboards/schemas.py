@@ -478,3 +478,90 @@ class SnapshotDiffOut(BaseModel):
     rows_removed: int = Field(..., ge=0)
     schema_hash_match: bool = False
     is_identical: bool = False
+
+
+# ── Multi-Source Project Federation (T10 / task #193) ──────────────────────
+
+
+SchemaAlignMode = Literal["intersect", "union", "strict"]
+
+
+class FederationBuildRequest(BaseModel):
+    """Body for ``POST /v1/dashboards/federation/build``.
+
+    The federation handler converts the supplied ``snapshot_ids`` into
+    a UNION-ALL DuckDB view that carries ``__project_id`` +
+    ``__snapshot_id`` provenance columns on every row. The endpoint
+    looks up each snapshot's owning project from the registry — the
+    client only needs to supply the ids.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    snapshot_ids: list[uuid.UUID] = Field(..., min_length=1, max_length=32)
+    schema_align: SchemaAlignMode = "intersect"
+
+
+class FederationSnapshotRefOut(BaseModel):
+    """One snapshot inside a federated view's provenance index."""
+
+    snapshot_id: uuid.UUID
+    project_id: uuid.UUID
+
+
+class FederationViewOut(BaseModel):
+    """Response envelope for ``POST /federation/build``.
+
+    ``view_name`` is opaque to the client — the build endpoint does not
+    keep the view alive across requests today (DuckDB views live on
+    a per-call connection). The shape is forward-compatible with a
+    persistent-session model where ``view_name`` becomes a token.
+    """
+
+    view_name: str
+    columns: list[str] = Field(default_factory=list)
+    dtypes: dict[str, str] = Field(default_factory=dict)
+    project_count: int = Field(..., ge=0)
+    snapshot_count: int = Field(..., ge=0)
+    row_count: int = Field(..., ge=0)
+    schema_align: SchemaAlignMode
+    snapshots: list[FederationSnapshotRefOut] = Field(default_factory=list)
+
+
+class FederationAggregateRequest(BaseModel):
+    """Body for ``POST /v1/dashboards/federation/aggregate``.
+
+    ``measure`` may be ``"*"`` when ``agg="count"``; otherwise it must
+    name a column present in the resolved federated schema. Provenance
+    columns are appended to ``group_by`` server-side so every row in
+    the response carries ``__project_id`` and ``__snapshot_id``.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    snapshot_ids: list[uuid.UUID] = Field(..., min_length=1, max_length=32)
+    schema_align: SchemaAlignMode = "intersect"
+    group_by: list[str] = Field(default_factory=list, max_length=8)
+    measure: str = Field(..., min_length=1, max_length=200)
+    agg: Literal["count", "sum", "avg", "min", "max"] = "count"
+    limit: int = Field(default=1000, ge=1, le=100_000)
+
+
+class FederationAggregateRowOut(BaseModel):
+    """One aggregated row from the federation. Free-form values because
+    the columns depend on the request's ``group_by``."""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class FederationAggregateOut(BaseModel):
+    """Response for ``POST /federation/aggregate``."""
+
+    columns: list[str] = Field(default_factory=list)
+    rows: list[dict[str, Any]] = Field(default_factory=list)
+    project_count: int = Field(..., ge=0)
+    snapshot_count: int = Field(..., ge=0)
+    schema_align: SchemaAlignMode
+    measure: str
+    agg: str
+    group_by: list[str] = Field(default_factory=list)

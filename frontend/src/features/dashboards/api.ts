@@ -708,3 +708,110 @@ export async function diffSnapshots(
     `/v1/dashboards/snapshots/diff?${params.toString()}`,
   );
 }
+
+/* ── Multi-Source Project Federation (T10 / task #193) ───────────────────── */
+
+export type FederationSchemaAlign = 'intersect' | 'union' | 'strict';
+
+export type FederationAggKind = 'count' | 'sum' | 'avg' | 'min' | 'max';
+
+export interface FederationSnapshotRef {
+  snapshot_id: string;
+  project_id: string;
+}
+
+export interface FederationView {
+  view_name: string;
+  columns: string[];
+  dtypes: Record<string, string>;
+  project_count: number;
+  snapshot_count: number;
+  row_count: number;
+  schema_align: FederationSchemaAlign;
+  snapshots: FederationSnapshotRef[];
+}
+
+export interface BuildFederationInput {
+  snapshotIds: string[];
+  schemaAlign?: FederationSchemaAlign;
+}
+
+export interface FederatedAggregateRow {
+  /** Provenance — always present. */
+  __project_id: string;
+  __snapshot_id: string;
+  /** Numeric measure value (count / sum / avg / min / max). */
+  measure_value: number | null;
+  /** Group-by values stamped onto each row by the server. */
+  [groupCol: string]: string | number | null;
+}
+
+export interface FederationAggregateResponse {
+  columns: string[];
+  rows: FederatedAggregateRow[];
+  project_count: number;
+  snapshot_count: number;
+  schema_align: FederationSchemaAlign;
+  measure: string;
+  agg: FederationAggKind;
+  group_by: string[];
+}
+
+export interface FederatedAggregateInput {
+  snapshotIds: string[];
+  schemaAlign?: FederationSchemaAlign;
+  groupBy: string[];
+  measure: string;
+  agg?: FederationAggKind;
+  limit?: number;
+}
+
+/**
+ * Construct a federated UNION-ALL view across multiple snapshots.
+ *
+ * Server-side this opens a temporary DuckDB connection, registers a
+ * UNION ALL view across the snapshots' parquet files (with provenance
+ * columns appended), and returns the reconciled column list. The view
+ * does not survive the request — clients call `federatedAggregate`
+ * to issue rollups in a single round trip.
+ */
+export async function buildFederation(
+  input: BuildFederationInput,
+): Promise<FederationView> {
+  return apiPost<FederationView, { snapshot_ids: string[]; schema_align: FederationSchemaAlign }>(
+    `/v1/dashboards/federation/build`,
+    {
+      snapshot_ids: input.snapshotIds,
+      schema_align: input.schemaAlign ?? 'intersect',
+    },
+  );
+}
+
+/**
+ * Run a high-level rollup (count / sum / avg / min / max) over a
+ * federated set of snapshots. Provenance columns (`__project_id`,
+ * `__snapshot_id`) are always part of the group-by, so every row in
+ * the response can be drilled back to its source snapshot.
+ */
+export async function federatedAggregate(
+  input: FederatedAggregateInput,
+): Promise<FederationAggregateResponse> {
+  return apiPost<
+    FederationAggregateResponse,
+    {
+      snapshot_ids: string[];
+      schema_align: FederationSchemaAlign;
+      group_by: string[];
+      measure: string;
+      agg: FederationAggKind;
+      limit: number;
+    }
+  >(`/v1/dashboards/federation/aggregate`, {
+    snapshot_ids: input.snapshotIds,
+    schema_align: input.schemaAlign ?? 'intersect',
+    group_by: input.groupBy,
+    measure: input.measure,
+    agg: input.agg ?? 'count',
+    limit: input.limit ?? 1000,
+  });
+}

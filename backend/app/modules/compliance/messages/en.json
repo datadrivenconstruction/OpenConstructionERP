@@ -11,6 +11,37 @@
       "compiled": "Rule '{rule_id}' compiled and registered successfully",
       "deleted": "Rule '{rule_id}' deleted",
       "evaluation_failed": "Rule '{rule_id}' could not be evaluated: {detail}"
+    },
+    "nl": {
+      "title": "Natural Language Rule Builder",
+      "subtitle": "Describe your rule in plain English, German or Russian — the builder generates valid DSL.",
+      "input_placeholder": "e.g. all walls must have a fire-rating property",
+      "generate": "Generate",
+      "save_as_rule": "Save as Compliance Rule",
+      "preview_title": "DSL Preview",
+      "no_dsl_yet": "Type a sentence and press Generate to see the DSL.",
+      "patterns_title": "Supported patterns",
+      "method_pattern": "Pattern matched",
+      "method_ai": "AI fallback",
+      "method_fallback": "No match",
+      "use_ai": "Use AI fallback",
+      "ai_unavailable": "AI fallback skipped — no API key configured.",
+      "input_empty": "Input is empty.",
+      "input_too_long": "Input exceeds 2000 characters.",
+      "no_match": "No pattern matched the input. Try one of the supported phrasings on the right.",
+      "low_confidence": "Low confidence — review the generated DSL carefully before saving.",
+      "saved": "Rule saved successfully.",
+      "save_failed": "Could not save rule: {detail}",
+      "pattern": {
+        "must_have": "All <entity> must have <field>",
+        "must_not_have": "No <entity> can have <field> = <value>",
+        "value_equals": "Every <entity> must have <field> = <value>",
+        "value_greater_than": "Every <entity> must have <field> > <N>",
+        "value_less_than": "Every <entity> must have <field> < <N>",
+        "value_at_least": "Every <entity> must have <field> >= <N>",
+        "count_at_least": "There must be at least <N> <entity>",
+        "count_zero": "No <entity> allowed"
+      }
     }
   }
 }
