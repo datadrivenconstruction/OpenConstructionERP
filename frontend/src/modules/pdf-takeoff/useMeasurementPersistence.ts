@@ -250,12 +250,12 @@ export function useMeasurementPersistence({
     };
   }, [fileName, measurements, scale]);
 
-  // Auto-sync to server with debounce (3s) — only measurement types, not annotations
+  // Auto-sync to server with debounce (3s). Both measurement and annotation
+  // types persist now (v2.6.7) — backend schema accepts the full set.
   useEffect(() => {
     if (!fileName || !projectId) return;
-    const measurementTypes = ['distance', 'polyline', 'area', 'volume', 'count'];
-    const serverMeasurements = measurements.filter((m) => measurementTypes.includes(m.type));
-    if (serverMeasurements.length === 0) return;
+    if (measurements.length === 0) return;
+    const serverMeasurements = measurements;
 
     if (serverSyncRef.current) clearTimeout(serverSyncRef.current);
     serverSyncRef.current = setTimeout(async () => {

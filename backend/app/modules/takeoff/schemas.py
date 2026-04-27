@@ -110,8 +110,11 @@ class TakeoffMeasurementCreate(BaseModel):
         ...,
         min_length=1,
         max_length=50,
-        pattern=r"^(distance|area|count|polyline|volume)$",
-        description="Measurement type: distance, area, count, polyline, volume",
+        pattern=r"^(distance|area|count|polyline|volume|cloud|arrow|text|rectangle|highlight)$",
+        description=(
+            "Measurement or annotation type. Measurement: distance, area, count, polyline, volume. "
+            "Annotation: cloud, arrow, text, rectangle, highlight."
+        ),
     )
     group_name: str = Field(default="General", max_length=100)
     group_color: str = Field(default="#3B82F6", max_length=20)

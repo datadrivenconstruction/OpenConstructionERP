@@ -5,6 +5,14 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.7] — 2026-04-27
+
+Annotation persistence — the last gap in PDF Takeoff durability.
+
+### Fixed — Takeoff
+- **Annotations now persist to the backend.** Cloud / arrow / text / rectangle / highlight types previously only saved to `localStorage`, so annotations vanished on a fresh device or browser. Schema regex extended (`takeoff/schemas.py`) and the frontend sync hook (`useMeasurementPersistence.ts`) no longer filters them out, so the existing 3-second debounce now covers the full set.
+- Backwards compatible: existing measurements rows untouched; clients running v2.6.6 continue to work (annotations just stay localStorage-only on those clients).
+
 ## [2.6.6] — 2026-04-27
 
 UX papercuts patch — Takeoff Tier 2 follow-up + Header surface fixes.
