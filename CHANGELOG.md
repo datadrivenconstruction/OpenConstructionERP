@@ -5,6 +5,29 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.11] — 2026-04-27
+
+### Fixed — Issue #96 (CLI / installer)
+- **`openconstructionerp upgrade`** new command that pip-installs into the *same* Python env it's running in (uses `sys.executable -m pip`). The Windows installer creates a private venv at `%LOCALAPPDATA%\OpenConstructionERP\venv`; running `pip install --upgrade openconstructionerp` from any other shell upgraded the user's global Python instead, leaving the launcher's venv pinned to the old wheel — so the startup banner kept reporting the old version even though pip claimed success. The new command always lands in the right env. `version` now also prints `Site-packages: …` so users can see which interpreter the launcher is actually using.
+
+### Fixed — BOQ editor
+- **VAT row no longer hardcoded.** Removed the German-19% fallback in `boqHelpers.ts`. The Net→VAT→Gross footer is now driven from the `tax`-category row in Markups & Overheads (single source of truth, matches the backend PDF/Excel exporters). When no tax markup exists, the VAT and Gross Total rows are hidden; adding any tax markup re-introduces them with the correct rate.
+- **Volume column edit lag fixed.** `updateMutation.onMutate` now writes the new value to the React Query cache immediately instead of only clearing badges, so a quantity edit no longer flickers through the old value for ~5 s while the server round-trips.
+- **BIM picker provenance preserved.** Backend `update_position` was unconditionally stripping `metadata.bim_qty_source` / `pdf_measurement_source` on any quantity change — including the same request that the BIM Quantity Picker used to *set* them. Now the strip pass skips link keys that the caller explicitly included in incoming metadata; pure manual quantity edits still drop the badge as before. Added `tests/integration/test_boq_bim_qty_source_roundtrip.py` (2 cases) covering both branches.
+- **BIM / PDF source icons in the Quantity cell.** `QuantityCellRenderer` now renders a small Cuboid icon for BIM-sourced cells and a Ruler icon for PDF-takeoff-sourced cells, so provenance is scannable without hovering for the tooltip.
+- **Custom Columns accept any script.** `CustomColumnsDialog.normalizeColumnName` was stripping every non-ASCII character (`/[^a-z0-9_]/g`), which silently nuked Cyrillic / CJK / Arabic input and surfaced as "Column name is invalid". Now uses Unicode property escapes (`\p{L}\p{N}`), mirroring Python's `str.isidentifier()` so frontend and backend agree.
+
+### Fixed — Country-specific defaults
+- **Removed German / Euro fallbacks** flagged by the country-hardcode audit:
+  - `getLocaleForRegion()` now falls back to the user's UI locale (resolved via `i18next`) instead of `'de-DE'`.
+  - `getCurrencySymbol()` and `getCurrencyCode()` return empty strings when no currency is set (was `'€'` / `'EUR'`).
+  - `createFormatter()` accepts an optional locale and falls back to `getIntlLocale()` instead of `'de-DE'`.
+- The static `VAT_RATES` map is renamed to `SUGGESTED_VAT_RATES` and downgraded to a *suggestion* — used only to seed the placeholder in Project Settings; no longer applied as a render-time default.
+
+### Tests
+- 196 / 196 BOQ frontend tests, 1 132 / 1 132 full frontend sweep — all green.
+- BOQ backend integration suite (44 tests) — all green, including the new `bim_qty_source` roundtrip cases.
+
 ## [2.6.10] — 2026-04-27
 
 ### Security

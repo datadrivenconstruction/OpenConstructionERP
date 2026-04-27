@@ -199,7 +199,11 @@ function normalizeColumnName(input: string): string {
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '_')
-    .replace(/[^a-z0-9_]/g, '');
+    // Strip only characters that aren't Unicode letters/digits or
+    // underscore. \p{L}=any letter (Cyrillic, CJK, Arabic, etc.),
+    // \p{N}=any digit. Mirrors Python's str.isidentifier() so the
+    // frontend and backend agree on what's a valid key.
+    .replace(/[^\p{L}\p{N}_]/gu, '');
 }
 
 /** Count how many positions have a non-empty value for a given column name. */
@@ -343,12 +347,12 @@ export function CustomColumnsDialog({
     if (!trimmed) return;
 
     const normalizedName = normalizeColumnName(trimmed);
-    if (!normalizedName || /^\d/.test(normalizedName)) {
+    if (!normalizedName || /^\p{N}/u.test(normalizedName)) {
       addToast({
         type: 'error',
         title: t('boq.column_name_invalid', { defaultValue: 'Column name is invalid' }),
         message: t('boq.column_name_invalid_hint', {
-          defaultValue: 'Use letters, numbers and spaces. Must start with a letter.',
+          defaultValue: 'Use letters (any script), numbers and spaces. Must start with a letter.',
         }),
       });
       return;

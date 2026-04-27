@@ -82,8 +82,12 @@ export type EditableField = (typeof EDITABLE_FIELDS)[number];
 
 /* ── VAT Rates ───────────────────────────────────────────────────────── */
 
-/** VAT rates by region — used when markups API is unavailable. */
-const VAT_RATES: Record<string, number> = {
+/**
+ * Suggested VAT rates per region — used ONLY as seed values when the user
+ * clicks "Apply Default Markups" in the Markups & Overheads panel. Never
+ * applied automatically; never used as a render-time fallback.
+ */
+export const SUGGESTED_VAT_RATES: Record<string, number> = {
   'DACH (Germany, Austria, Switzerland)': 0.19,
   'United Kingdom': 0.20,
   'France': 0.20,
@@ -96,7 +100,7 @@ const VAT_RATES: Record<string, number> = {
   'Russia': 0.20,
   'United States': 0.0,
   'Canada': 0.05,
-  'Brazil': 0.0, // PIS/COFINS varies
+  'Brazil': 0.0,
   'China': 0.09,
   'Japan': 0.10,
   'India': 0.18,
@@ -106,9 +110,27 @@ const VAT_RATES: Record<string, number> = {
   'New Zealand': 0.15,
 };
 
+/**
+ * Resolve VAT rate from the BOQ's `tax`-category markup row — single source
+ * of truth, matches backend PDF/Excel export behavior. Returns 0 when no
+ * tax markup exists; the editor footer renders "No VAT" in that case.
+ */
+export function getVatRateFromMarkups(markups: Markup[]): number {
+  const tax = markups.find(
+    (m) => m.category === 'tax' && m.is_active !== false && m.markup_type === 'percentage',
+  );
+  if (!tax) return 0;
+  return tax.percentage / 100;
+}
+
+/**
+ * Suggestion-only lookup for the Project Settings placeholder. Returns 0
+ * when the region is missing or unknown — never falls back to a country
+ * default. Do NOT use as a render-time VAT rate; use {@link getVatRateFromMarkups}.
+ */
 export function getVatRate(region?: string): number {
-  if (!region) return 0.19;
-  return VAT_RATES[region] ?? 0.19;
+  if (!region) return 0;
+  return SUGGESTED_VAT_RATES[region] ?? 0;
 }
 
 /* ── Region Locales ──────────────────────────────────────────────────── */
@@ -138,8 +160,13 @@ const REGION_LOCALES: Record<string, string> = {
 };
 
 export function getLocaleForRegion(region?: string): string {
-  if (!region) return 'de-DE';
-  return REGION_LOCALES[region] ?? 'en-US';
+  if (region) {
+    const mapped = REGION_LOCALES[region];
+    if (mapped) return mapped;
+  }
+  // No project region (or unknown) — fall back to the user's UI language
+  // resolved from i18next. Never hard-default to a country-specific locale.
+  return getIntlLocale();
 }
 
 /* ── Currency Symbols ────────────────────────────────────────────────── */
@@ -161,7 +188,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
  *  - "GBP" → "£"
  */
 export function getCurrencySymbol(currencyStr?: string): string {
-  if (!currencyStr) return '\u20ac';
+  if (!currencyStr) return '';
   // Try "(symbol)" pattern first: "CAD (C$) — Canadian Dollar"
   const match = currencyStr.match(/\((.+?)\)/);
   if (match?.[1]) return match[1];
@@ -180,18 +207,17 @@ export function getCurrencySymbol(currencyStr?: string): string {
  *  - "GBP" → "GBP"
  */
 export function getCurrencyCode(currencyStr?: string): string {
-  if (!currencyStr) return 'EUR';
+  if (!currencyStr) return '';
   const code = currencyStr.trim().substring(0, 3).toUpperCase();
-  // Validate it looks like a currency code (3 uppercase letters)
   if (/^[A-Z]{3}$/.test(code)) return code;
-  return 'EUR';
+  return '';
 }
 
 /* ── Number Formatting ───────────────────────────────────────────────── */
 
 /** Locale-aware number formatter for currency-like values. */
-export function createFormatter(locale = 'de-DE'): Intl.NumberFormat {
-  return new Intl.NumberFormat(locale, {
+export function createFormatter(locale?: string): Intl.NumberFormat {
+  return new Intl.NumberFormat(locale ?? getIntlLocale(), {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });

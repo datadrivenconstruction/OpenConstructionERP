@@ -2129,6 +2129,21 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
     );
   }
 
+  // Source badge: BIM-sourced cells get a small Cuboid icon, PDF-sourced
+  // cells get a Ruler icon — makes provenance scannable at a glance.
+  if (hasBimSource || hasPdfSource) {
+    const Icon = hasBimSource ? Cuboid : Ruler;
+    return (
+      <span
+        className={`flex items-center justify-end gap-1 w-full h-full text-xs tabular-nums leading-[32px] ${colorClass}`}
+        title={titleText}
+      >
+        <Icon className="w-3 h-3 opacity-80" aria-hidden="true" />
+        <span>{formatted}</span>
+      </span>
+    );
+  }
+
   return (
     <span
       className={`block text-right text-xs tabular-nums w-full h-full leading-[32px] ${colorClass}`}

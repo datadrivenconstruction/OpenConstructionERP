@@ -127,9 +127,9 @@ describe('evaluateFormula', () => {
 /* ── getCurrencySymbol ───────────────────────────────────────────────────── */
 
 describe('getCurrencySymbol', () => {
-  it('defaults to € when no argument provided', () => {
-    expect(getCurrencySymbol()).toBe('€');
-    expect(getCurrencySymbol(undefined)).toBe('€');
+  it('returns empty string when no argument provided — never a country-specific default', () => {
+    expect(getCurrencySymbol()).toBe('');
+    expect(getCurrencySymbol(undefined)).toBe('');
   });
 
   it('extracts symbol from parenthesised format: "EUR (€) — Euro" → "€"', () => {
@@ -163,13 +163,13 @@ describe('getCurrencySymbol', () => {
 
 /* ── getVatRate ──────────────────────────────────────────────────────────── */
 
-describe('getVatRate', () => {
-  it('returns 0.19 (German VAT) when no region provided', () => {
-    expect(getVatRate()).toBe(0.19);
-    expect(getVatRate(undefined)).toBe(0.19);
+describe('getVatRate (suggestion lookup)', () => {
+  it('returns 0 when no region provided — never country-specific default', () => {
+    expect(getVatRate()).toBe(0);
+    expect(getVatRate(undefined)).toBe(0);
   });
 
-  it('returns DACH VAT rate (19%) for Germany region', () => {
+  it('returns DACH VAT rate (19%) when DACH region selected', () => {
     expect(getVatRate('DACH (Germany, Austria, Switzerland)')).toBe(0.19);
   });
 
@@ -185,17 +185,18 @@ describe('getVatRate', () => {
     expect(getVatRate('Australia')).toBe(0.10);
   });
 
-  it('defaults to 0.19 for unknown region', () => {
-    expect(getVatRate('Unknown Region XYZ')).toBe(0.19);
+  it('returns 0 for unknown region', () => {
+    expect(getVatRate('Unknown Region XYZ')).toBe(0);
   });
 });
 
 /* ── getLocaleForRegion ──────────────────────────────────────────────────── */
 
 describe('getLocaleForRegion', () => {
-  it('defaults to "de-DE" when no region provided', () => {
-    expect(getLocaleForRegion()).toBe('de-DE');
-    expect(getLocaleForRegion(undefined)).toBe('de-DE');
+  it('falls back to user UI locale when region is missing — never a country default', () => {
+    // i18next lang in test env is 'en' → mapped to 'en-US' by getIntlLocale.
+    expect(getLocaleForRegion()).toBe('en-US');
+    expect(getLocaleForRegion(undefined)).toBe('en-US');
   });
 
   it('returns "de-DE" for DACH region', () => {
@@ -214,7 +215,7 @@ describe('getLocaleForRegion', () => {
     expect(getLocaleForRegion('France')).toBe('fr-FR');
   });
 
-  it('returns "en-US" as fallback for unknown region', () => {
+  it('falls back to user UI locale for unknown region', () => {
     expect(getLocaleForRegion('Unknown Region XYZ')).toBe('en-US');
   });
 });

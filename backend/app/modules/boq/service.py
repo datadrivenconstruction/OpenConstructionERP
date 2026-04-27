@@ -1763,16 +1763,24 @@ class BOQService:
         # When the user hand-edits the quantity, any previously-linked BIM or PDF
         # source is no longer authoritative — the unit-column badges disappear and
         # the red validation border clears until re-validation runs.
+        #
+        # Exception: when the caller (BIM Quantity Picker, PDF takeoff "Use as
+        # quantity") explicitly includes ``bim_qty_source`` / ``pdf_measurement_source``
+        # in the incoming metadata, that key is the authoritative new link and
+        # must be preserved through the strip pass. Without this carve-out the
+        # picker's own provenance was wiped on the same request that set it.
         if triggered_by_qty:
             existing_meta = position.metadata_ if isinstance(position.metadata_, dict) else {}
             incoming_meta = fields.get("metadata_")
-            base_meta = incoming_meta if isinstance(incoming_meta, dict) else dict(existing_meta)
+            base_meta = dict(incoming_meta) if isinstance(incoming_meta, dict) else dict(existing_meta)
             stripped = False
             for link_key in ("bim_qty_source", "pdf_measurement_source"):
+                if isinstance(incoming_meta, dict) and link_key in incoming_meta:
+                    continue
                 if link_key in base_meta:
                     base_meta.pop(link_key)
                     stripped = True
-            if stripped:
+            if stripped or isinstance(incoming_meta, dict):
                 fields["metadata_"] = base_meta
             if "validation_status" not in fields:
                 fields["validation_status"] = "pending"
