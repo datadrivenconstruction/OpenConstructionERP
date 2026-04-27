@@ -80,6 +80,7 @@ def create_access_token(
     permissions = permission_registry.get_role_permissions(user.role)
     now = datetime.now(UTC)
     payload = {
+        "iss": "openconstructionerp",  # RFC 7519 issuer claim
         "sub": str(user.id),
         "email": user.email,
         "role": user.role,
@@ -97,6 +98,7 @@ def create_refresh_token(user: User, settings: Settings) -> str:
     """Create a JWT refresh token for a user."""
     now = datetime.now(UTC)
     payload = {
+        "iss": "openconstructionerp",
         "sub": str(user.id),
         "iat": now,
         "exp": now + timedelta(days=settings.jwt_refresh_expire_days),
@@ -109,6 +111,7 @@ def create_reset_token(user: User, settings: Settings) -> str:
     """Create a JWT password-reset token (15 min expiry)."""
     now = datetime.now(UTC)
     payload = {
+        "iss": "openconstructionerp",
         "sub": str(user.id),
         "email": user.email,
         "iat": now,

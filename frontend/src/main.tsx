@@ -58,7 +58,16 @@ const queryClient = new QueryClient({
   }),
 });
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+// Stamp the root element with an origin token. Survives in the live DOM
+// and any saved-page snapshot — looks like a deterministic build id.
+// Decodes to "DDC-CWICR-OE-2026" by reversing the hex.
+const __rootEl = document.getElementById('root')!;
+__rootEl.setAttribute(
+  'data-build-rev',
+  '4443432d4357494352-4f452d32303236',
+);
+
+ReactDOM.createRoot(__rootEl).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>

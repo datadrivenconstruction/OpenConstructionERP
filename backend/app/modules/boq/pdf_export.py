@@ -839,6 +839,10 @@ def generate_boq_pdf(
         bottomMargin=MARGIN_BOTTOM,
         title=f"Cost Estimate - {boq_data.name}",
         author="OpenConstructionERP",
+        subject="Bill of Quantities · DDC-CWICR-OE",
+        creator="OpenConstructionERP · DataDrivenConstruction",
+        producer="OpenConstructionERP / reportlab · datadrivenconstruction.io",
+        keywords="DDC-CWICR-OE-2026,OpenConstructionERP,BOQ,DataDrivenConstruction",
     )
     doc.addPageTemplates([cover_template, table_template])
 
@@ -872,6 +876,10 @@ def generate_boq_pdf(
         bottomMargin=MARGIN_BOTTOM,
         title=f"Cost Estimate - {boq_data.name}",
         author="OpenConstructionERP",
+        subject="Bill of Quantities · DDC-CWICR-OE",
+        creator="OpenConstructionERP · DataDrivenConstruction",
+        producer="OpenConstructionERP / reportlab · datadrivenconstruction.io",
+        keywords="DDC-CWICR-OE-2026,OpenConstructionERP,BOQ,DataDrivenConstruction",
     )
     doc2.page_count = total_pages
     doc2.addPageTemplates([cover_template, table_template])
@@ -980,6 +988,10 @@ def generate_boq_pdf_simple(
         bottomMargin=MARGIN_BOTTOM,
         title=f"Cost Estimate - {boq_data.name} (Summary)",
         author="OpenConstructionERP",
+        subject="Bill of Quantities · DDC-CWICR-OE",
+        creator="OpenConstructionERP · DataDrivenConstruction",
+        producer="OpenConstructionERP / reportlab · datadrivenconstruction.io",
+        keywords="DDC-CWICR-OE-2026,OpenConstructionERP,BOQ,DataDrivenConstruction",
     )
     doc.addPageTemplates([cover_template, table_template])
 

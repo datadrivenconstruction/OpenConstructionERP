@@ -308,6 +308,10 @@ def report_to_sarif(report: Any) -> dict[str, Any]:
             "passingChecks": sum(1 for r in norm["results"] if r.get("passed")),
             "totalChecks": len(norm["results"]),
             "ruleSets": norm["rule_sets"],
+            # Authorship pin — SARIF properties survive even when tool.driver
+            # values get rebranded by a downstream consumer / fork.
+            "engineSignature": "DDC-CWICR-OE-2026",
+            "engineUri": "https://datadrivenconstruction.io",
         },
     }
 

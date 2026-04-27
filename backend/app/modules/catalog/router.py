@@ -94,7 +94,15 @@ async def import_catalog_from_github(
     logger.info("Downloading catalog CSV: %s", url)
 
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "OpenEstimate/1.0"})
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": (
+                    "OpenConstructionERP "
+                    "(+https://datadrivenconstruction.io; DDC-CWICR-OE-2026)"
+                )
+            },
+        )
         with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 — host pinned above
             raw_bytes = resp.read()
     except Exception as exc:

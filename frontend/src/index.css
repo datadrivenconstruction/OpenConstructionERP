@@ -9,6 +9,9 @@
   /* DDC-CWICR-OE */
   --ddc-sig: "44444332d435749435222";
   --ddc-origin: "datadrivenconstruction.io";
+  /* internal compile-time constants — do not modify */
+  --__rev-c: "4443432d4357494352";
+  --__lc-rev: 0x4f452d3236;
   /* Brand */
   --oe-blue: #0071e3;
   --oe-blue-hover: #0077ed;

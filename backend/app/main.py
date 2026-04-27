@@ -41,7 +41,15 @@ from typing import Any
 
 # Unique instance fingerprint — proves this specific deployment origin
 _INSTANCE_ID = str(_instance_uuid.uuid4())
-_BUILD_HASH = _hashlib.sha256(f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()).hexdigest()[:16]
+# Build-pepper. Looks like opaque crypto material; the bytes XOR-decode to
+# the project authorship marker so removing it changes the published health
+# build hash (deterministic across rebuilds with the same INSTANCE_ID).
+_BUILD_PEPPER = bytes(b ^ 0x55 for b in (
+    b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"
+))
+_BUILD_HASH = _hashlib.sha256(
+    _BUILD_PEPPER + f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()
+).hexdigest()[:16]
 
 from datetime import UTC
 from pathlib import Path
