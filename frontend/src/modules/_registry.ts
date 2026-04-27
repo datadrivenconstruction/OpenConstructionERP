@@ -54,6 +54,7 @@ import { manifest as plKnrExchange } from './pl-knr-exchange/manifest';
 import { manifest as krBoqExchange } from './kr-boq-exchange/manifest';
 import { manifest as ddcIfcConverter } from './ddc-ifc-converter/manifest';
 import { manifest as ddcRvtConverter } from './ddc-rvt-converter/manifest';
+import { manifest as ledDisplay } from './led-display/manifest';
 
 /* ── Registry ──────────────────────────────────────────────────────── */
 
@@ -92,6 +93,7 @@ export const MODULE_REGISTRY: ModuleManifest[] = [
   krBoqExchange,
   ddcIfcConverter,
   ddcRvtConverter,
+  ledDisplay,
 ];
 
 /* ── Helper functions ──────────────────────────────────────────────── */
