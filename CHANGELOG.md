@@ -5,6 +5,11 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.9] — 2026-04-27
+
+### Fixed — Takeoff
+- **Suppress "0 m²" / "0 m" labels for degenerate measurements.** `formatMeasurement(value, unit)` now returns the empty string when `value < 0.01`, so half-finished polygons and pre-calibration shapes no longer litter the side panel and on-canvas labels with misleading zero readouts.
+
 ## [2.6.8] — 2026-04-27
 
 ### Fixed — Takeoff

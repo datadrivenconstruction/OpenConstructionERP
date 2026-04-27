@@ -102,8 +102,9 @@ describe('scale-helpers', () => {
       expect(formatMeasurement(1234.5, 'm')).toBe('1234.5 m');
     });
 
-    it('should format zero', () => {
-      expect(formatMeasurement(0, 'm')).toBe('0 m');
+    it('should suppress zero (degenerate measurements render as empty)', () => {
+      expect(formatMeasurement(0, 'm')).toBe('');
+      expect(formatMeasurement(0.005, 'm²')).toBe('');
     });
   });
 

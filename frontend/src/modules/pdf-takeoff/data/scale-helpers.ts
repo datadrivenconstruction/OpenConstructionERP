@@ -76,9 +76,12 @@ export function polygonPerimeterPixels(
   return perimeter;
 }
 
-/** Format a measurement value with appropriate precision */
+/** Format a measurement value with appropriate precision.
+ *  Degenerate (sub-0.01) values render as the empty string instead of
+ *  "0 m²", so half-finished polygons / annotations don't litter the
+ *  panel and on-canvas labels with misleading zero readouts. */
 export function formatMeasurement(value: number, unit: string): string {
-  if (value < 0.01) return `0 ${unit}`;
+  if (value < 0.01) return '';
   if (value < 1) return `${value.toFixed(3)} ${unit}`;
   if (value < 100) return `${value.toFixed(2)} ${unit}`;
   return `${value.toFixed(1)} ${unit}`;
