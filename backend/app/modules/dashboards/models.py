@@ -14,11 +14,13 @@ lives in SQL — entity rows are never persisted to the relational DB.
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 
 from sqlalchemy import (
     JSON,
     Boolean,
     CheckConstraint,
+    DateTime,
     ForeignKey,
     Integer,
     String,
@@ -162,11 +164,25 @@ class DashboardPreset(Base):
     shared_with_project: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False,
     )
+    # ── Sync protocol (T09) ────────────────────────────────────────────
+    # ``synced``       — preset references match the snapshot's current shape.
+    # ``stale``        — snapshot was refreshed but no sync-check has run yet.
+    # ``needs_review`` — sync-check found issues that auto-heal cannot fix.
+    sync_status: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="synced",
+    )
+    last_sync_check_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True,
+    )
 
     __table_args__ = (
         CheckConstraint(
             "kind IN ('preset', 'collection')",
             name="ck_oe_dashboards_preset_kind",
+        ),
+        CheckConstraint(
+            "sync_status IN ('synced', 'stale', 'needs_review')",
+            name="ck_oe_dashboards_preset_sync_status",
         ),
     )
 

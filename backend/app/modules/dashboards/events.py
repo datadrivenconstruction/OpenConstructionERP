@@ -26,6 +26,13 @@ SNAPSHOT_DELETED: Final = "snapshot.deleted"
 be in flight — see ``SnapshotService.delete`` for orphan handling).
 Payload: ``{snapshot_id, project_id, tenant_id}``."""
 
+SNAPSHOT_REFRESHED: Final = "snapshot.refreshed"
+"""Published when an existing snapshot's data is re-materialised from a
+fresh upload (rather than via the create-new-row path). The sync
+protocol (T09) listens for this so dashboard presets that point at the
+snapshot get marked ``sync_status='stale'`` until the user runs a
+sync-check. Payload: ``{snapshot_id, project_id, tenant_id}``."""
+
 # ── Dashboard lifecycle ─────────────────────────────────────────────────────
 
 DASHBOARD_SAVED: Final = "dashboard.saved"

@@ -37,5 +37,15 @@
   "integrity.issue.outliers_present": "Numeric outliers detected (1.5·IQR rule).",
   "integrity.issue.high_zero_pct": "More than 50% of numeric values are exactly zero.",
   "integrity.issue.low_cardinality_string": "String column with very few distinct values — consider categorising.",
-  "integrity.issue.uuid_like": "Values look like UUIDs — usually not useful for filtering."
+  "integrity.issue.uuid_like": "Values look like UUIDs — usually not useful for filtering.",
+  "navigator.diff.cross_project": "The two snapshots belong to different projects and cannot be diffed.",
+  "preset.sync.unknown": "Preset has an unknown sync issue.",
+  "preset.sync.column_rename": "A column referenced by the preset looks renamed in the refreshed snapshot.",
+  "preset.sync.dropped_column": "A column referenced by the preset is no longer present in the snapshot.",
+  "preset.sync.dropped_filter_value": "Some filter values are no longer present in the snapshot.",
+  "preset.sync.dtype_change": "A column's data type changed in the refreshed snapshot.",
+  "preset.sync.in_sync": "Preset is in sync with the current snapshot.",
+  "preset.sync.stale": "Preset is stale — run a sync check.",
+  "preset.sync.needs_review": "Preset has issues that need manual review.",
+  "preset.sync.snapshot_unknown": "Preset does not reference a snapshot — nothing to sync."
 }

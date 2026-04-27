@@ -28,6 +28,11 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import CurrentUserId, RequirePermission, RequireRole, SessionDep
+from app.modules.costs.matcher import (
+    MatchResult,
+    match_cwicr_for_position,
+    match_cwicr_items,
+)
 from app.modules.costs.schemas import (
     CostAutocompleteItem,
     CostItemCreate,
@@ -36,6 +41,8 @@ from app.modules.costs.schemas import (
     CostSearchQuery,
     CostSearchResponse,
     CostSuggestion,
+    CwicrMatchFromPositionRequest,
+    CwicrMatchRequest,
     SuggestCostsForElementRequest,
 )
 from app.modules.costs.service import CostItemService
@@ -2293,3 +2300,60 @@ async def suggest_costs_for_element_by_id(
         limit=limit,
         region=region,
     )
+
+
+# ── CWICR Matcher (T12) ───────────────────────────────────────────────────
+
+
+@router.post("/match/", response_model=list[MatchResult])
+async def match_cwicr(
+    request: CwicrMatchRequest,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> list[MatchResult]:
+    """Rank CWICR cost items for a free-form BOQ description.
+
+    The endpoint is read-only against the cost database and is therefore
+    public (matches the existing autocomplete + search endpoints). The
+    optional ``mode`` selector chooses between ``lexical`` (always
+    available), ``semantic`` (requires the ``[semantic]`` extra), and
+    ``hybrid`` (blends both, falls back to lexical when deps absent).
+    """
+    _ = user_id  # accept anonymous — matches /autocomplete + /search
+    return await match_cwicr_items(
+        session,
+        request.query,
+        unit=request.unit,
+        lang=request.lang,
+        top_k=request.top_k,
+        mode=request.mode,
+        region=request.region,
+    )
+
+
+@router.post("/match-from-position/", response_model=list[MatchResult])
+async def match_cwicr_from_position(
+    request: CwicrMatchFromPositionRequest,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> list[MatchResult]:
+    """Resolve a Position by id and run the CWICR matcher on its description.
+
+    Returns 404 if the position does not exist.  Empty list is returned
+    (200) when the position has no description — that's the BOQ editor's
+    "scroll past empty rows" UX path.
+    """
+    _ = user_id
+    try:
+        return await match_cwicr_for_position(
+            session,
+            request.position_id,
+            top_k=request.top_k,
+            mode=request.mode,
+            lang=request.lang,
+            region=request.region,
+        )
+    except LookupError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc

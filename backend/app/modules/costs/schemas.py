@@ -170,3 +170,47 @@ class SuggestCostsForElementRequest(BaseModel):
     classification: dict[str, str] | None = None
     limit: int = Field(default=5, ge=1, le=50)
     region: str | None = None
+
+
+# ── CWICR Matcher (T12) ───────────────────────────────────────────────────
+
+
+class CwicrMatchRequest(BaseModel):
+    """Request body for ``POST /costs/match``.
+
+    The matcher is intentionally permissive on input — empty / whitespace
+    queries simply produce an empty result set rather than raising 422,
+    so the BOQ editor can call it on every keystroke without guards.
+    """
+
+    query: str = Field(default="", description="BOQ position description (free text)")
+    unit: str | None = Field(
+        default=None,
+        max_length=20,
+        description="Optional unit-of-measure hint (m, m2, m3, kg, pcs, ...)",
+    )
+    lang: str | None = Field(
+        default=None,
+        max_length=10,
+        description="Optional language hint (ISO-639-1: en, de, ru, fr, ...)",
+    )
+    top_k: int = Field(
+        default=10, ge=1, le=50, description="Maximum number of matches to return"
+    )
+    mode: str = Field(
+        default="lexical",
+        description="Matcher mode: lexical | semantic | hybrid",
+    )
+    region: str | None = Field(
+        default=None, max_length=50, description="Restrict to a single region"
+    )
+
+
+class CwicrMatchFromPositionRequest(BaseModel):
+    """Request body for ``POST /costs/match-from-position``."""
+
+    position_id: UUID = Field(..., description="UUID of the BOQ Position to match against")
+    top_k: int = Field(default=10, ge=1, le=50)
+    mode: str = Field(default="lexical")
+    lang: str | None = Field(default=None, max_length=10)
+    region: str | None = Field(default=None, max_length=50)
