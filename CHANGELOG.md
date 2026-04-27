@@ -5,6 +5,11 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.14] — 2026-04-27
+
+### Fixed
+- Alembic migrations `v260b` and `v260c` no longer raise on missing project / EAC tables — they skip with a warning so `Base.metadata.create_all()` at boot can handle the schema. Was bricking every prod `alembic upgrade head` while the running service was fine.
+
 ## [2.6.13] — 2026-04-27
 
 ### Fixed

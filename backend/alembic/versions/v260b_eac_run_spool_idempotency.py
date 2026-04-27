@@ -59,11 +59,15 @@ def upgrade() -> None:
     inspector = sa.inspect(bind)
 
     if _TABLE not in inspector.get_table_names():
-        # The base v260 migration must have been run; if not, this is a
-        # broken DB and we should fail loudly.
-        raise RuntimeError(
-            f"{_TABLE} not found — run v260_eac_v2_core first"
+        # Skip when missing — Base.metadata.create_all() handles it at
+        # service boot. Raising here used to brick every future
+        # `alembic upgrade head` on prod even though the service worked.
+        import logging
+        logging.getLogger("alembic").warning(
+            "v260b skipped: %s missing — Base.metadata.create_all() handles it at boot",
+            _TABLE,
         )
+        return
 
     if not _has_column(inspector, _TABLE, _SPOOL_COL):
         op.add_column(

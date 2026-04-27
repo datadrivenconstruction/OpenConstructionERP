@@ -47,10 +47,16 @@ def upgrade() -> None:
     inspector = sa.inspect(bind)
 
     if _TABLE not in inspector.get_table_names():
-        # Project table missing — base migration must run first. Failing
-        # loudly here is preferable to silently skipping; an operator who
-        # sees this knows their DB is in a broken state.
-        raise RuntimeError(f"{_TABLE} not found — run base project migration first")
+        # Skip silently when the project table doesn't exist on this DB
+        # (e.g. fresh service that creates tables via Base.metadata at
+        # boot, not via alembic). Raising here would brick every future
+        # `alembic upgrade head` even though the running service is fine.
+        import logging
+        logging.getLogger("alembic").warning(
+            "v260c skipped: %s missing — Base.metadata.create_all() handles it at boot",
+            _TABLE,
+        )
+        return
 
     if not _has_column(inspector, _TABLE, _FX_COL):
         op.add_column(
