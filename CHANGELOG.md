@@ -5,6 +5,18 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.6] — 2026-04-27
+
+UX papercuts patch — Takeoff Tier 2 follow-up + Header surface fixes.
+
+### Fixed — Takeoff
+- **Active-tool hint banner** above the canvas — every measure / annotation tool now shows a one-line instruction (e.g. "Click on each item to count" + "Esc: switch tool · Del: undo last"). Replaces the silent state where users could not tell what the tool expected.
+- **Annotation colour editing in the Notes panel** — small swatch next to each annotation row, native `<input type="color">` opens the OS palette so users can recolour after creation without re-drawing.
+- **DWG Layers tab counter** now reflects the *visible* layer count instead of the static total, so toggling layers updates the badge live.
+
+### Fixed — Header
+- "Report Issue" button surfaced directly in the top header (was hidden behind a `…` More popover). The mailto fallback stays inside the popover.
+
 ## [2.6.5] — 2026-04-27
 
 Hotfix bundle — security findings + deferred Auth/IDOR slice + Takeoff UX papercuts.

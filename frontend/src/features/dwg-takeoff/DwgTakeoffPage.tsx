@@ -3116,7 +3116,7 @@ export function DwgTakeoffPage() {
             <div className="flex border-b border-border">
               {(
                 [
-                  { id: 'layers' as const, icon: Layers, labelKey: 'dwg_takeoff.tab_layers_short', fallback: 'Layers', titleKey: 'dwg_takeoff.layers', titleFallback: 'Layers', count: layers.length },
+                  { id: 'layers' as const, icon: Layers, labelKey: 'dwg_takeoff.tab_layers_short', fallback: 'Layers', titleKey: 'dwg_takeoff.layers', titleFallback: 'Layers', count: visibleLayers.size > 0 ? visibleLayers.size : layers.length },
                   { id: 'annotations' as const, icon: MessageSquare, labelKey: 'dwg_takeoff.tab_annotations_short', fallback: 'Notes', titleKey: 'dwg_takeoff.annotations', titleFallback: 'Annotations', count: annotations.length },
                   { id: 'properties' as const, icon: Info, labelKey: 'dwg_takeoff.tab_properties_short', fallback: 'Props', titleKey: 'dwg_takeoff.properties', titleFallback: 'Properties', count: 0 },
                   { id: 'scale' as const, icon: Ruler, labelKey: 'dwg_takeoff.tab_scale_short', fallback: 'Scale', titleKey: 'dwg_takeoff.tab_scale', titleFallback: 'Drawing scale', count: 0 },

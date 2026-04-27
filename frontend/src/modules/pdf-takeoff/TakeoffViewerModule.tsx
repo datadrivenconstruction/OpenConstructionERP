@@ -2891,6 +2891,37 @@ export default function TakeoffViewerModule({
                         : t('takeoff_viewer.scale_click_second', { defaultValue: 'Click second point' }))}
                 </div>
               )}
+              {/* Active-tool hint banner — shows what the current tool expects.
+                  Critical for Count/Polyline/Area where users were unsure how
+                  to terminate a session (Esc) and for Calibrate workflow. The
+                  calibration-specific hint above already covers settingScale,
+                  so this branch only fires for measure/annotation tools. */}
+              {!settingScale && activeTool !== 'select' && (
+                <div
+                  className="absolute top-2 left-1/2 -translate-x-1/2 bg-oe-blue/90 text-white px-3 py-1 rounded-md text-[11px] font-medium shadow-lg pointer-events-none flex items-center gap-2"
+                  data-testid="active-tool-hint"
+                >
+                  <span>
+                    {activeTool === 'count' && t('takeoff_viewer.hint_count', { defaultValue: 'Click on each item to count.' })}
+                    {activeTool === 'distance' && t('takeoff_viewer.hint_distance', { defaultValue: 'Click two points for a distance.' })}
+                    {activeTool === 'polyline' && t('takeoff_viewer.hint_polyline', { defaultValue: 'Click points along the line.' })}
+                    {activeTool === 'area' && t('takeoff_viewer.hint_area', { defaultValue: 'Click polygon vertices.' })}
+                    {activeTool === 'volume' && t('takeoff_viewer.hint_volume', { defaultValue: 'Click area outline.' })}
+                    {activeTool === 'cloud' && t('takeoff_viewer.hint_cloud', { defaultValue: 'Click cloud outline points.' })}
+                    {activeTool === 'arrow' && t('takeoff_viewer.hint_arrow', { defaultValue: 'Click arrow start, then end.' })}
+                    {activeTool === 'rectangle' && t('takeoff_viewer.hint_rectangle', { defaultValue: 'Click two corners.' })}
+                    {activeTool === 'highlight' && t('takeoff_viewer.hint_highlight', { defaultValue: 'Drag to highlight a region.' })}
+                    {activeTool === 'text' && t('takeoff_viewer.hint_text', { defaultValue: 'Click to place a text pin.' })}
+                  </span>
+                  {(activeTool === 'count' || activeTool === 'polyline' || activeTool === 'area' || activeTool === 'cloud') && (
+                    <span className="opacity-80 border-l border-white/30 pl-2">
+                      {activeTool === 'count'
+                        ? t('takeoff_viewer.hint_esc_to_finish', { defaultValue: 'Esc: switch tool · Del: undo last' })
+                        : t('takeoff_viewer.hint_dblclick_close', { defaultValue: 'Double-click: close shape · Esc: cancel' })}
+                    </span>
+                  )}
+                </div>
+              )}
               {/* Inline text input overlay for text annotation tool */}
               {showTextInput && (
                 <div
@@ -3764,6 +3795,22 @@ export default function TakeoffViewerModule({
                                     )}
                                     <span className="text-2xs text-content-tertiary capitalize truncate shrink">{m.type}</span>
                                   </div>
+                                  {/* Color picker — change annotation colour
+                                      after creation. Native <input type="color">
+                                      gives a free palette without a custom UI;
+                                      uses the swatch as both the trigger and
+                                      the live preview. */}
+                                  <input
+                                    type="color"
+                                    value={m.color || '#EF4444'}
+                                    onChange={(e) => {
+                                      const newColor = e.target.value;
+                                      setMeasurements((prev) => prev.map((x) => (x.id === m.id ? { ...x, color: newColor } : x)));
+                                    }}
+                                    className="opacity-60 group-hover/item:opacity-100 transition-opacity h-4 w-4 rounded-full border border-border cursor-pointer shrink-0 p-0"
+                                    aria-label={t('takeoff_viewer.change_annotation_color', { defaultValue: 'Change annotation color' })}
+                                    title={t('takeoff_viewer.change_annotation_color', { defaultValue: 'Change color' })}
+                                  />
                                   <button
                                     onClick={() => deleteMeasurement(m.id)}
                                     className="opacity-50 group-hover/item:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"

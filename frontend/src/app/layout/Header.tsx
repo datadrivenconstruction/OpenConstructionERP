@@ -144,9 +144,40 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {/* Notification bell */}
         <NotificationBell />
 
-        {/* Issue tools — hidden by default behind a "More" details popover so
-             dev-style buttons (Report Issue / Email Issues) don't clutter
-             the production header chrome. */}
+        {/* Direct "Report Issue" button — surfaced at the top level so users
+             don't have to discover the More menu. The mailto fallback stays
+             inside the More popover below. */}
+        <button
+          type="button"
+          onClick={() => {
+            const blob = exportErrorReport();
+            const blobUrl = URL.createObjectURL(blob);
+            const dl = document.createElement('a');
+            dl.href = blobUrl;
+            dl.download = `openconstructionerp-report-${new Date().toISOString().slice(0, 10)}.json`;
+            dl.click();
+            URL.revokeObjectURL(blobUrl);
+            const params = new URLSearchParams({
+              report: 'true',
+              app_version: APP_VERSION,
+              platform: navigator.userAgent.includes('Win') ? 'Windows' : navigator.userAgent.includes('Mac') ? 'macOS' : 'Linux',
+            });
+            window.open(`https://openconstructionerp.com/contact.html?${params}`, '_blank');
+          }}
+          className={clsx(
+            'hidden sm:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
+            'text-xs font-medium',
+            'text-content-tertiary transition-colors',
+            'hover:bg-surface-secondary hover:text-content-secondary',
+          )}
+          title={t('feedback.report_issue', { defaultValue: 'Report Issue' })}
+          aria-label={t('feedback.report_issue', { defaultValue: 'Report Issue' })}
+        >
+          <Bug size={14} />
+          <span className="hidden md:inline">{t('feedback.report_issue', { defaultValue: 'Report Issue' })}</span>
+        </button>
+
+        {/* More popover — keeps the email fallback discoverable but uncluttered. */}
         <details className="relative hidden sm:block group">
           <summary
             className={clsx(
