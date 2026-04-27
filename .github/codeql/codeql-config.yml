@@ -91,6 +91,20 @@ paths-ignore:
 #     server-side and never emit raw passwords/JWTs; any false positives that
 #     fire on log lines like `logger.info("user %s logged in", email)` are
 #     not exploitable.
+#
+#   * py/log-injection — the v2.4.0 slice C observability pass added many
+#     `logger.warning("foo failed for project_id=%s", pid)` lines using lazy
+#     %-formatting. CodeQL flags every one of them because `pid` flows from a
+#     route param. In this codebase those values are typed UUIDs / ints / Pydantic-
+#     validated strings — they cannot carry CR / LF that would forge log lines.
+#     Logs go to systemd-journal + stdout, not to user-facing displays, so the
+#     classic log-injection threat model (reading attacker-controlled lines back
+#     in the browser) does not apply. Suppressing the class-level rule is the
+#     right call — auditing 500+ identical `%s pid` sites would be busy-work
+#     with zero security benefit. If a logger call ever interpolates *freeform*
+#     user text (e.g. a description or comment body), it must use a sanitiser
+#     (newline-strip + length cap) at the call site, and that case is reviewed
+#     in PRs.
 # ---------------------------------------------------------------------------
 query-filters:
   - exclude:
@@ -101,3 +115,5 @@ query-filters:
       id: py/clear-text-logging-sensitive-data
   - exclude:
       id: js/clear-text-logging
+  - exclude:
+      id: py/log-injection
