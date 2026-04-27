@@ -20,15 +20,24 @@ from __future__ import annotations
 
 import logging
 import uuid
-from typing import Annotated
+from typing import Annotated, Any
 
+import yaml
 from fastapi import APIRouter, HTTPException, Query, status
 
+from app.core.validation.dsl import (
+    list_supported_patterns,
+    parse_nl_to_dsl,
+)
 from app.dependencies import CurrentUserPayload, SessionDep
 from app.modules.compliance.manifest import manifest
 from app.modules.compliance.repository import ComplianceDSLRepository
 from app.modules.compliance.schemas import (
     DSLCompileRequest,
+    DSLFromNlRequest,
+    DSLFromNlResponse,
+    DSLNlPatternOut,
+    DSLNlPatternsResponse,
     DSLRuleListResponse,
     DSLRuleOut,
     DSLValidateRequest,
@@ -48,7 +57,7 @@ router = APIRouter(tags=["Compliance"])
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 
-def _user_id_from_payload(payload: dict) -> uuid.UUID:
+def _user_id_from_payload(payload: dict[str, Any]) -> uuid.UUID:
     sub = payload.get("sub") or payload.get("user_id")
     if not sub:
         raise HTTPException(
@@ -64,7 +73,7 @@ def _user_id_from_payload(payload: dict) -> uuid.UUID:
         ) from exc
 
 
-def _tenant_id_from_payload(payload: dict) -> str | None:
+def _tenant_id_from_payload(payload: dict[str, Any]) -> str | None:
     tenant = payload.get("tenant_id")
     if tenant:
         return str(tenant)
@@ -226,6 +235,116 @@ async def delete_rule(
         raise  # pragma: no cover
 
     await session.commit()
+
+
+# ── T13: Natural-language DSL builder ──────────────────────────────────────
+
+
+async def _build_ai_caller(
+    payload: dict[str, Any],  # noqa: ARG001 — placeholder for future per-tenant routing
+    session: Any,  # noqa: ANN401 — typed as AsyncSession by SessionDep, kept loose to avoid an import cycle
+) -> Any:
+    """Build a bound ``(system, prompt) -> str`` callable, or ``None``.
+
+    The returned coroutine wraps :func:`app.modules.ai.ai_client.call_ai`
+    so the DSL module never imports HTTP / settings models. If no API
+    key is configured for the caller — or any error happens during
+    resolution — we return ``None`` so :func:`parse_nl_to_dsl` skips the
+    AI path silently. **Never raises**.
+    """
+    try:
+        # Lazy imports keep the compliance module independent of AI.
+        from app.modules.ai.ai_client import (
+            call_ai,
+            resolve_provider_and_key,
+        )
+        from app.modules.ai.repository import AISettingsRepository
+    except Exception:  # pragma: no cover — defensive
+        return None
+
+    user_id_raw = payload.get("sub") or payload.get("user_id")
+    if not user_id_raw:
+        return None
+    try:
+        uid = uuid.UUID(str(user_id_raw))
+    except ValueError:
+        return None
+
+    try:
+        settings_obj = await AISettingsRepository(session).get_by_user_id(uid)
+        provider, api_key = resolve_provider_and_key(settings_obj)
+    except Exception:
+        return None
+
+    async def _caller(system: str, prompt: str) -> str:
+        text, _tokens = await call_ai(
+            provider=provider,
+            api_key=api_key,
+            system=system,
+            prompt=prompt,
+            max_tokens=1024,
+        )
+        return text
+
+    return _caller
+
+
+@router.get(
+    "/dsl/nl-patterns",
+    response_model=DSLNlPatternsResponse,
+    summary="List supported NL → DSL patterns (for the builder hints panel)",
+)
+async def list_nl_patterns(
+    payload: CurrentUserPayload,  # noqa: ARG001 — auth-only side effect
+) -> DSLNlPatternsResponse:
+    items = [DSLNlPatternOut.model_validate(p) for p in list_supported_patterns()]
+    return DSLNlPatternsResponse(items=items)
+
+
+@router.post(
+    "/dsl/from-nl",
+    response_model=DSLFromNlResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Convert plain-English / DE / RU text into a DSL definition",
+)
+async def from_nl(
+    body: DSLFromNlRequest,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+) -> DSLFromNlResponse:
+    ai_caller = None
+    if body.use_ai:
+        ai_caller = await _build_ai_caller(payload, session)
+
+    result = await parse_nl_to_dsl(
+        body.text,
+        lang=body.lang,
+        use_ai=body.use_ai,
+        ai_caller=ai_caller,
+    )
+
+    yaml_str: str | None = None
+    if result.dsl_definition:
+        try:
+            yaml_str = yaml.safe_dump(
+                result.dsl_definition,
+                sort_keys=False,
+                allow_unicode=True,
+                default_flow_style=False,
+            )
+        except yaml.YAMLError as exc:  # pragma: no cover — defensive
+            logger.warning("Failed to serialise NL builder result: %s", exc)
+            yaml_str = None
+
+    return DSLFromNlResponse(
+        dsl_definition=result.dsl_definition,
+        dsl_yaml=yaml_str,
+        confidence=result.confidence,
+        used_method=result.used_method,
+        matched_pattern=result.matched_pattern,
+        errors=list(result.errors),
+        suggestions=list(result.suggestions),
+    )
 
 
 # Re-exported so module-loader pickup is explicit.

@@ -23,6 +23,13 @@ export { SnapshotDiffView } from './SnapshotDiffView';
 export type { SnapshotDiffViewProps } from './SnapshotDiffView';
 export { SnapshotPickerInline } from './SnapshotPickerInline';
 export type { SnapshotPickerInlineProps } from './SnapshotPickerInline';
+export { FederationPanel } from './FederationPanel';
+export type {
+  FederationPanelProps,
+  FederationPanelSnapshotOption,
+} from './FederationPanel';
+export { FederatedResultsTable } from './FederatedResultsTable';
+export type { FederatedResultsTableProps } from './FederatedResultsTable';
 export {
   listSnapshots,
   getSnapshot,
@@ -44,6 +51,8 @@ export {
   getIntegrityReport,
   getSnapshotTimeline,
   diffSnapshots,
+  buildFederation,
+  federatedAggregate,
 } from './api';
 export type {
   Snapshot,
@@ -82,4 +91,12 @@ export type {
   SnapshotDiff,
   SnapshotDiffColumnChange,
   DiffSnapshotsInput,
+  FederationSchemaAlign,
+  FederationAggKind,
+  FederationSnapshotRef,
+  FederationView,
+  FederationAggregateResponse,
+  FederatedAggregateRow,
+  BuildFederationInput,
+  FederatedAggregateInput,
 } from './api';

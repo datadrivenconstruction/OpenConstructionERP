@@ -47,5 +47,10 @@
   "preset.sync.in_sync": "Voreinstellung ist mit dem aktuellen Snapshot synchron.",
   "preset.sync.stale": "Voreinstellung ist veraltet — Sync-Prüfung ausführen.",
   "preset.sync.needs_review": "Voreinstellung enthält Probleme, die manuell geprüft werden müssen.",
-  "preset.sync.snapshot_unknown": "Voreinstellung referenziert keinen Snapshot — nichts zu synchronisieren."
+  "preset.sync.snapshot_unknown": "Voreinstellung referenziert keinen Snapshot — nichts zu synchronisieren.",
+  "federation.snapshot_ids.empty": "Föderation benötigt mindestens eine Snapshot-ID.",
+  "federation.snapshot_ids.too_many": "Föderation akzeptiert maximal 32 Snapshots pro Anfrage.",
+  "federation.schema.mismatch": "Schemata der Snapshots sind unter strikter Ausrichtung nicht kompatibel.",
+  "federation.sql.rejected": "Föderiertes SQL wurde von der Sicherheits-Whitelist abgelehnt.",
+  "federation.snapshot_not_found": "Einer der Föderations-Snapshots konnte nicht geladen werden."
 }

@@ -47,5 +47,10 @@
   "preset.sync.in_sync": "Preset is in sync with the current snapshot.",
   "preset.sync.stale": "Preset is stale — run a sync check.",
   "preset.sync.needs_review": "Preset has issues that need manual review.",
-  "preset.sync.snapshot_unknown": "Preset does not reference a snapshot — nothing to sync."
+  "preset.sync.snapshot_unknown": "Preset does not reference a snapshot — nothing to sync.",
+  "federation.snapshot_ids.empty": "Federation requires at least one snapshot id.",
+  "federation.snapshot_ids.too_many": "Federation accepts at most 32 snapshots per request.",
+  "federation.schema.mismatch": "Snapshots have incompatible schemas under strict alignment.",
+  "federation.sql.rejected": "Federated SQL was rejected by the safety whitelist.",
+  "federation.snapshot_not_found": "One of the federation snapshots could not be loaded."
 }

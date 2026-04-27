@@ -63,8 +63,52 @@ class DSLRuleListResponse(BaseModel):
     items: list[DSLRuleOut]
 
 
+# ── T13: NL → DSL builder ──────────────────────────────────────────────────
+
+
+class DSLFromNlRequest(BaseModel):
+    """Body for ``POST /dsl/from-nl``.
+
+    ``text`` is the user's plain-language sentence. ``lang`` tells the
+    pattern matcher which alias table to apply before regex matching;
+    unknown values fall back to ``en``. ``use_ai`` is a hint — even when
+    true, the call degrades gracefully if no API key is configured for
+    the caller (the deterministic pattern still runs).
+    """
+
+    text: str = Field(..., min_length=1, max_length=2_000)
+    lang: str = Field("en", min_length=2, max_length=12)
+    use_ai: bool = False
+
+
+class DSLFromNlResponse(BaseModel):
+    """Result envelope for ``POST /dsl/from-nl``."""
+
+    dsl_definition: dict[str, Any] = Field(default_factory=dict)
+    dsl_yaml: str | None = None
+    confidence: float = 0.0
+    used_method: str = "fallback"
+    matched_pattern: str | None = None
+    errors: list[str] = Field(default_factory=list)
+    suggestions: list[str] = Field(default_factory=list)
+
+
+class DSLNlPatternOut(BaseModel):
+    pattern_id: str
+    name_key: str
+    confidence: float
+
+
+class DSLNlPatternsResponse(BaseModel):
+    items: list[DSLNlPatternOut]
+
+
 __all__ = [
     "DSLCompileRequest",
+    "DSLFromNlRequest",
+    "DSLFromNlResponse",
+    "DSLNlPatternOut",
+    "DSLNlPatternsResponse",
     "DSLRuleListResponse",
     "DSLRuleOut",
     "DSLValidateRequest",
