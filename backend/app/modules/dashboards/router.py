@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import (
@@ -71,6 +72,9 @@ from app.modules.dashboards.schemas import (
     SnapshotRowsOut,
     SnapshotSourceFileOut,
     SnapshotSummaryOut,
+    SyncHealOut,
+    SyncIssueOut,
+    SyncReportOut,
 )
 from app.modules.dashboards.service import (
     CreateSnapshotArgs,
@@ -78,6 +82,12 @@ from app.modules.dashboards.service import (
     SnapshotService,
 )
 from app.modules.dashboards.snapshot_storage import read_manifest
+from app.modules.dashboards.sync_protocol import (
+    PresetSyncProbe,
+    SyncReport,
+    auto_heal,
+    load_current_meta,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -762,6 +772,191 @@ async def share_preset(
     return DashboardPresetOut.model_validate(row)
 
 
+# ── Preset ↔ Snapshot Sync Protocol (T09 / task #192) ──────────────────────
+
+
+@router.post(
+    "/presets/{preset_id}/sync-check",
+    response_model=SyncReportOut,
+    summary="Diagnose staleness between a preset and its snapshot",
+)
+async def post_preset_sync_check(
+    preset_id: uuid.UUID,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    locale: Annotated[str, Query()] = "en",
+) -> SyncReportOut:
+    """Run :class:`PresetSyncProbe` against the preset's current snapshot.
+
+    The probe is non-destructive: it returns a :class:`SyncReport`
+    describing column renames, dropped columns, dropped filter values
+    and dtype changes — and crucially flips ``last_sync_check_at`` plus
+    re-classifies ``sync_status`` so the dashboard list can show the
+    right badge colour without re-running the probe.
+    """
+    from datetime import UTC, datetime
+
+    user_id = _user_id_from_payload(payload)
+    tenant_id = _tenant_id_from_payload(payload)
+    service = DashboardPresetService(
+        repo=DashboardPresetRepository(session),
+    )
+    try:
+        row = await service.get(
+            preset_id, owner_id=user_id, tenant_id=tenant_id,
+        )
+    except PresetError as exc:
+        _raise_preset_http(exc, locale)
+
+    snapshot_id = (row.config_json or {}).get("snapshot_id") if isinstance(
+        row.config_json, dict,
+    ) else None
+
+    report = await _build_sync_report(
+        preset_id=preset_id,
+        config=row.config_json or {},
+        snapshot_id=snapshot_id,
+    )
+
+    # Persist the new sync_status + timestamp.
+    row.sync_status = report.status
+    row.last_sync_check_at = datetime.now(UTC)
+    await session.flush()
+    await session.commit()
+
+    return _report_to_schema(report)
+
+
+@router.post(
+    "/presets/{preset_id}/sync-heal",
+    response_model=SyncHealOut,
+    summary="Apply safe auto-fixes from the sync report and persist them",
+)
+async def post_preset_sync_heal(
+    preset_id: uuid.UUID,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    locale: Annotated[str, Query()] = "en",
+) -> SyncHealOut:
+    """Patch the preset with the auto-applicable fixes from a fresh
+    sync-check and persist the result. Issues with
+    ``suggested_fix='manual'`` remain in the returned report; the user
+    addresses them by editing the preset by hand.
+    """
+    from datetime import UTC, datetime
+
+    user_id = _user_id_from_payload(payload)
+    tenant_id = _tenant_id_from_payload(payload)
+    service = DashboardPresetService(
+        repo=DashboardPresetRepository(session),
+    )
+    try:
+        row = await service.get(
+            preset_id, owner_id=user_id, tenant_id=tenant_id,
+        )
+    except PresetError as exc:
+        _raise_preset_http(exc, locale)
+
+    if row.owner_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=messages.translate("preset.access_denied", locale=locale),
+        )
+
+    snapshot_id = (row.config_json or {}).get("snapshot_id") if isinstance(
+        row.config_json, dict,
+    ) else None
+
+    report = await _build_sync_report(
+        preset_id=preset_id,
+        config=row.config_json or {},
+        snapshot_id=snapshot_id,
+    )
+
+    patched = auto_heal(row.config_json or {}, report)
+    row.config_json = patched
+    row.sync_status = report.status
+    row.last_sync_check_at = datetime.now(UTC)
+    row.updated_at = datetime.now(UTC)
+    await session.flush()
+    await session.commit()
+
+    return SyncHealOut(
+        preset=DashboardPresetOut.model_validate(row),
+        report=_report_to_schema(report),
+    )
+
+
+async def _build_sync_report(
+    *, preset_id: uuid.UUID, config: dict, snapshot_id: object,
+) -> SyncReport:
+    """Internal helper: load the snapshot's current meta (best-effort)
+    then run the probe."""
+    probe = PresetSyncProbe()
+
+    if not snapshot_id:
+        # No snapshot referenced — the preset is trivially in-sync but
+        # we still hand back an empty report so the UI badge updates.
+        return probe.run(
+            config, _empty_meta(), preset_id=str(preset_id),
+        )
+
+    pool = get_duckdb_pool()
+    # Best-effort: any exception means "no DuckDB-visible snapshot" and
+    # we fall back to an empty meta. The probe will surface every
+    # referenced column as "dropped" — which is the correct behaviour
+    # for a snapshot that's been deleted.
+    columns_to_probe: list[str] = []
+    cfg_filters = config.get("filters") if isinstance(config, dict) else None
+    if isinstance(cfg_filters, dict):
+        columns_to_probe = [str(k) for k in cfg_filters]
+
+    try:
+        # The probe needs a project_id to namespace the parquet read.
+        # ``config_json`` carries one when the preset was saved against
+        # a specific project — global presets have no DuckDB-resolvable
+        # snapshot so we fall through to the empty-meta path.
+        project_id = config.get("project_id")
+        if not project_id:
+            return probe.run(
+                config, _empty_meta(), preset_id=str(preset_id),
+            )
+        meta = await load_current_meta(
+            pool=pool,
+            snapshot_id=str(snapshot_id),
+            project_id=str(project_id),
+            columns_for_value_sets=columns_to_probe or None,
+        )
+        return probe.run(config, meta, preset_id=str(preset_id))
+    except Exception:
+        return probe.run(
+            config, _empty_meta(), preset_id=str(preset_id),
+        )
+
+
+def _empty_meta():
+    from app.modules.dashboards.sync_protocol import SnapshotMeta
+    return SnapshotMeta()
+
+
+def _report_to_schema(report: SyncReport) -> SyncReportOut:
+    """Convert the dataclass-based report into its Pydantic shape."""
+    import uuid as _uuid
+
+    return SyncReportOut(
+        preset_id=_uuid.UUID(report.preset_id),
+        snapshot_id=_uuid.UUID(report.snapshot_id) if report.snapshot_id else None,
+        status=report.status,
+        is_in_sync=report.is_in_sync,
+        column_renames=[SyncIssueOut(**i.to_dict()) for i in report.column_renames],
+        dropped_columns=[SyncIssueOut(**i.to_dict()) for i in report.dropped_columns],
+        dropped_filter_values=[
+            SyncIssueOut(**i.to_dict()) for i in report.dropped_filter_values
+        ],
+        dtype_changes=[SyncIssueOut(**i.to_dict()) for i in report.dtype_changes],
+    )
+
+
 # ── Tabular Data I/O (T06) ─────────────────────────────────────────────────
 
 
@@ -1052,6 +1247,181 @@ async def post_integrity_report(
         schema_hash=report.schema_hash,
         columns=columns,
         issue_summary=report.issue_summary,
+    )
+
+
+# ── Historical Snapshot Navigator (T11) ────────────────────────────────────
+
+
+@router.get(
+    "/snapshots/timeline",
+    response_model=None,
+    summary="Paged timeline of snapshots for a project",
+)
+async def get_snapshot_timeline(
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    project_id: Annotated[uuid.UUID, Query(description="Project to scope the timeline to")],
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    before: Annotated[datetime | None, Query(description="Cursor — only return rows with created_at < before")] = None,
+    locale: Annotated[str, Query()] = "en",
+):
+    """Return the snapshot timeline newest-first.
+
+    The frontend keeps the oldest ``created_at`` it currently shows as
+    the cursor (``next_before``) and re-issues the request to extend
+    the timeline. Pagination by cursor (rather than offset) avoids the
+    drift you'd get when a teammate uploads a new snapshot mid-scroll.
+    """
+    from app.modules.dashboards.schemas import (
+        SnapshotTimelineItemOut,
+        SnapshotTimelineResponse,
+    )
+    from app.modules.dashboards.snapshot_navigator import (
+        list_snapshots_for_project,
+    )
+
+    tenant_id = _tenant_id_from_payload(payload)
+    service = SnapshotService(repo=SnapshotRepository(session))
+
+    # Pull a generous page; the navigator pure helper applies the
+    # ``before`` cursor and the ``limit`` itself. Repository limit is
+    # capped at 500, which matches the navigator's 200-item ceiling
+    # twice over so the cursor never starves.
+    rows, _total = await service.list_for_project(
+        project_id,
+        tenant_id=tenant_id,
+        limit=500,
+        offset=0,
+    )
+
+    metas = list_snapshots_for_project(
+        list(rows),
+        limit=limit,
+        before=before,
+    )
+
+    next_before: datetime | None = None
+    if metas and len(metas) >= limit:
+        next_before = metas[-1].created_at
+
+    items = [
+        SnapshotTimelineItemOut(
+            id=m.id,
+            project_id=m.project_id,
+            label=m.label,
+            created_at=m.created_at,
+            created_by_user_id=m.created_by_user_id,
+            parent_snapshot_id=m.parent_snapshot_id,
+            total_entities=m.total_entities,
+            total_categories=m.total_categories,
+            source_file_count=m.source_file_count,
+            schema_hash=m.schema_hash,
+            completeness_score=m.completeness_score,
+        )
+        for m in metas
+    ]
+    return SnapshotTimelineResponse(
+        project_id=project_id,
+        items=items,
+        next_before=next_before,
+    )
+
+
+@router.get(
+    "/snapshots/diff",
+    response_model=None,
+    summary="Column-level diff between two snapshots",
+)
+async def get_snapshot_diff(
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    a: Annotated[uuid.UUID, Query(description="Older snapshot id")],
+    b: Annotated[uuid.UUID, Query(description="Newer snapshot id")],
+    locale: Annotated[str, Query()] = "en",
+):
+    """Compare two snapshots and return the structural delta.
+
+    Both snapshots must belong to the same project (the navigator UI
+    enforces this client-side, but we re-check server-side to avoid
+    cross-project leaks). The endpoint reports schema-level changes
+    (columns added / removed / dtype changed) and the row-count
+    delta — it does **not** scan parquet files for value-level diffs;
+    that would be too expensive for a "click any two snapshots" UX.
+    """
+    from app.modules.dashboards.schemas import (
+        SnapshotDiffColumnChangeOut,
+        SnapshotDiffOut,
+    )
+    from app.modules.dashboards.snapshot_navigator import (
+        SnapshotsNotInSameProjectError,
+        diff_two_snapshots,
+        schema_from_summary_stats,
+    )
+
+    tenant_id = _tenant_id_from_payload(payload)
+    service = SnapshotService(repo=SnapshotRepository(session))
+
+    try:
+        row_a = await service.get(a, tenant_id=tenant_id)
+        row_b = await service.get(b, tenant_id=tenant_id)
+    except SnapshotError as exc:
+        _raise_http(exc, locale)
+
+    if row_a.project_id != row_b.project_id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=messages.translate(
+                SnapshotsNotInSameProjectError.message_key,
+                locale=locale,
+            ),
+        )
+
+    # The navigator's diff is intentionally cheap: we use the
+    # row-side ``summary_stats`` for both snapshots. A future revision
+    # may upgrade this to a parquet-side schema probe; the navigator's
+    # public contract already accommodates dtype changes for that day.
+    schema_a = schema_from_summary_stats(
+        row_a.id,
+        summary_stats=row_a.summary_stats,
+        total_entities=row_a.total_entities,
+    )
+    schema_b = schema_from_summary_stats(
+        row_b.id,
+        summary_stats=row_b.summary_stats,
+        total_entities=row_b.total_entities,
+    )
+
+    diff = diff_two_snapshots(
+        schema_a,
+        schema_b,
+        a_label=row_a.label,
+        b_label=row_b.label,
+        a_created_at=row_a.created_at,
+        b_created_at=row_b.created_at,
+    )
+
+    return SnapshotDiffOut(
+        snapshot_a_id=diff.snapshot_a_id,
+        snapshot_b_id=diff.snapshot_b_id,
+        a_label=diff.a_label,
+        b_label=diff.b_label,
+        a_created_at=diff.a_created_at,
+        b_created_at=diff.b_created_at,
+        columns_added=list(diff.columns_added),
+        columns_removed=list(diff.columns_removed),
+        columns_changed=[
+            SnapshotDiffColumnChangeOut(
+                name=c.name, a_dtype=c.a_dtype, b_dtype=c.b_dtype,
+            )
+            for c in diff.columns_changed
+        ],
+        a_row_count=diff.a_row_count,
+        b_row_count=diff.b_row_count,
+        rows_added=diff.rows_added,
+        rows_removed=diff.rows_removed,
+        schema_hash_match=diff.schema_hash_match,
+        is_identical=diff.is_identical,
     )
 
 

@@ -225,6 +225,9 @@ class DashboardPresetUpdate(BaseModel):
     shared_with_project: bool | None = None
 
 
+SyncStatus = Literal["synced", "stale", "needs_review"]
+
+
 class DashboardPresetOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -237,6 +240,8 @@ class DashboardPresetOut(BaseModel):
     kind: PresetKind
     config_json: dict[str, Any] = Field(default_factory=dict)
     shared_with_project: bool = False
+    sync_status: SyncStatus = "synced"
+    last_sync_check_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -244,6 +249,54 @@ class DashboardPresetOut(BaseModel):
 class DashboardPresetListResponse(BaseModel):
     total: int
     items: list[DashboardPresetOut]
+
+
+# ── Sync Protocol (T09 / task #192) ────────────────────────────────────────
+
+
+SyncIssueKind = Literal[
+    "column_rename",
+    "dropped_column",
+    "dropped_filter_value",
+    "dtype_change",
+]
+SyncSeverity = Literal["warning", "error"]
+SyncSuggestedFix = Literal["auto_rename", "drop_filter", "manual"]
+
+
+class SyncIssueOut(BaseModel):
+    """One staleness signal between a preset and its source snapshot."""
+
+    kind: SyncIssueKind
+    severity: SyncSeverity
+    suggested_fix: SyncSuggestedFix
+    column: str
+    new_column: str | None = None
+    dropped_values: list[str] = Field(default_factory=list)
+    old_dtype: str | None = None
+    new_dtype: str | None = None
+    message_key: str
+    message: str = ""
+
+
+class SyncReportOut(BaseModel):
+    """Full sync report for a preset against its current snapshot meta."""
+
+    preset_id: uuid.UUID
+    snapshot_id: uuid.UUID | None = None
+    status: SyncStatus
+    is_in_sync: bool
+    column_renames: list[SyncIssueOut] = Field(default_factory=list)
+    dropped_columns: list[SyncIssueOut] = Field(default_factory=list)
+    dropped_filter_values: list[SyncIssueOut] = Field(default_factory=list)
+    dtype_changes: list[SyncIssueOut] = Field(default_factory=list)
+
+
+class SyncHealOut(BaseModel):
+    """Result of POST /presets/{id}/sync-heal — patched preset + report."""
+
+    preset: DashboardPresetOut
+    report: SyncReportOut
 
 
 # ── Tabular Data I/O (T06) ─────────────────────────────────────────────────
@@ -353,3 +406,75 @@ class IntegrityReportRequest(BaseModel):
 
     snapshot_id: uuid.UUID
     project_id: uuid.UUID
+
+
+# ── Historical Snapshot Navigator (T11) ────────────────────────────────────
+
+
+class SnapshotTimelineItemOut(BaseModel):
+    """One row of the navigator timeline.
+
+    Narrow on purpose — the timeline must scroll smoothly through
+    hundreds of snapshots, so we ship only what the timeline card and
+    the per-row badges need. The diff endpoint does the heavier work.
+    """
+
+    id: uuid.UUID
+    project_id: uuid.UUID
+    label: str
+    created_at: datetime
+    created_by_user_id: uuid.UUID
+    parent_snapshot_id: uuid.UUID | None = None
+    total_entities: int = Field(..., ge=0)
+    total_categories: int = Field(..., ge=0)
+    source_file_count: int = Field(..., ge=0)
+    schema_hash: str | None = None
+    completeness_score: float | None = Field(default=None, ge=0.0, le=1.0)
+
+
+class SnapshotTimelineResponse(BaseModel):
+    """Paginated timeline response.
+
+    ``next_before`` is the cursor the frontend should send back to load
+    older entries; it is the ``created_at`` of the oldest item in the
+    current page (or ``None`` when there is nothing else to fetch).
+    """
+
+    project_id: uuid.UUID
+    items: list[SnapshotTimelineItemOut] = Field(default_factory=list)
+    next_before: datetime | None = None
+
+
+class SnapshotDiffColumnChangeOut(BaseModel):
+    """One column whose dtype differs between A and B."""
+
+    name: str
+    a_dtype: str
+    b_dtype: str
+
+
+class SnapshotDiffOut(BaseModel):
+    """Structural diff between two snapshots.
+
+    All deltas are reported as ``A → B``: ``columns_added`` is the set
+    of columns *new* in B, ``columns_removed`` is *dropped* in B,
+    ``rows_added`` / ``rows_removed`` are positive non-overlapping
+    deltas. ``schema_hash_match`` is ``True`` only when both sides
+    recorded a hash and the hashes agree.
+    """
+
+    snapshot_a_id: uuid.UUID
+    snapshot_b_id: uuid.UUID
+    a_label: str
+    b_label: str
+    a_created_at: datetime
+    b_created_at: datetime
+    columns_added: list[str] = Field(default_factory=list)
+    columns_removed: list[str] = Field(default_factory=list)
+    columns_changed: list[SnapshotDiffColumnChangeOut] = Field(default_factory=list)
+    a_row_count: int = Field(..., ge=0)
+    b_row_count: int = Field(..., ge=0)
+    rows_added: int = Field(..., ge=0)
+    rows_removed: int = Field(..., ge=0)
+    schema_hash_match: bool = False
+    is_identical: bool = False

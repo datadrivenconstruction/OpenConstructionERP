@@ -17,6 +17,12 @@ export { ExportButton } from './ExportButton';
 export type { ExportButtonProps } from './ExportButton';
 export { IntegrityOverview } from './IntegrityOverview';
 export type { IntegrityOverviewProps } from './IntegrityOverview';
+export { SnapshotTimeline } from './SnapshotTimeline';
+export type { SnapshotTimelineProps } from './SnapshotTimeline';
+export { SnapshotDiffView } from './SnapshotDiffView';
+export type { SnapshotDiffViewProps } from './SnapshotDiffView';
+export { SnapshotPickerInline } from './SnapshotPickerInline';
+export type { SnapshotPickerInlineProps } from './SnapshotPickerInline';
 export {
   listSnapshots,
   getSnapshot,
@@ -36,6 +42,8 @@ export {
   getSnapshotRows,
   buildSnapshotExportUrl,
   getIntegrityReport,
+  getSnapshotTimeline,
+  diffSnapshots,
 } from './api';
 export type {
   Snapshot,
@@ -68,4 +76,10 @@ export type {
   IntegrityColumn,
   IntegrityReport,
   GetIntegrityReportInput,
+  SnapshotTimelineItem,
+  SnapshotTimelineResponse,
+  GetSnapshotTimelineInput,
+  SnapshotDiff,
+  SnapshotDiffColumnChange,
+  DiffSnapshotsInput,
 } from './api';

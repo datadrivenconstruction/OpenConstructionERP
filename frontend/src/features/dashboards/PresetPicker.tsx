@@ -24,6 +24,7 @@ import {
   type CreateDashboardPresetInput,
   type DashboardPreset,
 } from './api';
+import { PresetSyncBadge } from './PresetSyncBadge';
 
 export interface PresetPickerProps {
   projectId?: string | null;
@@ -184,13 +185,13 @@ function PresetGroup({
       ) : (
         <ul role="none" data-testid={`${testIdPrefix}-list`}>
           {presets.map((p) => (
-            <li key={p.id} role="none">
+            <li key={p.id} role="none" className="flex items-center gap-1.5 px-1">
               <button
                 type="button"
                 role="menuitem"
                 onClick={() => onSelect(p)}
                 data-testid={`${testIdPrefix}-${p.id}`}
-                className="flex w-full items-start gap-2 rounded px-2 py-1 text-left hover:bg-surface-secondary"
+                className="flex flex-1 items-start gap-2 rounded px-2 py-1 text-left hover:bg-surface-secondary"
               >
                 <Check className="mt-0.5 h-3 w-3 opacity-0 group-hover:opacity-100" />
                 <span className="flex-1">
@@ -204,6 +205,14 @@ function PresetGroup({
                   )}
                 </span>
               </button>
+              {p.sync_status && p.sync_status !== 'synced' && (
+                <span onClick={(e) => e.stopPropagation()}>
+                  <PresetSyncBadge
+                    presetId={p.id}
+                    initialStatus={p.sync_status}
+                  />
+                </span>
+              )}
             </li>
           ))}
         </ul>

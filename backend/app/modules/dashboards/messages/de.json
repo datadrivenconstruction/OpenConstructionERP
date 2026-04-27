@@ -37,5 +37,15 @@
   "integrity.issue.outliers_present": "Numerische Ausreißer erkannt (1.5·IQR-Regel).",
   "integrity.issue.high_zero_pct": "Mehr als 50% der numerischen Werte sind exakt null.",
   "integrity.issue.low_cardinality_string": "String-Spalte mit sehr wenigen verschiedenen Werten — als Kategorie behandeln.",
-  "integrity.issue.uuid_like": "Werte sehen wie UUIDs aus — meist nicht für Filter geeignet."
+  "integrity.issue.uuid_like": "Werte sehen wie UUIDs aus — meist nicht für Filter geeignet.",
+  "navigator.diff.cross_project": "Die beiden Snapshots gehören zu verschiedenen Projekten und können nicht verglichen werden.",
+  "preset.sync.unknown": "Voreinstellung hat ein unbekanntes Sync-Problem.",
+  "preset.sync.column_rename": "Eine von der Voreinstellung referenzierte Spalte wurde im aktualisierten Snapshot offenbar umbenannt.",
+  "preset.sync.dropped_column": "Eine von der Voreinstellung referenzierte Spalte ist im Snapshot nicht mehr vorhanden.",
+  "preset.sync.dropped_filter_value": "Einige Filterwerte sind im Snapshot nicht mehr vorhanden.",
+  "preset.sync.dtype_change": "Der Datentyp einer Spalte hat sich im aktualisierten Snapshot geändert.",
+  "preset.sync.in_sync": "Voreinstellung ist mit dem aktuellen Snapshot synchron.",
+  "preset.sync.stale": "Voreinstellung ist veraltet — Sync-Prüfung ausführen.",
+  "preset.sync.needs_review": "Voreinstellung enthält Probleme, die manuell geprüft werden müssen.",
+  "preset.sync.snapshot_unknown": "Voreinstellung referenziert keinen Snapshot — nichts zu synchronisieren."
 }

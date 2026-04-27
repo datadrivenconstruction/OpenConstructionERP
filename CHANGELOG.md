@@ -5,6 +5,34 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.3] — 2026-04-27
+
+Wave-4 patch release bundling three feature deliverables (T09 Model-Dashboard Sync Protocol, T11 Historical Snapshot Navigator, T12 CWICR Item Matcher).
+
+### Added — Dashboards (T09 Sync Protocol)
+- `sync_protocol.py` with `PresetSyncProbe`, `SyncReport`, `auto_heal()`, `diff_snapshot_meta()`. Detects column renames, drops, dtype changes, and dropped filter values; classifies severity and proposes auto-fixes.
+- `oe_dashboards_preset.sync_status` + `last_sync_check_at` columns (alembic `v2b0_preset_sync_columns`)
+- Subscribes to `snapshot.refreshed` event — flips matching presets to `stale` automatically
+- Endpoints: `POST /api/v1/dashboards/presets/{id}/sync-check`, `POST /presets/{id}/sync-heal`
+- Frontend: `PresetSyncBadge` (color-coded chip beside preset names), `SyncReportDrawer` (grouped issue list with Auto-heal CTA)
+
+### Added — Dashboards (T11 Snapshot Navigator)
+- `snapshot_navigator.py` with `list_snapshots_for_project()`, `diff_two_snapshots()`, schema-from-stats helper
+- Endpoints: `GET /snapshots/timeline`, `GET /snapshots/diff` (cross-project diff returns 422)
+- Frontend: `SnapshotTimeline` (vertical card list with multi-select + Compare), `SnapshotDiffView` (added/removed/dtype-changed columns + summary chips), `SnapshotPickerInline` (compact dropdown)
+
+### Added — Costs (T12 CWICR Item Matcher)
+- `costs/matcher.py` with `match_cwicr_items()` and `match_cwicr_for_position()`
+- Lexical scoring via rapidfuzz `token_set_ratio` over description + localized descriptions, with additive unit/lang bonuses
+- Optional semantic path tries `app.core.vector.encode_texts` then `sentence_transformers`; falls back to lexical-only if either is missing (logs once, never raises)
+- Hybrid mode: `0.6 * lexical + 0.4 * semantic`
+- Endpoints: `POST /api/v1/costs/match`, `POST /api/v1/costs/match-from-position`
+- Frontend: `CwicrMatchPanel` with query input, mode selector, and per-row Apply CTA
+
+### Tests
+- 25 + 7 (T09) + 19 + 14 (T11) + 25 + 7 (T12) = 97 new tests, all passing
+- ruff + mypy clean for backend; tsc + eslint clean for frontend
+
 ## [2.6.2] — 2026-04-27
 
 Patch release bundling three wave-3 features (T07 Dataset Integrity, T08 Compliance DSL Engine, EAC §3.2 Block Editor canvas) and a downgrade-path migration fix.

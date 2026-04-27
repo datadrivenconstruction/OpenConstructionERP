@@ -122,6 +122,48 @@ class DashboardPresetRepository:
         await self.session.delete(preset)
         await self.session.flush()
 
+    async def mark_stale_for_snapshot(
+        self,
+        snapshot_id: uuid.UUID | str,
+        *,
+        tenant_id: str | None = None,
+    ) -> int:
+        """Bump every preset whose ``config_json.snapshot_id`` matches.
+
+        Used by the ``snapshot.refreshed`` event subscriber: after a
+        snapshot is rebuilt, presets that pointed at it can no longer
+        guarantee their column / filter references are valid until a
+        sync-check runs. We flip them to ``sync_status='stale'``.
+
+        Returns the count of presets that actually moved (presets
+        already at ``stale`` or ``needs_review`` are *not* re-bumped —
+        a refresh that didn't change anything shouldn't undo a pending
+        manual review).
+        """
+        sid = str(snapshot_id)
+        # SQLite + JSON: portable approach is to fetch matching rows in
+        # Python then update them — the volume is bounded (presets per
+        # snapshot is normally <100) so we don't bother with the
+        # JSON-extract dialect dance.
+        stmt = select(DashboardPreset).where(
+            DashboardPreset.sync_status == "synced",
+        )
+        if tenant_id is not None:
+            stmt = stmt.where(DashboardPreset.tenant_id == str(tenant_id))
+        rows = (await self.session.execute(stmt)).scalars().all()
+        moved = 0
+        for row in rows:
+            cfg = row.config_json or {}
+            if not isinstance(cfg, dict):
+                continue
+            if str(cfg.get("snapshot_id") or "") != sid:
+                continue
+            row.sync_status = "stale"
+            moved += 1
+        if moved:
+            await self.session.flush()
+        return moved
+
 
 # ── helpers ─────────────────────────────────────────────────────────────────
 

@@ -324,6 +324,10 @@ export interface DashboardPreset {
   kind: DashboardPresetKind;
   config_json: Record<string, unknown>;
   shared_with_project: boolean;
+  /** T09: 'synced' | 'stale' | 'needs_review'. Defaults to 'synced'. */
+  sync_status?: 'synced' | 'stale' | 'needs_review';
+  /** T09: ISO timestamp of the last sync-check call, null if never run. */
+  last_sync_check_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -403,6 +407,70 @@ export async function shareDashboardPreset(
 ): Promise<DashboardPreset> {
   return apiPost<DashboardPreset, undefined>(
     `/v1/dashboards/presets/${encodeURIComponent(presetId)}/share`,
+  );
+}
+
+/* ── Sync Protocol (T09 / task #192) ─────────────────────────────────────── */
+
+export type SyncStatus = 'synced' | 'stale' | 'needs_review';
+export type SyncIssueKind =
+  | 'column_rename'
+  | 'dropped_column'
+  | 'dropped_filter_value'
+  | 'dtype_change';
+export type SyncSeverity = 'warning' | 'error';
+export type SyncSuggestedFix = 'auto_rename' | 'drop_filter' | 'manual';
+
+export interface SyncIssue {
+  kind: SyncIssueKind;
+  severity: SyncSeverity;
+  suggested_fix: SyncSuggestedFix;
+  column: string;
+  new_column: string | null;
+  dropped_values: string[];
+  old_dtype: string | null;
+  new_dtype: string | null;
+  message_key: string;
+  message: string;
+}
+
+export interface SyncReport {
+  preset_id: string;
+  snapshot_id: string | null;
+  status: SyncStatus;
+  is_in_sync: boolean;
+  column_renames: SyncIssue[];
+  dropped_columns: SyncIssue[];
+  dropped_filter_values: SyncIssue[];
+  dtype_changes: SyncIssue[];
+}
+
+export interface SyncHealResponse {
+  preset: DashboardPreset;
+  report: SyncReport;
+}
+
+/**
+ * Run the probe against the preset's current snapshot meta. Returns a
+ * structured report describing column renames / drops / dtype changes /
+ * dropped filter values, plus a status the badge picks up.
+ */
+export async function getSyncReport(presetId: string): Promise<SyncReport> {
+  return apiPost<SyncReport, undefined>(
+    `/v1/dashboards/presets/${encodeURIComponent(presetId)}/sync-check`,
+  );
+}
+
+/**
+ * Apply every safe auto-fix from the latest sync report and persist
+ * the patched preset. Manual issues are returned untouched in the
+ * accompanying report so the UI can prompt the user.
+ */
+export async function applySyncHeal(
+  presetId: string,
+): Promise<SyncHealResponse> {
+  return apiPost<SyncHealResponse, undefined>(
+    `/v1/dashboards/presets/${encodeURIComponent(presetId)}/sync-heal`,
   );
 }
 
@@ -545,5 +613,98 @@ export async function getIntegrityReport(
       snapshot_id: input.snapshotId,
       project_id: input.projectId,
     },
+  );
+}
+
+/* ── Historical Snapshot Navigator (T11) ─────────────────────────────────── */
+
+export interface SnapshotTimelineItem {
+  id: string;
+  project_id: string;
+  label: string;
+  created_at: string;
+  created_by_user_id: string;
+  parent_snapshot_id: string | null;
+  total_entities: number;
+  total_categories: number;
+  source_file_count: number;
+  schema_hash: string | null;
+  completeness_score: number | null;
+}
+
+export interface SnapshotTimelineResponse {
+  project_id: string;
+  items: SnapshotTimelineItem[];
+  /** ISO timestamp the caller should pass back as `before` for the
+   * next page; `null` when the current page exhausted history. */
+  next_before: string | null;
+}
+
+export interface GetSnapshotTimelineInput {
+  projectId: string;
+  /** Defaults to 50 server-side. */
+  limit?: number;
+  /** ISO timestamp — only return rows created strictly before this. */
+  before?: string | null;
+}
+
+/**
+ * Newest-first timeline of snapshots for a project. Pagination is
+ * cursor-based (`before` = the oldest `created_at` already on screen)
+ * to avoid drift when teammates upload concurrently.
+ */
+export async function getSnapshotTimeline(
+  input: GetSnapshotTimelineInput,
+): Promise<SnapshotTimelineResponse> {
+  const params = new URLSearchParams({ project_id: input.projectId });
+  if (input.limit !== undefined) params.set('limit', String(input.limit));
+  if (input.before) params.set('before', input.before);
+  return apiGet<SnapshotTimelineResponse>(
+    `/v1/dashboards/snapshots/timeline?${params.toString()}`,
+  );
+}
+
+export interface SnapshotDiffColumnChange {
+  name: string;
+  a_dtype: string;
+  b_dtype: string;
+}
+
+export interface SnapshotDiff {
+  snapshot_a_id: string;
+  snapshot_b_id: string;
+  a_label: string;
+  b_label: string;
+  a_created_at: string;
+  b_created_at: string;
+  columns_added: string[];
+  columns_removed: string[];
+  columns_changed: SnapshotDiffColumnChange[];
+  a_row_count: number;
+  b_row_count: number;
+  rows_added: number;
+  rows_removed: number;
+  schema_hash_match: boolean;
+  is_identical: boolean;
+}
+
+export interface DiffSnapshotsInput {
+  /** Older snapshot id (left-hand side of the diff). */
+  a: string;
+  /** Newer snapshot id (right-hand side of the diff). */
+  b: string;
+}
+
+/**
+ * Column-level diff between two snapshots. Both snapshots must belong
+ * to the same project — the backend enforces this and returns a 422
+ * otherwise.
+ */
+export async function diffSnapshots(
+  input: DiffSnapshotsInput,
+): Promise<SnapshotDiff> {
+  const params = new URLSearchParams({ a: input.a, b: input.b });
+  return apiGet<SnapshotDiff>(
+    `/v1/dashboards/snapshots/diff?${params.toString()}`,
   );
 }
