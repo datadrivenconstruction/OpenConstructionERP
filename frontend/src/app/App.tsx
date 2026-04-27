@@ -9,6 +9,7 @@ import { CostsPage, ImportDatabasePage } from '@/features/costs';
 import { OnboardingWizard } from '@/features/onboarding';
 import { AssembliesPage, AssemblyEditorPage, CreateAssemblyPage } from '@/features/assemblies';
 import { ValidationPage } from '@/features/validation';
+import { NlRuleBuilderPanel } from '@/features/compliance';
 import { QuantitiesPage } from '@/features/quantities';
 import { ModulesPage, ModuleDeveloperGuide } from '@/features/modules';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
@@ -394,6 +395,7 @@ export default function App() {
         <Route path="/assemblies/:assemblyId" element={<P title="Assembly Editor"><AssemblyEditorPage /></P>} />
 
         <Route path="/validation" element={<P title="Validation"><ValidationPage /></P>} />
+        <Route path="/compliance/builder" element={<P title="Compliance Rule Builder"><NlRuleBuilderPanel /></P>} />
 
         <Route path="/quantities" element={<P title="Quantity Takeoff"><QuantitiesPage /></P>} />
         <Route path="/takeoff" element={<P title="PDF Takeoff"><TakeoffPage /></P>} />

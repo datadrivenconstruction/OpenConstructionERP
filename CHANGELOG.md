@@ -5,6 +5,28 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.4] — 2026-04-27
+
+Wave-5 patch release — completes the T00–T13 dashboards/compliance backlog with two final feature deliverables.
+
+### Added — Dashboards (T10 Multi-Source Project Federation)
+- `dashboards/federation.py`: `build_federated_view(snapshot_ids, schema_align)` reads each snapshot's parquet into DuckDB and unions them with `__project_id` + `__snapshot_id` provenance columns. Three schema-align modes: `intersect` (common columns only), `union` (NULL-fill missing), `strict` (422 on mismatch).
+- `federated_query()` runs whitelisted SELECT-only SQL on the view (rejects ATTACH/INSTALL/DROP/PRAGMA/SET, rejects multi-statement, rejects empty input)
+- `federated_aggregate()` supports count/sum/avg/min/max with provenance group-by
+- Endpoints: `POST /api/v1/dashboards/federation/build`, `POST /api/v1/dashboards/federation/aggregate`
+- Frontend: `FederationPanel` (multi-select snapshot picker + schema-align mode + group-by/measure pickers), `FederatedResultsTable` (provenance chips first, project/snapshot labels)
+
+### Added — Compliance (T13 Natural Language Rule Builder)
+- `core/validation/dsl/nl_builder.py`: 8 deterministic patterns (must_have, must_not_have, value_equals, value_greater_than, value_less_than, value_at_least, count_at_least, count_zero) with EN / DE / RU lang aliases (incl. German V2 verb-final reordering)
+- Optional injectable AI fallback: lazy `app.modules.ai.ai_client` import, low-confidence-only invocation, response round-tripped through the strict T08 parser before acceptance — never crashes if no API key
+- Endpoints: `POST /api/v1/compliance/dsl/from-nl`, `GET /api/v1/compliance/dsl/nl-patterns`
+- Frontend: `/compliance/builder` route with `NlRuleBuilderPanel` (3-pane: NL textarea / DSL preview / pattern hints, Ctrl+Enter to generate, AI checkbox, confidence badge), `DslPreview` (token-level YAML highlight, no codemirror), `NlPatternHints`
+
+### Tests
+- 30 + 6 (T10) + 29 + 7 + 11 (T13) = 83 new tests, all passing
+- Full frontend `tsc --noEmit` clean across all dashboards + compliance + EAC canvas additions
+- ruff + mypy clean on all new backend code
+
 ## [2.6.3] — 2026-04-27
 
 Wave-4 patch release bundling three feature deliverables (T09 Model-Dashboard Sync Protocol, T11 Historical Snapshot Navigator, T12 CWICR Item Matcher).

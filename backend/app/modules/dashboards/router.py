@@ -55,6 +55,11 @@ from app.modules.dashboards.schemas import (
     DashboardPresetListResponse,
     DashboardPresetOut,
     DashboardPresetUpdate,
+    FederationAggregateOut,
+    FederationAggregateRequest,
+    FederationBuildRequest,
+    FederationSnapshotRefOut,
+    FederationViewOut,
     IntegrityColumnOut,
     IntegrityReportOut,
     IntegrityReportRequest,
@@ -1423,6 +1428,156 @@ async def get_snapshot_diff(
         schema_hash_match=diff.schema_hash_match,
         is_identical=diff.is_identical,
     )
+
+
+# ── Multi-Source Project Federation (T10 / task #193) ─────────────────────
+
+
+@router.post(
+    "/federation/build",
+    response_model=FederationViewOut,
+    summary="Build a federated UNION-ALL view across multiple snapshots",
+)
+async def post_federation_build(
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    body: FederationBuildRequest,
+    locale: Annotated[str, Query()] = "en",
+) -> FederationViewOut:
+    """Construct a federated view across N snapshots.
+
+    Looks up each snapshot through the registry (so tenant scoping is
+    enforced), opens an isolated DuckDB connection, registers a UNION
+    ALL view across the snapshots' parquet files, and returns the
+    reconciled column list + provenance counts. The DuckDB view itself
+    does not survive the request — clients call ``/aggregate`` to do
+    the rollup in a single round trip.
+    """
+    from app.modules.dashboards.federation import (
+        FederationError,
+        build_federated_view,
+    )
+
+    tenant_id = _tenant_id_from_payload(payload)
+    service = SnapshotService(repo=SnapshotRepository(session))
+
+    # Resolve every snapshot's owning project under the caller's
+    # tenant. A miss → 404; cross-tenant requests get 404 the same way
+    # ``service.get`` rejects them.
+    project_id_for: dict[str, str] = {}
+    for sid in body.snapshot_ids:
+        try:
+            row = await service.get(sid, tenant_id=tenant_id)
+        except SnapshotError as exc:
+            _raise_http(exc, locale)
+        project_id_for[str(sid)] = str(row.project_id)
+
+    try:
+        view = await build_federated_view(
+            [str(s) for s in body.snapshot_ids],
+            project_id_for=project_id_for,
+            schema_align=body.schema_align,
+        )
+    except FederationError as exc:
+        raise HTTPException(
+            status_code=exc.http_status,
+            detail=messages.translate(exc.message_key, locale=locale),
+        ) from exc
+
+    try:
+        return FederationViewOut(
+            view_name=view.view_name,
+            columns=list(view.columns),
+            dtypes=dict(view.dtypes),
+            project_count=view.project_count,
+            snapshot_count=view.snapshot_count,
+            row_count=view.row_count,
+            schema_align=view.schema_align,
+            snapshots=[
+                FederationSnapshotRefOut(
+                    snapshot_id=uuid.UUID(s.snapshot_id),
+                    project_id=uuid.UUID(s.project_id),
+                )
+                for s in view.snapshots
+            ],
+        )
+    finally:
+        await view.close()
+
+
+@router.post(
+    "/federation/aggregate",
+    response_model=FederationAggregateOut,
+    summary="Aggregate rows across a federated set of snapshots",
+)
+async def post_federation_aggregate(
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    body: FederationAggregateRequest,
+    locale: Annotated[str, Query()] = "en",
+) -> FederationAggregateOut:
+    """Run a high-level rollup (count / sum / avg / min / max) over a
+    federated view. The response always carries ``__project_id`` and
+    ``__snapshot_id`` columns so the UI can pivot the result by project
+    or by snapshot without rebuilding the view.
+    """
+    from app.modules.dashboards.federation import (
+        FederationError,
+        build_federated_view,
+        federated_aggregate,
+    )
+
+    tenant_id = _tenant_id_from_payload(payload)
+    service = SnapshotService(repo=SnapshotRepository(session))
+
+    project_id_for: dict[str, str] = {}
+    for sid in body.snapshot_ids:
+        try:
+            row = await service.get(sid, tenant_id=tenant_id)
+        except SnapshotError as exc:
+            _raise_http(exc, locale)
+        project_id_for[str(sid)] = str(row.project_id)
+
+    try:
+        view = await build_federated_view(
+            [str(s) for s in body.snapshot_ids],
+            project_id_for=project_id_for,
+            schema_align=body.schema_align,
+        )
+    except FederationError as exc:
+        raise HTTPException(
+            status_code=exc.http_status,
+            detail=messages.translate(exc.message_key, locale=locale),
+        ) from exc
+
+    try:
+        try:
+            rows = await federated_aggregate(
+                view,
+                group_by=body.group_by,
+                measure=body.measure,
+                agg=body.agg,
+                limit=body.limit,
+            )
+        except FederationError as exc:
+            raise HTTPException(
+                status_code=exc.http_status,
+                detail=messages.translate(exc.message_key, locale=locale),
+            ) from exc
+
+        columns = list(rows[0].keys()) if rows else []
+        return FederationAggregateOut(
+            columns=columns,
+            rows=rows,
+            project_count=view.project_count,
+            snapshot_count=view.snapshot_count,
+            schema_align=view.schema_align,
+            measure=body.measure,
+            agg=body.agg,
+            group_by=list(body.group_by),
+        )
+    finally:
+        await view.close()
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────

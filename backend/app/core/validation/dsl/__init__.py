@@ -42,6 +42,11 @@ from app.core.validation.dsl.evaluator import (
     DSLEvaluationError,
     compile_rule,
 )
+from app.core.validation.dsl.nl_builder import (
+    NlBuildResult,
+    list_supported_patterns,
+    parse_nl_to_dsl,
+)
 from app.core.validation.dsl.parser import (
     DSLError,
     DSLSyntaxError,
@@ -56,8 +61,11 @@ __all__ = [
     "DSLEvaluationError",
     "DSLSyntaxError",
     "DSLTypeError",
+    "NlBuildResult",
     "RuleDefinition",
     "compile_rule",
+    "list_supported_patterns",
     "parse_definition",
+    "parse_nl_to_dsl",
     "validate_definition",
 ]
