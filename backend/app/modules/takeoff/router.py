@@ -428,7 +428,16 @@ async def install_converter(
     Returns 200 with ``installed: true`` on success, or 200 with
     ``installed: false`` + ``platform_unsupported`` on Linux/Mac. Only
     truly unrecoverable failures (network down, repo layout changed)
-    raise HTTPException 502.
+    raise HTTPException 502 — and even then, the response body carries
+    the real error message so the user can act on it.
+
+    Hardening note (v2.6.22): the function body is wrapped in a top-
+    level try/except so an unexpected exception class (anything that
+    isn't ``RuntimeError``) translates to a 502 with the underlying
+    error class + message in ``detail`` instead of leaking a generic
+    "Internal server error" 500.  Without this guard the install banner
+    showed a useless toast when GitHub rate-limited or returned an
+    unexpected payload — Hans's reproducible DWG/DGN failure case.
     """
     import asyncio
     import sys
@@ -445,93 +454,166 @@ async def install_converter(
             ),
         )
 
-    # Already installed?
-    existing = find_converter(converter_id)
-    if existing:
-        return {
-            "converter_id": converter_id,
-            "installed": True,
-            "path": str(existing),
-            "already_installed": True,
-            "message": f"{meta['name']} is already installed at {existing}",
-        }
+    try:
+        # Already installed?
+        existing = find_converter(converter_id)
+        if existing:
+            return {
+                "converter_id": converter_id,
+                "installed": True,
+                "path": str(existing),
+                "already_installed": True,
+                "message": f"{meta['name']} is already installed at {existing}",
+            }
 
-    platform = sys.platform
-    if platform == "win32":
-        # Windows: download files from the upstream GitHub repo. The
-        # download walks ~30-50 small-to-medium files (~30-50 MB total)
-        # so we offload to a thread to keep the FastAPI event loop
-        # responsive.
-        try:
-            exe_path = await asyncio.to_thread(
-                _download_converter_files_windows, converter_id,
-            )
-        except RuntimeError as exc:
-            logger.warning(
-                "Windows converter install failed for %s: %s",
-                converter_id, exc,
-            )
-            raise HTTPException(
-                status_code=502,
-                detail=(
-                    f"Could not install {meta['name']}: {exc}. "
-                    f"You can install it manually from "
-                    f"https://github.com/{_DDC_REPO}/tree/{_DDC_BRANCH}/"
-                    f"{_WINDOWS_CONVERTER_DIRS[converter_id]}"
+        platform = sys.platform
+        if platform == "win32":
+            # Windows: download files from the upstream GitHub repo. The
+            # download walks ~30-50 small-to-medium files (~30-50 MB total)
+            # so we offload to a thread to keep the FastAPI event loop
+            # responsive.
+            try:
+                exe_path = await asyncio.to_thread(
+                    _download_converter_files_windows, converter_id,
+                )
+            except RuntimeError as exc:
+                logger.warning(
+                    "Windows converter install failed for %s: %s",
+                    converter_id, exc,
+                )
+                raise HTTPException(
+                    status_code=502,
+                    detail=(
+                        f"Could not install {meta['name']}: {exc}. "
+                        f"You can install it manually from "
+                        f"https://github.com/{_DDC_REPO}/tree/{_DDC_BRANCH}/"
+                        f"{_WINDOWS_CONVERTER_DIRS[converter_id]}"
+                    ),
+                ) from exc
+
+            # Post-install smoke test: launch the binary with a non-existent
+            # input + output so it exits quickly. We're only checking that the
+            # OS can load the exe + its Qt6 DLLs — a "missing DLL" error here
+            # means the install is broken and would fail silently on the next
+            # CAD upload, leaving the user staring at a "needs_converter"
+            # banner with no clue why. Exit codes and stderr from valid CLI
+            # error paths are fine; the only failure we care about is the
+            # Windows loader emitting WinError 3221225781 (0xc0000135) —
+            # "DLL not found" — which usually surfaces as a non-zero exit
+            # AND empty stdout/stderr on stderr=PIPE.
+            smoke_ok = True
+            smoke_message: str | None = None
+            try:
+                import subprocess
+
+                def _smoke() -> tuple[int, bytes, bytes]:
+                    proc = subprocess.run(
+                        [str(exe_path)],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        cwd=str(exe_path.parent),
+                        input=b"\n",
+                        timeout=15,
+                    )
+                    return proc.returncode, proc.stdout, proc.stderr
+
+                rc, _stdout, stderr = await asyncio.to_thread(_smoke)
+                # 0xC0000135 (-1073741515) → STATUS_DLL_NOT_FOUND
+                # 0xC0000142 (-1073741502) → STATUS_DLL_INIT_FAILED
+                if rc in (-1073741515, -1073741502, 3221225781, 3221225794):
+                    smoke_ok = False
+                    smoke_message = (
+                        f"Installed but the binary can't load — "
+                        f"a required DLL is missing (Windows error 0x{rc & 0xFFFFFFFF:08x}). "
+                        f"This usually means the Qt6 plugins didn't download correctly. "
+                        f"Try uninstalling and reinstalling, or install manually from "
+                        f"https://github.com/{_DDC_REPO}/tree/{_DDC_BRANCH}/"
+                        f"{_WINDOWS_CONVERTER_DIRS[converter_id]}"
+                    )
+            except Exception as exc:  # noqa: BLE001 — smoke test is best-effort
+                logger.warning("Smoke test for %s converter failed: %s", converter_id, exc)
+
+            size_bytes = exe_path.stat().st_size if exe_path.exists() else 0
+            return {
+                "converter_id": converter_id,
+                "installed": smoke_ok,
+                "path": str(exe_path),
+                "already_installed": False,
+                "size_bytes": size_bytes,
+                "platform": "windows",
+                "smoke_test_passed": smoke_ok,
+                "message": smoke_message or (
+                    f"{meta['name']} installed successfully at {exe_path}"
                 ),
-            ) from exc
+            }
 
-        size_bytes = exe_path.stat().st_size if exe_path.exists() else 0
-        return {
-            "converter_id": converter_id,
-            "installed": True,
-            "path": str(exe_path),
-            "already_installed": False,
-            "size_bytes": size_bytes,
-            "platform": "windows",
-            "message": (
-                f"{meta['name']} installed successfully at {exe_path}"
-            ),
-        }
+        if platform.startswith("linux"):
+            # Linux: surface apt instructions instead of auto-installing.
+            # We do not write to /etc/apt or sudo from a web handler.
+            apt_pkg = _LINUX_APT_PACKAGES.get(converter_id, f"ddc-{converter_id}converter")
+            instructions = (
+                f"# Add the DDC apt source (one-time)\n"
+                f"echo 'deb [trusted=yes] https://pkg.datadrivenconstruction.io stable main' "
+                f"| sudo tee /etc/apt/sources.list.d/ddc.list\n"
+                f"sudo apt update\n"
+                f"# Install the {meta['name']}\n"
+                f"sudo apt install -y {apt_pkg}"
+            )
+            return {
+                "converter_id": converter_id,
+                "installed": False,
+                "platform": "linux",
+                "platform_unsupported": True,
+                "apt_package": apt_pkg,
+                "instructions": instructions,
+                "message": (
+                    f"Linux auto-install is not supported for {meta['name']}. "
+                    f"Run the apt commands in `instructions` (or copy/paste "
+                    f"them into a root terminal). Once the package is in place "
+                    f"the converter is picked up automatically — no service "
+                    f"restart needed."
+                ),
+            }
 
-    if platform.startswith("linux"):
-        # Linux: surface apt instructions instead of auto-installing.
-        # We do not write to /etc/apt or sudo from a web handler.
-        apt_pkg = _LINUX_APT_PACKAGES.get(converter_id, f"ddc-{converter_id}converter")
-        instructions = (
-            f"# Add the DDC apt source (one-time)\n"
-            f"echo 'deb [trusted=yes] https://pkg.datadrivenconstruction.io stable main' "
-            f"| sudo tee /etc/apt/sources.list.d/ddc.list\n"
-            f"sudo apt update\n"
-            f"# Install the {meta['name']}\n"
-            f"sudo apt install -y {apt_pkg}"
-        )
+        # macOS / other — no DDC build available
         return {
             "converter_id": converter_id,
             "installed": False,
-            "platform": "linux",
+            "platform": platform,
             "platform_unsupported": True,
-            "apt_package": apt_pkg,
-            "instructions": instructions,
             "message": (
-                f"Linux auto-install is not supported. Run the apt commands "
-                f"shown in `instructions` to install {meta['name']}."
+                f"{meta['name']} is not yet available for {platform}. "
+                f"Convert to IFC on a Windows machine first, then upload the IFC "
+                f"file — IFC has a built-in text fallback parser that works on "
+                f"every platform."
             ),
         }
-
-    # macOS / other — no DDC build available
-    return {
-        "converter_id": converter_id,
-        "installed": False,
-        "platform": platform,
-        "platform_unsupported": True,
-        "message": (
-            f"{meta['name']} is not yet available for {platform}. "
-            f"Convert to IFC on a Windows machine first, then upload the IFC "
-            f"file — IFC has a built-in text fallback parser that works on "
-            f"every platform."
-        ),
-    }
+    except HTTPException:
+        # Already a structured response — let FastAPI translate it.
+        raise
+    except Exception as exc:  # noqa: BLE001 — last-ditch error envelope
+        # Any uncaught exception (json.JSONDecodeError on a rate-limited
+        # GitHub response, OSError on a permission-denied install dir,
+        # etc.) used to leak as a generic 500 "Internal server error"
+        # which gave the user no actionable signal.  Translate it to a
+        # 502 with the real error class + message so the install banner
+        # shows something useful — Hans's DWG/DGN failure case (Linux
+        # VPS hitting an edge case in find_converter / urlretrieve).
+        logger.exception(
+            "Unhandled exception in install_converter for %s: %s",
+            converter_id, exc,
+        )
+        raise HTTPException(
+            status_code=502,
+            detail=(
+                f"Could not install {meta['name']}: "
+                f"{type(exc).__name__}: {exc}. "
+                f"Check the server logs for the full traceback. You can "
+                f"install manually from "
+                f"https://github.com/{_DDC_REPO}/tree/{_DDC_BRANCH}/"
+                f"{_WINDOWS_CONVERTER_DIRS.get(converter_id, '')}"
+            ),
+        ) from exc
 
 
 @router.post(

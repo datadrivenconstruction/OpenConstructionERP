@@ -96,14 +96,28 @@ export interface BIMConvertersResponse {
   total_count: number;
 }
 
-/** Result of `POST /v1/takeoff/converters/{id}/install/`. */
+/** Result of `POST /v1/takeoff/converters/{id}/install/`.
+ *
+ * Hardening note (v2.6.22): the backend now always returns a structured
+ * response — even on failure paths the body carries `installed: false` plus
+ * a concrete `message` and (on Linux) `platform_unsupported: true` with
+ * the apt commands the user should run.  The frontend MUST branch on
+ * `installed` instead of treating any 2xx as success. */
 export interface BIMConverterInstallResult {
   converter_id: string;
   installed: boolean;
-  path: string;
+  path?: string;
   already_installed?: boolean;
   size_bytes?: number;
   message: string;
+  /** Linux / macOS — the OS has no Windows-style auto-install path. */
+  platform_unsupported?: boolean;
+  /** Linux only — apt package name and a copy-pasteable script. */
+  apt_package?: string;
+  instructions?: string;
+  /** Whether the post-install smoke test passed (Windows only). */
+  smoke_test_passed?: boolean;
+  platform?: string;
 }
 
 /** List every DDC converter and its install status.  Shared with the
@@ -136,6 +150,20 @@ export async function fetchBIMModels(projectId: string): Promise<BIMModelsRespon
 /** Fetch a single BIM model by ID (used for status polling). */
 export async function fetchBIMModel(modelId: string): Promise<BIMModelData> {
   return apiGet<BIMModelData>(`/v1/bim_hub/${encodeURIComponent(modelId)}`);
+}
+
+/** Re-schedule background CAD conversion for a model that previously failed.
+ *  Returns immediately with status="scheduled"; the frontend's existing
+ *  bim-models query polls and transitions the UI when the worker finishes.
+ *  Backend resets status="processing" + clears error_message before kicking
+ *  off the worker, so the UI flips to the processing overlay synchronously. */
+export async function retryBIMModelProcessing(
+  modelId: string,
+): Promise<{ status: string; model_id: string; message?: string }> {
+  return apiPost<{ status: string; model_id: string; message?: string }>(
+    `/v1/bim_hub/${encodeURIComponent(modelId)}/retry/`,
+    {},
+  );
 }
 
 /** Fetch elements for a specific BIM model.

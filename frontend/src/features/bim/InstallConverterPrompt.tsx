@@ -70,21 +70,37 @@ export function InstallConverterPrompt({
 
   const installMutation = useMutation({
     mutationFn: () => installBIMConverter(converterId),
-    onSuccess: () => {
-      addToast({
-        type: 'success',
-        title: t('bim.install_prompt_success_title', {
-          defaultValue: 'Converter installed',
-        }),
-        message: t('bim.install_prompt_success_msg', {
-          defaultValue: 'Retrying upload of {{name}}…',
-          name: fileName,
-        }),
-      });
+    onSuccess: (result) => {
+      // Branch on result.installed — Linux returns `installed: false`
+      // with apt instructions, and a partial Windows install can return
+      // `installed: false` with a smoke-test failure message.  We must
+      // not auto-retry the upload in either case.
+      if (result.installed) {
+        addToast({
+          type: 'success',
+          title: t('bim.install_prompt_success_title', {
+            defaultValue: 'Converter installed',
+          }),
+          message: t('bim.install_prompt_success_msg', {
+            defaultValue: 'Retrying upload of {{name}}…',
+            name: fileName,
+          }),
+        });
+        queryClient.invalidateQueries({ queryKey: ['bim-converters'] });
+        queryClient.invalidateQueries({ queryKey: ['takeoff', 'converters'] });
+        onInstalledAndRetry();
+        onClose();
+        return;
+      }
+      // Surface the backend's actionable message inline on the prompt
+      // (apt instructions on Linux, smoke-test diagnostics on Windows).
+      setLocalError(
+        result.message ||
+          t('bim.install_prompt_error_generic', {
+            defaultValue: 'Install failed. Please try again.',
+          }),
+      );
       queryClient.invalidateQueries({ queryKey: ['bim-converters'] });
-      queryClient.invalidateQueries({ queryKey: ['takeoff', 'converters'] });
-      onInstalledAndRetry();
-      onClose();
     },
     onError: (err) => {
       setLocalError(

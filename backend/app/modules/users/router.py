@@ -120,6 +120,86 @@ async def register(
 # is more robust than relying on slash redirects to behave correctly through
 # every reverse proxy in the wild.
 
+class DemoLoginRequest(BaseModel):
+    """Request body for the password-free demo login.
+
+    Only the e-mail field is honoured; the value MUST match one of the seeded
+    demo accounts (whitelist enforced server-side).
+    """
+
+    email: str
+
+
+# Whitelist of seeded demo accounts. Mirrors the spec list in
+# ``app.main._seed_demo_account``; both must stay in sync — the test
+# ``backend/tests/integration/test_demo_login_endpoint.py`` asserts this.
+_DEMO_EMAIL_WHITELIST: frozenset[str] = frozenset(
+    {
+        "demo@openestimator.io",
+        "estimator@openestimator.io",
+        "manager@openestimator.io",
+    }
+)
+
+
+@router.post("/auth/demo-login/", response_model=TokenResponse)
+@router.post(
+    "/auth/demo-login", response_model=TokenResponse, include_in_schema=False
+)
+async def demo_login(
+    data: DemoLoginRequest,
+    request: Request,
+    service: UserService = Depends(_get_service),
+) -> TokenResponse:
+    """Issue tokens for a seeded demo account without a password check.
+
+    Why this exists: the seeder in ``app.main._seed_demo_account`` generates a
+    fresh ``secrets.token_urlsafe(16)`` for every new install (BUG-D01 — no
+    hardcoded credential is shipped) and persists it to a 0600 credentials
+    file. The frontend's "Demo login" button cannot read that file, so on a
+    fresh install the documented ``DemoPass1234!`` stopped working and users
+    saw "Demo login failed. Please try again." This endpoint accepts the
+    demo email *only*, looks the row up, and issues the same JWT pair as the
+    regular login — without ever asking for the random password.
+
+    Hard guards:
+        * Disabled when ``SEED_DEMO`` env var is ``false`` / ``0`` / ``no``
+          (production deployments).
+        * Email must be in the whitelist of seeded demo accounts.
+        * Account must exist and be active. Missing rows return 404 with a
+          message that points the operator at the seed log.
+        * Rate-limited per source IP (``demo_{ip}`` bucket) — the same
+          login_limiter so repeated taps don't bypass throttling.
+    """
+    import os
+
+    if os.environ.get("SEED_DEMO", "true").lower() in ("false", "0", "no"):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Demo login is disabled on this server (SEED_DEMO=false).",
+        )
+
+    email = (data.email or "").strip().lower()
+    if email not in _DEMO_EMAIL_WHITELIST:
+        # Same generic 401 as a wrong password — avoid leaking whether the
+        # email is in the whitelist via an attacker-distinguishable response.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
+
+    client_ip = client_identifier(request)
+    allowed, _remaining = login_limiter.is_allowed(f"demo_{client_ip}")
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many login attempts. Please wait a minute and try again.",
+            headers={"Retry-After": "60"},
+        )
+
+    return await service.demo_login(email)
+
+
 @router.post("/auth/login/", response_model=TokenResponse)
 @router.post("/auth/login", response_model=TokenResponse, include_in_schema=False)
 async def login(

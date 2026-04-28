@@ -98,35 +98,51 @@ export function LoginPage() {
     setEmail('');
     setPassword('');
     try {
-      // Try login first
-      let res = await fetch('/api/v1/users/auth/login/', {
+      // Use the dedicated demo-login endpoint (v2.6.22) which mints tokens
+      // for seeded demo accounts without a password — necessary because the
+      // backend seeder generates a fresh `secrets.token_urlsafe(16)` per
+      // install (BUG-D01) and the frontend has no way to read it.
+      let res = await fetch('/api/v1/users/auth/demo-login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: demoEmail, password: 'DemoPass1234!' }),
+        body: JSON.stringify({ email: demoEmail }),
       });
 
-      // If user doesn't exist, auto-register then login
-      if (!res.ok) {
-        const errData = await res.json().catch(() => null);
-        const parsedMsg = extractErrorMessageFromBody(errData) ?? '';
-        if (parsedMsg.includes('Invalid') || parsedMsg.includes('not found') || res.status === 401) {
-          // Auto-register demo user
-          const regRes = await fetch('/api/v1/users/auth/register/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: demoEmail,
-              password: 'DemoPass1234!',
-              full_name: (demoEmail.split('@')[0] ?? 'Demo User').replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-            }),
-          });
-          if (regRes.ok) {
-            // Re-try login after registration
-            res = await fetch('/api/v1/users/auth/login/', {
+      // Fallback path: if the server is older than v2.6.22 it returns 404
+      // for /demo-login/. Try the legacy login + auto-register pair so
+      // existing deployments don't break the moment we ship the new client.
+      if (res.status === 404) {
+        res = await fetch('/api/v1/users/auth/login/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: demoEmail, password: 'DemoPass1234!' }),
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => null);
+          const parsedMsg = extractErrorMessageFromBody(errData) ?? '';
+          if (
+            parsedMsg.includes('Invalid') ||
+            parsedMsg.includes('not found') ||
+            res.status === 401
+          ) {
+            const regRes = await fetch('/api/v1/users/auth/register/', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: demoEmail, password: 'DemoPass1234!' }),
+              body: JSON.stringify({
+                email: demoEmail,
+                password: 'DemoPass1234!',
+                full_name: (demoEmail.split('@')[0] ?? 'Demo User')
+                  .replace(/[._]/g, ' ')
+                  .replace(/\b\w/g, (c) => c.toUpperCase()),
+              }),
             });
+            if (regRes.ok) {
+              res = await fetch('/api/v1/users/auth/login/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: demoEmail, password: 'DemoPass1234!' }),
+              });
+            }
           }
         }
       }

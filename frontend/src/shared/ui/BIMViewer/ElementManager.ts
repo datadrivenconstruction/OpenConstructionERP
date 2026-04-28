@@ -158,6 +158,15 @@ export interface BIMModelData {
   project_id?: string;
   /** Last updated ISO date */
   updated_at?: string;
+  /** Human-readable failure description set by the background processor.
+   *  Surfaced in the non-ready overlay so users can see *why* conversion
+   *  failed instead of a generic "Error" placeholder. */
+  error_message?: string | null;
+  /** Free-form metadata bag from the backend. Keys we read here:
+   *    - error_code: 'ddc_not_found' | 'ddc_failed' | 'zero_elements' | 'unexpected'
+   *    - converter_id: 'rvt' | 'ifc' | 'dwg' | 'dgn' (when error_code is converter-related)
+   *    - install_endpoint: POST URL to install the missing converter */
+  metadata?: Record<string, unknown> | null;
 }
 
 /* ── Discipline Colors ─────────────────────────────────────────────────── */

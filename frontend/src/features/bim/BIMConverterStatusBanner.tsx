@@ -55,20 +55,63 @@ export function BIMConverterStatusBanner({
 
   const installMutation = useMutation({
     mutationFn: (converterId: string) => installBIMConverter(converterId),
-    onSuccess: (_result, converterId) => {
+    onSuccess: (result, converterId) => {
       const conv = data?.converters.find((c) => c.id === converterId);
       const sizeMb = conv?.size_mb ?? 0;
-      addToast({
-        type: 'success',
-        title: t('bim.converter_install_success_title', {
-          defaultValue: 'Converter installed',
-        }),
-        message: t('bim.converter_install_success_msg', {
-          defaultValue: 'Installed {{name}} ({{size}} MB)',
-          name: conv?.name ?? converterId.toUpperCase(),
-          size: sizeMb,
-        }),
-      });
+      const name = conv?.name ?? converterId.toUpperCase();
+
+      if (result.installed) {
+        addToast({
+          type: 'success',
+          title: t('bim.converter_install_success_title', {
+            defaultValue: 'Converter installed',
+          }),
+          message:
+            result.message ||
+            t('bim.converter_install_success_msg', {
+              defaultValue: 'Installed {{name}} ({{size}} MB)',
+              name,
+              size: sizeMb,
+            }),
+        });
+      } else if (result.platform_unsupported && result.platform === 'linux') {
+        // Linux: backend can't auto-install, so surface the apt command
+        // so the user can copy-paste it into a root terminal.  The toast
+        // stays open longer than the default since the user needs time
+        // to read multi-line shell instructions.
+        const apt = result.apt_package
+          ? `\n\nsudo apt install -y ${result.apt_package}`
+          : '';
+        addToast(
+          {
+            type: 'info',
+            title: t('bim.converter_install_linux_title', {
+              defaultValue: 'Linux auto-install unavailable',
+            }),
+            message:
+              (result.message || `Run apt commands to install ${name}`) + apt,
+          },
+          { duration: 30_000 },
+        );
+      } else if (result.platform_unsupported) {
+        addToast({
+          type: 'warning',
+          title: t('bim.converter_install_unsupported_title', {
+            defaultValue: 'Auto-install not available',
+          }),
+          message: result.message || `${name} can't be auto-installed on this OS.`,
+        });
+      } else {
+        // installed === false but no platform_unsupported flag → the
+        // download finished but the smoke test or another check failed.
+        addToast({
+          type: 'warning',
+          title: t('bim.converter_install_problem_title', {
+            defaultValue: 'Converter install incomplete',
+          }),
+          message: result.message || `${name} install did not complete cleanly.`,
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ['bim-converters'] });
       queryClient.invalidateQueries({ queryKey: ['takeoff', 'converters'] });
     },

@@ -5,6 +5,19 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.22] — 2026-04-28
+
+### Fixed
+- **"Demo login failed. Please try again." on every fresh install.** The seeder in `app.main._seed_demo_account` generates a fresh `secrets.token_urlsafe(16)` per install (BUG-D01 — no hardcoded credential is shipped) and persists it to a 0600 credentials file, but the frontend's "Demo login" button hard-codes `DemoPass1234!`. So login → 401, auto-register → 409 "already registered", user → "Demo login failed". Added a dedicated `POST /api/v1/users/auth/demo-login/` endpoint that mints tokens for whitelisted seeded accounts without a password check (gated by `SEED_DEMO=true`, rate-limited per IP). Frontend now hits this endpoint; falls back to the legacy login+register pair against pre-v2.6.22 servers so deployments don't break the moment the new client ships.
+- **3D viewer stuck silently when CAD conversion fails (Hans's report).** The non-ready overlay now renders the backend's `error_message` directly so users see *why* their model didn't render — "RVT converter not installed", "RVT version newer than the converter", "No elements extracted from this IFC file" — instead of a generic "Error" placeholder. Background processor populates a structured `metadata.error_code` (`ddc_not_found` / `ddc_failed` / `zero_elements` / `unexpected`) so the UI can dispatch on it.
+- **DWG/DGN converter install showed "Internal server error"** instead of the actual reason. The `POST /api/v1/takeoff/converters/{id}/install/` endpoint only translated `RuntimeError` to a 502 — any other exception (rate-limited GitHub API, JSON decode error, OS permission denied) leaked as a generic 500. Wrapped the whole handler in a top-level `except` that returns 502 with `{exception_class}: {message}` so the install banner displays the real cause and a manual-install link.
+- **Linux install attempts shown as failures.** When the backend returned the structured `platform_unsupported: true` body with apt-install instructions, the banner mutation treated `installed: false` as "success", flashing "Installed" toast text. Now the toast branches on `result.installed`: success, info+long-duration on Linux (with the apt commands), warning on smoke-test failure, error on network failure. `InstallConverterPrompt` mirrors the same logic and refuses to auto-retry the upload when the install didn't actually succeed.
+
+### Added
+- **Retry button on the BIM viewer error overlay** — re-runs background DDC conversion for a previously failed model via new `POST /api/v1/bim_hub/{model_id}/retry/` endpoint. Useful after the user installs a missing converter (the "Install converter" button on the overlay auto-retries on success), or when the original failure was transient (network blip, OOM during a parallel upload burst).
+- **Pre-flight converter check before RVT processing.** `_process_cad_in_background` now verifies the RVT converter is installed up front and returns `status="needs_converter"` with a specific install link, instead of letting the pipeline run to the generic "no elements extracted" message.
+- **Post-install smoke test for the Windows DDC converter.** After downloading binaries from GitHub, `POST /api/v1/takeoff/converters/{id}/install/` launches the binary once with a 15s timeout to catch missing-DLL errors (`STATUS_DLL_NOT_FOUND`, `STATUS_DLL_INIT_FAILED`). Failures surface immediately with re-install instructions instead of the user discovering the problem on their next CAD upload.
+
 ## [2.6.21] — 2026-04-28
 
 ### Added

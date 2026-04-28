@@ -396,6 +396,58 @@ class UserService:
             expires_in=self.settings.jwt_expire_minutes * 60,
         )
 
+    async def demo_login(self, email: str) -> TokenResponse:
+        """Issue tokens for a seeded demo account without a password check.
+
+        Caller (router) is responsible for whitelisting the email to one of
+        the seeded demo accounts and gating on ``SEED_DEMO``. This method
+        only verifies the row exists and is active, then mints the same
+        JWT pair as :meth:`login`. Bumps ``last_login_at`` with the same
+        60-second throttle so heavy demo traffic doesn't hammer Postgres.
+        """
+        user = await self.user_repo.get_by_email(email)
+        if user is None or not user.is_active:
+            # The seeder must have failed (rare) or the row was manually
+            # deleted. Surface a 404 so the operator knows to check the
+            # startup log — distinct from a 401 so it's clear this isn't
+            # a credential problem.
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=(
+                    f"Demo account {email!r} is not present on this server. "
+                    f"Check the startup log for the seeder output, or set "
+                    f"SEED_DEMO=true and restart."
+                ),
+            )
+
+        user_id = user.id
+        prior_last_login = user.last_login_at
+        now = datetime.now(UTC)
+        skip_write = False
+        if prior_last_login is not None:
+            prior = prior_last_login
+            if prior.tzinfo is None:
+                prior = prior.replace(tzinfo=UTC)
+            skip_write = (now - prior).total_seconds() < 60.0
+        if not skip_write:
+            await self.user_repo.update_fields(user_id, last_login_at=now)
+            user = await self.user_repo.get_by_id(user_id)
+
+        access_token = create_access_token(user, self.settings)
+        refresh_token = create_refresh_token(user, self.settings)
+
+        await _safe_publish(
+            "users.user.logged_in",
+            {"user_id": str(user.id), "demo": True},
+            source_module="oe_users",
+        )
+
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            expires_in=self.settings.jwt_expire_minutes * 60,
+        )
+
     async def refresh_tokens(self, refresh_token: str) -> TokenResponse:
         """Issue new token pair from a valid refresh token.
 

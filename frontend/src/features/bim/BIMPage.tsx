@@ -32,6 +32,8 @@ import {
   ChevronUp,
   CalendarDays,
   Trash2,
+  RotateCcw,
+  DownloadCloud,
   Eye,
   Layers,
   AlertTriangle,
@@ -89,6 +91,8 @@ import {
   deleteLink,
   listElementGroups,
   deleteElementGroup,
+  installBIMConverter,
+  retryBIMModelProcessing,
   type BIMElementGroup,
 } from './api';
 
@@ -776,10 +780,16 @@ function UploadPanel({
 
 /* ── Non-Ready Model Overlay ─────────────────────────────────────────── */
 
-function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
-  model: BIMModelData | null; onUploadConverted: () => void; onDelete: () => void;
+function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstallConverter }: {
+  model: BIMModelData | null;
+  onUploadConverted: () => void;
+  onDelete: () => void;
+  onRetry: () => Promise<void>;
+  onInstallConverter: (converterId: string) => Promise<void>;
 }) {
   const { t } = useTranslation();
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [isInstalling, setIsInstalling] = useState(false);
 
   // model is null while the models query is still hydrating after a fresh
   // upload / deep link — render a lightweight "loading" overlay so we don't
@@ -805,6 +815,14 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
   const fmt = (model.model_format || model.format || '').toUpperCase();
   const isProcessing = model.status === 'processing';
 
+  // Pull structured error context from the model metadata. The backend
+  // background processor populates these on failure; when missing we fall
+  // back to the generic translated strings.
+  const meta = (model.metadata ?? {}) as Record<string, unknown>;
+  const errorCode = typeof meta.error_code === 'string' ? meta.error_code : null;
+  const converterId = typeof meta.converter_id === 'string' ? meta.converter_id : null;
+  const backendMessage = (model.error_message || '').trim();
+
   const configs = {
     processing: { icon: <Loader2 size={32} className="text-blue-500 animate-spin" />, bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800', title: t('bim.overlay_processing_title'), desc: t('bim.overlay_processing_desc', { format: fmt }) },
     needs_converter: { icon: <AlertTriangle size={32} className="text-amber-500" />, bg: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800', title: t('bim.overlay_needs_converter_title'), desc: t('bim.overlay_needs_converter_desc', { format: fmt }) },
@@ -812,12 +830,35 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
   };
   const c = configs[model.status as keyof typeof configs] ?? configs.error;
 
+  // Render the backend-supplied actionable message when present so users
+  // see *why* their model didn't convert (DDC missing, RVT version
+  // mismatch, etc.) instead of a generic "Error" placeholder.
+  const description = !isProcessing && backendMessage ? backendMessage : c.desc;
+
+  const handleRetry = async () => {
+    if (isRetrying) return;
+    setIsRetrying(true);
+    try { await onRetry(); }
+    finally { setIsRetrying(false); }
+  };
+  const handleInstall = async () => {
+    if (!converterId || isInstalling) return;
+    setIsInstalling(true);
+    try { await onInstallConverter(converterId); }
+    finally { setIsInstalling(false); }
+  };
+
+  // Show install button when the failure is "converter missing"; otherwise
+  // show retry. Either way the user has a one-click path forward.
+  const showInstallButton = !isProcessing && errorCode === 'ddc_not_found' && !!converterId;
+  const showRetryButton = !isProcessing && !showInstallButton;
+
   return (
     <div className="flex flex-col items-center justify-center h-full bg-surface-secondary" role={isProcessing ? 'status' : 'alert'}>
       <div className="text-center max-w-md px-6 w-full">
         <div className={`mx-auto w-20 h-20 rounded-2xl ${c.bg} border flex items-center justify-center mb-5`}>{c.icon}</div>
         <h2 className="text-lg font-bold text-content-primary mb-2">{c.title}</h2>
-        <p className="text-sm text-content-secondary mb-2">{c.desc}</p>
+        <p className="text-sm text-content-secondary mb-2 whitespace-pre-line">{description}</p>
         <p className="text-[11px] text-content-quaternary mb-6">{model.name}{model.file_size ? ` · ${formatFileSize(model.file_size)}` : ''}</p>
 
         {isProcessing && (
@@ -844,7 +885,33 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
 
         {!isProcessing && (
           <div className="flex items-center justify-center gap-3 flex-wrap">
-            <button onClick={onUploadConverted} aria-label={t('bim.overlay_upload_converted_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-oe-blue text-white text-sm font-semibold hover:bg-oe-blue-dark transition-colors shadow-sm">
+            {showInstallButton && (
+              <button
+                onClick={handleInstall}
+                disabled={isInstalling}
+                aria-label={t('bim.overlay_install_converter_btn', { defaultValue: 'Install converter' })}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isInstalling ? <Loader2 size={15} className="animate-spin" /> : <DownloadCloud size={15} />}
+                {isInstalling
+                  ? t('bim.overlay_install_in_progress', { defaultValue: 'Installing…' })
+                  : t('bim.overlay_install_converter_btn', { defaultValue: 'Install converter' })}
+              </button>
+            )}
+            {showRetryButton && (
+              <button
+                onClick={handleRetry}
+                disabled={isRetrying}
+                aria-label={t('bim.overlay_retry_btn', { defaultValue: 'Retry conversion' })}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-oe-blue text-white text-sm font-semibold hover:bg-oe-blue-dark transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isRetrying ? <Loader2 size={15} className="animate-spin" /> : <RotateCcw size={15} />}
+                {isRetrying
+                  ? t('bim.overlay_retry_in_progress', { defaultValue: 'Retrying…' })
+                  : t('bim.overlay_retry_btn', { defaultValue: 'Retry conversion' })}
+              </button>
+            )}
+            <button onClick={onUploadConverted} aria-label={t('bim.overlay_upload_converted_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-surface-secondary transition-colors">
               <UploadCloud size={15} /> {t('bim.overlay_upload_converted_btn')}
             </button>
             <button onClick={onDelete} aria-label={t('bim.overlay_delete_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
@@ -2695,6 +2762,56 @@ export function BIMPage() {
             }}
             onDelete={() => {
               if (activeModel) handleDeleteModel(activeModel.id, activeModel.name);
+            }}
+            onRetry={async () => {
+              if (!activeModel) return;
+              try {
+                await retryBIMModelProcessing(activeModel.id);
+                addToast({
+                  type: 'success',
+                  title: t('bim.retry_scheduled_title', { defaultValue: 'Retry scheduled' }),
+                  message: t('bim.retry_scheduled_desc', { defaultValue: 'The model is being re-processed. This page will update when done.' }),
+                });
+                queryClient.invalidateQueries({ queryKey: ['bim-models', projectId] });
+                queryClient.invalidateQueries({ queryKey: ['bim-model', activeModel.id] });
+              } catch (e) {
+                addToast({
+                  type: 'error',
+                  title: t('bim.retry_failed_title', { defaultValue: 'Retry failed' }),
+                  message: e instanceof Error ? e.message : String(e),
+                });
+              }
+            }}
+            onInstallConverter={async (converterId) => {
+              try {
+                const r = await installBIMConverter(converterId);
+                if (r.installed) {
+                  addToast({
+                    type: 'success',
+                    title: t('bim.converter_installed_title', { defaultValue: 'Converter installed' }),
+                    message: r.message || t('bim.converter_installed_desc', { defaultValue: 'Retrying conversion now…' }),
+                  });
+                  // Auto-retry after a successful install — saves the user
+                  // an extra click and keeps the workflow continuous.
+                  if (activeModel) {
+                    await retryBIMModelProcessing(activeModel.id);
+                    queryClient.invalidateQueries({ queryKey: ['bim-models', projectId] });
+                    queryClient.invalidateQueries({ queryKey: ['bim-model', activeModel.id] });
+                  }
+                } else {
+                  addToast({
+                    type: 'warning',
+                    title: t('bim.converter_install_problem_title', { defaultValue: 'Converter install incomplete' }),
+                    message: r.message || t('bim.converter_install_problem_desc', { defaultValue: 'Install finished but the binary did not pass the smoke test.' }),
+                  });
+                }
+              } catch (e) {
+                addToast({
+                  type: 'error',
+                  title: t('bim.converter_install_failed_title', { defaultValue: 'Converter install failed' }),
+                  message: e instanceof Error ? e.message : String(e),
+                });
+              }
             }}
           />
         ) : activeModelId ? (

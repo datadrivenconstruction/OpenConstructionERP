@@ -961,6 +961,44 @@ async def _process_cad_in_background(
 
     model_uuid = _uuid.UUID(model_id)
 
+    # Pre-flight: check the converter binary up front so we can surface a
+    # specific actionable error ("install the RVT converter") instead of the
+    # generic "no elements extracted" message that lands when DDC isn't found
+    # mid-pipeline. IFC has a built-in text fallback so we don't gate on it.
+    if ext.lower() == ".rvt":
+        try:
+            from app.modules.boq.cad_import import find_converter as _fc
+
+            if _fc("rvt") is None:
+                async with async_session_factory() as session:
+                    model = (
+                        await session.execute(
+                            select(BIMModel).where(BIMModel.id == model_uuid)
+                        )
+                    ).scalar_one_or_none()
+                    if model is not None:
+                        model.status = "needs_converter"
+                        model.error_message = (
+                            "The Revit (RVT) converter is not installed on this "
+                            "server. Open Settings → BIM Converters and click "
+                            "Install for RVT, then click Retry on this model."
+                        )
+                        meta = dict(model.metadata_ or {})
+                        meta["error_code"] = "ddc_not_found"
+                        meta["converter_id"] = "rvt"
+                        meta["install_endpoint"] = (
+                            "/api/v1/takeoff/converters/rvt/install/"
+                        )
+                        model.metadata_ = meta
+                        await session.commit()
+                logger.warning(
+                    "RVT pre-flight failed for model %s: converter not installed",
+                    model_id,
+                )
+                return
+        except Exception:  # noqa: BLE001 — pre-flight is best-effort
+            logger.exception("RVT converter pre-flight check failed for %s", model_id)
+
     try:
         content = await get_storage_backend().get(cad_storage_key)
 
@@ -1086,17 +1124,31 @@ async def _process_cad_in_background(
                     element_count, len(result["storeys"]), model_id,
                 )
             else:
+                meta = dict(model.metadata_ or {})
                 if ext == ".rvt":
                     model.status = "needs_converter"
                     model.error_message = (
-                        "RVT files require the DDC cad2data converter. "
-                        "Install cad2data or convert to IFC first, then re-upload."
+                        "The Revit (RVT) converter could not extract any elements "
+                        "from this file. The most common causes are: the converter "
+                        "isn't installed (Settings → BIM Converters), the RVT was "
+                        "saved with a Revit version newer than the converter, or "
+                        "the file is corrupt. Try installing/updating the RVT "
+                        "converter and clicking Retry."
+                    )
+                    meta["error_code"] = "ddc_failed"
+                    meta["converter_id"] = "rvt"
+                    meta["install_endpoint"] = (
+                        "/api/v1/takeoff/converters/rvt/install/"
                     )
                 else:
                     model.status = "error"
                     model.error_message = (
-                        "No elements could be extracted from this IFC file."
+                        "No elements could be extracted from this IFC file. "
+                        "Open the file in a viewer like BIMcollab Zoom to "
+                        "confirm it isn't empty, then click Retry."
                     )
+                    meta["error_code"] = "zero_elements"
+                model.metadata_ = meta
                 logger.warning(
                     "Background CAD processed but no elements found for model %s",
                     model_id,
@@ -1115,7 +1167,13 @@ async def _process_cad_in_background(
                 ).scalar_one_or_none()
                 if model is not None:
                     model.status = "error"
-                    model.error_message = f"Processing failed: {exc}"
+                    model.error_message = (
+                        f"Processing failed: {exc}. Click Retry to try again, or "
+                        f"contact support if this keeps happening."
+                    )
+                    meta = dict(model.metadata_ or {})
+                    meta["error_code"] = "unexpected"
+                    model.metadata_ = meta
                     await session.commit()
         except Exception as exc2:
             logger.exception("Failed to mark model %s as error: %s", model_id, exc2)
@@ -1555,6 +1613,100 @@ async def generate_pdf_sheets(
         model_name=model.name or "BIM Model",
         user_id=user_id or "",
     )
+
+    return {
+        "status": "scheduled",
+        "model_id": str(model_id),
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Retry conversion — re-runs the background CAD processor for a model that
+# previously failed (status="error" / "needs_converter"). Useful when the
+# user installs a missing converter after upload, or the original failure
+# was transient (network blip, OOM during a parallel upload burst).
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+@router.post("/{model_id}/retry/", status_code=202)
+async def retry_model_processing(
+    model_id: uuid.UUID,
+    background_tasks: BackgroundTasks,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
+    service: BIMHubService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Re-schedule background DDC conversion for a previously-failed model.
+
+    Resets ``status`` to ``processing``, clears ``error_message``, and re-
+    invokes :func:`_process_cad_in_background` against the same original CAD
+    blob.  Returns 202 immediately — the frontend already polls
+    ``GET /{model_id}/`` and will transition the UI when the worker finishes.
+
+    Refuses to retry models that:
+        * are already ``ready`` (no need),
+        * are already ``processing`` (a worker is in flight),
+        * have no original CAD blob recorded (re-upload required).
+    """
+    from app.modules.bim_hub import file_storage as _bim_storage
+
+    model = await _verify_model_access(service, model_id, user_id or "")
+
+    if model.status == "ready":
+        return {
+            "status": "noop",
+            "model_id": str(model_id),
+            "message": "Model is already ready — nothing to retry.",
+        }
+    if model.status == "processing":
+        return {
+            "status": "noop",
+            "model_id": str(model_id),
+            "message": "Model is already being processed.",
+        }
+
+    model_format = (model.model_format or "").lower()
+    if not model_format:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Model has no format recorded — cannot retry.",
+        )
+
+    ext = "." + model_format.lstrip(".")
+    cad_storage_key = _bim_storage.original_cad_key(
+        project_id=model.project_id,
+        model_id=model_id,
+        ext=ext,
+    )
+    backend_store = _bim_storage._backend()
+    if not await backend_store.exists(cad_storage_key):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=(
+                "Original CAD file is no longer available — re-upload the "
+                "model to retry."
+            ),
+        )
+
+    # Clear previous error state before re-scheduling so the frontend's
+    # polling immediately reflects "processing" once the retry kicks in.
+    model.status = "processing"
+    model.error_message = None
+    meta = dict(model.metadata_ or {})
+    for _k in ("error_code", "install_endpoint"):
+        meta.pop(_k, None)
+    model.metadata_ = meta
+    await service.session.commit()
+
+    background_tasks.add_task(
+        _process_cad_in_background,
+        project_id=str(model.project_id),
+        model_id=str(model_id),
+        cad_storage_key=cad_storage_key,
+        ext=ext,
+        conversion_depth="standard",
+    )
+    logger.info("Retry scheduled for model %s", model_id)
 
     return {
         "status": "scheduled",
