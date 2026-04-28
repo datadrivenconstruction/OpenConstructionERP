@@ -14,6 +14,7 @@ import {
   Trash2,
   Star,
   Sparkles,
+  Globe,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, CountryFlag } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
@@ -820,16 +821,20 @@ function LoadedDatabasesSection() {
                 const isDeleting = deletingRegion === rs.region;
                 // Fallback labels for non-CWICR regions
                 const regionLabel = db?.name ?? (rs.region === 'CUSTOM' ? 'My Database' : rs.region === 'DACH' ? 'DACH Region' : rs.region);
-                const regionFlag = db?.flagId ?? (rs.region === 'DACH' ? 'de' : undefined);
+                // Pass either the curated flagId or the raw region key —
+                // CountryFlag's resolveIso handles both shapes (DE_BERLIN
+                // -> de via prefix split, USA_USD -> us via the
+                // non-ISO-prefix map). Falling back to a Globe icon when
+                // it can't resolve, never to "first 2 letters of city".
+                const flagCode = db?.flagId ?? (rs.region === 'DACH' ? 'de' : rs.region);
                 return (
                   <tr key={rs.region} className="hover:bg-surface-secondary/50 transition-colors">
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
-                        {regionFlag ? <MiniFlag code={regionFlag} /> : (
-                          <span className="flex h-5 w-8 items-center justify-center rounded-sm bg-surface-tertiary text-2xs font-medium text-content-tertiary">
-                            {rs.region.slice(0, 2)}
-                          </span>
-                        )}
+                        <span className="inline-flex h-5 w-8 items-center justify-center">
+                          <CountryFlag code={flagCode} size={32} className="shadow-xs border border-black/5" />
+                          <Globe size={14} className="text-content-tertiary hidden [&:only-child]:block" />
+                        </span>
                         <div>
                           <span className="text-sm font-medium text-content-primary">
                             {regionLabel}
