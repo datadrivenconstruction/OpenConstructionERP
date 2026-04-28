@@ -5,6 +5,12 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.19] — 2026-04-28
+
+### Fixed
+- **Resource name vs position description X-alignment** — `InlineTextInput`'s display-mode span already adds `px-1` (4px) of horizontal padding internally. The resource name slot was *also* applying its own `pl-1`, double-padding to 8px while the position description column padding is only 4px (`!pl-1`). Removed the outer `pl-1` so the input span's own 4px is the single source of truth — resource names now start at the exact same X coordinate as position description text.
+- **Resource quantity vs position quantity X-alignment** — same double-padding bug on numeric slots. `InlineNumberInput`'s display span adds `px-1` (4px), and the qty slot had `pr-2` (8px), totalling 12px from slot right-edge to text right-edge while the position quantity cell uses only 8px (`!pr-2`). Resource qty slot reduced to `pr-1 pl-1` (4px) so combined with the input's 4px it sums to 8px, matching the position cell exactly.
+
 ## [2.6.18] — 2026-04-28
 
 ### Fixed

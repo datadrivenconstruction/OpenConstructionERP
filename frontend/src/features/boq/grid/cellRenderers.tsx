@@ -2478,12 +2478,14 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
       </span>
 
       {/* Name — flex-1, mirrors the position description column.
-          pl-1 matches the position description cellClass `!pl-1`, so
-          resource names start at the exact same X as position names.
+          NO outer padding: InlineTextInput's display-mode span already
+          adds `px-1` internally (4px), which matches the position
+          description cellClass `!pl-1` (4px) — so resource names start
+          at the exact same X as position names.
           Committing a different name strips the catalogue code
           (handleNameChange) so the row becomes a customised resource,
           savable via the BookmarkPlus action. */}
-      <span className="truncate min-w-0 flex-1 pl-1 self-center text-left text-content-secondary font-medium">
+      <span className="truncate min-w-0 flex-1 self-center text-left text-content-secondary font-medium">
         <InlineTextInput value={originalName} onCommit={handleNameChange} className="w-full text-xs text-left" />
       </span>
 
@@ -2500,7 +2502,11 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
         />
       </span>
 
-      <span className="shrink-0 text-right tabular-nums text-content-secondary self-center pr-2 pl-2" style={{ width: `${colWidths.quantity}px` }}>
+      {/* Qty — slot pr-1/pl-1 (4px) + InlineNumberInput's display-span
+          px-1 (4px) sums to 8px, matching the position quantity cell's
+          `!pr-2 !pl-2`. Without this compensation the resource qty
+          number sits 4px LEFT of the position qty number. */}
+      <span className="shrink-0 text-right tabular-nums text-content-secondary self-center pr-1 pl-1" style={{ width: `${colWidths.quantity}px` }}>
         <InlineNumberInput value={qty} onCommit={handleQtyChange} fmt={ctx.fmt} className="w-full text-xs" />
       </span>
 
