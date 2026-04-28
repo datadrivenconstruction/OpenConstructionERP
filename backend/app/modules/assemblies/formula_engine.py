@@ -143,7 +143,10 @@ class FormulaEvaluator:
                 try:
                     left = self._safe_eval(parts[0].strip())
                     right = self._safe_eval(parts[1].strip())
-                except Exception:
+                except FormulaError:
+                    # Wrong split — try the next operator. Programmer
+                    # errors (TypeError etc.) propagate so they don't
+                    # silently corrupt cost numbers.
                     continue
                 if op == ">=":
                     return left >= right

@@ -31,7 +31,7 @@ import {
   TrendingUp,
   Trash2,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, InfoHint, SkeletonTable, CountryFlag, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, InfoHint, SkeletonTable, CountryFlag, Breadcrumb, ConfirmDialog, KvList, Kv } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiDelete, triggerDownload } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
@@ -39,6 +39,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useCostDatabaseStore, REGION_MAP } from '@/stores/useCostDatabaseStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import type { CostItemMetadata } from './api';
 import { EscalationCalculator } from './EscalationCalculator';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -62,7 +63,7 @@ interface CostItem {
   region: string | null;
   classification: Record<string, string>;
   components: CostComponent[];
-  metadata_: Record<string, number>;
+  metadata_: CostItemMetadata;
   source: string;
 }
 
@@ -1822,6 +1823,135 @@ function CreateCostItemModal({
   );
 }
 
+/* ── Variant detail panel ──────────────────────────────────────────────── */
+
+/**
+ * Inline detail strip rendered below a cost-DB row when the underlying
+ * CWICR rate code carries `metadata_.variants` (≥2 entries).
+ *
+ * Surfaces:
+ *   • A `KvList` block of variant_stats (count / min / median / mean / max).
+ *   • A small table of every variant row (Variant / Price / Per unit /
+ *     "Used in N estimates"), sorted by price ascending so the user
+ *     instinctively reads the spread top-to-bottom.
+ *   • A "Median" badge on the row whose price equals `stats.median` —
+ *     this is the variant that the BOQ apply flow defaults to.
+ *
+ * Pure presentational — no fetch, no apply action. The picker that
+ * actually applies a variant lives in the BOQ-side flow (separate file).
+ */
+function CostVariantDetail({
+  variants,
+  stats,
+  fmt,
+  t,
+}: {
+  variants: import('./api').CostVariant[];
+  stats: import('./api').VariantStats;
+  fmt: (n: number) => string;
+  t: ReturnType<typeof import('react-i18next').useTranslation>['t'];
+}) {
+  // Stable sort by price ascending; ties keep original order.
+  const sorted = useMemo(
+    () => [...variants].sort((a, b) => a.price - b.price),
+    [variants],
+  );
+
+  // The "median" variant we tag in the table — match by exact price first,
+  // fall back to floor(len/2) when the median doesn't land on a real entry.
+  const medianIdx = useMemo(() => {
+    const exact = sorted.findIndex((v) => v.price === stats.median);
+    return exact >= 0 ? exact : Math.floor(sorted.length / 2);
+  }, [sorted, stats.median]);
+
+  return (
+    <div className="mb-4 rounded-lg border border-oe-blue-subtle bg-oe-blue-subtle/10 p-3 animate-fade-in">
+      <div className="mb-2.5 flex items-center gap-2">
+        <Layers size={13} className="text-oe-blue shrink-0" />
+        <span className="text-xs font-semibold text-content-primary">
+          {t('costs.variant_count', { defaultValue: 'Variants' })}
+          <span className="ml-1.5 rounded bg-oe-blue-subtle/40 px-1.5 py-0.5 text-2xs font-normal text-oe-blue">
+            {stats.count}
+          </span>
+        </span>
+        {stats.group && (
+          <span
+            className="truncate text-2xs text-content-tertiary"
+            title={stats.group}
+          >
+            {stats.group}
+          </span>
+        )}
+      </div>
+
+      {/* Stats summary — KvList primitive shared with the BIM drawer */}
+      <div className="mb-3 max-w-md rounded bg-surface-primary/60 px-3 py-2">
+        <KvList>
+          <Kv label={t('costs.variant_min', { defaultValue: 'Min' })} value={fmt(stats.min)} />
+          <Kv label={t('costs.variant_median', { defaultValue: 'Median' })} value={fmt(stats.median)} />
+          <Kv label={t('costs.variant_mean', { defaultValue: 'Mean' })} value={fmt(stats.mean)} />
+          <Kv label={t('costs.variant_max', { defaultValue: 'Max' })} value={fmt(stats.max)} />
+          {stats.position_count != null && stats.position_count > 0 && (
+            <Kv
+              label={t('costs.variant_position_count_label', { defaultValue: 'Estimates' })}
+              value={stats.position_count.toLocaleString()}
+            />
+          )}
+        </KvList>
+      </div>
+
+      {/* Variants table */}
+      <div className="overflow-hidden rounded border border-border-light">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="bg-surface-tertiary text-left">
+              <th className="px-2 py-1.5 w-10 text-center text-2xs font-medium text-content-secondary">#</th>
+              <th className="px-2 py-1.5 text-2xs font-medium text-content-secondary">
+                {t('costs.variant_label', { defaultValue: 'Variant' })}
+              </th>
+              <th className="px-2 py-1.5 text-right text-2xs font-medium text-content-secondary">
+                {t('costs.rate', { defaultValue: 'Rate' })}
+              </th>
+              <th className="px-2 py-1.5 text-right text-2xs font-medium text-content-secondary">
+                {t('costs.variant_per_unit', { defaultValue: 'Per unit' })}
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border-light">
+            {sorted.map((v, i) => {
+              const isMedian = i === medianIdx;
+              return (
+                <tr
+                  key={`${v.index}-${v.label}`}
+                  className={isMedian ? 'bg-oe-blue-subtle/15' : 'hover:bg-surface-secondary/30'}
+                >
+                  <td className="px-2 py-1.5 text-center font-mono text-2xs text-content-tertiary">{v.index + 1}</td>
+                  <td className="px-2 py-1.5 text-content-primary">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate" title={v.label}>{v.label}</span>
+                      {isMedian && (
+                        <Badge variant="blue" size="sm" className="text-2xs shrink-0">
+                          {t('costs.variant_default_median_chip', { defaultValue: 'Median' })}
+                        </Badge>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-2 py-1.5 text-right tabular-nums font-semibold text-content-primary">
+                    {fmt(v.price)}
+                  </td>
+                  <td className="px-2 py-1.5 text-right tabular-nums text-content-secondary">
+                    {v.price_per_unit != null ? fmt(v.price_per_unit) : '—'}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 /* ── Cost Item Row with expand ─────────────────────────────────────────── */
 
 function CostItemRow({
@@ -1861,6 +1991,14 @@ function CostItemRow({
   const laborHours = meta.labor_hours ?? 0;
   const workers = meta.workers_per_unit ?? 0;
 
+  // Variant detection — see frontend/src/features/costs/api.ts for the
+  // CostVariant / VariantStats shapes.  ≥2 means it's worth surfacing.
+  const variants = meta.variants ?? [];
+  const variantStats = meta.variant_stats;
+  const variantCount = variantStats?.count ?? 0;
+  const hasVariants = variantCount >= 2;
+  const isExpandable = hasComponents || hasVariants;
+
   // Classify components by type
   const materials = (item.components ?? []).filter((c) => c.type === 'material');
   const machines = (item.components ?? []).filter((c) => c.type === 'equipment' || c.type === 'operator' || c.type === 'electricity');
@@ -1874,9 +2012,9 @@ function CostItemRow({
   return (
     <>
       <tr
-        onClick={hasComponents ? onToggle : undefined}
+        onClick={isExpandable ? onToggle : undefined}
         className={`group transition-colors ${
-          hasComponents ? 'cursor-pointer' : ''
+          isExpandable ? 'cursor-pointer' : ''
         } ${isExpanded ? 'bg-oe-blue-subtle/10' : isSelected ? 'bg-oe-blue-subtle/5' : 'hover:bg-surface-secondary/50'}`}
       >
         <td className="px-2 py-3 w-10">
@@ -1908,7 +2046,7 @@ function CostItemRow({
         </td>
         <td className="px-4 py-3 text-content-primary max-w-[400px]">
           <div className="flex items-center gap-2">
-            {hasComponents && (
+            {isExpandable && (
               isExpanded
                 ? <ChevronUp size={14} className="text-oe-blue shrink-0" />
                 : <ChevronDown size={14} className="text-content-quaternary shrink-0" />
@@ -1930,7 +2068,22 @@ function CostItemRow({
           <Badge variant="neutral" size="sm">{item.unit}</Badge>
         </td>
         <td className="px-4 py-3 text-right font-semibold text-content-primary tabular-nums">
-          {fmt(item.rate)}
+          <div className="inline-flex items-center gap-1.5">
+            <span>{fmt(item.rate)}</span>
+            {hasVariants && variantStats && (
+              <Badge
+                variant="blue"
+                size="sm"
+                className="text-2xs"
+                // Tooltip shows the price range so the user sees the spread
+                // without having to expand the row.
+              >
+                <span title={`${fmt(variantStats.min)} – ${fmt(variantStats.max)}`}>
+                  {t('costs.variants_count', { count: variantCount, defaultValue: '{{count}} variants' })}
+                </span>
+              </Badge>
+            )}
+          </div>
         </td>
         <td className="px-4 py-3 text-center">
           {cls.collection || cls.code || cls.din276 ? (
@@ -1986,7 +2139,7 @@ function CostItemRow({
       </tr>
 
       {/* Expanded detail */}
-      {isExpanded && hasComponents && (
+      {isExpanded && isExpandable && (
         <tr>
           <td colSpan={7} className="p-0">
             <div className="bg-surface-secondary/30 border-t border-b border-border-light px-6 py-4 animate-fade-in">
@@ -2004,7 +2157,19 @@ function CostItemRow({
                 </div>
               )}
 
+              {/* Variant detail — abstract-resource price options behind this rate */}
+              {hasVariants && variantStats && (
+                <CostVariantDetail
+                  variants={variants}
+                  stats={variantStats}
+                  fmt={fmt}
+                  t={t}
+                />
+              )}
+
               {/* Cost breakdown summary cards */}
+              {hasComponents && (
+              <>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 <div className="rounded-lg bg-surface-primary border border-border-light p-3">
                   <div className="flex items-center gap-1.5 mb-1">
@@ -2152,6 +2317,8 @@ function CostItemRow({
                   </tbody>
                 </table>
               </div>
+              </>
+              )}
 
               {/* All Properties */}
               <details className="mt-4">

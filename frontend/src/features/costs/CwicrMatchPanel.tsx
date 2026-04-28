@@ -1,10 +1,38 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Sparkles, CheckCircle2, Loader2 } from 'lucide-react';
-import { matchCwicr, type CwicrMatchMode, type CwicrMatchResult } from './api';
+import { Badge } from '@/shared/ui';
+import { apiGet } from '@/shared/lib/api';
+import {
+  matchCwicr,
+  type CostItemMetadata,
+  type CostVariant,
+  type CwicrMatchMode,
+  type CwicrMatchResult,
+} from './api';
+import { VariantPicker } from './VariantPicker';
+
+/** Slim view of `CostItemResponse` — just the fields we need to drive
+ *  the variant picker. */
+interface CostItemDetail {
+  id: string;
+  unit: string;
+  rate: number;
+  currency: string;
+  metadata: CostItemMetadata;
+}
+
+/** Pending variant pick — stored in state so the picker can render once
+ *  outside the apply handler and the handler can resolve sequentially. */
+interface PendingVariantPick {
+  detail: CostItemDetail;
+  match: CwicrMatchResult;
+  anchorEl: HTMLElement | null;
+  resolve: (chosen: CostVariant | null) => void;
+}
 
 /* ── Component ────────────────────────────────────────────────────────── */
 
@@ -52,6 +80,12 @@ export function CwicrMatchPanel(props: CwicrMatchPanelProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [appliedId, setAppliedId] = useState<string | null>(null);
+  /** While true, the row's Apply button shows a spinner (we're fetching
+   *  the full CostItem to discover whether variants exist). */
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [activeVariantPick, setActiveVariantPick] = useState<PendingVariantPick | null>(null);
+  /** Per-row Apply button refs so the picker can anchor next to the click. */
+  const applyButtonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   // Reset the "Applied!" check mark when the user retypes.
   useEffect(() => {
@@ -96,8 +130,51 @@ export function CwicrMatchPanel(props: CwicrMatchPanelProps) {
   );
 
   const handleApply = useCallback(
-    (match: CwicrMatchResult) => {
-      onApply(match);
+    async (match: CwicrMatchResult) => {
+      // Fetch the full cost item to discover whether it carries CWICR
+      // abstract-resource variants.  One extra GET only when the user
+      // actually clicks Apply — negligible.
+      setResolvingId(match.cost_item_id);
+      let detail: CostItemDetail | null = null;
+      try {
+        detail = await apiGet<CostItemDetail>(`/v1/costs/${match.cost_item_id}`);
+      } catch {
+        // Fetch failed — fall back to the original flow so the user
+        // doesn't get stuck.  Apply with the matcher's scalar fields.
+        detail = null;
+      } finally {
+        setResolvingId(null);
+      }
+
+      const variants = detail?.metadata?.variants;
+      const stats = detail?.metadata?.variant_stats;
+
+      // No variants or fetch failed → original behaviour.
+      if (!detail || !variants || variants.length < 2 || !stats) {
+        onApply(match);
+        setAppliedId(match.cost_item_id);
+        return;
+      }
+
+      // Has variants → run the picker, anchored at the row's Apply
+      // button so positioning is stable.
+      const anchorEl = applyButtonRefs.current.get(match.cost_item_id) ?? null;
+      const chosen = await new Promise<CostVariant | null>((resolve) => {
+        setActiveVariantPick({ detail: detail as CostItemDetail, match, anchorEl, resolve });
+      });
+
+      // Cancelled — leave the row untouched.
+      if (!chosen) return;
+
+      onApply({
+        ...match,
+        unit_rate: chosen.price,
+        applied_variant: {
+          label: chosen.label,
+          price: chosen.price,
+          index: chosen.index,
+        },
+      });
       setAppliedId(match.cost_item_id);
     },
     [onApply],
@@ -213,16 +290,46 @@ export function CwicrMatchPanel(props: CwicrMatchPanelProps) {
                 <td title={row.description}>{row.description}</td>
                 <td>{row.unit}</td>
                 <td>
-                  {row.unit_rate.toFixed(2)} {row.currency}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}>
+                    <span>
+                      {row.unit_rate.toFixed(2)} {row.currency}
+                    </span>
+                    {/* Variant badge — backend MatchResult currently doesn't
+                        carry variant_count, so this is a no-op until the
+                        schema is extended.  Forward-compatible only. */}
+                    {(row.variant_count ?? 0) >= 2 && (
+                      <Badge variant="blue" size="sm" className="text-2xs">
+                        <span
+                          title={
+                            row.variant_min != null && row.variant_max != null
+                              ? `${row.variant_min.toFixed(2)} – ${row.variant_max.toFixed(2)} ${row.currency}`
+                              : undefined
+                          }
+                        >
+                          {t('costs.variants_count', {
+                            count: row.variant_count ?? 0,
+                            defaultValue: '{{count}} variants',
+                          })}
+                        </span>
+                      </Badge>
+                    )}
+                  </span>
                 </td>
                 <td title={`source=${row.source}`}>{formatScore(row.score)}</td>
                 <td>
                   <button
                     type="button"
-                    onClick={() => handleApply(row)}
+                    ref={(el) => {
+                      if (el) applyButtonRefs.current.set(row.cost_item_id, el);
+                      else applyButtonRefs.current.delete(row.cost_item_id);
+                    }}
+                    onClick={() => void handleApply(row)}
+                    disabled={resolvingId === row.cost_item_id}
                     data-testid={`cwicr-match-apply-${row.code}`}
                   >
-                    {appliedId === row.cost_item_id ? (
+                    {resolvingId === row.cost_item_id ? (
+                      <Loader2 size={14} aria-hidden className="oe-cwicr-match-panel__spinner" />
+                    ) : appliedId === row.cost_item_id ? (
                       <>
                         <CheckCircle2 size={14} aria-hidden />
                         {t('costs.cwicr_match.applied', { defaultValue: 'Applied' })}
@@ -236,6 +343,29 @@ export function CwicrMatchPanel(props: CwicrMatchPanelProps) {
             ))}
           </tbody>
         </table>
+      )}
+
+      {/* Variant picker — anchored at the row's Apply button. */}
+      {activeVariantPick
+        && activeVariantPick.detail.metadata?.variants
+        && activeVariantPick.detail.metadata?.variant_stats && (
+        <VariantPicker
+          variants={activeVariantPick.detail.metadata.variants}
+          stats={activeVariantPick.detail.metadata.variant_stats}
+          anchorEl={activeVariantPick.anchorEl}
+          unitLabel={activeVariantPick.detail.unit || ''}
+          currency={activeVariantPick.detail.currency || activeVariantPick.match.currency || 'USD'}
+          onApply={(chosen) => {
+            const pending = activeVariantPick;
+            setActiveVariantPick(null);
+            pending.resolve(chosen);
+          }}
+          onClose={() => {
+            const pending = activeVariantPick;
+            setActiveVariantPick(null);
+            pending.resolve(null);
+          }}
+        />
       )}
     </div>
   );

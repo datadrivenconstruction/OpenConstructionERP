@@ -69,6 +69,7 @@ import {
   SectionFullWidthRenderer,
   ResourceFullWidthRenderer,
   BimQtyPickerCellRenderer,
+  DescriptionCellRenderer,
   type ContextMenuTarget,
   type FullGridContext,
 } from './grid/cellRenderers';
@@ -913,6 +914,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       bimQtyPickerCellRenderer: BimQtyPickerCellRenderer,
       sectionFullWidthRenderer: SectionFullWidthRenderer,
       resourceFullWidthRenderer: ResourceFullWidthRenderer,
+      descriptionCellRenderer: DescriptionCellRenderer,
     }),
     [],
   );

@@ -17,7 +17,7 @@ import time
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Response, UploadFile, status
 
 logger = logging.getLogger(__name__)
 
@@ -314,6 +314,7 @@ async def photo_estimate(
     currency: str = Form(default="EUR", description="Currency code"),
     standard: str = Form(default="din276", description="Classification standard"),
     project_id: str | None = Form(default=None, description="Optional project ID"),
+    content_length: int | None = Header(default=None),
     remaining: int = Depends(check_ai_rate_limit),
     service: AIService = Depends(_get_service),
 ) -> EstimateJobResponse:
@@ -335,7 +336,14 @@ async def photo_estimate(
             detail=(f"Unsupported image type: {content_type}. Accepted: {', '.join(sorted(ALLOWED_IMAGE_TYPES))}"),
         )
 
-    # Read and validate size
+    # Reject obviously oversize bodies before reading them into memory.
+    if content_length is not None and content_length > MAX_PHOTO_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="Image too large. Maximum size is 10 MB.",
+        )
+
+    # Read and validate size (covers clients that omit/lie about Content-Length).
     image_bytes = await file.read()
     if not image_bytes:
         raise HTTPException(
@@ -344,7 +352,7 @@ async def photo_estimate(
         )
     if len(image_bytes) > MAX_PHOTO_SIZE:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail="Image too large. Maximum size is 10 MB.",
         )
 
@@ -387,6 +395,7 @@ async def file_estimate(
     currency: str = Form(default="EUR", description="Currency code"),
     standard: str = Form(default="din276", description="Classification standard"),
     project_id: str | None = Form(default=None, description="Optional project ID"),
+    content_length: int | None = Header(default=None),
     remaining: int = Depends(check_ai_rate_limit),
     service: AIService = Depends(_get_service),
 ) -> EstimateJobResponse:
@@ -414,12 +423,19 @@ async def file_estimate(
             detail=(f"Unsupported file type: .{ext}. Accepted: {', '.join(f'.{e}' for e in sorted(_EXT_CATEGORY))}"),
         )
 
+    # Reject obviously oversize bodies before reading them into memory.
+    if content_length is not None and content_length > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large. Max: {MAX_FILE_SIZE // 1024 // 1024} MB.",
+        )
+
     content = await file.read()
     if not content:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File is empty.")
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"File too large ({len(content) / 1024 / 1024:.1f} MB). Max: {MAX_FILE_SIZE // 1024 // 1024} MB.",
         )
 

@@ -5,7 +5,7 @@
  * Extracted from BOQEditorPage.tsx for modularity.
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -23,6 +23,8 @@ import { apiGet, apiPost } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { REGION_MAP } from '@/stores/useCostDatabaseStore';
+import { VariantPicker } from '@/features/costs/VariantPicker';
+import type { CostItemMetadata, CostVariant } from '@/features/costs/api';
 
 /* ── Types ───────────────────────────────────────────────────────────── */
 
@@ -32,6 +34,7 @@ interface CostSearchItem {
   description: string;
   unit: string;
   rate: number;
+  currency?: string;
   region: string | null;
   classification: Record<string, string>;
   components: Array<{
@@ -43,7 +46,14 @@ interface CostSearchItem {
     cost: number;
     type: string;
   }>;
-  metadata_: Record<string, unknown>;
+  metadata_: CostItemMetadata;
+}
+
+/** Pending variant pick — stored in state so the picker can render once
+ *  outside the multi-item add loop and the loop can resolve sequentially. */
+interface PendingVariantPick {
+  item: CostSearchItem;
+  resolve: (chosen: CostVariant | null) => void;
 }
 
 /* ── AssemblyPickerModal ─────────────────────────────────────────────── */
@@ -265,6 +275,8 @@ export function CostDatabaseSearchModal({
   const [region, setRegion] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isAdding, setIsAdding] = useState(false);
+  const [activeVariantPick, setActiveVariantPick] = useState<PendingVariantPick | null>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
 
   // Load available regions
   const { data: regionsData } = useQuery({
@@ -336,7 +348,29 @@ export function CostDatabaseSearchModal({
       }
 
       const selectedItems = items.filter((i) => selected.has(i.id));
+
+      // Promise wrapper around the variant picker — used only when a cost
+      // item carries 2+ CWICR abstract-resource variants.  Cancelling the
+      // picker (Esc / Cancel / outside-click) resolves with `null` and the
+      // outer loop skips that item but continues with the rest.
+      const pickVariant = (item: CostSearchItem): Promise<CostVariant | null> =>
+        new Promise((resolve) => {
+          setActiveVariantPick({ item, resolve });
+        });
+
+      let variantToastShown = false;
+
       for (const item of selectedItems) {
+        const variants = item.metadata_?.variants;
+        const stats = item.metadata_?.variant_stats;
+        let chosenVariant: CostVariant | null = null;
+
+        if (variants && variants.length >= 2 && stats) {
+          chosenVariant = await pickVariant(item);
+          // Cancelled — skip THIS item but keep going with the rest.
+          if (!chosenVariant) continue;
+        }
+
         const section = String(Math.floor((nextOrdNum - 1) / 999) + 1).padStart(2, '0');
         const pos = String(((nextOrdNum - 1) % 999) + 1).padStart(3, '0');
         const ordinal = `${section}.${pos}`;
@@ -350,21 +384,49 @@ export function CostDatabaseSearchModal({
           unit_rate: c.unit_rate ?? 0,
           total: c.cost || (c.quantity ?? 1) * (c.unit_rate ?? 0),
         }));
+
+        const baseDescription = item.description || 'Unnamed item';
+        const description = chosenVariant
+          ? `${baseDescription} (Variant: ${chosenVariant.label})`
+          : baseDescription;
+        const unitRate = chosenVariant ? chosenVariant.price : (item.rate ?? 0);
+
         await apiPost(`/v1/boq/boqs/${boqId}/positions/`, {
           boq_id: boqId,
           ordinal,
-          description: item.description || 'Unnamed item',
+          description,
           unit: item.unit || 'pcs',
           quantity: 1,
-          unit_rate: item.rate ?? 0,
+          unit_rate: unitRate,
           classification: item.classification || {},
           source: 'cost_database',
           metadata: {
             cost_item_code: item.code,
             cost_item_region: item.region,
+            ...(chosenVariant
+              ? {
+                  variant: {
+                    label: chosenVariant.label,
+                    price: chosenVariant.price,
+                    index: chosenVariant.index,
+                  },
+                }
+              : {}),
             ...(resources.length > 0 ? { resources } : {}),
           },
         });
+
+        if (chosenVariant && !variantToastShown) {
+          addToast({
+            type: 'success',
+            title: t('boq.variant_applied', {
+              defaultValue: 'Variant applied: {{label}}',
+              label: chosenVariant.label,
+            }),
+          });
+          variantToastShown = true;
+        }
+
         nextOrdNum++;
       }
       onAdded();
@@ -529,7 +591,24 @@ export function CostDatabaseSearchModal({
                         <Badge variant="neutral" size="sm">{item.unit}</Badge>
                       </td>
                       <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-content-primary">
-                        {fmtRate(item.rate)}
+                        <div className="inline-flex items-center gap-1.5">
+                          <span>{fmtRate(item.rate)}</span>
+                          {(() => {
+                            // Surface CWICR abstract-resource variants in the
+                            // search modal so the user knows clicking Add will
+                            // open a variant picker rather than apply blindly.
+                            const vc = item.metadata_?.variant_stats?.count ?? 0;
+                            const vs = item.metadata_?.variant_stats;
+                            if (vc < 2 || !vs) return null;
+                            return (
+                              <Badge variant="blue" size="sm" className="text-2xs">
+                                <span title={`${fmtRate(vs.min)} – ${fmtRate(vs.max)}`}>
+                                  {t('costs.variants_count', { count: vc, defaultValue: '{{count}} variants' })}
+                                </span>
+                              </Badge>
+                            );
+                          })()}
+                        </div>
                       </td>
                       <td className="px-3 py-2.5 text-center">
                         {(() => {
@@ -565,6 +644,7 @@ export function CostDatabaseSearchModal({
               {t('common.cancel', 'Cancel')}
             </Button>
             <Button
+              ref={addButtonRef}
               variant="primary"
               size="sm"
               disabled={selected.size === 0 || isAdding}
@@ -580,6 +660,30 @@ export function CostDatabaseSearchModal({
           </div>
         </div>
       </div>
+
+      {/* Variant picker — anchored to the Add button so positioning is
+          stable across the multi-item add loop.  Rendered outside the
+          modal's overflow:hidden body via createPortal in VariantPicker. */}
+      {activeVariantPick && activeVariantPick.item.metadata_?.variants
+        && activeVariantPick.item.metadata_?.variant_stats && (
+        <VariantPicker
+          variants={activeVariantPick.item.metadata_.variants}
+          stats={activeVariantPick.item.metadata_.variant_stats}
+          anchorEl={addButtonRef.current}
+          unitLabel={activeVariantPick.item.unit || ''}
+          currency={activeVariantPick.item.currency || 'USD'}
+          onApply={(chosen) => {
+            const pending = activeVariantPick;
+            setActiveVariantPick(null);
+            pending.resolve(chosen);
+          }}
+          onClose={() => {
+            const pending = activeVariantPick;
+            setActiveVariantPick(null);
+            pending.resolve(null);
+          }}
+        />
+      )}
     </div>
   );
 }

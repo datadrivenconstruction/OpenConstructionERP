@@ -111,3 +111,6 @@ export type {
   DWGElementPayload,
   PDFMeasurementPayload,
 } from './ElementInfoPopover';
+
+export { KvList, Kv } from './KvList';
+export { QtyTile } from './QtyTile';

@@ -30,6 +30,7 @@ import { RESOURCE_TYPE_BADGE, fmtWithCurrency, getUnitsForLocale, saveCustomUnit
 import { RESOURCE_TYPES, getResourceTypeLabel } from '../boqResourceTypes';
 import { countComments } from '../CommentDrawer';
 import { BIMQuantityPicker } from './BIMQuantityPicker';
+import { Badge } from '@/shared/ui';
 import { MiniGeometryPreview } from '@/shared/ui/MiniGeometryPreview';
 import { fetchBIMElementsByIds, fetchBIMElementProperties } from '@/features/bim/api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer/ElementManager';
@@ -367,6 +368,65 @@ export function ExpandCellRenderer(params: ICellRendererParams) {
         {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
       </button>
     </div>
+  );
+}
+
+/* ── Description + CWICR Variant Badge ────────────────────────────── */
+
+/**
+ * Position-description renderer that surfaces a small "variant" badge
+ * when the position was applied from a CWICR cost item via the variant
+ * picker.  The variant payload is stored under
+ * `position.metadata.variant = { label, price, index }` by
+ * `CostDatabaseSearchModal.handleAdd` and the BOQ patch flow on
+ * `CwicrMatchPanel.onApply`.  Rows without `metadata.variant` render as
+ * plain text — no visual change.
+ *
+ * The cell is editable (the column passes `editable: true`); AG Grid
+ * still mounts the cell editor on edit, the renderer only owns the
+ * read-only view.
+ */
+export function DescriptionCellRenderer(params: ICellRendererParams) {
+  const { data, value, context } = params;
+  const ctx = context as FullGridContext | undefined;
+  const t = ctx?.t ?? ((key: string, opts?: Record<string, string>) => (opts?.defaultValue as string) ?? key);
+
+  // Sections + footer + resource rows have their own renderers; bail
+  // out cleanly so AG Grid falls back to the default text rendering
+  // for those (driven by `colDef.cellClass`).
+  if (!data || data._isSection || data._isFooter || data._isResource || data._isAddResource) {
+    return <span>{value ?? ''}</span>;
+  }
+
+  const meta = (data.metadata ?? {}) as Record<string, unknown> | undefined;
+  const variant = (meta as { variant?: { label?: string; price?: number; index?: number } } | undefined)?.variant;
+  const hasVariant = !!variant && typeof variant.label === 'string' && typeof variant.price === 'number';
+
+  if (!hasVariant) {
+    return <span className="truncate">{value ?? ''}</span>;
+  }
+
+  const formattedPrice = (() => {
+    try {
+      return new Intl.NumberFormat(getIntlLocale(), {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(variant!.price as number);
+    } catch {
+      return String(variant!.price);
+    }
+  })();
+  const tooltip = `${variant!.label} \u00B7 ${formattedPrice}`;
+
+  return (
+    <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
+      <span className="truncate min-w-0">{value ?? ''}</span>
+      <Badge variant="blue" size="sm" className="shrink-0 cursor-help">
+        <span title={tooltip}>
+          {t('boq.from_variant', { defaultValue: 'variant' })}
+        </span>
+      </Badge>
+    </span>
   );
 }
 

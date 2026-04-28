@@ -45,6 +45,7 @@ from app.modules.bim_hub.schemas import (
     BIMElementGroupResponse,
     BIMElementGroupUpdate,
     BIMModelCreate,
+    BIMModelSchemaResponse,
     BIMModelUpdate,
     BIMQuantityMapCreate,
     BIMQuantityMapUpdate,
@@ -448,7 +449,7 @@ class BIMHubService:
             )
         return count
 
-    async def get_model_schema(self, model_id: uuid.UUID) -> "BIMModelSchemaResponse":
+    async def get_model_schema(self, model_id: uuid.UUID) -> BIMModelSchemaResponse:
         """Harvest distinct element types and property key/value pairs from a
         model's element set (RFC 24).
 
@@ -458,8 +459,6 @@ class BIMHubService:
         an ``element_type`` do not contribute a type but still contribute
         properties.
         """
-        from app.modules.bim_hub.schemas import BIMModelSchemaResponse
-
         model = await self.model_repo.get(model_id)
         if model is None:
             raise HTTPException(

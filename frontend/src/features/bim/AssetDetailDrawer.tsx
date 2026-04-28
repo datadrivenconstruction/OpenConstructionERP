@@ -33,7 +33,7 @@ import {
   X,
 } from 'lucide-react';
 
-import { Badge, Button } from '@/shared/ui';
+import { Badge, Button, KvList, Kv, QtyTile } from '@/shared/ui';
 
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -414,54 +414,6 @@ function Section({
       </header>
       {children}
     </section>
-  );
-}
-
-function KvList({ children }: { children: React.ReactNode }) {
-  return <dl className="grid grid-cols-[110px_1fr] gap-x-3 gap-y-1 text-[12px]">{children}</dl>;
-}
-
-function Kv({
-  label,
-  value,
-  mono = false,
-}: {
-  label: string;
-  value: React.ReactNode | string | null;
-  mono?: boolean;
-}) {
-  const isEmptyVal = value == null || value === '';
-  return (
-    <>
-      <dt className="text-[11px] text-content-tertiary">{label}</dt>
-      <dd
-        className={`min-w-0 break-words ${
-          isEmptyVal ? 'text-content-quaternary' : 'text-content-primary'
-        } ${mono ? 'font-mono text-[11px]' : ''}`}
-      >
-        {isEmptyVal ? '—' : value}
-      </dd>
-    </>
-  );
-}
-
-function QtyTile({
-  label,
-  value,
-  unit,
-}: {
-  label: string;
-  value: number;
-  unit: string;
-}) {
-  return (
-    <div className="rounded border border-border-light bg-surface-secondary/50 px-2 py-1.5">
-      <div className="text-[10px] uppercase tracking-wide text-content-tertiary">{label}</div>
-      <div className="font-mono text-sm font-semibold text-content-primary">
-        {value.toLocaleString(undefined, { maximumFractionDigits: 3 })}
-        <span className="ml-1 text-[10px] font-normal text-content-secondary">{unit}</span>
-      </div>
-    </div>
   );
 }
 

@@ -186,7 +186,7 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
         })
 
     # Build layer color map for ByLayer color resolution
-    layer_color_map: dict[str, str] = {l["name"]: l["color"] for l in layers}
+    layer_color_map: dict[str, str] = {layer["name"]: layer["color"] for layer in layers}
 
     # Build layer name set for counting
     layer_counts: dict[str, int] = {}

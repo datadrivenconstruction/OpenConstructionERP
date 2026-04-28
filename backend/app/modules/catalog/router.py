@@ -12,6 +12,7 @@ Endpoints:
     POST /extract    -- Extract resources from cost items (admin)
 """
 
+import asyncio
 import logging
 import uuid
 from typing import Any
@@ -103,8 +104,14 @@ async def import_catalog_from_github(
                 )
             },
         )
-        with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 — host pinned above
-            raw_bytes = resp.read()
+
+        # Offload blocking urllib to a worker thread so the event loop
+        # stays responsive during the 60-second download window.
+        def _fetch() -> bytes:
+            with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 — host pinned above
+                return resp.read()
+
+        raw_bytes = await asyncio.to_thread(_fetch)
     except Exception as exc:
         logger.error("Failed to download catalog CSV from %s: %s", url, exc)
         raise HTTPException(

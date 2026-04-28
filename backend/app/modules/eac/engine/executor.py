@@ -539,9 +539,11 @@ def _passes_geometry_filter(
         return False
     if sel.min_length_m is not None and (length is None or length < sel.min_length_m):
         return False
-    if sel.max_length_m is not None and (length is not None and length > sel.max_length_m):
-        return False
-    return True
+    return not (
+        sel.max_length_m is not None
+        and length is not None
+        and length > sel.max_length_m
+    )
 
 
 # ── Predicate evaluation ───────────────────────────────────────────────

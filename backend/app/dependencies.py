@@ -308,6 +308,19 @@ class RequirePermission:
             return
 
         if self.permission not in permissions:
+            # Issue #101: a JWT issued before a permission was lowered
+            # to a more permissive role still carries its old permission
+            # list, so the user appears blocked until they log out + log
+            # in. Fall through to the live registry to honour the current
+            # role→permission mapping for stale tokens. Admin already
+            # short-circuited above; this only widens for non-admins.
+            from app.core.permissions import permission_registry as _reg
+            if _reg.role_has_permission(role, self.permission):
+                logger.debug(
+                    "Permission granted via live-registry fallback (stale JWT): permission=%s role=%s",
+                    self.permission, role,
+                )
+                return
             # BUG-RBAC05: log denials at DEBUG, not WARN. Viewer accounts
             # navigating normal pages routinely hit gated routes that the
             # UI knows are off-limits; flooding WARN with these false-

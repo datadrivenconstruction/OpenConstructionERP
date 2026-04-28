@@ -561,7 +561,7 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
         min_x = min_y = 0.0
         max_x = max_y = 1000.0
 
-    layers = sorted(layers_map.values(), key=lambda l: l["name"])
+    layers = sorted(layers_map.values(), key=lambda layer: layer["name"])
     logger.info(
         "DDC DWG parsed: %d entities, %d layers, extents %.1f,%.1f → %.1f,%.1f",
         len(entities), len(layers), min_x, min_y, max_x, max_y,

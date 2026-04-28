@@ -249,7 +249,7 @@ async def get_entities(
     """Get parsed entities for a drawing, optionally filtered by visible layers."""
     visible_layers = None
     if layers:
-        visible_layers = [l.strip() for l in layers.split(",") if l.strip()]
+        visible_layers = [layer.strip() for layer in layers.split(",") if layer.strip()]
     return await service.get_entities(drawing_id, visible_layers=visible_layers)
 
 

@@ -1637,6 +1637,27 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
         if col in df.columns:
             agg_cols[col] = "first"
 
+    # Abstract-resource rows carry per-variant price options; preserve them so the UI can offer a picker.
+    # Column names follow the actual CWICR parquet schema (variable_parts / est_price_all_values),
+    # not the legacy aliases. position_count is a single per-rate_code total, not per-variant.
+    _ABSTRACT_COLS = (
+        "row_type",
+        "price_abstract_resource_variable_parts",
+        "price_abstract_resource_est_price_all_values",
+        "price_abstract_resource_position_count",
+        "price_abstract_resource_est_price_min",
+        "price_abstract_resource_est_price_max",
+        "price_abstract_resource_est_price_mean",
+        "price_abstract_resource_est_price_median",
+        "price_abstract_resource_unit",
+        "price_abstract_resource_group_per_unit",
+        "price_abstract_resource_variable_parts_per_unit",
+        "price_abstract_resource_est_price_all_values_per_unit",
+    )
+    for col in _ABSTRACT_COLS:
+        if col in df.columns:
+            agg_cols[col] = "first"
+
     grouped = df.groupby("rate_code", sort=False).agg(agg_cols)
     _log.info("Grouped %d unique items from %d rows in %.1fs", len(grouped), total_rows, time.monotonic() - start)
 
@@ -1654,6 +1675,11 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
         if v is None or (isinstance(v, float) and pd.isna(v)):
             return ""
         return str(v).strip()
+
+    def _split_bul(value: object) -> list[str]:
+        if value is None or (isinstance(value, float) and pd.isna(value)):
+            return []
+        return [p.strip() for p in str(value).split("\u2022") if p.strip()]
 
     # 4. Pre-build resource components per rate_code using vectorized pandas
     # Filter out empty rows, then group resources by rate_code
@@ -1837,7 +1863,7 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
         if cat:
             classification["category"] = cat
 
-        metadata: dict[str, float] = {}
+        metadata: dict[str, Any] = {}
         for mkey, col in [
             ("labor_cost", "cost_of_working_hours"),
             ("equipment_cost", "total_value_machinery_equipment"),
@@ -1848,6 +1874,38 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
             v = _safe_float(row.get(col, 0))
             if v > 0:
                 metadata[mkey] = round(v, 2)
+
+        labels = _split_bul(row.get("price_abstract_resource_variable_parts"))
+        values = _split_bul(row.get("price_abstract_resource_est_price_all_values"))
+        pu_vals = _split_bul(row.get("price_abstract_resource_est_price_all_values_per_unit"))
+        # position_count is a single per-rate_code total in the parquet, not per-variant.
+        total_position_count = int(_safe_float(row.get("price_abstract_resource_position_count")))
+        if labels and len(labels) > 1 and len(values) == len(labels):
+            variants = []
+            for i, (lbl, val) in enumerate(zip(labels, values, strict=False)):
+                v = _safe_float(val)
+                if v <= 0:
+                    continue
+                variants.append(
+                    {
+                        "index": i,
+                        "label": lbl[:200],
+                        "price": round(v, 2),
+                        "price_per_unit": round(_safe_float(pu_vals[i]), 4) if i < len(pu_vals) else None,
+                    }
+                )
+            if variants:
+                metadata["variants"] = variants
+                metadata["variant_stats"] = {
+                    "min": round(_safe_float(row.get("price_abstract_resource_est_price_min")), 2),
+                    "max": round(_safe_float(row.get("price_abstract_resource_est_price_max")), 2),
+                    "mean": round(_safe_float(row.get("price_abstract_resource_est_price_mean")), 2),
+                    "median": round(_safe_float(row.get("price_abstract_resource_est_price_median")), 2),
+                    "unit": _safe_str(row.get("price_abstract_resource_unit"))[:20],
+                    "group": _safe_str(row.get("price_abstract_resource_group_per_unit"))[:120],
+                    "count": len(variants),
+                    "position_count": total_position_count,
+                }
 
         # Get full resource components for this rate_code
         components = resources_by_code.get(code, [])

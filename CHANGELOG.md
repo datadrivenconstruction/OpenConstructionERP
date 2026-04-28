@@ -5,6 +5,20 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.16] — 2026-04-28
+
+### Added
+- CWICR abstract-resource variants surfaced end-to-end. Importer preserves the 4 bullet-separated parquet columns (`variable_parts`, `est_price_all_values`, `position_count`, plus the per-unit sibling) into `CostItem.metadata_['variants']` + `['variant_stats']`. Cost DB grid shows a blue "N variants" badge next to the rate; clicking the row expands a detail panel with KvList stats, sorted variants table, and a "Median" chip on the median row. BOQ "From Database" → row pick triggers a portal popover (`VariantPicker`) for choosing a specific variant; chosen price overrides `unit_rate`, label is appended as `(Variant: …)` suffix in the description, and `metadata.variant` is written to the BOQ position. BOQ grid renders a marker badge next to variant-bearing rows.
+- 8 new i18n keys per locale (EN + RU) under `costs.*` and `boq.*`.
+
+### Changed
+- Demo database trimmed from 75 mixed (Cycle/CostLink/Domain/Smoke probes) to 6 curated demo projects: Boylston Crossing, Wohnpark Friedrichshain, Residencial Salamanca, Residencial Vila Madalena, 上海徐汇职业学校扩建工程, Downtown Medical Center.
+- Hoisted `KvList`, `Kv`, `QtyTile` from BIM drawer to `frontend/src/shared/ui/` so cost variant detail panel can reuse them.
+
+### Fixed
+- **Issue #101 — RBAC: BOQ create blocked for viewer-tier users.** `boq.create` lowered from EDITOR to VIEWER so any signed-in user (including freshly self-registered viewers) can start an estimate; project ownership / membership is still enforced by the service. `RequirePermission` now falls back to the live permission registry when the JWT's frozen permission list omits a lowered permission, so existing sessions don't have to re-login. Update / delete remain editor-gated.
+- Several quality slices from prior sessions: punchlist photo upload now reads body before mkdir (413 fires even when storage is unwritable); AI photo/file estimate endpoints reject oversize Content-Length pre-emptively; assemblies formula-engine narrows the `except` ladder so type errors surface; erp_chat splits `ValueError` from generic `Exception` to stop flooding the journal with expected AI-key tracebacks; bim_hub forward-ref hoisted to module-level import; dwg_takeoff `l` → `layer` (E741); eac executor SIM103 collapsed; catalog `urlopen` offloaded to `asyncio.to_thread` to keep the event loop responsive.
+
 ## [2.6.15] — 2026-04-27
 
 ### Added

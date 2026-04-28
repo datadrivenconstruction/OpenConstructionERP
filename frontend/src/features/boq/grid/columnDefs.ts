@@ -120,6 +120,7 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       flex: 1,
       editable: true,
       cellEditor: 'agTextCellEditor',
+      cellRenderer: 'descriptionCellRenderer',
       cellClass: (params) => {
         if (params.data?._isSection) return 'font-bold uppercase tracking-wide text-xs';
         return 'text-xs';

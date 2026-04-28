@@ -286,21 +286,14 @@ async def upload_photo(
             detail="Photo exceeds 25 MB limit",
         )
 
-    # Ensure upload directory exists
-    PHOTOS_DIR.mkdir(parents=True, exist_ok=True)
-
-    # Generate unique filename
-    ext = Path(file.filename or "photo.jpg").suffix or ".jpg"
-    filename = f"{item_id}_{uuid.uuid4().hex[:8]}{ext}"
-    filepath = PHOTOS_DIR / filename
-
-    # Read into memory, enforce size cap before writing.
-    # NOTE: this is a fall-back for clients that omit Content-Length or
-    # send it incorrectly. Streaming chunked-read with a running total
-    # would be stricter (no full body in RAM) but Starlette's UploadFile
-    # buffers to a SpooledTemporaryFile that rolls over to disk past
-    # ~1MB, so the practical memory footprint is bounded. Acceptable
-    # but suboptimal — see fix-D9 notes.
+    # Read into memory and enforce size cap *before* touching the
+    # filesystem. Order matters: a hostile client that lies about
+    # Content-Length must still be rejected with 413 even if the
+    # storage directory is somehow unwritable, and we don't want to
+    # create empty dirs for uploads we're going to reject anyway.
+    # Starlette's UploadFile buffers to a SpooledTemporaryFile that
+    # rolls over to disk past ~1MB, so the in-memory footprint is
+    # bounded.
     try:
         content = await file.read()
     except Exception:
@@ -315,6 +308,12 @@ async def upload_photo(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail="Photo exceeds 25 MB limit",
         )
+
+    # Now that we've accepted the body, prepare the destination.
+    PHOTOS_DIR.mkdir(parents=True, exist_ok=True)
+    ext = Path(file.filename or "photo.jpg").suffix or ".jpg"
+    filename = f"{item_id}_{uuid.uuid4().hex[:8]}{ext}"
+    filepath = PHOTOS_DIR / filename
 
     try:
         filepath.write_bytes(content)

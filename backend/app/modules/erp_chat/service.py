@@ -222,6 +222,14 @@ class ERPChatService:
                             yield chunk
                         yield _sse("done", {})
                         return
+                except ValueError as exc:
+                    # Expected user-facing errors from ai_client (bad API key,
+                    # rate limit, malformed image). One line at WARNING is
+                    # enough — full traceback floods the journal.
+                    logger.warning("AI API call refused (round %d): %s", _round, exc)
+                    yield _sse("error", {"message": str(exc)})
+                    yield _sse("done", {})
+                    return
                 except Exception as exc:
                     logger.exception("AI API call failed (round %d)", _round)
                     yield _sse("error", {"message": f"AI API error: {exc}"})
