@@ -415,7 +415,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     // Force AG Grid to refresh ordinal cells so chevron state updates
     setTimeout(() => {
       gridApiRef.current?.stopEditing();
-      gridApiRef.current?.refreshCells({ columns: ['ordinal', '_expand'], force: true });
+      gridApiRef.current?.refreshCells({ columns: ['ordinal', '_expand', 'description', 'quantity', 'unit_rate', 'total'], force: true });
     }, 0);
   }, []);
 
@@ -761,28 +761,16 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       const update: UpdatePositionData = { [field]: newValue };
       const old: UpdatePositionData = { [field]: oldValue };
 
-      // For quantity, scale resources proportionally if they exist
+      // Position quantity is a multiplier on the per-unit unit_rate.
+      // Resources are stored as PER-UNIT norms (qty per 1 unit of
+      // position) — same convention as CostX, Candy, iTWO, ProEst —
+      // so changing position qty must NOT touch resource qty/rate or
+      // unit_rate. Backend re-derives total = qty × unit_rate.
       if (field === 'quantity') {
         const parsedNew = typeof newValue === 'number' ? newValue : parseFloat(newValue) || 0;
         const parsedOld = typeof oldValue === 'number' ? oldValue : parseFloat(oldValue) || 0;
         update.quantity = parsedNew;
         old.quantity = parsedOld;
-
-        const meta = data.metadata as Record<string, unknown> | undefined;
-        const resources = meta?.resources;
-        if (Array.isArray(resources) && resources.length > 0 && parsedOld > 0 && parsedNew !== parsedOld) {
-          const ratio = parsedNew / parsedOld;
-          const scaled = (resources as Array<Record<string, unknown>>).map((r) => {
-            const newResQty = Math.round(((r.quantity as number) || 0) * ratio * 10000) / 10000;
-            const resRate = (r.unit_rate as number) || 0;
-            return { ...r, quantity: newResQty, total: Math.round(newResQty * resRate * 100) / 100 };
-          });
-          // Derive unit_rate from scaled resources
-          const resourceTotal = scaled.reduce((sum, r) => sum + ((r.total as number) || 0), 0);
-          const derivedRate = parsedNew > 0 ? Math.round(resourceTotal / parsedNew * 10000) / 10000 : 0;
-          update.metadata = { ...meta, resources: scaled };
-          update.unit_rate = derivedRate;
-        }
       }
 
       // Handle custom column changes — store in metadata.custom_fields
@@ -1222,7 +1210,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     // Auto-expand the position's resources
     setExpandedPositions((prev) => new Set(prev).add(positionId));
     setTimeout(() => {
-      gridApiRef.current?.refreshCells({ columns: ['ordinal', '_expand'], force: true });
+      gridApiRef.current?.refreshCells({ columns: ['ordinal', '_expand', 'description', 'quantity', 'unit_rate', 'total'], force: true });
     }, 0);
   }, [manualResourceDialog, onAddManualResource]);
 

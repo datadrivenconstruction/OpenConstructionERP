@@ -1536,11 +1536,15 @@ export function BOQEditorPage() {
         }),
       });
       invalidateAll();
-    } catch {
+    } catch (err) {
+      // Surface the actual error to the console so the user can see why
+      // recalculate failed (auth, 404, 500…) instead of a generic toast.
+      console.error('[Update Rates] recalculate failed:', err);
+      const detail = err instanceof Error ? err.message : String(err);
       addToast({
         type: 'error',
         title: t('boq.recalculate_failed', { defaultValue: 'Recalculation failed' }),
-        message: t('boq.recalculate_failed_hint', { defaultValue: 'Check that the backend is running and cost database is loaded.' }),
+        message: detail || t('boq.recalculate_failed_hint', { defaultValue: 'Check that the backend is running and cost database is loaded.' }),
       });
     } finally {
       setIsRecalculating(false);
@@ -1638,13 +1642,15 @@ export function BOQEditorPage() {
       const rRate = (resources[resourceIndex].unit_rate as number) ?? 0;
       resources[resourceIndex].total = Math.round(rQty * rRate * 100) / 100;
       const newMeta = { ...pos.metadata, resources };
-      // Recalculate position unit_rate = sum(resource totals) / position quantity
+      // Resources are per-unit norms (qty per 1 unit of position) — same
+      // convention as CostX, Candy, iTWO, ProEst. So:
+      //   unit_rate = Σ(r.quantity × r.unit_rate)   [NOT divided by pos qty]
+      //   total     = pos.quantity × unit_rate     (computed by backend)
       let resourceTotal = 0;
       for (const r of resources) {
         resourceTotal += (r.total as number) ?? (((r.quantity as number) ?? 0) * ((r.unit_rate as number) ?? 0));
       }
-      const posQty = pos.quantity || 1;
-      const derivedUnitRate = Math.round((resourceTotal / posQty) * 10000) / 10000;
+      const derivedUnitRate = Math.round(resourceTotal * 10000) / 10000;
       updateMutation.mutate({
         id: positionId,
         data: { unit_rate: derivedUnitRate, metadata: newMeta },

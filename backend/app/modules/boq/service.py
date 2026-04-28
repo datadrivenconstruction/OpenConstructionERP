@@ -1721,11 +1721,16 @@ class BOQService:
         new_quantity = fields.get("quantity", position.quantity)
         new_unit_rate = fields.get("unit_rate", position.unit_rate)
 
-        # Heuristic: a "resource-driven" update is one where either (a) the
-        # quantity changed (resources scale with qty), or (b) the resources
-        # list itself differs from what's currently stored. Pure metadata
-        # patches that just touch custom_fields/notes/etc. should NOT trigger
-        # a recalculation.
+        # Resource model: each resource entry is a PER-UNIT norm
+        # (quantity per 1 unit of position) — same convention as CostX,
+        # Candy, iTWO, ProEst. Therefore:
+        #   unit_rate (of position) = Σ(r.quantity × r.unit_rate)   [no division by qty]
+        #   total    (of position) = position.quantity × unit_rate
+        #
+        # That means a pure position-quantity edit must leave unit_rate
+        # AND the per-unit resource norms untouched; only the total
+        # scales. unit_rate is re-derived from resources only when the
+        # resources list itself changed.
         triggered_by_qty = "quantity" in fields
         triggered_by_resources = False
         if meta and isinstance(meta, dict) and isinstance(meta.get("resources"), list):
@@ -1735,20 +1740,23 @@ class BOQService:
                 triggered_by_resources = True
 
         if (
-            (triggered_by_qty or triggered_by_resources)
+            triggered_by_resources
             and meta
             and isinstance(meta, dict)
             and isinstance(meta.get("resources"), list)
             and meta["resources"]
         ):
             resources = meta["resources"]
-            resource_total = sum(
-                float(r.get("quantity", 0)) * float(r.get("unit_rate", 0)) for r in resources if isinstance(r, dict)
-            )
-            qty_float = _str_to_float(new_quantity)
-            if qty_float > 0:
-                new_unit_rate = str(round(resource_total / qty_float, 4))
-                fields["unit_rate"] = new_unit_rate
+            # Sum of per-unit subtotals == position unit_rate (NO division by qty).
+            new_unit_rate = str(round(
+                sum(
+                    float(r.get("quantity", 0)) * float(r.get("unit_rate", 0))
+                    for r in resources
+                    if isinstance(r, dict)
+                ),
+                4,
+            ))
+            fields["unit_rate"] = new_unit_rate
 
         # Recalculate total only when something pricing-related actually changed.
         # A pure metadata patch (e.g. setting a custom column value) leaves the

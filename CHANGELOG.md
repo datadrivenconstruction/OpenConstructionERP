@@ -5,6 +5,28 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.18] — 2026-04-28
+
+### Fixed
+- **BOQ resource calculation model — corrected to per-unit norms** (CostX / Candy / iTWO / ProEst convention). Resources are now stored as quantities-per-1-unit-of-position. Position `unit_rate = Σ(r.quantity × r.unit_rate)` (no division by qty). Position `total = quantity × unit_rate`. Changing position quantity no longer scales resource quantities or recomputes unit_rate — only the total scales. Three sites fixed:
+  - `frontend/.../BOQGrid.tsx` `onCellValueChanged`: removed proportional resource scaling on qty edit.
+  - `frontend/.../BOQEditorPage.tsx` `handleUpdateResource`: dropped `/ posQty` divisor.
+  - `backend/.../service.py` `update_position`: only `triggered_by_resources` (not `triggered_by_qty`) recomputes unit_rate; formula is `sum`, no division.
+
+### Changed
+- **BOQ row alignment** — position cells and resource sub-rows now share an identical column grid:
+  - Resource left section restructured to mirror AG Grid columns 1:1 (code slot = ordinal column width, tag slot = bim_link column width, name slot = description column).
+  - `--ag-cell-horizontal-padding` 16px → 8px globally so AG Grid cells and resource slots use the same padding; right-edges of qty / unit_rate / total line up across positions and resources.
+  - Resource font sizes 11px → 12px to match position `text-xs`.
+  - Position ordinal made `text-right` so its right edge aligns with the resource code right edge.
+  - Resource catalogue code: full code visible (no truncation), 8px font, fixed 100px right-aligned slot.
+  - Expanded position rows now render ordinal / description / qty / unit_rate / total in `font-bold` so they stand out from the indented resource sub-rows.
+- **Toolbar dedup** — removed duplicate "Update Rates" entry from the Quality & AI dropdown menu; the standalone toolbar button is the only entry point.
+- **Checkbox column** trimmed 36px → 24px to reduce empty space between drag handle and expand chevron.
+
+### Added
+- "Update Rates" error toast now surfaces the actual exception message (instead of a generic "Recalculation failed") and writes a `[Update Rates]` line to the console for debugging.
+
 ## [2.6.17] — 2026-04-28
 
 ### Fixed

@@ -42,6 +42,7 @@ import { MiniGeometryPreview } from '@/shared/ui/MiniGeometryPreview';
 import { fetchBIMElementsByIds, fetchBIMElementProperties } from '@/features/bim/api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer/ElementManager';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { useFxRatesStore, getFxRate } from '@/stores/useFxRatesStore';
 
 /* ── Validation Status Dot ────────────────────────────────────────── */
 
@@ -1737,7 +1738,7 @@ function InlineTextInput({
 
 /* ── Editable Resource Row ───────────────────────────────────────── */
 
-interface ColWidths { leftPad: number; unit: number; quantity: number; unitRate: number; total: number; actions: number }
+interface ColWidths { leftPad: number; ordinal: number; bimLink: number; unit: number; quantity: number; unitRate: number; total: number; actions: number }
 
 /**
  * Inline unit input with datalist autocomplete. Accepts free-form values
@@ -1931,6 +1932,359 @@ function ResourceTypePicker({
   );
 }
 
+/**
+ * Resource currency combobox — picks from suggestions OR accepts a
+ * custom 3-letter code. Native <input list="…"> was hiding its
+ * dropdown for narrow inputs (60px) and gave no visible chevron, so
+ * users couldn't tell a list existed and the saved free-text value
+ * wasn't surfacing in the UI. This explicit combobox solves both:
+ * a button shows the current code + chevron, clicking opens a portal
+ * popover with a search-and-add input on top, the project FX group,
+ * and the global ISO 4217 list.  Hitting Enter on a non-empty
+ * search saves whatever the user typed as a custom currency, which
+ * is then highlighted amber wherever it appears.
+ */
+function ResourceCurrencyCombobox({
+  value,
+  onCommit,
+  projectGroup,
+  otherGroup,
+  fxRate,
+  fxSource,
+  baseCode,
+  onCommitFxRate,
+  isForeign,
+  t,
+}: {
+  value: string;
+  onCommit: (next: string) => void;
+  projectGroup: string[];
+  otherGroup: string[];
+  /** Foreign→base rate (1 unit of `value` in `baseCode`). */
+  fxRate?: number | undefined;
+  fxSource?: 'project' | 'global' | 'none';
+  baseCode?: string;
+  onCommitFxRate?: (rate: number) => void;
+  /** True iff `value !== baseCode`. */
+  isForeign?: boolean;
+  t: (key: string, opts?: Record<string, string>) => string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const [search, setSearch] = useState('');
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const projectSet = useMemo(() => new Set(projectGroup), [projectGroup]);
+  const otherSet = useMemo(() => new Set(otherGroup), [otherGroup]);
+  const isUserDefined = value.length > 0 && !projectSet.has(value) && !otherSet.has(value);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDocMouseDown = (e: MouseEvent) => {
+      if (btnRef.current?.contains(e.target as Node)) return;
+      // Allow clicks inside the popover (handled via stopPropagation in popover root)
+      const popover = document.getElementById('oe-currency-popover');
+      if (popover?.contains(e.target as Node)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDocMouseDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocMouseDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const togglePopover = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (open) { setOpen(false); return; }
+    if (btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 4, left: rect.left });
+    }
+    setSearch('');
+    setOpen(true);
+    // Focus the search input on next tick once the popover is mounted.
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  const commit = (raw: string) => {
+    const next = raw.trim().toUpperCase().slice(0, 6);
+    if (next === '' || next === value) { setOpen(false); return; }
+    onCommit(next);
+    setOpen(false);
+  };
+
+  // Filter both groups by the search prefix (case-insensitive); when the
+  // search yields no exact match, show an "Add custom" affordance so the
+  // user knows a free-text submission is supported.
+  const q = search.trim().toUpperCase();
+  const matchProject = projectGroup.filter((c) => !q || c.includes(q));
+  const matchOther = otherGroup.filter((c) => !q || c.includes(q));
+  const exactMatch = q.length > 0 && (matchProject.includes(q) || matchOther.includes(q));
+  const canAddCustom = q.length >= 2 && !exactMatch;
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={togglePopover}
+        className={`shrink-0 h-4 px-1 rounded text-[9px] font-mono uppercase tracking-wide
+                    text-center cursor-pointer outline-none focus:ring-1 focus:ring-oe-blue
+                    inline-flex items-center justify-center gap-0.5
+                    ${isUserDefined
+                      ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-400 text-amber-800 dark:text-amber-200 font-bold'
+                      : 'bg-surface-primary border border-border-light text-content-secondary'}`}
+        style={{ minWidth: '36px' }}
+        title={isUserDefined
+          ? t('boq.resource_currency_custom', {
+              defaultValue: 'Custom currency: {{code}} (not in project FX or ISO 4217 list)',
+              code: value,
+            })
+          : t('boq.resource_currency_pick', {
+              defaultValue: 'Currency — {{symbol}} {{code}}',
+              symbol: CURRENCY_SYMBOL[value] ?? '',
+              code: value,
+            })}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={t('boq.resource_currency', { defaultValue: 'Currency' })}
+      >
+        <span className="truncate">{value}</span>
+        <ChevronDown size={8} className="opacity-60" />
+      </button>
+      {open && pos && createPortal(
+        <div
+          id="oe-currency-popover"
+          role="listbox"
+          className="fixed z-[2000] bg-surface-primary border border-border-light rounded-md
+                     shadow-lg w-[220px] max-h-[320px] flex flex-col"
+          style={{ top: pos.top, left: pos.left }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className="p-2 border-b border-border-light">
+            <input
+              ref={inputRef}
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value.toUpperCase().slice(0, 6))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (canAddCustom) commit(q);
+                  else if (matchProject[0] || matchOther[0]) commit(matchProject[0] ?? matchOther[0]!);
+                }
+              }}
+              placeholder={t('boq.resource_currency_search', { defaultValue: 'Type or search (e.g. EUR, MYC)' })}
+              className="w-full h-7 px-2 text-[11px] font-mono uppercase tracking-wide
+                         text-center bg-surface-secondary border border-border-light rounded
+                         outline-none focus:ring-1 focus:ring-oe-blue"
+              autoComplete="off"
+              spellCheck={false}
+            />
+            {canAddCustom && (
+              <button
+                type="button"
+                onClick={() => commit(q)}
+                className="mt-1.5 w-full h-6 rounded text-[10px] font-bold uppercase tracking-wide
+                           bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/30 dark:hover:bg-amber-900/50
+                           text-amber-800 dark:text-amber-200 border border-amber-400
+                           flex items-center justify-center gap-1"
+              >
+                <Plus size={10} />
+                <span>{t('boq.resource_currency_add_custom', { defaultValue: 'Add custom: {{code}}', code: q })}</span>
+              </button>
+            )}
+            {/* FX rate editor — visible when the row's currency differs
+                from the project base. Lets the estimator confirm or
+                tweak the rate without leaving the picker. Project-
+                scoped FX rates (set by the BOQ owner) are read-only
+                here; the global localStorage rate is editable. */}
+            {isForeign && baseCode && onCommitFxRate && (
+              <div className="mt-2 pt-2 border-t border-border-light/60">
+                <div className="text-[9px] uppercase tracking-wider text-content-tertiary mb-1">
+                  {t('boq.fx_rate_label', { defaultValue: 'FX rate' })}
+                  {fxSource === 'project' && (
+                    <span className="ml-1 px-1 rounded bg-oe-blue-subtle text-oe-blue text-[8px] font-bold">
+                      {t('boq.fx_rate_project_badge', { defaultValue: 'PROJECT' })}
+                    </span>
+                  )}
+                  {fxSource === 'global' && (
+                    <span className="ml-1 px-1 rounded bg-surface-secondary text-content-tertiary text-[8px] font-bold">
+                      {t('boq.fx_rate_global_badge', { defaultValue: 'GLOBAL' })}
+                    </span>
+                  )}
+                </div>
+                <PopoverFxRateRow
+                  foreignCode={value}
+                  baseCode={baseCode}
+                  rate={fxRate}
+                  readOnly={fxSource === 'project'}
+                  onCommit={onCommitFxRate}
+                  t={t}
+                />
+              </div>
+            )}
+          </div>
+          <div className="overflow-auto flex-1 py-1">
+            {matchProject.length > 0 && (
+              <div className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-content-tertiary">
+                {t('boq.currency_group_project', { defaultValue: 'Project' })}
+              </div>
+            )}
+            {matchProject.map((code) => (
+              <CurrencyOption
+                key={`p-${code}`}
+                code={code}
+                selected={code === value}
+                custom={false}
+                onPick={() => commit(code)}
+              />
+            ))}
+            {matchOther.length > 0 && (
+              <div className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-content-tertiary border-t border-border-light/60">
+                {t('boq.currency_group_world', { defaultValue: 'World currencies' })}
+              </div>
+            )}
+            {matchOther.map((code) => (
+              <CurrencyOption
+                key={`w-${code}`}
+                code={code}
+                selected={code === value}
+                custom={false}
+                onPick={() => commit(code)}
+              />
+            ))}
+            {/* Surface the currently saved custom value at the bottom so
+                the user can confirm it's persisted. */}
+            {isUserDefined && (!q || value.includes(q)) && (
+              <>
+                <div className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 border-t border-border-light/60">
+                  {t('boq.currency_group_custom', { defaultValue: 'Custom (saved)' })}
+                </div>
+                <CurrencyOption
+                  code={value}
+                  selected
+                  custom
+                  onPick={() => setOpen(false)}
+                />
+              </>
+            )}
+            {matchProject.length === 0 && matchOther.length === 0 && !canAddCustom && (
+              <div className="px-2 py-3 text-[10px] text-center text-content-quaternary">
+                {t('boq.resource_currency_no_match', { defaultValue: 'No matches — type at least 2 letters to add a custom code.' })}
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body,
+      )}
+    </>
+  );
+}
+
+/**
+ * FX rate row inside the currency popover. Shows "1 ¤foreign = X ¤base"
+ * with X editable in place. Replaces the previous inline FX widget
+ * which used to live on the row itself; moving it into the popover
+ * frees horizontal space and keeps unit/qty/rate column boundaries
+ * aligned with the parent position row.
+ */
+function PopoverFxRateRow({
+  foreignCode,
+  baseCode,
+  rate,
+  readOnly,
+  onCommit,
+  t,
+}: {
+  foreignCode: string;
+  baseCode: string;
+  rate: number | undefined;
+  readOnly: boolean;
+  onCommit: (next: number) => void;
+  t: (key: string, opts?: Record<string, string>) => string;
+}) {
+  const [draft, setDraft] = useState(rate != null ? String(Number(rate.toFixed(6))) : '');
+  useEffect(() => {
+    setDraft(rate != null ? String(Number(rate.toFixed(6))) : '');
+  }, [rate]);
+
+  const commit = () => {
+    const n = parseFloat(draft.replace(',', '.'));
+    if (Number.isFinite(n) && n > 0 && rate !== n) onCommit(n);
+    else setDraft(rate != null ? String(Number(rate.toFixed(6))) : '');
+  };
+
+  return (
+    <div className="flex items-center gap-1 text-[10px] font-mono">
+      <span className="text-content-secondary">1 {foreignCode} =</span>
+      <input
+        type="text"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+          if (e.key === 'Escape') {
+            setDraft(rate != null ? String(Number(rate.toFixed(6))) : '');
+            (e.target as HTMLInputElement).blur();
+          }
+        }}
+        readOnly={readOnly}
+        placeholder="—"
+        spellCheck={false}
+        autoComplete="off"
+        className={`flex-1 min-w-0 h-5 px-1 rounded text-center tabular-nums
+                    outline-none focus:ring-1 focus:ring-oe-blue
+                    ${readOnly
+                      ? 'bg-surface-secondary/40 border border-border-light/60 text-content-tertiary cursor-not-allowed'
+                      : rate == null
+                      ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-400 text-amber-800 dark:text-amber-200 cursor-text'
+                      : 'bg-surface-primary border border-border-light text-content-primary cursor-text'}`}
+        aria-label={t('boq.fx_rate_input', { defaultValue: 'FX rate {{from}}→{{to}}', from: foreignCode, to: baseCode })}
+      />
+      <span className="text-content-secondary">{baseCode}</span>
+    </div>
+  );
+}
+
+function CurrencyOption({
+  code,
+  selected,
+  custom,
+  onPick,
+}: {
+  code: string;
+  selected: boolean;
+  custom: boolean;
+  onPick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="option"
+      aria-selected={selected}
+      onClick={(e) => { e.stopPropagation(); onPick(); }}
+      className={`flex items-center gap-2 w-full px-2 py-1.5 text-[11px] text-left
+                  hover:bg-surface-secondary transition-colors
+                  ${selected ? (custom ? 'bg-amber-100/40 dark:bg-amber-900/20' : 'bg-oe-blue-subtle/30') : ''}`}
+    >
+      <span className={`inline-flex items-center justify-center w-7 text-[10px] font-mono ${custom ? 'text-amber-700 dark:text-amber-300 font-bold' : 'text-content-secondary'}`}>
+        {CURRENCY_SYMBOL[code] ?? '·'}
+      </span>
+      <span className={`font-mono uppercase tracking-wide ${custom ? 'text-amber-800 dark:text-amber-200 font-bold' : 'text-content-primary'}`}>
+        {code}
+      </span>
+      {selected && <span className="ml-auto text-[10px] text-oe-blue">✓</span>}
+    </button>
+  );
+}
+
 function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, unknown>; ctx: FullGridContext; colWidths: ColWidths }) {
   const resourceType = (data._resourceType as string) || 'other';
   const qty = (data._resourceQty as number) ?? 0;
@@ -1941,9 +2295,31 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
   const isForeign = resourceCurrency !== baseCurrency;
   const fxRates = ctx.fxRates ?? [];
   const fxEntry = isForeign ? fxRates.find((r) => r.currency === resourceCurrency) : undefined;
-  const fxRate = fxEntry?.rate;
+  // Project-scoped FX rates (set by the BOQ owner) take priority. When
+  // missing, fall back to the global localStorage-persisted store so an
+  // estimator can pick e.g. JPY without the BOQ owner having pre-loaded
+  // a rate. Inline editing of the rate writes to the global store.
+  const ratesVsUsd = useFxRatesStore((s) => s.ratesVsUsd);
+  const setGlobalRate = useFxRatesStore((s) => s.setRate);
+  const globalRate = isForeign ? getFxRate(resourceCurrency, baseCurrency, ratesVsUsd) : undefined;
+  const fxRate: number | undefined = fxEntry?.rate ?? globalRate;
+  const fxSource: 'project' | 'global' | 'none' = fxEntry?.rate
+    ? 'project'
+    : (globalRate != null ? 'global' : 'none');
   const hasFxRate = !isForeign || (typeof fxRate === 'number' && fxRate > 0);
   const totalInBase = isForeign && hasFxRate ? total * (fxRate ?? 1) : total;
+
+  // When the user edits the global rate inline, we store "1 unit of <foreign> = X <USD>".
+  // Math: rate(foreign→base) = rateVsUsd(foreign) / rateVsUsd(base)
+  //   ⇒ rateVsUsd(foreign) = rate(foreign→base) * rateVsUsd(base)
+  const handleGlobalFxRateChange = useCallback(
+    (newRateForeignToBase: number) => {
+      if (!Number.isFinite(newRateForeignToBase) || newRateForeignToBase <= 0) return;
+      const baseVsUsd = ratesVsUsd[baseCurrency] ?? 1;
+      setGlobalRate(resourceCurrency, newRateForeignToBase * baseVsUsd);
+    },
+    [resourceCurrency, baseCurrency, ratesVsUsd, setGlobalRate],
+  );
 
   const formattedTotal = fmtWithCurrency(total, ctx.locale ?? 'de-DE', resourceCurrency);
   const formattedTotalInBase = isForeign && hasFxRate
@@ -2051,7 +2427,7 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
 
   return (
     <div
-      className="flex items-center w-full h-full gap-2 select-none group/res text-[11px]
+      className="flex items-stretch w-full h-full select-none group/res text-xs
                   bg-surface-secondary/40 border-b border-border-light/50"
       style={{ paddingLeft: `${colWidths.leftPad}px`, paddingRight: '4px' }}
       onContextMenu={(e) => {
@@ -2060,93 +2436,107 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
         ctx.onShowContextMenu?.(e, 'resource', data);
       }}
     >
-      {/* Type — fit-content badge picker (portal popover, not a native select
-          — native selects render at the width of the longest option which
-          left every badge stretched to "EQUIPMENT" width). */}
-      <ResourceTypePicker
-        value={resourceType}
-        onChange={handleTypeChange}
-        t={ctx.t}
-      />
+      {/* LEFT section — three slots that MIRROR the AG Grid columns
+          (ordinal, _bim_link, description) 1:1, so resource code lines
+          up under position ordinal, resource tag lines up under the
+          BIM-link column, and resource name starts where the position
+          description starts. Widths are read from the live grid via
+          colWidths, padding mirrors AG Grid's --ag-cell-horizontal-padding
+          equivalent (pr-2 / pl-1 = same as the column cellClass
+          overrides) so right edges and left edges line up exactly. */}
 
-      {/* Code (small, muted) — moved to the LEFT of the name so the catalogue
-          article number is the first thing the eye lands on. Hidden once
-          the user customises the name (handleNameChange clears it), so a
-          customised row reads as a brand-new entry, not a fork of the
-          original catalogue item. */}
-      {resourceCode && (
-        <span
-          className="shrink-0 text-[9px] font-mono text-content-quaternary truncate max-w-[80px]
-                     px-1 py-0.5 rounded bg-surface-secondary/60"
-          title={ctx.t('boq.resource_catalog_code', { defaultValue: 'Catalogue code: {{code}}', code: resourceCode })}
-        >
-          {resourceCode}
-        </span>
-      )}
-
-      {/* Name — editable. Committing a different name strips the catalogue
-          code (see handleNameChange) so the row becomes a customised
-          resource, savable to the user's personal catalogue via the
-          BookmarkPlus action. */}
-      <span className="truncate min-w-0 flex-1 text-content-secondary font-medium">
-        <InlineTextInput value={originalName} onCommit={handleNameChange} className="w-full text-[11px]" />
+      {/* Code — width = ordinal column. Right-aligned with pr-2 to match
+          the position ordinal cell's `text-right !pr-2`, so the code's
+          right edge sits on the same X as the ordinal's right edge. */}
+      <span
+        className="shrink-0 inline-flex items-center justify-end self-center pr-2 text-[8px] font-mono whitespace-nowrap overflow-hidden"
+        style={{ width: `${colWidths.ordinal}px` }}
+        title={resourceCode
+          ? ctx.t('boq.resource_catalog_code', { defaultValue: 'Catalogue code: {{code}}', code: resourceCode })
+          : ctx.t('boq.resource_customised', { defaultValue: 'Customised resource — no catalogue code' })}
+      >
+        {resourceCode ? (
+          <span className="px-1 py-0.5 rounded bg-surface-secondary/60 text-content-quaternary">
+            {resourceCode}
+          </span>
+        ) : (
+          <span className="text-content-quaternary/50">—</span>
+        )}
       </span>
 
-      {/* Unit — free-form with datalist autocomplete */}
-      <span className="shrink-0 text-center text-content-tertiary" style={{ width: `${colWidths.unit}px` }}>
-        <InlineUnitInput
-          value={data._resourceUnit as string}
-          onCommit={(v: string) => ctx.onUpdateResource?.(posId, resIdx, 'unit', v)}
-          className="w-full text-[11px] text-center"
+      {/* Tag — width = _bim_link column. Right-aligned so tag right
+          edges line up across all rows. */}
+      <span
+        className="shrink-0 inline-flex items-center justify-end self-center pr-2"
+        style={{ width: `${colWidths.bimLink}px` }}
+      >
+        <ResourceTypePicker
+          value={resourceType}
+          onChange={handleTypeChange}
+          t={ctx.t}
         />
       </span>
 
-      {/* Quantity — aligned to grid Qty column */}
-      <span className="shrink-0 text-right tabular-nums text-content-secondary" style={{ width: `${colWidths.quantity}px` }}>
-        <InlineNumberInput value={qty} onCommit={handleQtyChange} fmt={ctx.fmt} className="w-full text-[11px]" />
+      {/* Name — flex-1, mirrors the position description column.
+          pl-1 matches the position description cellClass `!pl-1`, so
+          resource names start at the exact same X as position names.
+          Committing a different name strips the catalogue code
+          (handleNameChange) so the row becomes a customised resource,
+          savable via the BookmarkPlus action. */}
+      <span className="truncate min-w-0 flex-1 pl-1 self-center text-left text-content-secondary font-medium">
+        <InlineTextInput value={originalName} onCommit={handleNameChange} className="w-full text-xs text-left" />
       </span>
 
-      {/* Rate — aligned to grid Unit Rate column */}
-      <span className="shrink-0 text-right tabular-nums text-content-secondary" style={{ width: `${colWidths.unitRate}px` }}>
-        <InlineNumberInput value={rate} onCommit={handleRateChange} fmt={ctx.fmt} className="w-full text-[11px]" />
+      {/* RIGHT section — unit / qty / rate / total / actions are direct
+          siblings of the outer flex container with NO inter-slot gap,
+          so their X coordinates exactly match the position row's AG
+          Grid columns. Per UX request: unit on every resource row must
+          sit on the same vertical X as unit on every position row. */}
+      <span className="shrink-0 text-center text-content-tertiary self-center px-2" style={{ width: `${colWidths.unit}px` }}>
+        <InlineUnitInput
+          value={data._resourceUnit as string}
+          onCommit={(v: string) => ctx.onUpdateResource?.(posId, resIdx, 'unit', v)}
+          className="w-full text-xs text-center"
+        />
       </span>
 
-      {/* Currency — grouped picker. Project FX-configured currencies appear
-          first; the global ISO catalogue follows so an international
-          estimator can pick e.g. JPY for an imported component even when
-          the BOQ owner hasn't set up FX rates yet. */}
-      <select
-        value={resourceCurrency}
-        onChange={(e) => handleCurrencyChange(e.target.value)}
-        onClick={(e) => e.stopPropagation()}
-        className="shrink-0 h-4 px-1 rounded text-[9px] font-mono uppercase tracking-wide
-                   bg-surface-primary border border-border-light text-content-secondary
-                   appearance-none cursor-pointer outline-none focus:ring-1 focus:ring-oe-blue"
-        style={{ width: '56px' }}
-        title={ctx.t('boq.resource_currency_pick', {
-          defaultValue: 'Currency — {{symbol}} {{code}}',
-          symbol: CURRENCY_SYMBOL[resourceCurrency] ?? '',
-          code: resourceCurrency,
-        })}
-        aria-label={ctx.t('boq.resource_currency', { defaultValue: 'Currency' })}
-      >
-        <optgroup label={ctx.t('boq.currency_group_project', { defaultValue: 'Project' })}>
-          {projectGroup.map((code) => (
-            <option key={code} value={code}>{code}</option>
-          ))}
-        </optgroup>
-        {otherGroup.length > 0 && (
-          <optgroup label={ctx.t('boq.currency_group_world', { defaultValue: 'World currencies' })}>
-            {otherGroup.map((code) => (
-              <option key={code} value={code}>{code}</option>
-            ))}
-          </optgroup>
-        )}
-      </select>
+      <span className="shrink-0 text-right tabular-nums text-content-secondary self-center pr-2 pl-2" style={{ width: `${colWidths.quantity}px` }}>
+        <InlineNumberInput value={qty} onCommit={handleQtyChange} fmt={ctx.fmt} className="w-full text-xs" />
+      </span>
 
-      {/* Total — aligned to grid Total column */}
+      {/* Unit rate slot — wraps the rate number AND the currency button
+          together so the currency is visually attached to the price
+          (it labels the price, not the unit). Currency button hosts
+          the FX-rate editor in its popover when the row uses a foreign
+          currency, so we don't need an extra inline FX widget. pr-2/pl-2
+          mirror the position cell padding so the rate text right edge
+          (before the currency chip) aligns with the position rate. */}
       <span
-        className="shrink-0 text-right tabular-nums font-medium text-content-primary flex items-center justify-end gap-1"
+        className="shrink-0 inline-flex items-center justify-end self-center gap-1 pr-2 pl-2"
+        style={{ width: `${colWidths.unitRate}px` }}
+      >
+        <InlineNumberInput
+          value={rate}
+          onCommit={handleRateChange}
+          fmt={ctx.fmt}
+          className="flex-1 min-w-0 text-right tabular-nums text-content-secondary text-xs"
+        />
+        <ResourceCurrencyCombobox
+          value={resourceCurrency}
+          onCommit={handleCurrencyChange}
+          projectGroup={projectGroup}
+          otherGroup={otherGroup}
+          fxRate={fxRate}
+          fxSource={fxSource}
+          baseCode={baseCurrency}
+          onCommitFxRate={handleGlobalFxRateChange}
+          isForeign={isForeign}
+          t={ctx.t}
+        />
+      </span>
+
+      <span
+        className="shrink-0 text-right tabular-nums font-medium text-content-primary flex items-center justify-end gap-1 self-center pr-2 pl-2"
         style={{ width: `${colWidths.total}px` }}
         title={totalTitle}
       >
@@ -2167,7 +2557,7 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
       </span>
 
       {/* Actions — aligned to grid Actions column */}
-      <span className="shrink-0 flex items-center justify-center gap-0.5" style={{ width: `${colWidths.actions}px` }}>
+      <span className="shrink-0 flex items-center justify-center gap-0.5 self-center" style={{ width: `${colWidths.actions}px` }}>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -2202,12 +2592,20 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
   const { data, context, api } = params;
   const ctx = context as FullGridContext | undefined;
 
-  // Read actual column widths from the grid for perfect alignment
+  // Read actual column widths from the grid for perfect alignment.
+  //
+  // leftPad lands the resource's catalogue-code chip at the SAME X as
+  // the position's ordinal cell (e.g. "01.02.003") — the visual spine
+  // the user asked for: position ordinals and resource codes line up
+  // vertically. Includes _drag + _checkbox + _expand (the three
+  // before the ordinal column).
   const colWidths = useMemo(() => {
     const getW = (id: string) => api?.getColumn(id)?.getActualWidth() ?? 0;
-    const leftPad = getW('_drag') + getW('_checkbox') + getW('ordinal');
+    const leftPad = getW('_drag') + getW('_checkbox') + getW('_expand');
     return {
       leftPad,
+      ordinal: getW('ordinal'),
+      bimLink: getW('_bim_link'),
       unit: getW('unit'),
       quantity: getW('quantity'),
       unitRate: getW('unit_rate'),

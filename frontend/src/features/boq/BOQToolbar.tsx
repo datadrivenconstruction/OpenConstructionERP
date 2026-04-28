@@ -368,8 +368,6 @@ export function BOQToolbar({
           onValidate={onValidate}
           isValidating={isValidating}
           lastValidationScore={lastValidationScore}
-          onRecalculate={onRecalculate}
-          isRecalculating={isRecalculating}
           onCheckAnomalies={onCheckAnomalies}
           onCancelAnomalies={onCancelAnomalies}
           isCheckingAnomalies={isCheckingAnomalies}
@@ -412,8 +410,6 @@ interface QualityAiMenuProps {
   onValidate: () => void;
   isValidating?: boolean;
   lastValidationScore?: number | null;
-  onRecalculate: () => void;
-  isRecalculating: boolean;
   onCheckAnomalies?: () => void;
   onCancelAnomalies?: () => void;
   isCheckingAnomalies?: boolean;
@@ -433,8 +429,6 @@ function QualityAiMenu(props: QualityAiMenuProps) {
     onValidate,
     isValidating,
     lastValidationScore,
-    onRecalculate,
-    isRecalculating,
     onCheckAnomalies,
     onCancelAnomalies,
     isCheckingAnomalies,
@@ -516,13 +510,6 @@ function QualityAiMenu(props: QualityAiMenuProps) {
               ) : null}
               onClick={fire(onValidate)}
               disabled={isValidating}
-            />
-            <MenuRow
-              icon={<RefreshCw size={14} className={isRecalculating ? 'animate-spin text-oe-blue' : 'text-content-tertiary'} />}
-              label={isRecalculating ? t('boq.recalculating', { defaultValue: 'Updating...' }) : t('boq.recalculate_rates', { defaultValue: 'Update Rates' })}
-              hint={t('boq.recalculate_tip', { defaultValue: 'Matches positions to cost database, attaches resource breakdowns (materials, labor, equipment), and recalculates unit rates from components.' })}
-              onClick={fire(onRecalculate)}
-              disabled={isRecalculating}
             />
             {onCheckAnomalies && (
               <MenuRow

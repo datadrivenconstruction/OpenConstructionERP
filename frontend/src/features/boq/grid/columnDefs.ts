@@ -58,9 +58,9 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
     {
       headerName: '',
       colId: '_checkbox',
-      width: 36,
-      maxWidth: 36,
-      minWidth: 36,
+      width: 24,
+      maxWidth: 24,
+      minWidth: 24,
       suppressHeaderMenuButton: true,
       editable: false,
       sortable: false,
@@ -95,7 +95,13 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
         if (params.data?._isSection || params.data?._isFooter) return false;
         return true;
       },
-      cellClass: 'font-mono text-xs',
+      cellClass: (params) => {
+        const base = 'font-mono text-xs text-right !pr-2';
+        const ctx = params.context as { expandedPositions?: Set<string> } | undefined;
+        const isExpanded = !!params.data?.id && (ctx?.expandedPositions?.has(params.data.id) ?? false);
+        return isExpanded ? `${base} font-bold` : base;
+      },
+      headerClass: 'ag-right-aligned-header',
     },
     {
       headerName: '',
@@ -121,9 +127,14 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       editable: true,
       cellEditor: 'agTextCellEditor',
       cellRenderer: 'descriptionCellRenderer',
+      // !pl-1 overrides AG Grid's default ~17px cell-horizontal-padding
+      // so the position description sits flush-left within the column
+      // (per UX request: remove the big empty indent on position rows).
       cellClass: (params) => {
-        if (params.data?._isSection) return 'font-bold uppercase tracking-wide text-xs';
-        return 'text-xs';
+        if (params.data?._isSection) return 'font-bold uppercase tracking-wide text-xs !pl-1 !pr-1';
+        const ctx = params.context as { expandedPositions?: Set<string> } | undefined;
+        const isExpanded = !!params.data?.id && (ctx?.expandedPositions?.has(params.data.id) ?? false);
+        return isExpanded ? 'text-xs font-bold !pl-1 !pr-1' : 'text-xs !pl-1 !pr-1';
       },
     },
     {
@@ -198,7 +209,12 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
         }
         return undefined;
       },
-      cellClass: 'text-right tabular-nums text-xs',
+      cellClass: (params) => {
+        const base = 'text-right tabular-nums text-xs !pr-2 !pl-2';
+        const ctx = params.context as { expandedPositions?: Set<string> } | undefined;
+        const isExpanded = !!params.data?.id && (ctx?.expandedPositions?.has(params.data.id) ?? false);
+        return isExpanded ? `${base} font-bold` : base;
+      },
       headerClass: 'ag-right-aligned-header',
       type: 'numericColumn',
     },
@@ -220,10 +236,12 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       },
       valueFormatter: currencyFormatter,
       cellClass: (params) => {
-        const base = 'text-right tabular-nums text-xs';
+        let base = 'text-right tabular-nums text-xs !pr-2 !pl-2';
         const res = params.data?.metadata?.resources;
-        if (Array.isArray(res) && res.length > 0) return `${base} text-content-tertiary`;
-        return base;
+        if (Array.isArray(res) && res.length > 0) base = `${base} text-content-tertiary`;
+        const ctx = params.context as { expandedPositions?: Set<string> } | undefined;
+        const isExpanded = !!params.data?.id && (ctx?.expandedPositions?.has(params.data.id) ?? false);
+        return isExpanded ? `${base} font-bold` : base;
       },
       headerClass: 'ag-right-aligned-header',
       type: 'numericColumn',
@@ -259,10 +277,12 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       },
       valueFormatter: totalFormatter,
       cellClass: (params) => {
-        const base = 'text-right tabular-nums text-xs';
+        const base = 'text-right tabular-nums text-xs !pr-2 !pl-2';
         if (params.data?._isSection) return `${base} font-bold`;
         if (params.data?._isFooter) return `${base} font-bold`;
-        return `${base} font-semibold`;
+        const ctx = params.context as { expandedPositions?: Set<string> } | undefined;
+        const isExpanded = !!params.data?.id && (ctx?.expandedPositions?.has(params.data.id) ?? false);
+        return isExpanded ? `${base} font-bold` : `${base} font-semibold`;
       },
       headerClass: 'ag-right-aligned-header',
       type: 'numericColumn',

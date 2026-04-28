@@ -397,7 +397,7 @@ h4 {
   --ag-selected-row-background-color: var(--oe-blue-subtle);
   --ag-range-selection-border-color: var(--oe-blue);
   --ag-range-selection-background-color: rgba(0, 113, 227, 0.08);
-  --ag-cell-horizontal-padding: 16px;
+  --ag-cell-horizontal-padding: 8px;
 }
 
 .dark .ag-theme-alpine {
