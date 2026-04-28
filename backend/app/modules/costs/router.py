@@ -1406,16 +1406,27 @@ CWICR_SEARCH_PATHS = [
 _CWICR_CACHE_DIR = Path.home() / ".openestimator" / "cache"
 
 
+_LAST_DOWNLOAD_ERROR: dict[str, str] = {}
+
+
 def _download_cwicr_from_github_sync(db_id: str) -> Path | None:
     """Download a CWICR parquet file from GitHub if available (sync version).
 
     Downloads to ~/.openestimator/cache/{db_id}.parquet.
-    Returns the local path on success, None on failure.
+    Returns the local path on success, None on failure. The most recent
+    failure reason for ``db_id`` lands in ``_LAST_DOWNLOAD_ERROR`` so the
+    HTTPException emitted upstream can surface it instead of a generic
+    "not found" message.
     """
     import urllib.request
 
     github_path = _GITHUB_CWICR_FILES.get(db_id)
     if not github_path:
+        _LAST_DOWNLOAD_ERROR[db_id] = (
+            f"backend has no GitHub mapping for '{db_id}'. Upgrade with "
+            f"`pip install --upgrade openconstructionerp` (≥ v2.6.23 added "
+            f"the 19 new regions; older backends know only the original 11)."
+        )
         return None
 
     url = f"{_GITHUB_CWICR_BASE_URL}/{github_path}"
@@ -1423,23 +1434,43 @@ def _download_cwicr_from_github_sync(db_id: str) -> Path | None:
     cache_dir.mkdir(parents=True, exist_ok=True)
     local_path = cache_dir / f"{db_id}.parquet"
 
-    # If already cached, return it
-    if local_path.exists() and local_path.stat().st_size > 1000:
-        logger.info("Using cached CWICR file: %s", local_path)
-        return local_path
+    # If already cached, return it. Stale partial downloads (<1 KB) are
+    # treated as missing so the next call re-fetches a healthy file.
+    if local_path.exists():
+        size = local_path.stat().st_size
+        if size > 1000:
+            logger.info("Using cached CWICR file: %s (%d bytes)", local_path, size)
+            return local_path
+        # Partial / corrupted leftover from a previous failure — wipe so
+        # the retry below gets a clean slot. Without this the user is
+        # permanently stuck behind a 0-byte cache file.
+        logger.warning("Discarding partial cache: %s (%d bytes)", local_path, size)
+        local_path.unlink(missing_ok=True)
 
     logger.info("Downloading CWICR %s from GitHub: %s", db_id, url)
     try:
         urllib.request.urlretrieve(url, str(local_path))
         if local_path.exists() and local_path.stat().st_size > 1000:
             logger.info("Downloaded CWICR %s: %d bytes", db_id, local_path.stat().st_size)
+            _LAST_DOWNLOAD_ERROR.pop(db_id, None)
             return local_path
-        else:
-            logger.warning("Downloaded file too small or missing: %s", local_path)
-            local_path.unlink(missing_ok=True)
-            return None
+        size = local_path.stat().st_size if local_path.exists() else 0
+        logger.warning(
+            "Downloaded file too small or missing: %s (%d bytes)",
+            local_path,
+            size,
+        )
+        _LAST_DOWNLOAD_ERROR[db_id] = (
+            f"GitHub download for '{db_id}' returned {size} bytes (expected ≥ 1 KB). "
+            f"URL: {url}. Likely upstream 404 or proxy strip — try re-checking "
+            f"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR "
+            f"is reachable from this network."
+        )
+        local_path.unlink(missing_ok=True)
+        return None
     except Exception as exc:
         logger.warning("Failed to download CWICR %s from GitHub: %s", db_id, exc)
+        _LAST_DOWNLOAD_ERROR[db_id] = f"GitHub download failed: {exc.__class__.__name__}: {exc}. URL: {url}"
         local_path.unlink(missing_ok=True)
         return None
 
@@ -1552,12 +1583,19 @@ async def load_cwicr_database(
     # Find the file (async — GitHub download runs in thread pool)
     cwicr_path = await _find_cwicr_file(db_id)
     if not cwicr_path:
-        raise HTTPException(
-            status_code=404,
-            detail=f"CWICR database '{db_id}' not found. "
-            f"Install DDC_Toolkit at ~/Desktop/CodeProjects/DDC_Toolkit "
-            f"or check your internet connection for GitHub download.",
-        )
+        # Surface the most-specific download failure so the user knows
+        # whether it's a backend version, a network issue, or a 0-byte
+        # cache stuck on disk — instead of a generic "not found".
+        last_error = _LAST_DOWNLOAD_ERROR.get(db_id)
+        detail = f"CWICR database '{db_id}' not found."
+        if last_error:
+            detail = f"{detail} {last_error}"
+        else:
+            detail = (
+                f"{detail} Install DDC_Toolkit at ~/Desktop/CodeProjects/DDC_Toolkit "
+                f"or check your internet connection for GitHub download."
+            )
+        raise HTTPException(status_code=404, detail=detail)
 
     logger.info("Loading CWICR from %s", cwicr_path)
 

@@ -5,6 +5,12 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.27] — 2026-04-28
+
+### Fixed
+- **Flags missing on Windows for 10 CWICR regions** — Australia, New Zealand, Croatia, Romania, Thailand, Vietnam, Indonesia, Mexico, South Africa, Nigeria all rendered as literal "AU"/"NZ"/etc. text on Windows because Win10/Win11 have no native flag-emoji glyphs in any system font. The emoji-only fallback added in v2.6.23 worked on Mac/Linux but not Windows. Replaced with real inline SVG flags for all 10 — guaranteed to render on every platform. SVG designs are simplified but recognisable at 14–32 px sizes.
+- **CWICR download error message was useless** — "CWICR database 'RO_BUCHAREST' not found. Install DDC_Toolkit…or check your internet connection" gave the user no signal whether the issue was a stale backend (no mapping for the new 19 regions in v2.6.22-), a partial cached file stuck at <1 KB, a network failure, or an upstream 404. Loader now records the last download failure per `db_id` and surfaces it through the 404 response: "backend has no GitHub mapping" / "returned 0 bytes (likely 404)" / "{ExceptionType}: {message}. URL: …". Partial-cache leftovers are auto-discarded so the next attempt gets a clean slot.
+
 ## [2.6.26] — 2026-04-28
 
 ### Fixed
