@@ -74,7 +74,12 @@ def upgrade() -> None:
                 "shared_with_project",
                 sa.Boolean(),
                 nullable=False,
-                server_default=sa.text("0"),
+                # Use sa.false() so the literal is dialect-aware: rendered as
+                # `false` on PostgreSQL, `0` on SQLite. sa.text("0") emits a
+                # raw integer literal which PostgreSQL rejects for a BOOLEAN
+                # column with: ``column "shared_with_project" is of type
+                # boolean but default expression is of type integer``.
+                server_default=sa.false(),
             ),
             sa.Column(
                 "created_at",
