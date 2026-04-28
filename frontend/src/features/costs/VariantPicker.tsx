@@ -3,21 +3,30 @@
 //
 // VariantPicker — portal popover that lets the user choose one of N
 // CWICR abstract-resource price variants when applying a cost item to a
-// BOQ position.  Pattern mirrors `features/boq/grid/BIMQuantityPicker.tsx`:
+// BOQ position.
 //
-//   * portal-rendered into `document.body` so AG Grid clipping and modal
-//     stacking contexts cannot hide it;
+// v2.6.24 redesign — when CWICR variants carry long descriptive labels
+// ("Ready-mix concrete C30/37, 32mm agg, S3 slump, supplier: ..."), a
+// single-line truncated row was unreadable. The picker now:
+//
+//   * widens to 520 px (max-w 92vw on small screens) so two-line labels fit;
+//   * shows the FULL label, wrapped, with a clamp at 3 lines + tooltip;
+//   * surfaces a delta-vs-mean chip per row so the user can see how each
+//     variant deviates from the average at a glance;
+//   * adds a search input (visible when ≥ 6 variants) to narrow by keyword;
+//   * adds a sort dropdown (default / price asc / price desc / label).
+//
+// Keyboard / portal behaviour preserved from the original implementation:
+//   * portal-rendered into `document.body` so AG Grid clipping cannot hide it;
 //   * anchored to a DOM element (typically the row's Add button);
 //   * Esc / outside-click / explicit close all call `onClose()`;
 //   * Apply does NOT auto-close — parent owns the close lifecycle so it
 //     can sequence multiple pickers in a multi-select flow.
-//
-// Reused primitives: KvList, Kv, QtyTile, Badge from '@/shared/ui'.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import { X, Search, ArrowUpDown } from 'lucide-react';
 import { Badge, Button, KvList, Kv, QtyTile } from '@/shared/ui';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import type { CostVariant, VariantStats } from './api';
@@ -49,6 +58,8 @@ export interface VariantPickerProps {
   onClose: () => void;
 }
 
+type SortMode = 'default' | 'price_asc' | 'price_desc' | 'label';
+
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
 /** Format a price in the given currency using the active i18n locale. */
@@ -61,7 +72,6 @@ function formatPrice(value: number, currency: string): string {
       maximumFractionDigits: 2,
     }).format(value);
   } catch {
-    // Unknown currency code — fall back to plain number + ISO suffix.
     const n = new Intl.NumberFormat(getIntlLocale(), {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -70,38 +80,19 @@ function formatPrice(value: number, currency: string): string {
   }
 }
 
-/** Resolve the initial selected index per the design rule.
- *
- *  Resolution order:
- *    1. Explicit `override` index when in-bounds.
- *    2. Variant whose `price` equals the chosen strategy stat (mean or
- *       median) within 1¢ tolerance.
- *    3. Variant closest in absolute price to the strategy stat — used when
- *       the average doesn't land on a real entry (common: `mean` between
- *       two variants).
- *    4. `floor(len/2)` as a final fallback.
- */
+/** Resolve the initial selected index per the design rule. */
 function resolveDefaultIndex(
   variants: CostVariant[],
   stats: VariantStats,
   strategy: 'mean' | 'median',
   override?: number,
 ): number {
-  if (
-    override != null &&
-    override >= 0 &&
-    override < variants.length
-  ) {
+  if (override != null && override >= 0 && override < variants.length) {
     return override;
   }
   const target = strategy === 'mean' ? stats.mean : stats.median;
-  const exactIdx = variants.findIndex(
-    (v) => Math.abs(v.price - target) < 0.01,
-  );
+  const exactIdx = variants.findIndex((v) => Math.abs(v.price - target) < 0.01);
   if (exactIdx >= 0) return exactIdx;
-  // No exact hit — pick the closest entry by absolute price.  Mean rarely
-  // lands exactly on a quote so this branch is the common case for the
-  // "mean" strategy.
   let bestIdx = 0;
   let bestDelta = Number.POSITIVE_INFINITY;
   for (let i = 0; i < variants.length; i++) {
@@ -114,6 +105,26 @@ function resolveDefaultIndex(
     }
   }
   return bestIdx;
+}
+
+/** Signed % deviation of `price` vs `mean`. Returns null when mean is 0
+ *  (degenerate dataset where every variant has the same price). */
+function deltaVsMean(price: number, mean: number): number | null {
+  if (!mean || mean === 0) return null;
+  return ((price - mean) / mean) * 100;
+}
+
+/** Format the delta chip — keeps the sign explicit and rounds to whole %
+ *  for visual stability. Returns "—" for zero-tolerant matches so we don't
+ *  show "+0%" / "-0%" jitter. */
+function formatDelta(deltaPct: number | null): { text: string; tone: 'pos' | 'neg' | 'flat' } {
+  if (deltaPct === null) return { text: '—', tone: 'flat' };
+  if (Math.abs(deltaPct) < 0.5) return { text: '≈ avg', tone: 'flat' };
+  const rounded = Math.round(deltaPct);
+  return {
+    text: `${rounded > 0 ? '+' : ''}${rounded}%`,
+    tone: rounded > 0 ? 'pos' : 'neg',
+  };
 }
 
 /* ── Component ────────────────────────────────────────────────────────── */
@@ -133,13 +144,17 @@ export function VariantPicker({
   const { t } = useTranslation();
   const popoverRef = useRef<HTMLDivElement>(null);
 
+  /* `selectedIdx` indexes into the ORIGINAL `variants` array, not the
+   *  display-sorted/filtered view. That keeps the parent's apply contract
+   *  unchanged — it always receives the same `CostVariant` shape regardless
+   *  of how the user got there. */
   const [selectedIdx, setSelectedIdx] = useState<number>(() =>
     resolveDefaultIndex(variants, stats, defaultStrategy, defaultIndex),
   );
+  const [query, setQuery] = useState('');
+  const [sortMode, setSortMode] = useState<SortMode>('default');
 
-  // Anchor rect — re-read on mount and on scroll/resize so a long-lived
-  // picker still tracks the anchor.  Falls back to centered placement
-  // when no anchor is provided.
+  /* ── Anchor tracking ─────────────────────────────────────────────── */
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(() =>
     anchorEl ? anchorEl.getBoundingClientRect() : null,
   );
@@ -155,7 +170,7 @@ export function VariantPicker({
     };
   }, [anchorEl]);
 
-  // Close on Escape.
+  /* ── Esc / outside-click ─────────────────────────────────────────── */
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -167,7 +182,6 @@ export function VariantPicker({
     return () => document.removeEventListener('keydown', handleKey, { capture: true });
   }, [onClose]);
 
-  // Close on outside click.
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
@@ -178,10 +192,9 @@ export function VariantPicker({
     return () => document.removeEventListener('mousedown', handleClick);
   }, [onClose]);
 
-  // Compute portal style — match BIMQuantityPicker logic but a touch wider
-  // because variant labels can be long.
-  const POPOVER_WIDTH = 360;
-  const POPOVER_MAX_HEIGHT = 480;
+  /* ── Width / placement ───────────────────────────────────────────── */
+  const POPOVER_WIDTH = 520;
+  const POPOVER_MAX_HEIGHT = 560;
   const style = useMemo<React.CSSProperties>(() => {
     if (!anchorRect) {
       return {
@@ -192,10 +205,11 @@ export function VariantPicker({
         zIndex: 10000,
       };
     }
+    const desiredWidth = Math.min(POPOVER_WIDTH, window.innerWidth - 16);
     const top = anchorRect.bottom + 4;
     const left = Math.min(
       Math.max(8, anchorRect.left),
-      window.innerWidth - POPOVER_WIDTH - 8,
+      window.innerWidth - desiredWidth - 8,
     );
     if (top + POPOVER_MAX_HEIGHT > window.innerHeight) {
       const flippedTop = Math.max(8, anchorRect.top - POPOVER_MAX_HEIGHT - 4);
@@ -204,23 +218,45 @@ export function VariantPicker({
     return { position: 'fixed', left, top, zIndex: 10000 };
   }, [anchorRect]);
 
-  // Index of the row that visually carries the "default" chip — drives a
-  // subtle highlight so the user can see at a glance which row matches the
-  // current strategy stat (mean / median).
+  /* ── Default chip — index in the original list ───────────────────── */
   const defaultIdx = useMemo(
     () => resolveDefaultIndex(variants, stats, defaultStrategy),
     [variants, stats, defaultStrategy],
   );
 
+  /* ── Display rows: filter then sort. Each row carries its original
+   *      index so clicking any row updates `selectedIdx` correctly. ── */
+  const displayRows = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const indexed = variants.map((v, originalIdx) => ({ v, originalIdx }));
+    const filtered = q
+      ? indexed.filter(({ v }) => v.label.toLowerCase().includes(q))
+      : indexed;
+    const sorted = [...filtered];
+    switch (sortMode) {
+      case 'price_asc':
+        sorted.sort((a, b) => a.v.price - b.v.price);
+        break;
+      case 'price_desc':
+        sorted.sort((a, b) => b.v.price - a.v.price);
+        break;
+      case 'label':
+        sorted.sort((a, b) => a.v.label.localeCompare(b.v.label));
+        break;
+      case 'default':
+      default:
+        // Original CWICR order — leaves the canonical variant at index 0.
+        break;
+    }
+    return sorted;
+  }, [variants, query, sortMode]);
+
   const chosen = variants[selectedIdx];
+  const showSearch = variants.length >= 6;
 
   const handleApply = () => {
     if (chosen) onApply(chosen);
   };
-
-  // "Use average" — sidesteps the per-row pick.  Parent stamps
-  // `metadata.variant_default = 'mean' | 'median'` so the BOQ row marker
-  // can render a softer "default · choose to refine" hint.
   const handleUseDefault = () => {
     onUseDefault?.(defaultStrategy);
   };
@@ -238,18 +274,27 @@ export function VariantPicker({
       aria-label={t('costs.choose_variant', { defaultValue: 'Choose price variant' })}
       className="bg-surface-elevated border border-border-light dark:border-border-dark
                  rounded-xl shadow-2xl flex flex-col overflow-hidden"
-      style={{ ...style, width: POPOVER_WIDTH, maxHeight: POPOVER_MAX_HEIGHT }}
+      style={{
+        ...style,
+        width: 'min(520px, calc(100vw - 16px))',
+        maxHeight: POPOVER_MAX_HEIGHT,
+      }}
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
-      {/* Header */}
+      {/* ── Header ──────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 shrink-0">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-baseline gap-2 min-w-0">
           <span className="text-sm font-semibold text-content-primary truncate">
             {t('costs.choose_variant', { defaultValue: 'Choose price variant' })}
           </span>
           <span className="text-2xs text-content-tertiary tabular-nums shrink-0">
-            ({variants.length})
+            {variants.length === 1
+              ? t('costs.variant_count_one', { defaultValue: '1 option' })
+              : t('costs.variant_count_n', {
+                  defaultValue: '{{count}} options',
+                  count: variants.length,
+                })}
           </span>
         </div>
         <button
@@ -263,98 +308,174 @@ export function VariantPicker({
         </button>
       </div>
 
-      {/* Stats */}
+      {/* ── Stats banner ────────────────────────────────────────────── */}
       <div className="px-4 py-3 border-b border-border-light bg-surface-secondary/20 shrink-0">
         <KvList>
           <Kv
             label={t('costs.variant_min', { defaultValue: 'Min' })}
-            value={<span className="tabular-nums">{formatPrice(stats.min, currency)}</span>}
+            value={
+              <span className="tabular-nums">{formatPrice(stats.min, currency)}</span>
+            }
+          />
+          <Kv
+            label={t('costs.variant_mean', { defaultValue: 'Avg' })}
+            value={
+              <span className="tabular-nums font-medium">
+                {formatPrice(stats.mean, currency)}
+              </span>
+            }
           />
           <Kv
             label={t('costs.variant_median', { defaultValue: 'Median' })}
-            value={<span className="tabular-nums font-medium">{formatPrice(stats.median, currency)}</span>}
+            value={
+              <span className="tabular-nums">{formatPrice(stats.median, currency)}</span>
+            }
           />
           <Kv
             label={t('costs.variant_max', { defaultValue: 'Max' })}
-            value={<span className="tabular-nums">{formatPrice(stats.max, currency)}</span>}
-          />
-          <Kv
-            label={t('costs.variant_count', { defaultValue: 'Count' })}
-            value={<span className="tabular-nums">{stats.count}</span>}
+            value={
+              <span className="tabular-nums">{formatPrice(stats.max, currency)}</span>
+            }
           />
         </KvList>
       </div>
 
-      {/* Variant list */}
+      {/* ── Search + Sort toolbar (only for ≥6 variants) ────────────── */}
+      {showSearch && (
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-border-light bg-surface-primary shrink-0">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <Search size={14} className="text-content-tertiary shrink-0" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t('costs.variant_search_placeholder', {
+                defaultValue: 'Filter variants by keyword…',
+              })}
+              className="flex-1 min-w-0 bg-transparent text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none"
+            />
+          </div>
+          <div className="flex items-center gap-1">
+            <ArrowUpDown size={12} className="text-content-tertiary" />
+            <select
+              value={sortMode}
+              onChange={(e) => setSortMode(e.target.value as SortMode)}
+              className="bg-transparent text-2xs text-content-secondary focus:outline-none cursor-pointer"
+              title={t('costs.variant_sort', { defaultValue: 'Sort variants' })}
+            >
+              <option value="default">
+                {t('costs.variant_sort_default', { defaultValue: 'Default' })}
+              </option>
+              <option value="price_asc">
+                {t('costs.variant_sort_price_asc', { defaultValue: 'Price ↑' })}
+              </option>
+              <option value="price_desc">
+                {t('costs.variant_sort_price_desc', { defaultValue: 'Price ↓' })}
+              </option>
+              <option value="label">
+                {t('costs.variant_sort_label', { defaultValue: 'Name A→Z' })}
+              </option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* ── Variant list ────────────────────────────────────────────── */}
       <div
         className="flex-1 overflow-y-auto"
         role="radiogroup"
         aria-label={t('costs.choose_variant', { defaultValue: 'Choose price variant' })}
       >
-        {variants.map((v, idx) => {
-          const isSel = idx === selectedIdx;
-          const isDefault = idx === defaultIdx;
-          return (
-            <button
-              key={v.index}
-              type="button"
-              role="radio"
-              aria-checked={isSel}
-              onClick={() => setSelectedIdx(idx)}
-              className={`w-full flex items-start gap-2.5 px-4 py-2 text-left border-b border-border-light/50 last:border-b-0 transition-colors ${
-                isSel
-                  ? 'bg-oe-blue-subtle/20'
-                  : 'hover:bg-surface-secondary/60'
-              }`}
-              data-testid={`variant-row-${idx}`}
-            >
-              {/* Radio circle */}
-              <span
-                className={`mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                  isSel ? 'border-oe-blue' : 'border-content-quaternary'
+        {displayRows.length === 0 ? (
+          <div className="px-6 py-8 text-center text-xs text-content-tertiary">
+            {t('costs.variant_no_match', {
+              defaultValue: 'No variants match your filter.',
+            })}
+          </div>
+        ) : (
+          displayRows.map(({ v, originalIdx }) => {
+            const isSel = originalIdx === selectedIdx;
+            const isDefault = originalIdx === defaultIdx;
+            const delta = formatDelta(deltaVsMean(v.price, stats.mean));
+            return (
+              <button
+                key={v.index}
+                type="button"
+                role="radio"
+                aria-checked={isSel}
+                onClick={() => setSelectedIdx(originalIdx)}
+                className={`w-full flex items-start gap-3 px-4 py-3 text-left border-b border-border-light/50 last:border-b-0 transition-colors ${
+                  isSel
+                    ? 'bg-oe-blue-subtle/20 ring-1 ring-inset ring-oe-blue/30'
+                    : 'hover:bg-surface-secondary/60'
                 }`}
+                data-testid={`variant-row-${originalIdx}`}
               >
-                {isSel && <span className="h-2 w-2 rounded-full bg-oe-blue" />}
-              </span>
+                {/* Radio circle */}
+                <span
+                  className={`mt-1 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                    isSel ? 'border-oe-blue' : 'border-content-quaternary'
+                  }`}
+                >
+                  {isSel && <span className="h-2 w-2 rounded-full bg-oe-blue" />}
+                </span>
 
-              {/* Label + footer */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className="text-xs font-medium text-content-primary truncate"
+                {/* Label + chips + per-unit info */}
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="text-sm leading-snug text-content-primary [display:-webkit-box] [-webkit-line-clamp:3] [-webkit-box-orient:vertical] overflow-hidden break-words"
                     title={v.label}
                   >
                     {v.label}
-                  </span>
-                  {isDefault && (
-                    <Badge variant="blue" size="sm">
-                      {defaultChipLabel}
-                    </Badge>
-                  )}
-                </div>
-                {v.price_per_unit != null && (
-                  <div className="text-2xs text-content-tertiary mt-0.5 tabular-nums">
-                    {t('costs.variant_per_unit', { defaultValue: 'Per unit' })}
-                    {': '}
-                    {v.price_per_unit.toLocaleString(undefined, { maximumFractionDigits: 4 })}
-                  </div>
-                )}
-              </div>
+                  </p>
 
-              {/* Price tile */}
-              <div className="shrink-0">
-                <QtyTile
-                  label={t('costs.rate', { defaultValue: 'Rate' })}
-                  value={v.price}
-                  unit={`${currency}${unitLabel ? `/${unitLabel}` : ''}`}
-                />
-              </div>
-            </button>
-          );
-        })}
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    {isDefault && (
+                      <Badge variant="blue" size="sm">
+                        {defaultChipLabel}
+                      </Badge>
+                    )}
+                    <span
+                      className={
+                        delta.tone === 'pos'
+                          ? 'inline-flex items-center rounded-full bg-amber-500/15 px-1.5 py-0.5 text-2xs font-semibold text-amber-700 dark:text-amber-300 tabular-nums'
+                          : delta.tone === 'neg'
+                          ? 'inline-flex items-center rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-2xs font-semibold text-emerald-700 dark:text-emerald-300 tabular-nums'
+                          : 'inline-flex items-center rounded-full bg-surface-tertiary px-1.5 py-0.5 text-2xs font-medium text-content-secondary tabular-nums'
+                      }
+                      title={t('costs.variant_delta_tooltip', {
+                        defaultValue: 'Difference vs the average rate',
+                      })}
+                    >
+                      {delta.text}
+                    </span>
+                    {v.price_per_unit != null && (
+                      <span className="text-2xs text-content-tertiary tabular-nums">
+                        {t('costs.variant_per_unit', { defaultValue: 'Per unit' })}
+                        {': '}
+                        {v.price_per_unit.toLocaleString(undefined, {
+                          maximumFractionDigits: 4,
+                        })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Price tile */}
+                <div className="shrink-0">
+                  <QtyTile
+                    label={t('costs.rate', { defaultValue: 'Rate' })}
+                    value={v.price}
+                    unit={`${currency}${unitLabel ? `/${unitLabel}` : ''}`}
+                  />
+                </div>
+              </button>
+            );
+          })
+        )}
       </div>
 
-      {/* Footer */}
+      {/* ── Footer ──────────────────────────────────────────────────── */}
       <div className="px-4 py-2.5 border-t border-border-light bg-surface-secondary/30 flex items-center justify-between gap-2 shrink-0">
         {onUseDefault ? (
           <button

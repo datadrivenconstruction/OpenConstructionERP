@@ -132,6 +132,86 @@ def _stamp_variant_snapshot(
     return metadata
 
 
+def _stamp_resource_variant_snapshots(
+    metadata: dict[str, Any],
+    *,
+    position_currency: str | None,
+) -> dict[str, Any]:
+    """Walk ``metadata.resources`` and stamp ``variant_snapshot`` on every
+    resource entry that carries a per-resource ``variant`` or
+    ``variant_default`` marker.
+
+    Mirrors the position-level helper but operates on each resource dict
+    independently so a position composed of multiple variant-bearing CWICR
+    items (e.g. concrete C30 + rebar 8mm) keeps an immutable record per
+    resource. Currency falls back to the per-resource ``currency`` field
+    first, then ``position_currency``, then ``"USD"``.
+
+    Idempotent: a no-op patch leaves existing snapshots intact.
+    """
+    resources = metadata.get("resources")
+    if not isinstance(resources, list):
+        return metadata
+
+    for resource in resources:
+        if not isinstance(resource, dict):
+            continue
+        variant = resource.get("variant")
+        variant_default = resource.get("variant_default")
+
+        has_user_pick = (
+            isinstance(variant, dict)
+            and isinstance(variant.get("label"), str)
+            and isinstance(variant.get("price"), int | float)
+        )
+        has_default = isinstance(variant_default, str) and variant_default in {
+            "mean",
+            "median",
+        }
+
+        if not (has_user_pick or has_default):
+            continue
+
+        try:
+            rate_val = float(resource.get("unit_rate", 0) or 0)
+        except (TypeError, ValueError):
+            rate_val = 0.0
+        rate_val = round(rate_val, 4)
+
+        if has_user_pick:
+            label = str(variant["label"])
+            source = "user_pick"
+        else:
+            label = "average" if variant_default == "mean" else "median"
+            source = f"default_{variant_default}"
+
+        existing = resource.get("variant_snapshot")
+        if (
+            isinstance(existing, dict)
+            and existing.get("label") == label
+            and existing.get("source") == source
+            and abs(float(existing.get("rate", 0)) - rate_val) < 0.005
+        ):
+            continue
+
+        resource_currency = resource.get("currency")
+        currency = (
+            resource_currency
+            if isinstance(resource_currency, str) and resource_currency
+            else position_currency or "USD"
+        )
+
+        resource["variant_snapshot"] = {
+            "label": label,
+            "rate": rate_val,
+            "currency": currency,
+            "captured_at": datetime.now(UTC).isoformat(timespec="seconds"),
+            "source": source,
+        }
+
+    return metadata
+
+
 logger_events = logging.getLogger(__name__ + ".events")
 _logger_audit = logging.getLogger(__name__ + ".audit")
 
@@ -1565,6 +1645,10 @@ class BOQService:
             unit_rate=data.unit_rate,
             currency=currency_hint if isinstance(currency_hint, str) else None,
         )
+        _stamp_resource_variant_snapshots(
+            merged_metadata,
+            position_currency=currency_hint if isinstance(currency_hint, str) else None,
+        )
 
         total = _compute_total(data.quantity, data.unit_rate)
         max_order = await self.position_repo.get_max_sort_order(data.boq_id)
@@ -1933,6 +2017,39 @@ class BOQService:
                 fields["metadata_"],
                 unit_rate=snapshot_rate,
                 currency=currency if isinstance(currency, str) else None,
+            )
+            # Per-resource snapshots — preserve any existing snapshots on
+            # incoming resources that didn't include one, so the idempotency
+            # check inside ``_stamp_resource_variant_snapshots`` can compare
+            # against them. Without this seeding, every metadata patch would
+            # bump ``captured_at`` on resources whose pick is unchanged.
+            existing_resources = (
+                existing_meta.get("resources") if isinstance(existing_meta, dict) else None
+            )
+            incoming_resources = fields["metadata_"].get("resources")
+            if isinstance(existing_resources, list) and isinstance(incoming_resources, list):
+                # Match by code+name pair to survive reorder; positional fall-
+                # back for anonymous resources. Existing snapshots are seeded
+                # only when the incoming entry lacks one.
+                lookup: dict[tuple[str, str], dict[str, Any]] = {}
+                for er in existing_resources:
+                    if isinstance(er, dict) and isinstance(er.get("variant_snapshot"), dict):
+                        key = (str(er.get("code", "")), str(er.get("name", "")))
+                        lookup[key] = er["variant_snapshot"]
+                for idx, ir in enumerate(incoming_resources):
+                    if not isinstance(ir, dict) or "variant_snapshot" in ir:
+                        continue
+                    key = (str(ir.get("code", "")), str(ir.get("name", "")))
+                    seeded = lookup.get(key)
+                    if seeded is None and idx < len(existing_resources):
+                        prev = existing_resources[idx]
+                        if isinstance(prev, dict) and isinstance(prev.get("variant_snapshot"), dict):
+                            seeded = prev["variant_snapshot"]
+                    if seeded is not None:
+                        ir["variant_snapshot"] = seeded
+            _stamp_resource_variant_snapshots(
+                fields["metadata_"],
+                position_currency=currency if isinstance(currency, str) else None,
             )
 
         if fields:

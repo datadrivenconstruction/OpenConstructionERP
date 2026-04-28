@@ -277,8 +277,11 @@ export function CostDatabaseSearchModal({
   boqId: string;
   onClose: () => void;
   onAdded: () => void;
-  /** When provided, the modal operates in "add resource" mode — selected items are passed back instead of added as positions. */
-  onSelectForResources?: (item: CostSearchItem) => void;
+  /** When provided, the modal operates in "add resource" mode — selected items
+   *  are passed back instead of added as positions. The optional second arg
+   *  carries the user's variant choice when the item had 2+ variants; resource
+   *  rate / variant marker are persisted by the caller on the resource entry. */
+  onSelectForResources?: (item: CostSearchItem, picked?: VariantResolution) => void;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -323,11 +326,32 @@ export function CostDatabaseSearchModal({
   const handleAdd = useCallback(async () => {
     if (selected.size === 0) return;
 
-    // Resource mode: pass the first selected item back
+    // Resource mode: pass each selected item back. When an item carries 2+
+    // CWICR abstract-resource variants, open the picker FIRST so the chosen
+    // variant rate is what lands on the resource entry — and the caller can
+    // stamp `metadata.resources[i].variant`/`variant_default` for backend
+    // snapshotting via `_stamp_resource_variant_snapshots`.
     if (onSelectForResources) {
       const selectedItems = items.filter((i) => selected.has(i.id));
+
+      const pickVariantForResource = (
+        item: CostSearchItem,
+      ): Promise<VariantResolution | null> =>
+        new Promise((resolve) => {
+          setActiveVariantPick({ item, resolve });
+        });
+
       for (const item of selectedItems) {
-        onSelectForResources(item);
+        const variants = item.metadata_?.variants;
+        const stats = item.metadata_?.variant_stats;
+        let picked: VariantResolution | undefined;
+        if (variants && variants.length >= 2 && stats) {
+          const resolution = await pickVariantForResource(item);
+          // Cancelled — skip this item, keep iterating.
+          if (!resolution) continue;
+          picked = resolution;
+        }
+        onSelectForResources(item, picked);
       }
       return;
     }

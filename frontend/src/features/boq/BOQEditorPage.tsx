@@ -1741,23 +1741,62 @@ export function BOQEditorPage() {
 
   /** When a cost item is selected and we're in "add resource" mode, add it as a resource. */
   const handleCostDbAddResource = useCallback(
-    (item: CostAutocompleteItem) => {
+    (
+      item: CostAutocompleteItem,
+      picked?:
+        | { kind: 'variant'; variant: { label: string; price: number; index: number } }
+        | { kind: 'default'; strategy: 'mean' | 'median' },
+    ) => {
       if (!costDbForPositionId) return;
       const pos = boq?.positions.find((p) => p.id === costDbForPositionId);
       if (!pos) return;
 
+      // Variant pick: collapse the cost-item's components into ONE priced
+      // resource at the chosen variant rate. CWICR variants represent
+      // alternate price points for the same rate-code (e.g. C25/C30/C35),
+      // not per-component breakdowns, so a single synthesized resource
+      // preserves variant semantics without scaling-vs-not-scaling
+      // ambiguity. Variant marker travels on the resource entry so the
+      // backend `_stamp_resource_variant_snapshots` freezes the rate.
       const components = item.components || [];
-      const newResources = components.length > 0
-        ? components.map((c) => ({
-            name: c.name, code: c.code || '', type: c.type || 'other',
-            unit: c.unit, quantity: c.quantity, unit_rate: c.unit_rate,
-            total: c.cost || c.quantity * c.unit_rate,
-          }))
-        : [{
-            name: item.description, code: item.code, type: 'material',
-            unit: item.unit, quantity: 1, unit_rate: item.rate,
-            total: item.rate,
-          }];
+      let newResources: Array<Record<string, unknown>>;
+
+      if (picked?.kind === 'variant') {
+        const v = picked.variant;
+        newResources = [{
+          name: `${item.description} (${v.label})`,
+          code: item.code,
+          type: 'material',
+          unit: item.unit,
+          quantity: 1,
+          unit_rate: v.price,
+          total: v.price,
+          variant: { label: v.label, price: v.price, index: v.index },
+        }];
+      } else if (picked?.kind === 'default') {
+        newResources = [{
+          name: item.description,
+          code: item.code,
+          type: 'material',
+          unit: item.unit,
+          quantity: 1,
+          unit_rate: item.rate,
+          total: item.rate,
+          variant_default: picked.strategy,
+        }];
+      } else {
+        newResources = components.length > 0
+          ? components.map((c) => ({
+              name: c.name, code: c.code || '', type: c.type || 'other',
+              unit: c.unit, quantity: c.quantity, unit_rate: c.unit_rate,
+              total: c.cost || c.quantity * c.unit_rate,
+            }))
+          : [{
+              name: item.description, code: item.code, type: 'material',
+              unit: item.unit, quantity: 1, unit_rate: item.rate,
+              total: item.rate,
+            }];
+      }
 
       const existingResources = [...((pos.metadata?.resources ?? []) as Array<Record<string, unknown>>)];
       const merged = [...existingResources, ...newResources];
@@ -1774,7 +1813,13 @@ export function BOQEditorPage() {
       });
       setCostDbForPositionId(null);
       setCostDbModalOpen(false);
-      addToast({ type: 'success', title: t('boq.resources_added', { defaultValue: 'Resources added to position' }) });
+      const successMsg = picked?.kind === 'variant'
+        ? t('boq.variant_resource_added', {
+            defaultValue: 'Resource added: {{label}}',
+            label: picked.variant.label,
+          })
+        : t('boq.resources_added', { defaultValue: 'Resources added to position' });
+      addToast({ type: 'success', title: successMsg });
     },
     [costDbForPositionId, boq?.positions, updateMutation, addToast, t],
   );
@@ -2848,7 +2893,7 @@ export function BOQEditorPage() {
             invalidateAll();
             addToast({ type: 'success', title: t('boq.positions_added', { defaultValue: 'Positions added from cost database' }) });
           }}
-          onSelectForResources={costDbForPositionId ? (item) => {
+          onSelectForResources={costDbForPositionId ? (item, picked) => {
             handleCostDbAddResource({
               code: item.code,
               description: item.description,
@@ -2864,7 +2909,7 @@ export function BOQEditorPage() {
                 cost: c.cost,
                 type: c.type,
               })),
-            });
+            }, picked);
           } : undefined}
         />
       )}

@@ -5,6 +5,14 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.25] — 2026-04-28
+
+### Added
+- **Per-resource CWICR variants on multi-resource positions.** When a position is composed of more than one variant-bearing resource (e.g. concrete C30 + rebar 8mm), each resource entry now keeps its own immutable `variant_snapshot`. The "Add resource from cost database" flow opens the variant picker first, the picked rate lands on the resource entry, and the backend's new `_stamp_resource_variant_snapshots` walks `metadata.resources[]` independently so a later cost-DB re-import cannot silently rewrite any one of them. 4 new pytest cases (per-resource stamp, mixed variant + variant_default + plain, idempotent no-op patch, switch one resource without disturbing the other).
+
+### Changed
+- **VariantPicker UX redesign.** Width 360 → 520px so full descriptions are visible with `line-clamp-3` instead of single-line truncation. Stats banner now shows Min / Avg / Median / Max (Avg added). Search input visible at ≥6 variants. Sort dropdown: default / price asc / price desc / label A→Z. Per-row delta-vs-mean chip (`+N%` amber, `-N%` emerald, `≈ avg` gray) so price spread reads at a glance. Selected row highlighted with `ring-1 ring-inset`. Empty state on filter miss. All 8 existing contract tests still green.
+
 ## [2.6.24] — 2026-04-28
 
 ### Fixed
