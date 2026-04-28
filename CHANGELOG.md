@@ -5,6 +5,14 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.26] — 2026-04-28
+
+### Fixed
+- **Unit "ton" rejected on CWICR add** — "Failed to add positions, unit 'ton' is not in the approved BOQ unit catalogue". Added a canonical alias map: `ton`/`tons`/`tonne`/`tonnes`/`mt` → `t`, `metre`/`metres`/`meter`/`meters` → `m`, `sqm`/`sq.m`/`cum`/`cu.m` → `m2`/`m3`, `each`/`piece(s)` → `ea`/`pcs`, `lump sum`/`lumpsum` → `lsum`, `hours`/`week`/`days`/`mo` → canonical forms. Aggregations stay coherent (everything buckets into the canonical unit) without rejecting common spellings.
+- **Country flags missing on cost-database regions** — `<CountryFlag code="DE_BERLIN" />` returned null because the lookup used the full lowercased key. The component now extracts the country prefix from region keys (`DE_BERLIN` → `de`, `AU_SYDNEY` → `au`) and maps non-ISO prefixes (`USA_USD` → `us`, `ENG_TORONTO` → `ca`, `SP_BARCELONA` → `es`, `PT_SAOPAULO` → `br`, `AR_DUBAI` → `ae`, `ZH_SHANGHAI` → `cn`, `HI_MUMBAI` → `in`, `CS_PRAGUE` → `cz`, `JA_TOKYO` → `jp`, `KO_SEOUL` → `kr`, `SV_STOCKHOLM` → `se`, `VI_HANOI` → `vn`) so all 30 CWICR regions render with proper flags everywhere.
+- **BIM converter status panel could not be dismissed on /bim** — `BIMPage` mounted the banner without `dismissible`, so the X button was never rendered. Now passed; banner can be closed and the dismissed flag persists in localStorage.
+- **Re-check: "Operation failed Not Found"** — the verify endpoint (`POST /v1/takeoff/converters/{id}/verify/`) only landed in v2.6.23. When users on stale backends click Re-check, the 404 now surfaces a clear "Backend version too old, run `pip install --upgrade openconstructionerp`" toast instead of a bare error.
+
 ## [2.6.25] — 2026-04-28
 
 ### Added

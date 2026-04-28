@@ -2580,7 +2580,7 @@ export function BIMPage() {
       {/* ── Converter status banner — surfaces any missing DDC
             converters so the user can one-click install them before
             dragging a native CAD file onto the upload zone. ── */}
-      <BIMConverterStatusBanner className="mx-3 mt-2" />
+      <BIMConverterStatusBanner className="mx-3 mt-2" dismissible />
 
       {/* ── 3D Viewport with filter sidebar ── */}
       <div className="flex-1 min-h-0 relative bg-surface-secondary flex">

@@ -69,13 +69,65 @@ _MULTI_PREFIX_RE: Final = re.compile(r"^\s*(\d{1,6})\s+([A-Za-z][A-Za-z0-9]{0,9}
 _CUSTOM_UNIT_RE: Final = re.compile(r"^[A-Za-z][A-Za-z0-9 ._/-]{0,19}$")
 
 
+# Canonical aliases — common synonyms that should bucket into the same
+# canonical unit so aggregations don't fragment. CWICR / RSMeans / SINAPI
+# / GAEB seeds use these spellings interchangeably; mapping them at the
+# validator preserves both round-trip ergonomics ("ton" works as input)
+# and downstream coherence (everything lands in "t"). Keep the map small
+# and unambiguous: only include synonyms with universal meaning. Locale-
+# specific variants (e.g. "штука", "шт") belong in i18n display, not here.
+_UNIT_ALIASES: Final[dict[str, str]] = {
+    # mass — metric tonne synonyms
+    "ton": "t",
+    "tons": "t",
+    "tonne": "t",
+    "tonnes": "t",
+    "mt": "t",
+    # length — meter / metre
+    "metre": "m",
+    "metres": "m",
+    "meter": "m",
+    "meters": "m",
+    # area / volume plurals
+    "sqm": "m2",
+    "sq.m": "m2",
+    "sqft": "ft2",
+    "sq.ft": "ft2",
+    "cum": "m3",
+    "cu.m": "m3",
+    "cuft": "ft3",
+    "cu.ft": "ft3",
+    # counts / lump synonyms
+    "piece": "pcs",
+    "pieces": "pcs",
+    "each": "ea",
+    "nr": "no",
+    "lump": "lsum",
+    "lumpsum": "lsum",
+    "lump-sum": "lsum",
+    "lump sum": "lsum",
+    # time / labour
+    "hours": "hr",
+    "hour": "hr",
+    "h": "hr",
+    "hrs": "hr",
+    "weeks": "wk",
+    "week": "wk",
+    "months": "month",
+    "mo": "month",
+    "days": "day",
+}
+
+
 def normalise_unit(unit: str | None) -> str | None:
     """Return the canonical form of ``unit`` if accepted, else None.
 
     Accepts (in order of priority):
-      - bare units from APPROVED_UNITS (case-insensitive)
+      - exact match in APPROVED_UNITS (case-insensitive)
+      - canonical alias from ``_UNIT_ALIASES`` (e.g. "ton" → "t")
       - CWICR-style multi-prefix forms like "100 EA", "1000 m" — returned
-        as ``"<N> <unit>"`` lower-cased.
+        as ``"<N> <unit>"`` lower-cased; trailing token can itself be an
+        alias.
       - any user-coined custom unit matching ``_CUSTOM_UNIT_RE`` — letters
         first, alphanumerics / space / ``._-/`` after, max 20 chars.
         Lower-cased on the way through. Lets estimators register novel
@@ -90,11 +142,15 @@ def normalise_unit(unit: str | None) -> str | None:
     lower = stripped.lower()
     if lower in APPROVED_UNITS:
         return lower
+    if lower in _UNIT_ALIASES:
+        return _UNIT_ALIASES[lower]
     m = _MULTI_PREFIX_RE.match(stripped)
     if m:
         n, base = m.group(1), m.group(2).lower()
-        # Trailing token: prefer canonical form, fall back to custom-shape
-        # so "100 myunit" (custom unit per 100 group) round-trips.
+        # Trailing token: alias → canonical → custom shape, in that order,
+        # so "1000 tons" and "100 each" both round-trip cleanly.
+        if base in _UNIT_ALIASES:
+            return f"{n} {_UNIT_ALIASES[base]}"
         if base in APPROVED_UNITS or _CUSTOM_UNIT_RE.match(base):
             return f"{n} {base}"
     if _CUSTOM_UNIT_RE.match(stripped):

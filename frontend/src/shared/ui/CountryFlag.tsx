@@ -92,6 +92,37 @@ const EMOJI_FALLBACK: Record<string, string> = {
   nz: '🇳🇿', ro: '🇷🇴', th: '🇹🇭', vn: '🇻🇳', za: '🇿🇦',
 };
 
+/** Region-key prefixes that don't match an ISO code directly.
+ *  Keeps CountryFlag callable with raw region keys ("DE_BERLIN",
+ *  "AR_DUBAI", "ENG_TORONTO") without making each call site re-map first.
+ *  Mirrors REGION_MAP in useCostDatabaseStore.ts; kept inline so this
+ *  shared UI component has no feature-store dependency. */
+const REGION_PREFIX_TO_ISO: Record<string, string> = {
+  usa: 'us', uk: 'gb', eng: 'ca', sp: 'es', pt: 'br',
+  ar: 'ae', zh: 'cn', hi: 'in', cs: 'cz', ja: 'jp',
+  ko: 'kr', sv: 'se', vi: 'vn',
+};
+
+/** Resolve a 2-letter ISO key from any of: bare ISO code ("de"),
+ *  region key with underscore ("DE_BERLIN" → "de"), region key with
+ *  non-ISO prefix ("USA_USD" → "us", "ENG_TORONTO" → "ca"). */
+function resolveIso(code: string): string | null {
+  const lc = code.toLowerCase();
+  if (FLAGS[lc] || EMOJI_FALLBACK[lc]) return lc;
+  // region-key shape: split on first "_" and try the prefix.
+  const underscore = lc.indexOf('_');
+  if (underscore > 0) {
+    const prefix = lc.slice(0, underscore);
+    if (FLAGS[prefix] || EMOJI_FALLBACK[prefix]) return prefix;
+    const mapped = REGION_PREFIX_TO_ISO[prefix];
+    if (mapped) return mapped;
+  }
+  // Bare non-ISO prefix (no underscore — e.g. someone passes "USA").
+  const mapped = REGION_PREFIX_TO_ISO[lc];
+  if (mapped) return mapped;
+  return null;
+}
+
 interface CountryFlagProps {
   code: string;
   size?: number;
@@ -99,13 +130,14 @@ interface CountryFlagProps {
 }
 
 export function CountryFlag({ code, size = 16, className = '' }: CountryFlagProps) {
-  const lc = code.toLowerCase();
-  const svg = FLAGS[lc];
+  const iso = resolveIso(code);
+  if (!iso) return null;
+  const svg = FLAGS[iso];
 
   if (!svg) {
-    const emoji = EMOJI_FALLBACK[lc];
+    const emoji = EMOJI_FALLBACK[iso];
     if (emoji) {
-      return <span className={className} role="img" aria-label={lc} style={{ fontSize: size * 0.7 }}>{emoji}</span>;
+      return <span className={className} role="img" aria-label={iso} style={{ fontSize: size * 0.7 }}>{emoji}</span>;
     }
     return null;
   }

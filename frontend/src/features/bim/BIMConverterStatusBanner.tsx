@@ -233,6 +233,29 @@ export function BIMConverterStatusBanner({
       queryClient.invalidateQueries({ queryKey: ['bim-converters'] });
     },
     onError: (err, converterId) => {
+      // Backend < v2.6.23 didn't have the per-converter verify endpoint —
+      // surface a clear "upgrade your backend" message instead of a bare
+      // "Not Found" so the user knows what to do.
+      const isMissingEndpoint =
+        err instanceof Error
+          && (err.message.includes('Not Found')
+              || err.message.includes('404'));
+      if (isMissingEndpoint) {
+        addToast(
+          {
+            type: 'warning',
+            title: t('bim.converter_verify_old_backend_title', {
+              defaultValue: 'Backend version too old for Re-check',
+            }),
+            message: t('bim.converter_verify_old_backend_msg', {
+              defaultValue:
+                'Re-check requires backend v2.6.23 or newer. Update with: pip install --upgrade openconstructionerp',
+            }),
+          },
+          { duration: 20_000 },
+        );
+        return;
+      }
       addToast({
         type: 'error',
         title: t('bim.converter_verify_error_title', {
