@@ -16,6 +16,7 @@ import {
 import { boqApi, type ResourceSummaryItem, type ResourceSummaryResponse } from './api';
 import { apiPost } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { getResourceTypeLabel } from './boqResourceTypes';
 
 /* ── Constants ──────────────────────────────────────────────────────── */
 
@@ -440,7 +441,7 @@ function ResourceRow({
           className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium ${badgeStyle}`}
         >
           {TYPE_ICONS[resource.type] || TYPE_ICONS.other}
-          {resource.type}
+          {getResourceTypeLabel(resource.type, t)}
         </span>
       </td>
       <td className="px-3 py-2 text-center text-content-secondary font-mono uppercase">

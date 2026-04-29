@@ -13,6 +13,7 @@ import { Search, X, Package, Hammer, Cpu, Users, Loader2, Boxes } from 'lucide-r
 import { Button } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { getResourceTypeLabel } from './boqResourceTypes';
 
 /* ── Types ───────────────────────────────────────────────────────────── */
 
@@ -295,7 +296,7 @@ export function CatalogPickerModal({ open, onClose, onSelect }: CatalogPickerMod
                           <span
                             className={`inline-flex items-center rounded px-1.5 py-0.5 text-2xs font-medium ${badgeStyle}`}
                           >
-                            {res.resource_type}
+                            {getResourceTypeLabel(res.resource_type, t)}
                           </span>
                           {res.category && (
                             <span className="text-content-quaternary">{res.category}</span>
