@@ -13,6 +13,8 @@ Endpoints:
     POST   /boqs/{boq_id}/positions            — Add a position to a BOQ
     POST   /boqs/{boq_id}/positions/bulk      — Bulk insert multiple positions
     PATCH  /positions/{position_id}            — Update a position
+    PATCH  /positions/{position_id}/resources/{resource_idx}/variant/
+                                               — Re-pick variant on a resource row
     DELETE /positions/{position_id}            — Delete a position
     POST   /boqs/{boq_id}/positions/reorder   — Reorder positions via drag-and-drop
     POST   /boqs/{boq_id}/sections             — Create a section header
@@ -58,7 +60,7 @@ from typing import Any, Literal
 
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.core.csv_safety import neutralise_formula
 from app.core.file_signature import detect as detect_signature
@@ -1519,6 +1521,62 @@ async def update_position(
     # (BUG-AUDIT01).  Without it the service falls back to anonymous and
     # the FK to ``oe_users_user`` would fail.
     position = await service.update_position(position_id, data, actor_id=user_id)
+    return _position_to_response(position)
+
+
+class _ResourceVariantRepickBody(BaseModel):
+    """Payload for the per-resource variant re-pick endpoint."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    variant_code: str = Field(
+        ...,
+        min_length=1,
+        max_length=512,
+        description=(
+            "Label of the desired variant in the resource's cached "
+            "``available_variants`` array. Matches ``CostVariant.label``."
+        ),
+    )
+
+
+@router.patch(
+    "/positions/{position_id}/resources/{resource_idx}/variant/",
+    response_model=PositionResponse,
+    summary="Re-pick variant on an existing resource entry",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def repick_resource_variant(
+    position_id: uuid.UUID,
+    resource_idx: int,
+    data: _ResourceVariantRepickBody,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> PositionResponse:
+    """Swap the variant on an already-added BOQ resource row.
+
+    Reads the variant set cached on
+    ``position.metadata.resources[resource_idx].available_variants`` (stamped
+    at apply-time by the frontend), finds the variant whose label matches
+    ``variant_code``, and patches that single resource's ``unit_rate``,
+    ``variant`` marker, and ``variant_snapshot``. Other resources on the
+    position are untouched — their snapshots keep their original
+    ``captured_at`` per the v2.6.25 immutability contract.
+    """
+    # IDOR guard: load position → derive boq_id → verify ownership chain.
+    existing = await service.position_repo.get_by_id(position_id)
+    if existing is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
+    await _verify_boq_owner(session, existing.boq_id, user_id, payload)
+
+    position = await service.repick_resource_variant(
+        position_id,
+        resource_idx,
+        data.variant_code,
+        actor_id=user_id,
+    )
     return _position_to_response(position)
 
 

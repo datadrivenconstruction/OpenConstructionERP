@@ -180,6 +180,20 @@ interface ResourceRow {
   _resourceCurrency?: string;
   /** Optional resource code (e.g. CWICR id) — used by inline editor. */
   _resourceCode?: string;
+  /**
+   * Cached CWICR variant catalog for this resource (v2.6.26+).  Populated at
+   * apply-time from ``CostItem.metadata_.variants``; absent on legacy rows.
+   * Drives the per-resource re-pick pill.
+   */
+  _resourceAvailableVariants?: Array<Record<string, unknown>>;
+  /** Aggregate stats matching ``_resourceAvailableVariants`` for the picker UI. */
+  _resourceAvailableVariantStats?: Record<string, unknown>;
+  /** Currently-applied variant marker (mirrors the resource's ``variant`` key). */
+  _resourceVariant?: { label: string; price: number; index: number };
+  /** Auto-default strategy when the user accepted mean / median (no explicit pick). */
+  _resourceVariantDefault?: 'mean' | 'median';
+  /** Frozen snapshot stamped by the backend; surfaced for hover tooltips. */
+  _resourceVariantSnapshot?: Record<string, unknown>;
   id: string;
   // Fields needed for GridRow compatibility
   description: string;
@@ -250,6 +264,13 @@ export interface BOQGridProps {
   onSaveResourceToCatalog?: (positionId: string, resourceIndex: number) => void;
   onOpenCostDbForPosition?: (positionId: string) => void;
   onOpenCatalogForPosition?: (positionId: string) => void;
+  /**
+   * Re-pick the variant on an already-added resource row (v2.6.26+).
+   * Reads ``available_variants`` cached on the resource entry and PATCHes
+   * ``/positions/{id}/resources/{idx}/variant/`` server-side. Optional —
+   * when omitted, the row's re-pick pill is hidden (graceful degrade).
+   */
+  onRepickResourceVariant?: (positionId: string, resourceIndex: number, variantCode: string) => void;
   onAddManualResource?: (positionId: string, resource: ManualResource) => void;
   onDuplicatePosition?: (positionId: string) => void;
   /* AI features */
@@ -304,6 +325,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onSaveResourceToCatalog,
   onOpenCostDbForPosition,
   onOpenCatalogForPosition,
+  onRepickResourceVariant,
   onAddManualResource,
   onDuplicatePosition,
   onSuggestRate,
@@ -458,6 +480,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       onSaveResourceToCatalog: onSaveResourceToCatalog ?? (() => {}),
       onOpenCostDbForPosition: onOpenCostDbForPosition ?? (() => {}),
       onOpenCatalogForPosition: onOpenCatalogForPosition ?? (() => {}),
+      onRepickResourceVariant,
       onDeletePosition,
       onSaveToDatabase,
       onAddComment: onAddComment ?? (() => {}),
@@ -483,7 +506,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     }) as FullGridContext,
     [currencySymbol, currencyCode, fxRates, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource, onUpdateResourceFields,
-     onSaveResourceToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition,
+     onSaveResourceToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition, onRepickResourceVariant,
      onDeletePosition, onSaveToDatabase, onAddComment,
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion, bimModelId,
      onUpdatePosition, onHighlightBIMElements, onDeleteSection, onReorderSections, onFormulaApplied],
@@ -524,6 +547,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       name: string; code?: string; type: string;
       unit: string; quantity: number; unit_rate: number; total?: number;
       currency?: string;
+      // CWICR variant fields (v2.6.26+) — surfaced to EditableResourceRow
+      // so the re-pick pill can render and the user's explicit pick can
+      // be marked vs an auto-default.
+      available_variants?: Array<Record<string, unknown>>;
+      available_variant_stats?: Record<string, unknown>;
+      variant?: { label: string; price: number; index: number };
+      variant_default?: 'mean' | 'median';
+      variant_snapshot?: Record<string, unknown>;
     }>;
     if (resources.length === 0) return;
 
@@ -543,6 +574,11 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         _resourceRate: r.unit_rate,
         _resourceCurrency: r.currency,
         _resourceCode: r.code,
+        _resourceAvailableVariants: r.available_variants,
+        _resourceAvailableVariantStats: r.available_variant_stats,
+        _resourceVariant: r.variant,
+        _resourceVariantDefault: r.variant_default,
+        _resourceVariantSnapshot: r.variant_snapshot,
         id: `${pos.id}_res_${i}`,
         description: r.name,
         ordinal: '',

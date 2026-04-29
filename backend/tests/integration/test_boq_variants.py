@@ -712,3 +712,285 @@ async def test_per_resource_switch_restamps_only_changed_resource(
     assert new_resources[1]["variant_snapshot"]["captured_at"] != orig_b["captured_at"], (
         "Resource B captured_at must advance when its variant changed"
     )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Per-resource variant re-pick endpoint (PATCH .../variant/)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@pytest.mark.asyncio
+async def test_repick_endpoint_swaps_target_resource_only(
+    shared_client: AsyncClient, shared_auth: dict[str, str]
+) -> None:
+    """PATCH /positions/{id}/resources/{idx}/variant/ swaps one resource's
+    variant and leaves siblings' snapshots untouched."""
+    client, auth = shared_client, shared_auth
+    project_id = await _create_project(client, auth)
+    boq_id = await _create_boq(client, auth, project_id)
+
+    create_resp = await client.post(
+        f"/api/v1/boq/boqs/{boq_id}/positions/",
+        json={
+            "boq_id": boq_id,
+            "ordinal": "RP.001",
+            "description": "Repick test position",
+            "unit": "m3",
+            "quantity": 1.0,
+            "unit_rate": 320.0,
+            "source": "cost_database",
+            "metadata": {
+                "currency": "EUR",
+                "resources": [
+                    {
+                        "name": "Concrete",
+                        "code": "BET",
+                        "type": "material",
+                        "unit": "m3",
+                        "quantity": 1.0,
+                        "unit_rate": 185.0,
+                        "total": 185.0,
+                        "variant": {"label": "C30/37", "price": 185.0, "index": 1},
+                        "available_variants": [
+                            {"index": 0, "label": "C25/30", "price": 165.0},
+                            {"index": 1, "label": "C30/37", "price": 185.0},
+                            {"index": 2, "label": "C35/45", "price": 215.0},
+                        ],
+                    },
+                    {
+                        "name": "Rebar 8mm",
+                        "code": "REB.8",
+                        "type": "material",
+                        "unit": "kg",
+                        "quantity": 90.0,
+                        "unit_rate": 1.50,
+                        "total": 135.0,
+                        "variant": {"label": "8mm", "price": 1.50, "index": 0},
+                        "available_variants": [
+                            {"index": 0, "label": "8mm", "price": 1.50},
+                            {"index": 1, "label": "10mm", "price": 1.65},
+                        ],
+                    },
+                ],
+            },
+        },
+        headers=auth,
+    )
+    assert create_resp.status_code == 201, create_resp.text
+    pos_id = create_resp.json()["id"]
+    orig_other = create_resp.json()["metadata"]["resources"][1]["variant_snapshot"]
+
+    await asyncio.sleep(1.1)
+
+    repick_resp = await client.patch(
+        f"/api/v1/boq/positions/{pos_id}/resources/0/variant/",
+        json={"variant_code": "C35/45"},
+        headers=auth,
+    )
+    assert repick_resp.status_code == 200, repick_resp.text
+    body = repick_resp.json()
+    new_resources = body["metadata"]["resources"]
+    # Target resource swapped.
+    assert new_resources[0]["variant"]["label"] == "C35/45"
+    assert new_resources[0]["unit_rate"] == 215.0
+    assert new_resources[0]["variant_snapshot"]["label"] == "C35/45"
+    assert new_resources[0]["variant_snapshot"]["rate"] == 215.0
+    # Sibling untouched bit-for-bit.
+    assert new_resources[1]["variant_snapshot"]["captured_at"] == orig_other["captured_at"]
+    # Position-level rate recomputed = 1*215 + 90*1.5 = 350.
+    assert float(body["unit_rate"]) == 350.0
+
+
+@pytest.mark.asyncio
+async def test_repick_endpoint_rejects_unknown_variant_code(
+    shared_client: AsyncClient, shared_auth: dict[str, str]
+) -> None:
+    client, auth = shared_client, shared_auth
+    project_id = await _create_project(client, auth)
+    boq_id = await _create_boq(client, auth, project_id)
+
+    create_resp = await client.post(
+        f"/api/v1/boq/boqs/{boq_id}/positions/",
+        json={
+            "boq_id": boq_id,
+            "ordinal": "RP.002",
+            "description": "Unknown variant code test",
+            "unit": "m3",
+            "quantity": 1.0,
+            "unit_rate": 100.0,
+            "source": "cost_database",
+            "metadata": {
+                "currency": "EUR",
+                "resources": [
+                    {
+                        "name": "X",
+                        "code": "X",
+                        "unit": "m3",
+                        "quantity": 1.0,
+                        "unit_rate": 100.0,
+                        "variant": {"label": "v1", "price": 100.0, "index": 0},
+                        "available_variants": [
+                            {"index": 0, "label": "v1", "price": 100.0},
+                        ],
+                    },
+                ],
+            },
+        },
+        headers=auth,
+    )
+    assert create_resp.status_code == 201
+    pos_id = create_resp.json()["id"]
+
+    resp = await client.patch(
+        f"/api/v1/boq/positions/{pos_id}/resources/0/variant/",
+        json={"variant_code": "nope"},
+        headers=auth,
+    )
+    assert resp.status_code == 422
+    assert "not found" in resp.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_repick_endpoint_rejects_out_of_range_idx(
+    shared_client: AsyncClient, shared_auth: dict[str, str]
+) -> None:
+    client, auth = shared_client, shared_auth
+    project_id = await _create_project(client, auth)
+    boq_id = await _create_boq(client, auth, project_id)
+
+    create_resp = await client.post(
+        f"/api/v1/boq/boqs/{boq_id}/positions/",
+        json={
+            "boq_id": boq_id,
+            "ordinal": "RP.003",
+            "description": "Out of range idx test",
+            "unit": "m3",
+            "quantity": 1.0,
+            "unit_rate": 100.0,
+            "source": "cost_database",
+            "metadata": {
+                "currency": "EUR",
+                "resources": [
+                    {
+                        "name": "X",
+                        "code": "X",
+                        "unit": "m3",
+                        "quantity": 1.0,
+                        "unit_rate": 100.0,
+                        "variant": {"label": "v1", "price": 100.0, "index": 0},
+                        "available_variants": [
+                            {"index": 0, "label": "v1", "price": 100.0},
+                        ],
+                    },
+                ],
+            },
+        },
+        headers=auth,
+    )
+    assert create_resp.status_code == 201
+    pos_id = create_resp.json()["id"]
+
+    resp = await client.patch(
+        f"/api/v1/boq/positions/{pos_id}/resources/99/variant/",
+        json={"variant_code": "v1"},
+        headers=auth,
+    )
+    assert resp.status_code == 422
+    assert "out of range" in resp.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_repick_endpoint_rejects_resource_without_cached_variants(
+    shared_client: AsyncClient, shared_auth: dict[str, str]
+) -> None:
+    """Backwards-compat: legacy resources without ``available_variants``
+    fail clearly so the UI degrades to no-pill mode."""
+    client, auth = shared_client, shared_auth
+    project_id = await _create_project(client, auth)
+    boq_id = await _create_boq(client, auth, project_id)
+
+    create_resp = await client.post(
+        f"/api/v1/boq/boqs/{boq_id}/positions/",
+        json={
+            "boq_id": boq_id,
+            "ordinal": "RP.004",
+            "description": "Legacy row without available_variants",
+            "unit": "m3",
+            "quantity": 1.0,
+            "unit_rate": 100.0,
+            "source": "cost_database",
+            "metadata": {
+                "currency": "EUR",
+                "resources": [
+                    {
+                        "name": "X",
+                        "code": "X",
+                        "unit": "m3",
+                        "quantity": 1.0,
+                        "unit_rate": 100.0,
+                        # No variant + no available_variants → legacy row.
+                    },
+                ],
+            },
+        },
+        headers=auth,
+    )
+    assert create_resp.status_code == 201
+    pos_id = create_resp.json()["id"]
+
+    resp = await client.patch(
+        f"/api/v1/boq/positions/{pos_id}/resources/0/variant/",
+        json={"variant_code": "anything"},
+        headers=auth,
+    )
+    assert resp.status_code == 422
+    assert "no cached variants" in resp.json()["detail"].lower()
+
+
+@pytest.mark.asyncio
+async def test_repick_endpoint_unauthorized(
+    shared_client: AsyncClient, shared_auth: dict[str, str]
+) -> None:
+    """Unauthorised callers (no Bearer token) are rejected with 401/403."""
+    client, auth = shared_client, shared_auth
+    project_id = await _create_project(client, auth)
+    boq_id = await _create_boq(client, auth, project_id)
+
+    create_resp = await client.post(
+        f"/api/v1/boq/boqs/{boq_id}/positions/",
+        json={
+            "boq_id": boq_id,
+            "ordinal": "RP.005",
+            "description": "Auth test",
+            "unit": "m3",
+            "quantity": 1.0,
+            "unit_rate": 100.0,
+            "source": "cost_database",
+            "metadata": {
+                "currency": "EUR",
+                "resources": [
+                    {
+                        "name": "X",
+                        "code": "X",
+                        "unit": "m3",
+                        "quantity": 1.0,
+                        "unit_rate": 100.0,
+                        "variant": {"label": "v1", "price": 100.0, "index": 0},
+                        "available_variants": [
+                            {"index": 0, "label": "v1", "price": 100.0},
+                        ],
+                    },
+                ],
+            },
+        },
+        headers=auth,
+    )
+    assert create_resp.status_code == 201
+    pos_id = create_resp.json()["id"]
+
+    # No auth header.
+    resp = await client.patch(
+        f"/api/v1/boq/positions/{pos_id}/resources/0/variant/",
+        json={"variant_code": "v1"},
+    )
+    assert resp.status_code in (401, 403), resp.text
