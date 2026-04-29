@@ -422,7 +422,7 @@ async def _seed_demo_account() -> None:
 
     Idempotent — safe to call on every startup. Creates:
 
-    * demo@openestimator.io        (role=viewer — read-only walkthrough)
+    * demo@openestimator.io        (role=admin — full walkthrough)
     * estimator@openestimator.io   (role=estimator)
     * manager@openestimator.io     (role=manager)
 
@@ -453,7 +453,7 @@ async def _seed_demo_account() -> None:
             "email": "demo@openestimator.io",
             "env_var": "DEMO_USER_PASSWORD",
             "full_name": "Demo User",
-            "role": "viewer",
+            "role": "admin",
         },
         {
             "email": "estimator@openestimator.io",
