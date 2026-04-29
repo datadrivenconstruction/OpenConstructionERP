@@ -39,6 +39,7 @@ import {
   type CreateAssemblyData,
   type CreateComponentData,
 } from '@/features/assemblies/api';
+import { getResourceTypeLabel } from '@/features/boq/boqResourceTypes';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -777,7 +778,7 @@ function ResourceDetailPanel({
           {/* Type + Category */}
           <div className="rounded-lg bg-surface-primary border border-border-light p-2.5">
             <div className="text-2xs text-content-quaternary uppercase tracking-wider mb-1">{t('catalog.type_label', { defaultValue: 'Type' })}</div>
-            <div className="text-xs font-medium text-content-primary capitalize">{resource.resource_type}</div>
+            <div className="text-xs font-medium text-content-primary">{getResourceTypeLabel(resource.resource_type, t)}</div>
             <div className="text-2xs text-content-tertiary mt-0.5">{resource.category}</div>
           </div>
 
