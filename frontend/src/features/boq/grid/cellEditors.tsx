@@ -10,6 +10,12 @@ import {
 import type { ICellEditorParams } from 'ag-grid-community';
 import { AutocompleteInput } from '../AutocompleteInput';
 import type { CostAutocompleteItem } from '../api';
+import {
+  evaluateFormula as evalFormulaImpl,
+  isFormula as isFormulaImpl,
+  normaliseFormula as normaliseFormulaImpl,
+  type FormulaContext,
+} from './formula';
 
 /* ── Formula Cell Editor ──────────────────────────────────────────── */
 
@@ -23,223 +29,45 @@ import type { CostAutocompleteItem } from '../api';
  *   • Functions: sqrt, abs, round, floor, ceil, pow, min, max, sin, cos, tan
  *   • Parentheses + nesting
  *
+ * Phase C extension (v2.7.0/C): when a `FormulaContext` is supplied the
+ * evaluator additionally accepts cross-position references (`pos("X")`),
+ * BOQ-scoped variables (`$GFA`), section aggregates, calculated-column
+ * row lookups, comparisons, `if(cond, a, b)`, unit conversions, and
+ * `round_up`/`round_down`. The single-arg signature is preserved
+ * verbatim — every existing callsite stays green.
+ *
  * CSP-safe: hand-written recursive-descent parser, no eval / no Function().
  *
  * Examples:
- *   "=2*PI()^2*3"  → 59.22
- *   "=sqrt(144)"   → 12
- *   "12 x 4 + 8"   → 56
- *   "=2,5 * 4"     → 10  (es/de comma decimal)
+ *   "=2*PI()^2*3"           → 59.22
+ *   "=sqrt(144)"            → 12
+ *   "12 x 4 + 8"            → 56
+ *   "=2,5 * 4"              → 10  (es/de comma decimal)
+ *   "=pos(\"1.1\").qty * 2" → ctx-dependent
+ *   "=$GFA * 0.15"          → ctx-dependent
  */
-export function evaluateFormula(input: string): number | null {
-  const trimmed = input.trim();
-  if (!trimmed) return null;
-  // Strip optional Excel-style leading "="
-  const body = trimmed.startsWith('=') ? trimmed.slice(1) : trimmed;
-  const normalised = normaliseFormula(body);
-  try {
-    const result = parseMathExpr(normalised);
-    if (typeof result === 'number' && isFinite(result) && result >= 0) {
-      // 4 decimal places — matches backend BUG-MATH01 storage precision.
-      return Math.round(result * 10000) / 10000;
-    }
-  } catch {
-    return null;
-  }
-  return null;
+export function evaluateFormula(input: string, ctx?: FormulaContext): number | null {
+  return evalFormulaImpl(input, ctx);
 }
 
 /**
  * Normalise human/locale variants of math syntax to canonical operators.
- *   • × → *
- *   • `x` between two operand-edges (digit/letter/paren) → *
- *   • `,` → `.` ONLY when used as a locale-decimal (no other commas + no
- *     parentheses, so it can't conflict with function-call argument
- *     separators like `min(1,2,3)`).
+ * See `./formula/engine.ts` for the canonical implementation; this
+ * thin wrapper preserves the legacy export name + signature.
  *
  * Exported for test coverage.
  */
 export function normaliseFormula(s: string): string {
-  let out = s.replace(/×/g, '*');
-  // `x`/`X` as multiplication: only when the LHS is a digit or `)`. If
-  // the LHS were a letter we'd also match the `x` inside identifiers like
-  // `max(`, breaking function-call parsing. The lookahead requires the
-  // RHS be a digit / opening paren / identifier start so we don't eat
-  // `x` from things like trailing literals.
-  out = out.replace(/([0-9)])\s*[xX]\s*(?=[0-9(a-zA-Z])/g, (_m, lhs) => `${lhs}*`);
-  // Locale-decimal: only safe when there are no parens (no function calls)
-  // and the comma count matches a single decimal value or list of plain
-  // decimals separated by spaces. To avoid stomping function-arg commas,
-  // we only convert when the input has no `(`.
-  if (!out.includes('(')) {
-    out = out.replace(/,/g, '.');
-  }
-  return out;
+  return normaliseFormulaImpl(s);
 }
 
-/* ── Recursive descent math parser (CSP-safe, no eval) ────────────── */
-
-const _IDENT_RE = /[a-zA-Z_]/;
-
-/** Tokenize a math expression into numbers, operators, parens, and identifiers. */
-function tokenize(expr: string): string[] {
-  const tokens: string[] = [];
-  let i = 0;
-  while (i < expr.length) {
-    const ch = expr[i]!;
-    if (ch === ' ' || ch === '\t') { i++; continue; }
-    if ('+-*/^(),'.includes(ch)) {
-      // Handle "**" as exponent (Python convention)
-      if (ch === '*' && expr[i + 1] === '*') {
-        tokens.push('^');
-        i += 2;
-        continue;
-      }
-      tokens.push(ch);
-      i++;
-    } else if ((ch >= '0' && ch <= '9') || ch === '.') {
-      // Locale-comma decimals are handled in normaliseFormula() before
-      // tokenization, so here `,` is unambiguously a function-arg separator
-      // (handled below in the operator branch).
-      let num = '';
-      while (i < expr.length) {
-        const c = expr[i]!;
-        if (!((c >= '0' && c <= '9') || c === '.')) break;
-        num += c;
-        i++;
-      }
-      tokens.push(num);
-    } else if (_IDENT_RE.test(ch)) {
-      let ident = '';
-      while (i < expr.length && (_IDENT_RE.test(expr[i]!) || (expr[i]! >= '0' && expr[i]! <= '9'))) {
-        ident += expr[i]!;
-        i++;
-      }
-      tokens.push(ident.toLowerCase());
-    } else {
-      throw new Error(`Unexpected character: ${ch}`);
-    }
-  }
-  return tokens;
-}
-
-const _CONSTANTS: Record<string, number> = {
-  pi: Math.PI,
-  e: Math.E,
-};
-
-/** Single-arg / multi-arg math functions. Anything not listed is rejected. */
-function callFunction(name: string, args: number[]): number {
-  switch (name) {
-    case 'sqrt': return Math.sqrt(args[0]!);
-    case 'abs': return Math.abs(args[0]!);
-    case 'round': return Math.round(args[0]!);
-    case 'floor': return Math.floor(args[0]!);
-    case 'ceil': return Math.ceil(args[0]!);
-    case 'sin': return Math.sin(args[0]!);
-    case 'cos': return Math.cos(args[0]!);
-    case 'tan': return Math.tan(args[0]!);
-    case 'log': return Math.log(args[0]!);
-    case 'exp': return Math.exp(args[0]!);
-    case 'pow': return Math.pow(args[0]!, args[1]!);
-    case 'min': return Math.min(...args);
-    case 'max': return Math.max(...args);
-    default: throw new Error(`Unknown function: ${name}`);
-  }
-}
-
-/**
- * Grammar (precedence low→high):
- *   expr   = term (('+' | '-') term)*
- *   term   = power (('*' | '/') power)*
- *   power  = factor ('^' power)?    -- right-associative
- *   factor = ('+' | '-') factor
- *          | '(' expr ')'
- *          | NUMBER
- *          | IDENT '(' [expr (',' expr)*] ')'   -- function call
- *          | IDENT                               -- constant (PI, E)
+/* ── Recursive descent math parser ──────────────────────────────────
+ *
+ * The actual parser lives in `./formula/engine.ts` (Phase C v2.7.0/C).
+ * The `evaluateFormula` and `normaliseFormula` exports above delegate
+ * to that module so legacy callsites (tests, BOQGrid, etc.) keep
+ * working unchanged.
  */
-function parseMathExpr(input: string): number {
-  const tokens = tokenize(input);
-  if (tokens.length === 0) throw new Error('Empty');
-  let pos = 0;
-
-  function parseExpr(): number {
-    let left = parseTerm();
-    while (pos < tokens.length && (tokens[pos] === '+' || tokens[pos] === '-')) {
-      const op = tokens[pos++];
-      const right = parseTerm();
-      left = op === '+' ? left + right : left - right;
-    }
-    return left;
-  }
-
-  function parseTerm(): number {
-    let left = parsePower();
-    while (pos < tokens.length && (tokens[pos] === '*' || tokens[pos] === '/')) {
-      const op = tokens[pos++];
-      const right = parsePower();
-      left = op === '*' ? left * right : left / right;
-    }
-    return left;
-  }
-
-  function parsePower(): number {
-    const base = parseFactor();
-    if (pos < tokens.length && tokens[pos] === '^') {
-      pos++;
-      const exp = parsePower(); // right-associative recursion
-      return Math.pow(base, exp);
-    }
-    return base;
-  }
-
-  function parseFactor(): number {
-    const tok = tokens[pos] ?? '';
-    if (tok === '-') { pos++; return -parseFactor(); }
-    if (tok === '+') { pos++; return parseFactor(); }
-    if (tok === '(') {
-      pos++;
-      const val = parseExpr();
-      if (tokens[pos] !== ')') throw new Error('Missing )');
-      pos++;
-      return val;
-    }
-    // Identifier — either a constant (PI, E) or a function call (sqrt(…), pi(), …)
-    if (_IDENT_RE.test(tok[0] ?? '')) {
-      pos++;
-      // Function call: IDENT '(' …args… ')'
-      if (tokens[pos] === '(') {
-        pos++;
-        const args: number[] = [];
-        if (tokens[pos] !== ')') {
-          args.push(parseExpr());
-          while (tokens[pos] === ',') {
-            pos++;
-            args.push(parseExpr());
-          }
-        }
-        if (tokens[pos] !== ')') throw new Error('Missing )');
-        pos++;
-        // PI() / E() as zero-arg "functions" — also valid as bare constants
-        if (args.length === 0 && tok in _CONSTANTS) return _CONSTANTS[tok]!;
-        return callFunction(tok, args);
-      }
-      // Bare constant
-      if (tok in _CONSTANTS) return _CONSTANTS[tok]!;
-      throw new Error(`Unknown identifier: ${tok}`);
-    }
-    // Number
-    const num = parseFloat(tok);
-    if (isNaN(num)) throw new Error(`Expected number, got: ${tok}`);
-    pos++;
-    return num;
-  }
-
-  const result = parseExpr();
-  if (pos < tokens.length) throw new Error(`Unexpected token: ${tokens[pos]}`);
-  return result;
-}
 
 export interface FormulaCellEditorParams extends ICellEditorParams {
   onFormulaApplied?: (positionId: string, formula: string, result: number) => void;
@@ -249,12 +77,7 @@ export interface FormulaCellEditorParams extends ICellEditorParams {
  * any math operator, named constant, or function call). Pure numbers like
  * "12.5" are NOT formulas — they go through the normal numeric path. */
 export function isFormula(input: string): boolean {
-  const t = input.trim();
-  if (!t) return false;
-  if (t.startsWith('=')) return true;
-  if (/[+\-*/^×()]/.test(t)) return true;
-  if (/\b(pi|e|sqrt|abs|round|floor|ceil|pow|min|max|sin|cos|tan|log|exp)\b/i.test(t)) return true;
-  return false;
+  return isFormulaImpl(input);
 }
 
 /**
@@ -277,17 +100,13 @@ function previewFor(input: string): FormulaPreview {
     const n = parseFloat(t.replace(',', '.'));
     return isFinite(n) ? { kind: 'number', v: n } : { kind: 'err', m: 'Not a number' };
   }
-  // Body for error reporting: try to surface the parser's exception detail
-  const body = t.startsWith('=') ? t.slice(1) : t;
-  const normalised = body.replace(/×/g, '*').replace(/\bx\b/gi, '*');
-  try {
-    const r = parseMathExpr(normalised);
-    if (!isFinite(r)) return { kind: 'err', m: 'Result is not finite' };
-    if (r < 0) return { kind: 'err', m: 'Result is negative' };
-    return { kind: 'ok', v: Math.round(r * 10000) / 10000 };
-  } catch (e) {
-    return { kind: 'err', m: e instanceof Error ? e.message : 'Syntax error' };
-  }
+  // The grid editor preview operates without a FormulaContext (the
+  // editor is mounted inside a single cell and doesn't have access to
+  // the full positions list), so $VAR / pos(...) preview as a parser
+  // error here. Live evaluation with a context happens elsewhere.
+  const r = evalFormulaImpl(t);
+  if (r === null) return { kind: 'err', m: 'Syntax error or unresolved reference' };
+  return { kind: 'ok', v: r };
 }
 
 export const FormulaCellEditor = forwardRef(
