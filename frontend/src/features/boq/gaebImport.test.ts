@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { parseGAEBXML, importGAEBToBOQ, type GAEBPosition } from './gaebImport';
+import { parseGAEBXML, importGAEBToBOQ, decodeXmlBuffer, type GAEBPosition } from './gaebImport';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -321,6 +321,108 @@ describe('parseGAEBXML', () => {
 
     expect(result[0].quantity).toBe(33);
     expect(result[0].unitRate).toBe(18);
+  });
+
+  // ── Test 13: Multi-paragraph descriptions preserve line breaks ──────────
+  it('preserves paragraph breaks when DetailTxt has multiple Text children', () => {
+    const xml = x83Doc(`
+      <Itemlist>
+        <Item RNoPart="001">
+          <Qty>10</Qty>
+          <QU>m2</QU>
+          <Description>
+            <CompleteText>
+              <DetailTxt>
+                <Text>First paragraph: technical description.</Text>
+                <Text>Second paragraph: installation notes.</Text>
+                <Text>Third paragraph: acceptance criteria.</Text>
+              </DetailTxt>
+            </CompleteText>
+          </Description>
+          <UP>50.00</UP>
+        </Item>
+      </Itemlist>
+    `);
+    const result = parseGAEBXML(xml);
+    expect(result).toHaveLength(1);
+    // All three paragraphs joined by newline
+    expect(result[0].description).toContain('First paragraph');
+    expect(result[0].description).toContain('Second paragraph');
+    expect(result[0].description).toContain('Third paragraph');
+    expect(result[0].description.split('\n')).toHaveLength(3);
+  });
+
+  // ── Test 14: Single-paragraph description still works after fix ─────────
+  it('handles single-paragraph descriptions identically to multi-paragraph', () => {
+    const xml = x83Doc(`
+      <Itemlist>
+        <Item RNoPart="001">
+          <Qty>5</Qty>
+          <QU>m</QU>
+          <Description>
+            <CompleteText>
+              <DetailTxt>
+                <Text>Steel beam HEB 200,   length 5m,    inkl. Korrosionsschutz</Text>
+              </DetailTxt>
+            </CompleteText>
+          </Description>
+          <UP>120.00</UP>
+        </Item>
+      </Itemlist>
+    `);
+    const result = parseGAEBXML(xml);
+    expect(result).toHaveLength(1);
+    // Internal multiple-spaces should still be collapsed to one
+    expect(result[0].description).toBe('Steel beam HEB 200, length 5m, inkl. Korrosionsschutz');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// decodeXmlBuffer — encoding sniffing tests
+// ---------------------------------------------------------------------------
+
+describe('decodeXmlBuffer', () => {
+  it('decodes a UTF-8 prolog as UTF-8', () => {
+    const xml = '<?xml version="1.0" encoding="UTF-8"?><GAEB><x>äöü</x></GAEB>';
+    const bytes = new TextEncoder().encode(xml);
+    const decoded = decodeXmlBuffer(bytes.buffer);
+    expect(decoded).toContain('äöü');
+  });
+
+  it('decodes an ISO-8859-1 prolog as Latin-1 (preserves umlauts)', () => {
+    // Build a Latin-1 byte sequence manually: ä=0xE4, ö=0xF6, ü=0xFC, ß=0xDF
+    const prolog = '<?xml version="1.0" encoding="ISO-8859-1"?><GAEB><x>';
+    const suffix = '</x></GAEB>';
+    const prologBytes = Array.from(prolog).map((c) => c.charCodeAt(0));
+    const umlautBytes = [0xe4, 0xf6, 0xfc, 0xdf]; // ä ö ü ß in Latin-1
+    const suffixBytes = Array.from(suffix).map((c) => c.charCodeAt(0));
+    const buffer = new Uint8Array([...prologBytes, ...umlautBytes, ...suffixBytes]).buffer;
+
+    const decoded = decodeXmlBuffer(buffer);
+    expect(decoded).toContain('äöüß');
+    // Critically: U+FFFD (replacement char) should NOT appear — that's what
+    // the broken UTF-8-only path would have produced.
+    expect(decoded).not.toContain('\ufffd');
+  });
+
+  it('decodes a Windows-1252 prolog correctly', () => {
+    const prolog = '<?xml version="1.0" encoding="Windows-1252"?><GAEB><x>';
+    const suffix = '</x></GAEB>';
+    const prologBytes = Array.from(prolog).map((c) => c.charCodeAt(0));
+    // Windows-1252: same as Latin-1 for these chars
+    const umlautBytes = [0xe4, 0xf6, 0xfc, 0xdf];
+    const suffixBytes = Array.from(suffix).map((c) => c.charCodeAt(0));
+    const buffer = new Uint8Array([...prologBytes, ...umlautBytes, ...suffixBytes]).buffer;
+
+    const decoded = decodeXmlBuffer(buffer);
+    expect(decoded).toContain('äöüß');
+  });
+
+  it('falls back to UTF-8 when no encoding is declared', () => {
+    const xml = '<?xml version="1.0"?><GAEB><x>äöü</x></GAEB>';
+    const bytes = new TextEncoder().encode(xml);
+    const decoded = decodeXmlBuffer(bytes.buffer);
+    expect(decoded).toContain('äöü');
   });
 });
 

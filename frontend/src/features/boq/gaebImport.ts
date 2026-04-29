@@ -12,6 +12,51 @@
 import { boqApi, type CreatePositionData } from './api';
 
 // ---------------------------------------------------------------------------
+// Encoding sniffing
+// ---------------------------------------------------------------------------
+
+/**
+ * Decode a raw byte buffer using the encoding declared in the XML prolog
+ * (`<?xml ... encoding="..."?>`). Falls back to UTF-8.
+ *
+ * Many DACH-region GAEB exports are still produced in ISO-8859-1 / Windows-1252
+ * because legacy AVA software defaults to those code pages. Reading them as
+ * UTF-8 corrupts every umlaut (ä/ö/ü/ß) into U+FFFD.
+ *
+ * Strategy: read the first ~1024 bytes as ASCII (which works for any
+ * single-byte legacy encoding too, since the XML prolog is pure ASCII),
+ * extract the declared encoding, then decode the full buffer with the
+ * matching TextDecoder.
+ */
+export function decodeXmlBuffer(buffer: ArrayBuffer): string {
+  const head = new Uint8Array(buffer, 0, Math.min(1024, buffer.byteLength));
+  const ascii = new TextDecoder('ascii').decode(head);
+  const match = ascii.match(/<\?xml[^?]*encoding=["']([^"']+)["']/i);
+  const declared = match?.[1]?.toLowerCase().trim();
+
+  // Map common legacy aliases to canonical TextDecoder labels.
+  const aliasMap: Record<string, string> = {
+    'iso-8859-1': 'iso-8859-1',
+    'iso8859-1': 'iso-8859-1',
+    latin1: 'iso-8859-1',
+    'iso-8859-15': 'iso-8859-15',
+    'windows-1252': 'windows-1252',
+    'cp1252': 'windows-1252',
+    'utf-8': 'utf-8',
+    utf8: 'utf-8',
+    'utf-16': 'utf-16',
+  };
+
+  const encoding = (declared && aliasMap[declared]) ?? declared ?? 'utf-8';
+  try {
+    return new TextDecoder(encoding, { fatal: false }).decode(buffer);
+  } catch {
+    // Unsupported encoding — fall back to UTF-8 rather than crash.
+    return new TextDecoder('utf-8', { fatal: false }).decode(buffer);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Public types
 // ---------------------------------------------------------------------------
 
@@ -50,14 +95,50 @@ function getText(parent: Element, tagName: string): string {
 }
 
 /**
- * Recursively extract text from DetailTxt > Text or CompleteText nodes,
- * collapsing whitespace into a single line.
+ * Normalise whitespace inside a single GAEB text run while preserving the
+ * paragraph structure of multi-line descriptions.
+ *
+ * Per GAEB DA XML 3.3, long-text positions ship as a sequence of <p> blocks
+ * inside <DetailTxt> (or as text nodes separated by <br/>). Collapsing every
+ * whitespace run to a single space — as the previous implementation did —
+ * destroys that structure and turns multi-paragraph descriptions into one
+ * unreadable line. We only collapse runs of spaces/tabs, leaving newlines.
+ */
+function normaliseRunWhitespace(text: string): string {
+  // Collapse runs of horizontal whitespace (spaces, tabs) but keep newlines.
+  return text
+    .replace(/\r\n?/g, '\n') // CRLF / CR -> LF
+    .replace(/[ \t]+/g, ' ')
+    .replace(/[ \t]*\n[ \t]*/g, '\n')
+    .replace(/\n{3,}/g, '\n\n') // collapse 3+ blank lines to one
+    .trim();
+}
+
+/**
+ * Recursively extract text from DetailTxt > Text / <p> nodes, preserving
+ * paragraph breaks as `\n` so multi-paragraph descriptions round-trip.
  */
 function extractDescription(itemEl: Element): string {
-  // Prefer CompleteText > DetailTxt > Text chain (X83 / X81 standard path)
-  const detailText = itemEl.querySelector('CompleteText > DetailTxt > Text');
-  if (detailText?.textContent) {
-    return detailText.textContent.replace(/\s+/g, ' ').trim();
+  // Prefer CompleteText > DetailTxt — may contain multiple <p> or <Text> nodes
+  const detailTxt = itemEl.querySelector('CompleteText > DetailTxt');
+  if (detailTxt) {
+    const blocks: string[] = [];
+    for (const child of Array.from(detailTxt.children)) {
+      const tag = child.tagName;
+      if (tag === 'Text' || tag === 'p' || tag === 'P') {
+        const t = child.textContent ?? '';
+        if (t.trim()) blocks.push(t);
+      } else if (tag === 'br' || tag === 'BR') {
+        blocks.push('');
+      }
+    }
+    if (blocks.length > 0) {
+      return normaliseRunWhitespace(blocks.join('\n'));
+    }
+    // No structured children — flatten the DetailTxt textContent
+    if (detailTxt.textContent) {
+      return normaliseRunWhitespace(detailTxt.textContent);
+    }
   }
 
   // Fall back to any nested <Text> element inside Description
@@ -65,14 +146,14 @@ function extractDescription(itemEl: Element): string {
   if (descEl) {
     const textEl = descEl.querySelector('Text');
     if (textEl?.textContent) {
-      return textEl.textContent.replace(/\s+/g, ' ').trim();
+      return normaliseRunWhitespace(textEl.textContent);
     }
-    return descEl.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+    return normaliseRunWhitespace(descEl.textContent ?? '');
   }
 
   // Last resort: ShortText
   const shortText = itemEl.querySelector('ShortText');
-  return shortText?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+  return normaliseRunWhitespace(shortText?.textContent ?? '');
 }
 
 /** Parse a decimal number from a string, returning the fallback on failure. */
@@ -120,6 +201,8 @@ function walkBoQBody(
       // Determine section label for items that fall under this category
       const lblTxEl = child.querySelector(':scope > LblTx, :scope > Description > LblTx');
       const label = lblTxEl?.textContent?.replace(/\s+/g, ' ').trim() || sectionLabel;
+      // Track parent ordinals so nested categories preserve hierarchy in the
+      // emitted GAEBPosition.section path. (Used by exporter round-trip.)
 
       // Recurse into nested BoQBody inside this category
       for (const nestedBody of Array.from(child.children)) {
@@ -244,7 +327,11 @@ export function parseGAEBXML(xmlString: string): GAEBPosition[] {
  * @param boqId Target BOQ identifier in OpenEstimate
  */
 export async function importGAEBToBOQ(file: File, boqId: string): Promise<GAEBImportResult> {
-  const xmlString = await file.text();
+  // Read raw bytes and decode using the encoding declared in the XML prolog.
+  // file.text() always assumes UTF-8 and corrupts ä/ö/ü/ß in legacy
+  // ISO-8859-1 / Windows-1252 GAEB exports — common in DACH AVA software.
+  const buffer = await file.arrayBuffer();
+  const xmlString = decodeXmlBuffer(buffer);
   const positions = parseGAEBXML(xmlString);
 
   let imported = 0;

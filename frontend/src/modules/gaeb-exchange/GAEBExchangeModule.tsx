@@ -17,7 +17,7 @@ import {
 import { Button, Badge } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
-import { parseGAEBXML, importGAEBToBOQ, type GAEBPosition } from '@/features/boq/gaebImport';
+import { parseGAEBXML, importGAEBToBOQ, decodeXmlBuffer, type GAEBPosition } from '@/features/boq/gaebImport';
 import {
   generateGAEBXML,
   downloadGAEBXML,
@@ -183,7 +183,11 @@ export default function GAEBExchangeModule() {
       setImportResult(null);
 
       try {
-        const xmlString = await file.text();
+        // Read raw bytes so the prolog-declared encoding (e.g. ISO-8859-1)
+        // can be honoured. file.text() always decodes as UTF-8 and corrupts
+        // umlauts in legacy DACH GAEB exports.
+        const buffer = await file.arrayBuffer();
+        const xmlString = decodeXmlBuffer(buffer);
         const positions = parseGAEBXML(xmlString);
 
         if (positions.length === 0) {

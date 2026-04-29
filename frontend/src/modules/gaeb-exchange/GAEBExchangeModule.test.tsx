@@ -2,9 +2,12 @@
 import { describe, it, expect } from 'vitest';
 import {
   generateGAEBXML,
+  toGaebUnitCode,
+  fromGaebUnitCode,
   type ExportPosition,
   type GAEBExportOptions,
 } from './data/gaebExport';
+import { parseGAEBXML } from '@/features/boq/gaebImport';
 
 // ---------------------------------------------------------------------------
 // Test data
@@ -86,9 +89,10 @@ describe('generateGAEBXML', () => {
     expect(result.xml).toContain('</GAEB>');
   });
 
-  it('includes GAEBInfo with version 3.3', () => {
+  it('includes GAEBInfo with VersMajor/VersMinor 3.3 (spec-compliant)', () => {
     const result = generateGAEBXML(makeOptions());
-    expect(result.xml).toContain('<Version>3.3</Version>');
+    expect(result.xml).toContain('<VersMajor>3</VersMajor>');
+    expect(result.xml).toContain('<VersMinor>3</VersMinor>');
     expect(result.xml).toContain('<ProgSystem>OpenEstimate</ProgSystem>');
   });
 
@@ -126,10 +130,12 @@ describe('generateGAEBXML', () => {
     expect(result.xml).toContain('Stahlbeton C30/37');
   });
 
-  it('includes quantities and units', () => {
+  it('includes quantities and units (with GAEB-DA short codes)', () => {
     const result = generateGAEBXML(makeOptions());
     expect(result.xml).toContain('<Qty>350.500</Qty>');
-    expect(result.xml).toContain('<QU>m3</QU>');
+    // Internal "m3" should be mapped to GAEB-DA short code "m³"
+    expect(result.xml).toContain('<QU>m³</QU>');
+    expect(result.xml).not.toContain('<QU>m3</QU>');
   });
 
   it('includes section labels as BoQCtgy with LblTx', () => {
@@ -204,5 +210,137 @@ describe('generateGAEBXML', () => {
     const result = generateGAEBXML(makeOptions());
     expect(result.xml).toContain('<Name>Hauptangebot LV</Name>');
     expect(result.xml).toContain('<LblBoQ>Hauptangebot LV</LblBoQ>');
+  });
+
+  // ── New: filename includes project name ────────────────────────────────
+  it('emits a filename with both project and BOQ name', () => {
+    const result = generateGAEBXML(makeOptions());
+    // safeProject: "Testprojekt_Berlin", safeBoq: "Hauptangebot_LV"
+    expect(result.filename).toBe('Testprojekt_Berlin-Hauptangebot_LV.x83');
+  });
+
+  // ── New: Unit codes — internal -> GAEB-DA short codes ──────────────────
+  it('maps internal canonical units to GAEB-DA short codes on export', () => {
+    const positions: ExportPosition[] = [
+      { id: 'a', ordinal: '01.001', description: 'Wall', unit: 'm2', quantity: 10, unitRate: 1, total: 10 },
+      { id: 'b', ordinal: '01.002', description: 'Concrete', unit: 'm3', quantity: 5, unitRate: 1, total: 5 },
+      { id: 'c', ordinal: '01.003', description: 'Doors', unit: 'pcs', quantity: 3, unitRate: 1, total: 3 },
+      { id: 'd', ordinal: '01.004', description: 'Cleaning', unit: 'lsum', quantity: 1, unitRate: 1, total: 1 },
+      { id: 'e', ordinal: '01.005', description: 'Labour', unit: 'hr', quantity: 8, unitRate: 1, total: 8 },
+      { id: 'f', ordinal: '01.006', description: 'Travel', unit: 'day', quantity: 2, unitRate: 1, total: 2 },
+    ];
+    const result = generateGAEBXML(makeOptions({ positions }));
+    expect(result.xml).toContain('<QU>m²</QU>');
+    expect(result.xml).toContain('<QU>m³</QU>');
+    expect(result.xml).toContain('<QU>Stk</QU>');
+    expect(result.xml).toContain('<QU>psch</QU>');
+    expect(result.xml).toContain('<QU>Std</QU>');
+    expect(result.xml).toContain('<QU>Tag</QU>');
+  });
+
+  it('round-trips GAEB-DA short codes back to canonical units', () => {
+    expect(fromGaebUnitCode('m²')).toBe('m2');
+    expect(fromGaebUnitCode('m³')).toBe('m3');
+    expect(fromGaebUnitCode('Stk')).toBe('pcs');
+    expect(fromGaebUnitCode('psch')).toBe('lsum');
+    expect(fromGaebUnitCode('Std')).toBe('hr');
+    expect(fromGaebUnitCode('Tag')).toBe('day');
+  });
+
+  it('forwards unknown units verbatim instead of corrupting them', () => {
+    expect(toGaebUnitCode('бр')).toBe('бр');
+    expect(toGaebUnitCode('个')).toBe('个');
+    expect(toGaebUnitCode('')).toBe('Stk'); // empty -> default
+  });
+
+  // ── New: Hierarchy preservation — multi-level (Los → Titel → Position) ─
+  it('preserves multi-level hierarchy on export (Los → Titel → Position)', () => {
+    const positions: ExportPosition[] = [
+      { id: 's1', ordinal: '01', description: 'Los 1 — Rohbau', unit: '', quantity: 0, unitRate: 0, total: 0, isSection: true },
+      { id: 's2', ordinal: '01.01', description: 'Titel 1.1 — Erdarbeiten', unit: '', quantity: 0, unitRate: 0, total: 0, isSection: true },
+      { id: 'p1', ordinal: '01.01.001', description: 'Aushub', unit: 'm3', quantity: 100, unitRate: 12, total: 1200 },
+      { id: 's3', ordinal: '01.02', description: 'Titel 1.2 — Beton', unit: '', quantity: 0, unitRate: 0, total: 0, isSection: true },
+      { id: 'p2', ordinal: '01.02.001', description: 'C30/37', unit: 'm3', quantity: 50, unitRate: 220, total: 11000 },
+    ];
+    const result = generateGAEBXML(makeOptions({ positions }));
+    // Verify nesting structure: Los 1 BoQCtgy contains Titel BoQCtgy children
+    const losStart = result.xml.indexOf('<LblTx>Los 1 — Rohbau</LblTx>');
+    const titel11 = result.xml.indexOf('<LblTx>Titel 1.1 — Erdarbeiten</LblTx>');
+    const titel12 = result.xml.indexOf('<LblTx>Titel 1.2 — Beton</LblTx>');
+    expect(losStart).toBeGreaterThan(0);
+    expect(titel11).toBeGreaterThan(losStart);
+    expect(titel12).toBeGreaterThan(titel11);
+    // Re-parse and verify positions still carry their original ordinals
+    const parsed = parseGAEBXML(result.xml);
+    expect(parsed.length).toBe(2);
+    expect(parsed.find((p) => p.description === 'Aushub')?.ordinal).toBe('01.01.001');
+    expect(parsed.find((p) => p.description === 'C30/37')?.ordinal).toBe('01.02.001');
+  });
+
+  // ── New: Multi-paragraph descriptions round-trip ───────────────────────
+  it('emits multi-paragraph descriptions as separate <Text> nodes', () => {
+    const positions: ExportPosition[] = [
+      {
+        id: 'p1',
+        ordinal: '01.001',
+        description: 'Para 1: scope.\nPara 2: standards.\nPara 3: acceptance.',
+        unit: 'm2',
+        quantity: 10,
+        unitRate: 50,
+        total: 500,
+      },
+    ];
+    const result = generateGAEBXML(makeOptions({ positions }));
+    // Three Text elements
+    const textMatches = result.xml.match(/<Text>[^<]*<\/Text>/g) ?? [];
+    expect(textMatches.length).toBe(3);
+    // Round-trip through parser preserves structure
+    const parsed = parseGAEBXML(result.xml);
+    expect(parsed[0].description.split('\n').length).toBe(3);
+    expect(parsed[0].description).toContain('Para 1: scope.');
+    expect(parsed[0].description).toContain('Para 3: acceptance.');
+  });
+
+  // ── New: Round-trip of special XML characters in description ──────────
+  it('round-trips XML special characters in descriptions', () => {
+    const positions: ExportPosition[] = [
+      {
+        id: 'p1',
+        ordinal: '01.001',
+        description: 'Wall > 2m & "tested" <special> apostrophe\'s',
+        unit: 'm2',
+        quantity: 10,
+        unitRate: 50,
+        total: 500,
+      },
+    ];
+    const result = generateGAEBXML(makeOptions({ positions }));
+    const parsed = parseGAEBXML(result.xml);
+    expect(parsed[0].description).toBe('Wall > 2m & "tested" <special> apostrophe\'s');
+  });
+
+  // ── New: ShortText doesn't break on multi-paragraph descriptions ────────
+  it('uses only first paragraph for ShortText (truncated to 70 chars)', () => {
+    const positions: ExportPosition[] = [
+      {
+        id: 'p1',
+        ordinal: '01.001',
+        description: 'First short paragraph.\nLong second paragraph with lots of additional context.',
+        unit: 'm',
+        quantity: 1,
+        unitRate: 1,
+        total: 1,
+      },
+    ];
+    const result = generateGAEBXML(makeOptions({ positions }));
+    const m = result.xml.match(/<ShortText>(.*?)<\/ShortText>/);
+    expect(m).not.toBeNull();
+    expect(m![1]).toBe('First short paragraph.');
+  });
+
+  // ── New: X81 uses DA81 namespace ────────────────────────────────────────
+  it('uses DA81 namespace for X81 export', () => {
+    const result = generateGAEBXML(makeOptions({ format: 'X81' }));
+    expect(result.xml).toContain('http://www.gaeb.de/GAEB_DA_XML/DA81/3.3');
   });
 });
