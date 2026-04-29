@@ -1138,26 +1138,13 @@ export function TakeoffPage() {
     setSelectedBoqId(boqId);
   }, []);
 
-  /** Also create a Document record in the Documents module for cross-referencing. */
-  const createDocumentRecord = useCallback(
-    async (file: File) => {
-      if (!selectedProjectId) return;
-      try {
-        const token = useAuthStore.getState().accessToken;
-        const formData = new FormData();
-        formData.append('file', file);
-        const headers: HeadersInit = { 'X-DDC-Client': 'OE/1.0' };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        await fetch(
-          `/api/v1/documents/upload?project_id=${selectedProjectId}&category=drawing`,
-          { method: 'POST', headers, body: formData },
-        );
-      } catch {
-        // Non-critical: the takeoff upload already succeeded
-      }
-    },
-    [selectedProjectId],
-  );
+  // BUG-DUAL-UPLOAD-PDF — the takeoff upload mutation already persists
+  // the PDF on the server.  An earlier helper (``createDocumentRecord``)
+  // re-uploaded the same file to ``/api/v1/documents/upload`` for
+  // "cross-referencing", which doubled the bytes-on-disk and showed two
+  // identical entries in the Documents module.  Removed.  If a takeoff
+  // doc needs to surface in the Documents module, do it backend-side at
+  // upload time via FK, not by sending the file twice.
 
   const handleFilesSelected = useCallback(
     (files: File[]) => {
@@ -1208,9 +1195,9 @@ export function TakeoffPage() {
               },
               { replace: true },
             );
-            // Also save to Documents module (fire-and-forget)
-            createDocumentRecord(file);
-            // Refresh server-side document list (fire-and-forget)
+            // Refresh server-side document list (fire-and-forget).
+            // The dual ``createDocumentRecord`` upload that used to live
+            // here was removed — see BUG-DUAL-UPLOAD-PDF comment above.
             refetchServerDocuments();
           },
           onError: (err) => {
@@ -1226,7 +1213,7 @@ export function TakeoffPage() {
         });
       }
     },
-    [uploadMutation, createDocumentRecord, refetchServerDocuments],
+    [uploadMutation, refetchServerDocuments],
   );
 
   const handleRemoveDocument = useCallback(

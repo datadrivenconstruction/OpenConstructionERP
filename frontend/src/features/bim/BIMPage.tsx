@@ -1545,6 +1545,24 @@ export function BIMPage() {
   const projectId = urlProjectId || contextProjectId || projectsList[0]?.id || '';
   const { confirm, ...confirmProps } = useConfirm();
 
+  // BUG-AUTO-PROJECT-SELECT — when /bim is opened cold (no URL project,
+  // no project in the global ProjectContextStore) we silently fall back
+  // to ``projectsList[0]`` for the models query.  That works for the
+  // first paint but leaves the context store empty, so any other page
+  // that reads ``activeProjectId`` (recents, breadcrumb, BOQ landing,
+  // upload dialogs) thinks there is no active project and either dims
+  // its CTA or drops the user back at the picker.  Pinning the resolved
+  // ``projectId`` into the store the first time we resolve one — and
+  // only when nothing else has set it — keeps the rest of the app in
+  // sync without ever overriding an explicit user pick.
+  const setActiveProjectInStore = useProjectContextStore((s) => s.setActiveProject);
+  useEffect(() => {
+    if (!projectId) return;
+    if (contextProjectId) return;
+    const proj = projectsList.find((p) => p.id === projectId);
+    setActiveProjectInStore(projectId, proj?.name ?? '');
+  }, [projectId, contextProjectId, projectsList, setActiveProjectInStore]);
+
   const [activeModelId, setActiveModelId] = useState<string | null>(urlModelId || null);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   // Full Ctrl+click / Shift+click multi-selection set, fed by the viewer's

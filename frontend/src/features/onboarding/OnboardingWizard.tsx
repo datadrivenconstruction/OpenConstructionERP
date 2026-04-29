@@ -624,7 +624,18 @@ function StepWelcome({
       <Button
         variant="primary"
         size="lg"
-        onClick={onNext}
+        onClick={() => {
+          // BUG-LANG-AUTODETECT — record that the user explicitly committed
+          // to a language via the wizard. The auto-detect useEffect above
+          // checks this flag to distinguish "real choice" from "stale
+          // ``i18nextLng`` left over from a previous tester or demo
+          // session". Without this set, an English-Windows browser whose
+          // ``i18nextLng`` happens to read ``pl`` (because someone else
+          // demoed the build in Polish) would silently switch back to
+          // Polish on the next page load.
+          localStorage.setItem('oe_lang_explicit', '1');
+          onNext();
+        }}
         icon={<ArrowRight size={18} />}
         iconPosition="right"
         className="mt-5 shadow-lg shadow-oe-blue/20"
