@@ -802,7 +802,13 @@ export function CostDatabaseSearchModal({
           defaultStrategy="mean"
           anchorEl={addButtonRef.current}
           unitLabel={activeVariantPick.item.unit || ''}
-          currency={activeVariantPick.item.currency || 'USD'}
+          currency={
+            activeVariantPick.item.currency
+            || (activeVariantPick.item.region
+              ? REGION_MAP[activeVariantPick.item.region]?.currency
+              : null)
+            || 'USD'
+          }
           onApply={(chosen) => {
             const pending = activeVariantPick;
             setActiveVariantPick(null);
