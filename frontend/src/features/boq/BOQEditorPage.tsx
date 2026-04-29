@@ -1730,6 +1730,49 @@ export function BOQEditorPage() {
     [boq?.positions, boqId, currencySymbol, addToast, t],
   );
 
+  /** Re-pick the variant on an already-added resource entry (v2.6.26+).
+   *
+   *  Reads ``available_variants`` cached on the resource at apply-time (see
+   *  ``handleCostDbAddResource``) and PATCHes the dedicated re-pick endpoint
+   *  so the backend's ``_stamp_resource_variant_snapshots`` re-stamps only
+   *  the swapped row. Optimistic update + cache invalidation mirror the
+   *  pattern used by ``updateMutation`` for plain field edits.
+   */
+  const handleRepickResourceVariant = useCallback(
+    async (positionId: string, resourceIndex: number, variantCode: string) => {
+      try {
+        const updated = await boqApi.repickResourceVariant(
+          positionId,
+          resourceIndex,
+          variantCode,
+        );
+        // React Query cache invalidation — the BOQ-with-positions query is
+        // the source of truth for the grid, so re-fetching it picks up the
+        // server-stamped variant_snapshot + recomputed totals.
+        await queryClient.invalidateQueries({ queryKey: ['boq', boqId] });
+        addToast({
+          type: 'success',
+          title: t('boq.variant_resource_repicked', {
+            defaultValue: 'Variant updated: {{label}}',
+            label: variantCode,
+          }),
+          message: updated?.description as string | undefined,
+        });
+      } catch (err) {
+        const detail =
+          err instanceof ApiError ? err.message : 'Variant re-pick failed';
+        addToast({
+          type: 'error',
+          title: t('boq.variant_resource_repick_failed', {
+            defaultValue: 'Variant re-pick failed',
+          }),
+          message: detail,
+        });
+      }
+    },
+    [boqId, queryClient, addToast, t],
+  );
+
   /** Open cost DB modal in "add resource to position" mode. */
   const handleOpenCostDbForPosition = useCallback(
     (positionId: string) => {
@@ -1761,6 +1804,18 @@ export function BOQEditorPage() {
       const components = item.components || [];
       let newResources: Array<Record<string, unknown>>;
 
+      // Cache the full variant catalog on the resource so the BOQ row's
+      // re-pick pill can swap variants without re-fetching the cost item.
+      // Only meaningful when the item carries 2+ variants (matches the
+      // EditableResourceRow visibility rule).
+      const itemVariants = item.metadata_?.variants;
+      const itemVariantStats = item.metadata_?.variant_stats;
+      const variantCache: Record<string, unknown> = {};
+      if (itemVariants && itemVariants.length >= 2 && itemVariantStats) {
+        variantCache.available_variants = itemVariants;
+        variantCache.available_variant_stats = itemVariantStats;
+      }
+
       if (picked?.kind === 'variant') {
         const v = picked.variant;
         newResources = [{
@@ -1772,6 +1827,7 @@ export function BOQEditorPage() {
           unit_rate: v.price,
           total: v.price,
           variant: { label: v.label, price: v.price, index: v.index },
+          ...variantCache,
         }];
       } else if (picked?.kind === 'default') {
         newResources = [{
@@ -1783,6 +1839,7 @@ export function BOQEditorPage() {
           unit_rate: item.rate,
           total: item.rate,
           variant_default: picked.strategy,
+          ...variantCache,
         }];
       } else {
         newResources = components.length > 0
@@ -1795,6 +1852,11 @@ export function BOQEditorPage() {
               name: item.description, code: item.code, type: 'material',
               unit: item.unit, quantity: 1, unit_rate: item.rate,
               total: item.rate,
+              // No variant marker here, but we still cache the variants if
+              // the item has them — that lets the user "promote" a plain
+              // single-rate resource into an explicit variant pick later
+              // via the row's re-pick pill.
+              ...variantCache,
             }];
       }
 
@@ -2758,6 +2820,7 @@ export function BOQEditorPage() {
           onUpdateResource={handleUpdateResource}
           onUpdateResourceFields={handleUpdateResourceFields}
           onSaveResourceToCatalog={handleSaveResourceToCatalog}
+          onRepickResourceVariant={handleRepickResourceVariant}
           onOpenCostDbForPosition={handleOpenCostDbForPosition}
           onOpenCatalogForPosition={handleOpenCatalogForPosition}
           onAddManualResource={handleAddManualResource}
@@ -2909,6 +2972,9 @@ export function BOQEditorPage() {
                 cost: c.cost,
                 type: c.type,
               })),
+              // v2.6.26+: forward the variant catalog so the resource entry
+              // can cache ``available_variants`` for later re-pick.
+              metadata_: item.metadata_,
             }, picked);
           } : undefined}
         />

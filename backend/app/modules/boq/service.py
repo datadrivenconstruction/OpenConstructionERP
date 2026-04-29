@@ -2151,6 +2151,255 @@ class BOQService:
 
         return position
 
+    async def repick_resource_variant(
+        self,
+        position_id: uuid.UUID,
+        resource_idx: int,
+        variant_code: str,
+        *,
+        actor_id: uuid.UUID | None = None,
+    ) -> Position:
+        """Swap the chosen variant on an already-added resource entry.
+
+        Looks up ``metadata.resources[resource_idx].available_variants`` (cached
+        at apply-time by the frontend), finds the entry whose ``label`` matches
+        ``variant_code``, then patches that resource's ``unit_rate`` + ``variant``
+        marker. The variant_snapshot is re-stamped via
+        ``_stamp_resource_variant_snapshots`` so the immutability contract from
+        v2.6.25 is preserved. Other resources on the same position are left
+        untouched (their snapshots retain their original ``captured_at``).
+
+        Args:
+            position_id: Target position identifier.
+            resource_idx: 0-based index into ``metadata.resources``.
+            variant_code: Label string identifying the desired variant in the
+                cached ``available_variants`` array.
+            actor_id: Caller user-id for audit-log attribution.
+
+        Returns:
+            The updated Position with the new resource ``variant`` /
+            ``variant_snapshot`` and recomputed ``unit_rate`` + ``total``.
+
+        Raises:
+            HTTPException 404: Position not found.
+            HTTPException 409: BOQ is locked.
+            HTTPException 422: ``resource_idx`` out of range, the resource
+                has no cached ``available_variants``, or ``variant_code``
+                does not exist in that array.
+        """
+        position = await self.position_repo.get_by_id(position_id)
+        if position is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Position not found",
+            )
+        await self._ensure_not_locked(position.boq_id)
+
+        existing_meta = position.metadata_ if isinstance(position.metadata_, dict) else {}
+        resources_raw = existing_meta.get("resources")
+        if not isinstance(resources_raw, list):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Position has no resources to re-pick a variant for",
+            )
+        if resource_idx < 0 or resource_idx >= len(resources_raw):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    f"resource_idx {resource_idx} is out of range "
+                    f"(position has {len(resources_raw)} resource(s))"
+                ),
+            )
+
+        # Deep-copy the resources so the in-memory ORM dict isn't mutated
+        # before we explicitly persist it.
+        resources: list[dict[str, Any]] = [
+            dict(r) if isinstance(r, dict) else {} for r in resources_raw
+        ]
+        target_resource = resources[resource_idx]
+        if not isinstance(target_resource, dict):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Resource at index {resource_idx} is malformed",
+            )
+
+        available = target_resource.get("available_variants")
+        if not isinstance(available, list) or not available:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    "Resource has no cached variants to re-pick from. "
+                    "Re-add the resource from the cost database to enable variant switching."
+                ),
+            )
+
+        # Find the variant in the cached array by label (the human-readable
+        # marker the frontend already uses as the variant identifier — see
+        # ``CostVariant.label`` in ``frontend/src/features/costs/api.ts``).
+        chosen: dict[str, Any] | None = None
+        for v in available:
+            if isinstance(v, dict) and str(v.get("label")) == variant_code:
+                chosen = v
+                break
+        if chosen is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    f"variant_code '{variant_code}' not found in available_variants "
+                    f"({len(available)} option(s) cached on this resource)"
+                ),
+            )
+
+        try:
+            new_price = float(chosen.get("price", 0) or 0)
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Selected variant has a malformed price",
+            ) from exc
+
+        try:
+            chosen_index = int(chosen.get("index", 0) or 0)
+        except (TypeError, ValueError):
+            chosen_index = 0
+
+        # Apply the new variant to the target resource. Drop any
+        # ``variant_default`` marker — the user made an explicit pick.
+        target_resource["variant"] = {
+            "label": str(chosen.get("label", variant_code)),
+            "price": new_price,
+            "index": chosen_index,
+        }
+        target_resource.pop("variant_default", None)
+        target_resource["unit_rate"] = new_price
+        try:
+            qty_val = float(target_resource.get("quantity", 0) or 0)
+        except (TypeError, ValueError):
+            qty_val = 0.0
+        target_resource["total"] = round(qty_val * new_price, 4)
+        # Drop the old snapshot so ``_stamp_resource_variant_snapshots``
+        # writes a fresh ``captured_at`` for the changed resource. Other
+        # resources still carry their original snapshots and remain idempotent.
+        target_resource.pop("variant_snapshot", None)
+
+        # Build the merged metadata. We must preserve every other key on
+        # the position's metadata (cost_item_id, currency, BIM links, ...)
+        new_meta: dict[str, Any] = dict(existing_meta)
+        new_meta["resources"] = resources
+
+        currency_hint = new_meta.get("currency")
+        position_currency = currency_hint if isinstance(currency_hint, str) else None
+
+        # Re-stamp variant snapshots for every variant-bearing resource. The
+        # idempotency guard inside the helper means resources whose pick is
+        # unchanged keep their original ``captured_at``; only the row whose
+        # ``variant_snapshot`` we just removed gets a fresh stamp.
+        _stamp_resource_variant_snapshots(new_meta, position_currency=position_currency)
+
+        # Recalculate the position-level unit_rate from per-unit resource
+        # subtotals. Mirrors the convention in ``update_position``:
+        #   unit_rate(position) = Σ(r.quantity × r.unit_rate)
+        new_unit_rate = round(
+            sum(
+                (float(r.get("quantity", 0) or 0) * float(r.get("unit_rate", 0) or 0))
+                for r in resources
+                if isinstance(r, dict)
+            ),
+            4,
+        )
+        new_total = _compute_total(position.quantity, str(new_unit_rate))
+
+        # Snapshot before for audit diff.
+        before_meta = (
+            dict(position.metadata_) if isinstance(position.metadata_, dict) else {}
+        )
+        before_unit_rate = position.unit_rate
+        before_total = position.total
+
+        try:
+            await self.position_repo.update_fields(
+                position_id,
+                metadata_=new_meta,
+                unit_rate=_quantize_money_str(str(new_unit_rate)),
+                total=new_total,
+                version=int(position.version or 0) + 1,
+            )
+            await self.session.flush()
+            await self.session.refresh(position)
+        except HTTPException:
+            raise
+        except Exception as exc:  # noqa: BLE001 — surface any DB failure as 422
+            logger.exception(
+                "repick_resource_variant DB write failed for %s[%s]",
+                position_id,
+                resource_idx,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    "Variant re-pick could not be applied. The position may have been "
+                    f"modified concurrently — reload and retry. ({type(exc).__name__})"
+                ),
+            ) from exc
+
+        await _safe_publish(
+            "boq.position.updated",
+            {
+                "position_id": str(position.id),
+                "boq_id": str(position.boq_id),
+                "ordinal": position.ordinal,
+                "changes": {
+                    "metadata": {
+                        "old": _coerce_audit_value(before_meta),
+                        "new": _coerce_audit_value(new_meta),
+                    },
+                    "unit_rate": {
+                        "old": _coerce_audit_value(before_unit_rate),
+                        "new": _coerce_audit_value(position.unit_rate),
+                    },
+                    "total": {
+                        "old": _coerce_audit_value(before_total),
+                        "new": _coerce_audit_value(position.total),
+                    },
+                },
+                "version": int(position.version or 0),
+                "kind": "resource_variant_repick",
+            },
+            source_module="oe_boq",
+        )
+
+        if actor_id is not None:
+            try:
+                project_id: uuid.UUID | None = None
+                try:
+                    boq = await self.get_boq(position.boq_id)
+                    project_id = boq.project_id
+                except Exception:  # noqa: BLE001 — best-effort
+                    project_id = None
+                await self.log_activity(
+                    user_id=actor_id,
+                    action="position.resource_variant_repicked",
+                    target_type="position",
+                    description=(
+                        f"Re-picked variant on resource[{resource_idx}] of "
+                        f"position {position.ordinal} → '{variant_code}'"
+                    ),
+                    project_id=project_id,
+                    boq_id=position.boq_id,
+                    target_id=position.id,
+                    metadata_={
+                        "resource_idx": resource_idx,
+                        "variant_code": variant_code,
+                        "version": int(position.version or 0),
+                    },
+                )
+            except Exception:  # noqa: BLE001 — best-effort, never break PATCH
+                logger.debug(
+                    "Activity-log write for resource_variant_repick failed", exc_info=True
+                )
+
+        return position
+
     async def delete_position(self, position_id: uuid.UUID, *, cascade: bool = False) -> None:
         """Delete a position.
 

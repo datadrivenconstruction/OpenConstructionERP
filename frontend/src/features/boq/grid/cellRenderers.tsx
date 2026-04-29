@@ -262,6 +262,18 @@ export interface ResourceGridContext {
   onSaveResourceToCatalog: (positionId: string, resourceIndex: number) => void;
   onOpenCostDbForPosition: (positionId: string) => void;
   onOpenCatalogForPosition: (positionId: string) => void;
+  /**
+   * Re-pick the variant on an already-added resource row (v2.6.26+).
+   * Surfaces the existing CWICR ``VariantPicker`` against the resource's
+   * cached ``available_variants`` array, then PATCHes the backend.
+   * Optional — when omitted, the row's re-pick pill is not rendered
+   * (graceful degrade for grids that haven't wired the callback).
+   */
+  onRepickResourceVariant?: (
+    positionId: string,
+    resourceIndex: number,
+    variantCode: string,
+  ) => void;
   currencySymbol: string;
   currencyCode: string;
   locale: string;
@@ -2396,7 +2408,7 @@ function CurrencyOption({
   );
 }
 
-function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, unknown>; ctx: FullGridContext; colWidths: ColWidths }) {
+export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, unknown>; ctx: FullGridContext; colWidths: ColWidths }) {
   const resourceType = (data._resourceType as string) || 'other';
   const qty = (data._resourceQty as number) ?? 0;
   const rate = (data._resourceRate as number) ?? 0;
@@ -2404,6 +2416,144 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
   const baseCurrency = ctx.currencyCode ?? 'EUR';
   const resourceCurrency = (data._resourceCurrency as string | undefined) || baseCurrency;
   const isForeign = resourceCurrency !== baseCurrency;
+
+  /* ── Variant re-pick state (v2.6.26+) ────────────────────────────────
+   *  available_variants is cached on the resource at apply-time. When
+   *  present (>= 2 variants) we surface a "▾ N options" pill in the
+   *  unit_rate cell that opens the existing CWICR VariantPicker. The
+   *  4px left-edge bar marks provenance: blue for an explicit pick,
+   *  amber for an auto-default-from-mean, none when the resource has
+   *  no variant link. */
+  const availableVariants = (data._resourceAvailableVariants as CostVariant[] | undefined);
+  const availableVariantStats = (data._resourceAvailableVariantStats as VariantStats | undefined);
+  const resourceVariant = data._resourceVariant as
+    | { label: string; price: number; index: number }
+    | undefined;
+  const resourceVariantDefault = data._resourceVariantDefault as 'mean' | 'median' | undefined;
+  const resourceVariantSnapshot = data._resourceVariantSnapshot as
+    | { label?: string; rate?: number; currency?: string; captured_at?: string; source?: string }
+    | undefined;
+  const hasVariants =
+    Array.isArray(availableVariants) &&
+    availableVariants.length >= 2 &&
+    availableVariantStats != null;
+  const canRepick = hasVariants && typeof ctx.onRepickResourceVariant === 'function';
+
+  // Provenance bar colour:
+  //   blue  → explicit user pick (resource.variant set)
+  //   amber → auto-default (variant_default set)
+  //   none  → plain row, no variant link
+  let variantBarTone: 'blue' | 'amber' | null = null;
+  if (resourceVariant) variantBarTone = 'blue';
+  else if (resourceVariantDefault) variantBarTone = 'amber';
+
+  const [variantPickerOpen, setVariantPickerOpen] = useState(false);
+  const variantPillRef = useRef<HTMLButtonElement>(null);
+  const closeVariantPicker = useCallback(() => setVariantPickerOpen(false), []);
+
+  const handleRepick = useCallback(
+    (chosen: CostVariant) => {
+      setVariantPickerOpen(false);
+      const posIdLocal = data._parentPositionId as string;
+      const resIdxLocal = data._resourceIndex as number;
+      ctx.onRepickResourceVariant?.(posIdLocal, resIdxLocal, chosen.label);
+    },
+    [ctx, data],
+  );
+
+  const handleRepickUseDefault = useCallback(
+    (strategy: 'mean' | 'median') => {
+      // The re-pick endpoint expects an explicit variant label; map the
+      // mean/median strategy to the closest variant in the cache. Mirrors
+      // the position-level pill's "Use average" CTA without forcing a
+      // separate backend code path.
+      if (!availableVariants || availableVariants.length === 0 || !availableVariantStats) {
+        setVariantPickerOpen(false);
+        return;
+      }
+      const target = strategy === 'mean' ? availableVariantStats.mean : availableVariantStats.median;
+      let bestIdx = 0;
+      let bestDelta = Number.POSITIVE_INFINITY;
+      for (let i = 0; i < availableVariants.length; i++) {
+        const v = availableVariants[i];
+        if (!v) continue;
+        const d = Math.abs(v.price - target);
+        if (d < bestDelta) {
+          bestDelta = d;
+          bestIdx = i;
+        }
+      }
+      const chosen = availableVariants[bestIdx];
+      if (chosen) {
+        const posIdLocal = data._parentPositionId as string;
+        const resIdxLocal = data._resourceIndex as number;
+        ctx.onRepickResourceVariant?.(posIdLocal, resIdxLocal, chosen.label);
+      }
+      setVariantPickerOpen(false);
+    },
+    [availableVariants, availableVariantStats, ctx, data],
+  );
+
+  // Pill tooltip — surface variant code + price + delta-vs-mean chip.
+  const variantPillTooltip = (() => {
+    if (!hasVariants) return '';
+    const meanRate = availableVariantStats!.mean;
+    const minRate = availableVariantStats!.min;
+    const maxRate = availableVariantStats!.max;
+    const range = `${minRate.toFixed(2)} – ${maxRate.toFixed(2)} ${resourceCurrency}`;
+    if (resourceVariant) {
+      const delta =
+        meanRate > 0
+          ? Math.round(((resourceVariant.price - meanRate) / meanRate) * 100)
+          : null;
+      const deltaStr =
+        delta == null ? '' : ` (${delta > 0 ? '+' : ''}${delta}% vs avg)`;
+      return ctx.t('boq.resource_variant_pill_tooltip_picked', {
+        defaultValue:
+          'Variant: {{label}} @ {{price}} {{currency}}{{delta}}. Click to switch.',
+        label: resourceVariant.label,
+        price: resourceVariant.price.toFixed(2),
+        currency: resourceCurrency,
+        delta: deltaStr,
+      });
+    }
+    if (resourceVariantDefault) {
+      return ctx.t('boq.resource_variant_pill_tooltip_default', {
+        defaultValue:
+          'Auto-applied with {{strategy}} rate. {{count}} options ({{range}}). Click to refine.',
+        strategy: resourceVariantDefault === 'mean' ? 'average' : 'median',
+        count: availableVariantStats!.count,
+        range,
+      });
+    }
+    return ctx.t('boq.resource_variant_pill_tooltip_unset', {
+      defaultValue:
+        '{{count}} priced variants available ({{range}}). Click to pick one.',
+      count: availableVariantStats!.count,
+      range,
+    });
+  })();
+
+  const variantBarTooltip = (() => {
+    if (variantBarTone === null) return '';
+    const captured = resourceVariantSnapshot?.captured_at;
+    if (variantBarTone === 'blue' && resourceVariant) {
+      return ctx.t('boq.resource_variant_bar_tooltip_picked', {
+        defaultValue: 'Explicit variant: {{label}}{{captured}}',
+        label: resourceVariant.label,
+        captured: captured ? ` · captured ${captured.split('T')[0]}` : '',
+      });
+    }
+    if (variantBarTone === 'amber' && resourceVariantDefault) {
+      return ctx.t('boq.resource_variant_bar_tooltip_default', {
+        defaultValue:
+          'Auto-default ({{strategy}}){{captured}} — click pill to refine.',
+        strategy: resourceVariantDefault,
+        captured: captured ? ` · captured ${captured.split('T')[0]}` : '',
+      });
+    }
+    return '';
+  })();
   const fxRates = ctx.fxRates ?? [];
   const fxEntry = isForeign ? fxRates.find((r) => r.currency === resourceCurrency) : undefined;
   // Project-scoped FX rates (set by the BOQ owner) take priority. When
@@ -2553,7 +2703,7 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
 
   return (
     <div
-      className="flex items-stretch w-full h-full select-none group/res text-xs
+      className="relative flex items-stretch w-full h-full select-none group/res text-xs
                   bg-surface-secondary/40 border-b border-border-light/50"
       style={{ paddingLeft: `${colWidths.leftPad}px`, paddingRight: '4px' }}
       onContextMenu={(e) => {
@@ -2562,6 +2712,23 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
         ctx.onShowContextMenu?.(e, 'resource', data);
       }}
     >
+      {/* Provenance left-edge bar — 4px wide, full row height. Marks variant
+          source so a quick scan reveals which resources were explicitly
+          picked vs auto-defaulted. Hidden when the resource has no variant
+          link (legacy rows). */}
+      {variantBarTone && (
+        <span
+          aria-hidden="true"
+          title={variantBarTooltip}
+          data-testid={`resource-variant-bar-${data._resourceIndex}-${variantBarTone}`}
+          className={`absolute left-0 top-0 bottom-0 w-1 ${
+            variantBarTone === 'blue'
+              ? 'bg-oe-blue/70'
+              : 'bg-amber-400 dark:bg-amber-500'
+          }`}
+        />
+      )}
+
       {/* LEFT section — three slots that MIRROR the AG Grid columns
           (ordinal, _bim_link, description) 1:1, so resource code lines
           up under position ordinal, resource tag lines up under the
@@ -2663,6 +2830,35 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
         className="shrink-0 inline-flex items-center justify-end self-center gap-1 pr-2 pl-2"
         style={{ width: `${colWidths.unitRate}px` }}
       >
+        {canRepick && (
+          <button
+            ref={variantPillRef}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setVariantPickerOpen((open) => !open);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className={`shrink-0 inline-flex items-center gap-0.5 h-4 px-1 rounded text-[9px] font-semibold
+                        transition-colors cursor-pointer ${
+                          resourceVariant
+                            ? 'bg-oe-blue/15 text-oe-blue hover:bg-oe-blue/25'
+                            : resourceVariantDefault
+                            ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60'
+                            : 'bg-surface-tertiary/60 text-content-secondary hover:bg-surface-tertiary'
+                        }`}
+            title={variantPillTooltip}
+            aria-label={variantPillTooltip}
+            aria-haspopup="dialog"
+            aria-expanded={variantPickerOpen}
+            data-testid={`resource-variant-pill-${data._resourceIndex}`}
+          >
+            {ctx.t('boq.resource_variant_pill', {
+              defaultValue: '\u25BE {{count}}',
+              count: availableVariantStats!.count,
+            })}
+          </button>
+        )}
         <InlineNumberInput
           value={rate}
           onCommit={handleRateChange}
@@ -2681,6 +2877,20 @@ function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, un
           isForeign={isForeign}
           t={ctx.t}
         />
+        {variantPickerOpen && hasVariants && (
+          <VariantPicker
+            variants={availableVariants!}
+            stats={availableVariantStats!}
+            defaultStrategy="mean"
+            defaultIndex={resourceVariant?.index}
+            anchorEl={variantPillRef.current}
+            unitLabel={(data._resourceUnit as string) || ''}
+            currency={resourceCurrency}
+            onApply={handleRepick}
+            onUseDefault={handleRepickUseDefault}
+            onClose={closeVariantPicker}
+          />
+        )}
       </span>
 
       <span

@@ -309,6 +309,31 @@ export interface CostAutocompleteItem {
   rate: number;
   classification: Record<string, string>;
   components: CostItemComponent[];
+  /**
+   * Optional CWICR variant payload (v2.6.26+). Surfaced when the cost item
+   * carries 2+ abstract-resource variants so callers (e.g. BOQEditorPage's
+   * ``handleCostDbAddResource``) can cache the variant catalog on the
+   * resource entry for later re-pick.
+   */
+  metadata_?: {
+    variants?: Array<{
+      index: number;
+      label: string;
+      price: number;
+      price_per_unit?: number | null;
+    }>;
+    variant_stats?: {
+      min: number;
+      max: number;
+      mean: number;
+      median: number;
+      unit: string;
+      group: string;
+      count: number;
+      position_count?: number;
+    };
+    [key: string]: unknown;
+  };
 }
 
 /* ── AI Chat types ──────────────────────────────────────────────────── */
@@ -572,6 +597,20 @@ export const boqApi = {
     apiPost<Position>(`/v1/boq/boqs/${data.boq_id}/positions/`, data),
   updatePosition: (posId: string, data: UpdatePositionData) =>
     apiPatch<Position>(`/v1/boq/positions/${posId}`, data),
+  /**
+   * Re-pick the variant on an existing resource row.  Backend reads the
+   * cached ``available_variants`` array on the resource entry, finds the
+   * variant whose label matches ``variantCode``, and patches that
+   * resource's unit_rate + variant_snapshot.  Other resources untouched.
+   *
+   * Added in v2.6.26 alongside the per-resource re-pick UI on
+   * ``EditableResourceRow``.
+   */
+  repickResourceVariant: (posId: string, resourceIdx: number, variantCode: string) =>
+    apiPatch<Position>(
+      `/v1/boq/positions/${posId}/resources/${resourceIdx}/variant/`,
+      { variant_code: variantCode },
+    ),
   deletePosition: (posId: string) => apiDelete(`/v1/boq/positions/${posId}`),
 
   /* Position reorder (drag-and-drop) */
