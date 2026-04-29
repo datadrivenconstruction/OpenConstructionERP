@@ -30,6 +30,12 @@ export interface CostVariant {
  * `count` is the number of valid `CostVariant` entries we kept;
  * `position_count` is the total number of real estimates that used this rate
  * code (frequency signal across all variants combined).
+ *
+ * `unit_localized` / `group_localized` are added by the backend translation
+ * layer (`backend/app/modules/costs/translations`) when the request carries
+ * a `?locale=` query param or `Accept-Language` header that maps to a
+ * shipped translation file.  Render with the standard fallback chain:
+ * `unit_localized || unit`.
  */
 export interface VariantStats {
   min: number;
@@ -40,6 +46,12 @@ export interface VariantStats {
   group: string;
   count: number;
   position_count?: number;
+  /** Localized mirror of `unit` — present when the API was called with
+   *  a known locale. Falls back to the German source when the locale is
+   *  unsupported or the token has no translation. */
+  unit_localized?: string;
+  /** Localized mirror of `group`. Same fallback semantics as `unit_localized`. */
+  group_localized?: string;
 }
 
 /**

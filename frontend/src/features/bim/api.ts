@@ -17,6 +17,17 @@ import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 export interface BIMModelsResponse {
   items: BIMModelData[];
   total: number;
+  /** Aggregate disk usage of conversion artifacts (GLB/DAE/parquet/thumbnails)
+   *  across every model in the project, in megabytes.  Surfaced in the
+   *  BIM page header chip so users can see persistence at a glance. */
+  total_artifact_size_mb?: number;
+  /** Aggregate disk usage of any retained original CAD uploads, MB.
+   *  Always 0 on production (`keep_original_cad=false`); non-zero on dev
+   *  installs that opt into keeping the raw uploads. */
+  total_original_size_mb?: number;
+  /** Short label of where the blobs live (e.g. `data/bim/` or
+   *  `s3://oe-bim-prod/bim/`).  Drives the chip's leading text. */
+  storage_root_label?: string;
 }
 
 export interface BIMElementsResponse {

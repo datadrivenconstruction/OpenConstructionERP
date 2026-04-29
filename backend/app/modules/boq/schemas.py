@@ -214,21 +214,25 @@ class PositionCreate(BaseModel):
         ),
     )
 
-    # BUG-MATH03: ``unit`` was free-text — typos like "tonne"/"tonnes"/"ton"
-    # produced three buckets in the unit-breakdown statistic and broke GAEB
-    # X83 export.  Validate against the curated catalogue at the schema
-    # layer; the DB column stays String for backwards-compat with legacy
-    # rows and the section-header sentinel.
+    # Sanitise + canonicalise; **don't** gate on a fixed catalogue.  Locale
+    # spellings (Romanian "Bucat", Bulgarian "бр", Russian "шт", German
+    # "Stück", CWICR multi-prefix forms like "100 EA") all round-trip
+    # through ``normalise_unit`` lowercased and stripped.  Common synonyms
+    # ("ton" → "t", "metre" → "m") still bucket into canonical forms so
+    # aggregations stay coherent.  Only genuinely unsafe shapes (empty,
+    # > 30 chars, control chars, HTML / SQL / quote characters) are
+    # rejected.
     @field_validator("unit", mode="after")
     @classmethod
     def _check_unit(cls, v: str) -> str:
-        from app.modules.boq.units import APPROVED_UNITS, normalise_unit
+        from app.modules.boq.units import normalise_unit
 
         normalised = normalise_unit(v)
         if normalised is None:
             raise ValueError(
-                f"unit '{v}' is not in the approved BOQ unit catalogue "
-                f"({', '.join(sorted(APPROVED_UNITS))})"
+                f"unit '{v}' has an unsafe shape — must be 1-30 characters, "
+                f"start with a letter or digit, and contain only letters, "
+                f"digits, spaces, or any of '. _ - / ² ³ %'"
             )
         return normalised
 
@@ -295,19 +299,20 @@ class PositionUpdate(BaseModel):
         ),
     )
 
-    # BUG-MATH03 (mirrors PositionCreate): validate unit on partial update too.
+    # Mirrors PositionCreate: sanitise + canonicalise on partial updates.
     @field_validator("unit", mode="after")
     @classmethod
     def _check_unit(cls, v: str | None) -> str | None:
         if v is None:
             return v
-        from app.modules.boq.units import APPROVED_UNITS, normalise_unit
+        from app.modules.boq.units import normalise_unit
 
         normalised = normalise_unit(v)
         if normalised is None:
             raise ValueError(
-                f"unit '{v}' is not in the approved BOQ unit catalogue "
-                f"({', '.join(sorted(APPROVED_UNITS))})"
+                f"unit '{v}' has an unsafe shape — must be 1-30 characters, "
+                f"start with a letter or digit, and contain only letters, "
+                f"digits, spaces, or any of '. _ - / ² ³ %'"
             )
         return normalised
 

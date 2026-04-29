@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import clsx from 'clsx';
 import { Sidebar, FloatingRecentButton } from './Sidebar';
 import { Header } from './Header';
-import { FeedbackDialog, OnboardingTour } from '@/shared/ui';
+import { FeedbackDialog } from '@/shared/ui';
 import { FloatingQueuePanel } from './FloatingQueuePanel';
 import { GlobalProgress } from '@/shared/ui/GlobalProgress';
 import { GlobalUploadIndicator } from '@/shared/ui/GlobalUploadIndicator';
@@ -119,8 +119,12 @@ export function AppLayout({ title, children }: AppLayoutProps) {
       <FloatingRecentButton />
       {/* FloatingChatButton hidden for now */}
 
-      {/* Onboarding tour — auto-starts on first visit */}
-      <OnboardingTour />
+      {/* OnboardingTour mounts once at App.tsx top level — moving it
+          out of here was the fix for BUG-UI02-TOUR-PERSISTENT.  When
+          mounted inside AppLayout, it remounted on every route change
+          (the page wrapper ``P`` recreates the layout per Route), and
+          a tour clicked-but-not-completed re-rendered from step 1 on
+          every navigation. */}
     </div>
   );
 }

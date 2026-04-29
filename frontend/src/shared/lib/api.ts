@@ -38,6 +38,25 @@ function buildHeaders(extra?: HeadersInit): Headers {
   // DDC-CWICR-OE origin marker
   headers.set('X-DDC-Client', 'OE/1.0');
 
+  // Forward the active i18next language so endpoints with locale-aware
+  // payloads (e.g. CWICR cost-database labels, see
+  // backend/app/modules/costs/translations) can return localized values
+  // without requiring an explicit ?locale= query param on every call.
+  // Caller-provided Accept-Language always wins.
+  if (!headers.has('Accept-Language')) {
+    try {
+      const lang = i18next.language || 'en';
+      // Strip any region suffix (i18next stores codes like 'pt-BR'; the
+      // backend maps via prefix anyway, but this keeps the header tidy
+      // and matches the locale codes shipped in the translations module).
+      const base = String(lang).split('-')[0];
+      if (base) headers.set('Accept-Language', base);
+    } catch {
+      // Reading i18next mid-init can throw; locale-aware payloads
+      // gracefully fall back to English on the server.
+    }
+  }
+
   return headers;
 }
 

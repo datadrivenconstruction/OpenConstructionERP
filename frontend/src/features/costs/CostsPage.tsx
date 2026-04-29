@@ -48,6 +48,10 @@ interface CostComponent {
   name: string;
   code: string;
   unit: string;
+  /** Localized mirror of `unit` populated by the backend translation
+   *  layer when a known locale is requested.  Render with the
+   *  `unit_localized || unit` fallback chain — see `api.ts`. */
+  unit_localized?: string;
   quantity: number;
   unit_rate: number;
   cost: number;
@@ -1874,12 +1878,12 @@ function CostVariantDetail({
             {stats.count}
           </span>
         </span>
-        {stats.group && (
+        {(stats.group_localized || stats.group) && (
           <span
             className="truncate text-2xs text-content-tertiary"
-            title={stats.group}
+            title={stats.group_localized || stats.group}
           >
-            {stats.group}
+            {stats.group_localized || stats.group}
           </span>
         )}
       </div>
@@ -2003,9 +2007,14 @@ function CostItemRow({
   const materials = (item.components ?? []).filter((c) => c.type === 'material');
   const machines = (item.components ?? []).filter((c) => c.type === 'equipment' || c.type === 'operator' || c.type === 'electricity');
 
-  // Classification breadcrumb
+  // Classification breadcrumb. Backend mirrors `category` into
+  // `category_localized` when a known locale is in use (CWICR ships
+  // `category` as frozen-German, e.g. "BAUARBEITEN") — fall back to the
+  // German source when no translation exists for the active locale.
   const cls = item.classification ?? {};
-  const breadcrumb = [cls.category, cls.collection, cls.department, cls.section, cls.subsection]
+  const localizedCategory =
+    (cls as Record<string, string>).category_localized || cls.category;
+  const breadcrumb = [localizedCategory, cls.collection, cls.department, cls.section, cls.subsection]
     .filter(Boolean)
     .join(' > ');
 
@@ -2146,7 +2155,7 @@ function CostItemRow({
               {/* Breadcrumb — wraps instead of overflowing */}
               {breadcrumb && (
                 <div className="mb-3 flex flex-wrap items-center gap-x-1 gap-y-0.5">
-                  {[cls.category, cls.collection, cls.department, cls.section, cls.subsection]
+                  {[localizedCategory, cls.collection, cls.department, cls.section, cls.subsection]
                     .filter(Boolean)
                     .map((part, i, arr) => (
                       <span key={`${String(part)}-${i}`} className="flex items-center gap-1">
@@ -2301,7 +2310,9 @@ function CostItemRow({
                               {typeLabel}
                             </span>
                           </td>
-                          <td className="px-3 py-2 text-content-tertiary">{comp.unit}</td>
+                          <td className="px-3 py-2 text-content-tertiary">
+                            {comp.unit_localized || comp.unit}
+                          </td>
                           <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
                             {comp.quantity > 0 ? comp.quantity.toFixed(2) : '—'}
                           </td>

@@ -1,31 +1,37 @@
-"""Approved BOQ units of measurement (BUG-MATH03).
+"""BOQ unit normaliser.
 
-Position ``unit`` was a free-text field — typos like "tonne" / "tonnes" /
-"ton" produced three separate buckets in unit-breakdown statistics and
-broke GAEB X83 export which requires a known QU code.
+Estimators globally use thousands of locale-specific units that no curated
+allowlist can ever cover: Romanian ``Bucat``, Bulgarian ``бр``, Russian
+``шт``, German ``Stück``, French ``unité``, CWICR multi-prefix forms like
+``100 EA``, plus per-trade slang ("man-day", "lin.m", "MWh", "%").  A
+strict allowlist meant every regional CWICR import re-surfaced the same
+422.  Policy is now **sanitise, don't gate**:
 
-The DB column stays ``String`` so legacy rows (pre-fix imports, section
-rows where ``unit="section"``) do not need a backfill migration.
-Validation happens at the Pydantic schema layer for new writes only.
+* canonicalise common synonyms via the alias table so aggregations don't
+  fragment ("ton" / "tonne" / "tonnes" → "t"),
+* otherwise return the input lowercased and stripped, regardless of
+  script (Latin, Cyrillic, Greek, CJK, accented),
+* reject only the genuinely unsafe shapes — empty, > 30 chars,
+  control characters, HTML / SQL / quote characters, or a non-letter /
+  non-digit leading character.
 
-Tenants that need a custom unit register it via the ``CUSTOM_UNITS``
-extension list (env-driven in a future patch); for now the curated
-catalogue covers all SI / imperial units the templates and CWICR seed
-data use.
+GAEB X83 export still needs a known QU code per row; rows whose unit
+isn't in :data:`APPROVED_UNITS` are emitted with QU="StPa" and the
+original string preserved in the ``Bezeichnung``.  The exporter, not
+this validator, is responsible for that mapping.
 """
 
 from __future__ import annotations
 
-import re
 from typing import Final
 
 # ── Curated unit catalogue ────────────────────────────────────────────
 #
-# Length / area / volume — SI and imperial.
-# Mass — SI only (imperial weights stored via ``lb`` if ever needed).
-# Counts / lump-sum / time — universal.
-#
-# When extending: prefer ISO 80000-1 short forms (lower-case, no period).
+# This used to be a strict allowlist that *rejected* anything outside.
+# It now serves only as a **canonical-form table**: when the user types a
+# spelling that already appears here, normalisation lower-cases it and
+# returns the canonical form.  Inputs outside this set still pass through
+# (lowercased) so locale-specific labels survive round-trips.
 APPROVED_UNITS: Final[frozenset[str]] = frozenset(
     {
         # length
@@ -40,42 +46,18 @@ APPROVED_UNITS: Final[frozenset[str]] = frozenset(
         "pcs", "ea", "no", "set", "lsum", "ls",
         # time / labour
         "hr", "h", "hrs", "hour", "hours", "day", "days", "wk", "month",
-        # internal sentinel: section header rows have unit="section" — keep
-        # it in the allowed list so existing section-create paths (which
-        # bypass ``PositionCreate``) round-trip cleanly through any future
-        # ``PositionResponse`` re-validation.
+        # internal sentinel: section header rows have unit="section" — kept
+        # in the canonical table so existing section-create paths round-trip
+        # cleanly through any future ``PositionResponse`` re-validation.
         "section",
     }
 )
 
 
-# CWICR and other catalogues commonly price grouped quantities — "100 EA",
-# "1000 m", "10 kg" — meaning "rate per N units".  Treat these as approved
-# when the trailing token is itself an approved unit; normalisation strips
-# the multiplier so downstream stats and GAEB export still see a clean
-# ``ea`` / ``m`` / ``kg``.  The numeric prefix is preserved on the
-# position via ``unit_multiplier`` (carried in metadata by the import flow)
-# so totals stay accurate.
-_MULTI_PREFIX_RE: Final = re.compile(r"^\s*(\d{1,6})\s+([A-Za-z][A-Za-z0-9]{0,9})\s*$")
-
-# A unit token's "shape" — used as a permissive fallback so estimators can
-# coin custom units (region-specific, internal-coding, novel materials) and
-# have them round-trip through the validator. Must start with a letter,
-# allow alphanumerics + space + a small set of separators (./-), max 20
-# chars. Rejects empty strings, control characters, HTML/SQL payloads, and
-# anything obviously non-unit-shaped. Curated catalogue still takes
-# priority for canonical forms (e.g. "tonne" → still rejected in favour of
-# "t") so existing aggregations stay coherent.
-_CUSTOM_UNIT_RE: Final = re.compile(r"^[A-Za-z][A-Za-z0-9 ._/-]{0,19}$")
-
-
 # Canonical aliases — common synonyms that should bucket into the same
-# canonical unit so aggregations don't fragment. CWICR / RSMeans / SINAPI
-# / GAEB seeds use these spellings interchangeably; mapping them at the
-# validator preserves both round-trip ergonomics ("ton" works as input)
-# and downstream coherence (everything lands in "t"). Keep the map small
-# and unambiguous: only include synonyms with universal meaning. Locale-
-# specific variants (e.g. "штука", "шт") belong in i18n display, not here.
+# canonical unit so aggregations don't fragment.  Locale-specific spellings
+# (Cyrillic / CJK / accented) deliberately don't appear here: we keep them
+# verbatim so the BOQ shows what the estimator typed.
 _UNIT_ALIASES: Final[dict[str, str]] = {
     # mass — metric tonne synonyms
     "ton": "t",
@@ -119,45 +101,108 @@ _UNIT_ALIASES: Final[dict[str, str]] = {
 }
 
 
-def normalise_unit(unit: str | None) -> str | None:
-    """Return the canonical form of ``unit`` if accepted, else None.
+# Maximum acceptable unit length.  Anything longer is almost certainly an
+# accidentally pasted description, not a unit of measurement.
+_MAX_UNIT_LEN: Final[int] = 30
 
-    Accepts (in order of priority):
-      - exact match in APPROVED_UNITS (case-insensitive)
-      - canonical alias from ``_UNIT_ALIASES`` (e.g. "ton" → "t")
-      - CWICR-style multi-prefix forms like "100 EA", "1000 m" — returned
-        as ``"<N> <unit>"`` lower-cased; trailing token can itself be an
-        alias.
-      - any user-coined custom unit matching ``_CUSTOM_UNIT_RE`` — letters
-        first, alphanumerics / space / ``._-/`` after, max 20 chars.
-        Lower-cased on the way through. Lets estimators register novel
-        units without a backend release; aggregations key off the saved
-        string so identical custom units bucket together.
+# Characters allowed in the body of a unit (after the leading letter or
+# digit).  Lets locale-specific spellings, percentages, and superscript
+# squared/cubed glyphs ("m²", "ft³") pass through cleanly.
+_BODY_EXTRA_CHARS: Final[frozenset[str]] = frozenset(" ._-/²³%")
+
+# Characters explicitly rejected anywhere in the unit string.  Keeps unit
+# values out of HTML / SQL / shell injection vectors regardless of context
+# the value is later concatenated into.
+_FORBIDDEN_CHARS: Final[frozenset[str]] = frozenset(
+    '<>&"\'`;\\\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f'
+)
+
+
+def _is_safe_unit_shape(unit: str) -> bool:
+    """Return True iff ``unit`` is non-empty, ≤ ``_MAX_UNIT_LEN``, and free
+    of forbidden characters.  The first character must be a letter or a
+    digit (so "100 ea" / "lin.m" / "м3" / "個" all pass; ";rm" / "<x>" do
+    not).
+    """
+    if not unit or len(unit) > _MAX_UNIT_LEN:
+        return False
+    head = unit[0]
+    # Letters / digits cover every script; "%" is the one symbolic unit
+    # (percentage) common enough to allow as a standalone label.
+    if not (head.isalpha() or head.isdigit() or head == "%"):
+        return False
+    for ch in unit:
+        if ch in _FORBIDDEN_CHARS:
+            return False
+        if ch.isalnum():
+            continue
+        if ch in _BODY_EXTRA_CHARS:
+            continue
+        return False
+    return True
+
+
+def normalise_unit(unit: str | None) -> str | None:
+    """Return the canonical form of ``unit`` if it has a safe shape, else
+    None.
+
+    Resolution order:
+      1. canonical alias from :data:`_UNIT_ALIASES` (e.g. "ton" → "t",
+         "hour" → "hr") — aliases are checked first so synonyms collapse
+         into one bucket regardless of whether they happen to also appear
+         in the catalogue
+      2. exact match in :data:`APPROVED_UNITS` (case-insensitive)
+      3. CWICR-style multi-prefix forms like "100 EA", "1000 m" — returned
+         as ``"<N> <unit>"`` with the trailing token canonicalised through
+         the alias table when possible
+      4. anything else — passed through, lower-cased, with surrounding
+         whitespace stripped (Cyrillic, CJK, Greek, accented Latin,
+         percent / squared / cubed glyphs all preserved verbatim)
+
+    Returns ``None`` only when the input is empty, longer than 30 chars,
+    contains forbidden characters, or starts with something that isn't a
+    letter or a digit.  Callers that previously relied on this returning
+    ``None`` for unknown labels (the old strict-allowlist behaviour) must
+    use :data:`APPROVED_UNITS` directly instead.
     """
     if not unit:
         return None
     stripped = unit.strip()
-    if not stripped:
+    if not _is_safe_unit_shape(stripped):
         return None
     lower = stripped.lower()
-    if lower in APPROVED_UNITS:
-        return lower
+    # Aliases first: "hour" / "hours" / "h" all collapse to "hr" even
+    # though each is in APPROVED_UNITS, fixing the original BUG-MATH03
+    # complaint that synonyms produced separate buckets in unit-breakdown
+    # statistics.
     if lower in _UNIT_ALIASES:
         return _UNIT_ALIASES[lower]
-    m = _MULTI_PREFIX_RE.match(stripped)
-    if m:
-        n, base = m.group(1), m.group(2).lower()
-        # Trailing token: alias → canonical → custom shape, in that order,
-        # so "1000 tons" and "100 each" both round-trip cleanly.
-        if base in _UNIT_ALIASES:
-            return f"{n} {_UNIT_ALIASES[base]}"
-        if base in APPROVED_UNITS or _CUSTOM_UNIT_RE.match(base):
-            return f"{n} {base}"
-    if _CUSTOM_UNIT_RE.match(stripped):
+    if lower in APPROVED_UNITS:
         return lower
-    return None
+    # Multi-prefix form: "100 EA" / "1000 m" / "10 kg".  Detect by
+    # splitting on the first whitespace run rather than a regex so the
+    # implementation stays Unicode-clean — Python's ``str.split`` already
+    # respects every Unicode whitespace code point.
+    parts = stripped.split(None, 1)
+    if len(parts) == 2 and parts[0].isdigit() and 1 <= len(parts[0]) <= 6:
+        head, tail = parts
+        tail_lower = tail.strip().lower()
+        if not tail_lower:
+            return None
+        if tail_lower in _UNIT_ALIASES:
+            return f"{head} {_UNIT_ALIASES[tail_lower]}"
+        return f"{head} {tail_lower}"
+    return lower
 
 
 def is_approved_unit(unit: str | None) -> bool:
-    """Return True when ``unit`` is in the approved catalogue (case-insensitive)."""
+    """Return True when ``unit`` has a safe shape (i.e.
+    :func:`normalise_unit` doesn't reject it).
+
+    Note: this is *not* membership in :data:`APPROVED_UNITS` — that strict
+    test still exists as plain set membership for callers (GAEB exporter,
+    aggregations) that need to know whether a unit maps to a canonical
+    QU code.  The schema validator uses the looser shape test so locale-
+    specific spellings round-trip without 422 errors.
+    """
     return normalise_unit(unit) is not None

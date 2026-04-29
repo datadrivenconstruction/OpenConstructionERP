@@ -19,7 +19,7 @@ import { DatabaseSetupPage } from '@/features/setup';
 import { IntegrationsPage } from '@/features/integrations';
 import { AboutPage } from '@/features/about/AboutPage';
 import { QuickEstimatePage } from '@/features/ai';
-import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, ErrorBoundary, NotFoundPage } from '@/shared/ui';
+import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, ErrorBoundary, NotFoundPage, OnboardingTour } from '@/shared/ui';
 import GlobalSearchModal from '@/features/search/GlobalSearchModal';
 import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
 import { FloatingQueuePanel } from './layout/FloatingQueuePanel';
@@ -359,6 +359,13 @@ export default function App() {
   return (
     <Suspense fallback={<LoadingScreen />}>
       {isAuthenticated && <GlobalShortcuts />}
+      {/* OnboardingTour mounted once at app top — moving it out of
+          AppLayout was the fix for BUG-UI02-TOUR-PERSISTENT.  When the
+          tour was inside AppLayout (which is recreated per-route by the
+          ``P`` page wrapper), every navigation re-mounted the tour and
+          a click-but-not-completed flow restarted from step 1 on the
+          next page. */}
+      {isAuthenticated && <OnboardingTour />}
       <Routes>
         {/* Auth — public */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />

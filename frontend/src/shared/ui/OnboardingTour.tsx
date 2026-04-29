@@ -195,6 +195,21 @@ export function OnboardingTour({
   const [tooltipCoords, setTooltipCoords] = useState<TooltipCoords>({ top: 0, left: 0 });
   const tooltipRef = useRef<HTMLDivElement>(null);
 
+  // Belt-and-braces (BUG-UI02-TOUR-PERSISTENT): persist the dismissed
+  // flag the moment the tour first becomes active.  The tour was
+  // previously only marked complete when the user reached the last step
+  // or hit Skip / Esc — anyone who clicked away mid-tour saw step 1
+  // again on the next reload.  Setting the flag on first activation
+  // gives them exactly one chance per session and never re-shows.
+  useEffect(() => {
+    if (!active) return;
+    try {
+      localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
+    } catch {
+      /* localStorage unavailable — non-fatal */
+    }
+  }, [active]);
+
   const step = steps[currentStep];
   const isFirst = currentStep === 0;
   const isLast = currentStep === steps.length - 1;

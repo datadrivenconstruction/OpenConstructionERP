@@ -270,9 +270,14 @@ def smoke_test_converter(extension: str, force: bool = False) -> ConverterHealth
     try:
         import subprocess
 
+        # ``input=`` already implies ``stdin=PIPE`` — passing both raises
+        # ``ValueError: stdin and input arguments may not both be used``,
+        # which used to crash the per-upload pre-flight check on every
+        # native CAD format and leave the model stuck at
+        # ``ddc_smoke_failed`` even when the binary was correctly
+        # installed.  Drop the explicit ``stdin=PIPE``.
         proc = subprocess.run(
             [str(exe_path)],
-            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=str(exe_path.parent),

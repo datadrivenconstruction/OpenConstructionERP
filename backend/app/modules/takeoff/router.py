@@ -635,8 +635,31 @@ async def install_converter(
                         f"https://github.com/{_DDC_REPO}/tree/{_DDC_BRANCH}/"
                         f"{_WINDOWS_CONVERTER_DIRS[converter_id]}"
                     )
+            except subprocess.TimeoutExpired:
+                # Timeout = binary loaded successfully and is waiting for
+                # stdin (likely showing a Qt window or sitting in a
+                # message loop).  That's exactly what we want to confirm:
+                # the loader works.  Treat as healthy and log at INFO
+                # instead of WARNING so the line doesn't read as a
+                # contradiction next to the "smoke_test_passed: true"
+                # response — see BUG-RVT02.
+                logger.info(
+                    "Smoke test for %s converter timed out — binary loaded "
+                    "but waiting for stdin; treating as healthy.",
+                    converter_id,
+                )
             except Exception as exc:  # noqa: BLE001 — smoke test is best-effort
-                logger.warning("Smoke test for %s converter failed: %s", converter_id, exc)
+                # Any other exception (FileNotFoundError, PermissionError,
+                # OSError) genuinely means the binary couldn't run.  Don't
+                # claim ``smoke_test_passed: true`` in the response.
+                smoke_ok = False
+                smoke_message = (
+                    f"Installed but the smoke test failed: {exc}. "
+                    f"Try the Re-check button on the BIM page or reinstall."
+                )
+                logger.warning(
+                    "Smoke test for %s converter failed: %s", converter_id, exc
+                )
 
             size_bytes = exe_path.stat().st_size if exe_path.exists() else 0
 

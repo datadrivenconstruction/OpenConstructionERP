@@ -195,10 +195,16 @@ async def test_position_create_requires_quantity(
 
 
 @pytest.mark.asyncio
-async def test_position_create_rejects_unknown_unit(
+async def test_position_create_rejects_unsafe_unit(
     shared_client: AsyncClient, shared_auth: dict[str, str]
 ) -> None:
-    """POST with ``unit='xyz'`` must 422 (BUG-MATH03)."""
+    """Genuinely unsafe shapes (HTML / SQL chars, > 30 chars, control
+    chars, non-letter / non-digit leading char) must still 422.
+
+    Locale-specific spellings ("Bucat", "шт", "個", "100 EA") and unknown
+    Latin tokens ("xyz") are accepted — the validator sanitises now
+    instead of gating on a fixed catalogue.
+    """
     project_id = await _create_project(shared_client, shared_auth)
     boq_id = await _create_boq(shared_client, shared_auth, project_id)
 
@@ -208,7 +214,7 @@ async def test_position_create_rejects_unknown_unit(
             "boq_id": boq_id,
             "ordinal": "M03.001",
             "description": "bad unit",
-            "unit": "xyz",
+            "unit": "<script>",
             "quantity": 1.0,
             "unit_rate": 10.0,
         },

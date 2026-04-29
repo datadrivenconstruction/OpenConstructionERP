@@ -52,7 +52,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Header, HTTPException, Query, UploadFile, status
-from fastapi.responses import RedirectResponse, StreamingResponse
+from fastapi.responses import JSONResponse, RedirectResponse, StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -1167,6 +1167,21 @@ async def _process_cad_in_background(
                     "Background CAD processed: %d elements, %d storeys → model %s ready",
                     element_count, len(result["storeys"]), model_id,
                 )
+
+                # Storage policy — drop the raw upload after a *successful*
+                # conversion when ``keep_original_cad`` is False (production
+                # default).  Failed conversions fall through to the else
+                # branch below and keep the original so retry works without
+                # re-upload.  Conversion artifacts (GLB/DAE/parquet) stay
+                # forever regardless.
+                from app.config import get_settings as _get_settings
+
+                if not _get_settings().keep_original_cad:
+                    await bim_file_storage.delete_original_cad(
+                        project_id=project_id,
+                        model_id=model_id,
+                        ext=ext,
+                    )
             else:
                 meta = dict(model.metadata_ or {})
                 if ext == ".rvt":
@@ -1397,38 +1412,100 @@ async def upload_cad_file(
             ),
         )
 
-    # Preflight: refuse uploads up-front when the required converter binary
-    # is not installed on this server. Returning a 200 with a dedicated
-    # ``converter_required`` status (instead of a 4xx) lets the frontend
-    # dispatch on the response body without falling into a generic error
-    # path — see BIMCadUploadResponse in frontend/src/features/bim/api.ts.
+    # Preflight: when the required converter binary isn't installed on
+    # this server, **persist** the upload and create a placeholder model
+    # so the user doesn't have to re-upload after running the install.
+    # The response is HTTP 202 Accepted (the request is good — we'll
+    # finish processing later) rather than 201 Created (we haven't
+    # created any geometry yet).  ``Retry-After`` and a ``Link`` header
+    # point the client at the converter-install endpoint and the model
+    # row that will be re-processed once the binary lands.  Frontend
+    # dispatches on the ``status`` field in the body — see
+    # ``BIMCadUploadResponse`` in ``frontend/src/features/bim/api.ts``.
     if ext in _NEEDS_CONVERTER_EXTS:
         from app.modules.boq.cad_import import find_converter
 
         if find_converter(ext.lstrip(".")) is None:
-            logger.info(
-                "Refusing %s upload — %s converter not installed",
-                ext, ext.lstrip(".").upper(),
+            # Read & save the file before responding so the user can
+            # install the converter and trigger a re-process from the UI
+            # without a second upload (BUG-RVT03).  We still cap on the
+            # configured 500 MB limit before reading.
+            if file.size and file.size > _CAD_MAX_SIZE:
+                raise HTTPException(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    detail=(
+                        f"File too large. Maximum size is "
+                        f"{_CAD_MAX_SIZE // (1024 * 1024)} MB."
+                    ),
+                )
+            content = await file.read()
+            if not content:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Uploaded file is empty.",
+                )
+
+            new_model_id = uuid.uuid4()
+            saved_cad_key = await bim_file_storage.save_original_cad(
+                project_uuid, new_model_id, ext, content,
             )
-            return {
-                "status": "converter_required",
-                "format": ext.lstrip("."),
-                "converter_id": ext.lstrip("."),
-                "message": (
-                    f"{ext.upper().lstrip('.')} files require the "
-                    f"{ext.upper().lstrip('.')} converter, which is not "
-                    f"installed on this server. Install it from the BIM "
-                    f"converter banner and re-upload."
+            display_name = (name or pathlib.Path(filename).stem).strip() or filename
+            from app.modules.bim_hub.schemas import BIMModelCreate
+
+            await service.create_model(
+                BIMModelCreate(
+                    project_id=project_uuid,
+                    name=display_name,
+                    discipline=discipline,
+                    model_format=ext.lstrip("."),
+                    canonical_file_path=saved_cad_key,
+                    status="needs_converter",
+                    error_message=(
+                        f"{ext.upper().lstrip('.')} converter not installed — "
+                        f"install it from the BIM converter banner, then "
+                        f"click Re-process on this model."
+                    ),
                 ),
-                "install_endpoint": (
-                    f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/"
-                ),
-                "model_id": None,
-                "name": None,
-                "file_size": 0,
-                "element_count": 0,
-                "error_message": None,
-            }
+                created_by=user_id or "",
+            )
+
+            logger.info(
+                "Saved %s upload pending converter — model=%s, key=%s, %d bytes",
+                ext, new_model_id, saved_cad_key, len(content),
+            )
+
+            install_endpoint = (
+                f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/"
+            )
+            return JSONResponse(
+                status_code=status.HTTP_202_ACCEPTED,
+                content={
+                    "status": "converter_required",
+                    "format": ext.lstrip("."),
+                    "converter_id": ext.lstrip("."),
+                    "message": (
+                        f"{ext.upper().lstrip('.')} files require the "
+                        f"{ext.upper().lstrip('.')} converter, which is not "
+                        f"installed on this server. Your file has been "
+                        f"saved — install the converter and click "
+                        f"Re-process on the model card to finish the upload."
+                    ),
+                    "install_endpoint": install_endpoint,
+                    "model_id": str(new_model_id),
+                    "name": display_name,
+                    "file_size": len(content),
+                    "element_count": 0,
+                    "error_message": None,
+                },
+                headers={
+                    "Retry-After": "60",
+                    "Link": (
+                        f"<{install_endpoint}>; rel=\"install-converter\", "
+                        f"</api/v1/bim_hub/{new_model_id}/retry/>; "
+                        f"rel=\"reprocess-model\""
+                    ),
+                },
+            )
 
     # Check Content-Length header before reading the whole file into memory
     if file.size and file.size > _CAD_MAX_SIZE:
@@ -1923,14 +2000,86 @@ async def list_models(
     _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMModelListResponse:
-    """List BIM models for a project."""
+    """List BIM models for a project.
+
+    Always returns every persisted BIMModel row (sorted by ``created_at``
+    desc) — including ``ready``, ``processing``, ``needs_converter`` and
+    ``error`` rows — so the /bim page can surface already-converted models
+    *without* triggering re-conversion.  Each item is enriched with
+    ``conversion_artifact_size_mb`` (sum of GLB/DAE/parquet/thumbnail
+    bytes), ``has_original`` (True iff the raw upload is still on
+    storage) and ``error_code`` (stable id lifted out of the metadata
+    blob for the converter-required UI state).  The list response also
+    carries aggregate ``total_artifact_size_mb`` /
+    ``total_original_size_mb`` totals which drive the disk-usage chip
+    in the BIM page header.
+    """
     await _verify_project_access(service.session, project_id, user_id or "")
     items, total = await service.list_models(project_id, offset=offset, limit=limit)
+
+    # Probe storage once per model in parallel to fill in artifact size +
+    # has_original.  Failures degrade gracefully: a failed probe leaves the
+    # field as ``None`` and the row still loads in the UI.
+    import asyncio as _asyncio
+
+    async def _enrich(model_obj):  # type: ignore[no-untyped-def]
+        size_bytes = 0
+        has_orig = False
+        try:
+            size_bytes = await bim_file_storage.compute_artifact_size_bytes(
+                model_obj.project_id, model_obj.id,
+            )
+        except Exception:  # noqa: BLE001
+            logger.exception("artifact-size probe failed for model=%s", model_obj.id)
+        ext_raw = (model_obj.model_format or "").lstrip(".")
+        if ext_raw:
+            try:
+                has_orig = await bim_file_storage.has_original_cad(
+                    model_obj.project_id, model_obj.id, ext=f".{ext_raw}",
+                )
+            except Exception:  # noqa: BLE001
+                logger.exception("has_original probe failed for model=%s", model_obj.id)
+        return size_bytes, has_orig
+
+    enriched = await _asyncio.gather(*[_enrich(m) for m in items], return_exceptions=False)
+
+    item_responses: list[BIMModelResponse] = []
+    total_artifact_bytes = 0
+    total_original_bytes = 0
+    for model_obj, (size_bytes, has_orig) in zip(items, enriched, strict=True):
+        resp = BIMModelResponse.model_validate(model_obj)
+        resp.conversion_artifact_size_mb = round(size_bytes / (1024 * 1024), 3)
+        resp.has_original = has_orig
+        meta = model_obj.metadata_ or {}
+        if isinstance(meta, dict):
+            err_code = meta.get("error_code")
+            if isinstance(err_code, str):
+                resp.error_code = err_code
+        total_artifact_bytes += size_bytes
+        if has_orig:
+            # Best-effort original-blob size — only inspected when the
+            # blob is still around (avoids a useless storage probe on the
+            # production ``keep_original_cad=False`` path).
+            ext_raw = (model_obj.model_format or "").lstrip(".")
+            if ext_raw:
+                try:
+                    backend = bim_file_storage._backend()
+                    key = bim_file_storage.original_cad_key(
+                        model_obj.project_id, model_obj.id, ext=f".{ext_raw}",
+                    )
+                    total_original_bytes += await backend.size(key)
+                except Exception:  # noqa: BLE001
+                    pass
+        item_responses.append(resp)
+
     return BIMModelListResponse(
-        items=[BIMModelResponse.model_validate(m) for m in items],
+        items=item_responses,
         total=total,
         offset=offset,
         limit=limit,
+        total_artifact_size_mb=round(total_artifact_bytes / (1024 * 1024), 3),
+        total_original_size_mb=round(total_original_bytes / (1024 * 1024), 3),
+        storage_root_label=bim_file_storage.bim_root_label(),
     )
 
 
@@ -2027,7 +2176,31 @@ async def get_model(
 ) -> BIMModelResponse:
     """Get a single BIM model by ID."""
     model = await _verify_model_access(service, model_id, user_id or "")
-    return BIMModelResponse.model_validate(model)
+    resp = BIMModelResponse.model_validate(model)
+    # Mirror the list endpoint enrichment so single-model polls
+    # (status transitions during background conversion) also expose
+    # artifact size + ``has_original`` to the frontend.
+    try:
+        size_bytes = await bim_file_storage.compute_artifact_size_bytes(
+            model.project_id, model.id,
+        )
+        resp.conversion_artifact_size_mb = round(size_bytes / (1024 * 1024), 3)
+    except Exception:  # noqa: BLE001
+        logger.exception("artifact-size probe failed for model=%s", model.id)
+    ext_raw = (model.model_format or "").lstrip(".")
+    if ext_raw:
+        try:
+            resp.has_original = await bim_file_storage.has_original_cad(
+                model.project_id, model.id, ext=f".{ext_raw}",
+            )
+        except Exception:  # noqa: BLE001
+            logger.exception("has_original probe failed for model=%s", model.id)
+    meta = model.metadata_ or {}
+    if isinstance(meta, dict):
+        err_code = meta.get("error_code")
+        if isinstance(err_code, str):
+            resp.error_code = err_code
+    return resp
 
 
 @router.patch("/{model_id}", response_model=BIMModelResponse)

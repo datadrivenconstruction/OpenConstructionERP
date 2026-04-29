@@ -75,6 +75,20 @@ class BIMModelResponse(BaseModel):
     canonical_file_path: str | None = None
     parent_model_id: UUID | None = None
     error_message: str | None = None
+    # ``error_code`` is a stable machine-readable identifier copied out of
+    # ``metadata`` so the frontend can branch on it without parsing the
+    # blob.  Common values: ``ddc_not_found``, ``ddc_failed``,
+    # ``zero_elements``, ``unexpected``.
+    error_code: str | None = None
+    # Total disk usage of the conversion artifacts (GLB, DAE, parquet,
+    # thumbnails) for this model, in megabytes.  ``None`` when the backend
+    # could not be probed (set on every successful list response).
+    conversion_artifact_size_mb: float | None = None
+    # ``True`` iff the raw uploaded ``original.{ext}`` blob is still on
+    # storage.  Drives the "Reconvert from original" affordance and the
+    # disk-usage tooltip.  Pre-v2.6.29 rows in the DB still report this
+    # field; the value just reflects the present state of the storage.
+    has_original: bool | None = None
     created_by: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
@@ -88,6 +102,11 @@ class BIMModelListResponse(BaseModel):
     total: int = 0
     offset: int = 0
     limit: int = 50
+    # Aggregate disk usage across all models in the list response.
+    # Surfaced in the BIM page header chip.
+    total_artifact_size_mb: float = 0.0
+    total_original_size_mb: float = 0.0
+    storage_root_label: str | None = None
 
 
 # ── BIMElement schemas ───────────────────────────────────────────────────────

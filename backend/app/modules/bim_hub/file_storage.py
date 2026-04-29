@@ -175,3 +175,134 @@ async def delete_model_blobs(
     if removed:
         logger.info("Removed %d BIM blob(s) at prefix=%s", removed, prefix)
     return removed
+
+
+# ──────────────────────────────────────────────────────────────────────────
+# Persistence-policy helpers (v2.6.29)
+# ──────────────────────────────────────────────────────────────────────────
+
+
+# Extensions of files we treat as "conversion artifacts" — these are kept
+# forever so the /bim page can serve them instantly without re-conversion.
+_ARTIFACT_EXTENSIONS: Final[tuple[str, ...]] = (
+    ".glb",
+    ".dae",
+    ".gltf",
+    ".json",
+    ".parquet",
+    ".png",
+    ".jpg",
+    ".pdf",
+)
+
+
+async def delete_original_cad(
+    project_id: uuid.UUID | str,
+    model_id: uuid.UUID | str,
+    ext: str,
+) -> bool:
+    """Delete the raw uploaded ``original.{ext}`` blob.
+
+    Returns ``True`` if a blob existed and was removed, ``False`` if no
+    blob was present.  Errors are swallowed and logged — the storage
+    cleanup must never block conversion success.
+
+    Used by the post-conversion success path when
+    ``settings.keep_original_cad`` is False (production default).
+    """
+    backend = _backend()
+    key = original_cad_key(project_id, model_id, ext)
+    try:
+        if not await backend.exists(key):
+            return False
+        await backend.delete(key)
+        logger.info("Deleted original CAD blob key=%s (storage policy)", key)
+        return True
+    except Exception as exc:  # noqa: BLE001 - never block conversion success
+        logger.warning("Failed to delete original CAD blob key=%s: %s", key, exc)
+        return False
+
+
+async def has_original_cad(
+    project_id: uuid.UUID | str,
+    model_id: uuid.UUID | str,
+    ext: str,
+) -> bool:
+    """Return True iff the raw upload is still on storage."""
+    if not ext:
+        return False
+    backend = _backend()
+    key = original_cad_key(project_id, model_id, ext)
+    try:
+        return await backend.exists(key)
+    except Exception:  # noqa: BLE001 - probing the backend must never raise
+        logger.exception("has_original_cad probe failed for key=%s", key)
+        return False
+
+
+async def compute_artifact_size_bytes(
+    project_id: uuid.UUID | str,
+    model_id: uuid.UUID | str,
+) -> int:
+    """Return total bytes of conversion artifacts for a single model.
+
+    For the local backend this walks the model directory on disk
+    (excluding ``original.*``).  For S3 this would be a ``list_objects_v2``
+    sweep — we fall back to counting the geometry-key candidates only,
+    which keeps the call cheap for the common case (single GLB).
+    """
+    backend = _backend()
+    prefix = bim_model_prefix(project_id, model_id)
+
+    # Fast path — local backend has a base_dir we can walk directly.
+    base_dir = getattr(backend, "base_dir", None)
+    if base_dir is not None:
+        from pathlib import Path  # local import: avoids broadening top-of-module deps
+
+        root = Path(str(base_dir))
+        for part in prefix.split("/"):
+            root = root / part
+        if not root.is_dir():
+            return 0
+        total = 0
+        for child in root.rglob("*"):
+            if not child.is_file():
+                continue
+            # Exclude raw uploads; everything else is treated as an artifact.
+            if child.name.lower().startswith("original."):
+                continue
+            try:
+                total += child.stat().st_size
+            except OSError:
+                continue
+        return total
+
+    # Fallback (S3 etc.) — probe the well-known geometry keys.
+    total = 0
+    for ext in _ARTIFACT_EXTENSIONS:
+        if ext not in GEOMETRY_EXTENSIONS:
+            continue
+        key = geometry_key(project_id, model_id, ext)
+        try:
+            if await backend.exists(key):
+                total += await backend.size(key)
+        except Exception:  # noqa: BLE001 - best-effort sizing
+            continue
+    return total
+
+
+def bim_root_label() -> str:
+    """Return a short human-readable label for where BIM blobs live.
+
+    The header chip on the BIM page surfaces this so users can see at a
+    glance whether the instance is on local disk or pushing to S3.
+    """
+    backend = _backend()
+    base_dir = getattr(backend, "base_dir", None)
+    if base_dir is not None:
+        # Trim to the conventional "data/bim/" suffix to keep the chip short.
+        return "data/bim/"
+    bucket = getattr(backend, "_bucket", None)
+    if bucket:
+        return f"s3://{bucket}/{_BIM_PREFIX}/"
+    return f"{_BIM_PREFIX}/"

@@ -167,6 +167,16 @@ export interface BIMModelData {
    *    - converter_id: 'rvt' | 'ifc' | 'dwg' | 'dgn' (when error_code is converter-related)
    *    - install_endpoint: POST URL to install the missing converter */
   metadata?: Record<string, unknown> | null;
+  /** Stable error id surfaced as a top-level field by the backend
+   *  (mirrors `metadata.error_code` for convenience).  Added in v2.6.29. */
+  error_code?: string | null;
+  /** Disk usage of conversion artifacts (GLB/DAE/parquet/thumbnails)
+   *  for this model, in megabytes.  `null` when the storage probe
+   *  failed.  Added in v2.6.29. */
+  conversion_artifact_size_mb?: number | null;
+  /** Whether the raw uploaded CAD file is still on storage.  Drives
+   *  retry availability and the disk-usage tooltip.  Added in v2.6.29. */
+  has_original?: boolean | null;
 }
 
 /* ── Discipline Colors ─────────────────────────────────────────────────── */

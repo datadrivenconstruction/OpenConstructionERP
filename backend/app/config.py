@@ -38,11 +38,29 @@ def _read_pyproject_version() -> str | None:
 
 
 def _detect_version() -> str:
-    """Read the installed package version so /api/health stays in sync
-    with pyproject.toml. Falls back to parsing pyproject.toml directly
-    when running uvicorn from a fresh checkout; only returns the
-    ``0.0.0+local`` sentinel if even that lookup fails.
+    """Pick the version /api/health should report.
+
+    When running from the source tree (the common dev workflow:
+    ``cd backend && python -m uvicorn app.main:create_app --factory``),
+    the *source* file is what's actually executing — but
+    ``importlib.metadata.version`` returns whatever is in ``site-packages``
+    if a stale ``pip install openconstructionerp==X`` happened earlier.
+    That made ``/api/health`` claim a wrong version after every dev
+    edit and made it impossible to tell, in a QA session, whether a
+    just-edited file was actually serving requests.
+
+    Resolution order (first hit wins):
+      1. If ``app/__init__.py`` lives outside ``site-packages`` and a
+         ``pyproject.toml`` is on disk above it, read that — the source
+         tree is the source of truth.
+      2. Otherwise, ``importlib.metadata.version("openconstructionerp")``.
+      3. ``0.0.0+local`` sentinel when all else fails.
     """
+    here = Path(__file__).resolve()
+    if "site-packages" not in str(here):
+        from_source = _read_pyproject_version()
+        if from_source:
+            return from_source
     try:
         return _pkg_version("openconstructionerp")
     except PackageNotFoundError:
@@ -230,6 +248,25 @@ class Settings(BaseSettings):
     default_validation_rule_sets: list[str] = Field(
         default=["boq_quality"],
         description="Default validation rule sets applied to all projects",
+    )
+
+    # ── BIM storage policy ──────────────────────────────────────────────
+    # Conversion artifacts (canonical JSON, GLB, DAE, thumbnails, parquet)
+    # are *always* persisted forever under ``data/bim/{project_id}/{model_id}/``
+    # so /bim opens instantly on revisit without re-conversion.
+    #
+    # ``keep_original_cad`` controls only the raw upload (``original.{ext}``):
+    #   * ``False`` (default, production) — drop the original after the
+    #     conversion succeeds. Saves disk; failed conversions still keep
+    #     it so retry works without re-upload.
+    #   * ``True`` (dev / debug) — keep both. Useful when iterating on the
+    #     converter pipeline and you want to re-run against the exact bytes.
+    keep_original_cad: bool = Field(
+        default=False,
+        description=(
+            "Keep the raw uploaded CAD file after conversion succeeds. "
+            "Conversion artifacts are always retained regardless of this flag."
+        ),
     )
 
     # ── Computed ─────────────────────────────────────────────────────────

@@ -529,16 +529,23 @@ function StepWelcome({
     [onLanguageChange],
   );
 
-  // Auto-detect on mount — only if no explicit user choice has been saved
+  // BUG-LANG-AUTODETECT: ``i18nextLng`` may already hold a stale value
+  // from a previous tester / demo session even on a fresh admin
+  // registration, so a US-Windows en-US browser landed in Polish UI.
+  // The fix splits "explicit user choice" from "any past i18next
+  // default" — only ``oe_lang_explicit`` (set when the user clicks Next
+  // on the language step, see ``onSelect`` below) blocks re-detection.
   useEffect(() => {
-    const saved = localStorage.getItem('i18nextLng');
-    if (saved) return; // User already made an explicit choice — don't override
+    const explicit = localStorage.getItem('oe_lang_explicit');
+    if (explicit) return;
     const detected = navigator.language?.split('-')[0] || 'en';
     const match = SUPPORTED_LANGUAGES.find((l) => l.code === detected);
-    if (match && match.code !== i18n.language) {
-      i18n.changeLanguage(match.code);
-      onLanguageChange(match.code);
+    const target = match ? match.code : 'en';
+    if (target !== i18n.language) {
+      i18n.changeLanguage(target);
+      onLanguageChange(target);
     }
+    setSelected(target);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

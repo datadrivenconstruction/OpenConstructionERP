@@ -23,7 +23,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -46,6 +46,7 @@ from app.modules.costs.schemas import (
     SuggestCostsForElementRequest,
 )
 from app.modules.costs.service import CostItemService
+from app.modules.costs.translations import localize_cost_row
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -53,6 +54,81 @@ logger = logging.getLogger(__name__)
 
 def _get_service(session: SessionDep) -> CostItemService:
     return CostItemService(session)
+
+
+# ── Locale resolution ─────────────────────────────────────────────────────
+
+
+def _resolve_cost_locale(
+    locale_param: str | None,
+    accept_language: str | None,
+) -> str:
+    """Pick the best CWICR translation locale for an HTTP request.
+
+    Priority:
+      1. ``?locale=ro`` query parameter (explicit, wins over header).
+      2. First language tag of ``Accept-Language`` (RFC 7231, region stripped).
+      3. ``"en"`` fallback.
+
+    The CWICR translations module uses its own SUPPORTED_LOCALES (16 entries)
+    independently of ``app.core.i18n`` (20 entries) — they overlap but the
+    CWICR set adds ``ro``, ``bg``, ``hr``, ``id``, ``th``, ``vi`` that the
+    UI-strings i18n doesn't ship yet.  Pulling the locale here keeps the
+    cost-data path decoupled from the broader request-locale middleware so
+    a missing UI locale doesn't accidentally lose a CWICR translation.
+    """
+    from app.modules.costs.translations import SUPPORTED_LOCALES as COST_LOCALES
+
+    # 1. Explicit query param wins. Strip region (de-DE → de).
+    if locale_param:
+        norm = locale_param.strip().lower().split("-")[0]
+        if norm in COST_LOCALES:
+            return norm
+
+    # 2. First entry of Accept-Language. Quality-weighted parsing isn't
+    #    necessary here — the costs UI only needs a single best-match,
+    #    and the existing AcceptLanguageMiddleware already does the
+    #    full RFC 7231 dance for the rest of the app.
+    if accept_language:
+        for raw in accept_language.split(","):
+            tag = raw.split(";", 1)[0].strip().lower().split("-")[0]
+            if tag in COST_LOCALES:
+                return tag
+
+    return "en"
+
+
+def _localize_response_payload(
+    item_response: CostItemResponse,
+    locale: str,
+) -> dict[str, Any]:
+    """Convert a CostItemResponse to a dict with localized mirror fields.
+
+    Pydantic responses are immutable for safety, so we serialize → mutate →
+    return a dict.
+
+    Note on the ``metadata_`` key: ``CostItemResponse`` defines its
+    metadata field with ``alias="metadata_"`` (SQLAlchemy reserves
+    ``metadata`` for its DeclarativeBase namespace).  ``model_dump(
+    by_alias=True)`` therefore emits the alias, and frontend clients
+    already key off ``metadata_`` (see ``api.ts``
+    ``CostItemMetadata``) — keep that contract intact.
+    """
+    payload = item_response.model_dump(by_alias=True, mode="json")
+    cls = payload.get("classification") or {}
+    # Schema uses alias="metadata_" → that's the dumped key here.
+    md = payload.get("metadata_") or {}
+    comps = payload.get("components") or []
+    localize_cost_row(
+        classification=cls,
+        metadata=md,
+        components=comps,
+        locale=locale,
+    )
+    payload["classification"] = cls
+    payload["metadata_"] = md
+    payload["components"] = comps
+    return payload
 
 
 # ── Autocomplete ──────────────────────────────────────────────────────────
@@ -66,6 +142,12 @@ async def autocomplete_cost_items(
     region: str | None = Query(default=None, description="Filter by region (e.g. DE_BERLIN)"),
     limit: int = Query(default=8, ge=1, le=20, description="Max results to return"),
     semantic: bool = Query(default=False, description="Use vector semantic search if available"),
+    locale: str | None = Query(
+        default=None,
+        max_length=10,
+        description="Localize CWICR-frozen-German fields (see search endpoint).",
+    ),
+    accept_language: str | None = Header(default=None, alias="accept-language"),
 ) -> list[CostAutocompleteItem]:
     """Fast autocomplete for cost items. Uses vector semantic search when available.
 
@@ -73,6 +155,7 @@ async def autocomplete_cost_items(
     to find semantically similar items (e.g. "concrete wall" finds
     "reinforced partition C30/37"). Falls back to text search otherwise.
     """
+    resolved_locale = _resolve_cost_locale(locale, accept_language)
     # Try vector search first if requested
     if semantic:
         try:
@@ -93,17 +176,28 @@ async def autocomplete_cost_items(
                     except Exception:
                         logger.debug("Cost search: component lookup failed", exc_info=True)
 
-                    return [
-                        CostAutocompleteItem(
-                            code=r.get("code", ""),
-                            description=r.get("description", ""),
-                            unit=r.get("unit", ""),
-                            rate=float(r.get("rate", 0)),
-                            classification=r.get("classification", {}),
-                            components=components_map.get(r.get("code", ""), []),
+                    out: list[CostAutocompleteItem] = []
+                    for r in results:
+                        cls = dict(r.get("classification") or {})
+                        comps = list(components_map.get(r.get("code", ""), []))
+                        # Mutates cls/comps in place to add *_localized keys.
+                        localize_cost_row(
+                            classification=cls,
+                            metadata=None,
+                            components=comps,
+                            locale=resolved_locale,
                         )
-                        for r in results
-                    ]
+                        out.append(
+                            CostAutocompleteItem(
+                                code=r.get("code", ""),
+                                description=r.get("description", ""),
+                                unit=r.get("unit", ""),
+                                rate=float(r.get("rate", 0)),
+                                classification=cls,
+                                components=comps,
+                            )
+                        )
+                    return out
         except Exception:
             logger.debug("Cost search: vector search failed, falling back to text", exc_info=True)
 
@@ -138,17 +232,27 @@ async def autocomplete_cost_items(
                 return []
         return raw if isinstance(raw, list) else []
 
-    return [
-        CostAutocompleteItem(
-            code=item.code,
-            description=item.description,
-            unit=item.unit,
-            rate=float(item.rate),
-            classification=item.classification or {},
-            components=_parse_components(item.components),
+    out: list[CostAutocompleteItem] = []
+    for item in sorted_items[:limit]:
+        cls = dict(item.classification or {})
+        comps = _parse_components(item.components)
+        localize_cost_row(
+            classification=cls,
+            metadata=None,
+            components=comps,
+            locale=resolved_locale,
         )
-        for item in sorted_items[:limit]
-    ]
+        out.append(
+            CostAutocompleteItem(
+                code=item.code,
+                description=item.description,
+                unit=item.unit,
+                rate=float(item.rate),
+                classification=cls,
+                components=comps,
+            )
+        )
+    return out
 
 
 # ── Create ────────────────────────────────────────────────────────────────
@@ -173,7 +277,7 @@ async def create_cost_item(
 # ── Search / List ─────────────────────────────────────────────────────────
 
 
-@router.get("/", response_model=CostSearchResponse)
+@router.get("/")
 async def search_cost_items(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: CostItemService = Depends(_get_service),
@@ -188,10 +292,26 @@ async def search_cost_items(
     max_rate: float | None = Query(default=None, ge=0, description="Maximum rate"),
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
-) -> CostSearchResponse:
+    locale: str | None = Query(
+        default=None,
+        max_length=10,
+        description=(
+            "Localize CWICR-frozen-German fields for this locale "
+            "(e.g. 'ro', 'bg', 'sv'). Falls back to Accept-Language. "
+            "Mirrors the source values into *_localized keys; the "
+            "originals stay untouched for backwards compatibility."
+        ),
+    ),
+    accept_language: str | None = Header(default=None, alias="accept-language"),
+) -> dict[str, Any]:
     """Search cost items with optional filters. Public endpoint.
 
     Returns a paginated response with items, total count, limit and offset.
+    Each item carries `classification.category_localized`,
+    `metadata.variant_stats.unit_localized` / `_group_localized`, and
+    per-component `unit_localized` mirror fields when the locale has a
+    translation table.  Originals are preserved so older clients
+    continue to read the German source.
     """
     query = CostSearchQuery(
         q=q,
@@ -205,12 +325,16 @@ async def search_cost_items(
         offset=offset,
     )
     items, total = await service.search_costs(query)
-    return CostSearchResponse(
-        items=[CostItemResponse.model_validate(i) for i in items],
-        total=total,
-        limit=limit,
-        offset=offset,
-    )
+    resolved_locale = _resolve_cost_locale(locale, accept_language)
+    return {
+        "items": [
+            _localize_response_payload(CostItemResponse.model_validate(i), resolved_locale)
+            for i in items
+        ],
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
 
 
 # ── Regions ───────────────────────────────────────────────────────────────
@@ -923,15 +1047,26 @@ async def list_available_databases() -> list[dict]:
 # ── Get by ID ─────────────────────────────────────────────────────────────
 
 
-@router.get("/{item_id}", response_model=CostItemResponse)
+@router.get("/{item_id}")
 async def get_cost_item(
     item_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: CostItemService = Depends(_get_service),
-) -> CostItemResponse:
-    """Get a cost item by ID."""
+    locale: str | None = Query(
+        default=None,
+        max_length=10,
+        description="Localize CWICR-frozen-German fields (see search endpoint).",
+    ),
+    accept_language: str | None = Header(default=None, alias="accept-language"),
+) -> dict[str, Any]:
+    """Get a cost item by ID, with optional locale-specific translation
+    of CWICR's frozen-German vocabulary columns (variant_stats,
+    classification.category, component units).
+    """
     item = await service.get_cost_item(item_id)
-    return CostItemResponse.model_validate(item)
+    response = CostItemResponse.model_validate(item)
+    resolved_locale = _resolve_cost_locale(locale, accept_language)
+    return _localize_response_payload(response, resolved_locale)
 
 
 # ── Update ────────────────────────────────────────────────────────────────
