@@ -706,10 +706,15 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
                 minWidth: `${Math.max(160, anchorRect.width)}px`,
               }}
               onMouseDown={(e) => {
-                // Prevent blur on the input — the click handler then runs and
-                // commits the picked value through ``pick``.
+                // Prevent blur on the input AND stop AG Grid's outside-click
+                // detector from cancelling the edit before pick() runs. The
+                // dropdown is portaled to <body> so AG Grid sees it as
+                // outside the editor cell — without stopPropagation, AG
+                // Grid 32 calls stopEditing(true) and the pick is dropped.
                 e.preventDefault();
+                e.stopPropagation();
               }}
+              onClick={(e) => e.stopPropagation()}
             >
               {filtered.map((u, idx) => (
                 <li
@@ -718,7 +723,17 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
                   role="option"
                   aria-selected={idx === activeIdx}
                   onMouseEnter={() => setActiveIdx(idx)}
-                  onClick={() => pick(u)}
+                  onMouseDown={(e) => {
+                    // Commit on mouseDown so AG Grid can't intercept and
+                    // stop editing before our onClick handler fires.
+                    e.preventDefault();
+                    e.stopPropagation();
+                    pick(u);
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!committedRef.current) pick(u);
+                  }}
                   className={`cursor-pointer px-2 py-1 font-mono whitespace-nowrap ${
                     idx === activeIdx
                       ? 'bg-oe-blue text-white'

@@ -296,7 +296,21 @@ export function CostDatabaseSearchModal({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
+  // Region: empty means no filter (legacy "All databases" behaviour).
+  // On mount we auto-pick the first country DB once regions load, so the
+  // initial result set is fast (single-region scan, ~1 s) instead of the
+  // 10+ s "all databases" scan. The "All databases" tab is still rendered
+  // at the end of the row so the user can opt in to the multi-region view.
   const [region, setRegion] = useState('');
+  const regionDefaultedRef = useRef(false);
+  // Distinguishes user-initiated region changes (tab click) from the
+  // auto-default. Path-reset only fires on user clicks — the auto-default
+  // mustn't wipe a path the user clicked on before regions resolved.
+  const userPickedRegionRef = useRef(false);
+  const setRegionByUser = useCallback((r: string) => {
+    userPickedRegionRef.current = true;
+    setRegion(r);
+  }, []);
   /** Slash-joined classification breadcrumb selected in the left tree.
    *  Empty string = "All categories". */
   const [selectedPath, setSelectedPath] = useState('');
@@ -359,6 +373,13 @@ export function CostDatabaseSearchModal({
       }),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.next_cursor,
+    // Wait for the regions list before firing the search. Without this we
+    // burn a 10+ s "all regions" scan on mount, then re-fire 1 s later
+    // with the auto-defaulted country DB (see effect below). Skipping the
+    // first fetch is also what keeps tests deterministic — only one fetch
+    // per (region × path × query) tuple, never an intermediate Loading...
+    // race during the queryKey flip.
+    enabled: regionsData !== undefined,
   });
 
   // Recover from a stale cursor (server returns 400 when the cursor format
@@ -435,11 +456,14 @@ export function CostDatabaseSearchModal({
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, items.length]);
 
   // Region change resets selected path + scroll, and invalidates the tree
-  // cache for the previous region (fresh fetch on next visit).
+  // cache for the previous region (fresh fetch on next visit). Gated on
+  // `userPickedRegionRef` so the on-mount auto-default does NOT wipe a
+  // path the user clicked on before the regions response landed.
   const previousRegionRef = useRef(region);
   useEffect(() => {
     if (previousRegionRef.current === region) return;
     previousRegionRef.current = region;
+    if (!userPickedRegionRef.current) return;
     setSelectedPath('');
     setSelected(new Set());
     if (listScrollRef.current) {
@@ -447,6 +471,16 @@ export function CostDatabaseSearchModal({
     }
     queryClient.invalidateQueries({ queryKey: ['cost-tree'] });
   }, [region, queryClient]);
+
+  // Auto-default the region to the first country DB once regions arrive.
+  useEffect(() => {
+    if (regionDefaultedRef.current) return;
+    const first = regions[0];
+    if (!first) return;
+    regionDefaultedRef.current = true;
+    setRegion(first);
+  }, [regions]);
+
 
 
   const handleSelectPath = useCallback((path: string) => {
@@ -803,10 +837,11 @@ export function CostDatabaseSearchModal({
           </button>
         </div>
 
-        {/* Region tabs — country DBs first, "All databases" pushed to the end
-            because selecting it triggers a multi-region scan that takes 10+ s
-            on demo data. Defaulting and listing country DBs first means the
-            user pays that cost only on explicit opt-in. */}
+        {/* Region tabs — country DBs first, "All databases" pushed to the
+            end of the row. The first country DB is auto-selected on mount
+            (see defaulting effect above) so the initial paint is fast,
+            and "All databases" remains accessible for the user who wants
+            the multi-region view. */}
         <div className="px-6 py-2 border-b border-border-light flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
           {regions.map((r) => {
             const info = REGION_MAP[r];
@@ -816,7 +851,7 @@ export function CostDatabaseSearchModal({
             return (
               <button
                 key={r}
-                onClick={() => setRegion(r)}
+                onClick={() => setRegionByUser(r)}
                 className={`shrink-0 flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                   isActive
                     ? 'bg-oe-blue text-white'
@@ -833,7 +868,7 @@ export function CostDatabaseSearchModal({
             );
           })}
           <button
-            onClick={() => setRegion('')}
+            onClick={() => setRegionByUser('')}
             className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
               region === ''
                 ? 'bg-oe-blue text-white'

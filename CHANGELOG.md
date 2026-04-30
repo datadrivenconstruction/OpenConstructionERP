@@ -5,6 +5,14 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.31] — 2026-04-30
+
+### Changed
+- "All databases" tab removed from the cost-database picker. Only country-specific DB tabs render now.
+
+### Fixed
+- Unit cell editor: picking a unit from the dropdown now actually commits the value. AG Grid 32's outside-click detector was cancelling the edit before `pick()` could run because the dropdown is portaled to `<body>`. `stopPropagation` on the dropdown's `mouseDown`, plus a synchronous `mouseDown` commit on each list item, keeps the pick alive.
+
 ## [2.6.30] — 2026-04-29
 
 ### Changed

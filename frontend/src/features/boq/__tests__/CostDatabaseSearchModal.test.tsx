@@ -162,8 +162,13 @@ describe('CostDatabaseSearchModal — paginated catalog', () => {
   it('shows the total count returned on the first page', async () => {
     renderModal();
     await waitFor(() => expect(fetchCostSearch).toHaveBeenCalled());
-    const counter = await screen.findByTestId('cost-results-count');
-    expect(counter.textContent).toContain('1,234');
+    // Counter element appears immediately but its content flips through
+    // "Loading..." while the query is in flight, so wait on the resolved
+    // text rather than the bare element.
+    await waitFor(() => {
+      const counter = screen.getByTestId('cost-results-count');
+      expect(counter.textContent).toContain('1,234');
+    });
   });
 
   it('combines selected category + text query in a single fetch', async () => {
@@ -246,16 +251,16 @@ describe('CostDatabaseSearchModal — paginated catalog', () => {
     // Filter chip is visible while the path is selected.
     expect(screen.getByTestId('filter-chip-category')).toBeInTheDocument();
 
-    // Click a different region tab.  Use the visible label to avoid relying
-    // on the accessible-name string composition inside the Button primitive.
-    const dachTab = screen.getByText('Germany / DACH');
-    fireEvent.click(dachTab);
+    // The modal auto-selects the first country DB on mount (DE_BERLIN), so
+    // click CS_PRAGUE to actually trigger a region change.
+    const czTab = screen.getByText('Czech Republic');
+    fireEvent.click(czTab);
 
     await waitFor(() => {
       const last = (fetchCostSearch as unknown as ReturnType<typeof vi.fn>).mock.calls.at(
         -1,
       )?.[0];
-      expect(last?.region).toBe('DE_BERLIN');
+      expect(last?.region).toBe('CS_PRAGUE');
       // The path was cleared by the region-change effect.
       expect(last?.classification_path).toBeUndefined();
     });
