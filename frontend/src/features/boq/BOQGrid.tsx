@@ -604,43 +604,98 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
   /** Patch the parent position behind a variant-header synthetic row.
    *
-   *  Both rate AND qty edits land on ``metadata.variant`` ONLY — the
-   *  position's own ``quantity`` and ``unit_rate`` stay independent so
-   *  editing the variant resource never alters the parent position row,
-   *  and editing the position qty never alters the variant resource qty.
-   *  Per the user's spec: "Объём вариативного ресурса никак не связан
-   *  с объёмом позиции". Same rule applies to price (already in place). */
+   *  Variant qty/price edits land on ``metadata.variant`` AND materialize
+   *  a corresponding entry in ``metadata.resources[]`` so the variant
+   *  contributes to the position's unit_rate (sum-of-resources) the same
+   *  way every other resource does. Per the user's spec: "вариативный
+   *  ресурс точно такой же ресурс как и остальные". After the first edit
+   *  the synthetic header is suppressed (``hasResourceLevelVariants``
+   *  branch) and the variant renders as a regular resource line with its
+   *  own re-pick pill. */
   const onUpdateVariantHeader = useCallback(
     (positionId: string, fields: { quantity?: number; unit_rate?: number }) => {
       const pos = positions.find((p) => p.id === positionId);
       if (!pos) return;
+      if (fields.quantity == null && fields.unit_rate == null) return;
+
       const oldMeta = (pos.metadata ?? {}) as Record<string, unknown>;
       const oldVariant = (oldMeta.variant ?? {}) as Record<string, unknown>;
       const newVariant: Record<string, unknown> = { ...oldVariant };
 
-      if (fields.quantity != null) {
-        newVariant.quantity = fields.quantity;
-      }
-      if (fields.unit_rate != null) {
-        newVariant.price = fields.unit_rate;
-      }
-
-      if (fields.quantity == null && fields.unit_rate == null) return;
-
-      // Manual edits stamp a label/index so the variant row still renders
-      // when no catalog variant has been picked yet.
+      if (fields.quantity != null) newVariant.quantity = fields.quantity;
+      if (fields.unit_rate != null) newVariant.price = fields.unit_rate;
       if (typeof newVariant.label !== 'string') newVariant.label = 'manual';
       if (typeof newVariant.index !== 'number') newVariant.index = -1;
 
-      const newMeta = { ...oldMeta, variant: newVariant };
-      // ``variant_default`` (auto mean/median) is dropped — explicit edits win.
+      // Materialize / update the variant as a real entry in resources[].
+      const oldResources = ((oldMeta.resources as Array<Record<string, unknown>>) ?? []).slice();
+      const variantsList = oldMeta.cost_item_variants as
+        | Array<Record<string, unknown>> | undefined;
+      const variantStats = oldMeta.cost_item_variant_stats as
+        | { common_start?: string; unit?: string; unit_localized?: string } | undefined;
+
+      // Identify the existing variant resource by the variant marker, NOT
+      // by code/name (the chosen variant label changes between picks). We
+      // only treat a row as "the variant" when it currently carries either
+      // ``variant`` or ``available_variants`` cached on it.
+      const variantResIdx = oldResources.findIndex(
+        (r) => Boolean(r?.variant) || Boolean(r?.available_variants),
+      );
+
+      const variantQty =
+        typeof newVariant.quantity === 'number' ? (newVariant.quantity as number) : 1;
+      const variantRate =
+        typeof newVariant.price === 'number' ? (newVariant.price as number) : 0;
+      const commonStart = (variantStats?.common_start || '').trim();
+      const variantLabel = String(newVariant.label || '').trim();
+      const composedName = [commonStart, variantLabel].filter(Boolean).join(' ').trim()
+        || (pos.description || 'Variant');
+
+      const variantResource: Record<string, unknown> = {
+        name: composedName,
+        code: (oldMeta.cost_item_code as string) || '',
+        type: 'material',
+        unit: (variantStats?.unit_localized || variantStats?.unit || pos.unit || 'pcs').trim(),
+        quantity: variantQty,
+        unit_rate: variantRate,
+        total: Math.round(variantQty * variantRate * 100) / 100,
+        variant: {
+          label: newVariant.label,
+          price: variantRate,
+          index: newVariant.index,
+        },
+        available_variants: variantsList,
+        available_variant_stats: variantStats,
+      };
+
+      if (variantResIdx >= 0) {
+        oldResources[variantResIdx] = { ...oldResources[variantResIdx], ...variantResource };
+      } else {
+        oldResources.push(variantResource);
+      }
+
+      // Recompute position unit_rate as Σ(resource.qty × resource.rate) —
+      // same convention the backend uses (boq/service.py::update_position
+      // with triggered_by_resources). Keeps the displayed total consistent
+      // with the resource panel before the server roundtrip.
+      const newUnitRate = oldResources.reduce(
+        (sum, r) => sum + ((r.quantity as number) ?? 0) * ((r.unit_rate as number) ?? 0),
+        0,
+      );
+      const newUnitRateRounded = Math.round(newUnitRate * 10000) / 10000;
+
+      const newMeta: Record<string, unknown> = {
+        ...oldMeta,
+        variant: newVariant,
+        resources: oldResources,
+      };
       if ('variant_default' in newMeta) {
-        delete (newMeta as Record<string, unknown>).variant_default;
+        delete newMeta.variant_default;
       }
 
       onUpdatePosition?.(
         pos.id,
-        { metadata: newMeta },
+        { metadata: newMeta, unit_rate: newUnitRateRounded },
         pos as unknown as Record<string, unknown>,
       );
     },

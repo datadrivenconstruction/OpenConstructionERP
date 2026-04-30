@@ -5,6 +5,15 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.33] — 2026-04-30
+
+### Fixed
+- Variant resource qty / rate edits now contribute to the position's unit_rate sum. The synthetic VARIANT row materializes the variant as a real entry in `metadata.resources[]` on first edit, so it participates in `Σ(r.qty × r.rate)` like every other resource. After the first edit the row renders as a regular resource line with its own ▾ re-pick pill.
+- Unit dropdown pick is no longer dropped by AG Grid 32's outside-click detector. The dropdown is portaled to `<body>`, so AG Grid's *native* document-level mousedown handler used to fire `stopEditing(true)` (cancel) before the React `onClick` could commit. Added `nativeEvent.stopImmediatePropagation()` on both UL and LI mouse events so the pick wins the race.
+
+### Changed
+- V-badge on positions with variant resources now toggles the resource panel (expand / collapse) instead of opening the variant picker. Picker access stays on the synthetic VARIANT row's "Variant" chip and on the per-resource ▾ pill in the expanded panel.
+
 ## [2.6.32] — 2026-04-30
 
 ### Fixed

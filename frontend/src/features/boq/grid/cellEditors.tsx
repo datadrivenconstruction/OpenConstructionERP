@@ -709,12 +709,20 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
                 // Prevent blur on the input AND stop AG Grid's outside-click
                 // detector from cancelling the edit before pick() runs. The
                 // dropdown is portaled to <body> so AG Grid sees it as
-                // outside the editor cell — without stopPropagation, AG
-                // Grid 32 calls stopEditing(true) and the pick is dropped.
+                // outside the editor cell. AG Grid 32's outside-click
+                // detector listens at the *native* document level, so
+                // React's synthetic ``stopPropagation()`` is not enough —
+                // we need ``nativeEvent.stopImmediatePropagation()`` to
+                // prevent ``stopEditing(true)`` (cancel=true), which would
+                // silently drop the pick before getValue() runs.
                 e.preventDefault();
                 e.stopPropagation();
+                e.nativeEvent.stopImmediatePropagation();
               }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.nativeEvent.stopImmediatePropagation();
+              }}
             >
               {filtered.map((u, idx) => (
                 <li
@@ -726,12 +734,17 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
                   onMouseDown={(e) => {
                     // Commit on mouseDown so AG Grid can't intercept and
                     // stop editing before our onClick handler fires.
+                    // ``stopImmediatePropagation`` on the native event is
+                    // required so AG Grid 32's document-level outside-
+                    // click listener does not cancel the edit first.
                     e.preventDefault();
                     e.stopPropagation();
+                    e.nativeEvent.stopImmediatePropagation();
                     pick(u);
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
+                    e.nativeEvent.stopImmediatePropagation();
                     if (!committedRef.current) pick(u);
                   }}
                   className={`cursor-pointer px-2 py-1 font-mono whitespace-nowrap ${

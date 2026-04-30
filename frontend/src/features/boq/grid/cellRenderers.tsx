@@ -558,11 +558,11 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
       type="button"
       onClick={(e) => {
         e.stopPropagation();
-        if (hasResourceVariants) {
-          ctx?.onOpenVariantPickerFor?.(positionId, variantResourceIdx);
-        } else if (hasPositionVariants) {
-          ctx?.onOpenPositionVariantPicker?.(positionId, e.currentTarget);
-        }
+        // V badge toggles the resource panel — same UX as the chevron in
+        // the expand column, but reachable inline next to the description.
+        // Picker access stays on the synthetic VARIANT row's "Variant"
+        // chip and the per-resource ▾-pill in the expanded panel.
+        ctx?.onToggleResources?.(positionId);
       }}
       onMouseDown={(e) => e.stopPropagation()}
       className="shrink-0 inline-flex h-[18px] w-[18px] items-center justify-center
@@ -576,10 +576,10 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
                  transition-colors duration-150"
       title={t('boq.position_variant_v_tooltip', {
         defaultValue:
-          'This position uses a variant resource — click to choose / switch a price option.',
+          'This position carries a variant resource — click to expand the resource panel.',
       })}
       aria-label={t('boq.position_variant_v_label', {
-        defaultValue: 'Open variant picker',
+        defaultValue: 'Expand resources',
       })}
       data-testid={`position-variant-v-${positionId}`}
     >
