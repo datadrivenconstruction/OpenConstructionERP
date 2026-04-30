@@ -600,6 +600,8 @@ export function CostDatabaseSearchModal({
           total: number;
           variant?: { label: string; price: number; index: number };
           variant_default?: 'mean' | 'median';
+          available_variants?: CostVariant[];
+          available_variant_stats?: import('@/features/costs/api').VariantStats;
         }> = (item.components || []).map((c) => ({
           name: c.name,
           code: c.code || '',
@@ -632,6 +634,12 @@ export function CostDatabaseSearchModal({
               index: resolution.variant.index,
             },
           };
+          // Persist the variant catalog ON the resource entry as well so
+          // the per-resource re-pick pill (EditableResourceRow / ResourceSummary)
+          // can fire without an extra fetch. This is what enables a position
+          // to carry MULTIPLE independent variant resources — every resource
+          // with its own ``available_variants`` gets its own picker pill in
+          // the expanded resource panel.
           // Append the variant as an additional resource line so the
           // position's total = sum of all resource totals (the contract
           // the user expects: "если есть ресурсы — стоимость собирается
@@ -651,6 +659,12 @@ export function CostDatabaseSearchModal({
               price: resolution.variant.price,
               index: resolution.variant.index,
             },
+            // available_variants + stats carried on the resource so the
+            // per-resource picker (EditableResourceRow's ▾ pill) opens
+            // immediately on click — independent of any other variant
+            // resource on the same position.
+            available_variants: variants,
+            available_variant_stats: stats,
           });
         } else if (resolution?.kind === 'default') {
           // Mean is the production default; median is exposed only by
@@ -676,6 +690,11 @@ export function CostDatabaseSearchModal({
             unit_rate: defaultRate,
             total: defaultRate,
             variant_default: resolution.strategy,
+            // Carry the variant catalog on the resource so the user can
+            // refine the auto-default into an explicit pick later via the
+            // per-resource re-pick pill.
+            available_variants: variants,
+            available_variant_stats: stats,
           });
         }
 

@@ -5,6 +5,14 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.32] — 2026-04-30
+
+### Fixed
+- Variant resource header no longer mirrors `position.quantity` for legacy positions. The synthetic header now defaults to `1` (per-unit norm) when `metadata.variant.quantity` is unset, so editing position qty never touches the variant resource qty visually or in storage.
+
+### Added
+- Per-resource variant pickers when a position carries multiple variant resources. `available_variants` + `available_variant_stats` now persist on every variant resource at add-time, so each resource gets its own re-pick pill in the expanded panel; the position-level synthetic header is suppressed when one or more resources carry their own variant catalog.
+
 ## [2.6.31] — 2026-04-30
 
 ### Changed

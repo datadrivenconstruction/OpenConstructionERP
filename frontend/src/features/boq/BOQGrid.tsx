@@ -800,7 +800,19 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       | { label?: string; price?: number; index?: number; quantity?: number }
       | undefined;
     const hasPositionLevelVariants = Array.isArray(posVariants) && posVariants.length >= 2;
-    if (hasPositionLevelVariants) {
+    // When the resources list already carries one or more entries with their
+    // own ``available_variants``, those entries render their own per-resource
+    // picker pill in EditableResourceRow and the position-level synthetic
+    // header would just duplicate them. Suppress the header in that case so
+    // a position can host MANY variant resources cleanly — each resource
+    // line is its own variant with its own picker. (User spec 2026-04-30:
+    // "у позиции может быть много вариативных ресурсов".)
+    const resourcesArr = (meta.resources as Array<Record<string, unknown>> | undefined) ?? [];
+    const hasResourceLevelVariants = resourcesArr.some((r) => {
+      const av = r?.available_variants;
+      return Array.isArray(av) && av.length >= 2;
+    });
+    if (hasPositionLevelVariants && !hasResourceLevelVariants) {
       // Variant header name = ONLY the abstract base
       // (``price_abstract_resource_common_start``). NEVER fall back to
       // the position description — the variant resource must carry its
@@ -820,14 +832,17 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           : null,
         _variantHeaderCount: posVariants!.length,
         _variantHeaderCurrency: (meta.currency as string | undefined) || currencyCode,
-        // Variant resource qty is stored independently of the position qty
-        // (per the user's spec: "Объём вариативного ресурса никак не связан
-        // с объёмом позиции"). For positions imported before the decouple
-        // we fall back to position.quantity so old data still renders.
+        // Variant resource qty is stored INDEPENDENTLY of the position qty
+        // (per the user's spec: "Объём вариативного ресурса никак не
+        // связан с объёмом позиции"). When ``metadata.variant.quantity``
+        // hasn't been set (legacy pre-decouple imports OR brand-new pick),
+        // default to 1 — the per-unit norm convention used by every other
+        // resource line. Falling back to ``pos.quantity`` here was the bug
+        // that made the variant row APPEAR to track the position's qty.
         _variantHeaderQty:
           typeof posChosenVariant?.quantity === 'number'
             ? posChosenVariant.quantity
-            : (pos.quantity ?? 0),
+            : 1,
         // Unit is sourced from the variant catalog itself (the average /
         // baseline value the CWICR row was estimated against), not from
         // the position. Falls back to the position unit when the variant
