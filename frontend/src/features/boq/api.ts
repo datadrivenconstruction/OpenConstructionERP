@@ -301,6 +301,19 @@ export interface CostItemComponent {
   unit_rate: number;
   cost: number;
   type: string;
+  /**
+   * Per-component variant catalog (v2.6.30+). Surfaced when the component
+   * is one of CWICR's abstract-resource (variant) slots for its rate row
+   * — e.g. a single rate that splits into multiple concrete grades or
+   * rebar diameters. Backend stamps these via
+   * ``costs/router.py::abstract_variants_by_pair`` so each component
+   * carries its OWN options list, independent of any other variant
+   * component on the same rate. Frontend forwards them to the BOQ
+   * resource entry on apply so each variant resource gets its own
+   * picker pill.
+   */
+  available_variants?: CostVariant[];
+  available_variant_stats?: VariantStats;
 }
 
 /**
@@ -359,6 +372,15 @@ export interface CostAutocompleteItem {
     variant_count?: number;
     labor_hours?: number;
     workers_per_unit?: number;
+    /**
+     * Ordered list of work steps describing what is included in this
+     * rate (e.g. "Установка телескопических стоек.", "Bodenbearbeitung
+     * nach Maß."). Sourced from CWICR's ``work_composition_text``
+     * column (universal scope detector — non-empty work_composition +
+     * empty resource_name). Surfaced in the BOQ grid description cell
+     * as an inline (i) hint with a bullet-list popover.
+     */
+    scope_of_work?: string[];
     [key: string]: unknown;
   };
 }

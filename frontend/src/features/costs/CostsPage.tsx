@@ -31,7 +31,7 @@ import {
   TrendingUp,
   Trash2,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, InfoHint, SkeletonTable, CountryFlag, Breadcrumb, ConfirmDialog, KvList, Kv } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, InfoHint, SkeletonTable, CountryFlag, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiDelete, triggerDownload } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
@@ -1834,12 +1834,12 @@ function CreateCostItemModal({
  * CWICR rate code carries `metadata_.variants` (≥2 entries).
  *
  * Surfaces:
- *   • A `KvList` block of variant_stats (count / min / median / mean / max).
- *   • A small table of every variant row (Variant / Price / Per unit /
- *     "Used in N estimates"), sorted by price ascending so the user
- *     instinctively reads the spread top-to-bottom.
- *   • A "Median" badge on the row whose price equals `stats.median` —
- *     this is the variant that the BOQ apply flow defaults to.
+ *   • A single-row stat chip strip (Min / Median / Mean / Max / Estimates)
+ *     using `tabular-nums` so digits line up across rows.
+ *   • A clamped variants table — top 8 by default, with a "Show all N" /
+ *     "Show less" toggle. The median row is always kept inside the
+ *     visible window (and tagged with a "Median" badge) because it's
+ *     the variant that the BOQ apply flow defaults to.
  *
  * Pure presentational — no fetch, no apply action. The picker that
  * actually applies a variant lives in the BOQ-side flow (separate file).
@@ -1855,6 +1855,8 @@ function CostVariantDetail({
   fmt: (n: number) => string;
   t: ReturnType<typeof import('react-i18next').useTranslation>['t'];
 }) {
+  const COLLAPSED_LIMIT = 8;
+
   // Stable sort by price ascending; ties keep original order.
   const sorted = useMemo(
     () => [...variants].sort((a, b) => a.price - b.price),
@@ -1868,9 +1870,35 @@ function CostVariantDetail({
     return exact >= 0 ? exact : Math.floor(sorted.length / 2);
   }, [sorted, stats.median]);
 
+  const canCollapse = sorted.length > COLLAPSED_LIMIT;
+  const [expanded, setExpanded] = useState(false);
+
+  // Visible slice — top N, but always keep the median row in view by
+  // splicing it in if the natural top-N would have hidden it.
+  const visible = useMemo(() => {
+    if (expanded || !canCollapse) {
+      return sorted.map((v, i) => ({ v, i }));
+    }
+    const indices: number[] = [];
+    for (let i = 0; i < Math.min(COLLAPSED_LIMIT, sorted.length); i += 1) {
+      indices.push(i);
+    }
+    if (medianIdx >= 0 && medianIdx < sorted.length && !indices.includes(medianIdx)) {
+      // Replace the last visible slot with the median to preserve count.
+      indices[indices.length - 1] = medianIdx;
+      indices.sort((a, b) => a - b);
+    }
+    return indices.map((i) => {
+      const row = sorted[i];
+      // sorted[i] is defined here because i < sorted.length, but
+      // noUncheckedIndexedAccess forces the narrow.
+      return row !== undefined ? { v: row, i } : null;
+    }).filter((x): x is { v: import('./api').CostVariant; i: number } => x !== null);
+  }, [expanded, canCollapse, sorted, medianIdx]);
+
   return (
-    <div className="mb-4 rounded-lg border border-oe-blue-subtle bg-oe-blue-subtle/10 p-3 animate-fade-in">
-      <div className="mb-2.5 flex items-center gap-2">
+    <div className="mb-4 rounded-lg border border-oe-blue-subtle bg-oe-blue-subtle/10 p-2 animate-fade-in">
+      <div className="mb-1.5 flex items-center gap-2">
         <Layers size={13} className="text-oe-blue shrink-0" />
         <span className="text-xs font-semibold text-content-primary">
           {t('costs.variant_count', { defaultValue: 'Variants' })}
@@ -1888,49 +1916,67 @@ function CostVariantDetail({
         )}
       </div>
 
-      {/* Stats summary — KvList primitive shared with the BIM drawer */}
-      <div className="mb-3 max-w-md rounded bg-surface-primary/60 px-3 py-2">
-        <KvList>
-          <Kv label={t('costs.variant_min', { defaultValue: 'Min' })} value={fmt(stats.min)} />
-          <Kv label={t('costs.variant_median', { defaultValue: 'Median' })} value={fmt(stats.median)} />
-          <Kv label={t('costs.variant_mean', { defaultValue: 'Mean' })} value={fmt(stats.mean)} />
-          <Kv label={t('costs.variant_max', { defaultValue: 'Max' })} value={fmt(stats.max)} />
-          {stats.position_count != null && stats.position_count > 0 && (
-            <Kv
-              label={t('costs.variant_position_count_label', { defaultValue: 'Estimates' })}
-              value={stats.position_count.toLocaleString()}
-            />
-          )}
-        </KvList>
+      {/* Compact stat chip strip — replaces the old KvList block */}
+      <div className="mb-2 flex flex-wrap items-center gap-x-1 gap-y-1 text-2xs tabular-nums text-content-secondary">
+        <span className="rounded bg-surface-primary/70 px-1.5 py-0.5">
+          <span className="text-content-tertiary">{t('costs.variant_min', { defaultValue: 'Min' })}</span>
+          <span className="ml-1 font-semibold text-content-primary">{fmt(stats.min)}</span>
+        </span>
+        <span className="text-content-tertiary">·</span>
+        <span className="rounded bg-surface-primary/70 px-1.5 py-0.5">
+          <span className="text-content-tertiary">{t('costs.variant_median', { defaultValue: 'Median' })}</span>
+          <span className="ml-1 font-semibold text-content-primary">{fmt(stats.median)}</span>
+        </span>
+        <span className="text-content-tertiary">·</span>
+        <span className="rounded bg-surface-primary/70 px-1.5 py-0.5">
+          <span className="text-content-tertiary">{t('costs.variant_mean', { defaultValue: 'Mean' })}</span>
+          <span className="ml-1 font-semibold text-content-primary">{fmt(stats.mean)}</span>
+        </span>
+        <span className="text-content-tertiary">·</span>
+        <span className="rounded bg-surface-primary/70 px-1.5 py-0.5">
+          <span className="text-content-tertiary">{t('costs.variant_max', { defaultValue: 'Max' })}</span>
+          <span className="ml-1 font-semibold text-content-primary">{fmt(stats.max)}</span>
+        </span>
+        {stats.position_count != null && stats.position_count > 0 && (
+          <>
+            <span className="text-content-tertiary">·</span>
+            <span className="rounded bg-surface-primary/70 px-1.5 py-0.5">
+              <span className="font-semibold text-content-primary">{stats.position_count.toLocaleString()}</span>
+              <span className="ml-1 text-content-tertiary">
+                {t('costs.variant_position_count_label', { defaultValue: 'Estimates' })}
+              </span>
+            </span>
+          </>
+        )}
       </div>
 
-      {/* Variants table */}
+      {/* Variants table — clamped to top 8 unless expanded */}
       <div className="overflow-hidden rounded border border-border-light">
         <table className="w-full text-xs">
           <thead>
             <tr className="bg-surface-tertiary text-left">
-              <th className="px-2 py-1.5 w-10 text-center text-2xs font-medium text-content-secondary">#</th>
-              <th className="px-2 py-1.5 text-2xs font-medium text-content-secondary">
+              <th className="px-2 py-1 w-10 text-center text-2xs font-medium text-content-secondary">#</th>
+              <th className="px-2 py-1 text-2xs font-medium text-content-secondary">
                 {t('costs.variant_label', { defaultValue: 'Variant' })}
               </th>
-              <th className="px-2 py-1.5 text-right text-2xs font-medium text-content-secondary">
+              <th className="px-2 py-1 text-right text-2xs font-medium text-content-secondary">
                 {t('costs.rate', { defaultValue: 'Rate' })}
               </th>
-              <th className="px-2 py-1.5 text-right text-2xs font-medium text-content-secondary">
+              <th className="px-2 py-1 text-right text-2xs font-medium text-content-secondary">
                 {t('costs.variant_per_unit', { defaultValue: 'Per unit' })}
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-light">
-            {sorted.map((v, i) => {
+            {visible.map(({ v, i }) => {
               const isMedian = i === medianIdx;
               return (
                 <tr
                   key={`${v.index}-${v.label}`}
                   className={isMedian ? 'bg-oe-blue-subtle/15' : 'hover:bg-surface-secondary/30'}
                 >
-                  <td className="px-2 py-1.5 text-center font-mono text-2xs text-content-tertiary">{v.index + 1}</td>
-                  <td className="px-2 py-1.5 text-content-primary">
+                  <td className="px-2 py-1 text-center font-mono text-2xs text-content-tertiary">{v.index + 1}</td>
+                  <td className="px-2 py-1 text-content-primary">
                     <div className="flex items-center gap-1.5">
                       <span className="truncate" title={v.label}>{v.label}</span>
                       {isMedian && (
@@ -1940,10 +1986,10 @@ function CostVariantDetail({
                       )}
                     </div>
                   </td>
-                  <td className="px-2 py-1.5 text-right tabular-nums font-semibold text-content-primary">
+                  <td className="px-2 py-1 text-right tabular-nums font-semibold text-content-primary">
                     {fmt(v.price)}
                   </td>
-                  <td className="px-2 py-1.5 text-right tabular-nums text-content-secondary">
+                  <td className="px-2 py-1 text-right tabular-nums text-content-secondary">
                     {v.price_per_unit != null ? fmt(v.price_per_unit) : '—'}
                   </td>
                 </tr>
@@ -1952,6 +1998,23 @@ function CostVariantDetail({
           </tbody>
         </table>
       </div>
+
+      {canCollapse && (
+        <div className="mt-1.5 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setExpanded((e) => !e)}
+            className="rounded px-2 py-0.5 text-2xs font-medium text-oe-blue hover:bg-oe-blue-subtle/30 transition-colors"
+          >
+            {expanded
+              ? t('costs.variant_show_less', { defaultValue: 'Show less' })
+              : t('costs.variant_show_all', {
+                  defaultValue: 'Show all {{count}}',
+                  count: sorted.length,
+                })}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

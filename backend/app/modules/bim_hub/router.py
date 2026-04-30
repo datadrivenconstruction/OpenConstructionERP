@@ -1452,7 +1452,13 @@ async def upload_cad_file(
             display_name = (name or pathlib.Path(filename).stem).strip() or filename
             from app.modules.bim_hub.schemas import BIMModelCreate
 
-            await service.create_model(
+            # NB: ``error_message`` is set via a follow-up update because
+            # ``BIMModelCreate`` doesn't expose that field — it lives on
+            # ``BIMModelUpdate`` so freshly-created records start clean.
+            # The kwarg here MUST be ``user_id=`` (the service signature) —
+            # passing ``created_by=`` raised a TypeError on every .rvt /
+            # .ifc upload that hit the missing-converter path.
+            pending_model = await service.create_model(
                 BIMModelCreate(
                     project_id=project_uuid,
                     name=display_name,
@@ -1460,13 +1466,18 @@ async def upload_cad_file(
                     model_format=ext.lstrip("."),
                     canonical_file_path=saved_cad_key,
                     status="needs_converter",
+                ),
+                user_id=user_id,
+            )
+            await service.update_model(
+                pending_model.id,
+                BIMModelUpdate(
                     error_message=(
                         f"{ext.upper().lstrip('.')} converter not installed — "
                         f"install it from the BIM converter banner, then "
                         f"click Re-process on this model."
                     ),
                 ),
-                created_by=user_id or "",
             )
 
             logger.info(

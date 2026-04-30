@@ -1184,12 +1184,24 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   /* ── Cell value changed → dispatch update ─────────────────────── */
   const onCellValueChanged = useCallback(
     (event: CellValueChangedEvent) => {
-      const { data, colDef, oldValue, newValue } = event;
+      const { data, colDef, oldValue } = event;
+      let { newValue } = event;
       if (!data?.id || data._isFooter) return;
-      if (oldValue === newValue) return;
 
       const field = colDef.field;
       if (!field) return;
+
+      // Unit column uses a custom ``valueSetter`` (see columnDefs.ts +
+      // cellEditors.tsx) that drains a StrictMode-proof commit channel
+      // and writes the picked value directly to ``data.unit``. AG Grid
+      // still emits the event's ``newValue`` from the editor's
+      // (possibly stale) ``getValue()`` — so for the unit column we
+      // trust the post-setter value on ``data`` instead.
+      if (field === 'unit') {
+        newValue = (data as Record<string, unknown>).unit;
+      }
+
+      if (oldValue === newValue) return;
 
       const update: UpdatePositionData = { [field]: newValue };
       const old: UpdatePositionData = { [field]: oldValue };

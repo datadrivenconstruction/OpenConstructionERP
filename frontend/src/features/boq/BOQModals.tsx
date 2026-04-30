@@ -589,7 +589,18 @@ export function CostDatabaseSearchModal({
         const section = String(Math.floor((nextOrdNum - 1) / 999) + 1).padStart(2, '0');
         const pos = String(((nextOrdNum - 1) % 999) + 1).padStart(3, '0');
         const ordinal = `${section}.${pos}`;
-        // Convert cost item components to position resources
+        // Convert cost item components to position resources.
+        //
+        // Per-component variants (v2.6.30+): the backend stamps
+        // ``available_variants`` + ``available_variant_stats`` on each
+        // abstract-resource component slot. Forward those onto the
+        // resource entry so the BOQ row exposes a dedicated re-pick pill
+        // per variant resource — supporting positions with MANY
+        // independent variant components (concrete grade + rebar type +
+        // formwork type, ...). Auto-default to the median rate so the
+        // resource has a working price out of the box; the amber
+        // provenance bar + per-resource pill make it discoverable for
+        // refinement.
         const resources: Array<{
           name: string;
           code: string;
@@ -602,15 +613,30 @@ export function CostDatabaseSearchModal({
           variant_default?: 'mean' | 'median';
           available_variants?: CostVariant[];
           available_variant_stats?: import('@/features/costs/api').VariantStats;
-        }> = (item.components || []).map((c) => ({
-          name: c.name,
-          code: c.code || '',
-          type: c.type || 'other',
-          unit: c.unit || 'pcs',
-          quantity: c.quantity ?? 1,
-          unit_rate: c.unit_rate ?? 0,
-          total: c.cost || (c.quantity ?? 1) * (c.unit_rate ?? 0),
-        }));
+        }> = (item.components || []).map((c) => {
+          const compVariants = c.available_variants;
+          const compStats = c.available_variant_stats;
+          const hasCompVariants =
+            Array.isArray(compVariants) &&
+            compVariants.length >= 2 &&
+            compStats != null;
+          return {
+            name: c.name,
+            code: c.code || '',
+            type: c.type || 'other',
+            unit: c.unit || 'pcs',
+            quantity: c.quantity ?? 1,
+            unit_rate: c.unit_rate ?? 0,
+            total: c.cost || (c.quantity ?? 1) * (c.unit_rate ?? 0),
+            ...(hasCompVariants
+              ? {
+                  variant_default: 'median' as const,
+                  available_variants: compVariants,
+                  available_variant_stats: compStats,
+                }
+              : {}),
+          };
+        });
 
         // Resolve description + variant metadata from the resolution.
         const baseDescription = item.description || 'Unnamed item';
@@ -621,10 +647,17 @@ export function CostDatabaseSearchModal({
         // catalog's native currency, then EUR.
         const itemCurrency = item.currency && item.currency.trim() ? item.currency : 'EUR';
         // common_start is the abstract resource's base name
-        // (price_abstract_resource_common_start). Used to label the
-        // variant resource line so it matches the variant header row.
+        // (price_abstract_resource_common_start). When non-empty it is the
+        // shared prefix every variant variable_part hangs off of (e.g.
+        // "Beton, Sortenliste C"). When empty (CWICR rows whose abstract
+        // resource doesn't carry a separate base) we DO NOT fall back to
+        // the cost item description — that just duplicates the rate-code
+        // text in front of an already-full variant label and produced the
+        // "Realizzazione di piattaforme... Bandstahl warmgewalzt..." mess
+        // user reported. In the empty-CS case the variant's full_label
+        // already carries the complete display name on its own.
         const commonStart =
-          (stats?.common_start && stats.common_start.trim()) || baseDescription;
+          (stats?.common_start && stats.common_start.trim()) || '';
 
         if (resolution?.kind === 'variant') {
           variantMeta = {
@@ -646,8 +679,25 @@ export function CostDatabaseSearchModal({
           // из общей стоимости ресурсов"). Without this, position.unit_rate
           // would lose the variant's contribution and the resource panel
           // total would diverge from the cell display.
+          //
+          // Resource name resolution priority:
+          //   1. The variant's own ``full_label`` (backend already composes
+          //      ``common_start + variable_part``, truncated to 400 chars).
+          //   2. ``${common_start} ${variant.label}`` when full_label is
+          //      missing (pre-v2.6.30 imports) but common_start is captured.
+          //   3. ``variant.label`` alone — for CWICR rows whose abstract
+          //      resource has no separate common_start (the label already
+          //      carries the full display text). Falls back to baseDescription
+          //      only when the label is also empty (defensive).
+          const variantFullLabel = (resolution.variant.full_label || '').trim();
+          const variantLabel = (resolution.variant.label || '').trim();
+          const composedName = variantFullLabel
+            || (commonStart && variantLabel
+                ? `${commonStart} ${variantLabel}`.trim()
+                : variantLabel)
+            || baseDescription;
           resources.push({
-            name: `${commonStart} ${resolution.variant.label}`.trim(),
+            name: composedName,
             code: item.code,
             type: 'material',
             unit: item.unit || 'pcs',
@@ -681,8 +731,13 @@ export function CostDatabaseSearchModal({
           variantMeta = {
             variant_default: resolution.strategy,
           };
+          // Default-pick name = the abstract base (common_start) when the
+          // CWICR row carries one, otherwise the cost item description.
+          // No variable_part is chosen yet, so we cannot compose
+          // common_start + variable_part — the row will show only the base
+          // until the user explicitly picks a variant via the re-pick pill.
           resources.push({
-            name: commonStart,
+            name: commonStart || baseDescription,
             code: item.code,
             type: 'material',
             unit: item.unit || 'pcs',
@@ -747,6 +802,14 @@ export function CostDatabaseSearchModal({
             ...variantCacheMeta,
             ...variantMeta,
             ...(resources.length > 0 ? { resources } : {}),
+            // Carry the catalog's scope-of-work bullets onto the new
+            // position so the BOQ grid can render the (i) hint next
+            // to the description. The CWICR loader populates this for
+            // every region with non-empty ``work_composition_text``.
+            ...(Array.isArray((item.metadata_ as Record<string, unknown> | undefined)?.scope_of_work) &&
+            ((item.metadata_ as Record<string, unknown>).scope_of_work as unknown[]).length > 0
+              ? { scope_of_work: (item.metadata_ as Record<string, unknown>).scope_of_work }
+              : {}),
           },
         });
 

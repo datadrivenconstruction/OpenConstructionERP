@@ -11,8 +11,9 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { CountryFlag } from '@/shared/ui';
 import { NotificationBell } from '@/shared/ui/NotificationBell';
 import { apiGet } from '@/shared/lib/api';
-import { exportErrorReport, getErrorCount } from '@/shared/lib/errorLogger';
-import { APP_VERSION } from '@/shared/lib/version';
+import { exportErrorReport, getErrorCount, getLastError } from '@/shared/lib/errorLogger';
+import { APP_VERSION, APP_BUILD_FINGERPRINT } from '@/shared/lib/version';
+import { useToastStore } from '@/stores/useToastStore';
 
 /** Map English page titles (passed from App.tsx routes) to i18n keys. */
 const TITLE_I18N_MAP: Record<string, string> = {
@@ -409,14 +410,105 @@ function LanguageSwitcher({
 
 /* ── User Menu ─────────────────────────────────────────────────────────── */
 
+/** GitHub repo slug for "Report a bug". Empty string = clipboard fallback. */
+const GITHUB_REPO = 'datadrivenconstruction/OpenConstructionERP';
+/** Hard ceiling for the GitHub issue body inside a URL. ~8KB is safe across browsers. */
+const MAX_BODY_BYTES = 7800;
+
+/**
+ * Build the GitHub "new issue" URL pre-filled with environment + last error.
+ *
+ * Returns `{ url, body }` so callers can fall back to clipboard when the
+ * repo is not configured.  The body is plain text (markdown-ish) and never
+ * contains user JWT, email, or other PII — `getLastError()` returns
+ * already-anonymized strings via `errorLogger.anonymize()`.
+ */
+function buildBugReportUrl(t: (key: string, opts?: { defaultValue?: string }) => string): {
+  url: string;
+  body: string;
+  title: string;
+} {
+  const last = getLastError();
+  const stackLines = last?.stack ? last.stack.split('\n').slice(0, 30).join('\n') : '';
+  const errorBlock = last
+    ? `\`\`\`\n${last.message}\n${stackLines}\n\`\`\``
+    : t('app.report_bug_no_error', { defaultValue: '_No error captured during this session._' });
+
+  const body = [
+    '### Description',
+    '<!-- describe what you were doing -->',
+    '',
+    '### Environment',
+    `- App version: ${APP_VERSION}`,
+    `- Page: ${window.location.pathname}${window.location.search}`,
+    `- User agent: ${navigator.userAgent}`,
+    `- Build: ${APP_BUILD_FINGERPRINT}`,
+    last ? `- Captured at: ${last.at}` : '',
+    '',
+    '### Last error captured',
+    errorBlock,
+  ].filter(Boolean).join('\n');
+
+  // URL-encode and trim if the body would push us past the safe size.
+  let safeBody = body;
+  let encoded = encodeURIComponent(safeBody);
+  if (encoded.length > MAX_BODY_BYTES) {
+    // Keep the head; truncation marker tells the maintainer to ask for the
+    // full JSON via "Report Issue" if they need more.
+    const trimmed = safeBody.slice(0, Math.floor(safeBody.length * (MAX_BODY_BYTES / encoded.length)) - 64);
+    safeBody = trimmed + '\n\n_[truncated — attach the full JSON via the Report Issue button if needed]_';
+    encoded = encodeURIComponent(safeBody);
+  }
+
+  const title = t('app.report_bug_title_default', { defaultValue: 'Bug report from in-app menu' });
+  const encodedTitle = encodeURIComponent(title);
+  const url = GITHUB_REPO
+    ? `https://github.com/${GITHUB_REPO}/issues/new?title=${encodedTitle}&body=${encoded}`
+    : '';
+  return { url, body: safeBody, title };
+}
+
 function UserMenu() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
   const userEmail = useAuthStore((s) => s.userEmail);
+  const addToast = useToastStore((s) => s.addToast);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const userInitial = userEmail ? userEmail.charAt(0).toUpperCase() : 'U';
+
+  const handleReportBug = useCallback(() => {
+    setOpen(false);
+    const { url, body } = buildBugReportUrl(t);
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    // No repo configured — fall back to clipboard + toast.
+    const fallback = async () => {
+      try {
+        await navigator.clipboard.writeText(body);
+        addToast({
+          type: 'info',
+          title: t('app.report_bug_not_configured', {
+            defaultValue: 'Bug reporting is not configured',
+          }),
+          message: t('app.report_bug_copied', {
+            defaultValue: 'Report contents copied to clipboard',
+          }),
+        });
+      } catch {
+        addToast({
+          type: 'warning',
+          title: t('app.report_bug_not_configured', {
+            defaultValue: 'Bug reporting is not configured',
+          }),
+        });
+      }
+    };
+    void fallback();
+  }, [t, addToast]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -468,6 +560,15 @@ function UserMenu() {
           >
             <Settings size={14} className="text-content-tertiary" />
             {t('nav.settings', 'Settings')}
+          </button>
+          <div className="my-1 border-t border-border-light" role="separator" />
+          <button
+            role="menuitem"
+            onClick={handleReportBug}
+            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+          >
+            <Bug size={14} className="text-content-tertiary" />
+            {t('app.report_bug', { defaultValue: 'Report a bug' })}
           </button>
           <div className="my-1 border-t border-border-light" role="separator" />
           <button

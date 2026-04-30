@@ -5,6 +5,37 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.35] — 2026-04-30
+
+### Fixed
+- Quantity edit no longer snaps back to old value after ~1s. FormulaCellEditor passes `cancel=true` to `stopEditing` after `setDataValue`, suppressing AG Grid's secondary commit from a doubly-mounted StrictMode editor.
+- Variant resource name no longer carries rate-code description as prefix bleed. Apply path uses `full_label → common_start + label → label → baseDescription`. `backend/scripts/backfill_variant_prefix.py` rewrites already-stamped names.
+- Unit dropdown commits via mouse click again (third recurrence). Capture-phase document-mousedown shield was halting dispatch before React's `onMouseDown<li>`. Replaced with native `<ul>` listener reading `data-unit-value`.
+- Resource rows use the same portaled-dropdown unit editor as position rows.
+- Multi-variant per position: each variant component gets its own picker pill — `available_variants` forwarded for ALL components on apply, not just the first.
+- `/costs/import` Installed Databases section reappears under empty/loading/error states; uninstall buttons restored.
+- Quantity save instant: PATCH response splices into cache (no full BOQ refetch). Sibling rollups debounced 400ms.
+- Revit `.rvt` upload no longer fails on `BIMHubService.create_model() got an unexpected keyword argument 'created_by'`.
+
+### Added
+- "Report a bug" entry in user menu — pre-filled GitHub issue with anonymized last error, app version, page, build hash.
+- BOQ position description shows inline (i) icon when source cost item has `scope_of_work`; click opens portaled bullet-list popover.
+- `/costs` variant detail compacted: inline stat strip + clamp top-8 with "Show all N" toggle (~1700px → ~250px).
+- VariantPicker accordion when ≥2 groups, flat list for 1.
+
+## [2.6.34] — 2026-04-30
+
+### Added
+- CWICR loader now imports per-component variant catalogs. Each abstract resource row inside a rate is preserved as its own resource with `available_variants` + `available_variant_stats` stamped on the component itself. Rates like `KANE_RINE_KAKARI_KARI` now arrive with all 3 variant resources (formwork / panels / boards), each with its own picker — previously only the first row survived and the other two were silently dropped.
+- CWICR loader now imports `metadata.scope_of_work` — the ordered list of work steps (`Состав работ` / `Scope of work` / `Arbeitsumfang` / `Composition des travaux`). Verified universal across all 30 regions in the catalog.
+
+### Fixed
+- Variant builder falls back to `..._all_values_per_unit` when `..._all_values` is empty, recovering catalogs for rate rows that only populate per-unit pricing (~4,800 rates per region).
+- Scope-of-work detector no longer relies on the `is_scope` flag (which is False in DE/FR exports) — uses `work_composition_text` non-empty + `resource_name` empty as the universal rule.
+
+### Changed
+- CWICR loader runs in no-cache mode: each `POST /load-cwicr/{db_id}` re-downloads the parquet from GitHub and deletes it in `finally` after processing. `~/.openestimator/cache/` is no longer consulted on lookup and stays empty between runs. Locally-installed DDC_Toolkit parquets (Priority 1) are still used and left untouched.
+
 ## [2.6.33] — 2026-04-30
 
 ### Fixed

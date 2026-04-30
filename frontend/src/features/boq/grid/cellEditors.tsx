@@ -216,13 +216,37 @@ export const FormulaCellEditor = forwardRef(
       // ``stopEditing(false)`` on functional editors, so write the value
       // directly *and* implement getValue. The check ``parsed !== old``
       // ensures we don't fire a no-op cellValueChanged.
+      //
+      // CRITICAL — flash-then-revert fix (v2.6.34):
+      // ``stopEditing(false)`` triggers AG Grid's own commit path, which
+      // calls ``getValue()`` on the editor instance React happens to be
+      // showing. Under StrictMode (and any double-mount of the popup
+      // editor) AG Grid can query a *different* React instance whose
+      // ``lastParsedRef`` is still ``null`` and whose ``value`` state is
+      // the pre-edit text — so getValue returns the OLD numeric value.
+      // That fires a *second* cellValueChanged with newValue=<old> and
+      // overwrites the value we just wrote via setDataValue.
+      //
+      // Behaviour observed by the live probe:
+      //   PROBE cellValueChanged {oldValue:1, newValue:6}        ← from setDataValue
+      //   PROBE cellValueChanged {oldValue:6, newValue:1, src:"edit"}   ← AG Grid stale-instance commit
+      //   → two PATCH requests fire ~3 ms apart, the second carrying the
+      //     OLD value, and a few hundred ms later the cell snaps back.
+      //
+      // Fix: when we successfully wrote via setDataValue, pass
+      // ``cancel=true`` to stopEditing so AG Grid skips its own commit
+      // step. Tab navigation is handled explicitly by the caller via
+      // ``tabToNextCell()``, and the new value is already in the row.
       const colId = props.column?.getColId?.() ?? 'quantity';
       const oldValue = props.node?.data?.[colId];
-      if (parsed !== oldValue) {
+      const wroteViaSetDataValue = parsed !== oldValue;
+      if (wroteViaSetDataValue) {
         props.node?.setDataValue(colId, parsed);
       }
 
-      props.api.stopEditing(cancelNavigation);
+      // If we already wrote the value, cancel AG Grid's secondary commit
+      // path; otherwise honour the caller's intent (commit-then-navigate).
+      props.api.stopEditing(wroteViaSetDataValue ? true : cancelNavigation);
     };
 
     useEffect(() => {
@@ -488,6 +512,67 @@ AutocompleteCellEditor.displayName = 'AutocompleteCellEditor';
  *   • accepts free-text input so any one-off unit still commits.
  */
 
+/**
+ * StrictMode-proof commit channel for unit picks.
+ *
+ * In React 18 + <StrictMode>, AG Grid's editor wrapper remounts the
+ * `UnitCellEditor` up to 8 times when a user dblclicks. Each remount
+ * gets a fresh React instance with its own `valueRef` / `committedRef`,
+ * and AG Grid's `getValue()` (called synchronously inside `stopEditing`)
+ * routes through whichever instance is current at THAT moment — which
+ * may be a different one than the instance whose `pick()` ran. The
+ * picked value gets dropped on the floor.
+ *
+ * The fix: when `pick()` fires, record the picked value in this
+ * module-scoped map keyed by `${rowId}:${colId}` BEFORE calling
+ * `stopEditing(false)`. The unit column also wires a `valueSetter`
+ * (see `getUnitColumnValueSetter`) that consults this map first,
+ * falling back to AG Grid's `params.newValue`. The map entry is
+ * cleared as soon as it's read so a stale pick from a previous edit
+ * can't leak into the next one. Because the channel lives outside
+ * the React tree, it doesn't matter which mount instance handled the
+ * keystroke — the pick is durable.
+ */
+const __unitPickCommitChannel = new Map<string, string>();
+
+function unitPickKey(rowId: string | number | undefined, colId: string | undefined): string {
+  return `${rowId ?? ''}:${colId ?? 'unit'}`;
+}
+
+/**
+ * `valueSetter` factory for the `unit` column. Drains
+ * `__unitPickCommitChannel` first if there's a pending pick for this
+ * row+col; otherwise falls back to the value AG Grid pulled via
+ * `getValue()` on the (possibly stale) editor instance. Always returns
+ * `true` when the value actually changed so AG Grid fires its
+ * `cellValueChanged` event and the position update flows through.
+ */
+export function unitColumnValueSetter(params: {
+  data: Record<string, unknown> | null | undefined;
+  newValue: unknown;
+  oldValue: unknown;
+  node?: { id?: string | number } | null;
+  column?: { getColId?: () => string } | null;
+}): boolean {
+  const data = params.data;
+  if (!data) return false;
+  const rowId = params.node?.id ?? (data as { id?: string }).id;
+  const colId = params.column?.getColId?.() ?? 'unit';
+  const key = unitPickKey(rowId, colId);
+  const pending = __unitPickCommitChannel.get(key);
+  // Drain the channel regardless of which path wins so a stale pick
+  // can't leak into the next edit.
+  if (pending !== undefined) __unitPickCommitChannel.delete(key);
+  const incoming = pending !== undefined
+    ? pending
+    : (params.newValue == null ? '' : String(params.newValue));
+  const next = incoming.trim();
+  const prev = params.oldValue == null ? '' : String(params.oldValue);
+  if (next === prev) return false;
+  (data as Record<string, unknown>).unit = next;
+  return true;
+}
+
 export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
   const { i18n } = useTranslation();
   const lang = i18n.language || 'en';
@@ -575,29 +660,58 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
     return () => clearTimeout(t);
   }, []);
 
-  const commit = useCallback((finalValue?: string) => {
+  // Stable key for the StrictMode-proof commit channel. AG Grid's
+  // ``props.node.id`` is the same row identifier `getRowId` returns, so
+  // remounted editor instances share the same key.
+  const channelKey = unitPickKey(
+    props.node?.id ?? (props.data as { id?: string } | undefined)?.id,
+    props.column?.getColId?.(),
+  );
+
+  /**
+   * Apply a unit commit synchronously, regardless of which React mount
+   * instance handled the keystroke. We push the value into the row via
+   * ``props.node.setDataValue(colId, v)`` — this triggers the column's
+   * ``valueSetter`` (which drains ``__unitPickCommitChannel`` for parity
+   * with the keyboard / AG-Grid-internal paths) and fires
+   * ``cellValueChanged``. Calling ``setDataValue`` bypasses the editor
+   * lifecycle entirely, so it doesn't matter whether AG Grid is about
+   * to query a stale React instance for ``getValue()`` — the data is
+   * already updated.
+   */
+  const applyCommit = useCallback((v: string) => {
     if (committedRef.current) return;
     committedRef.current = true;
-    const v = (finalValue ?? value).trim();
-    valueRef.current = v;          // sync the ref BEFORE stopEditing
-    if (v) saveCustomUnit(v);
-    setValue(v);
-    setTimeout(() => {
-      try { props.api.stopEditing(false); } catch { /* editor already gone */ }
-    }, 0);
-  }, [value, props.api]);
+    const trimmed = v.trim();
+    valueRef.current = trimmed;
+    __unitPickCommitChannel.set(channelKey, trimmed);
+    setValue(trimmed);
+    setOpen(false);
+    if (trimmed) saveCustomUnit(trimmed);
+    // Push the value into the row data. This is the StrictMode-proof
+    // path: ``setDataValue`` calls our ``valueSetter`` synchronously,
+    // which drains the channel and mutates ``data.unit`` regardless of
+    // which React instance is current. ``cellValueChanged`` fires next.
+    try {
+      const colId = props.column?.getColId?.() ?? 'unit';
+      const oldVal = props.node?.data?.[colId];
+      if (oldVal !== trimmed) {
+        props.node?.setDataValue(colId, trimmed);
+      }
+    } catch { /* node detached — channel still holds the value */ }
+    // Stop editing AFTER setDataValue so AG Grid doesn't try to
+    // re-commit via the editor lifecycle (which is the path that loses
+    // the pick in StrictMode).
+    try { props.api.stopEditing(true); } catch { /* editor already gone */ }
+  }, [props.api, props.node, props.column, channelKey]);
+
+  const commit = useCallback((finalValue?: string) => {
+    applyCommit(finalValue ?? value);
+  }, [applyCommit, value]);
 
   const pick = useCallback((u: string) => {
-    if (committedRef.current) return;
-    committedRef.current = true;
-    valueRef.current = u;          // sync the ref BEFORE stopEditing
-    setValue(u);
-    setOpen(false);
-    if (u.trim()) saveCustomUnit(u);
-    setTimeout(() => {
-      try { props.api.stopEditing(false); } catch { /* editor already gone */ }
-    }, 0);
-  }, [props.api]);
+    applyCommit(u);
+  }, [applyCommit]);
 
   // Scroll the active option into view as the user navigates.
   useEffect(() => {
@@ -621,6 +735,42 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
       window.removeEventListener('resize', updateAnchor);
     };
   }, [open]);
+
+  // Native mousedown listener on the portaled <ul> itself.
+  //
+  // Why not React's onMouseDown? In rare cases AG Grid's editor lifecycle
+  // unmounts the React tree (and the portal) BEFORE React flushes the
+  // synthetic-event handlers, so the React handler never runs. A native
+  // listener attached directly to the <ul> DOM node fires synchronously
+  // as the event reaches the target — and our handler reads the picked
+  // unit out of ``data-unit-value`` on the clicked <li>, which is set
+  // statically at render time and survives any subsequent unmount.
+  //
+  // We previously had a document-level CAPTURE-phase shield that called
+  // ``stopImmediatePropagation`` on mousedowns inside the listbox. That
+  // shield was the actual cause of the "unit pick silently dropped" bug:
+  // a capture-phase ``stopImmediatePropagation()`` on document halts the
+  // event before it reaches the target <li>, so React's onMouseDown
+  // handler never fired. Removed.
+  useEffect(() => {
+    if (!open) return;
+    const ul = listRef.current;
+    if (!ul) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      const li = target?.closest?.('li[role="option"]') as HTMLElement | null;
+      if (!li || !ul.contains(li)) return;
+      const picked = li.getAttribute('data-unit-value');
+      if (picked == null) return;
+      // Prevent the input from blurring (which would close the editor
+      // before our applyCommit runs) and stop AG Grid's outside-click
+      // detector via preventDefault on mousedown.
+      e.preventDefault();
+      applyCommit(picked);
+    };
+    ul.addEventListener('mousedown', handler);
+    return () => ul.removeEventListener('mousedown', handler);
+  }, [open, applyCommit]);
 
   return (
     <div className="relative w-full h-full">
@@ -728,20 +878,16 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
                 <li
                   key={u + idx}
                   data-idx={idx}
+                  data-unit-value={u}
                   role="option"
                   aria-selected={idx === activeIdx}
                   onMouseEnter={() => setActiveIdx(idx)}
-                  onMouseDown={(e) => {
-                    // Commit on mouseDown so AG Grid can't intercept and
-                    // stop editing before our onClick handler fires.
-                    // ``stopImmediatePropagation`` on the native event is
-                    // required so AG Grid 32's document-level outside-
-                    // click listener does not cancel the edit first.
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.nativeEvent.stopImmediatePropagation();
-                    pick(u);
-                  }}
+                  // NOTE: the actual commit handler is a native mousedown
+                  // listener attached to the <ul> in a useEffect above.
+                  // It reads ``data-unit-value`` off the closest <li>.
+                  // We don't use React's onMouseDown here because React's
+                  // synthetic events don't fire if AG Grid happens to
+                  // unmount the editor before flush.
                   onClick={(e) => {
                     e.stopPropagation();
                     e.nativeEvent.stopImmediatePropagation();

@@ -16,6 +16,7 @@ import {
   groupPositionsIntoSections,
   isSection,
   normalizePositions,
+  normalizePosition,
   type Position,
   type CreatePositionData,
   type UpdatePositionData,
@@ -266,6 +267,39 @@ export function BOQEditorPage() {
     queryClient.invalidateQueries({ queryKey: ['boq-activity', boqId] });
   }, [queryClient, boqId]);
 
+  /**
+   * Sibling rollups (cost breakdown, resource summary, markups, activity)
+   * depend on totals, so they DO need to refetch after position edits — but
+   * each refetch is a small query and firing them on every keystroke commit
+   * creates a 5-request waterfall per cell edit. Debounce by 400ms so that
+   * a burst of edits collapses into one refresh wave.
+   *
+   * Crucially, the BIG ['boq', boqId] query is NOT invalidated here — the
+   * mutation's onSuccess merges the server response straight into the cache
+   * via setQueryData, so we never need a full BOQ refetch after a PATCH.
+   */
+  const siblingDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const invalidateSiblingsDebounced = useCallback(() => {
+    if (siblingDebounceRef.current) clearTimeout(siblingDebounceRef.current);
+    siblingDebounceRef.current = setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: ['boq-cost-breakdown', boqId] });
+      queryClient.invalidateQueries({ queryKey: ['boq-resource-summary', boqId] });
+      queryClient.invalidateQueries({ queryKey: ['boq-markups', boqId] });
+      queryClient.invalidateQueries({ queryKey: ['boq-activity', boqId] });
+      siblingDebounceRef.current = null;
+    }, 400);
+  }, [queryClient, boqId]);
+
+  // Cleanup the debounce timer on unmount so we don't fire after teardown.
+  useEffect(() => {
+    return () => {
+      if (siblingDebounceRef.current) {
+        clearTimeout(siblingDebounceRef.current);
+        siblingDebounceRef.current = null;
+      }
+    };
+  }, []);
+
   const [newPositionId, setNewPositionId] = useState<string | null>(null);
 
   const addMutation = useMutation({
@@ -318,9 +352,11 @@ export function BOQEditorPage() {
     // 2. Snapshot the previous cache so onError can roll back without a
     //    refetch round-trip (which would also briefly show old values).
     // 3. setQueryData paints the user's edit instantly.
-    // 4. invalidateAll runs in onSettled (not onSuccess) so it fires once
-    //    per mutation regardless of outcome and never races with a sibling
-    //    mutation's onSuccess.
+    // 4. onSuccess splices the server response (the authoritative
+    //    PositionResponse) into the cache directly — no full BOQ refetch.
+    //    Sibling rollups (cost-breakdown, resource-summary, markups,
+    //    activity) refresh via a 400ms debounce so a burst of cell edits
+    //    collapses into ONE refresh wave instead of 4 GETs per keystroke.
     onMutate: async ({ id, data }: { id: string; data: UpdatePositionData }) => {
       await queryClient.cancelQueries({ queryKey: ['boq', boqId] });
       const previous = queryClient.getQueryData(['boq', boqId]);
@@ -362,6 +398,23 @@ export function BOQEditorPage() {
       });
       return { previous };
     },
+    onSuccess: (updated) => {
+      // Splice the authoritative server response straight into the cache.
+      // Avoids a full ['boq', boqId] refetch, which on large BOQs is the
+      // single biggest source of edit-to-paint latency.
+      const normalized = normalizePosition(updated);
+      queryClient.setQueryData(['boq', boqId], (old: unknown) => {
+        if (!old || typeof old !== 'object') return old;
+        const cur = old as { positions: Position[]; [k: string]: unknown };
+        return {
+          ...cur,
+          positions: cur.positions.map((p) => (p.id === normalized.id ? normalized : p)),
+        };
+      });
+      // Sibling rollups depend on totals; refresh them with a debounce so
+      // bursts of edits coalesce into a single refresh wave.
+      invalidateSiblingsDebounced();
+    },
     onError: (err: Error, _vars, ctx) => {
       // Restore the snapshot synchronously — no refetch flicker.
       if (ctx?.previous !== undefined) {
@@ -369,7 +422,6 @@ export function BOQEditorPage() {
       }
       addToast({ type: 'error', title: t('boq.update_failed', { defaultValue: 'Failed to update position' }), message: err.message });
     },
-    onSettled: () => invalidateAll(),
   });
 
   const deleteMutation = useMutation({
@@ -1909,16 +1961,31 @@ export function BOQEditorPage() {
 
       if (picked?.kind === 'variant') {
         const v = picked.variant;
-        // Resource name = full label (common_start + variable_part). Replaces
-        // the rate-code description so the BOQ row shows the concrete
-        // material the estimator chose, not the abstract group. Falls back
-        // to the legacy "description (label)" form for pre-v2.6.30 imports
-        // that didn't capture ``common_start``.
+        // Resource name resolution priority (matches BOQModals + cellRenderers):
+        //   1. ``v.full_label`` — backend-composed ``common_start + variable_part``,
+        //      truncated to 400 chars.
+        //   2. ``${common_start} ${variant.label}`` when full_label is absent
+        //      (pre-v2.6.30 imports) but common_start is captured.
+        //   3. ``v.label`` alone — for CWICR rows whose abstract resource has
+        //      no separate common_start (the label already carries the full
+        //      display text). NEVER fall back to ``item.description`` here:
+        //      that just duplicates the rate-code text in front of an
+        //      already-full variant label and produced the
+        //      "Realizzazione di piattaforme... Bandstahl warmgewalzt..." mess
+        //      the user reported (dev DB pos 01.045 / 01.046).
         const fullVariant = itemVariants?.find((x) => x.label === v.label);
-        const commonBase = itemVariantStats?.common_start ?? '';
+        const commonBase = (itemVariantStats?.common_start ?? '').trim();
+        const labelTrim = (v.label || '').trim();
+        const labelStartsWithBase =
+          commonBase.length > 0 &&
+          labelTrim.length > 0 &&
+          labelTrim.toLowerCase().startsWith(commonBase.toLowerCase());
         const resolvedName =
-          fullVariant?.full_label ||
-          (commonBase ? `${commonBase} ${v.label}`.trim() : `${item.description} (${v.label})`);
+          (fullVariant?.full_label || '').trim() ||
+          (commonBase && labelTrim && !labelStartsWithBase
+            ? `${commonBase} ${labelTrim}`.trim()
+            : labelTrim) ||
+          item.description;
         newResources = [{
           name: resolvedName,
           code: item.code,
@@ -1946,12 +2013,43 @@ export function BOQEditorPage() {
         }];
       } else {
         newResources = components.length > 0
-          ? components.map((c) => ({
-              name: c.name, code: c.code || '', type: c.type || 'other',
-              unit: c.unit, quantity: c.quantity, unit_rate: c.unit_rate,
-              total: c.cost || c.quantity * c.unit_rate,
-              ...currencyStamp,
-            }))
+          ? components.map((c) => {
+              // Per-component variant catalog (v2.6.30+): when a component
+              // carries its OWN ``available_variants`` slot, forward it so
+              // the BOQ resource row exposes its dedicated re-pick pill.
+              // A position can host MANY independent variant components
+              // (e.g. concrete grade + rebar type + formwork type) — each
+              // gets its own picker without affecting the others.
+              const compVariants = c.available_variants;
+              const compStats = c.available_variant_stats;
+              const hasCompVariants =
+                Array.isArray(compVariants) &&
+                compVariants.length >= 2 &&
+                compStats != null;
+              // Auto-default to the median variant so the user has a
+              // working price out of the box. The amber provenance bar +
+              // the per-resource pill make it discoverable for refinement.
+              const defaultStrategy: 'median' | undefined = hasCompVariants
+                ? 'median'
+                : undefined;
+              return {
+                name: c.name,
+                code: c.code || '',
+                type: c.type || 'other',
+                unit: c.unit,
+                quantity: c.quantity,
+                unit_rate: c.unit_rate,
+                total: c.cost || c.quantity * c.unit_rate,
+                ...(defaultStrategy ? { variant_default: defaultStrategy } : {}),
+                ...(hasCompVariants
+                  ? {
+                      available_variants: compVariants,
+                      available_variant_stats: compStats,
+                    }
+                  : {}),
+                ...currencyStamp,
+              };
+            })
           : [{
               name: item.description, code: item.code, type: 'material',
               unit: item.unit, quantity: 1, unit_rate: item.rate,
@@ -1967,7 +2065,19 @@ export function BOQEditorPage() {
 
       const existingResources = [...((pos.metadata?.resources ?? []) as Array<Record<string, unknown>>)];
       const merged = [...existingResources, ...newResources];
-      const newMeta = { ...pos.metadata, resources: merged };
+      const newMeta: Record<string, unknown> = { ...pos.metadata, resources: merged };
+      // Carry the scope-of-work bullets from the catalog over to the
+      // BOQ position so the grid's (i) hint shows what work is included
+      // in the freshly applied rate. Only overwrite when the position
+      // has no scope yet — preserves a richer manual override.
+      const sowFromCatalog = item.metadata_?.scope_of_work;
+      if (
+        Array.isArray(sowFromCatalog) &&
+        sowFromCatalog.length > 0 &&
+        !(Array.isArray(pos.metadata?.scope_of_work) && (pos.metadata?.scope_of_work as unknown[]).length > 0)
+      ) {
+        newMeta.scope_of_work = sowFromCatalog;
+      }
       // Recalculate unit_rate
       let computedRate = 0;
       for (const r of merged) {
@@ -2587,6 +2697,16 @@ export function BOQEditorPage() {
       }));
       const newMeta: Record<string, unknown> = { ...pos.metadata, cost_item_code: item.code, source: 'cost_database' };
       if (resources.length > 0) newMeta.resources = resources;
+      // Carry through the scope-of-work bullets from the catalog so the
+      // BOQ grid can surface them as a readable (i) hint next to the
+      // description. Only stamps when the catalog row actually carried
+      // the data — empty/missing keeps the position metadata clean.
+      const sow = item.metadata_?.scope_of_work;
+      if (Array.isArray(sow) && sow.length > 0) {
+        newMeta.scope_of_work = sow;
+      } else {
+        delete newMeta.scope_of_work;
+      }
       let computedRate = item.rate;
       if (resources.length > 0) {
         computedRate = resources.reduce((s, r) => s + (r.total || r.quantity * r.unit_rate), 0);
@@ -3101,15 +3221,27 @@ export function BOQEditorPage() {
               // honour it instead of silently coercing to the BOQ base).
               currency: item.currency,
               classification: item.classification || {},
-              components: (item.components || []).map((c) => ({
-                name: c.name,
-                code: c.code,
-                unit: c.unit,
-                quantity: c.quantity,
-                unit_rate: c.unit_rate,
-                cost: c.cost,
-                type: c.type,
-              })),
+              components: (item.components || []).map((c) => {
+                // Forward per-component variant catalog (v2.6.30+).
+                // Backend stamps ``available_variants`` /
+                // ``available_variant_stats`` on each abstract-resource
+                // component slot — see ``costs/router.py`` `_extract_components`.
+                const av = c.available_variants;
+                const avs = c.available_variant_stats;
+                return {
+                  name: c.name,
+                  code: c.code,
+                  unit: c.unit,
+                  quantity: c.quantity,
+                  unit_rate: c.unit_rate,
+                  cost: c.cost,
+                  type: c.type,
+                  ...(Array.isArray(av) && av.length >= 2
+                    ? { available_variants: av }
+                    : {}),
+                  ...(avs != null ? { available_variant_stats: avs } : {}),
+                };
+              }),
               // v2.6.26+: forward the variant catalog so the resource entry
               // can cache ``available_variants`` for later re-pick.
               metadata_: item.metadata_,

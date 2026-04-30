@@ -1,5 +1,6 @@
-import type { ColDef, ValueFormatterParams, ValueGetterParams } from 'ag-grid-community';
+import type { ColDef, ValueFormatterParams, ValueGetterParams, ValueSetterParams } from 'ag-grid-community';
 import { fmtWithCurrency } from '../boqHelpers';
+import { unitColumnValueSetter } from './cellEditors';
 import {
   buildFormulaContext,
   evaluateFormulaStrict,
@@ -171,6 +172,34 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       // value (e.g. "т", "маш.-ч") wasn't in the list.
       cellEditor: 'unitCellEditor',
       cellRenderer: 'unitCellRenderer',
+      // StrictMode-proof commit path: the editor remounts up to 8x in
+      // dev and AG Grid's ``getValue()`` may route through a stale
+      // instance whose ``valueRef`` never saw the pick. ``valueSetter``
+      // drains a module-scoped channel that the editor writes to BEFORE
+      // ``stopEditing()`` fires, so the pick survives regardless of
+      // which mount instance AG Grid queries. See ``__unitPickCommitChannel``
+      // and ``unitColumnValueSetter`` in ``cellEditors.tsx``.
+      valueSetter: (params: ValueSetterParams) => unitColumnValueSetter({
+        data: params.data,
+        newValue: params.newValue,
+        oldValue: params.oldValue,
+        node: params.node ? { id: params.node.id } : null,
+        column: params.column ? { getColId: () => params.column!.getColId() } : null,
+      }),
+      // Let the UnitCellEditor's own keyboard handler own Enter / ArrowUp
+      // / ArrowDown when it's editing. AG Grid 32 default would intercept
+      // Enter at the grid level (capture phase) and call ``stopEditing``
+      // before our React ``onKeyDown`` runs — that path reads ``getValue()``
+      // on whatever React instance is current (often a stale StrictMode
+      // mount whose ``valueRef`` never saw ``pick()``), and the user's
+      // selection silently disappears. ``suppressKeyboardEvent`` opts out
+      // of AG Grid's grid-level handling for these keys while editing,
+      // letting our editor commit through ``pick()`` → channel → setter.
+      suppressKeyboardEvent: (params) => {
+        if (!params.editing) return false;
+        const k = params.event.key;
+        return k === 'Enter' || k === 'ArrowUp' || k === 'ArrowDown';
+      },
       cellClass: 'text-center text-2xs font-mono',
       cellStyle: { display: 'flex', justifyContent: 'center', alignItems: 'center' },
     },

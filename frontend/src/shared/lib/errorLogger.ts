@@ -287,6 +287,30 @@ export function getErrorCount(): number {
 }
 
 /**
+ * Return the most recent captured error (anonymized) for use in bug reports.
+ *
+ * The stack is capped at ~2KB so the returned payload stays URL-safe even
+ * when concatenated into a GitHub issue body.
+ */
+export function getLastError(): {
+  message: string;
+  stack: string;
+  at: string;
+} | null {
+  if (memoryBuffer.length === 0) return null;
+  const last = memoryBuffer[memoryBuffer.length - 1];
+  if (!last) return null;
+  const stack = last.stack ?? '';
+  // Cap to ~2KB. Keep header lines (most informative) by slicing from start.
+  const cappedStack = stack.length > 2048 ? stack.slice(0, 2048) + '\n... [truncated]' : stack;
+  return {
+    message: last.message,
+    stack: cappedStack,
+    at: last.timestamp,
+  };
+}
+
+/**
  * Build and return a JSON Blob containing the full error report, ready for download.
  */
 export function exportErrorReport(): Blob {

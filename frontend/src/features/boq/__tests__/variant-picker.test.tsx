@@ -155,4 +155,83 @@ describe('VariantPicker', () => {
     );
     expect(screen.queryByTestId('variant-picker-use-default')).toBeNull();
   });
+
+  // ── Multi-group accordion ───────────────────────────────────────────
+  //
+  // When 2+ distinct group keys are present on the incoming variants, the
+  // picker switches from flat-list to an accordion: one collapsible header
+  // per group, first group expanded by default, others collapsed. The radio
+  // rows still resolve to the same `variant-row-${originalIdx}` testids so
+  // existing callers can drive the picker without caring about layout.
+  const MIXED_VARIANTS: CostVariant[] = [
+    { index: 0, label: 'C25/30', price: 100, price_per_unit: null, group: 'concrete' },
+    { index: 1, label: 'C30/37', price: 130, price_per_unit: null, group: 'concrete' },
+    { index: 2, label: 'BST 500 A', price: 800, price_per_unit: null, group: 'rebar' },
+    { index: 3, label: 'BST 500 B', price: 850, price_per_unit: null, group: 'rebar' },
+  ];
+
+  describe('multi-group accordion', () => {
+    it('renders accordion headers when 2+ groups are present', () => {
+      render(
+        <VariantPicker
+          variants={MIXED_VARIANTS}
+          stats={{ ...STATS, count: 4, mean: 470, median: 465, min: 100, max: 850 }}
+          anchorEl={null}
+          unitLabel="m3"
+          currency="EUR"
+          onApply={() => undefined}
+          onClose={() => undefined}
+        />,
+      );
+      expect(screen.getByTestId('variant-group-header-concrete')).toBeInTheDocument();
+      expect(screen.getByTestId('variant-group-header-rebar')).toBeInTheDocument();
+    });
+
+    it('expands the first group by default and collapses the rest', () => {
+      render(
+        <VariantPicker
+          variants={MIXED_VARIANTS}
+          stats={{ ...STATS, count: 4, mean: 470, median: 465, min: 100, max: 850 }}
+          anchorEl={null}
+          unitLabel="m3"
+          currency="EUR"
+          onApply={() => undefined}
+          onClose={() => undefined}
+        />,
+      );
+      // First group's rows are visible (idx 0 + 1), second group's rows are
+      // not rendered until the user expands.
+      expect(screen.getByTestId('variant-row-0')).toBeInTheDocument();
+      expect(screen.getByTestId('variant-row-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('variant-row-2')).toBeNull();
+      expect(screen.queryByTestId('variant-row-3')).toBeNull();
+    });
+
+    it('reveals a collapsed group when its header is clicked', () => {
+      render(
+        <VariantPicker
+          variants={MIXED_VARIANTS}
+          stats={{ ...STATS, count: 4, mean: 470, median: 465, min: 100, max: 850 }}
+          anchorEl={null}
+          unitLabel="m3"
+          currency="EUR"
+          onApply={() => undefined}
+          onClose={() => undefined}
+        />,
+      );
+      expect(screen.queryByTestId('variant-row-2')).toBeNull();
+      fireEvent.click(screen.getByTestId('variant-group-header-rebar'));
+      expect(screen.getByTestId('variant-row-2')).toBeInTheDocument();
+      expect(screen.getByTestId('variant-row-3')).toBeInTheDocument();
+    });
+
+    it('falls back to flat list when only one group is present', () => {
+      // VARIANTS has no `group` field on any row — variantGroupKey returns
+      // "" for each, so there is exactly one effective group.
+      renderPicker();
+      expect(screen.queryByTestId('variant-group-header-')).toBeNull();
+      // Each variant still rendered as a radio row.
+      expect(screen.getAllByRole('radio')).toHaveLength(3);
+    });
+  });
 });

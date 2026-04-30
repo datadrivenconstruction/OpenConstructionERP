@@ -401,7 +401,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
       </div>
 
       {/* Database grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
         {filteredDatabases.length === 0 && (
           <div className="col-span-full py-8 text-center text-sm text-content-tertiary">
             {t('costs.region_filter_no_results', {
@@ -684,10 +684,12 @@ function LoadedDatabasesSection() {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [deletingRegion, setDeletingRegion] = useState<string | null>(null);
 
-  // Fetch real per-region stats from backend
-  const { data: regionStats } = useQuery({
+  // Fetch real per-region stats from backend.
+  // ``.catch(() => [])`` so a transient 401/500 doesn't leave ``data`` undefined
+  // forever — the section still renders an empty-state row instead of vanishing.
+  const { data: regionStats, isLoading } = useQuery({
     queryKey: ['costs', 'regions', 'stats'],
-    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats/'),
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats/').catch(() => [] as RegionStat[]),
     retry: false,
     refetchOnWindowFocus: true,
   });
@@ -758,51 +760,79 @@ function LoadedDatabasesSection() {
     },
   });
 
-  if (!hasData) {
-    return null;
-  }
-
   const activeDbId = getActiveDatabase();
+  const regionCount = regionStats?.length ?? 0;
 
   return (
     <Card className="mb-6 animate-card-in" padding="none">
       <div className="px-6 py-5">
-        {/* Header */}
+        {/* Header — always rendered so users always have a way to manage installed DBs */}
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-semibold text-content-primary">
-              {t('costs.loaded_databases', { defaultValue: 'Loaded Databases' })}
+              {t('costs.loaded_databases', { defaultValue: 'Installed Databases' })}
             </h3>
             <p className="text-xs text-content-tertiary mt-0.5">
-              {regionStats.length} {regionStats.length === 1 ? 'region' : 'regions'} &middot;{' '}
-              {totalItems.toLocaleString()} items total
+              {isLoading
+                ? t('costs.loaded_loading', { defaultValue: 'Loading installed databases...' })
+                : hasData
+                  ? `${regionCount} ${regionCount === 1 ? t('costs.region_singular', { defaultValue: 'region' }) : t('costs.region_plural', { defaultValue: 'regions' })} · ${totalItems.toLocaleString()} ${t('costs.items_total', { defaultValue: 'items total' })}`
+                  : t('costs.no_databases_installed', {
+                      defaultValue: 'No databases installed yet. Pick a region above to install.',
+                    })}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<Download size={14} />}
-              onClick={() => exportMutation.mutate()}
-              loading={exportMutation.isPending}
-            >
-              {t('costs.export_excel', { defaultValue: 'Export Excel' })}
-            </Button>
-            {regionStats.length > 1 && (
+          {hasData && (
+            <div className="flex items-center gap-2">
               <Button
-                variant="danger"
+                variant="secondary"
                 size="sm"
-                icon={<Trash2 size={14} />}
-                onClick={() => setShowClearConfirm(true)}
-                loading={clearMutation.isPending}
+                icon={<Download size={14} />}
+                onClick={() => exportMutation.mutate()}
+                loading={exportMutation.isPending}
               >
-                {t('costs.clear_all', { defaultValue: 'Clear All' })}
+                {t('costs.export_excel', { defaultValue: 'Export Excel' })}
               </Button>
-            )}
-          </div>
+              {regionCount > 1 && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  icon={<Trash2 size={14} />}
+                  onClick={() => setShowClearConfirm(true)}
+                  loading={clearMutation.isPending}
+                >
+                  {t('costs.clear_all', { defaultValue: 'Clear All' })}
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Per-region table */}
+        {/* Loading skeleton */}
+        {isLoading && !regionStats && (
+          <div className="rounded-lg border border-border-light bg-surface-secondary/30 p-4">
+            <div className="flex items-center gap-2 text-xs text-content-tertiary">
+              <Loader2 size={14} className="animate-spin" />
+              {t('costs.loaded_fetching', { defaultValue: 'Fetching installed databases...' })}
+            </div>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!isLoading && !hasData && (
+          <div className="rounded-lg border border-dashed border-border-light bg-surface-secondary/20 px-4 py-6 text-center">
+            <Database size={20} className="mx-auto text-content-quaternary mb-2" />
+            <p className="text-xs text-content-secondary">
+              {t('costs.empty_pick_region_above', {
+                defaultValue:
+                  'Pick a region card above and click Install to load a regional cost database.',
+              })}
+            </p>
+          </div>
+        )}
+
+        {/* Per-region table — only when at least one region is installed */}
+        {hasData && (
         <div className="rounded-lg border border-border-light overflow-hidden">
           <table className="w-full text-sm">
             <thead>
@@ -815,7 +845,7 @@ function LoadedDatabasesSection() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border-light">
-              {regionStats.map((rs) => {
+              {regionStats!.map((rs) => {
                 const db = CWICR_DATABASES.find((d) => d.id === rs.region);
                 const isActive = activeDbId === rs.region;
                 const isDeleting = deletingRegion === rs.region;
@@ -886,16 +916,23 @@ function LoadedDatabasesSection() {
             </tbody>
           </table>
         </div>
+        )}
 
         {/* Clear all confirmation */}
-        {showClearConfirm && (
+        {showClearConfirm && hasData && (
           <div className="mt-4 rounded-xl border border-semantic-error/20 bg-semantic-error-bg/30 p-4">
             <p className="text-sm font-medium text-semantic-error mb-1">
-              Clear all {regionStats.length} databases?
+              {t('costs.clear_all_confirm_title', {
+                defaultValue: 'Clear all {{count}} databases?',
+                count: regionCount,
+              })}
             </p>
             <p className="text-xs text-content-secondary mb-3">
-              This will permanently remove all {totalItems.toLocaleString()} CWICR cost items. You
-              can re-import them later.
+              {t('costs.clear_all_confirm_body', {
+                defaultValue:
+                  'This will permanently remove all {{count}} CWICR cost items. You can re-import them later.',
+                count: totalItems,
+              })}
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -1178,7 +1215,7 @@ function VectorDatabaseSection() {
         ) : (
           <>
             {/* Region grid — same style as CWICR */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 mb-5">
               {CWICR_DATABASES.map((db) => {
                 const isLoadingThis = loadingRegion === db.id;
                 const isVectorized = vectorizedRegions.has(db.id);
@@ -1583,7 +1620,7 @@ export function ImportDatabasePage() {
   }, []);
 
   return (
-    <div className="max-w-2xl mx-auto animate-fade-in">
+    <div className="max-w-5xl mx-auto animate-fade-in">
       {/* Breadcrumb */}
       <Breadcrumb
         className="mb-4"

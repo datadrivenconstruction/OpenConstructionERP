@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo, useEffect, forwardRef } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect, useLayoutEffect, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { ICellRendererParams } from 'ag-grid-community';
@@ -474,6 +474,116 @@ export function ExpandCellRenderer(params: ICellRendererParams) {
   );
 }
 
+/* ── Scope-of-work (i) hint ─────────────────────────────────────────
+ *  Inline (i) icon shown next to the position description when the
+ *  underlying cost item carried a non-empty ``scope_of_work`` list
+ *  (sourced from CWICR's ``work_composition_text`` column — the
+ *  ordered steps describing HOW the position is performed). Clicking
+ *  the icon opens a portaled popover with the steps as a bullet list.
+ *
+ *  Portal-positioned because AG Grid cells have ``overflow: hidden``
+ *  that would otherwise clip the popover. Closes on outside click,
+ *  Esc, or scroll. No new dependencies — uses the already-imported
+ *  ``Info`` icon, ``createPortal``, and lucide ``X``. ───────────── */
+function ScopeOfWorkHint({
+  steps,
+  t,
+}: {
+  steps: string[];
+  t: (key: string, opts?: Record<string, string | number>) => string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement | null>(null);
+  const popRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDocMouseDown = (e: MouseEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (popRef.current?.contains(target)) return;
+      if (btnRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    const onScroll = () => setOpen(false);
+    document.addEventListener('mousedown', onDocMouseDown);
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('scroll', onScroll, true);
+    return () => {
+      document.removeEventListener('mousedown', onDocMouseDown);
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('scroll', onScroll, true);
+    };
+  }, [open]);
+
+  const onClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (open) {
+      setOpen(false);
+      return;
+    }
+    if (btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 4, left: rect.left });
+    }
+    setOpen(true);
+  };
+
+  const label = t('boq.scope_of_work_label', {
+    defaultValue: 'What work is included in this rate',
+  });
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        type="button"
+        tabIndex={-1}
+        onClick={onClick}
+        onMouseDown={(e) => e.stopPropagation()}
+        className="shrink-0 ml-1 inline-flex items-center justify-center
+                   text-content-tertiary hover:text-content-secondary
+                   transition-colors cursor-help outline-none
+                   focus-visible:ring-1 focus-visible:ring-oe-blue rounded-sm"
+        title={label}
+        aria-label={label}
+        aria-expanded={open}
+        data-testid="boq-scope-of-work-hint"
+      >
+        <Info size={12} strokeWidth={2} />
+      </button>
+      {open && pos && createPortal(
+        <div
+          ref={popRef}
+          role="tooltip"
+          className="fixed z-[2000] w-[320px] max-w-[90vw]
+                     rounded-lg border border-border-light bg-surface-primary
+                     shadow-lg p-3 text-xs text-content-secondary"
+          style={{ top: pos.top, left: pos.left }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-content-tertiary">
+            {label}
+          </div>
+          <ul className="list-disc pl-4 space-y-1 leading-relaxed max-h-[280px] overflow-auto">
+            {steps.map((step, i) => (
+              <li key={i} className="text-content-primary">
+                {step}
+              </li>
+            ))}
+          </ul>
+        </div>,
+        document.body,
+      )}
+    </>
+  );
+}
+
 /* ── Description + CWICR Variant Badge ────────────────────────────── */
 
 /**
@@ -503,6 +613,49 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
     ((key: string, opts?: Record<string, string | number>) =>
       (opts?.defaultValue as string) ?? key);
 
+  // Hooks must run unconditionally (Rules of Hooks) — declared up here
+  // so the bail-out below for non-position rows doesn't change the hook
+  // call order between renders. ``positionId`` is intentionally derived
+  // safely with optional chaining so the hook deps stay stable for non-
+  // position rows too.
+  const positionId = (data?.id as string | undefined) ?? '';
+  const handleVClick = useCallback(() => {
+    if (!positionId) return;
+    ctx?.onToggleResources?.(positionId);
+  }, [ctx, positionId]);
+  const vBtnRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    const node = vBtnRef.current;
+    if (!node) return;
+    // CAPTURE-phase listener so we run BEFORE any AG Grid handler —
+    // both React synthetic onClick and AG Grid's native cell-level
+    // mousedown listeners are bubble-phase, so a capture-phase
+    // pointerdown wins the race unconditionally regardless of which
+    // library happened to register first. Previously relied on
+    // ``nativeEvent.stopImmediatePropagation()`` in onClick + onMouseDown
+    // — that proved unreliable when the description column was editable
+    // and AG Grid attached its listener earlier in the event chain.
+    // Reported by user: "всё равно не работает - может перекрывается".
+    const stopAndToggle = (e: Event) => {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      handleVClick();
+    };
+    const stopOnly = (e: Event) => {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    };
+    node.addEventListener('pointerdown', stopAndToggle, true);
+    node.addEventListener('mousedown', stopOnly, true);
+    node.addEventListener('click', stopOnly, true);
+    return () => {
+      node.removeEventListener('pointerdown', stopAndToggle, true);
+      node.removeEventListener('mousedown', stopOnly, true);
+      node.removeEventListener('click', stopOnly, true);
+    };
+  }, [handleVClick]);
+
   // Sections + footer + resource rows have their own renderers; bail
   // out cleanly so AG Grid falls back to the default text rendering
   // for those (driven by `colDef.cellClass`).
@@ -520,6 +673,19 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
   const variantDefault = (meta as { variant_default?: 'mean' | 'median' }).variant_default;
   const hasVariant = !!variant && typeof variant.label === 'string' && typeof variant.price === 'number';
   const hasDefault = !hasVariant && (variantDefault === 'mean' || variantDefault === 'median');
+
+  // Scope-of-work hint — non-empty list sourced from the catalog when
+  // the position was applied from CWICR (universal scope detector:
+  // non-empty ``work_composition_text`` + empty ``resource_name``).
+  // We render an inline (i) icon that opens a portaled bullet-list
+  // popover; absent metadata = no icon, no chrome.
+  const scopeRaw = (meta as { scope_of_work?: unknown }).scope_of_work;
+  const scopeSteps: string[] = Array.isArray(scopeRaw)
+    ? scopeRaw.filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+    : [];
+  const scopeHint = scopeSteps.length > 0 ? (
+    <ScopeOfWorkHint steps={scopeSteps} t={t} />
+  ) : null;
 
   /* ── "V" icon — surfaces when EITHER:
    *     (a) at least one resource on this position carries cached
@@ -552,19 +718,18 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
 
   const hasVariantResource = hasResourceVariants || hasPositionVariants;
 
-  const positionId = data.id as string;
   const variantIconButton = hasVariantResource ? (
     <button
+      ref={vBtnRef}
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        // V badge toggles the resource panel — same UX as the chevron in
-        // the expand column, but reachable inline next to the description.
-        // Picker access stays on the synthetic VARIANT row's "Variant"
-        // chip and the per-resource ▾-pill in the expanded panel.
-        ctx?.onToggleResources?.(positionId);
-      }}
-      onMouseDown={(e) => e.stopPropagation()}
+      // Keep the button out of AG Grid's keyboard-navigation tab order
+      // so the description cell's editor doesn't try to claim focus when
+      // the V badge is clicked. Capture-phase listener handles activation.
+      tabIndex={-1}
+      // Stack above any AG Grid focus / selection overlay that may sit
+      // on top of the cell content (cause of the "ничего не происходит"
+      // case where the click landed on an invisible overlay).
+      style={{ position: 'relative', zIndex: 10 }}
       className="shrink-0 inline-flex h-[18px] w-[18px] items-center justify-center
                  rounded-md cursor-pointer
                  bg-violet-50 dark:bg-violet-900/30
@@ -588,13 +753,14 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
   ) : null;
 
   if (!hasVariant && !hasDefault) {
-    if (!variantIconButton) {
+    if (!variantIconButton && !scopeHint) {
       return <span className="truncate">{displayValue}</span>;
     }
     return (
       <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
         {variantIconButton}
         <span className="truncate min-w-0">{displayValue}</span>
+        {scopeHint}
       </span>
     );
   }
@@ -618,6 +784,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
       <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
         {variantIconButton}
         <span className="truncate min-w-0">{displayValue}</span>
+        {scopeHint}
       </span>
     );
   }
@@ -645,6 +812,7 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
     <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
       {variantIconButton}
       <span className="truncate min-w-0">{displayValue}</span>
+      {scopeHint}
       <span
         className="shrink-0 inline-flex items-center gap-1 rounded
                    bg-amber-100 dark:bg-amber-900/40
@@ -2008,11 +2176,22 @@ function InlineTextInput({
 interface ColWidths { leftPad: number; ordinal: number; bimLink: number; classification: number; unit: number; bimQty: number; quantity: number; unitRate: number; total: number; actions: number }
 
 /**
- * Inline unit input with datalist autocomplete. Accepts free-form values
- * and persists novel ones via `saveCustomUnit` so they appear next time.
+ * Inline unit input for resource rows. Accepts free-form values and
+ * persists novel ones via `saveCustomUnit` so they appear next time.
  *
- * Behaves like `InlineTextInput` (double-click to edit) but renders a
- * `<input list="…">` so the browser shows the locale unit suggestions.
+ * Mirrors the position-row ``UnitCellEditor`` UX: portaled dropdown
+ * anchored to the input, ArrowUp/ArrowDown navigation, Enter/Tab to
+ * commit the highlighted option (or the typed text if nothing is
+ * highlighted), Escape to cancel, click-to-pick on any option, and
+ * filtering as the user types.
+ *
+ * The dropdown is rendered via ``createPortal`` to ``document.body``
+ * so the row's ``overflow:hidden`` containers don't clip it. Resources
+ * are full-width custom rows (not AG Grid editable cells), so this
+ * component owns the entire edit lifecycle — no AG Grid editor
+ * registry is involved. Double-click on the display span enters edit
+ * mode (matches ``InlineTextInput`` and AG Grid's standard cell-edit
+ * activation gesture).
  */
 function InlineUnitInput({
   value,
@@ -2026,50 +2205,240 @@ function InlineUnitInput({
   const { t, i18n } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
+  const [open, setOpen] = useState(true);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  // Idempotency guard so the trailing onBlur doesn't double-commit
+  // after Enter/Tab/click-pick already committed.
+  const committedRef = useRef(false);
 
-  // Stable per-component datalist id so multiple rows don't collide.
-  const listId = useMemo(() => `oe-unit-list-${Math.random().toString(36).slice(2, 10)}`, []);
-  const units = useMemo(() => getUnitsForLocale(i18n.language), [i18n.language]);
+  const allOptions = useMemo(() => {
+    const list = getUnitsForLocale(i18n.language);
+    if (value && !list.includes(value)) return [...list, value];
+    return list;
+  }, [i18n.language, value]);
+
+  const filtered = useMemo(() => {
+    const q = text.trim().toLowerCase();
+    if (!q || q === value.trim().toLowerCase()) return allOptions;
+    const starts: string[] = [];
+    const contains: string[] = [];
+    for (const u of allOptions) {
+      const lc = u.toLowerCase();
+      if (lc.startsWith(q)) starts.push(u);
+      else if (lc.includes(q)) contains.push(u);
+    }
+    return [...starts, ...contains];
+  }, [text, value, allOptions]);
+
+  // Keep activeIdx within bounds when filter shrinks.
+  useEffect(() => {
+    if (activeIdx >= filtered.length) setActiveIdx(0);
+  }, [filtered.length, activeIdx]);
 
   const startEdit = useCallback(() => {
     setText(value);
     setEditing(true);
-    setTimeout(() => inputRef.current?.select(), 0);
+    setOpen(true);
+    setActiveIdx(0);
+    committedRef.current = false;
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 0);
   }, [value]);
 
-  const commit = useCallback(() => {
+  const commitWith = useCallback(
+    (raw: string) => {
+      if (committedRef.current) return;
+      committedRef.current = true;
+      setEditing(false);
+      setOpen(false);
+      const trimmed = raw.trim();
+      if (trimmed && trimmed !== value) {
+        // Persist user-typed unit so it shows up in future suggestions.
+        saveCustomUnit(trimmed);
+        onCommit(trimmed);
+      }
+    },
+    [value, onCommit],
+  );
+  const commit = useCallback(() => commitWith(text), [text, commitWith]);
+
+  const cancelEdit = useCallback(() => {
+    committedRef.current = true;
     setEditing(false);
-    const trimmed = text.trim();
-    if (trimmed && trimmed !== value) {
-      // Persist user-typed unit so it shows up in future suggestions.
-      saveCustomUnit(trimmed);
-      onCommit(trimmed);
-    }
-  }, [text, value, onCommit]);
+    setOpen(false);
+  }, []);
+
+  // Recompute the anchor rect every time the dropdown is shown / the
+  // window scrolls / resizes, so the portal stays glued to the input.
+  useLayoutEffect(() => {
+    if (!editing || !open) return;
+    const updateAnchor = () => {
+      if (inputRef.current) setAnchorRect(inputRef.current.getBoundingClientRect());
+    };
+    updateAnchor();
+    window.addEventListener('scroll', updateAnchor, true);
+    window.addEventListener('resize', updateAnchor);
+    return () => {
+      window.removeEventListener('scroll', updateAnchor, true);
+      window.removeEventListener('resize', updateAnchor);
+    };
+  }, [editing, open]);
+
+  // Scroll the active option into view as the user navigates.
+  useEffect(() => {
+    if (!editing || !open || !listRef.current) return;
+    const el = listRef.current.querySelector<HTMLLIElement>(`[data-idx="${activeIdx}"]`);
+    el?.scrollIntoView({ block: 'nearest' });
+  }, [activeIdx, editing, open]);
+
+  // Native mousedown listener on the portaled <ul>. Mirrors the
+  // ``UnitCellEditor`` rationale: a synthetic React handler may miss
+  // the event if the host re-renders the row mid-flush; reading the
+  // picked value off ``data-unit-value`` on the closest <li> is
+  // resilient because the attribute is set at render time.
+  useEffect(() => {
+    if (!editing || !open) return;
+    const ul = listRef.current;
+    if (!ul) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      const li = target?.closest?.('li[role="option"]') as HTMLElement | null;
+      if (!li || !ul.contains(li)) return;
+      const picked = li.getAttribute('data-unit-value');
+      if (picked == null) return;
+      // Prevent the input from blurring (which would close the editor
+      // before our commit runs) and stop outside-click detectors.
+      e.preventDefault();
+      commitWith(picked);
+    };
+    ul.addEventListener('mousedown', handler);
+    return () => ul.removeEventListener('mousedown', handler);
+  }, [editing, open, commitWith]);
 
   if (editing) {
     return (
-      <>
+      <div className="relative w-full h-full">
         <input
           ref={inputRef}
           type="text"
-          list={listId}
           value={text}
-          onChange={(e) => setText(e.target.value)}
-          onBlur={commit}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') commit();
-            if (e.key === 'Escape') setEditing(false);
+          maxLength={20}
+          onChange={(e) => {
+            setText(e.target.value);
+            setOpen(true);
+            setActiveIdx(0);
           }}
-          className={`bg-white dark:bg-surface-primary border border-oe-blue rounded px-1 py-0 outline-none ${className ?? ''}`}
+          onFocus={() => setOpen(true)}
+          onClick={() => setOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              const sel = filtered[activeIdx];
+              if (open && sel != null) commitWith(sel);
+              else commit();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              if (open) setOpen(false);
+              else cancelEdit();
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              setOpen(true);
+              setActiveIdx((i) => Math.min(filtered.length - 1, i + 1));
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              setActiveIdx((i) => Math.max(0, i - 1));
+            } else if (e.key === 'Tab') {
+              // Plain Tab commits the current text — same behaviour as Enter
+              // on a free-typed value, lets the user blow past the dropdown.
+              commit();
+            }
+          }}
+          onBlur={(e) => {
+            // Defer so a click on a list item commits the picked value first.
+            const next = e.relatedTarget as HTMLElement | null;
+            if (next && listRef.current?.contains(next)) return;
+            setTimeout(() => {
+              if (committedRef.current) return;
+              setOpen(false);
+              commit();
+            }, 100);
+          }}
+          className={`w-full h-full bg-white dark:bg-surface-primary border border-oe-blue rounded px-1 py-0 outline-none text-xs text-center font-mono ${className ?? ''}`}
           aria-label={t('boq.inline_edit_unit', { defaultValue: 'Edit unit' })}
-          autoFocus
+          autoComplete="off"
+          role="combobox"
+          aria-expanded={open}
+          aria-autocomplete="list"
         />
-        <datalist id={listId}>
-          {units.map((u) => <option key={u} value={u} />)}
-        </datalist>
-      </>
+        {open && filtered.length > 0 && anchorRect && createPortal(
+          (() => {
+            const MAX_HEIGHT = 256;
+            const GUTTER = 4;
+            const spaceBelow = window.innerHeight - anchorRect.bottom;
+            const flipAbove = spaceBelow < 160 && anchorRect.top > spaceBelow;
+            const top = flipAbove
+              ? Math.max(8, anchorRect.top - GUTTER - MAX_HEIGHT)
+              : anchorRect.bottom + GUTTER;
+            const left = Math.min(
+              anchorRect.left,
+              window.innerWidth - 200,
+            );
+            return (
+              <ul
+                ref={listRef}
+                role="listbox"
+                tabIndex={-1}
+                className="fixed z-[10001] max-h-64
+                           overflow-y-auto rounded border border-border-light bg-surface-elevated
+                           shadow-xl text-xs"
+                style={{
+                  top: `${top}px`,
+                  left: `${Math.max(0, left)}px`,
+                  minWidth: `${Math.max(160, anchorRect.width)}px`,
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.nativeEvent.stopImmediatePropagation();
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.nativeEvent.stopImmediatePropagation();
+                }}
+              >
+                {filtered.map((u, idx) => (
+                  <li
+                    key={u + idx}
+                    data-idx={idx}
+                    data-unit-value={u}
+                    role="option"
+                    aria-selected={idx === activeIdx}
+                    onMouseEnter={() => setActiveIdx(idx)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.nativeEvent.stopImmediatePropagation();
+                      if (!committedRef.current) commitWith(u);
+                    }}
+                    className={`cursor-pointer px-2 py-1 font-mono whitespace-nowrap ${
+                      idx === activeIdx
+                        ? 'bg-oe-blue text-white'
+                        : 'text-content-primary hover:bg-surface-secondary'
+                    }`}
+                  >
+                    {u}
+                  </li>
+                ))}
+              </ul>
+            );
+          })(),
+          document.body,
+        )}
+      </div>
     );
   }
 
@@ -2770,23 +3139,53 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
   const variantCommonStart =
     (availableVariantStats as { common_start?: string } | undefined)?.common_start?.trim() ?? '';
   const variantLabelForName = resourceVariant?.label?.trim() ?? '';
-  // Variant resource name = ``price_abstract_resource_common_start``
-  // (the abstract base) + the picked ``price_abstract_resource_variable_parts``
-  // token. When no variant picked yet, show just the base. Plain
-  // (non-variant) rows fall through to the stored name.
+  // Resolve the matching variant in the cached available_variants array
+  // so we can prefer its ``full_label`` (backend-composed
+  // common_start + variable_part, truncated to 400 chars). The picked
+  // ``resourceVariant`` only carries label/price/index — the full_label
+  // lives on the original catalog variant. Match by index first, fall
+  // back to label.
+  const matchingFullVariant: CostVariant | undefined = (() => {
+    if (!Array.isArray(availableVariants) || !resourceVariant) return undefined;
+    const byIdx = availableVariants.find(
+      (v) => typeof v.index === 'number' && v.index === resourceVariant.index,
+    );
+    if (byIdx) return byIdx;
+    return availableVariants.find(
+      (v) => (v.label || '').trim() === variantLabelForName,
+    );
+  })();
+  const variantFullLabel = (matchingFullVariant?.full_label || '').trim();
+  // Variant resource name resolution priority:
+  //   1. ``v.full_label`` from the matching cached variant (backend
+  //      composes ``common_start + variable_part``, truncated to 400 chars).
+  //   2. ``${common_start} ${variant.label}`` composed at render time.
+  //   3. ``variant.label`` alone.
+  //   4. ``common_start`` alone (no pick yet, just the base).
   const labelStartsWithCommon =
     variantLabelForName.length > 0 &&
     variantCommonStart.length > 0 &&
     variantLabelForName.toLowerCase().startsWith(variantCommonStart.toLowerCase());
   let composedVariantName = '';
-  if (variantCommonStart && variantLabelForName && !labelStartsWithCommon) {
+  if (variantFullLabel) {
+    composedVariantName = variantFullLabel;
+  } else if (variantCommonStart && variantLabelForName && !labelStartsWithCommon) {
     composedVariantName = `${variantCommonStart} ${variantLabelForName}`.trim();
   } else if (variantLabelForName) {
     composedVariantName = variantLabelForName;
   } else if (variantCommonStart) {
     composedVariantName = variantCommonStart;
   }
-  const originalName = composedVariantName || storedName;
+  // Final name resolution: the stored name always wins when it's
+  // non-empty. The composed variant name is only a fallback for
+  // resources that have no stored name yet (e.g. fresh in-flight picks
+  // before the server roundtrip lands). This keeps user customizations
+  // and legacy abstract-resource prefixes ("Прокат листовой
+  // горячекатаный...") intact across re-renders. Cleanup of buggy
+  // pre-v2.6.31 description+label stamps is done by the one-shot
+  // ``backend/scripts/backfill_variant_prefix.py`` and at apply-time
+  // (BOQModals / BOQEditorPage compose names correctly going forward).
+  const originalName = storedName || composedVariantName;
   const resourceCode = (data._resourceCode as string | undefined) || '';
 
   const handleQtyChange = useCallback(

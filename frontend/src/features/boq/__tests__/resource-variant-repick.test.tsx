@@ -219,4 +219,52 @@ describe('EditableResourceRow — variant re-pick pill (v2.6.26)', () => {
     expect(screen.queryByTestId('resource-variant-bar-0-blue')).toBeNull();
     expect(screen.queryByTestId('resource-variant-bar-0-amber')).toBeNull();
   });
+
+  /* ── Multi-resource variant pickers (v2.6.30+) ─────────────────────
+   *  A single position may carry MANY variant resources (e.g. concrete
+   *  grade + rebar diameter + formwork type). Each resource row reads
+   *  its own ``_resourceAvailableVariants`` slice, so each pill opens
+   *  the picker scoped to that resource — picking on one does not
+   *  affect the others. The rows are independent: picking on resource
+   *  index 1 forwards (positionId, 1, label) to the repick callback,
+   *  not (positionId, 0, label). */
+  it('forwards the resource index when multiple variant resources are on the same position', () => {
+    const REBAR_VARIANTS: CostVariant[] = [
+      { index: 0, label: 'Ø 8mm', price: 950, price_per_unit: null },
+      { index: 1, label: 'Ø 12mm', price: 1100, price_per_unit: null },
+    ];
+    const REBAR_STATS: VariantStats = {
+      min: 950,
+      max: 1100,
+      mean: 1025,
+      median: 1025,
+      unit: 't',
+      group: 'rebar',
+      count: 2,
+    };
+
+    // Render the SECOND variant resource on the position (resource_idx=1).
+    const { onRepickResourceVariant } = renderRow({
+      resourceData: {
+        _parentPositionId: 'pos-multi',
+        _resourceIndex: 1,
+        _resourceName: 'Rebar',
+        _resourceUnit: 't',
+        _resourceQty: 1,
+        _resourceRate: 1025,
+        _resourceCode: 'STL.B500',
+        _resourceAvailableVariants: REBAR_VARIANTS,
+        _resourceAvailableVariantStats: REBAR_STATS,
+        _resourceVariantDefault: 'median',
+      },
+    });
+    // Pill addresses the right resource via testid (-1 suffix).
+    const pill = screen.getByTestId('resource-variant-pill-1');
+    expect(pill).toBeInTheDocument();
+    fireEvent.click(pill);
+    fireEvent.click(screen.getByTestId('variant-row-1'));
+    fireEvent.click(screen.getByTestId('variant-picker-apply'));
+    // Critical: index 1 (the rebar resource), NOT 0 (the concrete one).
+    expect(onRepickResourceVariant).toHaveBeenCalledWith('pos-multi', 1, 'Ø 12mm');
+  });
 });

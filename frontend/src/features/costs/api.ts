@@ -32,6 +32,15 @@ export interface CostVariant {
   price: number;
   /** Optional per-unit price (rate normalized by unit). `null` when upstream column missing. */
   price_per_unit: number | null;
+  /** Optional grouping key — when the catalog mixes 2+ variant families
+   *  (e.g. concrete grade × reinforcement type) the backend stamps a
+   *  per-variant ``group`` so the picker can render an accordion instead
+   *  of a single flat list. Absent for single-group catalogs (the common
+   *  case today), in which case the picker falls back to flat rendering. */
+  group?: string;
+  /** Localized mirror of `group` — same fallback semantics as
+   *  `VariantStats.group_localized`. */
+  group_localized?: string;
 }
 
 /**

@@ -162,6 +162,9 @@ def _slim_autocomplete_metadata(metadata: dict[str, Any] | None) -> dict[str, An
       * ``variant_stats`` — rendered as the "N variants" hint.
       * ``variant_count`` — derived count when ``variants`` is present.
       * ``labor_hours`` / ``workers_per_unit`` — small auxiliary numbers.
+      * ``scope_of_work`` — ordered list of work steps (truncated to 8
+        entries to keep the payload bounded). Surfaced in the BOQ grid
+        as an inline (i) hint next to the description.
 
     Strips the heavy ``variants`` array — full variant data is fetched
     lazily via ``GET /v1/costs/{id}/`` when the user actually applies
@@ -181,6 +184,12 @@ def _slim_autocomplete_metadata(metadata: dict[str, Any] | None) -> dict[str, An
         v = metadata.get(k)
         if isinstance(v, (int, float)) and v > 0:
             out[k] = float(v)
+    sow = metadata.get("scope_of_work")
+    if isinstance(sow, list) and sow:
+        # Cap at 8 steps to keep the autocomplete payload small. The
+        # full list (often 10–20 steps for complex CWICR rates) is
+        # available via ``GET /v1/costs/{id}/`` when needed.
+        out["scope_of_work"] = [str(s)[:300] for s in sow[:8] if str(s).strip()]
     return out or None
 
 
@@ -1797,17 +1806,12 @@ def _download_cwicr_from_github_sync(db_id: str) -> Path | None:
     cache_dir.mkdir(parents=True, exist_ok=True)
     local_path = cache_dir / f"{db_id}.parquet"
 
-    # If already cached, return it. Stale partial downloads (<1 KB) are
-    # treated as missing so the next call re-fetches a healthy file.
+    # No-cache mode: always re-download. Any leftover from a previous run
+    # (whole or partial) is wiped before the fetch so we never serve stale
+    # bytes or get stuck behind a 0-byte file. The caller in
+    # ``load_cwicr_database`` removes the file again after processing,
+    # keeping the cache directory empty.
     if local_path.exists():
-        size = local_path.stat().st_size
-        if size > 1000:
-            logger.info("Using cached CWICR file: %s (%d bytes)", local_path, size)
-            return local_path
-        # Partial / corrupted leftover from a previous failure — wipe so
-        # the retry below gets a clean slot. Without this the user is
-        # permanently stuck behind a 0-byte cache file.
-        logger.warning("Discarding partial cache: %s (%d bytes)", local_path, size)
         local_path.unlink(missing_ok=True)
 
     logger.info("Downloading CWICR %s from GitHub: %s", db_id, url)
@@ -1848,7 +1852,12 @@ async def _download_cwicr_from_github(db_id: str) -> Path | None:
 async def _find_cwicr_file(db_id: str) -> Path | None:
     """Find a CWICR database file by database ID (e.g., DE_BERLIN).
 
-    Priority: Local Parquet > Local Excel SIMPLE > Local Excel any > GitHub download.
+    Priority: Local DDC_Toolkit Parquet > Local Excel SIMPLE > Local Excel any > GitHub download.
+
+    No-cache mode: ``~/.openestimator/cache/`` is no longer consulted on
+    lookup. The download helper writes there as a transient staging area,
+    and ``load_cwicr_database`` deletes the file in its ``finally`` block
+    so nothing accumulates between runs.
     """
     # Priority 1: Parquet files in local DDC_Toolkit (fastest and most reliable)
     for search_path in CWICR_SEARCH_PATHS:
@@ -1858,12 +1867,7 @@ async def _find_cwicr_file(db_id: str) -> Path | None:
                 if f.name.startswith(db_id) and f.suffix == ".parquet":
                     return f
 
-    # Priority 2: Cached parquet from previous GitHub download
-    cached = _CWICR_CACHE_DIR / f"{db_id}.parquet"
-    if cached.exists() and cached.stat().st_size > 1000:
-        return cached
-
-    # Priority 3: Excel SIMPLE
+    # Priority 2: Excel SIMPLE
     for search_path in CWICR_SEARCH_PATHS:
         p = Path(search_path)
         if not p.exists():
@@ -1872,7 +1876,7 @@ async def _find_cwicr_file(db_id: str) -> Path | None:
             if f.name.startswith(db_id) and "_SIMPLE" in f.name and f.suffix == ".xlsx":
                 return f
 
-    # Priority 4: Any Excel
+    # Priority 3: Any Excel
     for search_path in CWICR_SEARCH_PATHS:
         p = Path(search_path)
         if not p.exists():
@@ -1881,7 +1885,7 @@ async def _find_cwicr_file(db_id: str) -> Path | None:
             if f.name.startswith(db_id) and f.suffix == ".xlsx":
                 return f
 
-    # Priority 5: Download from GitHub (fallback — runs in thread to not block event loop)
+    # Priority 4: Download from GitHub (fallback — runs in thread to not block event loop)
     downloaded = await _download_cwicr_from_github(db_id)
     if downloaded:
         return downloaded
@@ -1992,6 +1996,16 @@ async def load_cwicr_database(
             status_code=500,
             detail=f"Failed to import CWICR database '{db_id}'. Check server logs.",
         )
+    finally:
+        # No-cache mode: if this file was downloaded into the transient
+        # cache dir for this request, delete it. A locally-installed
+        # DDC_Toolkit parquet (Priority 1) lives outside the cache dir
+        # and is left untouched.
+        try:
+            if cwicr_path.is_relative_to(_CWICR_CACHE_DIR):
+                cwicr_path.unlink(missing_ok=True)
+        except (OSError, ValueError):
+            logger.debug("Could not delete transient CWICR file %s", cwicr_path)
 
     duration = round(time.monotonic() - start, 1)
     result_data["duration_seconds"] = duration
@@ -2134,13 +2148,134 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
     ]
     available_res_cols = [c for c in res_cols if c in df.columns]
 
+    # ── Per-component variants index (from Abstract resource rows) ──
+    # Each rate_code can have several "Абстрактный ресурс" / "Abstract
+    # resource" rows — one per variable component (e.g. formwork type +
+    # board type + crane type). Each row carries its own
+    # ``price_abstract_resource_variable_parts`` list. We index by
+    # (rate_code, resource_code) so we can stamp the variant catalog onto
+    # the matching component below — replacing the previous "first row
+    # wins, dump on the cost item" behaviour that lost 2 of 3 variant
+    # slots on KANE_RINE_KAKARI_KARI and similar rates.
+    def _strip_unit_prefix(tok: str) -> str:
+        # First per-unit token can be prefixed with a unit marker
+        # (e.g. ``м3=20688.85``) — strip it so we can parse the number.
+        if "=" in tok:
+            return tok.split("=", 1)[1].strip()
+        return tok
+
+    abstract_variants_by_pair: dict[tuple[str, str], dict[str, Any]] = {}
+    if "price_abstract_resource_variable_parts" in df.columns and "resource_code" in df.columns:
+        abs_mask = df["price_abstract_resource_variable_parts"].fillna("").astype(str).str.len() > 0
+        for _, r in df[abs_mask].iterrows():
+            rc = _safe_str(r.get("rate_code", ""))
+            rescode = _safe_str(r.get("resource_code", ""))
+            if not rc or not rescode:
+                continue
+            labels = _split_bul(r.get("price_abstract_resource_variable_parts"))
+            values = _split_bul(r.get("price_abstract_resource_est_price_all_values"))
+            pu_vals_raw = _split_bul(r.get("price_abstract_resource_est_price_all_values_per_unit"))
+            pu_vals = [_strip_unit_prefix(t) for t in pu_vals_raw]
+            if not labels or len(labels) < 2:
+                continue
+            # Many rate rows (e.g. KANE_RINE_KAKARI_KARI's three variant
+            # slots) have an empty ``..._all_values`` column and only the
+            # ``_per_unit`` series populated. Fall back to per-unit so we
+            # still build the variant catalog instead of dropping it.
+            if len(values) != len(labels) and len(pu_vals) == len(labels):
+                values = pu_vals
+            if len(values) != len(labels):
+                continue
+            # ``common_start`` is the shared abstract-resource base name
+            # (e.g. "Beton, Sortenliste C") that prefixes every variant's
+            # variable_part. Read it BEFORE building variants so each row's
+            # ``full_label`` = ``common_start + label`` — what the BOQ
+            # resource row + Resource Summary display after a pick. The
+            # picker still renders ``label`` (variable part only) in its
+            # accordion rows because ``stats.common_start`` shows the base
+            # once as a header; the BOQ side has no header and needs the
+            # full composed name on each entry.
+            common_start = _safe_str(r.get("price_abstract_resource_common_start"))[:240]
+            variants_l: list[dict] = []
+            for i, (lbl, val) in enumerate(zip(labels, values, strict=False)):
+                v = _safe_float(val)
+                if v <= 0:
+                    continue
+                variable_part = lbl[:200]
+                full_label = (
+                    f"{common_start} {variable_part}".strip()
+                    if common_start
+                    else variable_part
+                )[:400]
+                variants_l.append({
+                    "index": i,
+                    "label": variable_part,
+                    "full_label": full_label,
+                    "price": round(v, 2),
+                    "price_per_unit": round(_safe_float(pu_vals[i]), 4) if i < len(pu_vals) else None,
+                })
+            if not variants_l:
+                continue
+            abstract_variants_by_pair[(rc, rescode)] = {
+                "variants": variants_l,
+                "variant_stats": {
+                    "min": round(_safe_float(r.get("price_abstract_resource_est_price_min")), 2),
+                    "max": round(_safe_float(r.get("price_abstract_resource_est_price_max")), 2),
+                    "mean": round(_safe_float(r.get("price_abstract_resource_est_price_mean")), 2),
+                    "median": round(_safe_float(r.get("price_abstract_resource_est_price_median")), 2),
+                    "unit": _safe_str(r.get("price_abstract_resource_unit"))[:20],
+                    "group": _safe_str(r.get("price_abstract_resource_group_per_unit"))[:120],
+                    "count": len(variants_l),
+                    "common_start": common_start,
+                },
+            }
+    _log.info("Indexed %d per-component variant catalogs", len(abstract_variants_by_pair))
+
+    # ── Scope-of-work index ──
+    # ``work_composition_text`` carries the ordered steps describing HOW a
+    # position is performed (e.g. "Установка телескопических стоек." /
+    # "Bodenbearbeitung nach Maß." / "Préparation du sol."). The companion
+    # ``is_scope`` flag is set in EN/RU exports but stays False in DE/FR
+    # exports, so we don't gate on it — instead we treat any row with a
+    # non-empty ``work_composition_text`` AND an empty ``resource_name`` as
+    # a scope step. Verified universal across all 16 cached regional
+    # parquets (168 120 scope rows in each, 0 overlaps with resource rows).
+    scope_by_code: dict[str, list[str]] = {}
+    if "work_composition_text" in df.columns:
+        wct_str = df["work_composition_text"].fillna("").astype(str)
+        rname_str = df["resource_name"].fillna("").astype(str) if "resource_name" in df.columns else None
+        scope_mask = wct_str.str.len() > 0
+        if rname_str is not None:
+            scope_mask = scope_mask & (rname_str.str.len() == 0)
+        scope_sub = df[scope_mask][["rate_code", "work_composition_text"]]
+        for _, r in scope_sub.iterrows():
+            rc = _safe_str(r.get("rate_code", ""))
+            text = _safe_str(r.get("work_composition_text", ""))
+            if not rc or not text or text == "nan":
+                continue
+            scope_by_code.setdefault(rc, []).append(text[:500])
+    _log.info("Indexed scope_of_work for %d rate_codes", len(scope_by_code))
+
     resources_by_code: dict[str, list[dict]] = {}
     if "resource_name" in df.columns and _cost_col in df.columns:
         # Filter rows that have resource data (non-empty name, non-zero cost)
-        res_df = df[available_res_cols].copy()
+        res_df = df[available_res_cols + (["price_abstract_resource_variable_parts"] if "price_abstract_resource_variable_parts" in df.columns else [])].copy()
         res_df = res_df[res_df["resource_name"].fillna("").str.len() > 0]
         if _cost_col in res_df.columns:
-            res_df = res_df[res_df[_cost_col].fillna(0).astype(float).abs() > 0.001]
+            # Keep abstract-resource rows even with cost==0 — they're a
+            # variant slot the user picks from. Without this carve-out
+            # KAME-LI-MENE-KAPU and similar amortisation/option rows get
+            # silently dropped and the user loses one of their variant
+            # picks.
+            if "price_abstract_resource_variable_parts" in res_df.columns:
+                _is_abstract = (
+                    res_df["price_abstract_resource_variable_parts"].fillna("").astype(str).str.len() > 0
+                )
+                res_df = res_df[
+                    (res_df[_cost_col].fillna(0).astype(float).abs() > 0.001) | _is_abstract
+                ]
+            else:
+                res_df = res_df[res_df[_cost_col].fillna(0).astype(float).abs() > 0.001]
         if "row_type" in res_df.columns:
             res_df = res_df[res_df["row_type"].fillna("") != "Scope of work"]
 
@@ -2223,17 +2358,22 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
                 if comps is None:
                     comps = []
                     resources_by_code[rc] = comps
-                comps.append(
-                    {
-                        "name": nm,
-                        "code": cd,
-                        "unit": un,
-                        "quantity": float(qt),
-                        "unit_rate": float(rt),
-                        "cost": float(cs),
-                        "type": tp,
-                    }
-                )
+                comp: dict[str, Any] = {
+                    "name": nm,
+                    "code": cd,
+                    "unit": un,
+                    "quantity": float(qt),
+                    "unit_rate": float(rt),
+                    "cost": float(cs),
+                    "type": tp,
+                }
+                # Stamp per-component variant catalog if this resource is one
+                # of the abstract-resource (variant) slots for this rate.
+                v_data = abstract_variants_by_pair.get((rc, cd))
+                if v_data is not None:
+                    comp["available_variants"] = v_data["variants"]
+                    comp["available_variant_stats"] = v_data["variant_stats"]
+                comps.append(comp)
 
         _log.info("Built resources for %d rate_codes in %.1fs", len(resources_by_code), time.monotonic() - start)
 
@@ -2300,9 +2440,22 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
             if v > 0:
                 metadata[mkey] = round(v, 2)
 
+        # ── Scope of work — ordered steps describing HOW the position is
+        # performed (e.g. "Установка телескопических стоек."). Sourced from
+        # rows flagged ``is_scope=True`` and pre-indexed above.
+        steps = scope_by_code.get(code)
+        if steps:
+            metadata["scope_of_work"] = steps
+
         labels = _split_bul(row.get("price_abstract_resource_variable_parts"))
         values = _split_bul(row.get("price_abstract_resource_est_price_all_values"))
-        pu_vals = _split_bul(row.get("price_abstract_resource_est_price_all_values_per_unit"))
+        pu_vals_raw = _split_bul(row.get("price_abstract_resource_est_price_all_values_per_unit"))
+        pu_vals = [_strip_unit_prefix(t) for t in pu_vals_raw]
+        # Some rate rows have an empty ``..._all_values`` series and only
+        # the per-unit one is populated — fall back so the legacy picker
+        # still gets a catalog instead of dropping it on import.
+        if labels and len(values) != len(labels) and len(pu_vals) == len(labels):
+            values = pu_vals
         # ``common_start`` is the shared base name for the abstract resource
         # (e.g. "Ready-mix concrete"); each ``variable_parts[i]`` is the
         # distinguishing tail (e.g. "C25/30 delivered"). The picker renders
