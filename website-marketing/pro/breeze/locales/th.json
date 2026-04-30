@@ -9,15 +9,15 @@
     "faq": "FAQ",
     "github": "GitHub",
     "try_demo": "Try demo",
-    "install": "Install"
+    "install": "ติดตั้ง"
   },
   "hero": {
     "version_meta": "shipped 2026-04-20",
-    "sub": "Open-source ERP for construction teams — estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time figures stay in sync with the drawings and the BOQ behind them.",
-    "cta_install": "Install now",
+    "sub": "เปิด-source ERP for construction teams — estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time figures stay in sync with the drawings and the BOQ behind them.",
+    "cta_install": "ติดตั้ง now",
     "cta_star": "Star on GitHub",
-    "meta_selfhost": "Self-hosted",
-    "mod_projects_title": "Projects",
+    "meta_selfhost": "โฮสต์เอง",
+    "mod_projects_title": "โครงการ",
     "mod_projects_sub": "portfolio",
     "mod_projects_feature": "Portfolio<br>&amp; teams",
     "mod_boq_sub": "assemblies",
@@ -31,7 +31,7 @@
     "mod_costs_title": "Costs",
     "mod_costs_sub": "55k items",
     "mod_costs_feature": "55k items<br>vector search",
-    "mod_validation_title": "Validation",
+    "mod_validation_title": "การตรวจสอบ",
     "mod_validation_sub": "compliance",
     "mod_validation_feature": "Traffic-light<br>report",
     "mod_tenders_title": "Tenders",
@@ -43,15 +43,15 @@
     "mod_inventory_title": "Inventory",
     "mod_inventory_sub": "materials",
     "mod_inventory_feature": "Stock<br>&amp; orders",
-    "mod_safety_title": "Safety",
-    "mod_safety_feature": "Incidents<br>&amp; toolbox",
+    "mod_safety_title": "ความปลอดภัย",
+    "mod_safety_feature": "เหตุการณ์<br>&amp; toolbox",
     "mod_documents_title": "Documents",
     "mod_documents_sub": "revisions",
-    "mod_documents_feature": "Revisions<br>&amp; diffs",
+    "mod_documents_feature": "การแก้ไข<br>&amp; diffs",
     "mod_site_tasks_title": "Site tasks",
     "mod_site_tasks_sub": "daily",
     "mod_site_tasks_feature": "Snags<br>&amp; photos",
-    "mod_equipment_title": "Equipment",
+    "mod_equipment_title": "อุปกรณ์",
     "mod_equipment_sub": "fleet",
     "mod_equipment_feature": "Fleet<br>&amp; plant",
     "mod_quality_title": "Quality",
@@ -69,8 +69,8 @@
     "title_line1": "Stop fighting your tools.",
     "title_line2_start": "Start",
     "title_line2_italic": "estimating.",
-    "sub": "Install in one command. Run on your laptop, VPS, or the cloud of your choice. Self-host forever, or let us do it.",
-    "btn_install": "Install now",
+    "sub": "ติดตั้ง in one command. Run on your laptop, VPS, or the cloud of your choice. Self-host forever, or let us do it.",
+    "btn_install": "ติดตั้ง now",
     "btn_star": "Star on GitHub"
   },
   "sections": {
@@ -88,10 +88,10 @@
   "demo": {
     "eyebrow": "Live preview · no sign-up, no demo call",
     "title": "Skip the sales call. <span class=\"italic\">See it work.</span>",
-    "lede": "No six-figure licence to read back your own data.",
+    "lede": "ไม่ six-figure licence to read back your own data.",
     "tab1_title": "BOQ editor",
     "tab1_hint": "Build bills of quantities, priced rows.",
-    "tab2_title": "Cost database",
+    "tab2_title": "ฐานข้อมูลต้นทุน",
     "tab2_hint": "55,000 priced positions · 18+ modules.",
     "tab3_title": "BIM → BOQ",
     "tab3_hint": "Link IFC and RVT models to estimates.",
@@ -101,17 +101,17 @@
     "tab5_hint": "Click-to-measure on PDF drawings.",
     "tab6_title": "Bulk CAD groups",
     "tab6_hint": "Link many elements, one pass.",
-    "tab7_title": "AI Estimate",
+    "tab7_title": "ประมาณราคาด้วย AI",
     "tab7_hint": "Photo or doc → priced first pass.",
     "more_value": "<em>+50</em>more features",
-    "more_hint": "Tendering, reports, validation, collab, multi-tenant …",
+    "more_hint": "การประกวดราคา, reports, การตรวจสอบ, collab, multi-tenant …",
     "slide1_alt": "BOQ editor — build bills of quantities, priced rows",
-    "slide2_alt": "Cost database — 55,000 priced positions, instant semantic search",
+    "slide2_alt": "ฐานข้อมูลต้นทุน — 55,000 priced positions, instant semantic search",
     "slide3_alt": "BIM → BOQ — link 3D model quantities directly to estimate positions",
     "slide4_alt": "AutoCAD → BOQ — DWG layers pushed into positions",
     "slide5_alt": "PDF takeoff — click-to-measure on PDF drawings, straight to BOQ",
     "slide6_alt": "Bulk-link CAD groups — select many elements, push quantities into BOQ at once",
-    "slide7_alt": "AI Estimate — snap a photo or upload a doc, get a first-pass priced estimate",
+    "slide7_alt": "ประมาณราคาด้วย AI — snap a photo or upload a doc, get a first-pass priced estimate",
     "now_name_default": "BOQ editor",
     "now_desc_default": "Build bills of quantities, priced rows"
   },
@@ -120,10 +120,10 @@
     "lede": "AGPL-3.0 on GitHub. Issues and the roadmap live there; if you want to see what's coming next or what broke last week, it's all on the commit log.",
     "hero_eyebrow": "<span class=\"num\">GitHub</span> · datadrivenconstruction",
     "hero_title": "Star the repo, <span class=\"italic\">shape the roadmap.</span>",
-    "hero_desc": "Every issue, PR and roadmap item is public on GitHub. Open an issue, comment on what matters, or send a PR — contributions of any size are welcome.",
+    "hero_desc": "Every issue, PR and roadmap item is public on GitHub. เปิด an issue, comment on what matters, or send a PR — contributions of any size are welcome.",
     "stat_stargazers": "stargazers",
     "stat_open_source": "open-source",
-    "cta_open_repo": "Open the repo",
+    "cta_open_repo": "เปิด the repo",
     "modcard_1_title": "Documentation",
     "modcard_1_desc": "Getting started, module SDK, API reference and deployment guides.",
     "modcard_2_title": "Issues & roadmap",
@@ -139,7 +139,7 @@
   "numbers": {
     "eyebrow": "<span class=\"num\">03</span> · by the numbers",
     "lede": "Numbers from the current release. Some of these will be out of date by the time you read this — the repo moves fast.",
-    "card1_eyebrow": "cost database",
+    "card1_eyebrow": "ฐานข้อมูลต้นทุน",
     "card1_label": "ready-to-use cost items across trades and assemblies.",
     "card1_foot": "updated monthly",
     "card2_eyebrow": "CAD formats",
@@ -148,7 +148,7 @@
     "card3_label": "plug-in modules covering the full site workflow — projects, BOQ, takeoff, tenders and more.",
     "card3_foot": "add & remove like packages",
     "card4_eyebrow": "licensing",
-    "card4_label": "open-source core under AGPL-3.0. No vendor lock-in. Your data stays yours.",
+    "card4_label": "open-source core under AGPL-3.0. ไม่ vendor lock-in. Your data stays yours.",
     "card4_foot": "AGPL-3.0 + Commercial"
   },
   "tour": {
@@ -156,75 +156,75 @@
     "lede": "Seven steps from first-run to finished tender. Follow them in order or jump ahead — each one plays a short capture from the running app.",
     "stage_caption_default": "01 · onboarding",
     "info_title_default": "Onboarding",
-    "info_desc_default": "First run. Pick language, region and currency — the app comes with a starter cost database (55,000+ priced positions) already loaded. Zero setup, no seed-data dance.",
+    "info_desc_default": "First run. Pick language, region and currency — the app comes with a starter ฐานข้อมูลต้นทุน (55,000+ priced positions) already loaded. Zero setup, no seed-data dance.",
     "info_chip1_default": "Language",
     "info_chip2_default": "Region",
-    "info_chip3_default": "Currency",
+    "info_chip3_default": "สกุลเงิน",
     "info_chip4_default": "Starter DB",
     "chip1_title": "Onboarding",
-    "chip2_title": "Create a project",
+    "chip2_title": "สร้าง a โครงการ",
     "chip3_title": "Start the estimate",
     "chip4_title": "Add positions",
     "chip5_title": "Resources",
     "chip6_title": "Link BIM",
     "chip7_title": "Link CAD / PDF",
-    "chip8_title": "Validate",
-    "chip9_title": "Tasks",
+    "chip8_title": "ตรวจสอบ",
+    "chip9_title": "งาน",
     "chip10_title": "Tender",
     "steps": [
       {
         "caption": "01 · onboarding",
         "title": "Onboarding",
-        "desc": "First run. Pick language, region and currency — the app comes with a starter cost database (55,000+ priced positions) already loaded. Zero setup, no seed-data dance.",
+        "desc": "First run. Pick language, region and currency — the app comes with a starter ฐานข้อมูลต้นทุน (55,000+ priced positions) already loaded. Zero setup, no seed-data dance.",
         "chips": [
           "Language",
           "Region",
-          "Currency",
+          "สกุลเงิน",
           "Starter DB"
         ]
       },
       {
-        "caption": "02 · create a project",
-        "title": "Create a project",
-        "desc": "Name it, set the location, invite the team. Every project gets its own dashboard, document room, validation rules and a set of estimates. Switch between projects in one click.",
+        "caption": "02 · create a โครงการ",
+        "title": "สร้าง a โครงการ",
+        "desc": "Name it, set the location, invite the team. Every โครงการ gets its own dashboard, document room, กฎการตรวจสอบ and a set of estimates. Switch between projects in one click.",
         "chips": [
           "Team",
           "Location",
           "Documents",
-          "Dashboard"
+          "แดชบอร์ด"
         ]
       },
       {
         "caption": "03 · start the estimate",
         "title": "Start the estimate",
-        "desc": "Open a new BOQ. Pick a classification tree — DIN 276, NRM, MasterFormat, or your own — and start building sections. Drag to reorder, nest any depth, copy from templates.",
+        "desc": "เปิด a new BOQ. Pick a classification tree — DIN 276, NRM, MasterFormat, or your own — and start building sections. Drag to reorder, nest any depth, copy from templates.",
         "chips": [
           "BOQ",
           "Sections",
-          "Templates",
+          "เทมเพลต",
           "Classification"
         ]
       },
       {
         "caption": "04 · add positions",
         "title": "Add positions",
-        "desc": "Search 55,000+ priced positions by trade, region or keyword. Drop them straight into the BOQ with their unit rates already filled in. Typeahead, semantic search, instant totals.",
+        "desc": "ค้นหา 55,000+ priced positions by trade, region or keyword. Drop them straight into the BOQ with their หน่วย rates already filled in. Typeahead, semantic search, instant totals.",
         "chips": [
           "55,000+",
           "Semantic search",
-          "Unit rates",
+          "หน่วย rates",
           "Regional"
         ]
       },
       {
         "caption": "05 · resources & assemblies",
         "title": "Resources & assemblies",
-        "desc": "Each position holds its resource breakdown — materials, labour, equipment — grouped as assemblies. Override rates, apply regional factors, watch totals recalculate across the project.",
+        "desc": "Each รายการ holds its resource breakdown — materials, labour, อุปกรณ์ — grouped as assemblies. Override rates, apply regional factors, watch totals recalculate across the โครงการ.",
         "chips": [
           "Materials",
           "Labour",
-          "Equipment",
-          "Assemblies"
+          "อุปกรณ์",
+          "ชุดประกอบ"
         ]
       },
       {
@@ -235,7 +235,7 @@
           "IFC",
           "RVT",
           "Canonical format",
-          "Revisions"
+          "การแก้ไข"
         ]
       },
       {
@@ -250,8 +250,8 @@
         ]
       },
       {
-        "caption": "08 · validate",
-        "title": "Validate the estimate",
+        "caption": "08 · ตรวจสอบ",
+        "title": "ตรวจสอบ the estimate",
         "desc": "Traffic-light pass across the whole BOQ. Built-in rule sets for DIN 276, NRM, MasterFormat and GAEB. Plus quality rules — zero prices, missing quantities, outlier rates — flagged inline.",
         "chips": [
           "DIN 276",
@@ -262,19 +262,19 @@
       },
       {
         "caption": "09 · tasks & follow-ups",
-        "title": "Tasks & follow-ups",
-        "desc": "Every flagged row, BIM element or reviewer comment can become a task. Kanban board per project, assignees, due dates, status columns — the estimators' to-do list lives where the estimate lives.",
+        "title": "งาน & follow-ups",
+        "desc": "Every flagged row, BIM element or reviewer comment can become a task. Kanban board per โครงการ, assignees, due dates, status columns — the estimators' to-do list lives where the estimate lives.",
         "chips": [
           "Kanban",
           "Assignees",
           "Due dates",
-          "Comments"
+          "ความคิดเห็น"
         ]
       },
       {
-        "caption": "10 · export the tender",
-        "title": "Export the tender",
-        "desc": "Totals roll up per section, trade and discipline. Export GAEB X83/X84/X89, Excel, PDF or JSON. Send the tender pack to subcontractors, collect bids, compare side-by-side.",
+        "caption": "10 · ส่งออก the tender",
+        "title": "ส่งออก the tender",
+        "desc": "Totals roll up per section, trade and discipline. ส่งออก GAEB X83/X84/X89, Excel, PDF or JSON. Send the tender pack to subcontractors, collect bids, compare side-by-side.",
         "chips": [
           "GAEB",
           "Excel",
@@ -291,7 +291,7 @@
     "col_enterprise": "Enterprise estimating suite",
     "col_heavy_civil": "Heavy civil bid tool",
     "col_legacy_erp": "Legacy construction ERP",
-    "row_agpl": "Open-source core (AGPL-3.0)",
+    "row_agpl": "เปิด-source core (AGPL-3.0)",
     "row_selfhost": "Self-host on your infra",
     "row_aitakeoff": "AI takeoff from PDF / photo",
     "row_multicad": "Multi-CAD ingest (DWG / RVT / IFC / DGN)",
@@ -313,15 +313,15 @@
   "video_intro": {
     "eyebrow": "02 · watch it run",
     "title": "See it work. <em>In one take.</em>",
-    "sub": "A short walkthrough of the whole pipeline — drawing in, tender out. No voiceover, no narration, just the product doing what it does.",
+    "sub": "A short walkthrough of the whole pipeline — drawing in, tender out. ไม่ voiceover, no narration, just the product doing what it does.",
     "badge": "watch · no sign-up"
   },
   "modular_universe": {
     "divider": "under the hood"
   },
   "module_lab": {
-    "eyebrow": "modular by design",
-    "title": "Add a module. Remove one. <br class=\"ml-br\"><em>No rebuild.</em>",
+    "eyebrow": "modular by ออกแบบ",
+    "title": "Add a module. Remove one. <br class=\"ml-br\"><em>ไม่ rebuild.</em>",
     "sub": "Every feature is a self-contained package. Drop it in, pull it out — the running install picks it up in seconds, zero downtime.",
     "card_regional": "Regional prices",
     "slot_label": "your module<br>goes here",
@@ -342,7 +342,7 @@
   },
   "voices": {
     "eyebrow": "<span class=\"num\">09</span> · why we're building this",
-    "para1": "Over the past ten years, I have been deeply involved in resource management for construction projects. This journey inevitably led me to study the history of the technologies that have shaped the industry—from the earliest attempts at design automation to modern ERP platforms <span style=\"color: var(--ink-3);\">(see the series of articles <em>“The Lobbyists’ Wars and the Development of BIM”</em> and <em>“The History of the BIM Map”</em>)</span>. Without understanding where we came from, it is impossible to see where we are going.",
+    "para1": "Over the past ten years, I have been deeply involved in resource management for construction projects. This journey inevitably led me to study the history of the technologies that have shaped the industry—from the earliest attempts at ออกแบบ automation to modern ERP platforms <span style=\"color: var(--ink-3);\">(see the series of articles <em>“The Lobbyists’ Wars and the Development of BIM”</em> and <em>“The History of the BIM Map”</em>)</span>. Without understanding where we came from, it is impossible to see where we are going.",
     "para2": "Over the years, dozens of articles have come off my desk, read by millions of professionals around the world. At the same time, I’ve consulted with major construction and consulting firms, developers, and software vendors themselves on data management in projects—helping them navigate processes where data is not a byproduct but the foundation for decision-making. This work gave me a rare opportunity to see the industry from both sides: through the eyes of those who create the tools and through the eyes of those who use them in real projects every day. Many of these observations and reflections are collected in my book <a href=\"https://datadrivenconstruction.io/\" target=\"_blank\" rel=\"noopener\">Data-Driven Construction</a>, which is now available in 16 languages—<a href=\"https://datadrivenconstruction.io/books/\" target=\"_blank\" rel=\"noopener\">datadrivenconstruction.io/books</a>.",
     "para3": "Two other things have kept me busy: helping non-developers get into proprietary formats that were never meant to be opened, and finding a cleaner way to describe construction work through a resource model. These efforts have resulted in free tools—<a href=\"https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN\" target=\"_blank\" rel=\"noopener\">DDC CAD/BIM data converters</a> (Revit, IFC, DWG, DGN → structured data), <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\">available on GitHub</a>, and the multilingual <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">CWICR database</a> of construction works and resources—over 55,000 items in 11 languages, published as <a href=\"https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR\" target=\"_blank\" rel=\"noopener\">OpenConstructionEstimate-DDC-CWICR</a>. All of this was a necessary step toward an idea I’ve been pursuing for the past decade — an open-source modular ERP for the construction industry.",
     "founder_title": "founder, datadrivenconstruction.io",
@@ -377,16 +377,16 @@
   "pricing": {
     "eyebrow": "pricing",
     "lede": "Two paths. Run it yourself for free under AGPL-3.0, or talk to us when you need hosted support, a commercial license for the converters, or anything else that shouldn't live in the open-source license.",
-    "tier1_eyebrow": "Self-hosted",
+    "tier1_eyebrow": "โฮสต์เอง",
     "tier1_amount": "Free",
     "tier1_desc": "The full open-source platform. Run it on your infra, no strings attached.",
     "tier1_feature1": "All 55,000+ cost items",
     "tier1_feature2": "Multi-CAD ingest (DWG / RVT / IFC / DGN)",
-    "tier1_feature3": "BOQ editor + validation pipeline",
+    "tier1_feature3": "BOQ editor + การตรวจสอบ pipeline",
     "tier1_feature4": "All 18 modules out of the box",
     "tier1_feature5": "Community support on GitHub",
     "tier1_feature6": "AGPL-3.0 license",
-    "tier1_cta": "Install free",
+    "tier1_cta": "ติดตั้ง free",
     "tier2_badge": "For commercial use",
     "tier2_eyebrow": "Hosted & licensed",
     "tier2_amount": "Get in touch",
@@ -395,7 +395,7 @@
     "tier2_feature2": "Commercial license for CAD converters & cost DB",
     "tier2_feature3": "Private deployments (on-prem, air-gapped, VPC)",
     "tier2_feature4": "SSO, RBAC, SLA & priority support",
-    "tier2_feature5": "Custom validation rule sets & integrations",
+    "tier2_feature5": "Custom การตรวจสอบ rule sets & integrations",
     "tier2_feature6": "Direct line for onboarding and roadmap requests",
     "tier2_cta": "Contact us"
   },
@@ -422,7 +422,7 @@
     "size_101_500": "101 – 500",
     "size_500_plus": "500+",
     "field_use_case": "Intended use",
-    "use_internal": "Internal use only (AGPL may be fine)",
+    "use_internal": "ภายใน use only (AGPL may be fine)",
     "use_saas": "Public SaaS / customer-facing product",
     "use_embedded": "Embedded in our own commercial software",
     "use_oem": "OEM / white-label distribution",
@@ -436,38 +436,38 @@
   "faq": {
     "eyebrow": "questions",
     "q1": "Is the core really free and open-source?",
-    "a1": "Yes. The core is AGPL-3.0 on <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\">GitHub</a>. You can self-host forever, audit every line, fork it, or run it in production. We also offer a commercial license for enterprises that can't use AGPL.",
+    "a1": "ใช่. The core is AGPL-3.0 on <a href=\"https://github.com/datadrivenconstruction\" target=\"_blank\" rel=\"noopener\">GitHub</a>. You can self-host forever, audit every line, fork it, or run it in production. We also offer a commercial license for enterprises that can't use AGPL.",
     "q2": "What hardware do I need to run it?",
     "a2": "The core runs on a 2 GB VPS. One PostgreSQL instance is all you need for a small team. AI features (takeoff, vector search) are optional — features degrade gracefully when AI services aren't available.",
-    "q3": "How do I import from my existing system?",
-    "a3": "Native GAEB XML (X83 / X84 / X89), Excel and CSV import are built in. Connectors for proprietary systems ship as modules — the marketplace already has a handful, including workflow integration via n8n. Custom migrations are available via Enterprise support.",
+    "q3": "How do I นำเข้า from my existing system?",
+    "a3": "Native GAEB XML (X83 / X84 / X89), Excel and CSV นำเข้า are built in. Connectors for proprietary systems ship as modules — the marketplace already has a handful, including workflow integration via n8n. Custom migrations are available via Enterprise support.",
     "q4": "Do I need AI services to use the product?",
-    "a4": "No. The BOQ editor, validation pipeline, CAD ingest and cost database all work without AI. AI takeoff and semantic search are optional enhancements — you can bring your own model or use the hosted CV/LLM services via Pro.",
+    "a4": "ไม่. The BOQ editor, การตรวจสอบ pipeline, CAD ingest and ฐานข้อมูลต้นทุน all work without AI. AI takeoff and semantic search are optional enhancements — you can bring your own model or use the hosted CV/LLM services via Pro.",
     "q5": "Who's behind this?",
-    "a5": "Built by <a href=\"https://datadrivenconstruction.io\" target=\"_blank\" rel=\"noopener\">DataDrivenConstruction</a> — the team behind CWICR (the 55,000-item cost database shipped here), cad2data, and 10+ years of construction-tech engineering. We ship our own tools on it.",
+    "a5": "Built by <a href=\"https://datadrivenconstruction.io\" target=\"_blank\" rel=\"noopener\">DataDrivenConstruction</a> — the team behind CWICR (the 55,000-item ฐานข้อมูลต้นทุน shipped here), cad2data, and 10+ years of construction-tech engineering. We ship our own tools on it.",
     "q6": "Can I contribute a module?",
-    "a6": "Absolutely. The SDK ships with a cookiecutter template — scaffold a module in one command, drop it in the marketplace when it's ready. Good candidates: regional cost databases, ERP connectors, custom validation rule sets.",
+    "a6": "Absolutely. The SDK ships with a cookiecutter template — scaffold a module in one command, drop it in the marketplace when it's ready. Good candidates: regional cost databases, ERP connectors, custom การตรวจสอบ rule sets.",
     "q7": "Where is my data stored? Does anything leave my server?",
-    "a7": "On your infrastructure. Projects, drawings and cost data live in your PostgreSQL and your object storage — nothing is phoned home, no telemetry by default. If you enable hosted AI services, only the payload you send is processed; it's opt-in per workspace and you can point the client at self-hosted models instead.",
+    "a7": "On your infrastructure. โครงการ, drawings and cost data live in your PostgreSQL and your object storage — nothing is phoned home, no telemetry by default. If you enable hosted AI services, only the payload you send is processed; it's opt-in per workspace and you can point the client at self-hosted models instead.",
     "q8": "What CAD and BIM formats are supported?",
     "a8": "DWG, DGN, RVT and IFC ingest through the cad2data pipeline into a canonical format — one schema to query, classify and cost against. PDF drawings go through the takeoff pipeline (vector extraction + OCR). New formats land as modules, not core rewrites.",
     "q9": "How does the commercial license work?",
-    "a9": "AGPL-3.0 is fine for most internal and service use. If you embed the product in a closed SaaS, ship it inside a proprietary application, or need an explicit waiver for procurement, talk to us — commercial terms cover that, plus priority support and enterprise SLA. No per-seat metering, no forced cloud.",
+    "a9": "AGPL-3.0 is fine for most internal and service use. If you embed the product in a closed SaaS, ship it inside a proprietary application, or need an explicit waiver for procurement, talk to us — commercial terms cover that, plus priority support and enterprise SLA. ไม่ per-seat metering, no forced cloud.",
     "q10": "Can I migrate away later?",
-    "a10": "Yes, and we mean it. Everything you put in comes back out — GAEB XML, Excel, CSV, JSON, Parquet, or a direct PostgreSQL dump. The schema is documented, the source is open; no proprietary file formats, no escrow games, no hostage data.",
+    "a10": "ใช่, and we mean it. Everything you put in comes back out — GAEB XML, Excel, CSV, JSON, Parquet, or a direct PostgreSQL dump. The schema is documented, the source is open; no proprietary file formats, no escrow games, no hostage data.",
     "q11": "How often do you ship updates?",
     "a11": "Minor releases roughly every 2–3 weeks, patch releases as needed. Changelog lives on GitHub, every tagged version has a Docker image, and migrations are reversible. You decide when to upgrade — self-hosted means nobody forces a deploy window on you.",
     "q12": "Which languages and regions are supported?",
-    "a12": "30 languages ship in the core i18n. Cost database labels, validation rule sets and classification trees are per-region modules — pick the ones you need, add your own. No hard-coded currency, no hard-coded date format."
+    "a12": "30 languages ship in the core i18n. ฐานข้อมูลต้นทุน labels, การตรวจสอบ rule sets and classification trees are per-region modules — pick the ones you need, add your own. ไม่ hard-coded currency, no hard-coded date format."
   },
   "install_cta": {
     "also_works_with": "Also works with:",
-    "reassure_no_card": "No credit card required",
+    "reassure_no_card": "ไม่ credit card required",
     "reassure_self_host": "Self-host on your infra",
     "reassure_agpl_forever": "AGPL-3.0 forever"
   },
   "footer": {
-    "tagline": "Open-source construction ERP. AI-powered BOQ, multi-CAD ingest, 55,000+ cost items — all in one lightweight install.",
+    "tagline": "เปิด-source construction ERP. AI-powered BOQ, multi-CAD ingest, 55,000+ cost items — all in one lightweight install.",
     "col_product": "Product",
     "col_developers": "Developers",
     "col_company": "Company",
@@ -479,7 +479,7 @@
     "link_edition_picker": "Edition picker",
     "link_github": "GitHub",
     "link_tech_stack": "Tech stack",
-    "link_modules": "Modules",
+    "link_modules": "โมดูล",
     "link_api_reference": "API reference",
     "link_sdk_docs": "SDK docs",
     "link_about_ddc": "About DDC",
@@ -495,13 +495,13 @@
     "bottom_back": "← back to editions",
     "aria_github": "GitHub",
     "aria_website": "Website",
-    "aria_email": "Email",
+    "aria_email": "อีเมล",
     "link_cookies": "Cookie preferences"
   },
   "newsletter": {
     "eyebrow": "Stay in the loop",
     "title": "Get product updates <span class=\"italic\">straight in your inbox.</span>",
-    "lede": "Monthly digest — new modules, CAD parser updates, cost-database releases, behind-the-scenes notes. No spam, unsubscribe any time.",
+    "lede": "Monthly digest — new modules, CAD parser updates, cost-database releases, behind-the-scenes notes. ไม่ spam, unsubscribe any time.",
     "placeholder": "your@email.com",
     "submit": "Subscribe",
     "note": "~1 email per month · no sales calls · GDPR-compliant",
@@ -510,16 +510,16 @@
   "popup": {
     "eyebrow": "Stay in the loop",
     "title": "Don't miss <span class=\"italic\">what's next.</span>",
-    "sub": "One short email a month — new modules, CAD parser releases, behind-the-scenes notes. No spam, unsubscribe any time.",
+    "sub": "One short email a month — new modules, CAD parser releases, behind-the-scenes notes. ไม่ spam, unsubscribe any time.",
     "placeholder": "your@email.com",
     "submit": "Subscribe",
     "note": "~1 email per month · GDPR-compliant",
-    "close": "Close"
+    "close": "ปิด"
   },
   "custom": {
     "eyebrow": "You ship — you keep",
-    "title": "Custom-built. <em>Self-hosted forever.</em>",
-    "lede": "Doesn't fit a tier? We design a stack tailored to your operations and hand it over with full source. Your hardware. Your data. Your rules.",
+    "title": "Custom-built. <em>โฮสต์เอง forever.</em>",
+    "lede": "Doesn't fit a tier? We ออกแบบ a stack tailored to your operations and hand it over with full source. Your hardware. Your data. Your rules.",
     "corner_tl": "FIVE LAYERS / ALL YOURS",
     "corner_tr": "REV. 2026.04 — DRAFT",
     "corner_bl": "YOU OWN ALL OF THIS",
@@ -534,7 +534,7 @@
     "l5_sub": "engineers, not just users · trained",
     "l4_title": "Your modules",
     "l4_tag": "custom",
-    "l4_sub": "BOQ · BIM · Tasks · custom reports",
+    "l4_sub": "BOQ · BIM · งาน · custom reports",
     "l4_meta": "built",
     "l3_title": "ERP core",
     "l3_sub": "GitHub · AGPL-3.0 · audit any line",
@@ -546,7 +546,7 @@
     "svc1_title": "Custom build",
     "svc1_meta": "FROM 4 WEEKS",
     "svc1_desc": "Discovery → workshop → modules picked → built → deployed on your hardware. Source delivered.",
-    "svc1_li1": "4–12 weeks total",
+    "svc1_li1": "4–12 weeks รวม",
     "svc1_li2": "AGPL or commercial license",
     "svc1_li3": "30 days post-launch support",
     "svc2_tag": "Train",
@@ -564,7 +564,7 @@
     "svc3_li2": "Outcome doc + recommendations",
     "svc3_li3": "Roll over into a build anytime",
     "form_title": "Tell us what you’re after. <em>Every message gets a real reply.</em>",
-    "form_sub": "I work on this project solo, so I prioritize teams that are ready to allocate real resources to a pilot — budget, timeline, a sponsor. Send the brief and I’ll get back to you within a few days.",
+    "form_sub": "I work on this โครงการ solo, so I prioritize teams that are ready to allocate real resources to a pilot — budget, timeline, a sponsor. Send the brief and I’ll get back to you within a few days.",
     "chips_label": "What can we help with?",
     "chip_build": "Custom build",
     "chip_workshop": "Workshops",
@@ -581,7 +581,7 @@
     "field_team_size": "Team size",
     "field_select": "Select…",
     "field_message": "Tell us about your setup or need",
-    "field_message_placeholder": "Modules you need, deployment scale, timeline, compliance requirements…",
+    "field_message_placeholder": "โมดูล you need, deployment scale, timeline, compliance requirements…",
     "consent": "I agree that OpenConstructionERP / DataDrivenConstruction may contact me about this inquiry, store the submitted data for the purpose of responding, and use my email to send occasional product news. You can unsubscribe at any time.",
     "form_meta": "info@datadrivenconstruction.io",
     "submit": "Send request",
@@ -594,7 +594,7 @@
   },
   "cookie": {
     "title": "Cookies & analytics",
-    "text": "We use essential cookies and anonymised analytics to improve the site. No third-party trackers, no ads. <a href=\"/privacy-policy.html\">Learn more</a>.",
+    "text": "We use essential cookies and anonymised analytics to improve the site. ไม่ third-party trackers, no ads. <a href=\"/privacy-policy.html\">Learn more</a>.",
     "accept": "Accept all",
     "reject": "Reject non-essential"
   },
