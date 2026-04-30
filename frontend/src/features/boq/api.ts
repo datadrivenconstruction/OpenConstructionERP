@@ -1,4 +1,5 @@
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from '@/shared/lib/api';
+import type { CostVariant, VariantStats } from '@/features/costs/api';
 
 /* ── Core BOQ types ──────────────────────────────────────────────────── */
 
@@ -302,36 +303,62 @@ export interface CostItemComponent {
   type: string;
 }
 
+/**
+ * Slim cost-breakdown payload returned by the autocomplete endpoint.
+ *
+ * Phase F (v2.7.0): the BOQ description-cell hover tooltip renders these
+ * three figures in the catalog's native currency. The keys mirror the
+ * CWICR metadata stamps and stay absent when the source row carries no
+ * such data — the tooltip hides the section gracefully in that case.
+ */
+export interface CostAutocompleteBreakdown {
+  labor_cost?: number;
+  material_cost?: number;
+  equipment_cost?: number;
+}
+
 export interface CostAutocompleteItem {
   code: string;
   description: string;
   unit: string;
   rate: number;
+  /** Catalog currency (ISO 4217). Forwarded to the BOQ resource entry on
+   *  apply so each resource keeps its native currency when added from a
+   *  catalog whose currency differs from the BOQ base. Optional for the
+   *  thin autocomplete endpoint that doesn't carry it. */
+  currency?: string;
+  /** Region tag (e.g. ``DE_BERLIN``). Surfaced so the tooltip can show
+   *  a region badge next to the code without forcing the caller to
+   *  re-derive it from currency. */
+  region?: string | null;
   classification: Record<string, string>;
   components: CostItemComponent[];
+  /**
+   * Optional labor / material / equipment split, in the catalog's native
+   * currency. Populated by the autocomplete endpoint from CWICR metadata
+   * (Phase F, v2.7.0). Absent when the source row carries no breakdown.
+   */
+  cost_breakdown?: CostAutocompleteBreakdown | null;
   /**
    * Optional CWICR variant payload (v2.6.26+). Surfaced when the cost item
    * carries 2+ abstract-resource variants so callers (e.g. BOQEditorPage's
    * ``handleCostDbAddResource``) can cache the variant catalog on the
-   * resource entry for later re-pick.
+   * resource entry for later re-pick. Re-uses the canonical CostVariant /
+   * VariantStats shapes from `@/features/costs/api` so newer fields
+   * (``full_label``, ``common_start``) propagate automatically.
+   *
+   * Phase F (v2.7.0): the autocomplete endpoint now also returns a slim
+   * ``variant_count`` here (the heavy ``variants`` array is intentionally
+   * omitted on the autocomplete path to keep the response small — fetch
+   * it lazily via ``GET /v1/costs/{id}/`` on apply). The full optional
+   * shape stays compatible.
    */
   metadata_?: {
-    variants?: Array<{
-      index: number;
-      label: string;
-      price: number;
-      price_per_unit?: number | null;
-    }>;
-    variant_stats?: {
-      min: number;
-      max: number;
-      mean: number;
-      median: number;
-      unit: string;
-      group: string;
-      count: number;
-      position_count?: number;
-    };
+    variants?: CostVariant[];
+    variant_stats?: VariantStats;
+    variant_count?: number;
+    labor_hours?: number;
+    workers_per_unit?: number;
     [key: string]: unknown;
   };
 }
@@ -398,6 +425,11 @@ export interface CostBreakdownResponse {
 
 /* ── Resource Summary types ────────────────────────────────────────── */
 
+export interface ResourcePositionRef {
+  position_id: string;
+  resource_idx: number;
+}
+
 export interface ResourceSummaryItem {
   name: string;
   type: string;
@@ -406,6 +438,25 @@ export interface ResourceSummaryItem {
   avg_unit_rate: number;
   total_cost: number;
   positions_used: number;
+
+  /**
+   * Variant catalog cached on at least one underlying resource slot.  When
+   * present (>= 2 entries), the ResourceSummary row surfaces a re-pick pill
+   * that opens the same VariantPicker used in the BOQ grid; ``Apply`` fans
+   * the new variant out to every entry in ``position_refs``.
+   */
+  available_variants?: CostVariant[] | null;
+  variant_stats?: VariantStats | null;
+  /**
+   * Variant label currently chosen across positions.  ``"__mixed__"`` when
+   * positions disagree (e.g. some picked ``C30/37``, others ``C25/30``);
+   * ``null`` when no explicit pick was made on any position.
+   */
+  current_variant_label?: string | null;
+  /** Auto-default strategy when one was applied uniformly. */
+  variant_default?: 'mean' | 'median' | null;
+  currency?: string | null;
+  position_refs?: ResourcePositionRef[];
 }
 
 export interface ResourceTypeSummary {
@@ -572,6 +623,125 @@ export interface CostItemSearchResponse {
   total_found: number;
   query_embedding_ms: number;
   search_ms: number;
+}
+
+/* ── Paginated cost search (used by CostDatabaseSearchModal) ─────────── */
+
+/**
+ * One row in the paginated /v1/costs/ search response.  Mirrors the public
+ * CostItemResponse on the backend and intentionally re-types only the fields
+ * the modal renders — extra metadata (variant_stats, full_label, etc.) flows
+ * through ``metadata_`` opaquely.
+ */
+export interface CostSearchItem {
+  id: string;
+  code: string;
+  description: string;
+  unit: string;
+  rate: number;
+  currency?: string;
+  region: string | null;
+  classification: Record<string, string>;
+  components: CostItemComponent[];
+  /** Opaque CWICR metadata (variants, variant_stats, etc.) — type-erased. */
+  metadata_?: Record<string, unknown>;
+}
+
+/**
+ * Search params accepted by ``fetchCostSearch``.  ``classification_path`` is
+ * a slash-joined breadcrumb (e.g. ``"Buildings/Concrete"``) the backend
+ * resolves against ``classification.collection / department / section /
+ * subsection``.  When ``cursor`` is supplied, ``offset`` is ignored.
+ */
+export interface CostSearchParams {
+  region?: string;
+  q?: string;
+  unit?: string;
+  source?: string;
+  classification_path?: string;
+  cursor?: string | null;
+  limit?: number;
+}
+
+/**
+ * Paginated response shape — matches ``CostSearchPaginatedResponse`` on the
+ * backend.  ``total`` is only populated on the first page (no cursor).
+ *
+ * For backwards compatibility with the legacy offset-paginated endpoint, the
+ * fetcher tolerates the older shape (no ``next_cursor`` / ``has_more``) and
+ * synthesises sensible defaults.
+ */
+export interface CostSearchPage {
+  items: CostSearchItem[];
+  next_cursor: string | null;
+  has_more: boolean;
+  /** Only set on the first page. */
+  total: number | null;
+}
+
+/** One node in the cost-database category tree. Recursive but bounded to 4 depths. */
+export interface CategoryTreeNode {
+  name: string;
+  count: number;
+  children: CategoryTreeNode[];
+}
+
+/**
+ * Fetch one page of cost search results.  Tolerant to the legacy non-paginated
+ * shape so the modal keeps working while the backend agent rolls out the new
+ * keyset endpoint.
+ */
+export async function fetchCostSearch(
+  params: CostSearchParams,
+): Promise<CostSearchPage> {
+  const qs = new URLSearchParams();
+  qs.set('limit', String(params.limit ?? 50));
+  if (params.region) qs.set('region', params.region);
+  if (params.q && params.q.length >= 2) {
+    qs.set('q', params.q);
+    qs.set('semantic', 'true');
+  }
+  if (params.unit) qs.set('unit', params.unit);
+  if (params.source) qs.set('source', params.source);
+  if (params.classification_path) qs.set('classification_path', params.classification_path);
+  if (params.cursor) qs.set('cursor', params.cursor);
+
+  const raw = await apiGet<{
+    items: CostSearchItem[];
+    next_cursor?: string | null;
+    has_more?: boolean;
+    total?: number | null;
+    limit?: number;
+    offset?: number;
+  }>(`/v1/costs/?${qs.toString()}`);
+
+  const items = raw.items ?? [];
+  const limit = raw.limit ?? params.limit ?? 50;
+  const next_cursor = raw.next_cursor ?? null;
+
+  // Tolerate legacy offset-paginated shape.  When the backend hasn't shipped
+  // the keyset endpoint yet, derive ``has_more`` from the row count vs limit.
+  const has_more =
+    typeof raw.has_more === 'boolean' ? raw.has_more : items.length >= limit;
+
+  // ``total`` is only meaningful on the first page (no cursor in the request).
+  // Honour ``null`` from the backend; fall back to legacy ``total``.
+  const total =
+    params.cursor == null
+      ? raw.total ?? null
+      : null;
+
+  return { items, next_cursor, has_more, total };
+}
+
+/** Fetch the category tree for a region.  Pass empty string to fetch globally. */
+export function fetchCategoryTree(region?: string): Promise<CategoryTreeNode[]> {
+  const qs = new URLSearchParams();
+  if (region) qs.set('region', region);
+  const suffix = qs.toString();
+  return apiGet<CategoryTreeNode[]>(
+    `/v1/costs/category-tree/${suffix ? `?${suffix}` : ''}`,
+  );
 }
 
 /* ── API client ──────────────────────────────────────────────────────── */
@@ -834,13 +1004,22 @@ export const boqApi = {
  * `sort_order` is assigned by the backend on insert (= current count) so the
  * client can omit it; on read it is always populated. The grid keeps columns
  * sorted by this value.
+ *
+ * v2.7.0/E — `calculated` columns carry a `formula` evaluated by the BOQ
+ * formula engine on every render. They are read-only; their value updates
+ * automatically when any referenced position, $variable, or row field
+ * changes. `decimals` controls display precision (default 2).
  */
 export interface CustomColumnDef {
   name: string;
   display_name: string;
-  column_type: 'text' | 'number' | 'date' | 'select';
+  column_type: 'text' | 'number' | 'date' | 'select' | 'calculated';
   options?: string[];
   sort_order?: number;
+  /** Formula source for `calculated` columns. e.g. `=quantity * unit_rate * 1.19`. */
+  formula?: string;
+  /** Display decimals for `calculated` columns when result is numeric. */
+  decimals?: number;
 }
 
 /**

@@ -2272,6 +2272,15 @@ class BOQService:
         }
         target_resource.pop("variant_default", None)
         target_resource["unit_rate"] = new_price
+
+        # Replace the resource's display name with the variant's full label
+        # (``common_start + variable_part``) so the BOQ row + Resource Summary
+        # reflect the concrete pick, not the abstract group description. Skip
+        # the rewrite for pre-v2.6.30 cached variants that don't carry
+        # ``full_label`` — preserves whatever name was stamped at apply-time.
+        full_label = chosen.get("full_label")
+        if isinstance(full_label, str) and full_label.strip():
+            target_resource["name"] = full_label.strip()[:400]
         try:
             qty_val = float(target_resource.get("quantity", 0) or 0)
         except (TypeError, ValueError):

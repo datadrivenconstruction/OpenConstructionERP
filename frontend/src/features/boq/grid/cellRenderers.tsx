@@ -37,7 +37,6 @@ import {
 import { RESOURCE_TYPES, getResourceTypeLabel } from '../boqResourceTypes';
 import { countComments } from '../CommentDrawer';
 import { BIMQuantityPicker } from './BIMQuantityPicker';
-import { Badge } from '@/shared/ui';
 import { MiniGeometryPreview } from '@/shared/ui/MiniGeometryPreview';
 import { fetchBIMElementsByIds, fetchBIMElementProperties } from '@/features/bim/api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer/ElementManager';
@@ -46,6 +45,48 @@ import { useFxRatesStore, getFxRate } from '@/stores/useFxRatesStore';
 import { isFormula, evaluateFormula } from './cellEditors';
 import { VariantPicker } from '@/features/costs/VariantPicker';
 import type { CostVariant, VariantStats } from '@/features/costs/api';
+
+/* ── Variant suffix stripper ──────────────────────────────────────────
+ *  Legacy CWICR position-mode applies appended "(Variant: <label>)" /
+ *  "(Вариант: <label>)" / "(Variante: <label>)" to the position
+ *  description. The variant pick already surfaces via the blue Variant
+ *  pill in DescriptionCellRenderer, so the trailing parenthetical is
+ *  redundant noise — strip it on display.
+ *
+ *  Two passes are needed:
+ *   1. ``WITH_PARENS_RE`` — the canonical "(Variant: …)" form with
+ *      balanced parens at the very end. Uses ``[\s\S]`` (no anchored
+ *      class) to allow nested parens / colons / multilingual chars
+ *      inside the label.
+ *   2. ``BARE_RE`` — fallback for descriptions where the parens were
+ *      dropped (legacy migrations, hand-edits). Strips a trailing
+ *      "Variant: …" / "Вариант: …" segment with no closing paren.
+ *
+ *  Both are case-insensitive, Unicode-aware, and cover Latin + Cyrillic
+ *  spellings (incl. common typos: "Вриант", "Варинт"). ────────────── */
+const VARIANT_KEYWORDS =
+  '(?:Variant|Variante|Variantă|Variantti|Variation|Varianta|Variantas|Varianti|Wariant|Wariacja|Variabel|Sürüm|Вариант|Варіант|Варијанта|Вріант|Вриант|Варинт|Варіант|Vairantă)';
+const VARIANT_SUFFIX_WITH_PARENS_RE = new RegExp(
+  `\\s*[(（\\[]\\s*${VARIANT_KEYWORDS}\\s*[:：][\\s\\S]*?[)）\\]]\\s*$`,
+  'iu',
+);
+const VARIANT_SUFFIX_BARE_RE = new RegExp(
+  `\\s*[\\.,;·\\-—]?\\s*${VARIANT_KEYWORDS}\\s*[:：][^\\n\\r]*$`,
+  'iu',
+);
+
+function stripVariantSuffix(s: string | null | undefined): string {
+  if (!s) return '';
+  let out = String(s);
+  // Loop the with-parens pass to strip multiple stacked suffixes.
+  for (let i = 0; i < 3; i++) {
+    const next = out.replace(VARIANT_SUFFIX_WITH_PARENS_RE, '');
+    if (next === out) break;
+    out = next;
+  }
+  out = out.replace(VARIANT_SUFFIX_BARE_RE, '');
+  return out.trim();
+}
 
 /* ── Validation Status Dot ────────────────────────────────────────── */
 
@@ -260,6 +301,16 @@ export interface ResourceGridContext {
    *  cache and the second silently overwrites the first. */
   onUpdateResourceFields?: (positionId: string, resourceIndex: number, fields: Record<string, number | string>) => void;
   onSaveResourceToCatalog: (positionId: string, resourceIndex: number) => void;
+  /** Save a variant-header synthetic row to the user's catalog under the
+   *  user-edited custom name. Reads the chosen variant off the position
+   *  directly (no resource index — the variant row is synthetic). */
+  onSaveVariantHeaderToCatalog?: (positionId: string, customName: string) => void;
+  /** Edit qty / rate on the variant-header synthetic row. The row mirrors
+   *  the parent position, so qty edits flow into ``position.quantity``
+   *  and rate edits into ``position.unit_rate`` (clearing the
+   *  ``metadata.variant`` snapshot so the row "becomes a regular article"
+   *  with a manually-overridden rate, per the user's spec). */
+  onUpdateVariantHeader?: (positionId: string, fields: { quantity?: number; unit_rate?: number }) => void;
   onOpenCostDbForPosition: (positionId: string) => void;
   onOpenCatalogForPosition: (positionId: string) => void;
   /**
@@ -274,6 +325,30 @@ export interface ResourceGridContext {
     resourceIndex: number,
     variantCode: string,
   ) => void;
+  /**
+   * One-shot signal that drives the auto-open of an ``EditableResourceRow``'s
+   * VariantPicker after the user clicks the position-description "V" icon.
+   * The DescriptionCellRenderer fires ``onOpenVariantPickerFor`` which sets
+   * this signal AND ensures the position is expanded; the row whose
+   * (positionId, resourceIdx) matches consumes the signal in a mount
+   * effect, opens its picker, and calls ``onClearOpenVariantPicker`` so the
+   * signal is not re-fired on the next render.
+   */
+  openVariantPickerFor?: { positionId: string; resourceIdx: number } | null;
+  onClearOpenVariantPicker?: () => void;
+  /** Click handler for the position-description "V" icon — see above.
+   *  Used when the position has at least one resource with cached
+   *  ``available_variants``. Expands the resource panel and signals the
+   *  matching ``EditableResourceRow`` to auto-open its picker. */
+  onOpenVariantPickerFor?: (positionId: string, resourceIdx: number) => void;
+  /** Position-level fallback for the "V" icon: legacy CWICR position-mode
+   *  applies stash the variant catalog on ``position.metadata.cost_item_variants``
+   *  with no per-resource cache. Click here renders a portal-anchored
+   *  VariantPicker against those catalog entries; ``onApply`` calls
+   *  ``onRepickPositionVariant`` so the position's ``unit_rate`` /
+   *  ``metadata.variant`` flip directly. ``anchorEl`` is the V button
+   *  itself so the popover positions correctly. */
+  onOpenPositionVariantPicker?: (positionId: string, anchorEl: HTMLElement | null) => void;
   currencySymbol: string;
   currencyCode: string;
   locale: string;
@@ -435,14 +510,93 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
     return <span>{value ?? ''}</span>;
   }
 
+  // Strip legacy "(Variant: …)" trailing parenthetical — variant choice
+  // is already displayed via the blue Variant pill on this row, so the
+  // duplicated text is just noise on legacy applies.
+  const displayValue = stripVariantSuffix(value as string | null | undefined);
+
   const meta = (data.metadata ?? {}) as Record<string, unknown>;
   const variant = (meta as { variant?: { label?: string; price?: number; index?: number } }).variant;
   const variantDefault = (meta as { variant_default?: 'mean' | 'median' }).variant_default;
   const hasVariant = !!variant && typeof variant.label === 'string' && typeof variant.price === 'number';
   const hasDefault = !hasVariant && (variantDefault === 'mean' || variantDefault === 'median');
 
+  /* ── "V" icon — surfaces when EITHER:
+   *     (a) at least one resource on this position carries cached
+   *         ``available_variants`` (>= 2) [resource-mode applies], OR
+   *     (b) the position itself has ``metadata.cost_item_variants``
+   *         (>= 2) [legacy position-mode CWICR applies — the catalog
+   *         was stashed at position level, not per-resource].
+   *
+   *     Click in case (a): expand resource panel + auto-open picker on
+   *     that resource (in-place re-pick, fans through onRepickResourceVariant).
+   *     Click in case (b): open a position-level picker anchored to the
+   *     V button itself; on apply, the position's unit_rate + metadata.variant
+   *     flip directly via onRepickPositionVariant.
+   *
+   *     The icon stays even when a variant is already picked so the user
+   *     can re-pick from the same affordance. */
+  const resourcesArr = (meta as { resources?: unknown[] }).resources;
+  const variantResourceIdx = Array.isArray(resourcesArr)
+    ? resourcesArr.findIndex((r) => {
+        if (!r || typeof r !== 'object') return false;
+        const av = (r as { available_variants?: unknown }).available_variants;
+        return Array.isArray(av) && av.length >= 2;
+      })
+    : -1;
+  const hasResourceVariants = variantResourceIdx >= 0;
+
+  const posLevelVariants = (meta as { cost_item_variants?: unknown }).cost_item_variants;
+  const hasPositionVariants =
+    Array.isArray(posLevelVariants) && posLevelVariants.length >= 2;
+
+  const hasVariantResource = hasResourceVariants || hasPositionVariants;
+
+  const positionId = data.id as string;
+  const variantIconButton = hasVariantResource ? (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        if (hasResourceVariants) {
+          ctx?.onOpenVariantPickerFor?.(positionId, variantResourceIdx);
+        } else if (hasPositionVariants) {
+          ctx?.onOpenPositionVariantPicker?.(positionId, e.currentTarget);
+        }
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
+      className="shrink-0 inline-flex h-[18px] w-[18px] items-center justify-center
+                 rounded-md cursor-pointer
+                 bg-violet-50 dark:bg-violet-900/30
+                 text-violet-700 dark:text-violet-300
+                 text-[11px] font-bold leading-none
+                 ring-1 ring-violet-200 dark:ring-violet-700/50
+                 hover:bg-violet-100 dark:hover:bg-violet-800/40
+                 hover:ring-violet-300 dark:hover:ring-violet-600
+                 transition-colors duration-150"
+      title={t('boq.position_variant_v_tooltip', {
+        defaultValue:
+          'This position uses a variant resource — click to choose / switch a price option.',
+      })}
+      aria-label={t('boq.position_variant_v_label', {
+        defaultValue: 'Open variant picker',
+      })}
+      data-testid={`position-variant-v-${positionId}`}
+    >
+      V
+    </button>
+  ) : null;
+
   if (!hasVariant && !hasDefault) {
-    return <span className="truncate">{value ?? ''}</span>;
+    if (!variantIconButton) {
+      return <span className="truncate">{displayValue}</span>;
+    }
+    return (
+      <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
+        {variantIconButton}
+        <span className="truncate min-w-0">{displayValue}</span>
+      </span>
+    );
   }
 
   const fmt = (n: number) => {
@@ -457,24 +611,13 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
   };
 
   if (hasVariant) {
-    const variantLabel = String(variant!.label ?? '');
-    const formattedPrice = fmt(variant!.price as number);
-    const tooltip = `${variantLabel} \u00B7 ${formattedPrice}`;
+    // Variant choice is surfaced through the V button + the synthetic
+    // VARIANT row inside the expanded resource panel \u2014 the blue
+    // "Variant: <label>" pill that used to render here was redundant.
     return (
       <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
-        <span className="truncate min-w-0">{value ?? ''}</span>
-        <Badge
-          variant="blue"
-          size="sm"
-          className="shrink-0 cursor-help"
-        >
-          <span title={tooltip}>
-            {t('boq.variant_pill_label', {
-              defaultValue: 'Variant: {{label}}',
-              label: variantLabel,
-            })}
-          </span>
-        </Badge>
+        {variantIconButton}
+        <span className="truncate min-w-0">{displayValue}</span>
       </span>
     );
   }
@@ -500,7 +643,8 @@ export function DescriptionCellRenderer(params: ICellRendererParams) {
 
   return (
     <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
-      <span className="truncate min-w-0">{value ?? ''}</span>
+      {variantIconButton}
+      <span className="truncate min-w-0">{displayValue}</span>
       <span
         className="shrink-0 inline-flex items-center gap-1 rounded
                    bg-amber-100 dark:bg-amber-900/40
@@ -538,7 +682,7 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
   const dotColor = VALIDATION_DOT_STYLES[status] ?? VALIDATION_DOT_STYLES.pending;
 
   return (
-    <div className="flex items-center gap-1 overflow-hidden">
+    <div className="flex items-center justify-end gap-1 overflow-hidden w-full">
       <span className="text-xs font-mono truncate min-w-0">{value}</span>
       <span
         className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${dotColor} cursor-help`}
@@ -2440,16 +2584,43 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
   const canRepick = hasVariants && typeof ctx.onRepickResourceVariant === 'function';
 
   // Provenance bar colour:
-  //   blue  → explicit user pick (resource.variant set)
-  //   amber → auto-default (variant_default set)
-  //   none  → plain row, no variant link
-  let variantBarTone: 'blue' | 'amber' | null = null;
+  //   blue   → explicit user pick (resource.variant set)
+  //   amber  → auto-default (variant_default set)
+  //   violet → variant resource w/ no pick yet (visual flag for the row)
+  //   none   → plain row, no variant link
+  let variantBarTone: 'blue' | 'amber' | 'violet' | null = null;
   if (resourceVariant) variantBarTone = 'blue';
   else if (resourceVariantDefault) variantBarTone = 'amber';
+  else if (hasVariants) variantBarTone = 'violet';
 
   const [variantPickerOpen, setVariantPickerOpen] = useState(false);
   const variantPillRef = useRef<HTMLButtonElement>(null);
   const closeVariantPicker = useCallback(() => setVariantPickerOpen(false), []);
+
+  /* ── Auto-open hook ────────────────────────────────────────────────
+   *  When the user clicks the position-description "V" icon, the parent
+   *  grid stashes a one-shot signal naming this exact (positionId, resIdx)
+   *  pair. We pop our picker open in response, then ask the parent to
+   *  clear the signal so a re-render with stale state doesn't re-open
+   *  the picker after the user has dismissed it.
+   *
+   *  Skipped when the row carries no variants — defensive, the parent
+   *  shouldn't fire the signal for non-variant rows in the first place.
+   */
+  const openVariantSignal = ctx.openVariantPickerFor;
+  const clearOpenVariant = ctx.onClearOpenVariantPicker;
+  useEffect(() => {
+    if (!openVariantSignal || !hasVariants) return;
+    const myPosId = data._parentPositionId as string;
+    const myResIdx = data._resourceIndex as number;
+    if (
+      openVariantSignal.positionId === myPosId &&
+      openVariantSignal.resourceIdx === myResIdx
+    ) {
+      setVariantPickerOpen(true);
+      clearOpenVariant?.();
+    }
+  }, [openVariantSignal, clearOpenVariant, hasVariants, data]);
 
   const handleRepick = useCallback(
     (chosen: CostVariant) => {
@@ -2589,7 +2760,33 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
 
   const posId = data._parentPositionId as string;
   const resIdx = data._resourceIndex as number;
-  const originalName = (data._resourceName as string) || '';
+  const storedName = (data._resourceName as string) || '';
+  // For variant resources, the display name MUST surface the abstract
+  // base (``price_abstract_resource_common_start``). Legacy applies
+  // stored only the variable_part / "description (label)" form, so we
+  // recompose at display time when the cached stats carry common_start
+  // and the stored name doesn't already start with it. Plain rows pass
+  // straight through.
+  const variantCommonStart =
+    (availableVariantStats as { common_start?: string } | undefined)?.common_start?.trim() ?? '';
+  const variantLabelForName = resourceVariant?.label?.trim() ?? '';
+  // Variant resource name = ``price_abstract_resource_common_start``
+  // (the abstract base) + the picked ``price_abstract_resource_variable_parts``
+  // token. When no variant picked yet, show just the base. Plain
+  // (non-variant) rows fall through to the stored name.
+  const labelStartsWithCommon =
+    variantLabelForName.length > 0 &&
+    variantCommonStart.length > 0 &&
+    variantLabelForName.toLowerCase().startsWith(variantCommonStart.toLowerCase());
+  let composedVariantName = '';
+  if (variantCommonStart && variantLabelForName && !labelStartsWithCommon) {
+    composedVariantName = `${variantCommonStart} ${variantLabelForName}`.trim();
+  } else if (variantLabelForName) {
+    composedVariantName = variantLabelForName;
+  } else if (variantCommonStart) {
+    composedVariantName = variantCommonStart;
+  }
+  const originalName = composedVariantName || storedName;
   const resourceCode = (data._resourceCode as string | undefined) || '';
 
   const handleQtyChange = useCallback(
@@ -2609,7 +2806,10 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
   const handleNameChange = useCallback(
     (v: string) => {
       const next = v.trim();
-      if (next === originalName.trim()) return;
+      // Compare against BOTH the stored name and the composed display
+      // name — committing the prefilled "common_start · label" without
+      // changes shouldn't trigger a rename.
+      if (next === storedName.trim() || next === originalName.trim()) return;
       // Renaming a catalogued resource clears its code (the row is now a
       // user customisation). Both fields must land in ONE mutation —
       // sending two `onUpdateResource` calls would race on the React Query
@@ -2630,7 +2830,7 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
         if (resourceCode) ctx.onUpdateResource?.(posId, resIdx, 'code', '');
       }
     },
-    [ctx, posId, resIdx, originalName, resourceCode],
+    [ctx, posId, resIdx, storedName, originalName, resourceCode],
   );
 
   const handleTypeChange = useCallback(
@@ -2703,19 +2903,23 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
 
   return (
     <div
-      className="relative flex items-stretch w-full h-full select-none group/res text-xs
-                  bg-surface-secondary/40 border-b border-border-light/50"
+      className={`relative flex items-stretch w-full h-full select-none group/res text-xs border-b border-border-light/50 ${
+        hasVariants
+          ? 'bg-violet-50/60 dark:bg-violet-950/25'
+          : 'bg-surface-secondary/40'
+      }`}
       style={{ paddingLeft: `${colWidths.leftPad}px`, paddingRight: '4px' }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
         ctx.onShowContextMenu?.(e, 'resource', data);
       }}
+      data-resource-variant={hasVariants ? '1' : undefined}
     >
       {/* Provenance left-edge bar — 4px wide, full row height. Marks variant
           source so a quick scan reveals which resources were explicitly
-          picked vs auto-defaulted. Hidden when the resource has no variant
-          link (legacy rows). */}
+          picked vs auto-defaulted vs unset-but-variant. Hidden when the
+          resource has no variant link at all (legacy plain rows). */}
       {variantBarTone && (
         <span
           aria-hidden="true"
@@ -2724,7 +2928,9 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
           className={`absolute left-0 top-0 bottom-0 w-1 ${
             variantBarTone === 'blue'
               ? 'bg-oe-blue/70'
-              : 'bg-amber-400 dark:bg-amber-500'
+              : variantBarTone === 'amber'
+              ? 'bg-amber-400 dark:bg-amber-500'
+              : 'bg-gradient-to-b from-violet-500 to-purple-600'
           }`}
         />
       )}
@@ -2758,9 +2964,14 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
       </span>
 
       {/* Tag — width = _bim_link column. Right-aligned so tag right
-          edges line up across all rows. */}
+          edges line up across all rows. ``pr-3`` keeps a 12px gap from
+          the start of the name slot; ``pl-2`` provides minimal padding
+          from the code chip when the bim_link column is at its
+          narrowest. The chip is right-anchored within this slot so the
+          left edge of the name slot can start at the SAME X as the
+          position description's left edge (visual spine). */}
       <span
-        className="shrink-0 inline-flex items-center justify-end self-center pr-2"
+        className="shrink-0 inline-flex items-center justify-end self-center pl-2 pr-3"
         style={{ width: `${colWidths.bimLink}px` }}
       >
         <ResourceTypePicker
@@ -2771,15 +2982,35 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
       </span>
 
       {/* Name — flex-1, mirrors the position description column.
-          InlineTextInput's display-mode span adds `px-1` (4px) internally,
-          which is the same as the position description cellClass `!pl-1`
-          (4px). Result: resource name text starts at the EXACT same X as
-          position description text — they live on the same vertical line.
-          Committing a different name strips the catalogue code
-          (handleNameChange) so the row becomes a customised resource,
-          savable via the BookmarkPlus action. */}
-      <span className="truncate min-w-0 flex-1 self-center text-left text-content-secondary font-medium">
-        <InlineTextInput value={originalName} onCommit={handleNameChange} className="w-full text-xs text-left" />
+          ``pl-1`` (4px) matches the position description column's
+          ``!pl-1`` cellClass so the resource name's left edge lands on
+          the EXACT same X as the position description text — the
+          vertical spine the user requested. Visual gap from the type
+          chip is preserved by the chip slot's ``pr-3`` (12px). */}
+      <span className="truncate min-w-0 flex-1 self-center text-left text-content-secondary font-medium inline-flex items-center gap-1 pl-1">
+        {hasVariants && (
+          <span
+            aria-hidden="true"
+            title={ctx.t('boq.resource_is_variant_badge', {
+              defaultValue: 'Variant resource — multiple price options available',
+            })}
+            className="shrink-0 relative inline-flex h-[18px] w-[18px] items-center justify-center
+                       rounded-full overflow-hidden
+                       bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-600
+                       text-white text-[9px] font-extrabold leading-none tracking-wider
+                       ring-1 ring-white/30
+                       shadow-[0_1px_3px_rgba(139,92,246,0.5),0_0_0_1px_rgba(139,92,246,0.2)]"
+            data-testid={`resource-variant-badge-${data._resourceIndex}`}
+          >
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-full
+                         bg-gradient-to-b from-white/35 to-transparent"
+            />
+            <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)]">V</span>
+          </span>
+        )}
+        <InlineTextInput value={originalName} onCommit={handleNameChange} className="flex-1 min-w-0 text-xs text-left" />
       </span>
 
       {/* Classification spacer — hidden by default (width 0) but reserved so
@@ -2944,6 +3175,317 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
   );
 }
 
+/* ── Variant Header Row ─────────────────────────────────────────────
+ *  Synthetic row prepended above a position's component-resources when
+ *  the position carries position-level CWICR variants
+ *  (``metadata.cost_item_variants``). Renders with the EXACT same column
+ *  geometry as ``EditableResourceRow`` so the abstract variant lines up
+ *  cleanly with the regular components beneath it: same code / type /
+ *  name / unit / qty / rate / total slots. The row is read-only and the
+ *  only mutation surface is the "▾ N options" pill in the unit-rate
+ *  cell — clicking it reopens the position-level VariantPicker, which on
+ *  apply patches ``position.unit_rate`` and ``metadata.variant``.
+ *
+ *  Quantity = position quantity (the abstract resource inherits the
+ *  position's volume — e.g. 1 t of steel — so qty × rate gives the
+ *  same total as the position's unit_rate). Only the rate flips with
+ *  variant choice. */
+function VariantHeaderResourceRow({
+  data,
+  ctx,
+  colWidths,
+}: {
+  data: Record<string, unknown>;
+  ctx: FullGridContext;
+  colWidths: ColWidths;
+}) {
+  const positionId = data._parentPositionId as string;
+  const headerName = (data._variantHeaderName as string) || '';
+  const chosenLabel = data._variantHeaderChosenLabel as string | null;
+  const chosenPrice = data._variantHeaderChosenPrice as number | null;
+  const optCount = (data._variantHeaderCount as number) || 0;
+  const currency = (data._variantHeaderCurrency as string) || 'EUR';
+  const qty = (data._variantHeaderQty as number) || 0;
+  const unitLabel = (data._variantHeaderUnit as string) || '';
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const openPicker = useCallback(() => {
+    ctx.onOpenPositionVariantPicker?.(positionId, triggerRef.current);
+  }, [ctx, positionId]);
+
+  const rate = chosenPrice ?? 0;
+  const total = qty * rate;
+  const fmtNum = (n: number) => ctx.fmt.format(n);
+  // Display name = ``price_abstract_resource_common_start`` as the base
+  // + the chosen ``price_abstract_resource_variable_parts`` token (the
+  // picked variant). When nothing's picked yet we show just the base.
+  // Defensive: if the chosen label was stamped as the full label
+  // (e.g. legacy mis-stamped imports), don't double up the prefix.
+  // The position description never bleeds into this name.
+  const trimmedBase = headerName.trim();
+  const trimmedChosen = (chosenLabel ?? '').trim();
+  const labelStartsWithBase =
+    trimmedChosen.length > 0 &&
+    trimmedBase.length > 0 &&
+    trimmedChosen.toLowerCase().startsWith(trimmedBase.toLowerCase());
+  let computedName: string;
+  if (trimmedBase && trimmedChosen && !labelStartsWithBase) {
+    computedName = `${trimmedBase} ${trimmedChosen}`;
+  } else if (trimmedChosen) {
+    computedName = trimmedChosen;
+  } else {
+    computedName = trimmedBase;
+  }
+
+  // Local edit state — the user can rename the variant resource inline.
+  // On commit we POST the new name to the user's catalog (the same code
+  // path the BookmarkPlus button on regular resources uses) so the row
+  // "becomes" a regular saved article. The row keeps its variant
+  // decorations so subsequent variant swaps still flip the rate.
+  const [editedName, setEditedName] = useState(computedName);
+  // Reset when the chosen variant changes upstream.
+  useEffect(() => setEditedName(computedName), [computedName]);
+  const isCustomName = editedName.trim() !== computedName.trim() && editedName.trim().length > 0;
+
+  // qty / rate edit handlers. The variant row is a SYNTHETIC view of the
+  // parent position, so commits flow into ``onUpdateVariantHeader`` which
+  // patches ``position.quantity`` / ``position.unit_rate`` upstream.
+  const handleQtyCommit = useCallback(
+    (v: number) => {
+      ctx.onUpdateVariantHeader?.(positionId, { quantity: v });
+    },
+    [ctx, positionId],
+  );
+  const handleRateCommit = useCallback(
+    (v: number) => {
+      ctx.onUpdateVariantHeader?.(positionId, { unit_rate: v });
+    },
+    [ctx, positionId],
+  );
+
+  // When qty is unset / 0 we hide qty / rate / total entirely — the user's
+  // spec: "если количества нет - то ничего и не показывай". The picker
+  // and the editable name still render so the user can pick a variant or
+  // promote the row before entering a quantity.
+  const showNumbers = qty > 0;
+
+  return (
+    <div
+      className="relative flex items-stretch w-full h-full select-none group/vh text-xs
+                 bg-violet-50/60 dark:bg-violet-950/25
+                 border-b border-border-light/50
+                 transition-colors"
+      style={{ paddingLeft: `${colWidths.leftPad}px`, paddingRight: '4px' }}
+      data-testid={`variant-header-row-${positionId}`}
+    >
+      {/* Provenance bar — same width as the resource provenance bar so the
+          variant row visually slots into the resource list, just with a
+          violet→fuchsia gradient announcing "this is the variant pick". */}
+      <span
+        aria-hidden="true"
+        className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-violet-500 to-fuchsia-600"
+      />
+
+      {/* Code slot — width = ordinal column (right-aligned, mirrors
+          EditableResourceRow). Shows a small "VAR" chip instead of a
+          catalogue code; tooltip explains the slot. */}
+      <span
+        className="shrink-0 inline-flex items-center justify-end self-center pr-2 text-[8px] font-mono whitespace-nowrap overflow-hidden"
+        style={{ width: `${colWidths.ordinal}px` }}
+        title={ctx.t('boq.variant_header_code_tooltip', {
+          defaultValue: 'Abstract variant resource — inherits the position quantity',
+        })}
+      >
+        <span className="px-1 py-0.5 rounded bg-violet-200/60 dark:bg-violet-800/40 text-violet-800 dark:text-violet-200 font-bold tracking-wider">
+          VAR
+        </span>
+      </span>
+
+      {/* Type slot — width = _bim_link column. Mirrors the resource type
+          chip ("МАТЕРИАЛЫ" / "ОБОРУДОВАНИЕ" / ...) by rendering a
+          dedicated "VARIANT" chip in the same place, so the variant
+          resource visually slots into the same column the user already
+          scans for resource categorisation. Mirrors EditableResourceRow
+          padding (``pl-2 pr-3``) so the name slot can start at the
+          SAME X as the position description (visual spine). */}
+      <span
+        className="shrink-0 inline-flex items-center justify-end self-center pl-2 pr-3"
+        style={{ width: `${colWidths.bimLink}px` }}
+      >
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            openPicker();
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="inline-flex items-center px-1.5 py-0.5 rounded
+                     bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white
+                     text-[9px] font-bold uppercase tracking-wider
+                     ring-1 ring-white/30 shadow-[0_1px_3px_rgba(139,92,246,0.4)]
+                     hover:from-violet-400 hover:to-fuchsia-500
+                     hover:shadow-[0_2px_6px_rgba(217,70,239,0.5)]
+                     hover:scale-105 active:scale-95
+                     transition-all duration-150 cursor-pointer"
+          title={ctx.t('boq.variant_header_type_tooltip', {
+            defaultValue: 'Click to pick a price variant from the catalog',
+          })}
+          data-testid={`variant-header-chip-${positionId}`}
+        >
+          {ctx.t('boq.variant_header_type_label', { defaultValue: 'Variant' })}
+        </button>
+      </span>
+
+      {/* Name slot — flex-1, mirrors the position description column.
+          The V badge lives on the parent position's description (not
+          repeated here); the VARIANT type chip + the violet provenance
+          bar already mark this row as the variant resource. The name is
+          editable: editing + committing turns this into a custom article
+          name that can be saved to the catalog via the BookmarkPlus
+          button in the Actions column (mirrors regular resources). */}
+      <span
+        className="truncate min-w-0 flex-1 self-center text-left text-content-primary font-medium pl-1 pr-1 inline-flex items-center gap-1"
+        data-variant-header-interactive="1"
+      >
+        <InlineTextInput
+          value={editedName}
+          onCommit={(v) => setEditedName(v)}
+          className="flex-1 min-w-0 text-xs text-left"
+        />
+      </span>
+
+      {/* Classification spacer — same hidden-by-default col as the
+          resource row so toggling on classification doesn't break align. */}
+      {colWidths.classification > 0 && (
+        <span className="shrink-0 self-center" style={{ width: `${colWidths.classification}px` }} aria-hidden="true" />
+      )}
+
+      {/* Unit slot. */}
+      <span
+        className="shrink-0 text-center text-content-secondary font-mono uppercase self-center px-2 text-[11px]"
+        style={{ width: `${colWidths.unit}px` }}
+      >
+        {unitLabel || '—'}
+      </span>
+
+      {/* _bim_qty spacer — same 28px column as the resource row. */}
+      {colWidths.bimQty > 0 && (
+        <span className="shrink-0 self-center" style={{ width: `${colWidths.bimQty}px` }} aria-hidden="true" />
+      )}
+
+      {/* Quantity slot — editable. Inherits from the parent position;
+          commits go through ``onUpdateVariantHeader`` which patches
+          ``position.quantity`` upstream. Empty when qty <= 0 (per user
+          spec: hide numbers when the position has no quantity yet). */}
+      <span
+        className="shrink-0 text-right tabular-nums text-content-secondary self-center pr-1 pl-1"
+        style={{ width: `${colWidths.quantity}px` }}
+        data-variant-header-interactive="1"
+        title={ctx.t('boq.variant_header_qty_edit_tooltip', {
+          defaultValue: 'Double-click to edit quantity (synced with the position).',
+        })}
+      >
+        {showNumbers ? (
+          <InlineNumberInput
+            value={qty}
+            onCommit={handleQtyCommit}
+            fmt={ctx.fmt}
+            className="w-full text-xs"
+          />
+        ) : (
+          ''
+        )}
+      </span>
+
+      {/* Unit rate slot — picker pill (▾ N) opens the variant picker;
+          rate is editable inline. Editing the rate manually keeps the
+          variant marker but overrides the price — the user's spec for
+          "стоановится обычным артикулом" is honoured by the editable
+          name + Save-to-catalog action above. */}
+      <span
+        className="shrink-0 inline-flex items-center justify-end self-center gap-1 pr-2 pl-2"
+        style={{ width: `${colWidths.unitRate}px` }}
+        data-variant-header-interactive="1"
+      >
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            openPicker();
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="shrink-0 inline-flex items-center gap-0.5 h-4 px-1 rounded text-[9px] font-semibold
+                     bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white
+                     ring-1 ring-white/30 shadow-[0_1px_3px_rgba(139,92,246,0.4)]
+                     hover:from-violet-400 hover:to-fuchsia-500 hover:shadow-[0_2px_6px_rgba(217,70,239,0.5)]
+                     hover:scale-105 active:scale-95
+                     transition-all duration-150 cursor-pointer"
+          title={ctx.t('boq.variant_header_pill_tooltip', {
+            defaultValue: 'Choose / switch a price variant for this abstract resource',
+          })}
+          data-testid={`variant-header-pill-${positionId}`}
+        >
+          ▾ {optCount}
+        </button>
+        {showNumbers && (
+          <>
+            <span className="flex-1 min-w-0 text-right tabular-nums text-content-primary text-xs font-semibold">
+              <InlineNumberInput
+                value={rate}
+                onCommit={handleRateCommit}
+                fmt={ctx.fmt}
+                className="w-full text-xs"
+              />
+            </span>
+            <span className="shrink-0 inline-flex items-center justify-center w-7 text-[10px] font-mono text-content-secondary">
+              {currency}
+            </span>
+          </>
+        )}
+      </span>
+
+      {/* Total slot — also empty when qty is 0 / missing. */}
+      <span
+        className="shrink-0 text-right tabular-nums font-semibold text-content-primary self-center pr-2 pl-2"
+        style={{ width: `${colWidths.total}px` }}
+      >
+        {showNumbers ? fmtNum(total) : ''}
+      </span>
+
+      {/* Actions slot — Save-to-catalog button mirrors the regular
+          resource row's BookmarkPlus, surfaces only after the user has
+          renamed the variant resource (so the user is opting in to
+          catalog-promote a customised name). Width matches the position
+          row's actions column for vertical alignment. */}
+      <span
+        className="shrink-0 flex items-center justify-center gap-0.5 self-center"
+        style={{ width: `${colWidths.actions}px` }}
+      >
+        {isCustomName && ctx.onSaveVariantHeaderToCatalog && (
+          <button
+            type="button"
+            data-variant-header-interactive="1"
+            onClick={(e) => {
+              e.stopPropagation();
+              ctx.onSaveVariantHeaderToCatalog?.(positionId, editedName);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="shrink-0 h-4 w-4 flex items-center justify-center rounded
+                       text-content-tertiary hover:text-oe-blue hover:bg-oe-blue-subtle
+                       transition-all"
+            title={ctx.t('boq.rs_save_variant_to_catalog', {
+              defaultValue: 'Save as a regular article in your catalog',
+            })}
+          >
+            <BookmarkPlus size={10} />
+          </button>
+        )}
+      </span>
+    </div>
+  );
+}
+
 /* ── Resource Full-Width Renderer ──────────────────────────────────── */
 
 export function ResourceFullWidthRenderer(params: ICellRendererParams) {
@@ -2959,7 +3501,13 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
   // before the ordinal column).
   const colWidths = useMemo(() => {
     const getW = (id: string) => api?.getColumn(id)?.getActualWidth() ?? 0;
-    const leftPad = getW('_drag') + getW('_checkbox') + getW('_expand');
+    // Extra 56px nudge — pushes code chip / type tag / resource name
+    // visibly to the right of the position ordinal column so the resource
+    // panel reads as visually subordinate to its parent position. The
+    // numeric columns (unit / qty / rate / total / actions) keep the same
+    // X coordinates as the position row because the flex-1 name slot
+    // absorbs the shift.
+    const leftPad = getW('_drag') + getW('_checkbox') + getW('_expand') + 56;
     return {
       leftPad,
       ordinal: getW('ordinal'),
@@ -2989,6 +3537,13 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
   // Resource sub-row
   if (data?._isResource) {
     return <EditableResourceRow data={data} ctx={ctx} colWidths={colWidths} />;
+  }
+
+  // Synthetic "abstract variant" header — surfaces the position-level
+  // CWICR variant catalog as a visible row inside the resource panel.
+  // V badge prominent + click anywhere reopens the position-level picker.
+  if (data?._isVariantHeader) {
+    return <VariantHeaderResourceRow data={data} ctx={ctx} colWidths={colWidths} />;
   }
 
   // "Add resource" row

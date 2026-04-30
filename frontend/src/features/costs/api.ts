@@ -16,8 +16,18 @@ import { apiPost } from '@/shared/lib/api';
 export interface CostVariant {
   /** Position in the original bullet-separated list (0-based). */
   index: number;
-  /** Human label (e.g. "ready-mix delivered"). Truncated to 200 chars upstream. */
+  /** Variable-part label only (e.g. "C25/30 delivered"). This is what the
+   *  picker renders per row — the shared common base is shown once as a
+   *  picker header (see ``VariantStats.common_start``). Truncated to 200
+   *  chars upstream. */
   label: string;
+  /** ``common_start + label`` joined with a space, truncated to 400 chars.
+   *  This is what gets stamped onto the BOQ resource row when the variant
+   *  is applied — it replaces the position's default description so the
+   *  estimator sees the actual chosen material/option, not the abstract
+   *  rate-code description. Optional for backward compatibility with
+   *  pre-v2.6.30 imports that didn't capture ``common_start``. */
+  full_label?: string;
   /** Variant price in the cost item's currency. */
   price: number;
   /** Optional per-unit price (rate normalized by unit). `null` when upstream column missing. */
@@ -52,6 +62,11 @@ export interface VariantStats {
   unit_localized?: string;
   /** Localized mirror of `group`. Same fallback semantics as `unit_localized`. */
   group_localized?: string;
+  /** Shared base name for the abstract resource (e.g. "Ready-mix concrete").
+   *  Rendered once as a picker header so each variant row can show only
+   *  the distinguishing variable part. Optional — empty for pre-v2.6.30
+   *  imports that didn't capture this column. */
+  common_start?: string;
 }
 
 /**

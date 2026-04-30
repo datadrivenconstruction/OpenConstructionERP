@@ -12,28 +12,149 @@ import { apiGet, apiPatch } from '@/shared/lib/api';
 
 /* ── Constants ───────────────────────────────────────────────────────── */
 
-/** Base metric units — always available regardless of language. */
-const BASE_UNITS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'] as const;
+/**
+ * Base metric units — always available regardless of language.
+ *
+ * Comprehensive global list covering construction estimating across all
+ * 21 supported locales. Order is curated: most-used metric tokens first,
+ * then imperial, then specialised industry tokens. The locale-specific
+ * dictionaries below add native-language tokens on top (e.g. "Stk" for
+ * de, "шт" for ru, "個" for ja).
+ */
+const BASE_UNITS = [
+  // ── Length (metric) ──
+  'mm', 'cm', 'dm', 'm', 'km', 'lm',
+  // ── Area (metric) ──
+  'mm2', 'cm2', 'dm2', 'm2', 'km2', 'ha', 'a',
+  // ── Volume (metric) ──
+  'mm3', 'cm3', 'dm3', 'm3', 'l', 'ml', 'cl', 'hl',
+  // ── Mass (metric) ──
+  'mg', 'g', 'kg', 't',
+  // ── Imperial / US ──
+  'in', 'ft', 'yd', 'mi',
+  'sqft', 'sqyd', 'acre',
+  'cuft', 'cuyd', 'gal', 'oz', 'lb', 'cwt', 'ton',
+  'cy', 'lf', 'msf', 'mbf', 'bdft',
+  // ── Counts / packaging ──
+  'pcs', 'pc', 'ea', 'set', 'pair', 'pr', 'lot', 'box',
+  'roll', 'sheet', 'bundle', 'pack', 'pkg', 'bag', 'unit',
+  // ── Construction-specific countables ──
+  'door', 'win', 'fixture', 'point', 'item',
+  // ── Labour / time ──
+  's', 'min', 'h', 'hr', 'mh', 'shift', 'day', 'wk', 'mo', 'yr',
+  // ── Lump-sum / scope ──
+  'lsum', 'ls', 'job', 'visit',
+  // ── Power / energy ──
+  'W', 'kW', 'MW', 'kVA', 'kWh', 'MWh', 'BTU',
+  // ── Force / pressure / per-unit-of-X ──
+  'kN', 'MN', 'kg/m', 'kg/m2', 'kg/m3',
+] as const;
 
 /**
- * Language-specific additional units.
- * Key = i18n language code, value = extra units for that locale.
+ * Language-specific additional units. Key = i18n language code, value =
+ * extra tokens for that locale. Each list focuses on common tokens that
+ * native estimators expect to see in the dropdown — local quantity
+ * surveying conventions (e.g. "ME" for "Mengeneinheit" in DE, "пм" for
+ * погонный метр in RU).
  */
 const LOCALE_UNITS: Record<string, readonly string[]> = {
-  de: ['Stk', 'Psch', 'lfm', 'Std', 'FM', 'Mt', 'Wo', 'Tag', 'LE', 'BE', 'ME'],
-  fr: ['u', 'ens', 'fft', 'ml', 'j', 'sem', 'mois', 'lot'],
-  es: ['ud', 'pa', 'ml', 'gl', 'jor', 'mes'],
-  pt: ['un', 'vb', 'cj', 'gl', 'dia', 'mes'],
-  ru: ['шт', 'компл', 'п.м', 'маш-ч', 'чел-ч', 'мес', 'усл'],
-  zh: ['个', '套', '延米', '台班', '工日', '月'],
-  ar: ['عدد', 'طقم', 'م.ط', 'يوم'],
-  ja: ['本', '枚', '箇所', '式', '台', 'セット', '組'],
-  ko: ['개', '세트', '식', '대'],
-  tr: ['ad', 'tk', 'mt', 'gn', 'ay'],
-  it: ['nr', 'cad', 'cpl', 'ml', 'gg', 'mese', 'corpo'],
-  nl: ['st', 'stel', 'str.m', 'dag', 'mnd'],
-  pl: ['szt', 'kpl', 'mb', 'r-g', 'm-g', 'dzień'],
-  cs: ['ks', 'kpl', 'bm', 'hod', 'den'],
+  // German (DACH / GAEB)
+  de: ['Stk', 'St', 'Std', 'Std.', 'Masch.-Std.',
+       'Psch', 'psch', 'lfm', 'FM', 'Mt', 'Wo', 'Tag',
+       'LE', 'BE', 'ME', 'Pos.', 'Stck', 'kpl', 'kompl'],
+  // French
+  fr: ['u', 'ens', 'fft', 'ml', 'm.l', 'j', 'jr', 'sem', 'mois',
+       'lot', 'forfait', 'pièce', 'unité'],
+  // Spanish
+  es: ['ud', 'uds', 'pa', 'ml', 'gl', 'jor', 'jornal', 'mes',
+       'partida', 'pieza'],
+  // Portuguese
+  pt: ['un', 'unid', 'vb', 'cj', 'gl', 'dia', 'mes',
+       'verba', 'peça'],
+  // Russian / Ukrainian / Belarusian / Kazakh (CWICR catalogues)
+  ru: ['шт', 'компл', 'комп', 'компл.', 'набор',
+       'пм', 'п.м', 'п.м.', 'мп', 'м.п', 'лм',
+       'маш-ч', 'маш.-ч', 'маш-час', 'чел-ч', 'чел.-ч', 'чел-час',
+       'ч-ч', 'ч/ч', 'ч.-ч',
+       'мин', 'час', 'сут', 'смен', 'смена', 'дн', 'мес', 'мес.', 'год',
+       'усл', 'усл.ед', 'у.е.',
+       'место', 'этаж', 'объект', 'позиц', 'позиция',
+       'мешок', 'упак', 'упак.', 'кор', 'рул', 'лист', 'пара',
+       'мм', 'см', 'дм', 'м', 'км',
+       'мм2', 'см2', 'м2', 'км2', 'га',
+       'мм3', 'см3', 'м3',
+       'мг', 'г', 'кг', 'т', 'ц',
+       'л', 'мл', 'кВт', 'кВт·ч', 'кВтч', 'Вт'],
+  // Chinese
+  zh: ['个', '只', '套', '台', '件', '块', '张', '根',
+       '延米', '米', '平方米', '立方米', '公斤', '吨',
+       '台班', '工日', '月', '天', '小时', '分钟', '秒',
+       '处', '层', '项', '组', '盒', '袋', '卷'],
+  // Arabic
+  ar: ['عدد', 'طقم', 'قطعة', 'قطع',
+       'م.ط', 'م.م', 'م.م²', 'م.م³',
+       'يوم', 'ساعة', 'شهر', 'سنة',
+       'كجم', 'طن', 'لتر'],
+  // Japanese
+  ja: ['本', '枚', '箇所', '式', '台', 'セット', '組',
+       '個', '体', '巻', '袋', '箱',
+       '人日', '人時', '時間', '日', '月', '年',
+       '平米', '立米', '平方', 'キロ', 'トン'],
+  // Korean
+  ko: ['개', '세트', '식', '대',
+       '매', '장', '롤', '봉', '박스',
+       '인', '인일', '인시', '시간', '일', '월', '년',
+       '평', '제곱미터', '입방미터'],
+  // Turkish
+  tr: ['ad', 'adet', 'tk', 'takım', 'mt', 'm.tul',
+       'gn', 'gün', 'ay', 'yıl', 'saat', 'dakika',
+       'çift', 'paket', 'rulo'],
+  // Italian
+  it: ['nr', 'n', 'cad', 'cpl', 'ml', 'm.l',
+       'gg', 'giorni', 'mese', 'corpo', 'a corpo',
+       'pz', 'pezzo', 'paio', 'set'],
+  // Dutch
+  nl: ['st', 'stk', 'stuk', 'stel', 'paar',
+       'str.m', 'sm', 'lm',
+       'dag', 'wk', 'mnd', 'jr', 'uur',
+       'set', 'rol', 'doos'],
+  // Polish
+  pl: ['szt', 'szt.', 'kpl', 'kpl.', 'mb', 'm.b',
+       'r-g', 'rbg', 'm-g', 'mg',
+       'dzień', 'dni', 'tydz', 'mies', 'rok', 'godz',
+       'para', 'opak'],
+  // Czech / Slovak
+  cs: ['ks', 'kpl', 'bm', 'hod', 'den',
+       'týd', 'měs', 'rok', 'min',
+       'pár', 'sada', 'bal'],
+  // Romanian
+  ro: ['buc', 'set', 'pereche', 'kit',
+       'ml', 'm.l',
+       'oră', 'h', 'zi', 'lună', 'an'],
+  // Bulgarian
+  bg: ['бр', 'бр.', 'комплект', 'двойка',
+       'лм', 'мл', 'м.л',
+       'час', 'ден', 'месец', 'година', 'смяна'],
+  // Croatian
+  hr: ['kom', 'kpl', 'par', 'set',
+       'm', 'm2', 'm3',
+       'h', 'sat', 'dan', 'mj', 'god'],
+  // Swedish
+  sv: ['st', 'styck', 'sats', 'par',
+       'lm', 'löpmeter',
+       'tim', 'h', 'dag', 'vecka', 'mån', 'år'],
+  // Vietnamese
+  vi: ['cái', 'chiếc', 'bộ', 'cặp', 'gói',
+       'm.dài',
+       'giờ', 'ngày', 'tuần', 'tháng', 'năm', 'ca'],
+  // Thai
+  th: ['ชิ้น', 'ตัว', 'ชุด', 'คู่', 'ม้วน',
+       'ม.', 'ตร.ม.', 'ลบ.ม.',
+       'ชั่วโมง', 'วัน', 'เดือน', 'ปี'],
+  // Indonesian / Malay
+  id: ['bh', 'buah', 'set', 'pasang', 'lembar',
+       'm', 'm2', 'm3',
+       'jam', 'hari', 'minggu', 'bulan', 'tahun'],
 };
 
 /**

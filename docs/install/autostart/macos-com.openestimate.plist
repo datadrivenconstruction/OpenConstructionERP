@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.openestimate.serve</string>
+
+    <!-- Replace /Users/USERNAME with your home dir; replace .venv path with
+         your actual venv (where `pip install openconstructionerp` ran). -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/USERNAME/.venv/bin/openestimate</string>
+        <string>serve</string>
+        <string>--host</string>
+        <string>127.0.0.1</string>
+        <string>--port</string>
+        <string>8000</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/USERNAME</string>
+
+    <!-- Run on user login. Use ~/Library/LaunchAgents/ for per-user, or
+         /Library/LaunchDaemons/ (with sudo) for system-wide boot start. -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Restart on crash -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <!-- Logs -->
+    <key>StandardOutPath</key>
+    <string>/Users/USERNAME/.openestimate/logs/serve.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/USERNAME/.openestimate/logs/serve-err.log</string>
+
+    <!-- Optional: environment overrides -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PYTHONUNBUFFERED</key>
+        <string>1</string>
+        <!-- <key>SEED_DEMO</key><string>false</string> -->
+        <!-- <key>DATABASE_URL</key><string>postgresql+asyncpg://...</string> -->
+    </dict>
+</dict>
+</plist>

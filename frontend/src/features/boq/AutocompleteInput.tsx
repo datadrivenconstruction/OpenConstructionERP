@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { boqApi, type CostAutocompleteItem } from './api';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { AutocompleteTooltip } from './AutocompleteTooltip';
 
 /**
  * Autocomplete suggestion for cost items.
@@ -8,7 +9,17 @@ import { getIntlLocale } from '@/shared/lib/formatters';
  * When the user types 2+ characters in a description cell, this component
  * fetches matching cost items and shows a dropdown. Selecting an item fills
  * the description, unit, and unit_rate fields.
+ *
+ * Phase F (v2.7.0) — hover tooltip on suggestions:
+ *   • mouseenter on a row → 300 ms delay → render ``<AutocompleteTooltip />``
+ *     anchored to the right of the row (auto-flips on overflow).
+ *   • mouseleave / keydown / dropdown close → hide.
+ *   • Keyboard ArrowUp/ArrowDown navigation never triggers the tooltip
+ *     (the spec calls for deliberate mouse hover only).
+ *   • Skipped entirely on touch devices (matchMedia ``(hover: hover)``).
  */
+
+const TOOLTIP_HOVER_DELAY_MS = 300;
 
 interface AutocompleteInputProps {
   /** Current value of the input field. */
@@ -21,6 +32,55 @@ interface AutocompleteInputProps {
   onCancel: () => void;
   /** Placeholder text. */
   placeholder?: string;
+}
+
+/** Detect hover-capable pointing devices. SSR-safe. */
+function isHoverCapableDevice(): boolean {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  try {
+    return window.matchMedia('(hover: hover)').matches;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Map an ISO 4217 currency code (or empty/undefined) to a short symbol
+ * for the tooltip. Falls back to the raw code so the user always sees
+ * *something* meaningful.
+ */
+function currencySymbolFor(currency: string | undefined | null): string {
+  if (!currency) return '';
+  const code = currency.toUpperCase();
+  switch (code) {
+    case 'EUR':
+      return '€';
+    case 'USD':
+    case 'CAD':
+    case 'AUD':
+    case 'NZD':
+    case 'MXN':
+    case 'BRL':
+    case 'ARS':
+      return '$';
+    case 'GBP':
+      return '£';
+    case 'JPY':
+    case 'CNY':
+      return '¥';
+    case 'INR':
+      return '₹';
+    case 'RUB':
+      return '₽';
+    case 'PLN':
+      return 'zł';
+    case 'CZK':
+      return 'Kč';
+    case 'CHF':
+      return 'CHF';
+    default:
+      return code;
+  }
 }
 
 export function AutocompleteInput({
@@ -36,9 +96,19 @@ export function AutocompleteInput({
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Hover tooltip state (Phase F). The pair (item, rect) is set together
+  // after a 300 ms delay so we never render a tooltip for a row the user
+  // only flicked across.
+  const [hoveredItem, setHoveredItem] = useState<CostAutocompleteItem | null>(null);
+  const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Hover detection runs once per mount so SSR stays safe.
+  const hoverCapable = useMemo(() => isHoverCapableDevice(), []);
 
   // Focus input on mount
   useEffect(() => {
@@ -100,26 +170,44 @@ export function AutocompleteInput({
     [fetchSuggestions],
   );
 
-  // Cleanup debounce on unmount
+  // Cleanup debounce + hover timer on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
     };
+  }, []);
+
+  /** Clear any pending hover timer + the visible tooltip. */
+  const clearHover = useCallback(() => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    setHoveredItem(null);
+    setHoveredRect(null);
   }, []);
 
   const handleSelect = useCallback(
     (item: CostAutocompleteItem) => {
+      clearHover();
       setShowDropdown(false);
       setInputValue(item.description);
       onSelectSuggestion(item);
     },
-    [onSelectSuggestion],
+    [onSelectSuggestion, clearHover],
   );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Any keyboard activity hides the tooltip — keyboard navigation
+      // must never coexist with a hover preview (per spec).
+      clearHover();
+
       if (e.key === 'Escape') {
         if (showDropdown) {
           setShowDropdown(false);
@@ -141,6 +229,15 @@ export function AutocompleteInput({
       }
 
       if (e.key === 'Tab') {
+        const selected = suggestions[selectedIndex];
+        if (showDropdown && selectedIndex >= 0 && selected) {
+          // Tab on a highlighted suggestion picks it (matches the BOQ
+          // editor expectation that Tab moves the focus *after* applying
+          // the current selection — see issue #102 follow-up).
+          e.preventDefault();
+          handleSelect(selected);
+          return;
+        }
         setShowDropdown(false);
         onCommit(inputValue);
         return;
@@ -156,8 +253,31 @@ export function AutocompleteInput({
         }
       }
     },
-    [showDropdown, selectedIndex, suggestions, inputValue, onCommit, onCancel, handleSelect],
+    [showDropdown, selectedIndex, suggestions, inputValue, onCommit, onCancel, handleSelect, clearHover],
   );
+
+  const handleSuggestionMouseEnter = useCallback(
+    (item: CostAutocompleteItem, idx: number, target: HTMLElement) => {
+      setSelectedIndex(idx);
+      if (!hoverCapable) return; // Skip on touch / no-hover devices.
+      // Snapshot the rect immediately so it doesn't drift if the user
+      // scrolls during the 300 ms delay.
+      const rect = target.getBoundingClientRect();
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
+      hoverTimerRef.current = setTimeout(() => {
+        setHoveredItem(item);
+        setHoveredRect(rect);
+        hoverTimerRef.current = null;
+      }, TOOLTIP_HOVER_DELAY_MS);
+    },
+    [hoverCapable],
+  );
+
+  const handleSuggestionMouseLeave = useCallback(() => {
+    clearHover();
+  }, [clearHover]);
 
   /** Format rate for display. */
   const fmtRate = (rate: number) =>
@@ -204,12 +324,14 @@ export function AutocompleteInput({
             <button
               key={item.code}
               type="button"
+              data-testid="autocomplete-suggestion"
               onMouseDown={(e) => {
                 // Use mouseDown to fire before blur
                 e.preventDefault();
                 handleSelect(item);
               }}
-              onMouseEnter={() => setSelectedIndex(idx)}
+              onMouseEnter={(e) => handleSuggestionMouseEnter(item, idx, e.currentTarget)}
+              onMouseLeave={handleSuggestionMouseLeave}
               className={`flex w-full items-start gap-3 px-3 py-2.5 text-left transition-colors ${
                 idx === selectedIndex
                   ? 'bg-oe-blue-subtle/40'
@@ -241,6 +363,16 @@ export function AutocompleteInput({
             </button>
           ))}
         </div>
+      )}
+
+      {/* Hover tooltip (rendered into a portal). The tooltip itself has
+          ``pointer-events: none`` so it never steals input from the row. */}
+      {hoveredItem && hoveredRect && (
+        <AutocompleteTooltip
+          item={hoveredItem}
+          anchorRect={hoveredRect}
+          currencySymbol={currencySymbolFor(hoveredItem.currency)}
+        />
       )}
     </div>
   );

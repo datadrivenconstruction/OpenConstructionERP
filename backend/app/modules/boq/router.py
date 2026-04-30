@@ -122,6 +122,7 @@ from app.modules.boq.schemas import (
     PrerequisiteItem,
     PricingAnomaly,
     RateMatch,
+    ResourcePositionRef,
     ResourceSummaryItem,
     ResourceSummaryResponse,
     ResourceTypeSummary,
@@ -4669,8 +4670,19 @@ async def get_resource_summary(
     # Aggregation key: (name_lower, type_lower) → accumulator
     agg: dict[tuple[str, str], dict[str, Any]] = {}
 
-    def _add_resource(raw: dict[str, Any], pos_id: str, pos_qty: float = 1.0) -> None:
-        """Add a single resource dict to the aggregation map."""
+    def _add_resource(
+        raw: dict[str, Any],
+        pos_id: str,
+        pos_qty: float = 1.0,
+        resource_idx: int | None = None,
+    ) -> None:
+        """Add a single resource dict to the aggregation map.
+
+        ``resource_idx`` is captured so the frontend can fan a re-pick out
+        to every (position, slot) where this aggregated resource lives.
+        It is ``None`` only for synthetic resources derived from
+        ``position.description`` (no real slot to patch).
+        """
         name = str(raw.get("name", raw.get("code", ""))).strip()
         rtype = str(raw.get("type", "other")).strip().lower()
         if not name:
@@ -4695,6 +4707,16 @@ async def get_resource_summary(
                 "total_cost": 0.0,
                 "rates": [],
                 "positions": set(),
+                # Variant surface — first-seen wins for the catalog/stats,
+                # since variants are intrinsic to the abstract resource.
+                "available_variants": None,
+                "variant_stats": None,
+                "currency": None,
+                # Distinct (label, default) tuples observed across positions:
+                # if all entries agree we surface that pick; mixed → "__mixed__".
+                "variant_labels": set(),
+                "variant_defaults": set(),
+                "position_refs": [],
             }
 
         entry = agg[key]
@@ -4703,16 +4725,48 @@ async def get_resource_summary(
         entry["rates"].append(rate)
         entry["positions"].add(pos_id)
 
+        # Capture variant catalog / stats / currency on first sighting.
+        avail = raw.get("available_variants")
+        if entry["available_variants"] is None and isinstance(avail, list) and len(avail) >= 2:
+            entry["available_variants"] = avail
+        vstats = raw.get("variant_stats") or raw.get("available_variant_stats")
+        if entry["variant_stats"] is None and isinstance(vstats, dict):
+            entry["variant_stats"] = vstats
+        cur = raw.get("currency")
+        if entry["currency"] is None and isinstance(cur, str) and cur:
+            entry["currency"] = cur
+
+        # Track current pick / default per position so the UI can show a
+        # consistent pill (or flag "mixed" when positions disagree).
+        variant = raw.get("variant")
+        if isinstance(variant, dict):
+            label = variant.get("label")
+            if isinstance(label, str) and label:
+                entry["variant_labels"].add(label)
+        else:
+            entry["variant_labels"].add("__unset__")
+        vdef = raw.get("variant_default")
+        if isinstance(vdef, str) and vdef in ("mean", "median"):
+            entry["variant_defaults"].add(vdef)
+
+        # Record a pointer back to this exact resource slot for fan-out
+        # re-pick. Skip for synthetic rows (resource_idx is None) — they
+        # have no slot to patch.
+        if resource_idx is not None:
+            entry["position_refs"].append(
+                ResourcePositionRef(position_id=pos_id, resource_idx=resource_idx)
+            )
+
     for pos in boq_data.positions:
         meta = pos.metadata or {}
         resources = meta.get("resources")
         pos_qty = float(pos.quantity or 0) if hasattr(pos, "quantity") else 1.0
 
         if isinstance(resources, list) and len(resources) > 0:
-            for raw in resources:
+            for idx, raw in enumerate(resources):
                 if not isinstance(raw, dict):
                     continue
-                _add_resource(raw, str(pos.id))
+                _add_resource(raw, str(pos.id), resource_idx=idx)
         else:
             # Fast heuristic: classify by description and create a synthetic resource
             desc = pos.description or ""
@@ -4739,6 +4793,23 @@ async def get_resource_summary(
     for entry in agg.values():
         rates_list: list[float] = entry["rates"]
         avg_rate = sum(rates_list) / len(rates_list) if rates_list else 0.0
+
+        # Resolve consensus pick across positions:
+        #   * single non-"__unset__" label  → that pick
+        #   * many                          → "__mixed__"
+        #   * only "__unset__"              → None (no explicit pick)
+        labels: set[str] = entry["variant_labels"]
+        explicit_labels = labels - {"__unset__"}
+        if len(explicit_labels) == 1 and "__unset__" not in labels:
+            current_label = next(iter(explicit_labels))
+        elif len(explicit_labels) >= 2:
+            current_label = "__mixed__"
+        else:
+            current_label = None
+
+        defaults: set[str] = entry["variant_defaults"]
+        variant_default = next(iter(defaults)) if len(defaults) == 1 else None
+
         resource_items.append(
             ResourceSummaryItem(
                 name=entry["name"],
@@ -4748,6 +4819,12 @@ async def get_resource_summary(
                 avg_unit_rate=round(avg_rate, 2),
                 total_cost=round(entry["total_cost"], 2),
                 positions_used=len(entry["positions"]),
+                available_variants=entry["available_variants"],
+                variant_stats=entry["variant_stats"],
+                current_variant_label=current_label,
+                variant_default=variant_default,
+                currency=entry["currency"],
+                position_refs=entry["position_refs"],
             )
         )
 
@@ -5509,10 +5586,27 @@ async def add_custom_column(
 
     display_name = data.get("display_name", name.replace("_", " ").title())
     column_type = data.get("column_type", "text")
-    if column_type not in ("text", "number", "date", "select"):
-        raise HTTPException(400, "column_type must be: text, number, date, or select")
+    if column_type not in ("text", "number", "date", "select", "calculated"):
+        raise HTTPException(
+            400, "column_type must be: text, number, date, select, or calculated"
+        )
 
     options = data.get("options", [])
+    # v2.7.0/E — calculated columns carry a user-authored formula evaluated
+    # client-side by the BOQ formula engine. Backend is purely a passthrough:
+    # we store the formula string + display decimals and trust the frontend
+    # to evaluate (the engine is CSP-safe and lives in the browser anyway).
+    formula = data.get("formula", "") if column_type == "calculated" else ""
+    decimals_raw = data.get("decimals")
+    decimals: int | None
+    if column_type == "calculated":
+        try:
+            decimals = int(decimals_raw) if decimals_raw is not None else 2
+        except (TypeError, ValueError):
+            decimals = 2
+        decimals = max(0, min(6, decimals))
+    else:
+        decimals = None
 
     from sqlalchemy.orm.attributes import flag_modified
 
@@ -5528,13 +5622,16 @@ async def add_custom_column(
     if any(c.get("name") == name for c in existing_columns):
         raise HTTPException(400, f"Column '{name}' already exists")
 
-    col_def = {
+    col_def: dict = {
         "name": name,
         "display_name": display_name,
         "column_type": column_type,
         "options": list(options),
         "sort_order": len(existing_columns),
     }
+    if column_type == "calculated":
+        col_def["formula"] = str(formula)
+        col_def["decimals"] = decimals
     new_columns = [*existing_columns, col_def]
     new_meta = {**existing_meta, "custom_columns": new_columns}
 

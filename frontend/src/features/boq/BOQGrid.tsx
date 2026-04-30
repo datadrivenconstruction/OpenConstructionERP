@@ -55,9 +55,11 @@ import {
   type CollabLock,
 } from '@/features/collab_locks';
 import { getColumnDefs, getCustomColumnDefs } from './grid/columnDefs';
+import type { FormulaVariable } from './grid/formula';
 import {
   FormulaCellEditor,
   AutocompleteCellEditor,
+  UnitCellEditor,
 } from './grid/cellEditors';
 import {
   ActionsCellRenderer,
@@ -80,6 +82,8 @@ import { RESOURCE_TYPES, getResourceTypeLabel } from './boqResourceTypes';
 import { CURRENCY_GROUPS } from '@/features/projects/CreateProjectPage';
 import { useToastStore } from '@/stores/useToastStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { VariantPicker } from '@/features/costs/VariantPicker';
+import type { CostVariant, VariantStats } from '@/features/costs/api';
 
 /* ── Column width persistence ─────────────────────────────────────── */
 
@@ -217,11 +221,45 @@ interface AddResourceRow {
   total: number;
 }
 
+/**
+ * Synthetic "abstract variant" header row prepended to the resource panel
+ * for legacy CWICR position-mode applies. Surfaces the variant catalog
+ * (``cost_item_variants``) as a visible, clickable row inside the resource
+ * area so the user finds the picker by scanning down — not just by hunting
+ * the description-cell V icon. The row is read-only and its only action
+ * is to re-open the position-level picker (same as the V icon).
+ */
+interface VariantHeaderRow {
+  _isVariantHeader: true;
+  _parentPositionId: string;
+  _variantHeaderName: string;
+  _variantHeaderChosenLabel: string | null;
+  _variantHeaderChosenPrice: number | null;
+  _variantHeaderCount: number;
+  _variantHeaderCurrency: string;
+  /** Position-level quantity — the abstract variant inherits the position's
+   *  quantity so the user sees the same volume × variant-price math as on
+   *  the position row above (and on every other component resource). */
+  _variantHeaderQty: number;
+  /** Position-level unit (e.g. "t", "m³"). Needed to render the unit cell
+   *  in alignment with the rest of the resource grid. */
+  _variantHeaderUnit: string;
+  id: string;
+  // Fields needed for GridRow compatibility (kept empty / 0).
+  description: string;
+  ordinal: string;
+  unit: string;
+  quantity: number;
+  unit_rate: number;
+  total: number;
+}
+
 type GridRow =
   | (Position & Partial<SectionRow>)
   | (FooterRow & Record<string, unknown>)
   | (ResourceRow & Record<string, unknown>)
-  | (AddResourceRow & Record<string, unknown>);
+  | (AddResourceRow & Record<string, unknown>)
+  | (VariantHeaderRow & Record<string, unknown>);
 
 export interface ManualResource {
   name: string;
@@ -262,6 +300,13 @@ export interface BOQGridProps {
   onUpdateResource?: (positionId: string, resourceIndex: number, field: string, value: number | string) => void;
   onUpdateResourceFields?: (positionId: string, resourceIndex: number, fields: Record<string, number | string>) => void;
   onSaveResourceToCatalog?: (positionId: string, resourceIndex: number) => void;
+  /**
+   * Save the variant-header synthetic row to the user's catalog under a
+   * custom name. The variant header is not in ``metadata.resources`` so the
+   * standard ``onSaveResourceToCatalog`` can't reach it — this dedicated
+   * handler reads the chosen variant off the position metadata directly.
+   */
+  onSaveVariantHeaderToCatalog?: (positionId: string, customName: string) => void;
   onOpenCostDbForPosition?: (positionId: string) => void;
   onOpenCatalogForPosition?: (positionId: string) => void;
   /**
@@ -285,6 +330,11 @@ export interface BOQGridProps {
   onSaveAsAssembly?: (positionId: string) => void;
   /** Custom column definitions from BOQ metadata */
   customColumns?: import('./grid/columnDefs').CustomColumnDef[];
+  /**
+   * BOQ-scoped named variables ($GFA, $LABOR_RATE, …). Used by `calculated`
+   * custom columns; safe to omit when no calculated columns are defined.
+   */
+  boqVariables?: import('./api').BOQVariable[];
   /** First ready BIM model ID for the project (used for mini 3D preview in ordinal badge). */
   bimModelId?: string | null;
   /** Highlight linked BIM elements in the 3D viewer (triggered from ordinal badge click). */
@@ -323,6 +373,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onUpdateResource,
   onUpdateResourceFields,
   onSaveResourceToCatalog,
+  onSaveVariantHeaderToCatalog,
   onOpenCostDbForPosition,
   onOpenCatalogForPosition,
   onRepickResourceVariant,
@@ -335,6 +386,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onApplyAnomalySuggestion,
   onSaveAsAssembly,
   customColumns,
+  boqVariables,
   bimModelId,
   onHighlightBIMElements,
 }, ref) {
@@ -444,6 +496,157 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     }, 0);
   }, []);
 
+  /* ── Variant-picker auto-open signal ──────────────────────────────
+   *  Triggered by the position-description "V" icon.  We ensure the
+   *  position's resource panel is expanded, then stash a one-shot
+   *  signal that the matching ``EditableResourceRow`` consumes in a
+   *  mount effect to pop its VariantPicker open. The row clears the
+   *  signal after consuming so it never re-fires on a re-render. */
+  const [openVariantPickerSignal, setOpenVariantPickerSignal] = useState<{
+    positionId: string;
+    resourceIdx: number;
+  } | null>(null);
+
+  const openVariantPickerFor = useCallback(
+    (positionId: string, resourceIdx: number) => {
+      setExpandedPositions((prev) => {
+        if (prev.has(positionId)) return prev;
+        const next = new Set(prev);
+        next.add(positionId);
+        return next;
+      });
+      setOpenVariantPickerSignal({ positionId, resourceIdx });
+      // Same refresh-cells dance as toggleResources so the new resource
+      // rows mount on the next tick — the row's mount-time effect then
+      // sees the signal and opens the picker.
+      setTimeout(() => {
+        gridApiRef.current?.stopEditing();
+        gridApiRef.current?.refreshCells({
+          columns: ['ordinal', '_expand', 'description', 'quantity', 'unit_rate', 'total'],
+          force: true,
+        });
+      }, 0);
+    },
+    [],
+  );
+
+  const clearOpenVariantPicker = useCallback(() => setOpenVariantPickerSignal(null), []);
+
+  /* ── Position-level variant picker ────────────────────────────────
+   *  Legacy CWICR position-mode applies stash the variant catalog on
+   *  ``position.metadata.cost_item_variants`` (no per-resource cache).
+   *  When the user clicks the description "V" icon for such a position,
+   *  we render a portal-anchored ``VariantPicker`` directly here against
+   *  those catalog entries; ``onApply`` updates the position's
+   *  ``unit_rate`` and ``metadata.variant`` via ``onUpdatePosition``. */
+  const [positionVariantPicker, setPositionVariantPicker] = useState<{
+    positionId: string;
+    anchorEl: HTMLElement | null;
+  } | null>(null);
+
+  const openPositionVariantPicker = useCallback(
+    (positionId: string, anchorEl: HTMLElement | null) => {
+      // Also expand the resource panel so the synthetic variant-header row
+      // becomes visible alongside the popover. Mirrors the resource-level V
+      // flow for a consistent "click V → see variant + resources" feel.
+      setExpandedPositions((prev) => {
+        if (prev.has(positionId)) return prev;
+        const next = new Set(prev);
+        next.add(positionId);
+        return next;
+      });
+      setPositionVariantPicker({ positionId, anchorEl });
+      setTimeout(() => {
+        gridApiRef.current?.stopEditing();
+        gridApiRef.current?.refreshCells({
+          columns: ['ordinal', '_expand', 'description', 'quantity', 'unit_rate', 'total'],
+          force: true,
+        });
+      }, 0);
+    },
+    [],
+  );
+
+  const closePositionVariantPicker = useCallback(
+    () => setPositionVariantPicker(null),
+    [],
+  );
+
+  /** Applies a chosen variant to the OPEN position-level picker target.
+   *  Mirrors the resource-level repick contract but writes to the
+   *  position itself: ``unit_rate`` ← variant.price, ``metadata.variant``
+   *  ← chosen marker. ``variant_default`` is dropped on an explicit pick
+   *  so the position-level pill reflects the deliberate choice. */
+  const applyPositionVariant = useCallback(
+    (chosen: CostVariant) => {
+      const target = positionVariantPicker;
+      if (!target) return;
+      const pos = positions.find((p) => p.id === target.positionId);
+      if (!pos) {
+        setPositionVariantPicker(null);
+        return;
+      }
+      const oldMeta = (pos.metadata ?? {}) as Record<string, unknown>;
+      const newMeta: Record<string, unknown> = {
+        ...oldMeta,
+        variant: { label: chosen.label, price: chosen.price, index: chosen.index },
+      };
+      delete (newMeta as { variant_default?: unknown }).variant_default;
+      onUpdatePosition?.(
+        pos.id,
+        { unit_rate: chosen.price, metadata: newMeta } as UpdatePositionData,
+        pos as unknown as Record<string, unknown>,
+      );
+      setPositionVariantPicker(null);
+    },
+    [positionVariantPicker, positions, onUpdatePosition],
+  );
+
+  /** Patch the parent position behind a variant-header synthetic row.
+   *
+   *  Both rate AND qty edits land on ``metadata.variant`` ONLY — the
+   *  position's own ``quantity`` and ``unit_rate`` stay independent so
+   *  editing the variant resource never alters the parent position row,
+   *  and editing the position qty never alters the variant resource qty.
+   *  Per the user's spec: "Объём вариативного ресурса никак не связан
+   *  с объёмом позиции". Same rule applies to price (already in place). */
+  const onUpdateVariantHeader = useCallback(
+    (positionId: string, fields: { quantity?: number; unit_rate?: number }) => {
+      const pos = positions.find((p) => p.id === positionId);
+      if (!pos) return;
+      const oldMeta = (pos.metadata ?? {}) as Record<string, unknown>;
+      const oldVariant = (oldMeta.variant ?? {}) as Record<string, unknown>;
+      const newVariant: Record<string, unknown> = { ...oldVariant };
+
+      if (fields.quantity != null) {
+        newVariant.quantity = fields.quantity;
+      }
+      if (fields.unit_rate != null) {
+        newVariant.price = fields.unit_rate;
+      }
+
+      if (fields.quantity == null && fields.unit_rate == null) return;
+
+      // Manual edits stamp a label/index so the variant row still renders
+      // when no catalog variant has been picked yet.
+      if (typeof newVariant.label !== 'string') newVariant.label = 'manual';
+      if (typeof newVariant.index !== 'number') newVariant.index = -1;
+
+      const newMeta = { ...oldMeta, variant: newVariant };
+      // ``variant_default`` (auto mean/median) is dropped — explicit edits win.
+      if ('variant_default' in newMeta) {
+        delete (newMeta as Record<string, unknown>).variant_default;
+      }
+
+      onUpdatePosition?.(
+        pos.id,
+        { metadata: newMeta },
+        pos as unknown as Record<string, unknown>,
+      );
+    },
+    [positions, onUpdatePosition],
+  );
+
   /* ── Imperative handle for parent components ───────────────────── */
   useImperativeHandle(ref, () => ({
     clearSelection: () => {
@@ -478,9 +681,15 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       onUpdateResource: onUpdateResource ?? (() => {}),
       onUpdateResourceFields,
       onSaveResourceToCatalog: onSaveResourceToCatalog ?? (() => {}),
+      onSaveVariantHeaderToCatalog,
       onOpenCostDbForPosition: onOpenCostDbForPosition ?? (() => {}),
       onOpenCatalogForPosition: onOpenCatalogForPosition ?? (() => {}),
       onRepickResourceVariant,
+      openVariantPickerFor: openVariantPickerSignal,
+      onClearOpenVariantPicker: clearOpenVariantPicker,
+      onOpenVariantPickerFor: openVariantPickerFor,
+      onOpenPositionVariantPicker: openPositionVariantPicker,
+      onUpdateVariantHeader,
       onDeletePosition,
       onSaveToDatabase,
       onAddComment: onAddComment ?? (() => {}),
@@ -506,7 +715,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     }) as FullGridContext,
     [currencySymbol, currencyCode, fxRates, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource, onUpdateResourceFields,
-     onSaveResourceToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition, onRepickResourceVariant,
+     onSaveResourceToCatalog, onSaveVariantHeaderToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition, onRepickResourceVariant,
+     openVariantPickerSignal, openVariantPickerFor, clearOpenVariantPicker, openPositionVariantPicker, onUpdateVariantHeader,
      onDeletePosition, onSaveToDatabase, onAddComment,
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion, bimModelId,
      onUpdatePosition, onHighlightBIMElements, onDeleteSection, onReorderSections, onFormulaApplied],
@@ -527,7 +737,23 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     // Insert custom columns before _actions column
     if (customColumns && customColumns.length > 0) {
       const actionsIdx = defs.findIndex((c) => c.field === '_actions');
-      const customDefs = getCustomColumnDefs(customColumns);
+      // v2.7.0/E — `calculated` columns evaluate user-authored formulas
+      // against the live positions list + BOQ variables. We project the
+      // BOQ-level variables map (UPPER_SNAKE keyed) into the engine's
+      // FormulaVariable shape on every column-defs rebuild; AG Grid then
+      // calls our valueGetter on every refresh, so changing a position
+      // automatically re-runs the calculation (we trigger refreshes via
+      // the effect below).
+      const variablesMap = new Map<string, FormulaVariable>();
+      if (boqVariables) {
+        for (const v of boqVariables) {
+          variablesMap.set(v.name.toUpperCase(), { type: v.type, value: v.value });
+        }
+      }
+      const customDefs = getCustomColumnDefs(customColumns, {
+        positions,
+        variables: variablesMap,
+      });
       if (actionsIdx >= 0) {
         defs.splice(actionsIdx, 0, ...customDefs);
       } else {
@@ -535,13 +761,91 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       }
     }
     return defs;
-  }, [currencySymbol, currencyCode, locale, fmt, t, customColumns]);
+  }, [currencySymbol, currencyCode, locale, fmt, t, customColumns, positions, boqVariables]);
+
+  /* ── Calculated-column refresh on positions change ──────────────────
+   * AG Grid re-runs `valueGetter` on every refresh; for cross-position
+   * formulas (e.g. `=pos("01.005").qty / quantity`) we must explicitly
+   * invalidate the calculated cells whenever the positions array changes.
+   * This is cheap — `refreshCells` only touches the listed columns. */
+  useEffect(() => {
+    if (!gridApiRef.current) return;
+    if (!customColumns || customColumns.length === 0) return;
+    const calculatedCols = customColumns
+      .filter((c) => c.column_type === 'calculated')
+      .map((c) => `custom_${c.name}`);
+    if (calculatedCols.length === 0) return;
+    gridApiRef.current.refreshCells({ columns: calculatedCols, force: true });
+  }, [positions, boqVariables, customColumns]);
 
   /* ── Helper: insert resource sub-rows after an expanded position ── */
   const insertResourceRows = useCallback((rows: GridRow[], pos: Position) => {
     rows.push(pos);
 
     if (!expandedPositions.has(pos.id)) return;
+
+    const meta = (pos.metadata ?? {}) as Record<string, unknown>;
+
+    // Synthetic variant-header row — only for positions that carry
+    // ``cost_item_variants`` at position level (legacy CWICR position-mode).
+    // Acts as the "variant resource" the user expects to see among the
+    // components: V badge prominent, click → reopen position-level picker.
+    const posVariants = meta.cost_item_variants as Array<{
+      index: number; label: string; price: number;
+    }> | undefined;
+    const posVariantStats = meta.cost_item_variant_stats as
+      | { common_start?: string; unit?: string; unit_localized?: string }
+      | undefined;
+    const posChosenVariant = meta.variant as
+      | { label?: string; price?: number; index?: number; quantity?: number }
+      | undefined;
+    const hasPositionLevelVariants = Array.isArray(posVariants) && posVariants.length >= 2;
+    if (hasPositionLevelVariants) {
+      // Variant header name = ONLY the abstract base
+      // (``price_abstract_resource_common_start``). NEVER fall back to
+      // the position description — the variant resource must carry its
+      // own catalog identity, not duplicate the parent position's text.
+      // When ``common_start`` wasn't captured (legacy / pre-v2.6.30
+      // imports) we leave it empty so the synthetic row only shows the
+      // chosen variant label (or the "Variant" chip when nothing's picked).
+      const headerName =
+        (posVariantStats?.common_start && posVariantStats.common_start.trim()) || '';
+      const headerRow: VariantHeaderRow = {
+        _isVariantHeader: true,
+        _parentPositionId: pos.id,
+        _variantHeaderName: headerName,
+        _variantHeaderChosenLabel: posChosenVariant?.label ?? null,
+        _variantHeaderChosenPrice: typeof posChosenVariant?.price === 'number'
+          ? posChosenVariant.price
+          : null,
+        _variantHeaderCount: posVariants!.length,
+        _variantHeaderCurrency: (meta.currency as string | undefined) || currencyCode,
+        // Variant resource qty is stored independently of the position qty
+        // (per the user's spec: "Объём вариативного ресурса никак не связан
+        // с объёмом позиции"). For positions imported before the decouple
+        // we fall back to position.quantity so old data still renders.
+        _variantHeaderQty:
+          typeof posChosenVariant?.quantity === 'number'
+            ? posChosenVariant.quantity
+            : (pos.quantity ?? 0),
+        // Unit is sourced from the variant catalog itself (the average /
+        // baseline value the CWICR row was estimated against), not from
+        // the position. Falls back to the position unit when the variant
+        // catalog doesn't carry one (older imports).
+        _variantHeaderUnit:
+          (posVariantStats?.unit_localized && posVariantStats.unit_localized.trim()) ||
+          (posVariantStats?.unit && posVariantStats.unit.trim()) ||
+          (pos.unit ?? ''),
+        id: `${pos.id}_variant_header`,
+        description: '',
+        ordinal: '',
+        unit: '',
+        quantity: 0,
+        unit_rate: 0,
+        total: 0,
+      };
+      rows.push(headerRow as GridRow);
+    }
 
     const resources = (pos.metadata?.resources ?? []) as Array<{
       name: string; code?: string; type: string;
@@ -604,7 +908,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       total: 0,
     };
     rows.push(addRow as GridRow);
-  }, [expandedPositions]);
+  }, [expandedPositions, currencyCode]);
 
   /* ── Build row data from positions ────────────────────────────── */
   const rowData: GridRow[] = useMemo(() => {
@@ -662,11 +966,11 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     if (params.data?._isFooter) {
       classes.push('bg-surface-tertiary/50', 'border-t', 'border-border');
     }
-    if (params.data?._isResource || params.data?._isAddResource) {
+    if (params.data?._isResource || params.data?._isAddResource || params.data?._isVariantHeader) {
       classes.push('oe-resource-row');
     }
     // Add 'group' to regular position rows so hover actions (save/delete) appear on hover
-    if (!params.data?._isSection && !params.data?._isFooter && !params.data?._isResource && !params.data?._isAddResource) {
+    if (!params.data?._isSection && !params.data?._isFooter && !params.data?._isResource && !params.data?._isAddResource && !params.data?._isVariantHeader) {
       classes.push('group');
 
       // Highlight unpriced positions (unit_rate is 0/empty) so the user can
@@ -711,7 +1015,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   const isFullWidthRow = useCallback(
     (params: IsFullWidthRowParams) => {
       const d = params.rowNode.data;
-      return !!d?._isSection || !!d?._isResource || !!d?._isAddResource;
+      return !!d?._isSection || !!d?._isResource || !!d?._isAddResource || !!d?._isVariantHeader;
     },
     [],
   );
@@ -720,6 +1024,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     if (params.data?._isSection) return 38;
     if (params.data?._isResource) return 28;
     if (params.data?._isAddResource) return 30;
+    if (params.data?._isVariantHeader) return 36;
     return 32;
   }, []);
 
@@ -952,6 +1257,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     () => ({
       formulaCellEditor: FormulaCellEditor,
       autocompleteCellEditor: AutocompleteCellEditor,
+      unitCellEditor: UnitCellEditor,
       actionsCellRenderer: ActionsCellRenderer,
       expandCellRenderer: ExpandCellRenderer,
       bimLinkCellRenderer: BimLinkCellRenderer,
@@ -1714,6 +2020,40 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         </div>,
         document.body,
       )}
+
+      {/* ── Position-level Variant Picker ─────────────────────────────
+       *   Renders only when the description-cell "V" icon was clicked
+       *   on a position whose variants live at position level (legacy
+       *   CWICR position-mode applies). The picker reads the catalog
+       *   directly from ``position.metadata.cost_item_variants`` and
+       *   on apply patches the position's unit_rate + metadata.variant
+       *   via ``onUpdatePosition``. */}
+      {(() => {
+        if (!positionVariantPicker) return null;
+        const pos = positions.find((p) => p.id === positionVariantPicker.positionId);
+        if (!pos) return null;
+        const meta = (pos.metadata ?? {}) as Record<string, unknown>;
+        const variants = meta.cost_item_variants as CostVariant[] | undefined;
+        const stats = meta.cost_item_variant_stats as VariantStats | undefined;
+        if (!Array.isArray(variants) || variants.length < 2 || !stats) return null;
+        const currency = (meta.currency as string | undefined) || currencyCode;
+        const currentVariant = (meta as { variant?: { index?: number } }).variant;
+        return (
+          <VariantPicker
+            variants={variants}
+            stats={stats}
+            anchorEl={positionVariantPicker.anchorEl}
+            unitLabel={pos.unit || ''}
+            currency={currency}
+            defaultStrategy="mean"
+            defaultIndex={
+              typeof currentVariant?.index === 'number' ? currentVariant.index : undefined
+            }
+            onApply={applyPositionVariant}
+            onClose={closePositionVariantPicker}
+          />
+        );
+      })()}
     </div>
   );
 });

@@ -11,6 +11,7 @@ JSON extraction is handled separately.
 
 import json
 import logging
+import os
 import re
 from typing import Any
 
@@ -275,6 +276,22 @@ _OPENAI_COMPAT_CONFIG = {
     "xai": {
         "url": "https://api.x.ai/v1/chat/completions",
         "model": "grok-2",
+    },
+    # Local LLM runtimes — OpenAI-compatible REST API, no key required.
+    # Override base URL via OE_OLLAMA_URL / OE_VLLM_URL env vars to point at
+    # a non-default host (default Ollama :11434, default VLLM :8001 to avoid
+    # colliding with our backend on :8000). The "api_key" field stored in
+    # user settings is sent as bearer regardless — Ollama ignores it; VLLM
+    # may require it depending on `--api-key` startup flag.
+    "ollama": {
+        "url": os.environ.get("OE_OLLAMA_URL", "http://localhost:11434/v1/chat/completions"),
+        "model": os.environ.get("OE_OLLAMA_MODEL", "llama3.1"),
+        "api_key_optional": True,
+    },
+    "vllm": {
+        "url": os.environ.get("OE_VLLM_URL", "http://localhost:8001/v1/chat/completions"),
+        "model": os.environ.get("OE_VLLM_MODEL", "meta-llama/Llama-3.1-8B-Instruct"),
+        "api_key_optional": True,
     },
 }
 

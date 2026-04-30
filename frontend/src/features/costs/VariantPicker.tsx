@@ -155,6 +155,15 @@ export function VariantPicker({
   const [sortMode, setSortMode] = useState<SortMode>('default');
 
   /* ── Anchor tracking ─────────────────────────────────────────────── */
+  //
+  // We measure the anchor ONCE on mount (and again on viewport resize) and
+  // freeze the popover at that location. Earlier behaviour also reacted to
+  // every ``scroll`` event so the popover would follow the anchor — but
+  // when AG Grid scrolls horizontally the anchor moves left/right and the
+  // popover ended up jumping side-to-side. Since the popover is rendered
+  // into ``document.body`` (position: fixed), we let it stay put and
+  // close it explicitly via Esc / outside-click instead. This matches how
+  // most popover libraries (Floating UI, Headless UI) behave by default.
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(() =>
     anchorEl ? anchorEl.getBoundingClientRect() : null,
   );
@@ -162,10 +171,8 @@ export function VariantPicker({
     if (!anchorEl) return;
     const update = () => setAnchorRect(anchorEl.getBoundingClientRect());
     update();
-    window.addEventListener('scroll', update, true);
     window.addEventListener('resize', update);
     return () => {
-      window.removeEventListener('scroll', update, true);
       window.removeEventListener('resize', update);
     };
   }, [anchorEl]);
@@ -307,6 +314,26 @@ export function VariantPicker({
           <X size={14} />
         </button>
       </div>
+
+      {/* ── Common base name (shared across all variants) ──────────────
+       *   When the imported CWICR row carries
+       *   ``price_abstract_resource_common_start``, that string is the
+       *   shared base name (e.g. "Ready-mix concrete"). Showing it once
+       *   here keeps the variant rows below short and scannable — they
+       *   render only the distinguishing variable_part. The full name
+       *   (common + variable) is stamped onto the BOQ resource row on
+       *   apply, so the estimator sees the concrete pick in their grid.
+       */}
+      {stats.common_start && (
+        <div className="px-4 py-2.5 border-b border-border-light bg-oe-blue-subtle/20 shrink-0">
+          <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-0.5">
+            {t('costs.variant_common_base', { defaultValue: 'Material / Resource' })}
+          </div>
+          <div className="text-sm font-semibold text-content-primary leading-snug break-words">
+            {stats.common_start}
+          </div>
+        </div>
+      )}
 
       {/* ── Stats banner ────────────────────────────────────────────── */}
       <div className="px-4 py-3 border-b border-border-light bg-surface-secondary/20 shrink-0">

@@ -667,8 +667,26 @@ class CostBreakdownResponse(BaseModel):
 # ── Resource Summary schemas ─────────────────────────────────────────────────
 
 
+class ResourcePositionRef(BaseModel):
+    """Pointer back to one BOQ position+resource slot that contributed to an
+    aggregated ``ResourceSummaryItem``. The frontend uses this list to fan
+    re-pick calls out to every occurrence of an abstract resource without
+    needing a dedicated bulk endpoint."""
+
+    position_id: str
+    resource_idx: int
+
+
 class ResourceSummaryItem(BaseModel):
-    """A single aggregated resource across all positions in a BOQ."""
+    """A single aggregated resource across all positions in a BOQ.
+
+    Variant fields (``available_variants`` etc.) are populated only when at
+    least one underlying ``position.metadata.resources[idx]`` carries the
+    cached CWICR variant catalog. They mirror the per-row variant pill on
+    the BOQ grid so the same picker can swap variants from this aggregated
+    view; ``current_variant_label`` is set when every contributing position
+    agrees on the same pick (otherwise ``"__mixed__"`` so the UI can flag
+    the conflict)."""
 
     name: str
     type: str
@@ -677,6 +695,15 @@ class ResourceSummaryItem(BaseModel):
     avg_unit_rate: float
     total_cost: float
     positions_used: int
+
+    # Variant surface — null when the resource has no abstract-resource
+    # catalog cached on any contributing position.
+    available_variants: list[dict[str, Any]] | None = None
+    variant_stats: dict[str, Any] | None = None
+    current_variant_label: str | None = None
+    variant_default: str | None = None
+    currency: str | None = None
+    position_refs: list[ResourcePositionRef] = Field(default_factory=list)
 
 
 class ResourceTypeSummary(BaseModel):

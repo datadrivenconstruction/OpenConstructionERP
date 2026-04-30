@@ -4,6 +4,7 @@
     "tour": "Rundgang",
     "compare": "Vergleich",
     "pricing": "Preise",
+    "partners": "Partner",
     "docs": "Dokumentation",
     "faq": "FAQ",
     "github": "GitHub",
@@ -11,7 +12,7 @@
     "install": "Installieren"
   },
   "hero": {
-    "version_meta": "veröffentlicht 2026-04-20 · zweite stabile Version",
+    "version_meta": "veröffentlicht 2026-04-20",
     "sub": "Open-Source-ERP für Bauteams — Kalkulation, Terminplanung, Ausschreibungen, Verträge, Baustellenaufgaben und Reporting in einer Installation. Kosten- und Zeitwerte bleiben synchron mit den Plänen und dem zugehörigen LV.",
     "cta_install": "Jetzt installieren",
     "cta_star": "Auf GitHub sternen",
@@ -296,7 +297,7 @@
     "row_multicad": "Multi-CAD-Import (DWG / RVT / IFC / DGN)",
     "row_55k": "55.000+ Kostenpositionen von Haus aus",
     "row_crdt": "Echtzeit-Mehrbenutzer (CRDT)",
-    "row_20lang": "20 Sprachen im Kern-i18n",
+    "row_20lang": "30 Sprachen im Kern-i18n",
     "row_modular": "Modulare Plugin-Architektur",
     "row_cost_label": "Typische Kosten / Platz / Jahr",
     "row_cost_us": "€ 0 · Self-Hosting",
@@ -457,7 +458,7 @@
     "q11": "Wie oft erscheinen Updates?",
     "a11": "Minor-Releases etwa alle 2–3 Wochen, Patch-Releases nach Bedarf. Changelog auf GitHub, jede getaggte Version hat ein Docker-Image, Migrationen sind reversibel. Sie entscheiden, wann Sie aktualisieren — Self-Hosting bedeutet, niemand erzwingt ein Deploy-Fenster.",
     "q12": "Welche Sprachen und Regionen werden unterstützt?",
-    "a12": "20 Sprachen im Kern-i18n. Kostendatenbank-Bezeichnungen, Validierungsregelsätze und Klassifikationsbäume sind regionsspezifische Module — wählen Sie aus oder fügen Sie eigene hinzu. Keine fest kodierte Währung, kein fest kodiertes Datumsformat."
+    "a12": "30 Sprachen im Kern-i18n. Kostendatenbank-Bezeichnungen, Validierungsregelsätze und Klassifikationsbäume sind regionsspezifische Module — wählen Sie aus oder fügen Sie eigene hinzu. Keine fest kodierte Währung, kein fest kodiertes Datumsformat."
   },
   "install_cta": {
     "also_works_with": "Funktioniert auch mit:",
@@ -562,7 +563,7 @@
     "svc3_li1": "Async-Review optional",
     "svc3_li2": "Ergebnisbericht + Empfehlungen",
     "svc3_li3": "Übergang zu Custom Build möglich",
-    "form_title": "Sagen Sie, worum es Ihnen geht. <em>Ich lese jede Nachricht selbst.</em>",
+    "form_title": "Sagen Sie uns, worum es Ihnen geht. <em>Jede Nachricht bekommt eine echte Antwort.</em>",
     "form_sub": "Ich arbeite allein an diesem Projekt und bevorzuge daher Teams, die bereit sind, einem Pilot echte Ressourcen zuzuweisen — Budget, Zeitplan, einen Sponsor. Schicken Sie mir das Briefing und ich melde mich innerhalb weniger Tage zurück.",
     "chips_label": "Wobei können wir helfen?",
     "chip_build": "Custom Build",

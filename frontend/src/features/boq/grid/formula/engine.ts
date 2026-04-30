@@ -121,6 +121,32 @@ export function evaluateFormulaRaw(
 }
 
 /**
+ * Strict variant of `evaluateFormulaRaw` that re-throws parser / runtime
+ * errors instead of swallowing them into `null`. Used by calculated
+ * custom columns so the UI can distinguish "valid empty result" from
+ * "broken formula" and render a `#ERR` sentinel for the latter.
+ *
+ * Returns `null` ONLY for empty input, non-finite numbers, or genuinely
+ * non-representable results — never for syntax / type errors.
+ */
+export function evaluateFormulaStrict(
+  input: string,
+  ctx?: FormulaContext,
+): number | string | boolean | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  const body = trimmed.startsWith('=') ? trimmed.slice(1) : trimmed;
+  const normalised = normaliseFormula(body);
+  const result = parseFormulaExpr(normalised, ctx);
+  if (typeof result === 'number') {
+    if (!isFinite(result)) return null;
+    return Math.round(result * 10000) / 10000;
+  }
+  if (typeof result === 'string' || typeof result === 'boolean') return result;
+  return null;
+}
+
+/**
  * Normalise human/locale variants of math syntax to canonical operators.
  *   • `×` → `*`
  *   • `x` between digits / closing-paren and digit / open-paren → `*`

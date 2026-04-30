@@ -28,8 +28,8 @@
     gtag('config', 'G-JYQXK2652T', { 'anonymize_ip': true });
   </script>
   <title>OpenConstructionERP — open-source construction ERP: estimates, BIM, BOQ, tenders</title>
-  <meta name="description" content="Open-source construction ERP in one install: estimates, schedules, tenders, contracts, site tasks, reports. 55,000+ priced cost items, DWG/RVT/IFC import, AI-powered PDF takeoff. Self-hosted under AGPL-3.0. Replaces iTWO, HeavyBid, Sage Estimating." />
-  <meta name="keywords" content="construction ERP, construction estimating software, open source construction software, BOQ software, bill of quantities, quantity takeoff, AI takeoff, construction project management, BIM, IFC, RVT, DWG, GAEB, DIN 276, NRM, MasterFormat, self-hosted ERP, iTWO alternative, Sage Estimating alternative, HeavyBid alternative, cost database" />
+  <meta name="description" content="Open-source construction ERP in one install: estimates, schedules, tenders, contracts, site tasks, reports. 55,000+ priced cost items, DWG/RVT/IFC import, AI-powered PDF takeoff. Self-hosted under AGPL-3.0." />
+  <meta name="keywords" content="construction ERP, construction estimating software, open source construction software, BOQ software, bill of quantities, quantity takeoff, AI takeoff, construction project management, BIM, IFC, RVT, DWG, self-hosted ERP, cost database" />
   <meta name="author" content="DataDrivenConstruction" />
   <meta name="publisher" content="DataDrivenConstruction" />
   <meta name="application-name" content="OpenConstructionERP" />
@@ -9214,6 +9214,7 @@
       .gnf-card { flex: 0 0 100%; }
     }
 
+
     /* ---- Workshop testimonials row (sits between gnf-wrap and form) ---- */
     .gnf-tst-row {
       max-width: 1280px;
@@ -10749,7 +10750,7 @@
         "applicationSubCategory": "Construction Estimating Software",
         "operatingSystem": "Linux, macOS, Windows, Docker, Kubernetes",
         "url": "https://openconstructionerp.com/",
-        "description": "Open-source construction ERP with AI-powered BOQ, multi-CAD ingest (DWG, RVT, IFC, DGN), 55,000+ cost items, real-time collaboration and 20-language i18n. Self-host under AGPL-3.0.",
+        "description": "Open-source construction ERP with AI-powered BOQ, multi-CAD ingest (DWG, RVT, IFC, DGN), 55,000+ cost items, real-time collaboration and 30-language i18n. Self-host under AGPL-3.0.",
         "softwareVersion": "1.9",
         "releaseNotes": "New AI takeoff, multi-CAD canonical format, real-time multiplayer via Yjs CRDT.",
         "license": "https://www.gnu.org/licenses/agpl-3.0.html",
@@ -10785,7 +10786,7 @@
           "55,000+ ready-to-use cost items",
           "Configurable validation rule sets",
           "Real-time multiplayer via Yjs CRDT",
-          "20 languages in core i18n",
+          "30 languages in core i18n",
           "Modular plugin architecture",
           "GAEB XML 3.3 import/export"
         ]
@@ -10827,10 +10828,10 @@
           },
           {
             "@type": "Question",
-            "name": "Who builds OpenConstructionERP?",
+            "name": "Who's behind this?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Built by DataDrivenConstruction — the team behind CWICR (the 55,000-item cost database shipped in the product), cad2data, and 10+ years of construction-tech engineering."
+              "text": "Built by DataDrivenConstruction — the team behind CWICR (the 55,000-item cost database shipped here), cad2data, and 10+ years of construction-tech engineering. We ship our own tools on it."
             }
           },
           {
@@ -10840,8 +10841,127 @@
               "@type": "Answer",
               "text": "Absolutely. The SDK ships with a cookiecutter template — scaffold a module in one command, drop it in the marketplace when it's ready. Good candidates: regional cost databases, ERP connectors, custom validation rule sets."
             }
+          },
+          {
+            "@type": "Question",
+            "name": "Where is my data stored? Does anything leave my server?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "On your infrastructure. Projects, drawings and cost data live in your PostgreSQL and your object storage — nothing is phoned home, no telemetry by default. If you enable hosted AI services, only the payload you send is processed; it's opt-in per workspace and you can point the client at self-hosted models instead."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What CAD and BIM formats are supported?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "DWG, DGN, RVT and IFC ingest through the cad2data pipeline into a canonical format — one schema to query, classify and cost against. PDF drawings go through the takeoff pipeline (vector extraction + OCR). New formats land as modules, not core rewrites."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does the commercial license work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "AGPL-3.0 is fine for most internal and service use. If you embed the product in a closed SaaS, ship it inside a proprietary application, or need an explicit waiver for procurement, talk to us — commercial terms cover that, plus priority support and enterprise SLA. No per-seat metering, no forced cloud."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I migrate away later?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, and we mean it. Everything you put in comes back out — GAEB XML, Excel, CSV, JSON, Parquet, or a direct PostgreSQL dump. The schema is documented, the source is open; no proprietary file formats, no escrow games, no hostage data."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How often do you ship updates?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Minor releases roughly every 2–3 weeks, patch releases as needed. The changelog lives on GitHub, every tagged version has a Docker image, and migrations are reversible. You decide when to upgrade — self-hosted means nobody forces a deploy window on you."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which languages and regions are supported?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "30 languages ship in the core i18n. Cost database labels, validation rule sets and classification trees are per-region modules — pick the ones you need, add your own. No hard-coded currency, no hard-coded date format."
+            }
           }
         ]
+      },
+      {
+        "@type": "HowTo",
+        "@id": "https://openconstructionerp.com/#howto-install",
+        "name": "Install OpenConstructionERP in under 2 minutes",
+        "description": "Three first-class install paths to bring up OpenConstructionERP locally or on a 2 GB VPS: Python pip, Docker Compose, or a single-command shell installer.",
+        "totalTime": "PT2M",
+        "supply": [
+          { "@type": "HowToSupply", "name": "A machine with at least 2 GB RAM and 2 GB free disk space" }
+        ],
+        "tool": [
+          { "@type": "HowToTool", "name": "Python 3.12+ (for pip install)" },
+          { "@type": "HowToTool", "name": "Docker 24+ with Compose (for docker install)" },
+          { "@type": "HowToTool", "name": "Bash / sh (for the curl-based installer)" }
+        ],
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Pick an install method",
+            "text": "Choose one of three install paths depending on your stack: pip for Python users, Docker Compose for containerised deployments, or the curl-based one-liner for VPS bootstrap."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Run the install command",
+            "text": "Pip path: run 'pip install openconstructionerp'. Docker path: run 'docker compose up' inside a checkout of the repo. Shell path: run 'curl -fsSL get.openconstructionerp.com | sh'. Each path bootstraps PostgreSQL (or SQLite for dev), seeds the CWICR cost database with 55,000+ items, and starts the API at port 8000.",
+            "url": "https://openconstructionerp.com/#install"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Open the app",
+            "text": "Visit http://localhost:8000 in a browser. Log in with the demo credentials shown in the installer output, or self-register the first admin account. The full ERP — BOQ, takeoff, schedules, tenders, contracts, validation, reporting — is immediately available."
+          }
+        ]
+      },
+      {
+        "@type": "Person",
+        "@id": "https://openconstructionerp.com/#person-artem",
+        "name": "Artem Boiko",
+        "jobTitle": "Founder, OpenConstructionERP",
+        "description": "Construction-tech engineer with 10+ years of hands-on experience in construction cost estimation. Author of CWICR (the 55,000-item multilingual cost database shipped inside OpenConstructionERP), creator of the cad2data CAD/BIM-to-data converters, and founder of DataDrivenConstruction.",
+        "knowsAbout": [
+          "Construction cost estimation",
+          "Bill of quantities (BOQ)",
+          "Quantity takeoff",
+          "BIM data extraction",
+          "GAEB XML and DIN 276",
+          "ERP for construction",
+          "Open data standards in AEC"
+        ],
+        "worksFor": { "@id": "https://datadrivenconstruction.io/#organization" },
+        "url": "https://datadrivenconstruction.io",
+        "sameAs": [
+          "https://github.com/datadrivenconstruction",
+          "https://www.linkedin.com/company/datadrivenconstruction",
+          "https://www.youtube.com/@datadrivenconstruction"
+        ]
+      },
+      {
+        "@type": "VideoObject",
+        "@id": "https://openconstructionerp.com/#video-walkthrough",
+        "name": "OpenConstructionERP — drawing in, tender out",
+        "description": "A short walkthrough of the whole OpenConstructionERP pipeline: import a drawing, run AI takeoff, build the BOQ, validate against the chosen rule set, and export the tender package — no voiceover, just the product running end to end.",
+        "thumbnailUrl": "https://openconstructionerp.com/assets/stills/video-thumb-openconstructionerp.png",
+        "embedUrl": "https://www.youtube.com/embed/X06cIaroAeI",
+        "contentUrl": "https://www.youtube.com/watch?v=X06cIaroAeI",
+        "uploadDate": "2026-04-20",
+        "publisher": { "@id": "https://datadrivenconstruction.io/#organization" },
+        "isPartOf": { "@id": "https://openconstructionerp.com/#software" }
       },
       {
         "@type": "BreadcrumbList",
@@ -11093,6 +11213,7 @@
         <a href="#demo" data-i18n="nav.tour">Tour</a>
         <a href="#compare" data-i18n="nav.compare">Compare</a>
         <a href="#pricing" data-i18n="nav.pricing">Pricing</a>
+        <a href="/partners.html" data-i18n="nav.partners">Partners</a>
         <a href="/docs.html" data-i18n="nav.docs">Docs</a>
         <a href="#faq" data-i18n="nav.faq">FAQ</a>
       </div>
@@ -11176,7 +11297,7 @@
 
       <div class="eyebrow" id="fx-eyebrow">
         <span class="dot" aria-hidden="true"></span>
-        <span><b>v2.0.0</b> &middot; <span data-i18n="hero.version_meta">shipped 2026-04-20 · second stable</span></span>
+        <span><b>v2.0.0</b> &middot; <span data-i18n="hero.version_meta">shipped 2026-04-20</span></span>
       </div>
 
       <h1 class="headline" id="headline">
@@ -12169,7 +12290,7 @@
             <td><span class="compare-cross">✕</span></td>
           </tr>
           <tr>
-            <td class="feature-col" data-i18n="compare.row_20lang">20 languages in core i18n</td>
+            <td class="feature-col" data-i18n="compare.row_20lang">30 languages in core i18n</td>
             <td class="us-cell"><span class="compare-check">&#10003;</span></td>
             <td><span class="compare-partial">~</span></td>
             <td><span class="compare-cross">✕</span></td>
@@ -13250,21 +13371,22 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
     </div>
 
     <div class="gnf-wrap reveal">
-      <p class="gnf-note" data-i18n="workshops.lede">Selected public workshops only. Many major enterprise engagements remain under NDA.</p>
+      <p class="gnf-note" data-i18n="workshops.lede">Public workshops shown below. Many major enterprise engagements remain under NDA — represented anonymously by the lock cards in each row.</p>
       <div class="gnf-track">
         <div class="gnf-card" style="--rot: -5deg; z-index: 2;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/dress-and-sommer-1-scaled.png" alt="Drees &amp; Sommer" loading="lazy" decoding="async"><div class="gnf-cap"><span>Drees &amp; Sommer</span></div></div></div>
         <div class="gnf-card" style="--rot: -2.5deg; z-index: 3;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/Lindner-scaled.png" alt="Lindner Group" loading="lazy" decoding="async"><div class="gnf-cap"><span>Lindner Group</span></div></div></div>
         <div class="gnf-card" style="--rot: 2.5deg; z-index: 4;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/OTWB-1-scaled.png" alt="OTWB" loading="lazy" decoding="async"><div class="gnf-cap"><span>OTWB</span></div></div></div>
         <div class="gnf-card" style="--rot: 5deg; z-index: 3;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/ShapeMaker-1-scaled.png" alt="ShapeMaker" loading="lazy" decoding="async"><div class="gnf-cap"><span>ShapeMaker</span></div></div></div>
-        <div class="gnf-card gnf-card-nda" style="--rot: 7deg; z-index: 2;" aria-label="Confidential workshop &mdash; Under NDA"><div class="gnf-card-inner"><div class="gnf-nda-img"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="11" width="15" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><div class="gnf-nda-bars"><span></span><span></span><span></span></div></div><div class="gnf-cap"><span>Under NDA</span></div></div></div>
+        <div class="gnf-card gnf-card-nda" style="--rot: 7deg; z-index: 2;" aria-label="Confidential workshop &mdash; Tier-1 GC DACH"><div class="gnf-card-inner"><div class="gnf-nda-img"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="11" width="15" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><div class="gnf-nda-bars"><span></span><span></span><span></span></div></div><div class="gnf-cap"><span>Under NDA</span></div></div></div>
       </div>
       <div class="gnf-track">
         <div class="gnf-card" style="--rot: -4deg; z-index: 2;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/Bauindustrie-scaled.png" alt="Bauindustrie Bayern &amp; TUM" loading="lazy" decoding="async"><div class="gnf-cap"><span>Bauindustrie Bayern &amp; TUM</span></div></div></div>
         <div class="gnf-card" style="--rot: -1.5deg; z-index: 3;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/BIMClusterBW-scaled.png" alt="BIM Cluster BW" loading="lazy" decoding="async"><div class="gnf-cap"><span>BIM Cluster BW</span></div></div></div>
         <div class="gnf-card" style="--rot: 3deg; z-index: 4;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/03/BIMDAYGVA-scaled.png" alt="BIM DAY GENF" loading="lazy" decoding="async"><div class="gnf-cap"><span>BIM DAY GENF</span></div></div></div>
         <div class="gnf-card" style="--rot: 6deg; z-index: 3;"><div class="gnf-card-inner"><img src="https://datadrivenconstruction.io/wp-content/uploads/2026/04/Herbert_workshop.png" alt="Herbert Gruppe" loading="lazy" decoding="async"><div class="gnf-cap"><span>Herbert Gruppe</span></div></div></div>
-        <div class="gnf-card gnf-card-nda" style="--rot: 8deg; z-index: 2;" aria-label="Confidential workshop &mdash; Under NDA"><div class="gnf-card-inner"><div class="gnf-nda-img"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="11" width="15" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><div class="gnf-nda-bars"><span></span><span></span><span></span></div></div><div class="gnf-cap"><span>Under NDA</span></div></div></div>
+        <div class="gnf-card gnf-card-nda" style="--rot: 8deg; z-index: 2;" aria-label="Confidential workshop &mdash; Public infrastructure agency CH"><div class="gnf-card-inner"><div class="gnf-nda-img"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="11" width="15" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><div class="gnf-nda-bars"><span></span><span></span><span></span></div></div><div class="gnf-cap"><span>Under NDA</span></div></div></div>
       </div>
+
     </div>
 
     <div class="gnf-tst-row reveal">
@@ -13344,7 +13466,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
       </aside>
     <div class="cb-form-wrap" id="license">
       <div class="cb-form-head">
-        <h3 data-i18n-html="custom.form_title">Tell me what you&rsquo;re after. <em>I read every message myself.</em></h3>
+        <h3 data-i18n-html="custom.form_title">Tell us what you&rsquo;re after. <em>Every message gets a real reply.</em></h3>
         <p data-i18n="custom.form_sub">I work on this project solo, so I prioritize teams that are ready to allocate real resources to a pilot &mdash; budget, timeline, a sponsor. Send the brief and I&rsquo;ll get back to you within a few days.</p>
       </div>
 
@@ -13647,7 +13769,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
           </span>
         </summary>
         <div class="faq-a" data-i18n-html="faq.a12">
-          20 languages ship in the core i18n. Cost database labels, validation rule sets and
+          30 languages ship in the core i18n. Cost database labels, validation rule sets and
           classification trees are per-region modules &mdash; pick the ones you need, add your own.
           No hard-coded currency, no hard-coded date format.
         </div>
@@ -13717,6 +13839,835 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           <span>Email</span>
         </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- SECTION 12.7 — PARTNER PROGRAM TEASER                             -->
+  <!-- "80% open. 20% paid. 100% yours." — links to /partners.html       -->
+  <!-- ================================================================ -->
+  <style>
+    .partners-teaser-section {
+      padding: clamp(56px, 8vw, 100px) 0;
+      background:
+        radial-gradient(60% 80% at 80% 20%, color-mix(in oklab, var(--accent-3) 9%, transparent) 0%, transparent 60%),
+        radial-gradient(50% 60% at 20% 80%, color-mix(in oklab, var(--accent-5) 8%, transparent) 0%, transparent 60%);
+      border-top: 1px solid var(--line-0);
+      border-bottom: 1px solid var(--line-0);
+    }
+    .partners-teaser {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 clamp(20px, 4vw, 48px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(28px, 4vw, 48px);
+    }
+    .partners-teaser-head { max-width: 880px; }
+    .partners-teaser-head .partners-teaser-title { font-size: clamp(36px, 4.8vw, 60px); }
+    .partners-teaser-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--accent) 10%, transparent);
+      border: 1px solid color-mix(in oklab, var(--accent) 28%, transparent);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      margin-bottom: 18px;
+    }
+    .partners-teaser-eyebrow .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+    }
+    .partners-teaser-title {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: clamp(32px, 4.4vw, 56px);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin: 0 0 18px;
+      color: var(--ink-0);
+    }
+    .partners-teaser-title em {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+    }
+    .partners-teaser-sub {
+      font-size: 17px;
+      color: var(--ink-1);
+      max-width: 56ch;
+      margin: 0 0 14px;
+      line-height: 1.55;
+    }
+    .partners-teaser-body {
+      font-size: 15px;
+      color: var(--ink-2);
+      max-width: 60ch;
+      margin: 0 0 26px;
+      line-height: 1.6;
+    }
+    .partners-teaser-body em {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      color: var(--ink-0);
+    }
+    .partners-teaser-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .partners-teaser-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 22px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      border: 1px solid transparent;
+    }
+    .partners-teaser-cta.primary {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%);
+      color: #fff;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.3) inset,
+        0 12px 28px -10px color-mix(in oklab, var(--accent) 60%, transparent);
+    }
+    .partners-teaser-cta.primary:hover { transform: translateY(-2px); color: #fff; }
+    .partners-teaser-cta.ghost {
+      background: transparent;
+      color: var(--ink-1);
+      border-color: var(--line-2);
+    }
+    .partners-teaser-cta.ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .partners-teaser-cta .ico { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+    .partners-teaser-cta .ico svg { display: block; }
+    .partners-teaser-proof {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--ink-3);
+      letter-spacing: 0.02em;
+    }
+    /* ---- 80 / 20 VISUALIZATION ---- */
+    .p8020 {
+      position: relative;
+      border-radius: 22px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      overflow: hidden;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 28px 70px -32px color-mix(in oklab, var(--accent) 32%, rgba(8,15,35,0.28));
+    }
+    .p8020-row {
+      position: relative;
+      padding: clamp(22px, 2.6vw, 32px) clamp(22px, 3vw, 36px);
+    }
+    .p8020-row + .p8020-row { border-top: 1px solid var(--line-1); }
+    /* Fold-line transition between 80% and 20% rows */
+    .p8020-row.is-paid::before {
+      content: "";
+      position: absolute;
+      top: -1px; left: 0; right: 0;
+      height: 24px;
+      background: linear-gradient(180deg,
+        color-mix(in oklab, var(--accent) 16%, transparent) 0%,
+        transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .p8020-row.is-paid > * { position: relative; z-index: 1; }
+    .p8020-fold {
+      position: relative;
+      height: 0;
+      border-top: 1px solid var(--line-1);
+      z-index: 2;
+    }
+    .p8020-fold::before {
+      content: "↓  where partners earn  ↓";
+      position: absolute;
+      left: 50%;
+      top: -1px;
+      transform: translate(-50%, -50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      white-space: nowrap;
+      padding: 6px 16px;
+      background: var(--bg-1);
+      border-radius: 999px;
+      border: 1px solid color-mix(in oklab, var(--accent) 32%, var(--line-1));
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.55) inset,
+        0 8px 22px -8px color-mix(in oklab, var(--accent) 36%, transparent);
+    }
+    .p8020-row-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .p8020-row-eyebrow {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .p8020-pct {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: clamp(56px, 6.4vw, 88px);
+      line-height: 0.95;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.04em;
+      text-shadow: 0 0 28px color-mix(in oklab, currentColor 22%, transparent);
+    }
+    .p8020-pct sup {
+      font-family: 'Inter Tight', sans-serif;
+      font-size: 0.32em;
+      font-weight: 700;
+      vertical-align: 0.7em;
+      margin-left: 4px;
+      letter-spacing: 0;
+      text-shadow: none;
+    }
+    .p8020-row-title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .p8020-row-title h3 {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: clamp(20px, 2vw, 26px);
+      color: var(--ink-0);
+      margin: 0;
+      line-height: 1.15;
+    }
+    .p8020-row-title h3 em {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+    }
+    .p8020-row-sub {
+      font-size: 14px;
+      color: var(--ink-2);
+      max-width: 56ch;
+    }
+    .p8020-tag {
+      align-self: flex-start;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* TOP — open core (80%) */
+    .p8020-row.is-free { background: linear-gradient(180deg, var(--bg-1) 0%, color-mix(in oklab, #16a34a 4%, var(--bg-1)) 100%); }
+    .p8020-row.is-free .p8020-pct {
+      color: #15803d;
+      background: linear-gradient(135deg, #15803d 0%, #22c55e 60%, #16a34a 100%);
+      -webkit-background-clip: text;
+              background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .p8020-row.is-free .p8020-pct sup {
+      -webkit-text-fill-color: #15803d;
+      color: #15803d;
+    }
+    .p8020-row.is-free .p8020-tag {
+      background: color-mix(in oklab, #16a34a 14%, transparent);
+      color: #15803d;
+      border: 1px solid color-mix(in oklab, #16a34a 30%, transparent);
+    }
+    [data-theme="dark"] .p8020-row.is-free .p8020-pct {
+      background: linear-gradient(135deg, #4ade80 0%, #86efac 60%, #4ade80 100%);
+      -webkit-background-clip: text;
+              background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    [data-theme="dark"] .p8020-row.is-free .p8020-pct sup { -webkit-text-fill-color: #4ade80; color: #4ade80; }
+    [data-theme="dark"] .p8020-row.is-free .p8020-tag { background: color-mix(in oklab, #4ade80 18%, transparent); color: #4ade80; }
+
+    /* BOTTOM — partner-paid (20%) */
+    .p8020-row.is-paid {
+      background: linear-gradient(180deg,
+        color-mix(in oklab, var(--accent) 6%, var(--bg-1)) 0%,
+        color-mix(in oklab, var(--accent-3) 5%, var(--bg-1)) 100%);
+    }
+    .p8020-row.is-paid .p8020-pct {
+      color: var(--accent);
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 60%, var(--accent-4, var(--accent-3)) 100%);
+      -webkit-background-clip: text;
+              background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .p8020-row.is-paid .p8020-pct sup {
+      -webkit-text-fill-color: var(--accent);
+      color: var(--accent);
+    }
+    .p8020-row.is-paid .p8020-tag {
+      background: color-mix(in oklab, var(--accent) 14%, transparent);
+      color: var(--accent);
+      border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+    }
+
+    /* Module grid for 80% row — phase-grouped */
+    .p8020-phases {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .p8020-phase {
+      display: grid;
+      grid-template-columns: 132px 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+    @media (max-width: 720px) {
+      .p8020-phase { grid-template-columns: 1fr; gap: 8px; }
+    }
+    .p8020-phase-label {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8px 0;
+      border-right: 1px dashed color-mix(in oklab, #16a34a 40%, var(--line-1));
+      padding-right: 14px;
+    }
+    @media (max-width: 720px) {
+      .p8020-phase-label {
+        border-right: 0;
+        border-bottom: 1px dashed color-mix(in oklab, #16a34a 40%, var(--line-1));
+        padding: 0 0 6px;
+        flex-direction: row;
+        align-items: baseline;
+        gap: 10px;
+      }
+    }
+    .p8020-phase-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #15803d;
+      font-weight: 700;
+    }
+    [data-theme="dark"] .p8020-phase-num { color: #4ade80; }
+    .p8020-phase-name {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--ink-0);
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+    .p8020-phase-meta {
+      font-size: 11.5px;
+      color: var(--ink-3);
+      margin-top: 2px;
+    }
+    .p8020-modules {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(102px, 1fr));
+      gap: 6px;
+    }
+
+    /* Open-core stats footer */
+    .p8020-foot {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px dashed color-mix(in oklab, #16a34a 30%, var(--line-1));
+    }
+    .p8020-foot-cell {
+      text-align: center;
+    }
+    .p8020-foot-num {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 22px;
+      color: var(--ink-0);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .p8020-foot-label {
+      font-size: 11.5px;
+      color: var(--ink-2);
+      margin-top: 4px;
+      letter-spacing: 0.01em;
+    }
+    .p8020-mod-count {
+      align-self: flex-start;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: color-mix(in oklab, #16a34a 14%, transparent);
+      color: #15803d;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      margin-top: 6px;
+    }
+    [data-theme="dark"] .p8020-mod-count { background: color-mix(in oklab, #4ade80 18%, transparent); color: #4ade80; }
+    .p8020-mod {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 9px;
+      border-radius: 8px;
+      background: var(--bg-0);
+      border: 1px solid var(--line-1);
+      transition: transform 0.18s ease, border-color 0.18s ease;
+      min-width: 0;
+    }
+    .p8020-mod > div { min-width: 0; flex: 1; }
+    .p8020-mod:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in oklab, #16a34a 35%, var(--line-1));
+    }
+    .p8020-mod-ico {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      width: 22px; height: 22px;
+      display: grid; place-items: center;
+      border-radius: 5px;
+      color: var(--accent);
+      background: color-mix(in oklab, var(--accent) 10%, transparent);
+      flex-shrink: 0;
+    }
+    .p8020-mod[data-tier="t2"] .p8020-mod-ico { color: var(--accent-3); background: color-mix(in oklab, var(--accent-3) 10%, transparent); }
+    .p8020-mod[data-tier="t3"] .p8020-mod-ico { color: var(--accent-5, #6366f1); background: color-mix(in oklab, var(--accent-5, #6366f1) 10%, transparent); }
+    .p8020-mod-name {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 11.5px;
+      color: var(--ink-0);
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .p8020-mod-sub {
+      font-size: 10px;
+      color: var(--ink-3);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+
+    /* Commercial / partner-paid grid for 20% row */
+    .p8020-paid-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+    @media (max-width: 1100px) {
+      .p8020-paid-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      .p8020-paid-grid { grid-template-columns: 1fr; }
+    }
+    .p8020-paid {
+      position: relative;
+      padding: 16px 16px 14px;
+      border-radius: 12px;
+      background: linear-gradient(180deg,
+        var(--bg-1) 0%,
+        color-mix(in oklab, var(--accent) 5%, var(--bg-1)) 100%);
+      border: 1px solid color-mix(in oklab, var(--accent) 22%, var(--line-1));
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+      min-width: 0;
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    .p8020-paid::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--accent), var(--accent-3));
+      box-shadow: 1px 0 10px -1px color-mix(in oklab, var(--accent) 50%, transparent);
+    }
+    .p8020-paid:hover {
+      transform: translateY(-3px);
+      border-color: color-mix(in oklab, var(--accent) 50%, var(--line-1));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 18px 32px -14px color-mix(in oklab, var(--accent) 36%, transparent);
+    }
+    .p8020-paid-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .p8020-paid-ico {
+      width: 26px; height: 26px;
+      display: grid; place-items: center;
+      border-radius: 7px;
+      background: color-mix(in oklab, var(--accent) 14%, transparent);
+      color: var(--accent);
+      flex: 0 0 auto;
+    }
+    .p8020-paid-name {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--ink-0);
+      line-height: 1.2;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .p8020-paid-margin {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--accent);
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--accent) 12%, transparent);
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+    .p8020-paid-desc {
+      font-size: 11.5px;
+      color: var(--ink-2);
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    /* Big visual proportion bar */
+    .p8020-scale {
+      display: grid;
+      grid-template-columns: 4fr 1fr;
+      gap: 4px;
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--line-1);
+      margin: 0 0 18px;
+    }
+    .p8020-scale-free { background: linear-gradient(90deg, #16a34a, #22c55e); }
+    .p8020-scale-paid { background: linear-gradient(90deg, var(--accent), var(--accent-3)); }
+    .p8020-scale-labels {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      margin-bottom: 6px;
+    }
+    .p8020-scale-labels b { color: var(--ink-0); font-weight: 700; }
+  </style>
+  <section class="partners-teaser-section reveal" aria-label="Partner Program" id="partners-block">
+    <div class="partners-teaser">
+      <!-- Header -->
+      <div class="partners-teaser-head">
+        <span class="partners-teaser-eyebrow">
+          <span class="dot" aria-hidden="true"></span>
+          <span>Partner Program · Founding cohort</span>
+        </span>
+        <h2 class="partners-teaser-title">
+          Open core. <em>Paid on top.</em>
+        </h2>
+        <p class="partners-teaser-sub">
+          OpenConstructionERP is AGPL-3.0 and free — clone, deploy, run. The commercial
+          layer above is where partners earn: implementation, training, support, and
+          regional / commercial licences.
+        </p>
+      </div>
+
+      <!-- 80 / 20 visualization -->
+      <div class="p8020" role="img" aria-label="80% open source, 20% commercial revenue split">
+
+        <!-- Top — 80% open core -->
+        <div class="p8020-row is-free">
+          <div class="p8020-row-head">
+            <div class="p8020-row-eyebrow">
+              <span class="p8020-pct">80<sup>%</sup></span>
+              <div class="p8020-row-title">
+                <h3>Open core — <em>free, AGPL-3.0.</em></h3>
+                <p class="p8020-row-sub">
+                  Every module below ships in the public repo. Clone, run, fork.
+                  No licence fees, no per-seat metering, no expiry.
+                </p>
+              </div>
+            </div>
+            <span class="p8020-tag">free forever</span>
+          </div>
+
+          <div class="p8020-scale" aria-hidden="true">
+            <div class="p8020-scale-free"></div>
+            <div class="p8020-scale-paid"></div>
+          </div>
+          <div class="p8020-scale-labels" aria-hidden="true">
+            <span><b>80%</b> open</span>
+            <span><b>20%</b> paid</span>
+          </div>
+
+          <div class="p8020-phases">
+
+            <!-- Phase 1 — Plan & estimate -->
+            <div class="p8020-phase">
+              <div class="p8020-phase-label">
+                <div>
+                  <div class="p8020-phase-num">01 · plan</div>
+                  <div class="p8020-phase-name">Estimate</div>
+                  <div class="p8020-phase-meta">scope, cost, time</div>
+                </div>
+              </div>
+              <div class="p8020-modules">
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">◫</span><div><div class="p8020-mod-name">Projects</div><div class="p8020-mod-sub">portfolio</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">☰</span><div><div class="p8020-mod-name">BOQ</div><div class="p8020-mod-sub">assemblies</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">€</span><div><div class="p8020-mod-name">Costs</div><div class="p8020-mod-sub">55k items</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">◷</span><div><div class="p8020-mod-name">Schedules</div><div class="p8020-mod-sub">4D gantt</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">∿</span><div><div class="p8020-mod-name">Risk</div><div class="p8020-mod-sub">register</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">⎈</span><div><div class="p8020-mod-name">Resources</div><div class="p8020-mod-sub">crews · roles</div></div></div>
+              </div>
+            </div>
+
+            <!-- Phase 2 — Design / BIM -->
+            <div class="p8020-phase">
+              <div class="p8020-phase-label">
+                <div>
+                  <div class="p8020-phase-num">02 · design</div>
+                  <div class="p8020-phase-name">BIM &amp; CAD</div>
+                  <div class="p8020-phase-meta">model in, data out</div>
+                </div>
+              </div>
+              <div class="p8020-modules">
+                <div class="p8020-mod" data-tier="t2"><span class="p8020-mod-ico">✶</span><div><div class="p8020-mod-name">Takeoff</div><div class="p8020-mod-sub">AI auto</div></div></div>
+                <div class="p8020-mod" data-tier="t2"><span class="p8020-mod-ico">◈</span><div><div class="p8020-mod-name">CAD / BIM</div><div class="p8020-mod-sub">DWG · IFC</div></div></div>
+                <div class="p8020-mod" data-tier="t2"><span class="p8020-mod-ico">⌗</span><div><div class="p8020-mod-name">Drawings</div><div class="p8020-mod-sub">register</div></div></div>
+                <div class="p8020-mod" data-tier="t2"><span class="p8020-mod-ico">⊘</span><div><div class="p8020-mod-name">BCF / Issues</div><div class="p8020-mod-sub">model defects</div></div></div>
+                <div class="p8020-mod" data-tier="t2"><span class="p8020-mod-ico">✓</span><div><div class="p8020-mod-name">Validation</div><div class="p8020-mod-sub">compliance</div></div></div>
+                <div class="p8020-mod" data-tier="t2"><span class="p8020-mod-ico">⌬</span><div><div class="p8020-mod-name">Clash detect</div><div class="p8020-mod-sub">model checks</div></div></div>
+              </div>
+            </div>
+
+            <!-- Phase 3 — Tender & procurement -->
+            <div class="p8020-phase">
+              <div class="p8020-phase-label">
+                <div>
+                  <div class="p8020-phase-num">03 · procure</div>
+                  <div class="p8020-phase-name">Tender</div>
+                  <div class="p8020-phase-meta">bids, suppliers</div>
+                </div>
+              </div>
+              <div class="p8020-modules">
+                <div class="p8020-mod" data-tier="t3"><span class="p8020-mod-ico">⎋</span><div><div class="p8020-mod-name">Tenders</div><div class="p8020-mod-sub">bid packs</div></div></div>
+                <div class="p8020-mod" data-tier="t3"><span class="p8020-mod-ico">⌖</span><div><div class="p8020-mod-name">Procurement</div><div class="p8020-mod-sub">POs · approvals</div></div></div>
+                <div class="p8020-mod" data-tier="t3"><span class="p8020-mod-ico">⌘</span><div><div class="p8020-mod-name">Subcontractors</div><div class="p8020-mod-sub">scopes · subs</div></div></div>
+                <div class="p8020-mod" data-tier="t3"><span class="p8020-mod-ico">⊠</span><div><div class="p8020-mod-name">Vendors</div><div class="p8020-mod-sub">supplier DB</div></div></div>
+                <div class="p8020-mod" data-tier="t3"><span class="p8020-mod-ico">§</span><div><div class="p8020-mod-name">Contracts</div><div class="p8020-mod-sub">awards</div></div></div>
+              </div>
+            </div>
+
+            <!-- Phase 4 — Execute on site -->
+            <div class="p8020-phase">
+              <div class="p8020-phase-label">
+                <div>
+                  <div class="p8020-phase-num">04 · execute</div>
+                  <div class="p8020-phase-name">Site</div>
+                  <div class="p8020-phase-meta">progress, labour</div>
+                </div>
+              </div>
+              <div class="p8020-modules">
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">⚙</span><div><div class="p8020-mod-name">Site tasks</div><div class="p8020-mod-sub">daily</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">⊟</span><div><div class="p8020-mod-name">Daily log</div><div class="p8020-mod-sub">site journal</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">◉</span><div><div class="p8020-mod-name">Photos</div><div class="p8020-mod-sub">site capture</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">⊙</span><div><div class="p8020-mod-name">Time tracking</div><div class="p8020-mod-sub">labour hours</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">▣</span><div><div class="p8020-mod-name">Inventory</div><div class="p8020-mod-sub">materials</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">⛭</span><div><div class="p8020-mod-name">Equipment</div><div class="p8020-mod-sub">fleet</div></div></div>
+              </div>
+            </div>
+
+            <!-- Phase 5 — Quality & comms -->
+            <div class="p8020-phase">
+              <div class="p8020-phase-label">
+                <div>
+                  <div class="p8020-phase-num">05 · control</div>
+                  <div class="p8020-phase-name">Quality &amp; comms</div>
+                  <div class="p8020-phase-meta">checks, RFIs, safety</div>
+                </div>
+              </div>
+              <div class="p8020-modules">
+                <div class="p8020-mod" data-tier="t2"><span class="p8020-mod-ico">⦿</span><div><div class="p8020-mod-name">Quality</div><div class="p8020-mod-sub">QA · QC</div></div></div>
+                <div class="p8020-mod" data-tier="t2"><span class="p8020-mod-ico">☑</span><div><div class="p8020-mod-name">Punch list</div><div class="p8020-mod-sub">snags · defects</div></div></div>
+                <div class="p8020-mod" data-tier="t2"><span class="p8020-mod-ico">⊕</span><div><div class="p8020-mod-name">Safety</div><div class="p8020-mod-sub">HSE</div></div></div>
+                <div class="p8020-mod" data-tier="t2"><span class="p8020-mod-ico">?</span><div><div class="p8020-mod-name">RFIs</div><div class="p8020-mod-sub">requests</div></div></div>
+                <div class="p8020-mod" data-tier="t2"><span class="p8020-mod-ico">⊿</span><div><div class="p8020-mod-name">Submittals</div><div class="p8020-mod-sub">approvals</div></div></div>
+              </div>
+            </div>
+
+            <!-- Phase 6 — Money & change -->
+            <div class="p8020-phase">
+              <div class="p8020-phase-label">
+                <div>
+                  <div class="p8020-phase-num">06 · money</div>
+                  <div class="p8020-phase-name">Finance</div>
+                  <div class="p8020-phase-meta">payments, change</div>
+                </div>
+              </div>
+              <div class="p8020-modules">
+                <div class="p8020-mod" data-tier="t3"><span class="p8020-mod-ico">⎔</span><div><div class="p8020-mod-name">Cashflow</div><div class="p8020-mod-sub">forecast</div></div></div>
+                <div class="p8020-mod" data-tier="t3"><span class="p8020-mod-ico">↺</span><div><div class="p8020-mod-name">Change orders</div><div class="p8020-mod-sub">variations</div></div></div>
+                <div class="p8020-mod" data-tier="t3"><span class="p8020-mod-ico">¤</span><div><div class="p8020-mod-name">Payments</div><div class="p8020-mod-sub">progress claims</div></div></div>
+                <div class="p8020-mod" data-tier="t3"><span class="p8020-mod-ico">⊞</span><div><div class="p8020-mod-name">Budgets</div><div class="p8020-mod-sub">vs actuals</div></div></div>
+              </div>
+            </div>
+
+            <!-- Phase 7 — Closeout & reporting -->
+            <div class="p8020-phase">
+              <div class="p8020-phase-label">
+                <div>
+                  <div class="p8020-phase-num">07 · close</div>
+                  <div class="p8020-phase-name">Reporting</div>
+                  <div class="p8020-phase-meta">handover, KPIs</div>
+                </div>
+              </div>
+              <div class="p8020-modules">
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">⎘</span><div><div class="p8020-mod-name">Documents</div><div class="p8020-mod-sub">revisions</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">◐</span><div><div class="p8020-mod-name">Reporting</div><div class="p8020-mod-sub">exports</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">▦</span><div><div class="p8020-mod-name">Dashboards</div><div class="p8020-mod-sub">KPIs</div></div></div>
+                <div class="p8020-mod" data-tier="t1"><span class="p8020-mod-ico">✿</span><div><div class="p8020-mod-name">Handover</div><div class="p8020-mod-sub">warranty</div></div></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Open-core stats footer -->
+          <div class="p8020-foot">
+            <div class="p8020-foot-cell"><div class="p8020-foot-num">36</div><div class="p8020-foot-label">built-in modules</div></div>
+            <div class="p8020-foot-cell"><div class="p8020-foot-num">7</div><div class="p8020-foot-label">workflow phases</div></div>
+            <div class="p8020-foot-cell"><div class="p8020-foot-num">55k</div><div class="p8020-foot-label">cost-DB items</div></div>
+            <div class="p8020-foot-cell"><div class="p8020-foot-num">€0</div><div class="p8020-foot-label">licence fees, ever</div></div>
+            <div class="p8020-foot-cell"><div class="p8020-foot-num">100%</div><div class="p8020-foot-label">on GitHub</div></div>
+          </div>
+        </div>
+
+        <div class="p8020-fold" aria-hidden="true"></div>
+
+        <!-- Bottom — 20% partner-paid -->
+        <div class="p8020-row is-paid">
+          <div class="p8020-row-head">
+            <div class="p8020-row-eyebrow">
+              <span class="p8020-pct">20<sup>%</sup></span>
+              <div class="p8020-row-title">
+                <h3>Partner-paid layer — <em>where the margin lives.</em></h3>
+                <p class="p8020-row-sub">
+                  Services and commercial SKUs sold by partners on top of the open
+                  core. Partners keep <strong>25–100%</strong> depending on the line.
+                </p>
+              </div>
+            </div>
+            <span class="p8020-tag">partners earn here</span>
+          </div>
+
+          <div class="p8020-paid-grid">
+            <div class="p8020-paid">
+              <div class="p8020-paid-head">
+                <span class="p8020-paid-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg></span>
+                <span class="p8020-paid-name">Implementation</span>
+                <span class="p8020-paid-margin">100%</span>
+              </div>
+              <p class="p8020-paid-desc">Discovery, configuration, data migration, go-live. DDC never quotes this work.</p>
+            </div>
+
+            <div class="p8020-paid">
+              <div class="p8020-paid-head">
+                <span class="p8020-paid-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 4 3 6 3s6-1 6-3v-5"/></svg></span>
+                <span class="p8020-paid-name">Training</span>
+                <span class="p8020-paid-margin">100%</span>
+              </div>
+              <p class="p8020-paid-desc">Workshops, certifications, custom curricula. Branded by you, billed by you.</p>
+            </div>
+
+            <div class="p8020-paid">
+              <div class="p8020-paid-head">
+                <span class="p8020-paid-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s-8-4-8-12V5l8-3 8 3v5c0 8-8 12-8 12z"/></svg></span>
+                <span class="p8020-paid-name">Support &amp; SLA</span>
+                <span class="p8020-paid-margin">100%</span>
+              </div>
+              <p class="p8020-paid-desc">Production support, incident response, monitoring. Your team, your retainer.</p>
+            </div>
+
+            <div class="p8020-paid">
+              <div class="p8020-paid-head">
+                <span class="p8020-paid-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
+                <span class="p8020-paid-name">Commercial licences</span>
+                <span class="p8020-paid-margin">25–65%</span>
+              </div>
+              <p class="p8020-paid-desc">OCERP commercial licence, CWICR cost DB and cad2data converters (DWG · RVT · IFC · DGN). Resold by partners at tier rate.</p>
+            </div>
+
+            <div class="p8020-paid">
+              <div class="p8020-paid-head">
+                <span class="p8020-paid-ico"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>
+                <span class="p8020-paid-name">Custom modules</span>
+                <span class="p8020-paid-margin">100%</span>
+              </div>
+              <p class="p8020-paid-desc">Bespoke modules built per client — Revit connector, country cost matrix, ERP bridge. Your team, your timeline.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- CTAs + proof -->
+      <div>
+        <div class="partners-teaser-ctas">
+          <a class="partners-teaser-cta primary" href="/partners.html#apply">
+            <span class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z"/><path d="M3 21v-1a6 6 0 0 1 6-6h6a6 6 0 0 1 6 6v1"/><path d="m17 6 2 2 4-4"/></svg>
+            </span>
+            <span>Become a partner</span>
+          </a>
+          <a class="partners-teaser-cta ghost" href="/partners.html">
+            <span class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </span>
+            <span>Read full program</span>
+          </a>
+        </div>
+        <div class="partners-teaser-proof">
+          15,000 GitHub clones in week 1 · 55k+ cost items · Open-source ERP for construction
+        </div>
       </div>
     </div>
   </section>
@@ -14502,6 +15453,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
           const el = entry.target;
           const target = parseFloat(el.dataset.count || '0');
           const suffix = el.dataset.suffix || '';
+          const prefix = el.dataset.prefix || '';
           const duration = 1600;
           const start = performance.now();
           const format = (v) => {
@@ -14513,7 +15465,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
             const t = Math.min(1, (now - start) / duration);
             const eased = 1 - Math.pow(1 - t, 3);
             const val = target * eased;
-            el.innerHTML = format(val) + (suffix ? '<span class="suffix">' + suffix + '</span>' : '');
+            el.innerHTML = prefix + format(val) + (suffix ? '<span class="suffix">' + suffix + '</span>' : '');
             if (t < 1) requestAnimationFrame(step);
           };
           requestAnimationFrame(step);
@@ -14527,7 +15479,8 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
       document.querySelectorAll('[data-count]').forEach((el) => {
         const target = parseFloat(el.dataset.count || '0');
         const suffix = el.dataset.suffix || '';
-        el.innerHTML = (target >= 1000 ? target.toLocaleString('en-US') : target.toString())
+        const prefix = el.dataset.prefix || '';
+        el.innerHTML = prefix + (target >= 1000 ? target.toLocaleString('en-US') : target.toString())
           + (suffix ? '<span class="suffix">' + suffix + '</span>' : '');
       });
     }
@@ -16605,7 +17558,7 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
         try {
           // Cache-bust on each release so updated copy reaches users without
           // a hard refresh. LOCALE_VERSION is bumped on every content change.
-          const LOCALE_VERSION = '20260426y';
+          const LOCALE_VERSION = '20260429n';
           const res = await fetch(`locales/${lang}.json?v=${LOCALE_VERSION}`, { cache: 'default' });
           if (!res.ok) throw 0;
           const json = await res.json();

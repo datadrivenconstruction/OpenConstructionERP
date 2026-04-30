@@ -4,6 +4,7 @@
     "tour": "Tour",
     "compare": "Compare",
     "pricing": "Pricing",
+    "partners": "Partners",
     "docs": "Docs",
     "faq": "FAQ",
     "github": "GitHub",
@@ -11,7 +12,7 @@
     "install": "Install"
   },
   "hero": {
-    "version_meta": "shipped 2026-04-20 · second stable",
+    "version_meta": "shipped 2026-04-20",
     "sub": "Open-source ERP for construction teams — estimates, schedules, tenders, contracts, site tasks and reporting in one install. Cost and time figures stay in sync with the drawings and the BOQ behind them.",
     "cta_install": "Install now",
     "cta_star": "Star on GitHub",
@@ -296,7 +297,7 @@
     "row_multicad": "Multi-CAD ingest (DWG / RVT / IFC / DGN)",
     "row_55k": "55,000+ cost items out of the box",
     "row_crdt": "Real-time multiplayer (CRDT)",
-    "row_20lang": "20 languages in core i18n",
+    "row_20lang": "30 languages in core i18n",
     "row_modular": "Modular plugin architecture",
     "row_cost_label": "Typical cost / seat / yr",
     "row_cost_us": "€ 0 · self-host",
@@ -457,7 +458,7 @@
     "q11": "How often do you ship updates?",
     "a11": "Minor releases roughly every 2–3 weeks, patch releases as needed. Changelog lives on GitHub, every tagged version has a Docker image, and migrations are reversible. You decide when to upgrade — self-hosted means nobody forces a deploy window on you.",
     "q12": "Which languages and regions are supported?",
-    "a12": "20 languages ship in the core i18n. Cost database labels, validation rule sets and classification trees are per-region modules — pick the ones you need, add your own. No hard-coded currency, no hard-coded date format."
+    "a12": "30 languages ship in the core i18n. Cost database labels, validation rule sets and classification trees are per-region modules — pick the ones you need, add your own. No hard-coded currency, no hard-coded date format."
   },
   "install_cta": {
     "also_works_with": "Also works with:",
@@ -562,7 +563,7 @@
     "svc3_li1": "Async review optional",
     "svc3_li2": "Outcome doc + recommendations",
     "svc3_li3": "Roll over into a build anytime",
-    "form_title": "Tell me what you’re after. <em>I read every message myself.</em>",
+    "form_title": "Tell us what you’re after. <em>Every message gets a real reply.</em>",
     "form_sub": "I work on this project solo, so I prioritize teams that are ready to allocate real resources to a pilot — budget, timeline, a sponsor. Send the brief and I’ll get back to you within a few days.",
     "chips_label": "What can we help with?",
     "chip_build": "Custom build",

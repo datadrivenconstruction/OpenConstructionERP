@@ -1,0 +1,45 @@
+[Unit]
+Description=OpenConstructionERP — open-source construction cost estimation
+After=network.target
+
+[Service]
+Type=simple
+User=openestimate
+Group=openestimate
+WorkingDirectory=/home/openestimate
+
+# Path to the venv that has `pip install openconstructionerp` in it.
+# Replace with your install location.
+ExecStart=/home/openestimate/.venv/bin/openestimate serve --host 0.0.0.0 --port 8000
+
+# Environment overrides — uncomment what you need.
+# Environment=SEED_DEMO=false
+# Environment=DATABASE_URL=postgresql+asyncpg://oe:CHANGE_ME@localhost:5432/openestimate
+# Environment=ALLOWED_ORIGINS=https://erp.example.com
+# Environment=OE_OLLAMA_URL=http://localhost:11434/v1/chat/completions
+
+# Restart policy
+Restart=on-failure
+RestartSec=5
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/openestimate/.openestimate
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LockPersonality=true
+
+# Log to journald (view with `journalctl -u openestimate -f`)
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,5 +1,13 @@
-import type { ColDef, ValueFormatterParams } from 'ag-grid-community';
+import type { ColDef, ValueFormatterParams, ValueGetterParams } from 'ag-grid-community';
 import { fmtWithCurrency } from '../boqHelpers';
+import {
+  buildFormulaContext,
+  evaluateFormulaStrict,
+  isFormula,
+  type FormulaContext,
+  type FormulaVariable,
+} from './formula';
+import type { Position } from '../api';
 
 export interface BOQColumnContext {
   currencySymbol: string;
@@ -88,8 +96,8 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
     {
       headerName: t('boq.ordinal', { defaultValue: 'Pos.' }),
       field: 'ordinal',
-      width: 120,
-      minWidth: 90,
+      width: 88,
+      minWidth: 70,
       editable: (params) => {
         if (params.data?._isSection || params.data?._isFooter) return false;
         return true;
@@ -155,13 +163,14 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       field: 'unit',
       width: 80,
       editable: (params) => !params.data?._isSection && !params.data?._isFooter,
-      cellEditor: 'agSelectCellEditor',
-      cellEditorParams: {
-        values: ['m', 'm2', 'm3', 'kg', 'pcs', 'lsum', 'hr', 't', 'l', 'set', 'pair', 'ea', 'lot'],
-      },
+      // Custom combobox: dropdown of standard SI / Cyrillic / labour
+      // tokens + free-text input + auto-memory of custom values via
+      // localStorage (so a unit typed once shows up in the dropdown
+      // next time). Replaces the strict ``agSelectCellEditor`` whose
+      // hard-coded list silently swallowed edits when the existing
+      // value (e.g. "т", "маш.-ч") wasn't in the list.
+      cellEditor: 'unitCellEditor',
       cellRenderer: 'unitCellRenderer',
-      // Bug 9: cell renderer & editor must show identical labels. Removed `uppercase` —
-      // editor dropdown shows raw codes ("m", "m2"), so renderer must too. No transform either side.
       cellClass: 'text-center text-2xs font-mono',
       cellStyle: { display: 'flex', justifyContent: 'center', alignItems: 'center' },
     },
@@ -223,6 +232,11 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       width: 130,
       editable: (params) => {
         if (params.data?._isSection || params.data?._isFooter) return false;
+        // Position rate is the sum of resource subtotals — never editable
+        // when the position carries resources. Variant rate edits happen
+        // on the synthetic VARIANT row inside the resource panel and
+        // patch ``metadata.variant.price`` only (see onUpdateVariantHeader
+        // in BOQGrid). User design: "если есть ресурсы, не нужно трогать".
         const res = params.data?.metadata?.resources;
         if (Array.isArray(res) && res.length > 0) return false;
         return true;
@@ -308,44 +322,186 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
 export interface CustomColumnDef {
   name: string;
   display_name: string;
-  column_type: 'text' | 'number' | 'date' | 'select';
+  column_type: 'text' | 'number' | 'date' | 'select' | 'calculated';
   options?: string[];
   sort_order?: number;
+  /** Formula source for `calculated` columns. e.g. `=quantity * unit_rate * 1.19`. */
+  formula?: string;
+  /** Display decimals for `calculated` columns when result is numeric. */
+  decimals?: number;
 }
 
-export function getCustomColumnDefs(customColumns: CustomColumnDef[]): ColDef[] {
+/**
+ * Optional engine context for `calculated` columns. When supplied, the
+ * column's valueGetter evaluates the formula against these positions and
+ * variables; otherwise calculated columns render `''` (no engine = nothing
+ * to evaluate). Text/number/date/select columns ignore this argument and
+ * keep their original behaviour.
+ */
+export interface CustomColumnEngineContext {
+  positions: Position[];
+  variables?: Map<string, FormulaVariable>;
+}
+
+/**
+ * Format a numeric formula result for display. Mirrors the rounding the
+ * engine already applies (4-decimal max via `evaluateFormulaRaw`) but lets
+ * the column author choose presentation precision separately.
+ */
+function formatCalculatedNumber(value: number, decimals: number): string {
+  const safe = Math.max(0, Math.min(6, decimals));
+  return value.toFixed(safe);
+}
+
+/**
+ * Build a `FormulaContext` for the row currently being rendered. Every
+ * calculated cell needs the WHOLE positions list (so `pos("01.001")` can
+ * resolve other rows) plus the row's own field values exposed through
+ * `col("name")` and the bare identifiers `quantity` / `unit_rate` /
+ * `total`. We project the latter into `currentRow` AND inject them as
+ * read-only $variables — `quantity` / `unit_rate` are already valid
+ * identifiers in the engine grammar (no leading `$`), so we wrap them in
+ * a synthetic context shape: bare identifiers go through the `col(...)`
+ * lookup path the engine already supports.
+ *
+ * We deliberately DON'T mutate the shared variables map here; we clone
+ * it and overlay the row-scoped overrides so concurrent renders don't
+ * race.
+ */
+function buildRowFormulaContext(
+  row: Record<string, unknown> | undefined,
+  engineCtx: CustomColumnEngineContext,
+): FormulaContext {
+  const row_ = row ?? {};
+  const variables = new Map<string, FormulaVariable>(engineCtx.variables ?? new Map());
+  // Expose the current row's measure / rate / total as $-variables so the
+  // user can write `=quantity * unit_rate * 1.19` without having to pull
+  // them through `col()`. Names are uppercased to match the engine's
+  // canonical $VAR convention.
+  const q = typeof row_.quantity === 'number' ? row_.quantity : parseFloat(String(row_.quantity ?? ''));
+  const r = typeof row_.unit_rate === 'number' ? row_.unit_rate : parseFloat(String(row_.unit_rate ?? ''));
+  const tot = typeof row_.total === 'number' ? row_.total : parseFloat(String(row_.total ?? ''));
+  if (!isNaN(q)) variables.set('QUANTITY', { type: 'number', value: q });
+  if (!isNaN(r)) variables.set('UNIT_RATE', { type: 'number', value: r });
+  if (!isNaN(tot)) variables.set('TOTAL', { type: 'number', value: tot });
+  return buildFormulaContext({
+    positions: engineCtx.positions,
+    variables,
+    currentPositionId: typeof row_.id === 'string' ? row_.id : undefined,
+    currentRow: row_,
+  });
+}
+
+/**
+ * valueGetter factory for a `calculated` column. Returns the formatted
+ * formula result, or one of the sentinel error markers:
+ *   • `#ERR`   — syntax / runtime error (unknown function, type mismatch, …)
+ *   • `#CYCLE` — formula transitively references its own column
+ *
+ * Cycle detection is best-effort here: the BOQ-level dependency graph
+ * already covers `pos(...)` cycles, but a calculated column that calls
+ * `col("self_name")` would self-loop. We guard that one case explicitly.
+ */
+function makeCalculatedValueGetter(
+  col: CustomColumnDef,
+  engineCtx: CustomColumnEngineContext,
+): (params: ValueGetterParams) => string {
+  const formula = col.formula ?? '';
+  const decimals = col.decimals ?? 2;
+  return (params: ValueGetterParams): string => {
+    const data = params.data as Record<string, unknown> | undefined;
+    if (!data) return '';
+    if (data._isSection || data._isFooter) return '';
+    if (!isFormula(formula)) return '';
+    // Self-reference guard: `col("X")` inside column X's own formula.
+    if (formula.includes(`col("${col.name}")`) || formula.includes(`col('${col.name}')`)) {
+      return '#CYCLE';
+    }
+    try {
+      const ctx = buildRowFormulaContext(data, engineCtx);
+      const result = evaluateFormulaStrict(formula, ctx);
+      if (result === null) return '';
+      if (typeof result === 'number') return formatCalculatedNumber(result, decimals);
+      if (typeof result === 'boolean') return result ? '1' : '0';
+      return String(result);
+    } catch {
+      return '#ERR';
+    }
+  };
+}
+
+export function getCustomColumnDefs(
+  customColumns: CustomColumnDef[],
+  engineCtx?: CustomColumnEngineContext,
+): ColDef[] {
+  // Default empty engine context — calculated columns simply render '' if
+  // no positions / variables are wired in. This keeps the call-site
+  // backwards compatible for callers that don't yet supply context.
+  const ctx: CustomColumnEngineContext = engineCtx ?? { positions: [] };
   return customColumns
     .slice()
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
     .map((col) => {
+      // Migration: legacy rows without `column_type` default to 'text'.
+      const colType: CustomColumnDef['column_type'] = col.column_type ?? 'text';
+      const isCalculated = colType === 'calculated';
+      const isNumeric = colType === 'number' || isCalculated;
+
       const base: ColDef = {
-        headerName: col.display_name,
+        headerName: isCalculated ? `ƒ ${col.display_name}` : col.display_name,
         field: `_custom_${col.name}`,
         colId: `custom_${col.name}`,
-        width: col.column_type === 'text' ? 140 : 100,
-        editable: (params) => !params.data?._isSection && !params.data?._isFooter,
-        cellClass: col.column_type === 'number' ? 'text-right tabular-nums text-xs' : 'text-xs',
-        headerClass: col.column_type === 'number' ? 'ag-right-aligned-header' : '',
-        valueGetter: (params) => {
-          const cf = params.data?.metadata?.custom_fields;
-          return cf?.[col.name] ?? '';
-        },
-        valueSetter: (params) => {
-          if (!params.data) return false;
-          if (!params.data.metadata) params.data.metadata = {};
-          if (!params.data.metadata.custom_fields) params.data.metadata.custom_fields = {};
-          params.data.metadata.custom_fields[col.name] = params.newValue;
-          return true;
-        },
+        width: colType === 'text' ? 140 : 110,
+        editable: isCalculated
+          ? false
+          : (params) => !params.data?._isSection && !params.data?._isFooter,
+        cellClass: isNumeric
+          ? isCalculated
+            ? 'text-right tabular-nums text-xs text-content-secondary'
+            : 'text-right tabular-nums text-xs'
+          : 'text-xs',
+        headerClass: isNumeric ? 'ag-right-aligned-header' : '',
       };
 
-      if (col.column_type === 'number') {
+      if (isCalculated) {
+        base.valueGetter = makeCalculatedValueGetter(col, ctx);
+        // Formula result IS the display value — no further formatting.
+        base.valueFormatter = (params: ValueFormatterParams) =>
+          typeof params.value === 'string' ? params.value : '';
+        base.tooltipValueGetter = (params) => {
+          const v = params.value;
+          if (v === '#CYCLE') {
+            return 'This calculated column references itself — cycle detected.';
+          }
+          if (v === '#ERR') {
+            return `Formula error in "${col.formula ?? ''}". Open Custom Columns to edit.`;
+          }
+          return col.formula ? `Formula: ${col.formula}` : undefined;
+        };
+        return base;
+      }
+
+      // Non-calculated columns: same valueGetter / valueSetter as before.
+      base.valueGetter = (params) => {
+        const cf = (params.data?.metadata as Record<string, unknown> | undefined)
+          ?.custom_fields as Record<string, unknown> | undefined;
+        return cf?.[col.name] ?? '';
+      };
+      base.valueSetter = (params) => {
+        if (!params.data) return false;
+        if (!params.data.metadata) params.data.metadata = {};
+        if (!params.data.metadata.custom_fields) params.data.metadata.custom_fields = {};
+        (params.data.metadata.custom_fields as Record<string, unknown>)[col.name] = params.newValue;
+        return true;
+      };
+
+      if (colType === 'number') {
         base.cellEditor = 'agNumberCellEditor';
         base.valueParser = (params) => {
           const val = parseFloat(params.newValue);
           return isNaN(val) ? '' : val;
         };
-      } else if (col.column_type === 'select' && col.options?.length) {
+      } else if (colType === 'select' && col.options?.length) {
         base.cellEditor = 'agSelectCellEditor';
         base.cellEditorParams = { values: ['', ...col.options] };
       } else {

@@ -5,6 +5,17 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.30] — 2026-04-29
+
+### Changed
+- Cost-database modal: country DBs lead the region tabs row, "All databases" pushed to the end.
+- Variant resource quantity is now stored at `metadata.variant.quantity` and decoupled from `position.quantity` — editing one no longer changes the other.
+
+### Added
+- Paginated "From Database" search (cursor + 50/page) and a category tree sidebar backed by `GET /api/v1/costs/category-tree/` (5-min cache).
+- Calculated custom-column type with formula textarea, Test button, and live re-eval (Phase E).
+- Autocomplete tooltip for Description column (Phase F).
+
 ## [2.6.29] — 2026-04-29
 
 ### Added

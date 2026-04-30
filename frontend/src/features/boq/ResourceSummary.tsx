@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -17,6 +17,8 @@ import { boqApi, type ResourceSummaryItem, type ResourceSummaryResponse } from '
 import { apiPost } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { getResourceTypeLabel } from './boqResourceTypes';
+import { VariantPicker } from '@/features/costs/VariantPicker';
+import type { CostVariant } from '@/features/costs/api';
 
 /* ── Constants ──────────────────────────────────────────────────────── */
 
@@ -120,6 +122,49 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
   );
 
   void savingResource; // used implicitly via savedResources
+
+  /** Bulk re-pick: fan the chosen variant out to every (position, resource_idx)
+   *  pair captured on the aggregated row. Mirrors the per-row re-pick on the
+   *  BOQ grid but applies uniformly across all positions where this abstract
+   *  resource appears. */
+  const handleRepickVariant = useCallback(
+    async (resource: ResourceSummaryItem, chosen: CostVariant) => {
+      const refs = resource.position_refs ?? [];
+      if (refs.length === 0) return;
+      try {
+        await Promise.all(
+          refs.map((ref) =>
+            boqApi.repickResourceVariant(ref.position_id, ref.resource_idx, chosen.label),
+          ),
+        );
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['boq-resource-summary', boqId] }),
+          queryClient.invalidateQueries({ queryKey: ['boq', boqId] }),
+        ]);
+        addToast({
+          type: 'success',
+          title: t('boq.variant_resource_repicked', {
+            defaultValue: 'Variant updated: {{label}}',
+            label: chosen.label,
+          }),
+          message: t('boq.rs_variant_applied_to_n', {
+            defaultValue: 'Applied to {{count}} position(s)',
+            count: refs.length,
+          }),
+        });
+      } catch (err) {
+        const detail = err instanceof Error ? err.message : '';
+        addToast({
+          type: 'error',
+          title: t('boq.variant_resource_repick_failed', {
+            defaultValue: 'Variant re-pick failed',
+          }),
+          message: detail,
+        });
+      }
+    },
+    [addToast, boqId, queryClient, t],
+  );
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['boq-resource-summary', boqId],
@@ -350,6 +395,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
                             fmt={fmt}
                             onSaveToCatalog={handleSaveToCatalog}
                             isSaved={savedResources.has(`${res.type}:${res.name}`)}
+                            onRepickVariant={handleRepickVariant}
                           />
                         ))}
                       </tbody>
@@ -424,14 +470,77 @@ function ResourceRow({
   fmt,
   onSaveToCatalog,
   isSaved,
+  onRepickVariant,
 }: {
   resource: ResourceSummaryItem;
   fmt: Intl.NumberFormat;
   onSaveToCatalog: (resource: ResourceSummaryItem) => void;
   isSaved: boolean;
+  onRepickVariant: (resource: ResourceSummaryItem, chosen: CostVariant) => void;
 }) {
   const { t } = useTranslation();
   const badgeStyle = TYPE_BADGE_STYLES[resource.type] || TYPE_BADGE_STYLES.other;
+
+  /* ── Variant re-pick (mirrors EditableResourceRow on the BOQ grid) ───
+   *  Variants are intrinsic to one abstract resource — a swap here fans
+   *  the chosen variant out to every position_ref the backend recorded
+   *  for this aggregated row, so every BOQ position using this resource
+   *  flips together.  No-op when fewer than 2 variants are cached. */
+  const variants = resource.available_variants ?? null;
+  const stats = resource.variant_stats ?? null;
+  const hasVariants = Array.isArray(variants) && variants.length >= 2 && stats != null;
+  const refs = resource.position_refs ?? [];
+  const canRepick = hasVariants && refs.length > 0;
+
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const pillRef = useRef<HTMLButtonElement>(null);
+  const closePicker = useCallback(() => setPickerOpen(false), []);
+
+  const handleApply = useCallback(
+    (chosen: CostVariant) => {
+      setPickerOpen(false);
+      onRepickVariant(resource, chosen);
+    },
+    [onRepickVariant, resource],
+  );
+
+  // Mixed pick across positions → softer label so user knows the swap
+  // will overwrite divergent picks.
+  const isMixed = resource.current_variant_label === '__mixed__';
+  const explicitLabel =
+    resource.current_variant_label && !isMixed ? resource.current_variant_label : null;
+
+  // Tone follows the BOQ grid convention: blue = explicit pick, amber =
+  // auto-default, none = unset.
+  let pillTone: 'blue' | 'amber' | 'gray' = 'gray';
+  if (explicitLabel) pillTone = 'blue';
+  else if (resource.variant_default) pillTone = 'amber';
+  else if (isMixed) pillTone = 'amber';
+
+  const pillClass =
+    pillTone === 'blue'
+      ? 'bg-oe-blue-subtle/50 text-oe-blue ring-1 ring-oe-blue/30 hover:bg-oe-blue-subtle'
+      : pillTone === 'amber'
+      ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500/30 hover:bg-amber-500/25'
+      : 'bg-surface-tertiary text-content-secondary ring-1 ring-border-light hover:bg-surface-tertiary/80';
+
+  const pillLabel = (() => {
+    if (isMixed) {
+      return t('boq.rs_variant_pill_mixed', {
+        defaultValue: 'Mixed · {{count}} options',
+        count: variants?.length ?? 0,
+      });
+    }
+    if (explicitLabel) {
+      // Truncate long CWICR labels so they don't blow up the cell.
+      const short = explicitLabel.length > 28 ? `${explicitLabel.slice(0, 26)}…` : explicitLabel;
+      return short;
+    }
+    return t('boq.rs_variant_pill_options', {
+      defaultValue: '▾ {{count}} options',
+      count: variants?.length ?? 0,
+    });
+  })();
 
   return (
     <tr className="border-t border-border-light/30 hover:bg-surface-secondary/40 transition-colors group">
@@ -451,7 +560,54 @@ function ResourceRow({
         {fmt.format(resource.total_quantity)}
       </td>
       <td className="px-3 py-2 text-right text-content-secondary tabular-nums">
-        {fmt.format(resource.avg_unit_rate)}
+        <div className="inline-flex items-center justify-end gap-1.5">
+          <span>{fmt.format(resource.avg_unit_rate)}</span>
+          {canRepick && (
+            <>
+              <button
+                ref={pillRef}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPickerOpen((open) => !open);
+                }}
+                className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium transition-colors ${pillClass}`}
+                title={
+                  isMixed
+                    ? t('boq.rs_variant_pill_mixed_tooltip', {
+                        defaultValue:
+                          'Different variants picked across positions. Click to choose one for all.',
+                      })
+                    : explicitLabel
+                    ? t('boq.rs_variant_pill_picked_tooltip', {
+                        defaultValue: 'Variant: {{label}}. Click to switch (applies to all positions).',
+                        label: explicitLabel,
+                      })
+                    : t('boq.rs_variant_pill_unset_tooltip', {
+                        defaultValue:
+                          '{{count}} priced variants available. Click to pick one for all positions.',
+                        count: variants?.length ?? 0,
+                      })
+                }
+                data-testid={`rs-variant-pill-${resource.type}-${resource.name}`}
+              >
+                {pillLabel}
+              </button>
+              {pickerOpen && variants && stats && (
+                <VariantPicker
+                  variants={variants}
+                  stats={stats}
+                  anchorEl={pillRef.current}
+                  unitLabel={resource.unit}
+                  currency={resource.currency || 'EUR'}
+                  defaultStrategy={resource.variant_default ?? 'mean'}
+                  onApply={handleApply}
+                  onClose={closePicker}
+                />
+              )}
+            </>
+          )}
+        </div>
       </td>
       <td className="px-3 py-2 text-right text-content-primary font-semibold tabular-nums">
         {fmt.format(resource.total_cost)}

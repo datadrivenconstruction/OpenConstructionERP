@@ -10,6 +10,9 @@ Stateless service layer. Handles:
 
 from __future__ import annotations
 
+import base64
+import binascii
+import json as _json
 import logging
 import re
 import uuid
@@ -41,6 +44,51 @@ from app.modules.costs.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+# ── Keyset cursor codec ────────────────────────────────────────────────────
+#
+# Cursors are opaque to the client. We encode the (code, id) pair as a
+# base64-encoded JSON object. Base64 is URL-safe (no padding hassles when
+# the cursor flows back as a query parameter) and JSON keeps the payload
+# self-describing for debugging. The codec is intentionally tolerant:
+# any decode error returns ``None`` so the router can map it to a 400
+# without leaking parser internals to the caller.
+
+def encode_cursor(code: str, item_id: str) -> str:
+    """Pack ``(code, id)`` into a URL-safe base64 cursor token."""
+    payload = _json.dumps({"code": code, "id": item_id}, separators=(",", ":"))
+    return base64.urlsafe_b64encode(payload.encode("utf-8")).decode("ascii")
+
+
+def decode_cursor(token: str) -> tuple[str, str] | None:
+    """Decode a cursor back to ``(code, id)``.
+
+    Returns ``None`` for any malformed input — empty / wrong base64 /
+    non-JSON / missing keys — so callers can map the failure to a 400
+    without distinguishing the underlying cause.
+    """
+    if not token or not isinstance(token, str):
+        return None
+    try:
+        # urlsafe_b64decode is strict about padding; pad on the fly so a
+        # cursor that round-tripped through a URL without padding still
+        # decodes.
+        padded = token + "=" * (-len(token) % 4)
+        raw = base64.urlsafe_b64decode(padded.encode("ascii"))
+    except (binascii.Error, ValueError, UnicodeDecodeError):
+        return None
+    try:
+        data = _json.loads(raw.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    code = data.get("code")
+    item_id = data.get("id")
+    if not isinstance(code, str) or not isinstance(item_id, str):
+        return None
+    return code, item_id
 
 
 class CostItemService:
@@ -107,18 +155,83 @@ class CostItemService:
         return await self.repo.get_by_codes(codes)
 
     async def search_costs(self, query: CostSearchQuery) -> tuple[list[CostItem], int]:
-        """Search cost items with filters and pagination."""
-        return await self.repo.search(
+        """Search cost items with filters and pagination (legacy offset path).
+
+        This wrapper preserves the older 2-tuple return shape used by the
+        autocomplete endpoint and external callers that don't care about
+        cursor pagination. The new keyset-aware search lives in
+        :meth:`search_costs_paginated`.
+        """
+        items, total, _ = await self.repo.search(
             q=query.q,
             unit=query.unit,
             source=query.source,
             region=query.region,
             category=query.category,
+            classification_path=query.classification_path,
             min_rate=query.min_rate,
             max_rate=query.max_rate,
             offset=query.offset,
             limit=query.limit,
+            cursor=None,
+            skip_count=False,
         )
+        # ``total`` is guaranteed non-None here because skip_count=False.
+        assert total is not None
+        return items, total
+
+    async def search_costs_paginated(
+        self,
+        query: CostSearchQuery,
+    ) -> tuple[list[CostItem], int | None, bool, str | None]:
+        """Search with cursor-aware pagination.
+
+        Returns ``(items, total_or_None, has_more, next_cursor_or_None)``.
+        ``total`` is computed only when no cursor was supplied (first page).
+        ``next_cursor`` is the encoded cursor for the next page, or ``None``
+        when there is no next page.
+        """
+        decoded_cursor: tuple[str, str] | None = None
+        if query.cursor:
+            decoded_cursor = decode_cursor(query.cursor)
+            if decoded_cursor is None:
+                # Malformed cursor → 400. The frontend treats this as a
+                # signal to drop the bookmark and refetch the first page.
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid pagination cursor",
+                )
+
+        items, total, has_more = await self.repo.search(
+            q=query.q,
+            unit=query.unit,
+            source=query.source,
+            region=query.region,
+            category=query.category,
+            classification_path=query.classification_path,
+            min_rate=query.min_rate,
+            max_rate=query.max_rate,
+            offset=query.offset,
+            limit=query.limit,
+            cursor=decoded_cursor,
+            skip_count=decoded_cursor is not None,
+        )
+
+        next_cursor: str | None = None
+        if has_more and items:
+            last = items[-1]
+            next_cursor = encode_cursor(last.code, str(last.id))
+
+        return items, total, has_more, next_cursor
+
+    async def category_tree(self, region: str | None = None) -> list[dict[str, Any]]:
+        """Return the 4-level classification tree, optionally filtered by region.
+
+        Caching is the router's job (``_region_cache``) — keep this layer
+        stateless so background callers (e.g. event handlers) don't share
+        a stale snapshot with HTTP clients.
+        """
+        return await self.repo.category_tree(region=region)
 
     # ── Update ────────────────────────────────────────────────────────────
 

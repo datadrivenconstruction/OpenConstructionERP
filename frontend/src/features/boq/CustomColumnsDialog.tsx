@@ -30,19 +30,26 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   X, Plus, Trash2, Columns3,
-  Type, Hash, Calendar, List,
-  AlertCircle, Check, ChevronDown, Globe,
+  Type, Hash, Calendar, List, Sigma,
+  AlertCircle, Check, ChevronDown, Globe, PlayCircle,
 } from 'lucide-react';
 import { Button, Badge, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
-import { boqApi, type CustomColumnDef, type Position } from './api';
+import { boqApi, type CustomColumnDef, type Position, type BOQVariable } from './api';
 import { getErrorMessage } from '@/shared/lib/api';
 import {
   type ColumnPreset,
   getUniversalPresets,
   getRegionalPresets,
 } from './presets';
+import {
+  buildFormulaContext,
+  evaluateFormulaRaw,
+  isFormula,
+  normaliseFormula,
+  type FormulaVariable,
+} from './grid/formula';
 
 interface CustomColumnsDialogProps {
   open: boolean;
@@ -51,6 +58,9 @@ interface CustomColumnsDialogProps {
   /** Positions used to compute fill-rate stats per column. Optional — if not
    *  provided, fill rates are not shown. */
   positions?: Position[];
+  /** BOQ variables — used by the calculated-column "Test" button to preview
+   *  formulas with the same context the grid will see at runtime. */
+  variables?: BOQVariable[];
 }
 
 const COLUMN_TYPE_ICONS: Record<CustomColumnDef['column_type'], typeof Type> = {
@@ -58,7 +68,18 @@ const COLUMN_TYPE_ICONS: Record<CustomColumnDef['column_type'], typeof Type> = {
   number: Hash,
   date: Calendar,
   select: List,
+  calculated: Sigma,
 };
+
+/** Quick-insert formula presets surfaced as chips below the textarea. */
+const FORMULA_PRESETS: { label: string; snippet: string; hint: string }[] = [
+  { label: '× 1.19 (VAT)', snippet: '=$QUANTITY * $UNIT_RATE * 1.19', hint: 'Total with German VAT' },
+  { label: 'qty × rate', snippet: '=$QUANTITY * $UNIT_RATE', hint: 'Net total' },
+  { label: 'pos ref', snippet: '=pos("01.001").qty', hint: 'Pull qty from another row' },
+  { label: 'if branch', snippet: '=if($QUANTITY > 100, $UNIT_RATE * 0.95, $UNIT_RATE)', hint: 'Volume discount' },
+  { label: '$VAR', snippet: '=$QUANTITY * $LABOR_RATE', hint: 'Use a BOQ variable' },
+  { label: 'round', snippet: '=round($QUANTITY * $UNIT_RATE, 2)', hint: 'Round to 2 decimals' },
+];
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
@@ -102,6 +123,7 @@ export function CustomColumnsDialog({
   onClose,
   boqId,
   positions,
+  variables,
 }: CustomColumnsDialogProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -112,7 +134,68 @@ export function CustomColumnsDialog({
   const [newName, setNewName] = useState('');
   const [newType, setNewType] = useState<CustomColumnDef['column_type']>('text');
   const [newOptions, setNewOptions] = useState('');
+  // v2.7.0/E — calculated-column-only state.
+  const [newFormula, setNewFormula] = useState('');
+  const [newDecimals, setNewDecimals] = useState(2);
+  const [testResult, setTestResult] = useState<string | null>(null);
   const [showCustomForm, setShowCustomForm] = useState(false);
+
+  /** Live syntax validation for the formula textarea. We accept anything
+   *  `isFormula` recognises and only flag it red when `normaliseFormula`
+   *  throws (mismatched quotes, etc) — actual evaluation errors surface
+   *  via the Test button. */
+  const formulaError = useMemo(() => {
+    if (newType !== 'calculated') return null;
+    const v = newFormula.trim();
+    if (!v) return null;
+    if (!isFormula(v)) return 'Must start with `=` or contain a math operator / function.';
+    try {
+      normaliseFormula(v.startsWith('=') ? v.slice(1) : v);
+      return null;
+    } catch (e) {
+      return e instanceof Error ? e.message : 'Invalid formula syntax.';
+    }
+  }, [newType, newFormula]);
+
+  /** Run the user's formula against the first non-section position so they
+   *  can see the result before saving. Mirrors the runtime path in
+   *  `getCustomColumnDefs` / `makeCalculatedValueGetter`. */
+  const handleTestFormula = useCallback(() => {
+    setTestResult(null);
+    const formula = newFormula.trim();
+    if (!formula) return;
+    const sample = (positions ?? []).find((p) => p.unit !== '');
+    if (!sample) {
+      setTestResult('No position to test against.');
+      return;
+    }
+    const varMap = new Map<string, FormulaVariable>();
+    if (variables) {
+      for (const v of variables) {
+        varMap.set(v.name.toUpperCase(), { type: v.type, value: v.value });
+      }
+    }
+    // Same shape the runtime uses — quantity / unit_rate / total exposed
+    // both via `col(...)` (currentRow) and as $-variables.
+    const sampleRow = sample as unknown as Record<string, unknown>;
+    if (typeof sample.quantity === 'number') varMap.set('QUANTITY', { type: 'number', value: sample.quantity });
+    if (typeof sample.unit_rate === 'number') varMap.set('UNIT_RATE', { type: 'number', value: sample.unit_rate });
+    if (typeof sample.total === 'number') varMap.set('TOTAL', { type: 'number', value: sample.total });
+    const ctx = buildFormulaContext({
+      positions: positions ?? [],
+      variables: varMap,
+      currentPositionId: sample.id,
+      currentRow: sampleRow,
+    });
+    try {
+      const r = evaluateFormulaRaw(formula, ctx);
+      if (r === null) setTestResult('(empty)');
+      else if (typeof r === 'number') setTestResult(r.toFixed(Math.max(0, Math.min(6, newDecimals))));
+      else setTestResult(String(r));
+    } catch (e) {
+      setTestResult(`#ERR: ${e instanceof Error ? e.message : 'unknown'}`);
+    }
+  }, [newFormula, newDecimals, positions, variables]);
 
   const { data: columns = [], isLoading } = useQuery({
     queryKey: ['boq-custom-columns', boqId],
@@ -135,6 +218,9 @@ export function CustomColumnsDialog({
       setNewName('');
       setNewType('text');
       setNewOptions('');
+      setNewFormula('');
+      setNewDecimals(2);
+      setTestResult(null);
       setShowCustomForm(false);
       addToast({
         type: 'success',
@@ -327,6 +413,29 @@ export function CustomColumnsDialog({
         return;
       }
       payload.options = opts;
+    } else if (newType === 'calculated') {
+      const formula = newFormula.trim();
+      if (!formula) {
+        addToast({
+          type: 'error',
+          title: t('boq.column_calc_needs_formula', {
+            defaultValue: 'Calculated column needs a formula',
+          }),
+        });
+        return;
+      }
+      if (formulaError) {
+        addToast({
+          type: 'error',
+          title: t('boq.column_calc_invalid_formula', {
+            defaultValue: 'Formula has a syntax error',
+          }),
+          message: formulaError,
+        });
+        return;
+      }
+      payload.formula = formula;
+      payload.decimals = Math.max(0, Math.min(6, newDecimals));
     }
     addMut.mutate(payload);
   };
@@ -398,7 +507,12 @@ export function CustomColumnsDialog({
               <div className="rounded-lg border border-border-light divide-y divide-border-light">
                 {columns.map((col) => {
                   const Icon = COLUMN_TYPE_ICONS[col.column_type] ?? Type;
-                  const fr = fillRateFor(positions, col.name);
+                  // Calculated columns aren't stored per-position — fill rate
+                  // is meaningless. Suppress the bar.
+                  const fr =
+                    col.column_type === 'calculated'
+                      ? { filled: 0, total: 0 }
+                      : fillRateFor(positions, col.name);
                   const fillPct = fr.total > 0 ? Math.round((fr.filled / fr.total) * 100) : 0;
                   return (
                     <div
@@ -422,6 +536,13 @@ export function CustomColumnsDialog({
                             </span>
                           )}
                         </div>
+                        {col.column_type === 'calculated' && col.formula && (
+                          <div className="mt-0.5">
+                            <code className="font-mono text-2xs text-content-secondary truncate block">
+                              {col.formula}
+                            </code>
+                          </div>
+                        )}
                         <div className="mt-0.5 flex items-center gap-2 text-2xs text-content-tertiary">
                           <code className="font-mono">{col.name}</code>
                           {fr.total > 0 && (
@@ -540,23 +661,64 @@ export function CustomColumnsDialog({
                       )}
                     </div>
                     <div>
-                      <label
-                        htmlFor="column-type"
+                      <span
+                        id="column-type-label"
                         className="block text-xs font-medium text-content-secondary mb-1.5"
                       >
                         {t('boq.column_type', { defaultValue: 'Type' })}
-                      </label>
-                      <select
-                        id="column-type"
-                        value={newType}
-                        onChange={(e) => setNewType(e.target.value as CustomColumnDef['column_type'])}
-                        className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+                      </span>
+                      <div
+                        role="radiogroup"
+                        aria-labelledby="column-type-label"
+                        className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-surface-primary p-1"
                       >
-                        <option value="text">{t('boq.column_type_text', { defaultValue: 'Text' })}</option>
-                        <option value="number">{t('boq.column_type_number', { defaultValue: 'Number' })}</option>
-                        <option value="date">{t('boq.column_type_date', { defaultValue: 'Date' })}</option>
-                        <option value="select">{t('boq.column_type_select', { defaultValue: 'Select (dropdown)' })}</option>
-                      </select>
+                        {(['text', 'number', 'calculated'] as const).map((tp) => {
+                          const Icon = COLUMN_TYPE_ICONS[tp];
+                          const active = newType === tp;
+                          const labels: Record<typeof tp, string> = {
+                            text: t('boq.column_type_text', { defaultValue: 'Text' }),
+                            number: t('boq.column_type_number', { defaultValue: 'Number' }),
+                            calculated: t('boq.column_type_calculated', { defaultValue: 'Calculated' }),
+                          };
+                          return (
+                            <button
+                              key={tp}
+                              type="button"
+                              role="radio"
+                              aria-checked={active}
+                              onClick={() => setNewType(tp)}
+                              className={`flex h-7 items-center justify-center gap-1 rounded text-2xs font-medium transition-colors ${
+                                active
+                                  ? 'bg-oe-blue text-white shadow-sm'
+                                  : 'text-content-secondary hover:bg-surface-secondary'
+                              }`}
+                            >
+                              <Icon size={12} />
+                              {labels[tp]}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {/* Date / Select still reachable for power users via a
+                          secondary control — kept off the primary radio so
+                          the new "Calculated" option stays prominent. */}
+                      <div className="mt-1 flex gap-2 text-2xs">
+                        <button
+                          type="button"
+                          onClick={() => setNewType('date')}
+                          className={`underline-offset-2 hover:underline ${newType === 'date' ? 'text-oe-blue' : 'text-content-tertiary'}`}
+                        >
+                          {t('boq.column_type_date', { defaultValue: 'Date' })}
+                        </button>
+                        <span className="text-content-tertiary">·</span>
+                        <button
+                          type="button"
+                          onClick={() => setNewType('select')}
+                          className={`underline-offset-2 hover:underline ${newType === 'select' ? 'text-oe-blue' : 'text-content-tertiary'}`}
+                        >
+                          {t('boq.column_type_select', { defaultValue: 'Select' })}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -579,6 +741,94 @@ export function CustomColumnsDialog({
                     </div>
                   )}
 
+                  {newType === 'calculated' && (
+                    <div className="space-y-2">
+                      <div>
+                        <label
+                          htmlFor="column-formula"
+                          className="block text-xs font-medium text-content-secondary mb-1.5"
+                        >
+                          {t('boq.column_formula', { defaultValue: 'Formula' })}
+                        </label>
+                        <textarea
+                          id="column-formula"
+                          value={newFormula}
+                          onChange={(e) => {
+                            setNewFormula(e.target.value);
+                            setTestResult(null);
+                          }}
+                          placeholder="=quantity * unit_rate * 1.19"
+                          rows={3}
+                          spellCheck={false}
+                          className={`w-full rounded-lg border bg-surface-primary px-3 py-2 font-mono text-xs text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 transition-all resize-none ${
+                            formulaError
+                              ? 'border-semantic-error focus:ring-semantic-error/30 focus:border-semantic-error'
+                              : 'border-border focus:ring-oe-blue/30 focus:border-oe-blue'
+                          }`}
+                        />
+                        {formulaError && (
+                          <p className="mt-1 text-2xs text-semantic-error">{formulaError}</p>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {FORMULA_PRESETS.map((p) => (
+                          <button
+                            key={p.label}
+                            type="button"
+                            title={p.hint}
+                            onClick={() => {
+                              setNewFormula(p.snippet);
+                              setTestResult(null);
+                            }}
+                            className="rounded-full border border-border-light bg-surface-primary px-2 py-0.5 text-2xs font-mono text-content-secondary hover:border-oe-blue/40 hover:text-oe-blue transition-colors"
+                          >
+                            {p.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex items-end gap-3">
+                        <div>
+                          <label
+                            htmlFor="column-decimals"
+                            className="block text-xs font-medium text-content-secondary mb-1.5"
+                          >
+                            {t('boq.column_decimals', { defaultValue: 'Decimals' })}
+                          </label>
+                          <input
+                            id="column-decimals"
+                            type="number"
+                            min={0}
+                            max={6}
+                            value={newDecimals}
+                            onChange={(e) => {
+                              const n = parseInt(e.target.value, 10);
+                              setNewDecimals(isNaN(n) ? 2 : Math.max(0, Math.min(6, n)));
+                            }}
+                            className="h-9 w-20 rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleTestFormula}
+                          disabled={!newFormula.trim() || !!formulaError}
+                        >
+                          <PlayCircle size={14} className="mr-1.5" />
+                          {t('boq.column_test_formula', { defaultValue: 'Test' })}
+                        </Button>
+                        {testResult !== null && (
+                          <div className="flex-1 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 font-mono text-xs">
+                            <span className="text-content-tertiary">
+                              {t('boq.column_test_result', { defaultValue: 'Result:' })}{' '}
+                            </span>
+                            <span className="text-content-primary">{testResult}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex justify-end gap-2 pt-1">
                     <Button
                       type="button"
@@ -588,6 +838,9 @@ export function CustomColumnsDialog({
                         setShowCustomForm(false);
                         setNewName('');
                         setNewOptions('');
+                        setNewFormula('');
+                        setNewDecimals(2);
+                        setTestResult(null);
                       }}
                     >
                       {t('common.cancel', { defaultValue: 'Cancel' })}

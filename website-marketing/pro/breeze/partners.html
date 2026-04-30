@@ -1,0 +1,4005 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <title>Partner Program — OpenConstructionERP (Open Source Construction ERP)</title>
+  <meta name="description" content="Become a Founding Partner. 45–65% margins on OpenConstructionERP commercial licences, CWICR cost DB, cad2data converters and localisation packs. 100% on implementation services. AGPL-3.0 + Commercial dual-licence." />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://openconstructionerp.com/pro/breeze/partners.html" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://openconstructionerp.com/pro/breeze/partners.html" />
+  <meta property="og:title" content="OpenConstructionERP Partner Program — 80% open. 20% paid. 100% yours." />
+  <meta property="og:description" content="Free foundation. Paid floors. Real construction software, built like a building. Founding Partner cohort open — 10 spots, no fee, top-tier economics from day one." />
+  <meta property="og:image" content="https://openconstructionerp.com/pro/shared/media/og-breeze.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Favicon (shared between site variants) -->
+  <link rel="icon" type="image/svg+xml" href="/pro/cinematic/assets/favicon.svg" />
+
+  <!-- Fonts: same family as breeze -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=Fraunces:ital,wght@1,300..500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Inherit theme preference from main site -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('oce-theme') || 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+
+  <style>
+    /* ================================================================ */
+    /* THEME TOKENS — same family as breeze (sky blue palette)          */
+    /* ================================================================ */
+    :root {
+      --bg-0: #f7fbff;
+      --bg-1: #edf5ff;
+      --bg-2: #e7f2fd;
+      --ink-0: #0b1220;
+      --ink-1: #1e293b;
+      --ink-2: #475569;
+      --ink-3: #94a3b8;
+      --line-0: rgba(15, 23, 42, 0.05);
+      --line-1: rgba(15, 23, 42, 0.09);
+      --line-2: rgba(15, 23, 42, 0.14);
+      --accent: #0284c7;
+      --accent-2: #0ea5e9;
+      --accent-3: #2563eb;
+      --accent-4: #6366f1;
+      --accent-5: #06b6d4;
+
+      /* Construction-Stack floor accents */
+      --floor-foundation: #94a3b8;  /* slate-400 — open core */
+      --floor-1: #06b6d4;            /* cyan-500 — localisation */
+      --floor-2: #0ea5e9;            /* sky-500 — commercial */
+      --floor-3: #2563eb;            /* blue-600 — services */
+      --floor-roof: #f59e0b;         /* amber-500 — success */
+    }
+    [data-theme="dark"] {
+      --bg-0: #0b1220;
+      --bg-1: #111a2c;
+      --bg-2: #152238;
+      --ink-0: #eff6ff;
+      --ink-1: #cfe0f5;
+      --ink-2: #94a3b8;
+      --ink-3: #64748b;
+      --line-0: rgba(255, 255, 255, 0.06);
+      --line-1: rgba(255, 255, 255, 0.10);
+      --line-2: rgba(255, 255, 255, 0.16);
+      --accent: #38bdf8;
+      --accent-2: #7dd3fc;
+      --accent-3: #60a5fa;
+
+      --floor-foundation: #64748b;
+      --floor-1: #22d3ee;
+      --floor-2: #38bdf8;
+      --floor-3: #60a5fa;
+      --floor-roof: #fbbf24;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(60% 50% at 50% 0%, color-mix(in oklab, var(--accent) 8%, transparent) 0%, transparent 70%),
+        var(--bg-0);
+      color: var(--ink-0);
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+    a { color: inherit; }
+    a:hover { color: var(--accent); }
+
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+    .narrow { max-width: 880px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+
+    /* ─── TOP NAV — matches main site visually ───────────────────── */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: color-mix(in oklab, var(--bg-0) 88%, transparent);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+              backdrop-filter: blur(14px) saturate(1.4);
+      border-bottom: 1px solid var(--line-1);
+    }
+    .nav-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 12px clamp(20px, 4vw, 48px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .nav-left, .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: baseline;
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: -0.015em;
+    }
+    .brand-name { display: inline-flex; align-items: baseline; }
+    .brand-seg-1 { color: var(--ink-0); }
+    .brand-seg-2 { color: var(--ink-2); }
+    .brand-seg-3 { color: var(--accent); font-weight: 800; }
+    .nav-icon-btn {
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      border-radius: 9px;
+      border: 1px solid var(--line-2);
+      background: transparent;
+      color: var(--ink-2);
+      cursor: pointer;
+      transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    }
+    .nav-icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-icon-btn .icon-moon { display: none; }
+    [data-theme="dark"] .nav-icon-btn .icon-sun { display: none; }
+    [data-theme="dark"] .nav-icon-btn .icon-moon { display: block; }
+    .nav-links {
+      display: flex;
+      gap: clamp(10px, 1.6vw, 22px);
+      align-items: center;
+      font-size: 14px;
+    }
+    .nav-links a {
+      color: var(--ink-2);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 6px 4px;
+      transition: color 0.15s ease;
+    }
+    .nav-links a:hover, .nav-links a.is-active { color: var(--accent); }
+    .nav-links a.is-active { font-weight: 600; }
+    .nav-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease;
+    }
+    .nav-pill.github {
+      border: 1px solid var(--line-2);
+      color: var(--ink-1);
+      background: transparent;
+    }
+    .nav-pill.github:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-pill.apply {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%);
+      color: #fff;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.3) inset,
+        0 8px 18px -8px color-mix(in oklab, var(--accent) 60%, transparent);
+    }
+    .nav-pill.apply:hover { transform: translateY(-1px); color: #fff; }
+    .nav-pill .arrow { transition: transform 0.15s ease; }
+    .nav-pill:hover .arrow { transform: translateX(2px); }
+    @media (max-width: 980px) {
+      .nav-links a:not(.partners-link), .nav-pill.github { display: none; }
+    }
+    @media (max-width: 540px) {
+      .nav-icon-btn { width: 34px; height: 34px; }
+      .brand { font-size: 15px; }
+      .nav-pill.apply { padding: 7px 12px; font-size: 12px; }
+    }
+
+    /* ─── HERO ─────────────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      padding: clamp(56px, 9vw, 120px) 0 clamp(48px, 7vw, 96px);
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, color-mix(in oklab, var(--accent) 9%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in oklab, var(--accent) 9%, transparent) 1px, transparent 1px);
+      background-size: 56px 56px;
+      -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 35%, black 30%, transparent 78%);
+              mask-image: radial-gradient(ellipse 75% 60% at 50% 35%, black 30%, transparent 78%);
+      pointer-events: none;
+      opacity: 0.55;
+      z-index: 0;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      top: -120px; right: -120px;
+      width: 420px; height: 420px;
+      background: radial-gradient(closest-side,
+        color-mix(in oklab, var(--accent-3) 22%, transparent) 0%,
+        transparent 100%);
+      filter: blur(20px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero > .wrap { position: relative; z-index: 1; }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: clamp(32px, 5vw, 80px);
+      align-items: center;
+    }
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── METRIC RIBBON (under hero) ─────────────────────────────── */
+    .metric-ribbon {
+      padding: 0 0 clamp(40px, 6vw, 64px);
+    }
+    .ribbon-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 clamp(20px, 4vw, 48px);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 880px) {
+      .ribbon-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .ribbon-grid { grid-template-columns: 1fr; }
+    }
+    .ribbon-card {
+      position: relative;
+      padding: 22px 22px 20px;
+      background:
+        linear-gradient(160deg,
+          color-mix(in oklab, var(--bg-1) 96%, transparent) 0%,
+          color-mix(in oklab, var(--accent) 5%, var(--bg-1)) 100%);
+      border: 1px solid var(--line-1);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+    .ribbon-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(120% 80% at 100% 0%,
+        color-mix(in oklab, var(--accent) 18%, transparent) 0%, transparent 60%);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .ribbon-card:hover {
+      transform: translateY(-4px);
+      border-color: color-mix(in oklab, var(--accent) 38%, var(--line-1));
+      box-shadow: 0 22px 44px -18px color-mix(in oklab, var(--accent) 36%, transparent);
+    }
+    .ribbon-card.hi {
+      background:
+        linear-gradient(160deg,
+          color-mix(in oklab, var(--accent) 12%, var(--bg-1)) 0%,
+          color-mix(in oklab, var(--accent-3) 10%, var(--bg-1)) 100%);
+      border-color: color-mix(in oklab, var(--accent) 32%, transparent);
+    }
+    .ribbon-card.hi::before {
+      background: radial-gradient(120% 80% at 100% 0%,
+        color-mix(in oklab, var(--accent-3) 28%, transparent) 0%, transparent 60%);
+      opacity: 0.9;
+    }
+    .ribbon-num {
+      position: relative;
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: clamp(36px, 4.6vw, 56px);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--ink-0);
+      font-variant-numeric: tabular-nums;
+      display: inline-block;
+    }
+    .ribbon-card.hi .ribbon-num {
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      -webkit-background-clip: text;
+              background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+    .ribbon-num sup {
+      font-size: 0.4em;
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      vertical-align: 0.55em;
+      margin-left: 4px;
+      letter-spacing: 0;
+      -webkit-text-fill-color: currentColor;
+      color: var(--ink-2);
+    }
+    .ribbon-card.hi .ribbon-num sup {
+      color: var(--accent);
+      -webkit-text-fill-color: currentColor;
+    }
+    .ribbon-label {
+      position: relative;
+      margin-top: 12px;
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 14.5px;
+      color: var(--ink-0);
+      letter-spacing: -0.005em;
+    }
+    .ribbon-sub {
+      position: relative;
+      margin-top: 4px;
+      font-size: 12.5px;
+      color: var(--ink-2);
+      letter-spacing: 0.01em;
+    }
+    .ribbon-glyph {
+      position: absolute;
+      top: 18px; right: 18px;
+      width: 22px; height: 22px;
+      color: color-mix(in oklab, var(--accent) 60%, var(--ink-3));
+      opacity: 0.45;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+    .ribbon-card:hover .ribbon-glyph {
+      opacity: 1;
+      transform: rotate(-6deg) scale(1.08);
+    }
+    .ribbon-card.hi .ribbon-glyph {
+      color: var(--accent);
+      opacity: 0.85;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--accent) 10%, transparent);
+      border: 1px solid color-mix(in oklab, var(--accent) 28%, transparent);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      margin-bottom: 22px;
+    }
+    .eyebrow .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      animation: dotPulse 2.4s ease-in-out infinite;
+    }
+    @keyframes dotPulse {
+      0%, 100% { opacity: 0.55; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    .h1 {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: clamp(36px, 5.4vw, 68px);
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      margin: 0 0 24px;
+      color: var(--ink-0);
+    }
+    .h1 em {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+    .lede {
+      font-size: clamp(16px, 1.4vw, 19px);
+      color: var(--ink-1);
+      max-width: 56ch;
+      margin: 0 0 32px;
+      line-height: 1.55;
+    }
+    .lede em {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      color: var(--ink-0);
+      font-weight: 400;
+    }
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 22px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%);
+      color: #fff;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.3) inset,
+        0 12px 28px -10px color-mix(in oklab, var(--accent) 60%, transparent);
+    }
+    .btn-primary:hover { transform: translateY(-2px); color: #fff; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink-1);
+      border-color: var(--line-2);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn .arr {
+      width: 16px; height: 16px;
+      transition: transform 0.2s ease;
+    }
+    .btn:hover .arr { transform: translateX(3px); }
+
+    .trust-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--ink-2);
+      letter-spacing: 0.02em;
+      margin-top: 10px;
+    }
+    .trust-strip .sep { color: var(--ink-3); }
+
+    /* ─── CONSTRUCTION STACK ──────────────────────────────────────── */
+    .stack-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 460px;
+      margin-left: auto;
+    }
+    @media (max-width: 900px) {
+      .stack-wrap { margin: 0 auto; }
+    }
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      filter: drop-shadow(0 30px 60px color-mix(in oklab, var(--accent) 18%, rgba(8,15,35,0.18)));
+    }
+    .floor {
+      position: relative;
+      display: grid;
+      grid-template-columns: 110px 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px 16px 22px;
+      background: linear-gradient(180deg,
+        color-mix(in oklab, var(--floor-tint, var(--accent)) 6%, var(--bg-1)) 0%,
+        color-mix(in oklab, var(--floor-tint, var(--accent)) 1%, var(--bg-1)) 100%);
+      border: 1px solid color-mix(in oklab, var(--floor-tint, var(--accent)) 14%, var(--line-1));
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.22s ease, border-color 0.22s ease, background 0.25s ease, box-shadow 0.25s ease;
+      overflow: hidden;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        0 8px 14px -10px color-mix(in oklab, var(--floor-tint, var(--accent)) 26%, transparent);
+    }
+    @media (max-width: 560px) {
+      .floor { grid-template-columns: 90px 1fr; gap: 12px; padding: 14px 16px 14px 20px; }
+      .floor .floor-margin { grid-column: 1 / -1; justify-self: start; margin-top: 2px; }
+    }
+    .floor:hover {
+      transform: translateX(6px);
+      border-color: color-mix(in oklab, var(--floor-tint, var(--accent)) 60%, transparent);
+      background: linear-gradient(180deg,
+        color-mix(in oklab, var(--floor-tint, var(--accent)) 14%, var(--bg-1)) 0%,
+        color-mix(in oklab, var(--floor-tint, var(--accent)) 5%, var(--bg-1)) 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 18px 36px -12px color-mix(in oklab, var(--floor-tint, var(--accent)) 38%, transparent);
+    }
+    .floor::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 5px;
+      background: linear-gradient(180deg,
+        color-mix(in oklab, var(--floor-tint, var(--accent)) 70%, white) 0%,
+        var(--floor-tint, var(--accent)) 100%);
+      box-shadow: 1px 0 10px -1px color-mix(in oklab, var(--floor-tint, var(--accent)) 55%, transparent);
+    }
+    .floor::after {
+      content: "";
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 38%;
+      background: radial-gradient(closest-side at 100% 50%,
+        color-mix(in oklab, var(--floor-tint, var(--accent)) 14%, transparent) 0%,
+        transparent 100%);
+      opacity: 0;
+      transition: opacity 0.22s ease;
+      pointer-events: none;
+    }
+    .floor:hover::after { opacity: 1; }
+    .floor-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--ink-3);
+      font-weight: 600;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .floor-body { min-width: 0; }
+    .floor-title {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--ink-0);
+      letter-spacing: -0.005em;
+    }
+    .floor-sub {
+      font-size: 12px;
+      color: var(--ink-2);
+      margin-top: 2px;
+    }
+    .floor-margin {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--floor-tint, var(--accent)) 14%, transparent);
+      color: var(--floor-tint, var(--accent));
+      white-space: nowrap;
+    }
+    .floor-roof {
+      background: linear-gradient(105deg,
+        color-mix(in oklab, var(--floor-roof) 16%, var(--bg-1)) 0%,
+        color-mix(in oklab, var(--floor-roof) 7%, var(--bg-1)) 100%);
+      border-color: color-mix(in oklab, var(--floor-roof) 28%, var(--line-1));
+      clip-path: polygon(0 30%, 50% 0%, 100% 30%, 100% 100%, 0 100%);
+      padding-top: 22px;
+    }
+    .floor-foundation {
+      background: linear-gradient(180deg,
+        color-mix(in oklab, var(--floor-foundation) 10%, var(--bg-2)) 0%,
+        color-mix(in oklab, var(--floor-foundation) 4%, var(--bg-2)) 100%);
+      border-color: color-mix(in oklab, var(--floor-foundation) 24%, var(--line-1));
+    }
+    .floor[data-floor="1"] { --floor-tint: var(--floor-1); }
+    .floor[data-floor="2"] { --floor-tint: var(--floor-2); }
+    .floor[data-floor="3"] { --floor-tint: var(--floor-3); }
+    .floor[data-floor="roof"] { --floor-tint: var(--floor-roof); }
+    .floor[data-floor="foundation"] { --floor-tint: var(--floor-foundation); }
+    .stack-callout {
+      margin-top: 18px;
+      padding: 14px 18px;
+      border-left: 2px solid var(--accent);
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--ink-1);
+      max-width: 100%;
+    }
+
+    /* ─── SECTION SCAFFOLD ────────────────────────────────────────── */
+    .section {
+      padding: clamp(56px, 8vw, 100px) 0;
+      border-top: 1px solid var(--line-0);
+    }
+    .section-head {
+      max-width: 760px;
+      margin: 0 auto clamp(36px, 5vw, 64px);
+      text-align: center;
+    }
+    .h2 {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: clamp(28px, 3.6vw, 48px);
+      line-height: 1.12;
+      letter-spacing: -0.025em;
+      margin: 0 0 18px;
+      color: var(--ink-0);
+    }
+    .h2 em {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+    }
+    .section-lede {
+      font-size: 17px;
+      color: var(--ink-2);
+      margin: 0 auto;
+      max-width: 60ch;
+    }
+
+    /* ─── FULL STACK SECTION ──────────────────────────────────────── */
+    .stack-section .stack-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .stack-section .legend {
+      max-width: 720px;
+      margin: 22px auto 0;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-2);
+      letter-spacing: 0.02em;
+    }
+    .stack-section .legend b { color: var(--ink-0); }
+
+    /* ─── AUDIENCE CARDS ──────────────────────────────────────────── */
+    .audience-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    @media (max-width: 880px) {
+      .audience-grid { grid-template-columns: 1fr; }
+    }
+    .audience-card {
+      padding: 28px 26px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .audience-card:hover {
+      transform: translateY(-3px);
+      border-color: color-mix(in oklab, var(--accent) 40%, transparent);
+    }
+    .audience-icon {
+      width: 44px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: color-mix(in oklab, var(--accent) 14%, transparent);
+      color: var(--accent);
+      flex: 0 0 auto;
+    }
+    .audience-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 1.6;
+    }
+    .audience-title {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--ink-0);
+    }
+    .audience-who {
+      font-size: 13px;
+      color: var(--ink-3);
+      letter-spacing: 0.01em;
+    }
+    .audience-body {
+      font-size: 14.5px;
+      color: var(--ink-1);
+      line-height: 1.55;
+      flex: 1 1 auto;
+    }
+    .audience-cta {
+      align-self: flex-start;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .audience-cta:hover { gap: 10px; }
+
+    /* ─── TIER LADDER ─────────────────────────────────────────────── */
+    .tiers {
+      max-width: 1140px;
+      margin: 0 auto;
+      overflow-x: auto;
+    }
+    .tier-grid {
+      display: grid;
+      grid-template-columns: 1.4fr repeat(4, 1fr);
+      gap: 0;
+      min-width: 720px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .tier-grid > div {
+      position: relative;
+      padding: 14px 16px;
+      font-size: 13.5px;
+      border-bottom: 1px solid var(--line-0);
+      border-right: 1px solid var(--line-0);
+    }
+    .tier-grid > div:nth-child(5n) { border-right: 0; }
+    .tier-grid > div:nth-last-child(-n+5) { border-bottom: 0; }
+    .tier-grid .row-label {
+      color: var(--ink-2);
+      background: color-mix(in oklab, var(--bg-2) 60%, transparent);
+      font-weight: 500;
+    }
+    .tier-grid .col-head {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+      color: var(--ink-0);
+      text-align: center;
+      padding: 18px 14px;
+      background: color-mix(in oklab, var(--bg-2) 40%, transparent);
+    }
+    .tier-grid .col-head[data-tier="r"] {
+      box-shadow: inset 0 -3px 0 #cbd5e1;
+    }
+    .tier-grid .col-head[data-tier="s"] {
+      box-shadow: inset 0 -3px 0 #94a3b8;
+    }
+    .tier-grid .col-head[data-tier="g"] {
+      box-shadow: inset 0 -3px 0 var(--accent-2);
+    }
+    .tier-grid .col-head[data-tier="p"] {
+      box-shadow: inset 0 -3px 0 #f59e0b;
+      background: linear-gradient(180deg,
+        color-mix(in oklab, #fbbf24 12%, var(--bg-2)) 0%,
+        color-mix(in oklab, #f59e0b 6%, var(--bg-2)) 100%);
+    }
+    .tier-grid .col-head .badge {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+      box-shadow: 0 0 0 2px color-mix(in oklab, var(--bg-1) 80%, transparent);
+    }
+    .tier-grid .col-head[data-tier="r"] .badge { background: #cbd5e1; }
+    .tier-grid .col-head[data-tier="s"] .badge { background: #94a3b8; }
+    .tier-grid .col-head[data-tier="g"] .badge { background: var(--accent-2); }
+    .tier-grid .col-head[data-tier="p"] .badge { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+
+    /* Column-wise tier tinting — Registered / Silver / Gold / Platinum */
+    .tier-grid > div:nth-child(5n+2):not(.col-head):not(.row-label) {
+      background: linear-gradient(90deg,
+        color-mix(in oklab, #cbd5e1 12%, transparent) 0%,
+        color-mix(in oklab, #cbd5e1 4%, transparent) 100%);
+    }
+    .tier-grid > div:nth-child(5n+3):not(.col-head):not(.row-label) {
+      background: linear-gradient(90deg,
+        color-mix(in oklab, #94a3b8 16%, transparent) 0%,
+        color-mix(in oklab, #94a3b8 6%, transparent) 100%);
+    }
+    .tier-grid > div:nth-child(5n+4):not(.col-head):not(.row-label) {
+      background: linear-gradient(90deg,
+        color-mix(in oklab, var(--accent-2) 22%, transparent) 0%,
+        color-mix(in oklab, var(--accent-2) 8%, transparent) 100%);
+    }
+    .tier-grid > div:nth-child(5n+5):not(.col-head):not(.row-label) {
+      background: linear-gradient(90deg,
+        color-mix(in oklab, #fbbf24 24%, transparent) 0%,
+        color-mix(in oklab, #f59e0b 10%, transparent) 100%);
+    }
+    .tier-grid .num {
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--ink-0);
+      transition: transform 0.18s ease;
+    }
+    .tier-grid .num:hover {
+      transform: scale(1.06);
+    }
+    .tier-grid .num.lg {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      text-shadow: 0 0 18px color-mix(in oklab, var(--accent) 40%, transparent);
+    }
+    .tier-grid > div:nth-child(5n+5).num.lg {
+      color: #b45309;
+      text-shadow: 0 0 18px color-mix(in oklab, #f59e0b 50%, transparent);
+    }
+    .tier-fee-banner {
+      max-width: 1140px;
+      margin: 18px auto 0;
+      padding: 18px;
+      text-align: center;
+      background: linear-gradient(135deg,
+        color-mix(in oklab, var(--accent) 8%, transparent) 0%,
+        color-mix(in oklab, var(--accent-3) 8%, transparent) 100%);
+      border: 1px solid color-mix(in oklab, var(--accent) 26%, transparent);
+      border-radius: 14px;
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: clamp(20px, 2.2vw, 26px);
+      color: var(--ink-0);
+    }
+    .tier-fee-banner em {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+    }
+
+    /* ─── EARNS (20% earning visualization) ───────────────────────── */
+    .earns-wrap {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 28px;
+    }
+    @media (max-width: 900px) {
+      .earns-wrap { grid-template-columns: 1fr; }
+    }
+    .earns-deal {
+      background: var(--bg-1);
+      border: 1px solid var(--ink-5);
+      border-radius: 18px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .earns-deal-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed var(--ink-5);
+    }
+    .earns-deal-title {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--ink-0);
+    }
+    .earns-deal-total {
+      font-family: 'Fraunces', serif;
+      font-weight: 600;
+      font-size: 22px;
+      color: var(--ink-0);
+    }
+    .earns-row {
+      display: grid;
+      grid-template-columns: 1fr 110px 80px 110px;
+      align-items: center;
+      gap: 10px;
+      font-size: 14.5px;
+    }
+    @media (max-width: 540px) {
+      .earns-row { grid-template-columns: 1fr 80px; }
+      .earns-row .earns-rate, .earns-row .earns-bar-cell { display: none; }
+    }
+    .earns-row + .earns-row { padding-top: 10px; border-top: 1px solid color-mix(in oklab, var(--ink-5) 70%, transparent); }
+    .earns-label { color: var(--ink-1); }
+    .earns-label small { display: block; font-size: 11.5px; color: var(--ink-3); margin-top: 2px; letter-spacing: 0.01em; }
+    .earns-rate {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--ink-2);
+      text-align: right;
+    }
+    .earns-bar-cell {
+      height: 8px;
+      background: color-mix(in oklab, var(--ink-5) 60%, transparent);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .earns-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-3));
+      border-radius: 4px;
+    }
+    .earns-amount {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--ink-0);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .earns-deal-foot {
+      margin-top: 6px;
+      padding-top: 14px;
+      border-top: 1px solid var(--ink-5);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .earns-deal-foot strong {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 28px;
+      color: var(--accent);
+    }
+    .earns-deal-foot span {
+      font-size: 13px;
+      color: var(--ink-2);
+    }
+    .earns-explain {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .earns-explain h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: clamp(22px, 2.3vw, 30px);
+      color: var(--ink-0);
+      line-height: 1.2;
+      margin: 0;
+    }
+    .earns-explain h3 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .earns-explain p {
+      font-size: 15px;
+      color: var(--ink-1);
+      line-height: 1.6;
+      margin: 0;
+    }
+    .earns-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .earns-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--accent) 10%, transparent);
+      border: 1px solid color-mix(in oklab, var(--accent) 25%, transparent);
+      font-size: 13px;
+      color: var(--ink-1);
+      font-weight: 500;
+    }
+    .earns-pill b { color: var(--accent); font-weight: 700; }
+    .earns-recurring {
+      margin-top: 8px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: color-mix(in oklab, var(--accent-3) 8%, transparent);
+      border-left: 3px solid var(--accent-3);
+      font-size: 14px;
+      color: var(--ink-1);
+      line-height: 1.55;
+    }
+    .earns-recurring b { color: var(--ink-0); }
+
+    /* ─── FOUNDING PARTNER ────────────────────────────────────────── */
+    .founding {
+      background: linear-gradient(165deg,
+        color-mix(in oklab, var(--accent) 8%, var(--bg-1)) 0%,
+        color-mix(in oklab, var(--accent-3) 6%, var(--bg-1)) 100%);
+      border-radius: 24px;
+      padding: clamp(36px, 6vw, 64px);
+      max-width: 1080px;
+      margin: 0 auto;
+      border: 1px solid color-mix(in oklab, var(--accent) 24%, transparent);
+    }
+    .founding-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(32px, 5vw, 64px);
+      align-items: start;
+    }
+    @media (max-width: 880px) {
+      .founding-grid { grid-template-columns: 1fr; }
+    }
+    .founding h3 {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: clamp(24px, 3vw, 36px);
+      letter-spacing: -0.025em;
+      margin: 0 0 18px;
+      line-height: 1.15;
+    }
+    .founding h3 em {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+    }
+    .founding p {
+      font-size: 15px;
+      color: var(--ink-1);
+      line-height: 1.6;
+      margin: 0 0 14px;
+    }
+    .founding p strong { color: var(--ink-0); }
+    .founding-counter-card {
+      position: relative;
+      background: linear-gradient(165deg, var(--bg-0) 0%, color-mix(in oklab, var(--accent) 5%, var(--bg-0)) 100%);
+      border: 1px solid color-mix(in oklab, var(--accent) 28%, transparent);
+      border-radius: 16px;
+      padding: 22px 22px 18px;
+      margin-bottom: 18px;
+      overflow: hidden;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        0 16px 36px -18px color-mix(in oklab, var(--accent) 32%, transparent);
+    }
+    .founding-counter-card::before {
+      content: "";
+      position: absolute;
+      top: -40%;
+      right: -25%;
+      width: 60%;
+      height: 180%;
+      background: radial-gradient(closest-side,
+        color-mix(in oklab, var(--accent) 18%, transparent) 0%,
+        transparent 100%);
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    .founding-counter-card > * { position: relative; }
+    .founding-counter-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .founding-counter-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+    .founding-counter-big {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: clamp(28px, 4vw, 40px);
+      line-height: 1;
+      color: var(--ink-0);
+      font-variant-numeric: tabular-nums;
+    }
+    .founding-counter-big b {
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .founding-counter-sub {
+      font-size: 13.5px;
+      color: var(--ink-2);
+      line-height: 1.45;
+      margin: 0 0 18px;
+    }
+    .founding-counter-sub b { color: var(--ink-0); font-weight: 700; }
+    .founding-counter {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .founding-counter .slot {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border: 2px solid color-mix(in oklab, var(--accent) 50%, transparent);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--accent);
+      background: color-mix(in oklab, var(--accent) 5%, var(--bg-0));
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .founding-counter .slot > * { position: relative; z-index: 1; }
+    .founding-counter .slot:not(.filled)::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(60% 60% at 50% 55%,
+        color-mix(in oklab, var(--accent) 26%, transparent) 0%,
+        transparent 70%);
+      animation: slotPulse 2.6s ease-in-out infinite;
+      z-index: 0;
+    }
+    .founding-counter .slot:not(.filled)::after {
+      content: "open";
+      position: absolute;
+      bottom: 5px;
+      left: 0; right: 0;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: color-mix(in oklab, var(--accent) 78%, transparent);
+      opacity: 0.75;
+      z-index: 1;
+    }
+    @keyframes slotPulse {
+      0%, 100% { opacity: 0.25; transform: scale(0.85); }
+      50% { opacity: 0.85; transform: scale(1.08); }
+    }
+    .founding-counter .slot:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 12px 22px -8px color-mix(in oklab, var(--accent) 38%, transparent);
+    }
+    .founding-counter .slot:not(.filled):hover::before {
+      animation: none;
+      opacity: 0.95;
+      transform: scale(1.18);
+    }
+    .founding-counter .slot.filled {
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      border-color: transparent;
+      color: #fff;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        0 6px 14px -6px color-mix(in oklab, var(--accent) 60%, transparent);
+    }
+    .founding-counter .slot.filled::after {
+      content: "";
+      position: absolute;
+      top: 4px; right: 4px;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.85);
+    }
+    @media (max-width: 480px) {
+      .founding-counter { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+      .founding-counter .slot { font-size: 13px; border-radius: 8px; }
+    }
+    .founding .micro {
+      font-size: 12.5px;
+      color: var(--ink-3);
+      margin-top: 14px;
+    }
+
+    /* ─── STICKY SECTION NAV ──────────────────────────────────────── */
+    .section-nav {
+      position: sticky;
+      top: 64px;
+      z-index: 40;
+      background: color-mix(in oklab, var(--bg-1) 88%, transparent);
+      backdrop-filter: saturate(1.4) blur(14px);
+      -webkit-backdrop-filter: saturate(1.4) blur(14px);
+      border-bottom: 1px solid var(--line-1);
+      padding: 8px 0;
+    }
+    .section-nav-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 clamp(16px, 3vw, 32px);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .section-nav-inner::-webkit-scrollbar { display: none; }
+    .section-nav-label {
+      flex: 0 0 auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      font-weight: 700;
+      padding-right: 12px;
+      border-right: 1px solid var(--line-2);
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+    .section-nav a {
+      flex: 0 0 auto;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--ink-2);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .section-nav a:hover {
+      background: color-mix(in oklab, var(--accent) 10%, transparent);
+      color: var(--accent);
+    }
+    .section-nav a.is-active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: #fff;
+    }
+    @media (max-width: 700px) {
+      .section-nav { top: 60px; }
+      .section-nav-label { display: none; }
+    }
+
+    /* ─── TRUST / CREDIBILITY ─────────────────────────────────────── */
+    .trust-wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 32px;
+      align-items: stretch;
+    }
+    @media (max-width: 940px) { .trust-wrap { grid-template-columns: 1fr; } }
+    .trust-bio {
+      padding: 28px;
+      border-radius: 18px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .trust-bio-head {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+    .trust-avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 26px;
+      box-shadow: 0 6px 18px -8px color-mix(in oklab, var(--accent) 60%, transparent);
+      overflow: hidden;
+    }
+    .trust-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .trust-bio-name {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: 22px;
+      color: var(--ink-0);
+      line-height: 1.2;
+    }
+    .trust-bio-name em { font-style: italic; color: var(--accent); }
+    .trust-bio-role {
+      font-size: 13px;
+      color: var(--ink-3);
+      margin-top: 2px;
+      letter-spacing: 0.01em;
+    }
+    .trust-bio-quote {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--ink-1);
+      margin: 0;
+      padding-left: 16px;
+      border-left: 3px solid color-mix(in oklab, var(--accent) 40%, transparent);
+    }
+    .trust-bio-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: auto;
+    }
+    .trust-bio-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--accent) 8%, transparent);
+      border: 1px solid color-mix(in oklab, var(--accent) 22%, transparent);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .trust-bio-link:hover {
+      background: color-mix(in oklab, var(--accent) 14%, transparent);
+      transform: translateY(-1px);
+    }
+    .trust-track {
+      padding: 28px;
+      border-radius: 18px;
+      background: linear-gradient(160deg,
+        color-mix(in oklab, var(--accent) 9%, var(--bg-1)) 0%,
+        color-mix(in oklab, var(--accent-3) 6%, var(--bg-1)) 100%);
+      border: 1px solid color-mix(in oklab, var(--accent) 28%, var(--line-1));
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .trust-track h3 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0;
+    }
+    .trust-track-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .trust-track-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding-bottom: 14px;
+      border-bottom: 1px dashed color-mix(in oklab, var(--accent) 25%, transparent);
+    }
+    .trust-track-item:last-child { border-bottom: 0; padding-bottom: 0; }
+    .trust-track-num {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 28px;
+      color: var(--ink-0);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .trust-track-text {
+      font-size: 13.5px;
+      color: var(--ink-1);
+      line-height: 1.45;
+    }
+    .trust-track-text b { color: var(--ink-0); font-weight: 700; }
+    .trust-track-since {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-3);
+    }
+
+    /* ─── PARTNER TOOLKIT (what's in the box) ─────────────────────── */
+    .toolkit-grid {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .toolkit-card {
+      position: relative;
+      padding: 22px 22px 20px;
+      border-radius: 16px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+    .toolkit-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      padding: 1px;
+      background: linear-gradient(135deg,
+        color-mix(in oklab, var(--accent) 35%, transparent),
+        transparent 50%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.22s ease;
+      pointer-events: none;
+    }
+    .toolkit-card:hover {
+      transform: translateY(-3px);
+      border-color: color-mix(in oklab, var(--accent) 30%, var(--line-1));
+      box-shadow: 0 18px 32px -22px color-mix(in oklab, var(--accent) 30%, rgba(8,15,35,0.18));
+    }
+    .toolkit-card:hover::before { opacity: 1; }
+    .toolkit-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: grid; place-items: center;
+      background: color-mix(in oklab, var(--accent) 12%, transparent);
+      color: var(--accent);
+    }
+    .toolkit-title {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--ink-0);
+      margin: 4px 0 0;
+    }
+    .toolkit-desc {
+      font-size: 13.5px;
+      color: var(--ink-2);
+      line-height: 1.5;
+      margin: 0;
+    }
+    .toolkit-tag {
+      align-self: flex-start;
+      margin-top: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--accent-3) 12%, transparent);
+      color: var(--accent-3);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .toolkit-tag.day1 {
+      background: color-mix(in oklab, #16a34a 14%, transparent);
+      color: #15803d;
+    }
+    .toolkit-foot {
+      max-width: 1180px;
+      margin: 22px auto 0;
+      text-align: center;
+      font-size: 13.5px;
+      color: var(--ink-2);
+    }
+    .toolkit-foot em { color: var(--accent); font-style: normal; font-weight: 600; }
+
+    /* ─── REVENUE CALCULATOR ──────────────────────────────────────── */
+    .calc-wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      gap: 28px;
+    }
+    @media (max-width: 980px) { .calc-wrap { grid-template-columns: 1fr; } }
+    .calc-inputs {
+      padding: 28px;
+      border-radius: 18px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .calc-input-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .calc-input-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .calc-input-label > span:first-child {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--ink-0);
+    }
+    .calc-input-label small {
+      font-size: 11.5px;
+      color: var(--ink-3);
+    }
+    .calc-input-value {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 22px;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .calc-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--line-1);
+      outline: none;
+      cursor: pointer;
+    }
+    .calc-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      cursor: pointer;
+      box-shadow: 0 2px 8px -2px color-mix(in oklab, var(--accent) 60%, transparent);
+      border: 2px solid var(--bg-1);
+    }
+    .calc-slider::-moz-range-thumb {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      cursor: pointer;
+      border: 2px solid var(--bg-1);
+    }
+    .calc-tier-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .calc-tier-btn {
+      padding: 10px 8px;
+      border-radius: 10px;
+      border: 1px solid var(--line-1);
+      background: var(--bg-1);
+      color: var(--ink-2);
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .calc-tier-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .calc-tier-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px -4px color-mix(in oklab, var(--accent) 50%, transparent);
+    }
+    .calc-output {
+      padding: 28px;
+      border-radius: 18px;
+      background: linear-gradient(165deg,
+        color-mix(in oklab, var(--accent) 9%, var(--bg-1)) 0%,
+        color-mix(in oklab, var(--accent-3) 7%, var(--bg-1)) 100%);
+      border: 1px solid color-mix(in oklab, var(--accent) 30%, var(--line-1));
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .calc-output-headline {
+      text-align: center;
+      padding-bottom: 18px;
+      border-bottom: 1px dashed color-mix(in oklab, var(--accent) 35%, transparent);
+    }
+    .calc-output-headline-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .calc-output-headline-num {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: clamp(40px, 5.5vw, 64px);
+      line-height: 1;
+      color: var(--ink-0);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+    .calc-output-headline-num em {
+      color: var(--accent);
+      font-style: normal;
+      font-weight: 600;
+    }
+    .calc-output-headline-sub {
+      font-size: 13px;
+      color: var(--ink-2);
+      margin-top: 6px;
+    }
+    .calc-output-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .calc-output-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: baseline;
+      font-size: 14px;
+      color: var(--ink-1);
+    }
+    .calc-output-row b {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--ink-0);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .calc-output-row.total {
+      padding-top: 12px;
+      margin-top: 4px;
+      border-top: 1px solid var(--line-2);
+      font-weight: 700;
+      color: var(--ink-0);
+    }
+    .calc-output-row.total b {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 18px;
+      color: var(--accent);
+    }
+    .calc-output-recurring {
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: color-mix(in oklab, var(--accent-3) 10%, transparent);
+      border-left: 3px solid var(--accent-3);
+      font-size: 13px;
+      color: var(--ink-1);
+      line-height: 1.5;
+    }
+    .calc-output-recurring b { color: var(--ink-0); }
+    .calc-disclaimer {
+      grid-column: 1 / -1;
+      max-width: 1180px;
+      margin: 18px auto 0;
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--ink-3);
+      font-style: italic;
+    }
+
+    /* ─── COMPETITIVE COMPARISON TABLE ───────────────────────────── */
+    .cmp-wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      overflow-x: auto;
+      border-radius: 18px;
+      border: 1px solid var(--line-1);
+      background: var(--bg-1);
+    }
+    .cmp-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .cmp-table thead th {
+      padding: 18px 16px;
+      text-align: center;
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--ink-2);
+      background: color-mix(in oklab, var(--ink-5) 35%, transparent);
+      border-bottom: 1px solid var(--line-1);
+      white-space: nowrap;
+    }
+    .cmp-table thead th:first-child { text-align: left; padding-left: 22px; }
+    .cmp-table thead th.us {
+      background: linear-gradient(135deg,
+        color-mix(in oklab, var(--accent) 18%, transparent),
+        color-mix(in oklab, var(--accent-3) 14%, transparent));
+      color: var(--ink-0);
+      position: relative;
+    }
+    .cmp-table thead th.us::after {
+      content: "you";
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 10.5px;
+      color: var(--accent);
+    }
+    .cmp-table tbody td {
+      padding: 14px 16px;
+      text-align: center;
+      border-top: 1px solid var(--line-2);
+      color: var(--ink-1);
+      vertical-align: middle;
+      line-height: 1.4;
+    }
+    .cmp-table tbody td:first-child {
+      text-align: left;
+      padding-left: 22px;
+      color: var(--ink-0);
+      font-weight: 600;
+      font-size: 13.5px;
+    }
+    .cmp-table tbody td:first-child small {
+      display: block;
+      color: var(--ink-3);
+      font-weight: 400;
+      font-size: 11.5px;
+      margin-top: 2px;
+    }
+    .cmp-table tbody td.us-cell {
+      background: color-mix(in oklab, var(--accent) 7%, transparent);
+      color: var(--ink-0);
+      font-weight: 600;
+    }
+    .cmp-table tbody tr:hover td { background: color-mix(in oklab, var(--ink-5) 22%, transparent); }
+    .cmp-table tbody tr:hover td.us-cell { background: color-mix(in oklab, var(--accent) 14%, transparent); }
+    .cmp-yes { color: #16a34a; font-weight: 700; }
+    .cmp-no { color: #dc2626; font-weight: 700; }
+    .cmp-na { color: var(--ink-3); }
+
+    /* ─── RISK REVERSAL ──────────────────────────────────────────── */
+    .risk-grid {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    @media (max-width: 880px) { .risk-grid { grid-template-columns: 1fr; } }
+    .risk-card {
+      padding: 24px 22px;
+      border-radius: 16px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      border-top: 3px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .risk-q {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-style: italic;
+      font-size: 17px;
+      color: var(--ink-0);
+      line-height: 1.3;
+      margin: 0;
+    }
+    .risk-a {
+      font-size: 14px;
+      color: var(--ink-1);
+      line-height: 1.55;
+      margin: 0;
+    }
+    .risk-a b { color: var(--ink-0); }
+    .risk-a em { color: var(--accent); font-style: normal; font-weight: 600; }
+    .risk-icon {
+      width: 32px; height: 32px;
+      display: grid; place-items: center;
+      border-radius: 10px;
+      background: color-mix(in oklab, var(--accent) 14%, transparent);
+      color: var(--accent);
+    }
+
+    /* ─── TERRITORY MAP ───────────────────────────────────────────── */
+    .terr-wrap { max-width: 1140px; margin: 0 auto; }
+    .terr-legend {
+      display: flex; flex-wrap: wrap; gap: 14px;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--ink-2);
+    }
+    .terr-legend .swatch {
+      display: inline-block; width: 12px; height: 12px;
+      border-radius: 3px; vertical-align: middle; margin-right: 6px;
+    }
+    .terr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .terr-card {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .terr-card:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in oklab, var(--accent) 35%, var(--line-1));
+    }
+    .terr-flag {
+      font-size: 22px;
+      line-height: 1;
+      width: 30px;
+      text-align: center;
+    }
+    .terr-name {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--ink-0);
+    }
+    .terr-meta {
+      font-size: 11.5px;
+      color: var(--ink-3);
+      margin-top: 2px;
+    }
+    .terr-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .terr-card[data-status="open"] .terr-status {
+      background: color-mix(in oklab, #16a34a 14%, transparent);
+      color: #15803d;
+    }
+    .terr-card[data-status="open"] {
+      border-left: 3px solid #16a34a;
+    }
+    .terr-card[data-status="pilot"] .terr-status {
+      background: color-mix(in oklab, #d97706 14%, transparent);
+      color: #b45309;
+    }
+    .terr-card[data-status="pilot"] {
+      border-left: 3px solid #d97706;
+    }
+    .terr-card[data-status="reserved"] .terr-status {
+      background: color-mix(in oklab, var(--ink-3) 18%, transparent);
+      color: var(--ink-3);
+    }
+    .terr-card[data-status="reserved"] {
+      border-left: 3px solid var(--ink-3);
+      opacity: 0.7;
+    }
+    [data-theme="dark"] .terr-card[data-status="open"] .terr-status {
+      background: color-mix(in oklab, #4ade80 16%, transparent);
+      color: #4ade80;
+    }
+    [data-theme="dark"] .terr-card[data-status="pilot"] .terr-status {
+      background: color-mix(in oklab, #fbbf24 16%, transparent);
+      color: #fbbf24;
+    }
+    .terr-foot {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 13.5px;
+      color: var(--ink-2);
+      max-width: 720px;
+      margin-left: auto; margin-right: auto;
+    }
+    .terr-foot em { color: var(--accent); font-style: normal; font-weight: 600; }
+
+    /* ─── PARTNER ARCHETYPES ──────────────────────────────────────── */
+    .arche-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+    @media (max-width: 980px) { .arche-grid { grid-template-columns: 1fr; } }
+    .arche-card {
+      position: relative;
+      padding: 26px 26px 22px;
+      border-radius: 18px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .arche-card:hover {
+      transform: translateY(-3px);
+      border-color: color-mix(in oklab, var(--accent) 32%, var(--line-1));
+      box-shadow: 0 18px 36px -22px color-mix(in oklab, var(--accent) 30%, rgba(8,15,35,0.18));
+    }
+    .arche-card.featured {
+      background: linear-gradient(165deg,
+        color-mix(in oklab, var(--accent) 7%, var(--bg-1)) 0%,
+        color-mix(in oklab, var(--accent-3) 5%, var(--bg-1)) 100%);
+      border-color: color-mix(in oklab, var(--accent) 35%, var(--line-1));
+    }
+    .arche-tag {
+      align-self: flex-start;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--accent) 12%, transparent);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .arche-name {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: 24px;
+      line-height: 1.2;
+      color: var(--ink-0);
+      margin: 0;
+    }
+    .arche-name em { font-style: italic; color: var(--accent); }
+    .arche-who {
+      font-size: 13px;
+      color: var(--ink-3);
+      letter-spacing: 0.01em;
+    }
+    .arche-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+      padding: 14px 0;
+      border-top: 1px dashed var(--line-2);
+      border-bottom: 1px dashed var(--line-2);
+    }
+    .arche-stat-num {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 22px;
+      line-height: 1;
+      color: var(--ink-0);
+      font-variant-numeric: tabular-nums;
+    }
+    .arche-stat-label {
+      font-size: 11.5px;
+      color: var(--ink-2);
+      margin-top: 4px;
+      letter-spacing: 0.02em;
+    }
+    .arche-mix {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .arche-mix-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--ink-1);
+    }
+    .arche-mix-bar {
+      grid-column: 1 / -1;
+      height: 6px;
+      background: var(--line-1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .arche-mix-bar > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-3));
+      border-radius: 3px;
+    }
+    .arche-mix-amt {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      color: var(--ink-0);
+      font-variant-numeric: tabular-nums;
+    }
+    .arche-tldr {
+      font-size: 13.5px;
+      color: var(--ink-1);
+      line-height: 1.55;
+      margin: 0;
+    }
+    .arche-tldr b { color: var(--ink-0); }
+
+    /* ─── APPLICATION FLOW ────────────────────────────────────────── */
+    .apply-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto 36px;
+      counter-reset: stepc;
+    }
+    @media (max-width: 880px) {
+      .apply-flow { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+      .apply-flow { grid-template-columns: 1fr; }
+    }
+    .apply-step {
+      position: relative;
+      padding: 22px 22px 22px 64px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      border-radius: 14px;
+      counter-increment: stepc;
+    }
+    .apply-step::before {
+      content: counter(stepc);
+      position: absolute;
+      left: 18px;
+      top: 22px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: #fff;
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 4px 12px -4px color-mix(in oklab, var(--accent) 50%, transparent);
+    }
+    .apply-step h4 {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--ink-0);
+      margin: 0 0 8px;
+      letter-spacing: -0.005em;
+    }
+    .apply-step p {
+      font-size: 13.5px;
+      color: var(--ink-2);
+      margin: 0;
+      line-height: 1.5;
+    }
+    .apply-meta {
+      max-width: 1100px;
+      margin: 0 auto;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      color: var(--ink-2);
+    }
+
+    /* ─── FAQ ─────────────────────────────────────────────────────── */
+    .faq-list {
+      max-width: 880px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .faq-item {
+      border: 1px solid var(--line-1);
+      border-radius: 12px;
+      background: var(--bg-1);
+      overflow: hidden;
+    }
+    .faq-q {
+      list-style: none;
+      cursor: pointer;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--ink-0);
+      transition: background 0.15s ease;
+    }
+    .faq-q::-webkit-details-marker { display: none; }
+    .faq-q:hover { background: color-mix(in oklab, var(--accent) 5%, transparent); }
+    .faq-chev {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: color-mix(in oklab, var(--accent) 12%, transparent);
+      display: grid; place-items: center;
+      transition: transform 0.2s ease;
+      flex: 0 0 auto;
+    }
+    .faq-chev svg { color: var(--accent); }
+    .faq-item[open] .faq-chev { transform: rotate(45deg); }
+    .faq-a {
+      padding: 0 20px 20px;
+      font-size: 14.5px;
+      color: var(--ink-1);
+      line-height: 1.65;
+    }
+    .faq-a strong { color: var(--ink-0); }
+
+    /* ─── APPLY SECTION (improved layout) ───────────────────────── */
+    .apply-section {
+      background:
+        radial-gradient(80% 60% at 50% 0%, color-mix(in oklab, var(--accent) 7%, transparent) 0%, transparent 65%),
+        var(--bg-2);
+      padding: clamp(64px, 10vw, 120px) 0;
+    }
+    .apply-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+      gap: clamp(28px, 5vw, 56px);
+      max-width: 1100px;
+      margin: 0 auto;
+      align-items: start;
+    }
+    @media (max-width: 880px) {
+      .apply-layout { grid-template-columns: 1fr; }
+    }
+
+    /* Left rail */
+    .apply-rail-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .apply-rail h2 {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: clamp(28px, 4vw, 40px);
+      letter-spacing: -0.025em;
+      line-height: 1.12;
+      margin: 0 0 16px;
+      color: var(--ink-0);
+    }
+    .apply-rail h2 em {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+    }
+    .apply-rail-lede {
+      font-size: 15px;
+      color: var(--ink-1);
+      line-height: 1.55;
+      margin: 0 0 28px;
+    }
+    .apply-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .apply-step-row {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .apply-step-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: #fff;
+      display: grid; place-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .apply-step-row b {
+      font-family: 'Inter Tight', sans-serif;
+      font-size: 14px;
+      color: var(--ink-0);
+      font-weight: 700;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .apply-step-row span {
+      font-size: 13px;
+      color: var(--ink-2);
+      line-height: 1.5;
+    }
+    .apply-note {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 16px 18px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-1);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      margin-bottom: 24px;
+    }
+    .apply-note-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: #fff;
+      display: grid; place-items: center;
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .apply-note-body {
+      font-size: 13px;
+      color: var(--ink-1);
+      line-height: 1.55;
+      font-style: italic;
+    }
+    .apply-note-body b {
+      font-style: normal;
+      color: var(--ink-0);
+      font-weight: 700;
+      display: block;
+      margin-top: 6px;
+      font-size: 12.5px;
+    }
+    .apply-trust {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .apply-trust-row {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: center;
+      font-size: 12.5px;
+      color: var(--ink-2);
+      line-height: 1.4;
+    }
+    .apply-trust-row svg {
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .apply-trust-row b { color: var(--ink-0); font-weight: 700; }
+
+    /* Form card */
+    .apply-form-wrap {
+      padding: clamp(24px, 4vw, 36px);
+      background: var(--bg-0);
+      border: 1px solid var(--line-1);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px -28px color-mix(in oklab, var(--accent) 22%, rgba(8,15,35,0.16));
+    }
+    .apply-form-section-label {
+      grid-column: 1 / -1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      padding-bottom: 6px;
+      border-bottom: 1px dashed var(--line-1);
+      margin-bottom: 4px;
+    }
+    .apply-form-section-label.first { margin-top: 0; }
+    .apply-form-section-label:not(.first) { margin-top: 14px; }
+    .apply-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 600px) {
+      .apply-form-grid { grid-template-columns: 1fr; }
+    }
+    .apply-form label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12.5px;
+      color: var(--ink-2);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .apply-form label.full { grid-column: 1 / -1; }
+    .apply-form input,
+    .apply-form select,
+    .apply-form textarea {
+      padding: 12px 14px;
+      border: 1px solid var(--line-2);
+      border-radius: 10px;
+      background: var(--bg-1);
+      color: var(--ink-0);
+      font-family: inherit;
+      font-size: 14.5px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .apply-form input:hover,
+    .apply-form select:hover,
+    .apply-form textarea:hover {
+      border-color: color-mix(in oklab, var(--accent) 40%, var(--line-2));
+    }
+    .apply-form input:focus,
+    .apply-form select:focus,
+    .apply-form textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--bg-0);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
+    }
+    .apply-form textarea { min-height: 120px; resize: vertical; }
+    .apply-form .submit-row {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 18px;
+      border-top: 1px dashed var(--line-1);
+    }
+    .apply-form .submit-row .btn {
+      width: 100%;
+      justify-content: center;
+      padding: 14px 22px;
+      font-size: 15px;
+    }
+    .apply-form .micro {
+      font-size: 12px;
+      color: var(--ink-3);
+      text-align: center;
+    }
+    .apply-form .micro b { color: var(--ink-1); font-weight: 700; }
+
+    /* ─── FOOTER CTA ───────────────────────────────────────────────── */
+    .footer-cta {
+      padding: clamp(56px, 8vw, 120px) 0;
+      text-align: center;
+      background:
+        radial-gradient(60% 80% at 50% 0%, color-mix(in oklab, var(--accent) 9%, transparent) 0%, transparent 70%),
+        var(--bg-0);
+      border-top: 1px solid var(--line-0);
+    }
+    .footer-cta h2 {
+      font-family: 'Inter Tight', sans-serif;
+      font-weight: 600;
+      font-size: clamp(32px, 4.4vw, 56px);
+      letter-spacing: -0.03em;
+      margin: 0 0 14px;
+      color: var(--ink-0);
+    }
+    .footer-cta h2 em {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent);
+    }
+    .footer-cta p {
+      max-width: 60ch;
+      margin: 0 auto 28px;
+      font-size: 16px;
+      color: var(--ink-2);
+    }
+    .footer-cta .commitment {
+      margin-top: 28px;
+      max-width: 60ch;
+      margin-left: auto;
+      margin-right: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-3);
+      line-height: 1.6;
+    }
+
+    /* ─── PAGE FOOTER ──────────────────────────────────────────────── */
+    .pagefoot {
+      padding: 36px 0 56px;
+      border-top: 1px solid var(--line-1);
+      font-size: 13px;
+      color: var(--ink-3);
+    }
+    .pagefoot-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .pagefoot a { color: var(--ink-2); text-decoration: none; }
+    .pagefoot a:hover { color: var(--accent); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .eyebrow .dot { animation: none; }
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+
+  <!-- =============================================================== -->
+  <!-- SEO: Structured Data (JSON-LD)                                  -->
+  <!-- =============================================================== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://openconstructionerp.com/pro/breeze/partners.html#webpage",
+        "url": "https://openconstructionerp.com/pro/breeze/partners.html",
+        "name": "Partner Program — OpenConstructionERP",
+        "description": "Become a Founding Partner. 45–65% margins on OpenConstructionERP commercial licences, CWICR cost DB, cad2data converters and localisation packs. 100% on implementation services. AGPL-3.0 + Commercial dual-licence.",
+        "inLanguage": "en",
+        "isPartOf": { "@id": "https://openconstructionerp.com/#website" },
+        "about": { "@id": "https://openconstructionerp.com/#software" },
+        "publisher": { "@id": "https://datadrivenconstruction.io/#organization" }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://openconstructionerp.com/pro/breeze/partners.html#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "It's AGPL-3.0 — can my client really use it commercially without paying anything?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. AGPL-3.0 permits commercial use, modification, and self-hosting. The obligation is to publish derivative source code if you modify and distribute or expose it as a network service to third parties. For most construction firms running internally, no obligation triggers. For SaaS resellers or OEMs, a commercial licence removes the AGPL obligation entirely — that licence is one of the SKUs partners sell at 45–55% margin."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why would a client pay a partner if the software is free?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "For the same reason a developer pays a builder when bricks are sold at the merchant: assembling, sequencing, localising, validating, and operating the system reliably is the work. The repo gives you the bricks. The partner ships the building."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Will OpenConstructionERP compete with partners on implementation services?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. This is a written commitment in every partnership agreement. DDC's three commercial product lines are OpenConstructionERP commercial licences, CWICR (cost database), and cad2data converters — plus localisation packs and core training. Implementation services are 100% partner revenue."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do margins actually pay out?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Two models per deal: resold (partner invoices client at list, pays DDC the wholesale price, keeps the margin) or referred (DDC invoices client, pays partner the margin within 30 days of cash receipt)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What's the difference between a Founding Partner and a Platinum Partner?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Founding Partners are the first 10 signatories. They get Platinum economics from day 0 (no ladder climb), 12-month soft geographic exclusivity, and a permanent badge. Platinum is the standard top tier reached by performance. Founding cohort closes when 10 partners sign or on 31 December 2026, whichever comes first."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need to be a developer or software house to qualify?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. The dominant partner profile is a BIM consultancy or construction-tech integrator with one technical lead and one delivery lead. Training is free for the first two engineers per partner."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What about CWICR (cost database)?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The community CWICR is free with the AGPL repo. The commercial CWICR — covering 11 countries, 55,000+ items, monthly updates, audit trail — is sold separately and resold by partners at 45–55% margin."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I run my client on the free AGPL version forever?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes — and many will. Partners earn their margin on the four things free AGPL does not deliver: production hosting, production SLA, localisation packs, and AGPL-free commercial licensing for clients who need it."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is this different from being an Odoo partner?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Three concrete differences: (1) construction-native product (BOQ, IFC, schedule, AI takeoff) — no retrofit; (2) higher margins (up to 65% on localisation, 55% on commercial); (3) no annual partnership fee at any tier; (4) DDC explicitly does not compete on services."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What happens if I do not hit Gold or Platinum requirements?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nothing punitive. Tiers are reviewed annually. Partners retain their tier for 12 months from signing regardless of activity. If activity slows, we work on lead-share or co-sell rather than demote."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+
+<body>
+
+<!-- ============================================================ -->
+<!-- NAV — same visual language as the main site                   -->
+<!-- ============================================================ -->
+<nav class="nav" aria-label="Primary">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <a class="brand" href="/">
+        <span class="brand-name">
+          <span class="brand-seg-1">Open</span><span class="brand-seg-2">Construction</span><span class="brand-seg-3">ERP</span>
+        </span>
+      </a>
+      <button type="button" class="nav-icon-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="nav-links">
+      <a href="/#tour">Tour</a>
+      <a href="/#compare">Compare</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/partners.html" class="partners-link is-active">Partners</a>
+      <a href="/#faq">FAQ</a>
+    </div>
+    <div class="nav-right">
+      <a class="nav-pill github" href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.05 0 0 .97-.31 3.18 1.18A11 11 0 0 1 12 6.8a11 11 0 0 1 2.9.39c2.2-1.5 3.17-1.18 3.17-1.18.63 1.58.24 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+        <span>GitHub</span>
+      </a>
+      <a class="nav-pill apply" href="#apply">
+        <span>Apply</span>
+        <svg class="arrow" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================================================ -->
+<!-- 0. STICKY SECTION NAV (in-page anchors)                       -->
+<!-- ============================================================ -->
+<nav class="section-nav" aria-label="Partner page sections">
+  <div class="section-nav-inner" id="section-nav-inner">
+    <span class="section-nav-label">On this page</span>
+    <a href="#stack">Stack</a>
+    <a href="#earns">Economics</a>
+    <a href="#audience">Audience</a>
+    <a href="#compare-programs">vs Others</a>
+    <a href="#tiers">Tiers</a>
+    <a href="#founding">Founding</a>
+    <a href="#toolkit">Toolkit</a>
+    <a href="#archetypes">Archetypes</a>
+    <a href="#calculator">Calculator</a>
+    <a href="#risk">Risk</a>
+    <a href="#faq">FAQ</a>
+    <a href="#apply">Apply →</a>
+  </div>
+</nav>
+
+<!-- ============================================================ -->
+<!-- 1. HERO                                                       -->
+<!-- ============================================================ -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow">
+          <span class="dot" aria-hidden="true"></span>
+          <span>Partner Program · Founding cohort</span>
+        </span>
+        <h1 class="h1">
+          Free foundation. <em>Paid floors.</em><br>
+          Real construction software, built like a building.
+        </h1>
+        <p class="lede">
+          OpenConstructionERP is <strong>AGPL-3.0 and free forever</strong>. Implementation,
+          localisation, training and converters are commercial — and partners keep
+          <strong>up to 100%</strong> of services revenue. The lumber is free at the yard.
+          <em>The contractor is what builds the house.</em>
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#apply">
+            Become a Founding Partner
+            <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="#audience">
+            I'm a client — find a partner
+          </a>
+        </div>
+        <div class="trust-strip">
+          <span>15,000+ GitHub clones</span>
+          <span class="sep">·</span>
+          <span>AGPL-3.0 + commercial dual-licence</span>
+          <span class="sep">·</span>
+          <span>CWICR cost database in 11 countries</span>
+        </div>
+      </div>
+      <div>
+        <div class="stack-wrap">
+          <div class="stack" role="img" aria-label="Construction Stack — five floors representing the open-source foundation and the commercial value layered on top">
+            <div class="floor floor-roof" data-floor="roof">
+              <div class="floor-num">Roof</div>
+              <div class="floor-body">
+                <div class="floor-title">Success</div>
+                <div class="floor-sub">SLA, optimisation, year-3 expansion</div>
+              </div>
+              <div class="floor-margin">30% rec.</div>
+            </div>
+            <div class="floor" data-floor="3">
+              <div class="floor-num">Floor 3</div>
+              <div class="floor-body">
+                <div class="floor-title">Services</div>
+                <div class="floor-sub">Implementation, training, custom modules</div>
+              </div>
+              <div class="floor-margin">100%</div>
+            </div>
+            <div class="floor" data-floor="2">
+              <div class="floor-num">Floor 2</div>
+              <div class="floor-body">
+                <div class="floor-title">Commercial</div>
+                <div class="floor-sub">OpenConstructionERP commercial · CWICR · cad2data converters</div>
+              </div>
+              <div class="floor-margin">45–55%</div>
+            </div>
+            <div class="floor" data-floor="1">
+              <div class="floor-num">Floor 1</div>
+              <div class="floor-body">
+                <div class="floor-title">Localisation</div>
+                <div class="floor-sub">30 languages · DACH · UK · US · regional packs</div>
+              </div>
+              <div class="floor-margin">55–65%</div>
+            </div>
+            <div class="floor floor-foundation" data-floor="foundation">
+              <div class="floor-num">Foundation</div>
+              <div class="floor-body">
+                <div class="floor-title">AGPL-3.0 repo</div>
+                <div class="floor-sub">BOQ, BIM viewer, schedule, AI takeoff</div>
+              </div>
+              <div class="floor-margin" style="background: color-mix(in oklab, var(--ink-3) 18%, transparent); color: var(--ink-2);">free</div>
+            </div>
+          </div>
+          <p class="stack-callout">
+            80% of the building is the foundation.<br>20% is what makes it habitable.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 1.5 METRIC RIBBON — partner economics at a glance             -->
+<!-- ============================================================ -->
+<section class="metric-ribbon" aria-label="Partner economics at a glance">
+  <div class="ribbon-grid">
+
+    <div class="ribbon-card">
+      <svg class="ribbon-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="6" width="18" height="13" rx="2"/>
+        <path d="M3 10h18"/>
+        <path d="M7 15h2"/>
+      </svg>
+      <div class="ribbon-num">€0<sup>fee</sup></div>
+      <div class="ribbon-label">Annual partnership fee</div>
+      <div class="ribbon-sub">All tiers, forever — written in</div>
+    </div>
+
+    <div class="ribbon-card">
+      <svg class="ribbon-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/>
+      </svg>
+      <div class="ribbon-num">100<sup>%</sup></div>
+      <div class="ribbon-label">Implementation revenue</div>
+      <div class="ribbon-sub">DDC never quotes services</div>
+    </div>
+
+    <div class="ribbon-card hi">
+      <svg class="ribbon-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 17l6-6 4 4 8-8"/>
+        <polyline points="14 7 21 7 21 14"/>
+      </svg>
+      <div class="ribbon-num">65<sup>%</sup></div>
+      <div class="ribbon-label">Top localisation margin</div>
+      <div class="ribbon-sub">Regional packs · cad2data · Platinum</div>
+    </div>
+
+    <div class="ribbon-card">
+      <svg class="ribbon-glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 8v4l3 2"/>
+        <circle cx="12" cy="12" r="10"/>
+      </svg>
+      <div class="ribbon-num">30<sup>%</sup></div>
+      <div class="ribbon-label">Recurring on renewals</div>
+      <div class="ribbon-sub">Passive Year-2+ revenue stream</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 2. CONSTRUCTION STACK — full size                             -->
+<!-- ============================================================ -->
+<section class="section stack-section" id="stack">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">This is how the value <em>is built.</em></h2>
+      <p class="section-lede">
+        Grey is open source — free forever. Coloured floors are commercial. Partners keep
+        25%–100% of revenue on every floor above the foundation.
+      </p>
+    </div>
+    <div class="stack-wrap">
+      <div class="stack" role="img" aria-label="Full Construction Stack visualization">
+        <div class="floor floor-roof" data-floor="roof">
+          <div class="floor-num">Roof</div>
+          <div class="floor-body">
+            <div class="floor-title">Success — Year 2 and beyond</div>
+            <div class="floor-sub">SLAs, optimisation cycles, capacity expansion, post-go-live consulting</div>
+          </div>
+          <div class="floor-margin">30% rec.</div>
+        </div>
+        <div class="floor" data-floor="3">
+          <div class="floor-num">Floor 3</div>
+          <div class="floor-body">
+            <div class="floor-title">Services — implementation, training, custom modules</div>
+            <div class="floor-sub">Pure partner P&amp;L. DDC never competes on this floor — written commitment.</div>
+          </div>
+          <div class="floor-margin">100% partner</div>
+        </div>
+        <div class="floor" data-floor="2">
+          <div class="floor-num">Floor 2</div>
+          <div class="floor-body">
+            <div class="floor-title">Commercial SKUs — Enterprise · CWICR · connectors</div>
+            <div class="floor-sub">Closed-source-friendly licence, 55,000+ item cost DB, Revit/IFC/Tekla/Primavera connectors, batch converters</div>
+          </div>
+          <div class="floor-margin">45–55%</div>
+        </div>
+        <div class="floor" data-floor="1">
+          <div class="floor-num">Floor 1</div>
+          <div class="floor-body">
+            <div class="floor-title">Localisation packs — own your country</div>
+            <div class="floor-sub">Tax codes · cost classifications · regulator output · language pack — 30 languages live, regional rollouts ongoing</div>
+          </div>
+          <div class="floor-margin">55–65%</div>
+        </div>
+        <div class="floor floor-foundation" data-floor="foundation">
+          <div class="floor-num">Foundation</div>
+          <div class="floor-body">
+            <div class="floor-title">AGPL-3.0 — free forever</div>
+            <div class="floor-sub">BOQ editor · BIM viewer · 4D schedule · AI takeoff · validation pipeline</div>
+          </div>
+          <div class="floor-margin" style="background: color-mix(in oklab, var(--ink-3) 18%, transparent); color: var(--ink-2);">free</div>
+        </div>
+      </div>
+      <p class="legend">
+        <b>Foundation</b> = open source. <b>Floors above</b> = commercial. <b>Roof</b> = recurring success.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 2.5 HOW THE 20% EARNS                                         -->
+<!-- ============================================================ -->
+<section class="section" id="earns" style="background: var(--bg-2);">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">Where the margin <em>comes from.</em></h2>
+      <p class="section-lede">
+        One mid-market deal, broken down line by line. The open core stays free.
+        Partners earn on the commercial layers and on services.
+      </p>
+    </div>
+
+    <div class="earns-wrap">
+      <!-- Left: deal breakdown card -->
+      <div class="earns-deal">
+        <div class="earns-deal-head">
+          <div>
+            <div class="earns-deal-title">Year-1 deal — regional GC, ~120 seats</div>
+            <div style="font-size: 12.5px; color: var(--ink-3); margin-top: 4px;">Mid-market, single country, 1 production go-live</div>
+          </div>
+          <div class="earns-deal-total">€120,000<span style="font-size:12px;color:var(--ink-3);font-weight:400;display:block;text-align:right;">total deal value</span></div>
+        </div>
+
+        <div class="earns-row">
+          <div class="earns-label">Open Core (AGPL)<small>BOQ · BIM · 4D · AI takeoff</small></div>
+          <div class="earns-rate">€0 × free</div>
+          <div class="earns-bar-cell"><div class="earns-bar" style="width: 0%; background: var(--ink-5);"></div></div>
+          <div class="earns-amount" style="color: var(--ink-3);">€0</div>
+        </div>
+
+        <div class="earns-row">
+          <div class="earns-label">Localisation pack<small>Tax · cost classes · regulator output</small></div>
+          <div class="earns-rate">€18k × 55%</div>
+          <div class="earns-bar-cell"><div class="earns-bar" style="width: 55%;"></div></div>
+          <div class="earns-amount">€9,900</div>
+        </div>
+
+        <div class="earns-row">
+          <div class="earns-label">Commercial SKUs<small>Enterprise licence · CWICR DB · connectors</small></div>
+          <div class="earns-rate">€42k × 45%</div>
+          <div class="earns-bar-cell"><div class="earns-bar" style="width: 45%;"></div></div>
+          <div class="earns-amount">€18,900</div>
+        </div>
+
+        <div class="earns-row">
+          <div class="earns-label">Implementation<small>Discovery · config · data migration · training</small></div>
+          <div class="earns-rate">€55k × 100%</div>
+          <div class="earns-bar-cell"><div class="earns-bar" style="width: 100%; background: linear-gradient(90deg, var(--accent-3), var(--accent));"></div></div>
+          <div class="earns-amount">€55,000</div>
+        </div>
+
+        <div class="earns-row">
+          <div class="earns-label">Year-2 SLA + optimisation<small>Recurring, starts month 13</small></div>
+          <div class="earns-rate">€15k × 25%</div>
+          <div class="earns-bar-cell"><div class="earns-bar" style="width: 25%;"></div></div>
+          <div class="earns-amount">€3,750</div>
+        </div>
+
+        <div class="earns-deal-foot">
+          <span>Partner take · Year-1 + first recurring slice</span>
+          <strong>€87,550</strong>
+        </div>
+      </div>
+
+      <!-- Right: explanation -->
+      <div class="earns-explain">
+        <h3>Services are <em>100% yours.</em></h3>
+        <p>
+          DDC writes the open core and doesn't quote implementation work. Every
+          euro the client pays for partner hours, training or custom modules
+          stays with the partner. No clawback, no marketplace fee.
+        </p>
+        <p>
+          On commercial lines, the split is published. Localisation and cad2data
+          carry the highest partner share because that's where local work
+          actually happens.
+        </p>
+
+        <div class="earns-pill-row">
+          <span class="earns-pill"><b>100%</b> implementation</span>
+          <span class="earns-pill"><b>55–65%</b> localisation</span>
+          <span class="earns-pill"><b>45–55%</b> commercial</span>
+          <span class="earns-pill"><b>15–30%</b> recurring</span>
+        </div>
+
+        <div class="earns-recurring">
+          <b>Year-2 onwards:</b> the same client pays an SLA / optimisation retainer.
+          A Platinum partner keeps <b>30%</b> of that for as long as the client stays
+          live. Three live clients ≈ €11k/year before any new work.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 3. AUDIENCE ROUTING                                           -->
+<!-- ============================================================ -->
+<section class="section" id="audience">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">Which one are you?</h2>
+      <p class="section-lede">Three reader profiles. Pick the one that matches.</p>
+    </div>
+    <div class="audience-grid">
+      <div class="audience-card">
+        <div class="audience-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z"/><path d="M3 21v-1a6 6 0 0 1 6-6h6a6 6 0 0 1 6 6v1"/><path d="m17 6 2 2 4-4"/></svg>
+        </div>
+        <div class="audience-title">You're a partner</div>
+        <div class="audience-who">BIM consultancy · ERP integrator · freelance dev · local SI</div>
+        <p class="audience-body">
+          You sell implementation, training, custom modules. We share margins
+          (25–65%) on everything commercial and never compete on services.
+          €0 partnership fee at any tier.
+        </p>
+        <a class="audience-cta" href="#apply">Apply as a partner →</a>
+      </div>
+      <div class="audience-card">
+        <div class="audience-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h2"/><path d="M9 13h2"/><path d="M13 9h2"/><path d="M13 13h2"/><path d="M9 17h6v4"/></svg>
+        </div>
+        <div class="audience-title">You're a client</div>
+        <div class="audience-who">GC · subcontractor · developer · owner</div>
+        <p class="audience-body">
+          You can run OpenConstructionERP for free — or hire a vetted partner for
+          production go-live, localisation and SLA. Three legitimate paths,
+          your choice depends on team capacity and risk appetite.
+        </p>
+        <a class="audience-cta" href="#tiers">Compare your options →</a>
+      </div>
+      <div class="audience-card">
+        <div class="audience-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>
+        </div>
+        <div class="audience-title">You're a specialist</div>
+        <div class="audience-who">Plugin author · Revit dev · IFC expert · trainer</div>
+        <p class="audience-body">
+          You build a connector, training pack or custom module and earn
+          45–65% on every commercial deal it touches. Listed in the marketplace
+          once your first artefact ships.
+        </p>
+        <a class="audience-cta" href="#apply">Apply as a specialist →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 4.5 COMPETITIVE COMPARISON                                    -->
+<!-- ============================================================ -->
+<section class="section" id="compare-programs" style="background: var(--bg-2);">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">Compared with other programs.</h2>
+      <p class="section-lede">
+        Side-by-side with partner programs you may be weighing against.
+        Same metrics, no footnotes.
+      </p>
+    </div>
+
+    <div class="cmp-wrap">
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Odoo Partner</th>
+            <th>Salesforce Partner</th>
+            <th>Procore Marketplace</th>
+            <th class="us">OpenConstructionERP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Annual partnership fee<small>at top tier</small></td>
+            <td>~€18,000+</td>
+            <td>~$3,000–25,000</td>
+            <td>$0 / revenue share</td>
+            <td class="us-cell"><b style="color:var(--accent);">€0</b><small style="color:var(--ink-3);font-weight:400;">all tiers, forever</small></td>
+          </tr>
+          <tr>
+            <td>Top-tier margin on commercial<small>licences / SaaS</small></td>
+            <td>10–30%</td>
+            <td>5–15%</td>
+            <td>n/a (rev-share)</td>
+            <td class="us-cell">45–55%</td>
+          </tr>
+          <tr>
+            <td>Top-tier margin on regional packs<small>localisation / vertical</small></td>
+            <td>n/a</td>
+            <td>n/a</td>
+            <td>n/a</td>
+            <td class="us-cell">55–65%</td>
+          </tr>
+          <tr>
+            <td>Implementation revenue<small>partner-kept</small></td>
+            <td>100%</td>
+            <td>100%</td>
+            <td>100%</td>
+            <td class="us-cell">100%</td>
+          </tr>
+          <tr>
+            <td>Vendor competes on services?<small>directly with you</small></td>
+            <td><span class="cmp-yes">Yes</span><small style="color:var(--ink-3);font-weight:400;">Odoo Enterprise sells direct</small></td>
+            <td><span class="cmp-yes">Yes</span><small style="color:var(--ink-3);font-weight:400;">Salesforce Services Cloud</small></td>
+            <td><span class="cmp-yes">Yes</span><small style="color:var(--ink-3);font-weight:400;">Procore implementation team</small></td>
+            <td class="us-cell"><span class="cmp-no">No</span><small style="color:var(--ink-3);font-weight:400;">written non-compete</small></td>
+          </tr>
+          <tr>
+            <td>Headcount minimum<small>certified engineers required</small></td>
+            <td>2–4</td>
+            <td>varies</td>
+            <td>—</td>
+            <td class="us-cell"><span style="color:#16a34a;font-weight:700;">0</span></td>
+          </tr>
+          <tr>
+            <td>Geographic exclusivity<small>per top-tier partner</small></td>
+            <td><span class="cmp-no">No</span></td>
+            <td><span class="cmp-no">No</span></td>
+            <td><span class="cmp-no">No</span></td>
+            <td class="us-cell"><span class="cmp-yes">12 months soft</span></td>
+          </tr>
+          <tr>
+            <td>Open-source product<small>partner can fork &amp; extend</small></td>
+            <td>Community Edition only</td>
+            <td><span class="cmp-no">No</span></td>
+            <td><span class="cmp-no">No</span></td>
+            <td class="us-cell"><span class="cmp-yes">Full AGPL-3.0</span></td>
+          </tr>
+          <tr>
+            <td>Construction-native product<small>BOQ · BIM · 4D · AI takeoff</small></td>
+            <td><span class="cmp-no">No — generic ERP</span></td>
+            <td><span class="cmp-no">No — generic CRM/ERP</span></td>
+            <td><span class="cmp-yes">Yes</span></td>
+            <td class="us-cell"><span class="cmp-yes">Yes</span></td>
+          </tr>
+          <tr>
+            <td>Recurring renewal margin<small>passive Year-2+ stream</small></td>
+            <td>~10%</td>
+            <td>~5–10%</td>
+            <td>varies</td>
+            <td class="us-cell">15–30%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="calc-disclaimer">
+      Based on publicly listed partner program terms as of Q1 2026.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 5. TIER LADDER                                                -->
+<!-- ============================================================ -->
+<section class="section" id="tiers">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">Tiers and margins.</h2>
+      <p class="section-lede">
+        Move up by closing deals. Margins go up with each tier. Reviewed annually,
+        no demotion in the first year.
+      </p>
+    </div>
+    <div class="tiers">
+      <div class="tier-grid" role="table" aria-label="Partner tier ladder">
+        <div class="row-label">Margin band</div>
+        <div class="col-head" data-tier="r"><span class="badge"></span>Registered</div>
+        <div class="col-head" data-tier="s"><span class="badge"></span>Silver</div>
+        <div class="col-head" data-tier="g"><span class="badge"></span>Gold</div>
+        <div class="col-head" data-tier="p"><span class="badge"></span>Platinum</div>
+
+        <div class="row-label">Commercial licences · Enterprise · CWICR · connectors</div>
+        <div class="num">25%</div>
+        <div class="num">35%</div>
+        <div class="num lg">45%</div>
+        <div class="num lg">55%</div>
+
+        <div class="row-label">Localisation packs · cad2data converters</div>
+        <div class="num">35%</div>
+        <div class="num">45%</div>
+        <div class="num lg">55%</div>
+        <div class="num lg">65%</div>
+
+        <div class="row-label">Recurring on renewals</div>
+        <div class="num">15%</div>
+        <div class="num">20%</div>
+        <div class="num">25%</div>
+        <div class="num lg">30%</div>
+
+        <div class="row-label">Implementation services</div>
+        <div class="num">100%</div>
+        <div class="num">100%</div>
+        <div class="num">100%</div>
+        <div class="num">100%</div>
+
+        <div class="row-label">Tier criteria (rolling 12 mo)</div>
+        <div class="num">Apply</div>
+        <div class="num">1 deal</div>
+        <div class="num">3 deals</div>
+        <div class="num">8 deals</div>
+
+        <div class="row-label" style="font-weight: 700; color: var(--ink-0);">Annual fee</div>
+        <div class="num lg">€0</div>
+        <div class="num lg">€0</div>
+        <div class="num lg">€0</div>
+        <div class="num lg">€0</div>
+      </div>
+    </div>
+    <div class="tier-fee-banner">
+      <em>€0 annual fee.</em> No headcount minimums, no certification gates, no quotas.
+      Just close deals when you have them — keep the margin when you do.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 8. FOUNDING PARTNER                                           -->
+<!-- ============================================================ -->
+<section class="section" id="founding">
+  <div class="wrap">
+    <div class="founding">
+      <div class="founding-grid">
+        <div>
+          <h3>Founding Partner — <em>10 spots,</em> no fee, top-tier economics from day one.</h3>
+          <p>
+            <strong>Skip Registered and Silver.</strong> Founding Partners are placed on
+            Gold/Platinum economics from signing, retain that status for 36 months,
+            and co-shape the roadmap.
+          </p>
+          <p>
+            <strong>Why founding?</strong> The next 90 days decide which integrators own
+            the geographies that matter — Romania, DACH, France, Spain. Once a Platinum
+            partner is established in a territory, no second Platinum will be appointed
+            in the same country for 12 months.
+          </p>
+          <p>
+            <strong>What you get:</strong> <strong>65% margin on localisation packs and cad2data converters</strong>,
+            <strong>55% on OpenConstructionERP commercial licences and CWICR</strong>, 30% recurring on
+            renewals, 100% on services, <strong>€0 fees ever</strong>, direct Telegram with Artem
+            and the core team, your logo on the homepage, co-authored case study after
+            first go-live.
+          </p>
+          <p>
+            <strong>What we ask:</strong> one pilot deal in 90 days and a public commitment
+            to AGPL stewardship. <em>No headcount minimums. No certification gates.</em>
+            Build the team you need when you need it.
+          </p>
+        </div>
+        <div>
+          <div class="founding-counter-card">
+            <div class="founding-counter-head">
+              <div class="founding-counter-eyebrow">Founding cohort</div>
+              <div class="founding-counter-big"><b>10</b> / 10</div>
+            </div>
+            <p class="founding-counter-sub">
+              Ten Founding Partner spots open. Each slot below is one country-leading
+              integrator who joins on Gold/Platinum economics from day one — no fees,
+              36-month status lock, direct line to the core team. <b>0 claimed so far.</b>
+            </p>
+            <div class="founding-counter" aria-label="Founding Partner spots — 0 of 10 claimed">
+              <div class="slot" title="Spot 1 — open">1</div>
+              <div class="slot" title="Spot 2 — open">2</div>
+              <div class="slot" title="Spot 3 — open">3</div>
+              <div class="slot" title="Spot 4 — open">4</div>
+              <div class="slot" title="Spot 5 — open">5</div>
+              <div class="slot" title="Spot 6 — open">6</div>
+              <div class="slot" title="Spot 7 — open">7</div>
+              <div class="slot" title="Spot 8 — open">8</div>
+              <div class="slot" title="Spot 9 — open">9</div>
+              <div class="slot" title="Spot 10 — open">10</div>
+            </div>
+          </div>
+          <a class="btn btn-primary" href="#apply" style="margin-top: 6px;">
+            Apply for a Founding Partner spot
+            <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <p class="micro">
+            Average response time: 48 hours. Onboarding completed in 14 days.
+            Founding cohort closes at 10 partners or 31 December 2026 — whichever comes first.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 8.5 TERRITORY MAP — REMOVED                                   -->
+<!-- ============================================================ -->
+<section class="section" id="territories" style="background: var(--bg-2); display:none;">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">Open territories.</h2>
+      <p class="section-lede">
+        One Platinum partner per country, 12-month soft exclusivity from
+        signing. The list below is the priority cohort — every other
+        country is open at the same terms.
+      </p>
+    </div>
+
+    <div class="terr-wrap">
+      <div class="terr-legend">
+        <span><span class="swatch" style="background:#16a34a"></span> Open — apply now</span>
+        <span><span class="swatch" style="background:#94a3b8"></span> Reserved — Platinum signed</span>
+      </div>
+
+      <div class="terr-grid">
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇩🇪</span><div><div class="terr-name">Germany</div><div class="terr-meta">DACH · DIN 276 · GAEB</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇦🇹</span><div><div class="terr-name">Austria</div><div class="terr-meta">DACH · ÖNORM · GAEB</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇨🇭</span><div><div class="terr-name">Switzerland</div><div class="terr-meta">DACH · BKP · CRB</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇬🇧</span><div><div class="terr-name">United Kingdom</div><div class="terr-meta">NRM 1/2 · BCIS</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇫🇷</span><div><div class="terr-name">France</div><div class="terr-meta">DPGF · CCTP</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇪🇸</span><div><div class="terr-name">Spain</div><div class="terr-meta">BC3 · FIEBDC-3</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇮🇹</span><div><div class="terr-name">Italy</div><div class="terr-meta">DEI · Computo Metrico</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇵🇱</span><div><div class="terr-name">Poland</div><div class="terr-meta">KNR · BIMestiMate</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇷🇴</span><div><div class="terr-name">Romania</div><div class="terr-meta">SR EN</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇳🇱</span><div><div class="terr-name">Netherlands</div><div class="terr-meta">STABU · NL-SfB</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇧🇪</span><div><div class="terr-name">Belgium</div><div class="terr-meta">VMSW · CCTB</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇵🇹</span><div><div class="terr-name">Portugal</div><div class="terr-meta">CCP · ProNIC</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇸🇪</span><div><div class="terr-name">Sweden</div><div class="terr-meta">BSAB · CoClass</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇳🇴</span><div><div class="terr-name">Norway</div><div class="terr-meta">NS 3450 · TFM</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇩🇰</span><div><div class="terr-name">Denmark</div><div class="terr-meta">CCS · molio</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇫🇮</span><div><div class="terr-name">Finland</div><div class="terr-meta">Talo 2000 · YM</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇨🇿</span><div><div class="terr-name">Czechia</div><div class="terr-meta">RTS · ÚRS</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇮🇪</span><div><div class="terr-name">Ireland</div><div class="terr-meta">ARM 4 · SCSI</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇺🇸</span><div><div class="terr-name">USA — East</div><div class="terr-meta">MasterFormat · UniFormat</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇺🇸</span><div><div class="terr-name">USA — West</div><div class="terr-meta">MasterFormat · UniFormat</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇨🇦</span><div><div class="terr-name">Canada</div><div class="terr-meta">UniFormat · NMS</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇲🇽</span><div><div class="terr-name">Mexico</div><div class="terr-meta">CMIC · BIMx</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇧🇷</span><div><div class="terr-name">Brazil</div><div class="terr-meta">SINAPI · NBR</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇦🇪</span><div><div class="terr-name">UAE</div><div class="terr-meta">CESMM · NRM-aligned</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇸🇦</span><div><div class="terr-name">Saudi Arabia</div><div class="terr-meta">SBC · NEOM-grade</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇦🇺</span><div><div class="terr-name">Australia</div><div class="terr-meta">NATSPEC · Rawlinsons</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇮🇳</span><div><div class="terr-name">India</div><div class="terr-meta">CPWD · DSR · IS</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇸🇬</span><div><div class="terr-name">Singapore</div><div class="terr-meta">SS CP · BCA</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇯🇵</span><div><div class="terr-name">Japan</div><div class="terr-meta">Sekisan · JCS</div></div><span class="terr-status">open</span></div>
+        <div class="terr-card" data-status="open"><span class="terr-flag">🇰🇷</span><div><div class="terr-name">South Korea</div><div class="terr-meta">KCS · SeoulHousing</div></div><span class="terr-status">open</span></div>
+      </div>
+
+      <p class="terr-foot">
+        Country not listed? Apply anyway — same economics as the priority cohort.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 8.7 PARTNER ARCHETYPES                                        -->
+<!-- ============================================================ -->
+<section class="section" id="archetypes">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">Partner profiles.</h2>
+      <p class="section-lede">
+        Three shapes of partner, with rough Year-1 numbers. Pick the one
+        closest to your team.
+      </p>
+    </div>
+
+    <div class="arche-grid">
+      <!-- Archetype 1: Solo Specialist -->
+      <article class="arche-card">
+        <span class="arche-tag">Solo specialist</span>
+        <h3 class="arche-name">Independent expert.</h3>
+        <div class="arche-who">Senior BIM consultant · 1 person · DACH or UK</div>
+
+        <div class="arche-stats">
+          <div><div class="arche-stat-num">2–3</div><div class="arche-stat-label">deals / year</div></div>
+          <div><div class="arche-stat-num">€60–110k</div><div class="arche-stat-label">Year-1 take</div></div>
+          <div><div class="arche-stat-num">Silver</div><div class="arche-stat-label">target tier</div></div>
+          <div><div class="arche-stat-num">€0</div><div class="arche-stat-label">fees, ever</div></div>
+        </div>
+
+        <div class="arche-mix">
+          <div class="arche-mix-row"><span>Implementation services (100%)</span><span class="arche-mix-amt">€55k</span></div>
+          <div class="arche-mix-bar"><span style="width:80%"></span></div>
+          <div class="arche-mix-row"><span>Localisation packs (45%)</span><span class="arche-mix-amt">€7k</span></div>
+          <div class="arche-mix-bar"><span style="width:18%"></span></div>
+          <div class="arche-mix-row"><span>Commercial / CWICR (35%)</span><span class="arche-mix-amt">€4k</span></div>
+          <div class="arche-mix-bar"><span style="width:9%"></span></div>
+        </div>
+
+        <p class="arche-tldr">
+          You sell your own time. Implementation pays the bills, licence margin
+          is upside. No hires, no fixed costs, no quotas.
+        </p>
+      </article>
+
+      <!-- Archetype 2: BIM Consultancy / SI (FEATURED) -->
+      <article class="arche-card featured">
+        <span class="arche-tag" style="background: color-mix(in oklab, var(--accent) 18%, transparent);">Most common</span>
+        <h3 class="arche-name">BIM consultancy.</h3>
+        <div class="arche-who">5–25 staff · half BIM, half dev · regional reach</div>
+
+        <div class="arche-stats">
+          <div><div class="arche-stat-num">6–10</div><div class="arche-stat-label">deals / year</div></div>
+          <div><div class="arche-stat-num">€420–680k</div><div class="arche-stat-label">Year-1 take</div></div>
+          <div><div class="arche-stat-num">Gold→Platinum</div><div class="arche-stat-label">target tier</div></div>
+          <div><div class="arche-stat-num">+30%</div><div class="arche-stat-label">recurring Year-2</div></div>
+        </div>
+
+        <div class="arche-mix">
+          <div class="arche-mix-row"><span>Implementation services (100%)</span><span class="arche-mix-amt">€330k</span></div>
+          <div class="arche-mix-bar"><span style="width:78%"></span></div>
+          <div class="arche-mix-row"><span>Localisation + cad2data (55–65%)</span><span class="arche-mix-amt">€95k</span></div>
+          <div class="arche-mix-bar"><span style="width:23%"></span></div>
+          <div class="arche-mix-row"><span>OCERP commercial + CWICR (45–55%)</span><span class="arche-mix-amt">€70k</span></div>
+          <div class="arche-mix-bar"><span style="width:17%"></span></div>
+        </div>
+
+        <p class="arche-tldr">
+          You own a country, run discovery and go-live, ship one localisation
+          pack, keep 3+ clients on SLA. Recurring margin starts month 13.
+        </p>
+      </article>
+
+      <!-- Archetype 3: ERP Integrator -->
+      <article class="arche-card">
+        <span class="arche-tag">ERP integrator</span>
+        <h3 class="arche-name">Multi-product SI.</h3>
+        <div class="arche-who">25+ staff · enterprise accounts · adds OCERP to existing portfolio</div>
+
+        <div class="arche-stats">
+          <div><div class="arche-stat-num">12–20</div><div class="arche-stat-label">deals / year</div></div>
+          <div><div class="arche-stat-num">€1.1–1.8M</div><div class="arche-stat-label">Year-1 take</div></div>
+          <div><div class="arche-stat-num">Platinum</div><div class="arche-stat-label">target tier</div></div>
+          <div><div class="arche-stat-num">5+</div><div class="arche-stat-label">countries served</div></div>
+        </div>
+
+        <div class="arche-mix">
+          <div class="arche-mix-row"><span>Implementation services (100%)</span><span class="arche-mix-amt">€820k</span></div>
+          <div class="arche-mix-bar"><span style="width:75%"></span></div>
+          <div class="arche-mix-row"><span>Multi-country localisation (65%)</span><span class="arche-mix-amt">€180k</span></div>
+          <div class="arche-mix-bar"><span style="width:22%"></span></div>
+          <div class="arche-mix-row"><span>Commercial + cad2data resale (55%)</span><span class="arche-mix-amt">€140k</span></div>
+          <div class="arche-mix-bar"><span style="width:17%"></span></div>
+        </div>
+
+        <p class="arche-tldr">
+          You already sell Odoo, SAP or Oracle. OCERP slots in as the
+          construction-specific layer — same sales motion, same delivery team.
+          One agreement covers multiple countries.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 8.8 INTERACTIVE REVENUE CALCULATOR                            -->
+<!-- ============================================================ -->
+<section class="section" id="calculator" style="background: var(--bg-2);">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">Try the numbers.</h2>
+      <p class="section-lede">
+        Set deal size, deal count and your tier. The estimate updates live.
+      </p>
+    </div>
+
+    <div class="calc-wrap" id="calc-root">
+      <div class="calc-inputs">
+        <div class="calc-input-row">
+          <div class="calc-input-label">
+            <span>Average deal size</span>
+            <span><span class="calc-input-value" id="calc-deal-val">€120k</span></span>
+          </div>
+          <input type="range" class="calc-slider" id="calc-deal" min="40" max="500" step="10" value="120" aria-label="Average deal size in thousands of euros">
+          <div class="calc-input-label" style="margin-top: 4px;">
+            <small>€40k</small>
+            <small>€500k</small>
+          </div>
+        </div>
+
+        <div class="calc-input-row">
+          <div class="calc-input-label">
+            <span>Deals per year</span>
+            <span><span class="calc-input-value" id="calc-deals-val">5</span></span>
+          </div>
+          <input type="range" class="calc-slider" id="calc-deals" min="1" max="25" step="1" value="5" aria-label="Number of deals per year">
+          <div class="calc-input-label" style="margin-top: 4px;">
+            <small>1 deal</small>
+            <small>25 deals</small>
+          </div>
+        </div>
+
+        <div class="calc-input-row">
+          <div class="calc-input-label">
+            <span>Your tier</span>
+            <span><small>Move up by closing deals</small></span>
+          </div>
+          <div class="calc-tier-row" role="radiogroup" aria-label="Partner tier">
+            <button type="button" class="calc-tier-btn" data-tier="r" data-com="0.25" data-loc="0.35" data-rec="0.15">Registered</button>
+            <button type="button" class="calc-tier-btn" data-tier="s" data-com="0.35" data-loc="0.45" data-rec="0.20">Silver</button>
+            <button type="button" class="calc-tier-btn active" data-tier="g" data-com="0.45" data-loc="0.55" data-rec="0.25">Gold</button>
+            <button type="button" class="calc-tier-btn" data-tier="p" data-com="0.55" data-loc="0.65" data-rec="0.30">Platinum</button>
+          </div>
+        </div>
+
+        <div style="font-size:12px;color:var(--ink-3);font-style:italic;line-height:1.5;padding-top:8px;border-top:1px dashed var(--line-2);">
+          Default deal mix: 45% implementation services (you keep 100%), 15%
+          localisation packs, 35% commercial OCERP/CWICR, 5% cad2data converters.
+          Edit assumptions in the deal preview by closing more deals.
+        </div>
+      </div>
+
+      <div class="calc-output">
+        <div class="calc-output-headline">
+          <div class="calc-output-headline-label">Year-1 partner take · estimate</div>
+          <div class="calc-output-headline-num"><em id="calc-headline">€328,500</em></div>
+          <div class="calc-output-headline-sub" id="calc-headline-sub">5 deals × €120k average · Gold tier</div>
+        </div>
+
+        <div class="calc-output-rows" id="calc-rows">
+          <div class="calc-output-row">
+            <span>Implementation services<br><small style="color:var(--ink-3);font-size:11.5px;">45% of deal · 100% partner</small></span>
+            <b id="calc-impl">€270,000</b>
+          </div>
+          <div class="calc-output-row">
+            <span>Localisation packs<br><small style="color:var(--ink-3);font-size:11.5px;">15% of deal · tier rate</small></span>
+            <b id="calc-loc">€49,500</b>
+          </div>
+          <div class="calc-output-row">
+            <span>OpenConstructionERP commercial + CWICR<br><small style="color:var(--ink-3);font-size:11.5px;">35% of deal · tier rate</small></span>
+            <b id="calc-com">€94,500</b>
+          </div>
+          <div class="calc-output-row">
+            <span>cad2data converters<br><small style="color:var(--ink-3);font-size:11.5px;">5% of deal · tier rate</small></span>
+            <b id="calc-cad">€16,500</b>
+          </div>
+          <div class="calc-output-row total">
+            <span>Year-1 partner take</span>
+            <b id="calc-total">€430,500</b>
+          </div>
+        </div>
+
+        <div class="calc-output-recurring">
+          <b>Plus recurring (Year 2+):</b> at your tier, every retained client
+          adds <b id="calc-rec">~€3,750</b> per deal per year in passive SLA + optimisation
+          margin — for as long as they stay live. <b id="calc-rec-total">€18,750/yr</b>
+          off your current pipeline.
+        </div>
+      </div>
+
+      <p class="calc-disclaimer">
+        Estimates based on the published rate card and a typical mid-market mix.
+        Real deals shift the mix toward implementation (good for you) or
+        commercial licences (still good for you, just at the lower margin).
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 9. APPLICATION FLOW                                           -->
+<!-- ============================================================ -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">How to apply.</h2>
+      <p class="section-lede">
+        Four steps, about two weeks for Founding Partners.
+      </p>
+    </div>
+    <div class="apply-flow">
+      <div class="apply-step">
+        <h4>Apply</h4>
+        <p>6-field form: name, company, country, website, current AEC clients, target tier.</p>
+      </div>
+      <div class="apply-step">
+        <h4>Discovery call</h4>
+        <p>30 minutes with Artem. We walk through your portfolio and target deals.</p>
+      </div>
+      <div class="apply-step">
+        <h4>Sign &amp; onboard</h4>
+        <p>Partnership agreement (PDF, ~6 pages), Telegram invite, sales deck, demo environment, first certification scheduled.</p>
+      </div>
+      <div class="apply-step">
+        <h4>First deal</h4>
+        <p>Listed on partner directory, co-marketed by DDC, eligible for lead share.</p>
+      </div>
+    </div>
+    <div class="apply-meta">
+      14 days for Founding Partners · 30 days for standard applications.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 9.5 RISK REVERSAL — common worries answered                    -->
+<!-- ============================================================ -->
+<section class="section" id="risk" style="background: var(--bg-2);">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">Common worries.</h2>
+      <p class="section-lede">
+        Plain answers to the questions worth asking before signing anything —
+        ours, theirs, anyone's.
+      </p>
+    </div>
+
+    <div class="risk-grid">
+      <div class="risk-card">
+        <span class="risk-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </span>
+        <h3 class="risk-q">"What if you go out of business?"</h3>
+        <p class="risk-a">
+          The product is <b>AGPL-3.0 open source</b>. BOQ, BIM viewer, schedule,
+          AI takeoff — everything sits on GitHub under a licence we can't revoke.
+          If DDC disappears, your clients keep running, your contracts stay in
+          force, and you can fork and maintain it yourself.
+        </p>
+      </div>
+
+      <div class="risk-card">
+        <span class="risk-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </span>
+        <h3 class="risk-q">"What if I don't close any deals in Year 1?"</h3>
+        <p class="risk-a">
+          You owe nothing. <b>€0 annual fee, no quotas, no minimums.</b>
+          You stay at Registered tier indefinitely. Deal volume only matters
+          for moving up tiers. Founding cohort is the only exception
+          (1 deal in 90 days) and it's optional.
+        </p>
+      </div>
+
+      <div class="risk-card">
+        <span class="risk-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="m15 6 6 6-6 6"/></svg>
+        </span>
+        <h3 class="risk-q">"Can I exit and take my clients with me?"</h3>
+        <p class="risk-a">
+          Yes. Client contracts are between you and the client — DDC has no
+          claim on them. Clients can keep running the AGPL build with nothing
+          to renew. You'd just stop selling the commercial dual-licence and
+          regional packs.
+        </p>
+      </div>
+
+      <div class="risk-card">
+        <span class="risk-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </span>
+        <h3 class="risk-q">"What if you change the terms later?"</h3>
+        <p class="risk-a">
+          Founding Partners keep signing-day economics for 36 months. Standard
+          partners get a 12-month rate guarantee on deals already in flight.
+          New rates only apply to deals booked after 90 days' notice.
+        </p>
+      </div>
+
+      <div class="risk-card">
+        <span class="risk-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </span>
+        <h3 class="risk-q">"Show me the contract before I commit."</h3>
+        <p class="risk-a">
+          The agreement is a 6-page PDF in plain English. We send it after
+          the discovery call. No NDA required to read it. If anything looks
+          off, you walk away — half an hour spent, no obligation.
+        </p>
+      </div>
+
+      <div class="risk-card">
+        <span class="risk-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </span>
+        <h3 class="risk-q">"What if my first client hates the product?"</h3>
+        <p class="risk-a">
+          They run the AGPL build for free, so the downside is your hours
+          and their time — not a six-figure licence. If a Founding pilot
+          fails inside 90 days, we run a joint retrospective and help you
+          unwind it.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 10. FAQ                                                       -->
+<!-- ============================================================ -->
+<section class="section" id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="h2">Still have <em>questions?</em></h2>
+      <p class="section-lede">Ten of them, answered straight.</p>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>It's AGPL-3.0 — can my client really use it commercially without paying anything?</span>
+          <span class="faq-chev"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </summary>
+        <div class="faq-a">
+          Yes. AGPL-3.0 permits commercial use, modification, and self-hosting. The
+          obligation is to publish derivative source code if you modify and
+          <strong>distribute</strong> or <strong>expose it as a network service to
+          third parties</strong>. For most construction firms running internally, no
+          obligation triggers. For SaaS resellers or OEMs, a commercial licence
+          removes the AGPL obligation entirely — that licence is one of the SKUs
+          partners sell at 45–55% margin.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>Why would a client pay a partner if the software is free?</span>
+          <span class="faq-chev"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </summary>
+        <div class="faq-a">
+          For the same reason a developer pays a builder when bricks are sold at the
+          merchant: <strong>assembling, sequencing, localising, validating, and
+          operating</strong> the system reliably is the work. The repo gives you the
+          bricks. The partner ships the building.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>Will OpenConstructionERP compete with me on implementation services?</span>
+          <span class="faq-chev"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </summary>
+        <div class="faq-a">
+          <strong>No. This is a written commitment in every partnership agreement.</strong>
+          DDC's three commercial product lines are <strong>OpenConstructionERP commercial
+          licences</strong>, <strong>CWICR (cost database)</strong>, and
+          <strong>cad2data converters</strong> — plus localisation packs and core training.
+          Implementation services are 100% partner revenue. Where a strategic account
+          asks DDC directly, we route it to the closest qualified partner.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>How do margins actually pay out?</span>
+          <span class="faq-chev"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </summary>
+        <div class="faq-a">
+          Two models, available per deal: <strong>(a) resold</strong> — partner invoices
+          client at list, pays DDC the wholesale price, keeps the margin;
+          <strong>(b) referred</strong> — DDC invoices client, pays partner the margin
+          within 30 days of cash receipt.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>What's the difference between a Founding Partner and a Platinum Partner?</span>
+          <span class="faq-chev"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </summary>
+        <div class="faq-a">
+          Founding Partners are the first 10 signatories. They get Platinum economics
+          from day 0 (no ladder climb), 12-month soft geographic exclusivity, and a
+          permanent badge. Platinum is the standard top tier reached by performance.
+          <strong>Founding cohort closes</strong> when 10 partners sign or on
+          31 December 2026, whichever comes first.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>Do I need to be a developer or a software house to qualify?</span>
+          <span class="faq-chev"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </summary>
+        <div class="faq-a">
+          No. The dominant partner profile is a <strong>BIM consultancy or
+          construction-tech integrator</strong> with one technical lead and one
+          delivery lead. We help you onboard a developer if you don't have one —
+          training is free for the first two engineers per partner.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>What about CWICR — the cost database?</span>
+          <span class="faq-chev"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </summary>
+        <div class="faq-a">
+          The <strong>community CWICR</strong> is free with the AGPL repo. The
+          <strong>commercial CWICR</strong> — covering 11 countries, 55,000+ items,
+          monthly updates, audit trail — is sold separately and resold by partners
+          at 45–55% margin.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>Can I run my client on the free AGPL version forever?</span>
+          <span class="faq-chev"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </summary>
+        <div class="faq-a">
+          Yes — and many will. Partners earn their margin on the four things free AGPL
+          doesn't deliver: <strong>production go-live, SLA support, localisation
+          packs, and AGPL-free commercial licensing</strong> for clients who need it.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>How is this different from being an Odoo partner?</span>
+          <span class="faq-chev"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </summary>
+        <div class="faq-a">
+          Three concrete differences: (1) <strong>construction-native product</strong>
+          (BOQ, IFC, schedule, AI takeoff) — no retrofit; (2) <strong>higher
+          margins</strong> — up to 65% on localisation packs and cad2data converters,
+          55% on commercial OpenConstructionERP / CWICR; (3) <strong>no annual
+          partnership fee</strong> at any tier; (4) DDC explicitly does not compete on
+          services.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span>What happens if I don't hit Gold or Platinum requirements?</span>
+          <span class="faq-chev"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        </summary>
+        <div class="faq-a">
+          Nothing punitive. Tiers are reviewed annually. <strong>You retain your tier
+          for 12 months from signing</strong> regardless of activity. If activity slows,
+          we work with you on lead-share or co-sell rather than demote.
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- APPLICATION FORM                                              -->
+<!-- ============================================================ -->
+<section class="apply-section" id="apply">
+  <div class="wrap">
+    <div class="apply-layout">
+
+      <!-- LEFT RAIL: what happens next + trust -->
+      <div class="apply-rail">
+        <div class="apply-rail-eyebrow">Founding cohort · 0 of 10 claimed</div>
+        <h2>Apply in <em>six fields.</em></h2>
+        <p class="apply-rail-lede">
+          We read every application personally. Most replies go out within 48 hours.
+          No automated funnel, no sales rep — just a direct conversation.
+        </p>
+
+        <div class="apply-steps">
+          <div class="apply-step-row">
+            <div class="apply-step-num">1</div>
+            <div>
+              <b>You send the form</b>
+              <span>Six fields. Two minutes. No file uploads required.</span>
+            </div>
+          </div>
+          <div class="apply-step-row">
+            <div class="apply-step-num">2</div>
+            <div>
+              <b>We reply within 48 hours</b>
+              <span>A short note from Artem with next steps and a link to a 30-min call.</span>
+            </div>
+          </div>
+          <div class="apply-step-row">
+            <div class="apply-step-num">3</div>
+            <div>
+              <b>Onboarding in 14 days</b>
+              <span>Partnership agreement, Telegram invite, demo environment, first deal review.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="apply-note">
+          <div class="apply-note-avatar" aria-hidden="true">A</div>
+          <div class="apply-note-body">
+            "I read every Founding application myself. If your team has a clear first
+            client and a country we can localise, you'll hear from me within two days."
+            <b>— Artem, founder · DataDrivenConstruction</b>
+          </div>
+        </div>
+
+        <div class="apply-trust">
+          <div class="apply-trust-row">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Stored in <b>EU servers</b> · GDPR-compliant · never sold or shared</span>
+          </div>
+          <div class="apply-trust-row">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="10"/></svg>
+            <span>Average reply time: <b>~36 hours</b> · 100% within 5 business days</span>
+          </div>
+          <div class="apply-trust-row">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12V8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-1"/><path d="M16 12h4M18 10v4"/></svg>
+            <span><b>€0 partnership fees</b> at every tier · forever, written into the agreement</span>
+          </div>
+          <div class="apply-trust-row">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+            <span>No headcount minimums · build the team when you need it</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: form card -->
+      <div class="apply-form-wrap">
+        <form class="apply-form" action="https://formsubmit.co/info@datadrivenconstruction.io" method="POST">
+          <input type="hidden" name="_subject" value="OpenConstructionERP — Partner Application" />
+          <input type="hidden" name="_template" value="table" />
+          <input type="hidden" name="_captcha" value="false" />
+          <input type="hidden" name="_next" value="https://openconstructionerp.com/pro/breeze/partners.html?submitted=1" />
+          <div class="apply-form-grid">
+
+            <div class="apply-form-section-label first">Who you are</div>
+            <label>
+              Your name
+              <input type="text" name="name" required autocomplete="name" placeholder="Full name" />
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" required autocomplete="email" placeholder="you@company.com" />
+            </label>
+            <label>
+              Company
+              <input type="text" name="company" required autocomplete="organization" placeholder="Company name" />
+            </label>
+            <label>
+              Country
+              <input type="text" name="country" required autocomplete="country-name" placeholder="Germany, France, UK..." />
+            </label>
+            <label class="full">
+              Website <span style="color:var(--ink-3); font-weight:400;">(optional)</span>
+              <input type="url" name="website" placeholder="https://..." />
+            </label>
+
+            <div class="apply-form-section-label">What you'd build</div>
+            <label class="full">
+              Current AEC clients &amp; what you'd implement first
+              <textarea name="brief" required placeholder="e.g. We are a Berlin-based BIM consultancy with 12 GC clients. First target: a €120k pilot for a residential developer in Q3 2026..."></textarea>
+            </label>
+            <label>
+              Target tier
+              <select name="target_tier" required>
+                <option value="founding" selected>Founding Partner (top priority)</option>
+                <option value="platinum">Platinum</option>
+                <option value="gold">Gold</option>
+                <option value="silver">Silver</option>
+                <option value="registered">Registered</option>
+                <option value="not_sure">Not sure — let's discuss</option>
+              </select>
+            </label>
+            <label>
+              Audience type
+              <select name="audience_type">
+                <option value="partner">Implementation / reseller partner</option>
+                <option value="specialist">Specialist (plugin / training / converter)</option>
+                <option value="client_inquiry">I'm a client looking for a partner</option>
+              </select>
+            </label>
+
+            <div class="submit-row">
+              <button type="submit" class="btn btn-primary">
+                Send application
+                <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+              <span class="micro">
+                Reply within <b>48 hours</b>. Used only to evaluate your application. Stored in EU. Never sold.
+              </span>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 12. FOOTER CTA                                                -->
+<!-- ============================================================ -->
+<section class="footer-cta">
+  <div class="narrow">
+    <h2>Build with us. <em>Or build on us.</em></h2>
+    <p>Either way, the foundation stays open.</p>
+    <div class="cta-row" style="justify-content: center;">
+      <a class="btn btn-primary" href="#apply">Apply as a partner</a>
+      <a class="btn btn-ghost" href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+    <p class="commitment">
+      Written commitment in every partnership agreement: DDC will never compete with
+      partners on implementation services. Tiers reviewed annually, never demoted in
+      the first year. €0 partnership fee at every tier, forever.
+    </p>
+  </div>
+</section>
+
+<footer class="pagefoot">
+  <div class="wrap">
+    <div class="pagefoot-inner">
+      <div>© 2026 DataDrivenConstruction — Open source under AGPL-3.0.</div>
+      <div>
+        <a href="/">Home</a> ·
+        <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener">GitHub</a> ·
+        <a href="https://datadrivenconstruction.io" target="_blank" rel="noopener">DataDrivenConstruction.io</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Light analytics nudge for floor-click intent on the Construction Stack.
+  document.querySelectorAll('.floor').forEach((el) => {
+    el.addEventListener('click', () => {
+      const f = el.dataset.floor;
+      try { window.dispatchEvent(new CustomEvent('partners:stack_floor_click', { detail: { floor: f } })); } catch (e) {}
+    });
+  });
+
+  // ?submitted=1 toast after the formsubmit redirect.
+  if (location.search.includes('submitted=1')) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0284c7,#2563eb);color:#fff;padding:14px 22px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 18px 36px -12px rgba(2,90,160,0.6);z-index:9999';
+    t.textContent = '✓ Application received — we reply within 48 hours.';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 6000);
+  }
+
+  // Revenue calculator — sliders + tier buttons, live recompute.
+  (function () {
+    const root = document.getElementById('calc-root');
+    if (!root) return;
+    const dealEl = document.getElementById('calc-deal');
+    const dealsEl = document.getElementById('calc-deals');
+    const dealValEl = document.getElementById('calc-deal-val');
+    const dealsValEl = document.getElementById('calc-deals-val');
+    const tierBtns = root.querySelectorAll('.calc-tier-btn');
+    const headlineEl = document.getElementById('calc-headline');
+    const headlineSubEl = document.getElementById('calc-headline-sub');
+    const implEl = document.getElementById('calc-impl');
+    const locEl = document.getElementById('calc-loc');
+    const comEl = document.getElementById('calc-com');
+    const cadEl = document.getElementById('calc-cad');
+    const totalEl = document.getElementById('calc-total');
+    const recEl = document.getElementById('calc-rec');
+    const recTotalEl = document.getElementById('calc-rec-total');
+
+    // Default mix: services 45% / loc 15% / commercial 35% / cad2data 5%
+    const MIX = { services: 0.45, loc: 0.15, com: 0.35, cad: 0.05 };
+    let activeTier = root.querySelector('.calc-tier-btn.active');
+
+    const TIER_NAMES = { r: 'Registered', s: 'Silver', g: 'Gold', p: 'Platinum' };
+
+    function fmt(v) {
+      if (v >= 1_000_000) return '€' + (v / 1_000_000).toFixed(2).replace(/\.?0+$/, '') + 'M';
+      if (v >= 1000) return '€' + Math.round(v / 100) / 10 + 'k'.replace('.0k', 'k');
+      return '€' + Math.round(v).toLocaleString('en-US');
+    }
+    function fmtFull(v) {
+      return '€' + Math.round(v).toLocaleString('en-US');
+    }
+
+    function recompute() {
+      const dealK = parseInt(dealEl.value, 10);  // €k per deal
+      const deals = parseInt(dealsEl.value, 10);
+      const com = parseFloat(activeTier.dataset.com);
+      const loc = parseFloat(activeTier.dataset.loc);
+      const rec = parseFloat(activeTier.dataset.rec);
+
+      const totalDealValue = dealK * 1000 * deals;
+
+      const impl = totalDealValue * MIX.services * 1.0;        // 100% services
+      const locRev = totalDealValue * MIX.loc * loc;            // tier rate on localisation
+      const comRev = totalDealValue * MIX.com * com;            // tier rate on commercial
+      const cadRev = totalDealValue * MIX.cad * loc;            // cad2data uses loc rate (high)
+
+      const total = impl + locRev + comRev + cadRev;
+
+      // Recurring: per deal, ~12% of deal value at tier rec rate
+      const recPerDeal = dealK * 1000 * 0.12 * rec;
+      const recTotal = recPerDeal * deals;
+
+      dealValEl.textContent = '€' + dealK + 'k';
+      dealsValEl.textContent = deals;
+
+      headlineEl.textContent = fmtFull(total);
+      headlineSubEl.textContent = `${deals} deal${deals === 1 ? '' : 's'} × €${dealK}k average · ${TIER_NAMES[activeTier.dataset.tier]} tier`;
+
+      implEl.textContent = fmtFull(impl);
+      locEl.textContent = fmtFull(locRev);
+      comEl.textContent = fmtFull(comRev);
+      cadEl.textContent = fmtFull(cadRev);
+      totalEl.textContent = fmtFull(total);
+      recEl.textContent = '~' + fmtFull(recPerDeal);
+      recTotalEl.textContent = fmtFull(recTotal) + '/yr';
+    }
+
+    dealEl.addEventListener('input', recompute);
+    dealsEl.addEventListener('input', recompute);
+    tierBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        tierBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTier = btn;
+        recompute();
+      });
+    });
+
+    recompute();
+  })();
+</script>
+
+</body>
+</html>

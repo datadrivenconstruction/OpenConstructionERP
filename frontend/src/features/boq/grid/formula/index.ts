@@ -5,6 +5,7 @@
 export {
   evaluateFormula,
   evaluateFormulaRaw,
+  evaluateFormulaStrict,
   isFormula,
   normaliseFormula,
   buildFormulaContext,

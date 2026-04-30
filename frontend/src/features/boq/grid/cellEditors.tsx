@@ -6,10 +6,14 @@ import {
   useState,
   useEffect,
   useCallback,
+  useLayoutEffect,
 } from 'react';
+import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import type { ICellEditorParams } from 'ag-grid-community';
 import { AutocompleteInput } from '../AutocompleteInput';
 import type { CostAutocompleteItem } from '../api';
+import { getUnitsForLocale, saveCustomUnit } from '../boqHelpers';
 import {
   evaluateFormula as evalFormulaImpl,
   isFormula as isFormulaImpl,
@@ -464,3 +468,272 @@ export const AutocompleteCellEditor = forwardRef(
   },
 );
 AutocompleteCellEditor.displayName = 'AutocompleteCellEditor';
+
+/* ── Unit Cell Editor (combobox: dropdown + free typing) ──────────────
+ *
+ * Replaces the strict ``agSelectCellEditor`` for the ``unit`` column.
+ * The strict dropdown silently swallowed edits when the existing value
+ * wasn't in its hard-coded list (every CWICR row whose unit was a
+ * Cyrillic / locale-specific token like "т" / "маш.-ч" was uneditable).
+ *
+ * Reuses ``getUnitsForLocale()`` + ``saveCustomUnit()`` from boqHelpers
+ * so the dropdown:
+ *   • shows the canonical multilingual unit set + the active i18n
+ *     language's locale-specific tokens (DE: Stk/Std, RU: шт/маш.-ч,
+ *     ZH: 个/套, JA: 本/箇所, ...),
+ *   • includes any custom unit the user has typed before (synced to
+ *     ``/v1/users/me/custom-units/`` so the same list shows on every
+ *     device + the same custom set is shared with the cost database,
+ *     assemblies and catalog screens),
+ *   • accepts free-text input so any one-off unit still commits.
+ */
+
+export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
+  const { i18n } = useTranslation();
+  const lang = i18n.language || 'en';
+  const initial = String(props.value ?? '');
+  const [value, setValue] = useState<string>(initial);
+  // Open by default so the dropdown is visible the moment the editor
+  // mounts (matches the original ``agSelectCellEditor`` UX). The
+  // dropdown lives in a portal at <body> level (see render below) so
+  // AG Grid's per-cell ``overflow:hidden`` no longer clips it — the
+  // earlier ``open=false`` workaround is replaced by the portal fix.
+  const [open, setOpen] = useState(true);
+  const [activeIdx, setActiveIdx] = useState(0);
+  // Anchor rect for portal positioning. Recomputed when the dropdown
+  // opens so resizing the column / scrolling doesn't leave a stale popover.
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  // ``committedRef`` short-circuits redundant stopEditing calls — when
+  // pick() / Enter / Tab commits, we set this flag so the trailing
+  // onBlur doesn't double-commit.
+  const committedRef = useRef(false);
+  // ``valueRef`` is the source of truth for AG Grid's getValue() —
+  // setValue() is async, so reading from React state inside getValue()
+  // (which AG Grid invokes synchronously during stopEditing) returned
+  // the stale pre-commit value. The ref is mutated synchronously
+  // alongside setValue, so getValue() always sees the latest pick.
+  const valueRef = useRef<string>(initial);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+
+  // Locale-aware multilingual list + user's custom units. Current value
+  // is appended when not already in the list so the existing token still
+  // shows up.
+  const allOptions = useMemo(() => {
+    const list = getUnitsForLocale(lang);
+    if (initial && !list.includes(initial)) return [...list, initial];
+    return list;
+  }, [lang, initial]);
+
+  // Filter as the user types. Empty / unchanged value shows the FULL list
+  // (the previous datalist-based implementation hid all-but-one options
+  // when the existing value matched a single token — Chromium's datalist
+  // filters strictly by the input's current value). Built-in tokens
+  // bubble to the top; the rest preserves the locale-curated order.
+  const filtered = useMemo(() => {
+    const q = value.trim().toLowerCase();
+    if (!q || q === initial.trim().toLowerCase()) return allOptions;
+    const starts: string[] = [];
+    const contains: string[] = [];
+    for (const u of allOptions) {
+      const lc = u.toLowerCase();
+      if (lc.startsWith(q)) starts.push(u);
+      else if (lc.includes(q)) contains.push(u);
+    }
+    return [...starts, ...contains];
+  }, [value, initial, allOptions]);
+
+  // Keep activeIdx within bounds when filter changes.
+  useEffect(() => {
+    if (activeIdx >= filtered.length) setActiveIdx(0);
+  }, [filtered.length, activeIdx]);
+
+  // Mirror React state into the ref so getValue() (which AG Grid invokes
+  // synchronously) always reads the current value, not a stale closure.
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  useImperativeHandle(ref, () => ({
+    getValue() {
+      return (valueRef.current ?? '').trim();
+    },
+    isCancelAfterEnd() {
+      return false;
+    },
+  }));
+
+  useEffect(() => {
+    // Defer focus by one tick so AG Grid finishes attaching the editor
+    // to the DOM before we steal focus into the input. Calling focus
+    // synchronously inside useEffect on mount caused intermittent
+    // races on AG Grid 32 where the cell hadn't received focus yet.
+    const t = setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
+
+  const commit = useCallback((finalValue?: string) => {
+    if (committedRef.current) return;
+    committedRef.current = true;
+    const v = (finalValue ?? value).trim();
+    valueRef.current = v;          // sync the ref BEFORE stopEditing
+    if (v) saveCustomUnit(v);
+    setValue(v);
+    setTimeout(() => {
+      try { props.api.stopEditing(false); } catch { /* editor already gone */ }
+    }, 0);
+  }, [value, props.api]);
+
+  const pick = useCallback((u: string) => {
+    if (committedRef.current) return;
+    committedRef.current = true;
+    valueRef.current = u;          // sync the ref BEFORE stopEditing
+    setValue(u);
+    setOpen(false);
+    if (u.trim()) saveCustomUnit(u);
+    setTimeout(() => {
+      try { props.api.stopEditing(false); } catch { /* editor already gone */ }
+    }, 0);
+  }, [props.api]);
+
+  // Scroll the active option into view as the user navigates.
+  useEffect(() => {
+    if (!open || !listRef.current) return;
+    const el = listRef.current.querySelector<HTMLLIElement>(`[data-idx="${activeIdx}"]`);
+    el?.scrollIntoView({ block: 'nearest' });
+  }, [activeIdx, open]);
+
+  // Recompute the anchor rect every time the dropdown opens (or the
+  // window scrolls / resizes) so the portal stays glued to the input.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const updateAnchor = () => {
+      if (inputRef.current) setAnchorRect(inputRef.current.getBoundingClientRect());
+    };
+    updateAnchor();
+    window.addEventListener('scroll', updateAnchor, true);
+    window.addEventListener('resize', updateAnchor);
+    return () => {
+      window.removeEventListener('scroll', updateAnchor, true);
+      window.removeEventListener('resize', updateAnchor);
+    };
+  }, [open]);
+
+  return (
+    <div className="relative w-full h-full">
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        maxLength={20}
+        onChange={(e) => {
+          setValue(e.target.value);
+          setOpen(true);
+          setActiveIdx(0);
+        }}
+        onFocus={() => setOpen(true)}
+        onClick={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const sel = filtered[activeIdx];
+            if (open && sel != null) pick(sel);
+            else commit();
+          } else if (e.key === 'Escape') {
+            e.preventDefault();
+            if (open) setOpen(false);
+            else props.api.stopEditing(true);
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setOpen(true);
+            setActiveIdx((i) => Math.min(filtered.length - 1, i + 1));
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActiveIdx((i) => Math.max(0, i - 1));
+          } else if (e.key === 'Tab') {
+            // Plain Tab commits the current text — same behaviour as Enter on
+            // a free-typed value, lets the user blow past the dropdown.
+            commit();
+          }
+        }}
+        onBlur={(e) => {
+          // Defer so a click on a list item commits the picked value first.
+          const next = e.relatedTarget as HTMLElement | null;
+          if (next && listRef.current?.contains(next)) return;
+          setTimeout(() => {
+            setOpen(false);
+            commit();
+          }, 100);
+        }}
+        className="w-full h-full text-center text-xs font-mono bg-white dark:bg-surface-primary border border-oe-blue rounded px-1 py-0 outline-none"
+        aria-label="Edit unit"
+        autoComplete="off"
+        role="combobox"
+        aria-expanded={open}
+        aria-autocomplete="list"
+      />
+      {open && filtered.length > 0 && anchorRect && createPortal(
+        (() => {
+          // Position dropdown directly below the input, anchored at the
+          // input's left edge. Auto-flips above when there's no room
+          // below (within 8 px of the viewport bottom). Min-width keeps
+          // it readable even when the unit column is narrow (~80 px).
+          const MAX_HEIGHT = 256;            // matches max-h-64
+          const GUTTER = 4;
+          const spaceBelow = window.innerHeight - anchorRect.bottom;
+          const flipAbove = spaceBelow < 160 && anchorRect.top > spaceBelow;
+          const top = flipAbove
+            ? Math.max(8, anchorRect.top - GUTTER - MAX_HEIGHT)
+            : anchorRect.bottom + GUTTER;
+          const left = Math.min(
+            anchorRect.left,
+            window.innerWidth - 200, // keep within viewport (200 = min-width + slack)
+          );
+          return (
+            <ul
+              ref={listRef}
+              role="listbox"
+              tabIndex={-1}
+              className="fixed z-[10001] max-h-64
+                         overflow-y-auto rounded border border-border-light bg-surface-elevated
+                         shadow-xl text-xs"
+              style={{
+                top: `${top}px`,
+                left: `${Math.max(0, left)}px`,
+                minWidth: `${Math.max(160, anchorRect.width)}px`,
+              }}
+              onMouseDown={(e) => {
+                // Prevent blur on the input — the click handler then runs and
+                // commits the picked value through ``pick``.
+                e.preventDefault();
+              }}
+            >
+              {filtered.map((u, idx) => (
+                <li
+                  key={u + idx}
+                  data-idx={idx}
+                  role="option"
+                  aria-selected={idx === activeIdx}
+                  onMouseEnter={() => setActiveIdx(idx)}
+                  onClick={() => pick(u)}
+                  className={`cursor-pointer px-2 py-1 font-mono whitespace-nowrap ${
+                    idx === activeIdx
+                      ? 'bg-oe-blue text-white'
+                      : 'text-content-primary hover:bg-surface-secondary'
+                  }`}
+                >
+                  {u}
+                </li>
+              ))}
+            </ul>
+          );
+        })(),
+        document.body,
+      )}
+    </div>
+  );
+});
+UnitCellEditor.displayName = 'UnitCellEditor';

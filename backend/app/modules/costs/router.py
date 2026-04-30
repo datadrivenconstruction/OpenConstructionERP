@@ -34,6 +34,7 @@ from app.modules.costs.matcher import (
     match_cwicr_items,
 )
 from app.modules.costs.schemas import (
+    CategoryTreeNode,
     CostAutocompleteItem,
     CostItemCreate,
     CostItemResponse,
@@ -52,8 +53,135 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+# ── Region → currency map ─────────────────────────────────────────────────
+#
+# CWICR catalogues are imported per-region, but the parquet files don't
+# carry an explicit currency column — every rate is denominated in the
+# region's local currency. Mirror the frontend ``REGION_MAP`` so we can
+# resolve the right ISO 4217 code at ingestion time AND lazily on read
+# for legacy rows that landed with ``currency = ''`` before this map
+# existed.
+#
+# Keep the keys exactly aligned with the parquet ``db_id`` / ``region``
+# convention (UPPERCASE, country prefix). Unknown keys fall back to the
+# explicit currency on the row, then to "EUR" so the picker never crashes.
+_REGION_CURRENCY: dict[str, str] = {
+    "DE_BERLIN": "EUR",
+    "DE_MUNICH": "EUR",
+    "DE_HAMBURG": "EUR",
+    "AT_VIENNA": "EUR",
+    "CH_ZURICH": "CHF",
+    "FR_PARIS": "EUR",
+    "ES_MADRID": "EUR",
+    "IT_ROME": "EUR",
+    "NL_AMSTERDAM": "EUR",
+    "BE_BRUSSELS": "EUR",
+    "PT_LISBON": "EUR",
+    "PT_SAOPAULO": "BRL",
+    "GB_LONDON": "GBP",
+    "IE_DUBLIN": "EUR",
+    "PL_WARSAW": "PLN",
+    "CZ_PRAGUE": "CZK",
+    "RO_BUCHAREST": "RON",
+    "RU_STPETERSBURG": "RUB",
+    "RU_MOSCOW": "RUB",
+    "USA_USD": "USD",
+    "USA_NEWYORK": "USD",
+    "CA_TORONTO": "CAD",
+    "MX_MEXICO": "MXN",
+    "BR_SAOPAULO": "BRL",
+    "AR_BUENOSAIRES": "ARS",
+    "CN_SHANGHAI": "CNY",
+    "JP_TOKYO": "JPY",
+    "IN_MUMBAI": "INR",
+    "AE_DUBAI": "AED",
+    "SA_RIYADH": "SAR",
+    "TR_ISTANBUL": "TRY",
+    "AU_SYDNEY": "AUD",
+    "NZ_AUCKLAND": "NZD",
+    "ZA_JOHANNESBURG": "ZAR",
+}
+
+
+def _resolve_currency(currency: str | None, region: str | None) -> str:
+    """Return the catalogue currency, deriving it from region when empty.
+
+    The CWICR import historically stored ``currency = ''`` because the source
+    parquet doesn't carry the field — every rate is in the region's local
+    currency. This helper plugs that hole without forcing a re-import.
+
+    Resolution order:
+        1. Non-empty incoming ``currency`` (caller-supplied wins).
+        2. ``_REGION_CURRENCY[region]`` when the region matches a known key.
+        3. ``"EUR"`` as a final fallback so the API never returns an
+           empty currency string to the frontend.
+    """
+    if isinstance(currency, str):
+        cleaned = currency.strip().upper()
+        if cleaned:
+            return cleaned
+    if isinstance(region, str):
+        mapped = _REGION_CURRENCY.get(region.strip().upper())
+        if mapped:
+            return mapped
+    return "EUR"
+
+
 def _get_service(session: SessionDep) -> CostItemService:
     return CostItemService(session)
+
+
+# ── Autocomplete metadata helpers (Phase F v2.7.0) ────────────────────────
+
+
+_BREAKDOWN_KEYS: tuple[str, ...] = ("labor_cost", "material_cost", "equipment_cost")
+
+
+def _extract_cost_breakdown(metadata: dict[str, Any] | None) -> dict[str, float] | None:
+    """Pull labor / material / equipment numbers out of CWICR metadata.
+
+    The CWICR ingest stamps these as ``round(value, 2)`` only when the
+    source row carries a non-zero figure — so an absent key really means
+    "no data" (not "zero"). Returns ``None`` when none of the three keys
+    are present so the tooltip can hide the breakdown section gracefully.
+    """
+    if not isinstance(metadata, dict) or not metadata:
+        return None
+    out: dict[str, float] = {}
+    for key in _BREAKDOWN_KEYS:
+        v = metadata.get(key)
+        if isinstance(v, (int, float)) and v >= 0:
+            out[key] = float(v)
+    return out or None
+
+
+def _slim_autocomplete_metadata(metadata: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Project metadata to a tooltip-sized payload.
+
+    Keeps:
+      * ``variant_stats`` — rendered as the "N variants" hint.
+      * ``variant_count`` — derived count when ``variants`` is present.
+      * ``labor_hours`` / ``workers_per_unit`` — small auxiliary numbers.
+
+    Strips the heavy ``variants`` array — full variant data is fetched
+    lazily via ``GET /v1/costs/{id}/`` when the user actually applies
+    the suggestion. The slim payload is bounded to roughly < 200 B per
+    item so the autocomplete response stays snappy on slow links.
+    """
+    if not isinstance(metadata, dict) or not metadata:
+        return None
+    out: dict[str, Any] = {}
+    stats = metadata.get("variant_stats")
+    if isinstance(stats, dict) and stats:
+        out["variant_stats"] = stats
+    variants = metadata.get("variants")
+    if isinstance(variants, list) and variants:
+        out["variant_count"] = len(variants)
+    for k in ("labor_hours", "workers_per_unit"):
+        v = metadata.get(k)
+        if isinstance(v, (int, float)) and v > 0:
+            out[k] = float(v)
+    return out or None
 
 
 # ── Locale resolution ─────────────────────────────────────────────────────
@@ -154,6 +282,13 @@ async def autocomplete_cost_items(
     When ``semantic=true`` and a vector index exists, uses AI embeddings
     to find semantically similar items (e.g. "concrete wall" finds
     "reinforced partition C30/37"). Falls back to text search otherwise.
+
+    The response carries a slim ``cost_breakdown`` (labor / material /
+    equipment) and a thinned ``metadata_`` block so the BOQ description
+    cell can render a rich hover tooltip (Phase F, v2.7.0) without a
+    second round-trip. The variant array itself is intentionally omitted
+    to keep the per-item delta well under 200 B — callers that need the
+    full variant catalog should hit ``GET /v1/costs/{id}/`` on hover.
     """
     resolved_locale = _resolve_cost_locale(locale, accept_language)
     # Try vector search first if requested
@@ -169,10 +304,14 @@ async def autocomplete_cost_items(
                     # Vector results may not have components — look them up from DB
                     codes = [r.get("code", "") for r in results]
                     components_map: dict[str, list[dict[str, Any]]] = {}
+                    metadata_map: dict[str, dict[str, Any]] = {}
                     try:
                         items_from_db = await service.get_by_codes(codes)
                         for db_item in items_from_db:
                             components_map[db_item.code] = db_item.components or []
+                            metadata_map[db_item.code] = (
+                                db_item.metadata_ or {}
+                            )
                     except Exception:
                         logger.debug("Cost search: component lookup failed", exc_info=True)
 
@@ -180,6 +319,7 @@ async def autocomplete_cost_items(
                     for r in results:
                         cls = dict(r.get("classification") or {})
                         comps = list(components_map.get(r.get("code", ""), []))
+                        md_full = metadata_map.get(r.get("code", ""), {})
                         # Mutates cls/comps in place to add *_localized keys.
                         localize_cost_row(
                             classification=cls,
@@ -187,14 +327,22 @@ async def autocomplete_cost_items(
                             components=comps,
                             locale=resolved_locale,
                         )
+                        breakdown = _extract_cost_breakdown(md_full)
+                        slim_md = _slim_autocomplete_metadata(md_full)
                         out.append(
                             CostAutocompleteItem(
                                 code=r.get("code", ""),
                                 description=r.get("description", ""),
                                 unit=r.get("unit", ""),
                                 rate=float(r.get("rate", 0)),
+                                currency=_resolve_currency(
+                                    r.get("currency"), r.get("region")
+                                ),
+                                region=r.get("region"),
                                 classification=cls,
                                 components=comps,
+                                cost_breakdown=breakdown,
+                                metadata_=slim_md,
                             )
                         )
                     return out
@@ -242,14 +390,24 @@ async def autocomplete_cost_items(
             components=comps,
             locale=resolved_locale,
         )
+        md_full = item.metadata_ or {}
+        breakdown = _extract_cost_breakdown(md_full)
+        slim_md = _slim_autocomplete_metadata(md_full)
         out.append(
             CostAutocompleteItem(
                 code=item.code,
                 description=item.description,
                 unit=item.unit,
                 rate=float(item.rate),
+                currency=_resolve_currency(
+                    getattr(item, "currency", None),
+                    getattr(item, "region", None),
+                ),
+                region=getattr(item, "region", None),
                 classification=cls,
                 components=comps,
+                cost_breakdown=breakdown,
+                metadata_=slim_md,
             )
         )
     return out
@@ -288,10 +446,27 @@ async def search_cost_items(
     category: str | None = Query(
         default=None, description="Filter by classification.collection (construction category)"
     ),
+    classification_path: str | None = Query(
+        default=None,
+        description=(
+            "Slash-delimited classification prefix path "
+            "(collection/department/section/subsection). Prefix-matches "
+            "at any depth; empty middle segments act as wildcards. "
+            "AND-combined with the other filters."
+        ),
+    ),
     min_rate: float | None = Query(default=None, ge=0, description="Minimum rate"),
     max_rate: float | None = Query(default=None, ge=0, description="Maximum rate"),
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    cursor: str | None = Query(
+        default=None,
+        description=(
+            "Opaque keyset cursor returned in the previous page's "
+            "``next_cursor``. When set, ``offset`` is ignored and "
+            "``total`` is omitted."
+        ),
+    ),
     locale: str | None = Query(
         default=None,
         max_length=10,
@@ -306,12 +481,17 @@ async def search_cost_items(
 ) -> dict[str, Any]:
     """Search cost items with optional filters. Public endpoint.
 
-    Returns a paginated response with items, total count, limit and offset.
-    Each item carries `classification.category_localized`,
-    `metadata.variant_stats.unit_localized` / `_group_localized`, and
-    per-component `unit_localized` mirror fields when the locale has a
+    Returns a keyset-paginated response with items, optional total count,
+    next_cursor, and has_more. Each item carries
+    ``classification.category_localized``,
+    ``metadata.variant_stats.unit_localized`` / ``_group_localized``, and
+    per-component ``unit_localized`` mirror fields when the locale has a
     translation table.  Originals are preserved so older clients
     continue to read the German source.
+
+    Backwards compatibility: clients that don't send ``cursor`` continue
+    to receive a non-null ``total``. The new fields ``next_cursor`` and
+    ``has_more`` are additions to the response shape.
     """
     query = CostSearchQuery(
         q=q,
@@ -319,12 +499,14 @@ async def search_cost_items(
         source=source,
         region=region,
         category=category,
+        classification_path=classification_path,
         min_rate=min_rate,
         max_rate=max_rate,
         limit=limit,
         offset=offset,
+        cursor=cursor,
     )
-    items, total = await service.search_costs(query)
+    items, total, has_more, next_cursor = await service.search_costs_paginated(query)
     resolved_locale = _resolve_cost_locale(locale, accept_language)
     return {
         "items": [
@@ -334,6 +516,8 @@ async def search_cost_items(
         "total": total,
         "limit": limit,
         "offset": offset,
+        "next_cursor": next_cursor,
+        "has_more": has_more,
     }
 
 
@@ -345,12 +529,22 @@ async def search_cost_items(
 import time as _time
 
 _region_cache: dict[str, Any] = {"regions": None, "stats": None, "categories": None, "ts": 0}
-_CACHE_TTL = 30  # seconds
+_CACHE_TTL = 30  # seconds — short-lived snapshot for /regions, /stats, /categories
+
+# The category tree is much heavier to compute (single GROUP BY across the
+# four classification depths against the full active catalog) and rarely
+# changes between imports. Cache it longer, per-region, and key the entries
+# off a separate timestamp so it doesn't piggy-back on the 30s general TTL.
+_CATEGORY_TREE_CACHE_TTL = 300  # 5 minutes
+_category_tree_cache: dict[str, dict[str, Any]] = {}
 
 
 def _invalidate_cost_cache() -> None:
     """Call after import/delete to force refresh on next request."""
     _region_cache["ts"] = 0
+    # Tree cache lives in its own dict — wipe all regional snapshots so
+    # the next request rebuilds against the post-import catalog.
+    _category_tree_cache.clear()
 
 
 @router.get("/regions/", response_model=list[str])
@@ -1027,6 +1221,40 @@ async def list_categories(
     _region_cache[cache_key] = cats
     _region_cache["ts"] = now
     return cats
+
+
+# ── Category tree (4-level classification hierarchy) ─────────────────────
+
+
+@router.get("/category-tree/", response_model=list[CategoryTreeNode])
+async def get_category_tree(
+    service: CostItemService = Depends(_get_service),
+    region: str | None = Query(
+        default=None,
+        description="Restrict the aggregation to a single region (e.g. DE_BERLIN).",
+    ),
+) -> list[CategoryTreeNode]:
+    """Return the 4-level classification tree for a region.
+
+    The tree is nested as
+    ``collection → department → section → subsection``. NULL / empty
+    values at any depth coalesce into the sentinel ``"__unspecified__"``;
+    the frontend is expected to localize this label.
+
+    Cached for 5 minutes per region. The cache is wiped on any
+    import / delete via ``_invalidate_cost_cache()``, so post-import
+    catalogues become visible immediately on the next request.
+    """
+    cache_key = f"tree::{region or '__all__'}"
+    now = _time.monotonic()
+    cached = _category_tree_cache.get(cache_key)
+    if cached is not None and now - cached.get("ts", 0) < _CATEGORY_TREE_CACHE_TTL:
+        return cached["nodes"]
+
+    raw = await service.category_tree(region=region)
+    nodes = [CategoryTreeNode.model_validate(n) for n in raw]
+    _category_tree_cache[cache_key] = {"nodes": nodes, "ts": now}
+    return nodes
 
 
 # ── Available CWICR databases ─────────────────────────────────────────────
@@ -2075,6 +2303,15 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
         labels = _split_bul(row.get("price_abstract_resource_variable_parts"))
         values = _split_bul(row.get("price_abstract_resource_est_price_all_values"))
         pu_vals = _split_bul(row.get("price_abstract_resource_est_price_all_values_per_unit"))
+        # ``common_start`` is the shared base name for the abstract resource
+        # (e.g. "Ready-mix concrete"); each ``variable_parts[i]`` is the
+        # distinguishing tail (e.g. "C25/30 delivered"). The picker renders
+        # ``common_start`` once as a header and the rows show only the
+        # variable tails. ``full_label`` = ``common_start + variable_part``
+        # is what the BOQ resource row displays after a pick — replacing
+        # the position's default description so the user sees the actual
+        # concrete material chosen.
+        common_start = _safe_str(row.get("price_abstract_resource_common_start"))[:240]
         # position_count is a single per-rate_code total in the parquet, not per-variant.
         total_position_count = int(_safe_float(row.get("price_abstract_resource_position_count")))
         if labels and len(labels) > 1 and len(values) == len(labels):
@@ -2083,10 +2320,17 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
                 v = _safe_float(val)
                 if v <= 0:
                     continue
+                variable_part = lbl[:200]
+                full_label = (
+                    f"{common_start} {variable_part}".strip()
+                    if common_start
+                    else variable_part
+                )[:400]
                 variants.append(
                     {
                         "index": i,
-                        "label": lbl[:200],
+                        "label": variable_part,
+                        "full_label": full_label,
                         "price": round(v, 2),
                         "price_per_unit": round(_safe_float(pu_vals[i]), 4) if i < len(pu_vals) else None,
                     }
@@ -2102,6 +2346,7 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
                     "group": _safe_str(row.get("price_abstract_resource_group_per_unit"))[:120],
                     "count": len(variants),
                     "position_count": total_position_count,
+                    "common_start": common_start,
                 }
 
         # Get full resource components for this rate_code
@@ -2239,7 +2484,11 @@ def _build_cwicr_items(df: pd.DataFrame, db_id: str) -> list[dict[str, Any]]:  #
                 "description": desc[:500],
                 "unit": unit,
                 "rate": str(round(rate, 2)),
-                "currency": "",
+                # CWICR parquets don't carry a currency column — every rate
+                # is denominated in the region's local currency. Resolve
+                # via the central region map so the picker shows the right
+                # ISO code (e.g. RU_STPETERSBURG → RUB, not USD fallback).
+                "currency": _resolve_currency(None, db_id),
                 "source": "cwicr",
                 "classification": classification,
                 "tags": [],

@@ -5,10 +5,14 @@
  * Extracted from BOQEditorPage.tsx for modularity.
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   Plus,
   X,
@@ -17,6 +21,8 @@ import {
   Check,
   Layers,
   Database,
+  ChevronDown,
+  AlertCircle,
 } from 'lucide-react';
 import { Button, Badge, CountryFlag } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
@@ -24,30 +30,33 @@ import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { REGION_MAP } from '@/stores/useCostDatabaseStore';
 import { VariantPicker } from '@/features/costs/VariantPicker';
-import type { CostItemMetadata, CostVariant } from '@/features/costs/api';
+import type { CostVariant } from '@/features/costs/api';
+import {
+  fetchCategoryTree,
+  fetchCostSearch,
+  type CostSearchItem as ApiCostSearchItem,
+  type CostSearchPage,
+} from './api';
+import { CostCategoryTree } from './CostCategoryTree';
 
 /* ── Types ───────────────────────────────────────────────────────────── */
 
-interface CostSearchItem {
-  id: string;
-  code: string;
-  description: string;
-  unit: string;
-  rate: number;
-  currency?: string;
-  region: string | null;
-  classification: Record<string, string>;
-  components: Array<{
-    name: string;
-    code?: string;
-    unit: string;
-    quantity: number;
-    unit_rate: number;
-    cost: number;
-    type: string;
-  }>;
-  metadata_: CostItemMetadata;
-}
+/**
+ * Local alias — narrows the canonical ``ApiCostSearchItem`` so the existing
+ * variant-picker integration code (which reads ``metadata_.variants`` and
+ * ``metadata_.variant_stats`` as concrete CWICR shapes) keeps its types.
+ *
+ * The canonical type stores ``metadata_`` as ``Record<string, unknown>`` so
+ * the API surface stays generic.  We re-narrow here without using ``any`` or
+ * ``as unknown as`` — TS happily accepts the broader source.
+ */
+type CostSearchItem = Omit<ApiCostSearchItem, 'metadata_'> & {
+  metadata_?: {
+    variants?: CostVariant[];
+    variant_stats?: import('@/features/costs/api').VariantStats;
+    [key: string]: unknown;
+  };
+};
 
 /** Pending variant pick — stored in state so the picker can render once
  *  outside the multi-item add loop and the loop can resolve sequentially.
@@ -285,32 +294,168 @@ export function CostDatabaseSearchModal({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
   const [region, setRegion] = useState('');
+  /** Slash-joined classification breadcrumb selected in the left tree.
+   *  Empty string = "All categories". */
+  const [selectedPath, setSelectedPath] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isAdding, setIsAdding] = useState(false);
   const [activeVariantPick, setActiveVariantPick] = useState<PendingVariantPick | null>(null);
+  /** Mobile-only popover for the category tree.  Hidden on >=md viewports. */
+  const [mobileTreeOpen, setMobileTreeOpen] = useState(false);
   const addButtonRef = useRef<HTMLButtonElement>(null);
+  const listScrollRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const cursorErrorToastShown = useRef(false);
+  const addToast = useToastStore((s) => s.addToast);
 
   // Load available regions
   const { data: regionsData } = useQuery({
     queryKey: ['cost-regions-modal'],
     queryFn: () => apiGet<string[]>('/v1/costs/regions/'),
   });
-  const regions = regionsData ?? [];
+  const regions = useMemo(() => regionsData ?? [], [regionsData]);
 
-  // Search cost items with region filter — show first 20 immediately
-  const regionParam = region ? `&region=${encodeURIComponent(region)}` : '';
-  const searchParam = query.length >= 2 ? `&q=${encodeURIComponent(query)}&semantic=true` : '';
-  const { data, isLoading } = useQuery({
-    queryKey: ['cost-search-modal', query.length >= 2 ? query : '', region],
-    queryFn: () =>
-      apiGet<{ items: CostSearchItem[]; total: number }>(
-        `/v1/costs/?limit=30${regionParam}${searchParam}`,
-      ),
+  // Category tree — separate query, scoped to active region.  5-min staleTime
+  // matches the backend's cache TTL so we don't refetch on every interaction.
+  const {
+    data: categoryTree,
+    isLoading: treeLoading,
+    isError: treeError,
+    refetch: refetchTree,
+  } = useQuery({
+    queryKey: ['cost-tree', region],
+    queryFn: () => fetchCategoryTree(region || undefined),
+    staleTime: 5 * 60 * 1000,
   });
 
-  const items = data?.items ?? [];
+  // Paginated infinite search.  Cursor-based — when ``next_cursor`` is null,
+  // ``hasNextPage`` flips to false and ``fetchNextPage`` is a no-op.
+  const {
+    data: searchData,
+    isLoading,
+    isError: searchError,
+    error: searchErrorObj,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    refetch: refetchSearch,
+  } = useInfiniteQuery<CostSearchPage, Error>({
+    queryKey: [
+      'cost-search',
+      region,
+      query.length >= 2 ? query : '',
+      selectedPath,
+    ],
+    queryFn: ({ pageParam }) =>
+      fetchCostSearch({
+        region: region || undefined,
+        q: query.length >= 2 ? query : undefined,
+        classification_path: selectedPath || undefined,
+        cursor: (pageParam as string | null) ?? null,
+        limit: 50,
+      }),
+    initialPageParam: null as string | null,
+    getNextPageParam: (last) => last.next_cursor,
+  });
+
+  // Recover from a stale cursor (server returns 400 when the cursor format
+  // changes after a deploy).  One-shot toast + cache reset so subsequent
+  // refetches start fresh from the first page.
+  useEffect(() => {
+    if (!searchError) {
+      cursorErrorToastShown.current = false;
+      return;
+    }
+    const msg = searchErrorObj instanceof Error ? searchErrorObj.message : '';
+    if (/cursor|400/i.test(msg) && !cursorErrorToastShown.current) {
+      cursorErrorToastShown.current = true;
+      addToast({
+        type: 'info',
+        title: t('boq.cursor_error_title', {
+          defaultValue: 'Loading older results failed — refreshing',
+        }),
+      });
+      // Drop pages so the next fetch starts at cursor=null.
+      queryClient.removeQueries({
+        queryKey: ['cost-search', region, query.length >= 2 ? query : '', selectedPath],
+      });
+      refetchSearch();
+    }
+  }, [
+    searchError,
+    searchErrorObj,
+    addToast,
+    t,
+    queryClient,
+    region,
+    query,
+    selectedPath,
+    refetchSearch,
+  ]);
+
+  // Flatten pages for rendering.  Empty pages array → empty items.
+  const items: CostSearchItem[] = useMemo(() => {
+    if (!searchData) return [];
+    const flat: CostSearchItem[] = [];
+    for (const page of searchData.pages) {
+      for (const item of page.items) {
+        flat.push(item as CostSearchItem);
+      }
+    }
+    return flat;
+  }, [searchData]);
+
+  // Total count is only known on the first page.  Subsequent pages get null.
+  const totalCount = searchData?.pages[0]?.total ?? null;
+
+  // IntersectionObserver-driven auto-load.  Only attaches when there's a
+  // sentinel in the DOM AND another page exists.  Re-runs whenever the active
+  // query key flips (e.g. region change → fresh observer for the new list).
+  // Older runtimes (IE11, JSDOM-based test envs) lack the API; the visible
+  // "Load more" fallback button keeps pagination usable in those cases.
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasNextPage) return;
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const root = listScrollRef.current ?? null;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting) && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { root, rootMargin: '200px 0px', threshold: 0 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, items.length]);
+
+  // Region change resets selected path + scroll, and invalidates the tree
+  // cache for the previous region (fresh fetch on next visit).
+  const previousRegionRef = useRef(region);
+  useEffect(() => {
+    if (previousRegionRef.current === region) return;
+    previousRegionRef.current = region;
+    setSelectedPath('');
+    setSelected(new Set());
+    if (listScrollRef.current) {
+      listScrollRef.current.scrollTop = 0;
+    }
+    queryClient.invalidateQueries({ queryKey: ['cost-tree'] });
+  }, [region, queryClient]);
+
+
+  const handleSelectPath = useCallback((path: string) => {
+    setSelectedPath(path);
+    setMobileTreeOpen(false);
+    if (listScrollRef.current) {
+      listScrollRef.current.scrollTop = 0;
+    }
+  }, []);
 
   const toggleSelect = useCallback((id: string) => {
     setSelected((prev) => {
@@ -320,8 +465,6 @@ export function CostDatabaseSearchModal({
       return next;
     });
   }, []);
-
-  const addToast = useToastStore((s) => s.addToast);
 
   const handleAdd = useCallback(async () => {
     if (selected.size === 0) return;
@@ -413,7 +556,17 @@ export function CostDatabaseSearchModal({
         const pos = String(((nextOrdNum - 1) % 999) + 1).padStart(3, '0');
         const ordinal = `${section}.${pos}`;
         // Convert cost item components to position resources
-        const resources = (item.components || []).map((c) => ({
+        const resources: Array<{
+          name: string;
+          code: string;
+          type: string;
+          unit: string;
+          quantity: number;
+          unit_rate: number;
+          total: number;
+          variant?: { label: string; price: number; index: number };
+          variant_default?: 'mean' | 'median';
+        }> = (item.components || []).map((c) => ({
           name: c.name,
           code: c.code || '',
           type: c.type || 'other',
@@ -423,18 +576,21 @@ export function CostDatabaseSearchModal({
           total: c.cost || (c.quantity ?? 1) * (c.unit_rate ?? 0),
         }));
 
-        // Resolve description + unit rate from the resolution.  The default
-        // path (kind === 'default') uses the resolved stats[strategy] —
-        // which is the rate the position will lock in via variant_snapshot
-        // server-side.
+        // Resolve description + variant metadata from the resolution.
         const baseDescription = item.description || 'Unnamed item';
-        let description = baseDescription;
-        let unitRate = item.rate ?? 0;
+        const description = baseDescription;
         let variantMeta: Record<string, unknown> = {};
 
+        // Currency for the variant resource entry — falls back to the
+        // catalog's native currency, then EUR.
+        const itemCurrency = item.currency && item.currency.trim() ? item.currency : 'EUR';
+        // common_start is the abstract resource's base name
+        // (price_abstract_resource_common_start). Used to label the
+        // variant resource line so it matches the variant header row.
+        const commonStart =
+          (stats?.common_start && stats.common_start.trim()) || baseDescription;
+
         if (resolution?.kind === 'variant') {
-          description = `${baseDescription} (Variant: ${resolution.variant.label})`;
-          unitRate = resolution.variant.price;
           variantMeta = {
             variant: {
               label: resolution.variant.label,
@@ -442,13 +598,33 @@ export function CostDatabaseSearchModal({
               index: resolution.variant.index,
             },
           };
+          // Append the variant as an additional resource line so the
+          // position's total = sum of all resource totals (the contract
+          // the user expects: "если есть ресурсы — стоимость собирается
+          // из общей стоимости ресурсов"). Without this, position.unit_rate
+          // would lose the variant's contribution and the resource panel
+          // total would diverge from the cell display.
+          resources.push({
+            name: `${commonStart} ${resolution.variant.label}`.trim(),
+            code: item.code,
+            type: 'material',
+            unit: item.unit || 'pcs',
+            quantity: 1,
+            unit_rate: resolution.variant.price,
+            total: resolution.variant.price,
+            variant: {
+              label: resolution.variant.label,
+              price: resolution.variant.price,
+              index: resolution.variant.index,
+            },
+          });
         } else if (resolution?.kind === 'default') {
           // Mean is the production default; median is exposed only by
           // legacy callers.  Fall back to median if mean is zero (defensive).
           const stats2 = item.metadata_!.variant_stats!;
           const meanRate = stats2.mean;
           const medianRate = stats2.median;
-          unitRate =
+          const defaultRate =
             resolution.strategy === 'mean' && meanRate > 0
               ? meanRate
               : medianRate > 0
@@ -457,6 +633,27 @@ export function CostDatabaseSearchModal({
           variantMeta = {
             variant_default: resolution.strategy,
           };
+          resources.push({
+            name: commonStart,
+            code: item.code,
+            type: 'material',
+            unit: item.unit || 'pcs',
+            quantity: 1,
+            unit_rate: defaultRate,
+            total: defaultRate,
+            variant_default: resolution.strategy,
+          });
+        }
+
+        // unit_rate = sum of all resource totals when resources exist,
+        // otherwise fall back to the catalog rate (positions without a
+        // component breakdown still need a price).
+        const resourcesTotal = resources.reduce((s, r) => s + (r.total ?? 0), 0);
+        const unitRate = resources.length > 0 ? resourcesTotal : (item.rate ?? 0);
+        // Stamp catalog-native currency on every resource line so the
+        // BOQ row's per-resource currency cell shows it correctly.
+        for (const r of resources) {
+          (r as Record<string, unknown>).currency = itemCurrency;
         }
 
         // Cache the variant set on the position metadata so the inline
@@ -486,7 +683,14 @@ export function CostDatabaseSearchModal({
             cost_item_code: item.code,
             cost_item_region: item.region,
             cost_item_id: item.id,
-            currency: item.currency || 'USD',
+            // Resolve currency: catalog field (now populated server-side
+            // via _resolve_currency) → region map fallback → EUR. Avoid
+            // the legacy "USD" default, which mislabelled every RU/RO/UK
+            // rate when the catalog row had an empty currency string.
+            currency:
+              (item.currency && item.currency.trim()) ||
+              (item.region && REGION_MAP[item.region]?.currency) ||
+              'EUR',
             ...variantCacheMeta,
             ...variantMeta,
             ...(resources.length > 0 ? { resources } : {}),
@@ -543,6 +747,29 @@ export function CostDatabaseSearchModal({
   const fmtRate = (n: number) =>
     new Intl.NumberFormat(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
+  // Compose the count label.  When ``totalCount`` is known we render the
+  // canonical "{{loaded}} of {{total}}" form; while still loading more pages
+  // without a known total we show "{{loaded}}+ items".
+  const countLabel = (() => {
+    if (isLoading && items.length === 0) {
+      return t('boq.tree_loading', { defaultValue: 'Loading...' });
+    }
+    if (totalCount != null) {
+      return t('boq.loaded_n_of_m', {
+        defaultValue: '{{loaded}} of {{total}} items',
+        loaded: items.length.toLocaleString(),
+        total: totalCount.toLocaleString(),
+      });
+    }
+    return t('boq.cost_results_count', {
+      defaultValue: '{{loaded}}+ items',
+      loaded: items.length.toLocaleString(),
+    });
+  })();
+
+  // Active filter chips — selected category breadcrumb + free-text query.
+  const hasActiveFilters = selectedPath !== '' || query.length >= 2;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose} aria-hidden="true">
       <div
@@ -551,11 +778,11 @@ export function CostDatabaseSearchModal({
         aria-label={onSelectForResources
           ? t('boq.add_resource_from_database', { defaultValue: 'Add Resources from Database' })
           : t('boq.add_from_database', { defaultValue: 'Add from Cost Database' })}
-        className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-2xl mx-4 overflow-hidden animate-fade-in"
+        className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-6xl mx-4 max-h-[88vh] overflow-hidden animate-fade-in flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-border-light">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-border-light shrink-0">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue">
             <Database size={18} />
           </div>
@@ -576,18 +803,11 @@ export function CostDatabaseSearchModal({
           </button>
         </div>
 
-        {/* Region tabs */}
-        <div className="px-6 py-2 border-b border-border-light flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-          <button
-            onClick={() => setRegion('')}
-            className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              region === ''
-                ? 'bg-oe-blue text-white'
-                : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary'
-            }`}
-          >
-            {t('catalog.all_regions', { defaultValue: 'All databases' })}
-          </button>
+        {/* Region tabs — country DBs first, "All databases" pushed to the end
+            because selecting it triggers a multi-region scan that takes 10+ s
+            on demo data. Defaulting and listing country DBs first means the
+            user pays that cost only on explicit opt-in. */}
+        <div className="px-6 py-2 border-b border-border-light flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
           {regions.map((r) => {
             const info = REGION_MAP[r];
             const label = info?.name || r;
@@ -612,155 +832,319 @@ export function CostDatabaseSearchModal({
               </button>
             );
           })}
+          <button
+            onClick={() => setRegion('')}
+            className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+              region === ''
+                ? 'bg-oe-blue text-white'
+                : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary'
+            }`}
+          >
+            {t('catalog.all_regions', { defaultValue: 'All databases' })}
+          </button>
         </div>
 
-        {/* Search */}
-        <div className="px-6 py-3 border-b border-border-light">
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
-              <Search size={16} />
+        {/* Two-pane body: tree (left) + search/list (right) */}
+        <div className="flex flex-1 min-h-0 overflow-hidden">
+          {/* Left: category tree.  Hidden on mobile; popover variant rendered
+              inside the right pane via mobileTreeOpen.  Desktop sidebar is
+              fixed-width (w-72) with its own scroll. */}
+          <aside
+            className="hidden md:flex w-72 shrink-0 flex-col border-r border-border-light bg-surface-secondary/30"
+            data-testid="cost-modal-sidebar"
+          >
+            <div className="px-3 pt-3 pb-1 text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+              {t('boq.cost_tree_title', { defaultValue: 'Categories' })}
             </div>
-            <input
-              autoFocus
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t('boq.search_cost_items', { defaultValue: 'Search cost items by description...' })}
-              aria-label={t('boq.search_cost_items', { defaultValue: 'Search cost items by description...' })}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue"
-            />
-          </div>
-        </div>
-
-        {/* Results */}
-        <div className="max-h-[400px] overflow-y-auto">
-          {isLoading ? (
-            <div className="px-6 py-8 text-center">
-              <Loader2 size={20} className="mx-auto mb-2 animate-spin text-oe-blue" />
-              <p className="text-xs text-content-tertiary">{t('common.loading')}</p>
-            </div>
-          ) : items.length === 0 ? (
-            // Two distinct empty states:
-            //   1. No databases imported on this server → guide the user to
-            //      `/costs/import` instead of leaving them stuck on a generic
-            //      "no results" message. Detected by regions list being empty
-            //      AND the user not having narrowed by query.
-            //   2. Databases exist but the current query/region filter has no
-            //      matches → show the original neutral message.
-            regions.length === 0 && query.length < 2 && !region ? (
-              <div className="px-6 py-10 text-center">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-oe-blue-subtle/40">
-                  <Database size={22} className="text-oe-blue" />
-                </div>
-                <h3 className="mb-1 text-sm font-semibold text-content-primary">
-                  {t('boq.no_databases_title', {
-                    defaultValue: 'No cost database installed yet',
-                  })}
-                </h3>
-                <p className="mx-auto mb-4 max-w-sm text-xs text-content-tertiary">
-                  {t('boq.no_databases_help', {
-                    defaultValue:
-                      "There's no cost-rate database on this server, so search has nothing to show. Import a free CWICR pack — 30 regional databases are one click away.",
+            {treeLoading ? (
+              <div className="flex flex-1 items-center justify-center text-xs text-content-tertiary">
+                <Loader2 size={14} className="mr-1.5 animate-spin" />
+                {t('boq.tree_loading', { defaultValue: 'Loading...' })}
+              </div>
+            ) : treeError ? (
+              <div className="px-3 py-4 text-center">
+                <AlertCircle size={16} className="mx-auto mb-1.5 text-semantic-error" />
+                <p className="mb-2 text-2xs text-content-tertiary">
+                  {t('boq.cost_tree_error', {
+                    defaultValue: 'Could not load categories',
                   })}
                 </p>
                 <Button
+                  variant="secondary"
                   size="sm"
-                  onClick={() => {
-                    onClose();
-                    navigate('/costs/import');
-                  }}
-                  icon={<Plus size={14} />}
+                  onClick={() => refetchTree()}
                 >
-                  {t('boq.import_database_cta', {
-                    defaultValue: 'Import a database',
-                  })}
+                  {t('common.retry', { defaultValue: 'Retry' })}
                 </Button>
               </div>
             ) : (
-              <div className="px-6 py-8 text-center">
-                <p className="text-sm text-content-tertiary">
-                  {t('boq.no_items_found', { defaultValue: 'No matching items found' })}
-                </p>
+              <CostCategoryTree
+                tree={categoryTree ?? []}
+                selectedPath={selectedPath}
+                onSelect={handleSelectPath}
+                t={t}
+              />
+            )}
+          </aside>
+
+          {/* Right pane */}
+          <div className="flex flex-1 min-w-0 flex-col">
+            {/* Search */}
+            <div className="px-6 py-3 border-b border-border-light shrink-0 flex items-center gap-2">
+              {/* Mobile-only "Categories" toggle */}
+              <button
+                type="button"
+                onClick={() => setMobileTreeOpen((v) => !v)}
+                className="md:hidden flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-secondary"
+                aria-expanded={mobileTreeOpen}
+              >
+                <span>{t('boq.cost_tree_title', { defaultValue: 'Categories' })}</span>
+                <ChevronDown size={12} />
+              </button>
+              <div className="relative flex-1">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
+                  <Search size={16} />
+                </div>
+                <input
+                  autoFocus
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={t('boq.search_cost_items', { defaultValue: 'Search cost items by description...' })}
+                  aria-label={t('boq.search_cost_items', { defaultValue: 'Search cost items by description...' })}
+                  className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue"
+                />
               </div>
-            )
-          ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-surface-tertiary sticky top-0">
-                <tr>
-                  <th className="px-3 py-2 w-8" />
-                  <th className="px-3 py-2 text-left text-xs font-medium text-content-secondary">{t('boq.description')}</th>
-                  <th className="px-3 py-2 text-center text-xs font-medium text-content-secondary w-16">{t('boq.unit')}</th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-content-secondary w-24">{t('costs.rate', 'Rate')}</th>
-                  <th className="px-3 py-2 text-center text-xs font-medium text-content-secondary w-20">
-                    {t('boq.region', { defaultValue: 'Database' })}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-light">
-                {items.map((item) => {
-                  const isSel = selected.has(item.id);
-                  return (
-                    <tr
-                      key={item.id}
-                      onClick={() => toggleSelect(item.id)}
-                      className={`cursor-pointer transition-colors ${isSel ? 'bg-oe-blue-subtle/20' : 'hover:bg-surface-secondary/50'}`}
+            </div>
+
+            {/* Mobile category-tree popover */}
+            {mobileTreeOpen && (
+              <div className="md:hidden border-b border-border-light bg-surface-secondary/30 max-h-72 overflow-hidden flex flex-col">
+                {treeLoading ? (
+                  <div className="px-3 py-4 text-center text-xs text-content-tertiary">
+                    <Loader2 size={14} className="mx-auto animate-spin" />
+                  </div>
+                ) : treeError ? (
+                  <div className="px-3 py-4 text-center">
+                    <p className="mb-2 text-2xs text-content-tertiary">
+                      {t('boq.cost_tree_error', {
+                        defaultValue: 'Could not load categories',
+                      })}
+                    </p>
+                    <Button variant="secondary" size="sm" onClick={() => refetchTree()}>
+                      {t('common.retry', { defaultValue: 'Retry' })}
+                    </Button>
+                  </div>
+                ) : (
+                  <CostCategoryTree
+                    tree={categoryTree ?? []}
+                    selectedPath={selectedPath}
+                    onSelect={handleSelectPath}
+                    t={t}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Active filter chips + result count */}
+            <div className="flex items-center gap-2 px-6 py-2 border-b border-border-light shrink-0 text-2xs text-content-tertiary flex-wrap">
+              <span data-testid="cost-results-count">{countLabel}</span>
+              {hasActiveFilters && <span className="text-content-quaternary">·</span>}
+              {selectedPath && (
+                <span
+                  data-testid="filter-chip-category"
+                  className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle/60 text-oe-blue px-2 py-0.5 text-2xs font-medium"
+                >
+                  <span title={selectedPath} className="max-w-[200px] truncate">
+                    {selectedPath
+                      .split('/')
+                      .map((seg) =>
+                        seg === '__unspecified__'
+                          ? t('boq.uncategorized', { defaultValue: '(Uncategorized)' })
+                          : seg,
+                      )
+                      .join(' / ')}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPath('')}
+                    aria-label={t('boq.clear_filter', { defaultValue: 'Clear filter' })}
+                    className="hover:text-oe-blue-active"
+                  >
+                    <X size={10} />
+                  </button>
+                </span>
+              )}
+              {query.length >= 2 && (
+                <span
+                  data-testid="filter-chip-query"
+                  className="inline-flex items-center gap-1 rounded-full bg-surface-tertiary text-content-secondary px-2 py-0.5 text-2xs font-medium"
+                >
+                  <Search size={10} />
+                  <span className="max-w-[140px] truncate">{query}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQuery('')}
+                    aria-label={t('boq.clear_filter', { defaultValue: 'Clear filter' })}
+                    className="hover:text-content-primary"
+                  >
+                    <X size={10} />
+                  </button>
+                </span>
+              )}
+            </div>
+
+            {/* Results */}
+            <div
+              ref={listScrollRef}
+              className="flex-1 overflow-y-auto"
+              data-testid="cost-results-scroll"
+            >
+              {isLoading ? (
+                <div className="px-6 py-8 text-center">
+                  <Loader2 size={20} className="mx-auto mb-2 animate-spin text-oe-blue" />
+                  <p className="text-xs text-content-tertiary">{t('common.loading')}</p>
+                </div>
+              ) : items.length === 0 ? (
+                regions.length === 0 && query.length < 2 && !region && !selectedPath ? (
+                  <div className="px-6 py-10 text-center">
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-oe-blue-subtle/40">
+                      <Database size={22} className="text-oe-blue" />
+                    </div>
+                    <h3 className="mb-1 text-sm font-semibold text-content-primary">
+                      {t('boq.no_databases_title', {
+                        defaultValue: 'No cost database installed yet',
+                      })}
+                    </h3>
+                    <p className="mx-auto mb-4 max-w-sm text-xs text-content-tertiary">
+                      {t('boq.no_databases_help', {
+                        defaultValue:
+                          "There's no cost-rate database on this server, so search has nothing to show. Import a free CWICR pack — 30 regional databases are one click away.",
+                      })}
+                    </p>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        onClose();
+                        navigate('/costs/import');
+                      }}
+                      icon={<Plus size={14} />}
                     >
-                      <td className="px-3 py-2.5">
-                        <div className={`h-4 w-4 rounded border-2 flex items-center justify-center ${isSel ? 'border-oe-blue bg-oe-blue' : 'border-content-quaternary'}`}>
-                          {isSel && <Check size={10} className="text-white" />}
-                        </div>
-                      </td>
-                      <td className="px-3 py-2.5 max-w-[300px]">
-                        <span className="text-content-primary truncate block" title={item.description}>{item.description}</span>
-                        <span className="text-2xs text-content-quaternary font-mono">{item.code}</span>
-                      </td>
-                      <td className="px-3 py-2.5 text-center">
-                        <Badge variant="neutral" size="sm">{item.unit}</Badge>
-                      </td>
-                      <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-content-primary">
-                        <div className="inline-flex items-center gap-1.5">
-                          <span>{fmtRate(item.rate)}</span>
-                          {(() => {
-                            // Surface CWICR abstract-resource variants in the
-                            // search modal so the user knows clicking Add will
-                            // open a variant picker rather than apply blindly.
-                            const vc = item.metadata_?.variant_stats?.count ?? 0;
-                            const vs = item.metadata_?.variant_stats;
-                            if (vc < 2 || !vs) return null;
-                            return (
-                              <Badge variant="blue" size="sm" className="text-2xs">
-                                <span title={`${fmtRate(vs.min)} – ${fmtRate(vs.max)}`}>
-                                  {t('costs.variants_count', { count: vc, defaultValue: '{{count}} variants' })}
-                                </span>
-                              </Badge>
-                            );
-                          })()}
-                        </div>
-                      </td>
-                      <td className="px-3 py-2.5 text-center">
-                        {(() => {
-                          const info = item.region ? REGION_MAP[item.region] : null;
-                          if (!info) return <span className="text-2xs text-content-quaternary">&mdash;</span>;
-                          return (
-                            <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
-                              {info.flag && info.flag !== 'custom' && (
-                                <CountryFlag code={info.flag} size={11} />
-                              )}
-                              <span className="truncate max-w-[60px]">{info.label?.split(' ')[0] || item.region}</span>
-                            </span>
-                          );
-                        })()}
-                      </td>
+                      {t('boq.import_database_cta', {
+                        defaultValue: 'Import a database',
+                      })}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="px-6 py-8 text-center">
+                    <p className="text-sm text-content-tertiary">
+                      {t('boq.no_items_found', { defaultValue: 'No matching items found' })}
+                    </p>
+                  </div>
+                )
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="bg-surface-tertiary sticky top-0 z-10">
+                    <tr>
+                      <th className="px-3 py-2 w-8" />
+                      <th className="px-3 py-2 text-left text-xs font-medium text-content-secondary">{t('boq.description')}</th>
+                      <th className="px-3 py-2 text-center text-xs font-medium text-content-secondary w-16">{t('boq.unit')}</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-content-secondary w-24">{t('costs.rate', 'Rate')}</th>
+                      <th className="px-3 py-2 text-center text-xs font-medium text-content-secondary w-20">
+                        {t('boq.region', { defaultValue: 'Database' })}
+                      </th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
+                  </thead>
+                  <tbody className="divide-y divide-border-light">
+                    {items.map((item) => {
+                      const isSel = selected.has(item.id);
+                      return (
+                        <tr
+                          key={item.id}
+                          onClick={() => toggleSelect(item.id)}
+                          className={`cursor-pointer transition-colors ${isSel ? 'bg-oe-blue-subtle/20' : 'hover:bg-surface-secondary/50'}`}
+                        >
+                          <td className="px-3 py-2.5">
+                            <div className={`h-4 w-4 rounded border-2 flex items-center justify-center ${isSel ? 'border-oe-blue bg-oe-blue' : 'border-content-quaternary'}`}>
+                              {isSel && <Check size={10} className="text-white" />}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5 max-w-[420px]">
+                            <span className="text-content-primary truncate block" title={item.description}>{item.description}</span>
+                            <span className="text-2xs text-content-quaternary font-mono">{item.code}</span>
+                          </td>
+                          <td className="px-3 py-2.5 text-center">
+                            <Badge variant="neutral" size="sm">{item.unit}</Badge>
+                          </td>
+                          <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-content-primary">
+                            <div className="inline-flex items-center gap-1.5">
+                              <span>{fmtRate(item.rate)}</span>
+                              {(() => {
+                                const vc = item.metadata_?.variant_stats?.count ?? 0;
+                                const vs = item.metadata_?.variant_stats;
+                                if (vc < 2 || !vs) return null;
+                                return (
+                                  <Badge variant="blue" size="sm" className="text-2xs">
+                                    <span title={`${fmtRate(vs.min)} – ${fmtRate(vs.max)}`}>
+                                      {t('costs.variants_count', { count: vc, defaultValue: '{{count}} variants' })}
+                                    </span>
+                                  </Badge>
+                                );
+                              })()}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5 text-center">
+                            {(() => {
+                              const info = item.region ? REGION_MAP[item.region] : null;
+                              if (!info) return <span className="text-2xs text-content-quaternary">&mdash;</span>;
+                              return (
+                                <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
+                                  {info.flag && info.flag !== 'custom' && (
+                                    <CountryFlag code={info.flag} size={11} />
+                                  )}
+                                  <span className="truncate max-w-[60px]">{info.label?.split(' ')[0] || item.region}</span>
+                                </span>
+                              );
+                            })()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+
+              {/* Infinite-scroll sentinel + Load-more fallback button.
+                  The button is purely a fallback for environments where
+                  IntersectionObserver fails (older browsers, JSDOM). */}
+              {items.length > 0 && hasNextPage && (
+                <div
+                  ref={sentinelRef}
+                  data-testid="cost-results-sentinel"
+                  className="flex items-center justify-center py-3"
+                >
+                  {isFetchingNextPage ? (
+                    <span className="inline-flex items-center gap-1.5 text-2xs text-content-tertiary">
+                      <Loader2 size={12} className="animate-spin" />
+                      {t('boq.tree_loading', { defaultValue: 'Loading...' })}
+                    </span>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => fetchNextPage()}
+                    >
+                      {t('boq.load_more', { defaultValue: 'Load more' })}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-3 border-t border-border-light bg-surface-secondary/30">
+        <div className="flex items-center justify-between px-6 py-3 border-t border-border-light bg-surface-secondary/30 shrink-0">
           <span className="text-xs text-content-tertiary">
             {selected.size > 0
               ? `${selected.size} ${t('boq.items_selected', { defaultValue: 'items selected' })}`

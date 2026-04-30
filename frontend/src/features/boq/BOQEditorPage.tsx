@@ -167,6 +167,18 @@ export function BOQEditorPage() {
     if (!meta || typeof meta !== 'object') return [];
     return (meta as Record<string, unknown>).custom_columns as import('./grid/columnDefs').CustomColumnDef[] ?? [];
   }, [boq]);
+
+  // BOQ-scoped named variables ($GFA, $LABOR_RATE, …) — read from the same
+  // metadata bag and forwarded to the grid so calculated custom columns
+  // can resolve them. v2.7.0/E.
+  const boqVariables = useMemo<import('./api').BOQVariable[]>(() => {
+    const raw = boq as unknown as Record<string, unknown> | undefined;
+    const meta = raw?.metadata ?? raw?.metadata_;
+    if (!meta || typeof meta !== 'object') return [];
+    const vs = (meta as Record<string, unknown>).variables;
+    if (!Array.isArray(vs)) return [];
+    return vs as import('./api').BOQVariable[];
+  }, [boq]);
   const fmt = useMemo(
     () => createFormatter(locale),
     [locale],
@@ -1730,6 +1742,75 @@ export function BOQEditorPage() {
     [boq?.positions, boqId, currencySymbol, addToast, t],
   );
 
+  /** Save the variant-header row to the user's catalog under a custom name.
+   *
+   *  The variant header is a SYNTHETIC grid row — it has no entry in
+   *  ``position.metadata.resources`` — so ``handleSaveResourceToCatalog``
+   *  can't reach it via index. This handler reads the chosen variant
+   *  directly off the position (``metadata.cost_item_variants`` +
+   *  ``metadata.variant``) and POSTs the user's edited name as a brand-new
+   *  catalog article so the user keeps a private copy ("превратится в
+   *  обычный артикул"). */
+  const handleSaveVariantHeaderToCatalog = useCallback(
+    async (positionId: string, customName: string) => {
+      const pos = boq?.positions.find((p) => p.id === positionId);
+      if (!pos) return;
+      const meta = (pos.metadata ?? {}) as Record<string, unknown>;
+      const variants = (meta.cost_item_variants as Array<Record<string, unknown>> | undefined) ?? [];
+      const chosenCode = (meta.variant as string | undefined) ?? null;
+      const chosen =
+        (chosenCode ? variants.find((v) => (v.code as string) === chosenCode) : null) ??
+        variants[0];
+      if (!chosen) return;
+      const trimmed = customName.trim();
+      if (!trimmed) return;
+      // Currency resolution chain: per-variant override (rare) → position
+      // metadata.currency (set when the CWICR row was applied to the
+      // position) → BOQ symbol fallback. The catalog should keep the
+      // article in its native currency, not the project base — that
+      // matches the rest of the variant pipeline.
+      const posMetaCurrency = (meta.currency as string | undefined) || undefined;
+      const catalogCurrency =
+        (chosen.currency as string | undefined) ||
+        posMetaCurrency ||
+        (currencySymbol === '€' ? 'EUR' : currencySymbol === '£' ? 'GBP' : currencySymbol === '$' ? 'USD' : 'EUR');
+      const code = `MY-VAR-${Date.now().toString(36).toUpperCase()}`;
+      try {
+        await apiPost('/v1/catalog/', {
+          resource_code: code,
+          name: trimmed,
+          resource_type: 'material',
+          category: 'Variant',
+          unit: pos.unit,
+          base_price: chosen.price ?? pos.unit_rate,
+          min_price: chosen.price ?? pos.unit_rate,
+          max_price: chosen.price ?? pos.unit_rate,
+          currency: catalogCurrency,
+          source: 'boq_variant_promote',
+          region: 'CUSTOM',
+          specifications: {
+            source_position: pos.description,
+            source_boq_id: boqId,
+            promoted_from_variant: chosen.code ?? null,
+            saved_at: new Date().toISOString(),
+          },
+          metadata: {},
+        });
+        addToast({
+          type: 'success',
+          title: t('boq.saved_to_catalog', { defaultValue: 'Saved to catalog' }),
+          message: trimmed,
+        });
+      } catch {
+        addToast({
+          type: 'error',
+          title: t('boq.save_to_catalog_failed', { defaultValue: 'Save failed' }),
+        });
+      }
+    },
+    [boq?.positions, boqId, currencySymbol, addToast, t],
+  );
+
   /** Re-pick the variant on an already-added resource entry (v2.6.26+).
    *
    *  Reads ``available_variants`` cached on the resource at apply-time (see
@@ -1816,10 +1897,30 @@ export function BOQEditorPage() {
         variantCache.available_variant_stats = itemVariantStats;
       }
 
+      // Catalog currency stamp — when the cost item carries an explicit
+      // currency, propagate it to every synthesized resource entry so the
+      // BOQ row's per-resource currency cell + the variant picker both
+      // show the catalog's native currency instead of falling back to the
+      // BOQ base. ``itemCurrency`` is omitted (not falsified) when the
+      // catalog row didn't supply one — that lets the existing baseCurrency
+      // fallback still apply for purely manual rows.
+      const itemCurrency = item.currency && item.currency.trim() ? item.currency : undefined;
+      const currencyStamp = itemCurrency ? { currency: itemCurrency } : {};
+
       if (picked?.kind === 'variant') {
         const v = picked.variant;
+        // Resource name = full label (common_start + variable_part). Replaces
+        // the rate-code description so the BOQ row shows the concrete
+        // material the estimator chose, not the abstract group. Falls back
+        // to the legacy "description (label)" form for pre-v2.6.30 imports
+        // that didn't capture ``common_start``.
+        const fullVariant = itemVariants?.find((x) => x.label === v.label);
+        const commonBase = itemVariantStats?.common_start ?? '';
+        const resolvedName =
+          fullVariant?.full_label ||
+          (commonBase ? `${commonBase} ${v.label}`.trim() : `${item.description} (${v.label})`);
         newResources = [{
-          name: `${item.description} (${v.label})`,
+          name: resolvedName,
           code: item.code,
           type: 'material',
           unit: item.unit,
@@ -1827,6 +1928,7 @@ export function BOQEditorPage() {
           unit_rate: v.price,
           total: v.price,
           variant: { label: v.label, price: v.price, index: v.index },
+          ...currencyStamp,
           ...variantCache,
         }];
       } else if (picked?.kind === 'default') {
@@ -1839,6 +1941,7 @@ export function BOQEditorPage() {
           unit_rate: item.rate,
           total: item.rate,
           variant_default: picked.strategy,
+          ...currencyStamp,
           ...variantCache,
         }];
       } else {
@@ -1847,6 +1950,7 @@ export function BOQEditorPage() {
               name: c.name, code: c.code || '', type: c.type || 'other',
               unit: c.unit, quantity: c.quantity, unit_rate: c.unit_rate,
               total: c.cost || c.quantity * c.unit_rate,
+              ...currencyStamp,
             }))
           : [{
               name: item.description, code: item.code, type: 'material',
@@ -1856,6 +1960,7 @@ export function BOQEditorPage() {
               // the item has them — that lets the user "promote" a plain
               // single-rate resource into an explicit variant pick later
               // via the row's re-pick pill.
+              ...currencyStamp,
               ...variantCache,
             }];
       }
@@ -2336,15 +2441,31 @@ export function BOQEditorPage() {
       const form = new FormData();
       form.append('file', file);
 
+      // GAEB DA XML files (.x81/.x83/.x84/.xml) have a dedicated parser on
+      // the backend (``/import/gaeb/``) that understands the GAEB-specific
+      // structure — namespace-agnostic, X81/X83/X84 schema-aware. Smart
+      // import doesn't recognise these, so the file would be silently
+      // rejected. Route by extension before posting.
+      const ext = (file.name.split('.').pop() ?? '').toLowerCase();
+      const isGaeb = ['x81', 'x83', 'x84'].includes(ext) ||
+        (ext === 'xml' && /\.(x8[134]|gaeb)\.xml$/i.test(file.name));
+      const endpoint = isGaeb
+        ? `/api/v1/boq/boqs/${boqId}/import/gaeb/`
+        : `/api/v1/boq/boqs/${boqId}/import/smart/`;
+
       // Tell the user *immediately* that the import is in flight — the server
       // can take 30+ seconds for large XLSX/PDF/CAD files, and without this
       // toast the UI looks frozen (Bug 2).
       addToast({
         type: 'info',
         title: t('boq.import_started', { defaultValue: 'Importing {{name}}…', name: file.name }),
-        message: t('boq.import_started_hint', {
-          defaultValue: 'Large files (PDF / CAD / 1000+ rows) may take up to 60 seconds.',
-        }),
+        message: isGaeb
+          ? t('boq.import_started_gaeb_hint', {
+              defaultValue: 'Parsing GAEB XML — namespace-agnostic, X81/X83/X84 supported.',
+            })
+          : t('boq.import_started_hint', {
+              defaultValue: 'Large files (PDF / CAD / 1000+ rows) may take up to 60 seconds.',
+            }),
       });
 
       // Abort if the server doesn't respond within 90 seconds. Without a timeout
@@ -2353,7 +2474,7 @@ export function BOQEditorPage() {
       const timeoutId = setTimeout(() => controller.abort(), 90_000);
 
       try {
-        const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/smart/`, {
+        const res = await fetch(endpoint, {
           method: 'POST',
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           body: form,
@@ -2369,24 +2490,35 @@ export function BOQEditorPage() {
         const result: {
           imported: number;
           errors: { item?: string; error: string }[];
-          total_items: number;
-          method: string;
-          model_used: string | null;
+          total_items?: number;
+          method?: string;
+          model_used?: string | null;
           cad_format?: string;
           cad_elements?: number;
+          // GAEB-specific
+          skipped?: number;
+          sections?: unknown[];
+          source_format?: string;
+          currency?: string;
         } = await res.json();
 
         let methodLabel: string;
-        if (result.method === 'cad_ai') {
+        if (isGaeb || result.source_format === 'gaeb') {
+          const sectionCount = Array.isArray(result.sections) ? result.sections.length : 0;
+          methodLabel = ` (GAEB XML, ${sectionCount} section${sectionCount === 1 ? '' : 's'}${result.currency ? `, ${result.currency}` : ''})`;
+        } else if (result.method === 'cad_ai') {
           methodLabel = ` (CAD + ${result.model_used ?? 'AI'}, ${result.cad_elements ?? 0} elements)`;
         } else if (result.method === 'ai') {
           methodLabel = ` (AI: ${result.model_used ?? 'auto'})`;
         } else {
           methodLabel = ' (direct)';
         }
+        // GAEB returns ``skipped`` instead of ``total_items`` — derive a
+        // reasonable denominator so the toast reads cleanly for both shapes.
+        const denominator = result.total_items ?? (result.imported + (result.skipped ?? 0));
         addToast({
           type: result.imported > 0 ? 'success' : 'warning',
-          title: `Imported ${result.imported} of ${result.total_items} items${methodLabel}`,
+          title: `Imported ${result.imported} of ${denominator} items${methodLabel}`,
           message:
             result.errors.length > 0
               ? `${result.errors.length} error(s) occurred`
@@ -2820,6 +2952,7 @@ export function BOQEditorPage() {
           onUpdateResource={handleUpdateResource}
           onUpdateResourceFields={handleUpdateResourceFields}
           onSaveResourceToCatalog={handleSaveResourceToCatalog}
+          onSaveVariantHeaderToCatalog={handleSaveVariantHeaderToCatalog}
           onRepickResourceVariant={handleRepickResourceVariant}
           onOpenCostDbForPosition={handleOpenCostDbForPosition}
           onOpenCatalogForPosition={handleOpenCatalogForPosition}
@@ -2832,6 +2965,7 @@ export function BOQEditorPage() {
           onApplyAnomalySuggestion={handleApplyAnomalySuggestion}
           onSaveAsAssembly={handleSaveAsAssembly}
           customColumns={boqCustomColumns}
+          boqVariables={boqVariables}
           bimModelId={bimModelId}
           onHighlightBIMElements={(elementIds) => {
             setBOQLinkSelection(null, elementIds);
@@ -2962,6 +3096,10 @@ export function BOQEditorPage() {
               description: item.description,
               unit: item.unit,
               rate: item.rate,
+              // Forward the catalog currency so the resource entry keeps
+              // its native currency (the picker + repick endpoint then
+              // honour it instead of silently coercing to the BOQ base).
+              currency: item.currency,
               classification: item.classification || {},
               components: (item.components || []).map((c) => ({
                 name: c.name,
@@ -3155,6 +3293,7 @@ export function BOQEditorPage() {
           onClose={() => setCustomColumnsOpen(false)}
           boqId={boqId}
           positions={boq?.positions}
+          variables={boqVariables}
         />
       )}
 

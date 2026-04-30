@@ -11,7 +11,7 @@ export const manifest: ModuleManifest = {
   version: '1.0.0',
   icon: FileText,
   category: 'tools',
-  defaultEnabled: false,
+  defaultEnabled: true,
   depends: ['boq'],
   routes: [
     {
@@ -26,7 +26,6 @@ export const manifest: ModuleManifest = {
       to: '/gaeb-exchange',
       icon: FileText,
       group: 'tools',
-      advancedOnly: true,
     },
   ],
   searchEntries: [
