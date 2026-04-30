@@ -74,7 +74,9 @@ frontend/stats.html
 logs/
 
 # Generated
-backend/locales/
+# backend/locales/ — kept tracked: stub locales ship with the wheel,
+# auto-generation now happens on top of tracked baselines so new
+# langs added in source DON'T silently drop out of releases.
 i18n-audit/
 translation_keys.txt
 

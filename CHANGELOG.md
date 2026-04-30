@@ -5,6 +5,15 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.36] — 2026-04-30
+
+### Added
+- 5 new UI languages: Croatian (`hr`), Indonesian (`id`), Romanian (`ro`), Thai (`th`), Vietnamese (`vi`). Frontend `SUPPORTED_LANGUAGES` now 26. Backend + marketing locales aligned (`hi` was missing from backend, `bg`+`hi` from marketing — added).
+
+### Fixed
+- `backend/pyproject.toml` version was out of lockstep with `frontend/package.json` and `CHANGELOG.md` in v2.6.35 (committed at 2.6.34; PyPI build patched it). Lockstep restored at v2.6.36.
+- `backend/locales/` removed from `.gitignore` — new UI-language stubs were silently dropped from git on v2.6.35. Tracked baselines so source-added langs ship in releases.
+
 ## [2.6.35] — 2026-04-30
 
 ### Fixed

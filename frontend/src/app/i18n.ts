@@ -24,6 +24,11 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'da', name: 'Dansk', flag: '🇩🇰', country: 'dk' },
   { code: 'fi', name: 'Suomi', flag: '🇫🇮', country: 'fi' },
   { code: 'bg', name: 'Български', flag: '🇧🇬', country: 'bg' },
+  { code: 'hr', name: 'Hrvatski', flag: '🇭🇷', country: 'hr' },
+  { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩', country: 'id' },
+  { code: 'ro', name: 'Română', flag: '🇷🇴', country: 'ro' },
+  { code: 'th', name: 'ไทย', flag: '🇹🇭', country: 'th' },
+  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳', country: 'vn' },
 ];
 
 export function getLanguageByCode(code: string): (typeof SUPPORTED_LANGUAGES)[number] {
