@@ -1281,6 +1281,15 @@ export function CatalogPage() {
 
   const handleDeleteRegion = useCallback(
     async (regionId: string) => {
+      // Destructive: wipes every resource in the region. Confirm before firing
+      // so a stray click can't nuke a populated region.
+      const confirmed = window.confirm(
+        t('catalog.delete_region_confirm', {
+          defaultValue: 'Delete region "{{region}}" and all its resources? This cannot be undone.',
+          region: regionId,
+        }),
+      );
+      if (!confirmed) return;
       try {
         const result = await apiDelete<{ deleted: number; region: string }>(
           `/v1/catalog/region/${regionId}`,
@@ -2370,10 +2379,16 @@ function CreateResourceModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-md mx-4 animate-fade-in" onClick={(e) => e.stopPropagation()}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="catalog-create-resource-title"
+        className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-md mx-4 animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 id="catalog-create-resource-title" className="text-base font-semibold text-content-primary">
               {t('catalog.create_resource', { defaultValue: 'Add Custom Resource' })}
             </h2>
             <p className="text-xs text-content-tertiary">

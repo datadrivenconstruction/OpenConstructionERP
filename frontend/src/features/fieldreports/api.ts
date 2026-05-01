@@ -124,7 +124,7 @@ export async function fetchFieldReports(
   if (filters?.status) params.set('status', filters.status);
   if (filters?.type) params.set('type', filters.type);
   const res = await apiGet<FieldReport[] | { items: FieldReport[] }>(
-    `/v1/fieldreports/reports?${params.toString()}`,
+    `/v1/fieldreports/reports/?${params.toString()}`,
   );
   return Array.isArray(res) ? res : res.items ?? [];
 }

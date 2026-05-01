@@ -108,7 +108,7 @@ export function ContactSearchInput({
     setIsLoading(true);
     try {
       const data = await apiGet<ContactSearchResponse>(
-        `/v1/contacts/search?q=${encodeURIComponent(q)}&limit=10`,
+        `/v1/contacts/search/?q=${encodeURIComponent(q)}&limit=10`,
       );
       setResults(data.items || []);
       setIsOpen(true);

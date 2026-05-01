@@ -5,6 +5,15 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.41] — 2026-05-01
+
+### Fixed
+- 3 more trailing-slash 404/422 endpoints surfaced after the v2.6.40 sweep: `/v1/procurement/goods-receipts`, `/v1/contacts/search`, `/v1/fieldreports/reports` — frontend now hits the slashed form so the lists actually populate.
+- `Delete Region` on `/catalog` ran without confirmation — destructive action wiped the entire region's resources on a single click. Now gated by `window.confirm`, matching the BOQ section-delete pattern.
+
+### Changed
+- `CreateResourceModal` (catalog) given proper `role="dialog"` + `aria-modal="true"` + `aria-labelledby` — was a bare div, invisible to screen readers and to the QA-crawler heuristic.
+
 ## [2.6.40] — 2026-05-01
 
 ### Fixed

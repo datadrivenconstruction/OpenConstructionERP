@@ -804,7 +804,7 @@ function GoodsReceiptsTab({ projectId }: { projectId: string }) {
     queryKey: ['procurement-gr', projectId],
     queryFn: () =>
       apiGet<{ items: GoodsReceipt[]; total: number }>(
-        `/v1/procurement/goods-receipts?project_id=${projectId}`,
+        `/v1/procurement/goods-receipts/?project_id=${projectId}`,
       ).then((res) => res.items),
   });
 
