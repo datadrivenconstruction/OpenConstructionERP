@@ -154,3 +154,4 @@ backend/_frontend_dist/
 backend/*.log.err
 .claude/settings.local.json
 i18n_audit_report.md
+qa-report/
