@@ -334,6 +334,13 @@ export function CostDatabaseSearchModal({
 
   // Category tree — separate query, scoped to active region.  5-min staleTime
   // matches the backend's cache TTL so we don't refetch on every interaction.
+  // The backend ``/v1/costs/category-tree/`` endpoint accepts a ``depth``
+  // (1..4) param; we keep the modal at the default depth=4 so users can
+  // drill the full classification hierarchy from the sidebar without a
+  // second request. Cold catalogs still feel snappy because the tree
+  // query is independent of the search-results query — the right pane
+  // renders the first 15 items as soon as the search returns, even
+  // before the tree finishes loading.
   const {
     data: categoryTree,
     isLoading: treeLoading,
@@ -369,7 +376,12 @@ export function CostDatabaseSearchModal({
         q: query.length >= 2 ? query : undefined,
         classification_path: selectedPath || undefined,
         cursor: (pageParam as string | null) ?? null,
-        limit: 50,
+        // Small initial page so the modal shows results within ~150 ms even
+        // on a cold catalog. The IntersectionObserver below auto-loads the
+        // next page when the user scrolls near the sentinel — perceived
+        // "infinite scroll" without holding up the first paint on a 50-item
+        // batch fetch + serialization.
+        limit: 15,
       }),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.next_cursor,
@@ -1187,8 +1199,42 @@ export function CostDatabaseSearchModal({
                             </div>
                           </td>
                           <td className="px-3 py-2.5 max-w-[420px]">
-                            <span className="text-content-primary truncate block" title={item.description}>{item.description}</span>
-                            <span className="text-2xs text-content-quaternary font-mono">{item.code}</span>
+                            {(() => {
+                              // Variant resources (CWICR ``price_abstract_resource_*``)
+                              // carry an abstract base name in
+                              // ``metadata_.variant_stats.common_start`` which is the
+                              // user-facing identifier for the resource family
+                              // (e.g. "Beton, Sortenliste C"). The bare
+                              // ``item.description`` is the rate-code description —
+                              // useful as context, but secondary. Render
+                              // ``common_start`` as the primary line and the rate-code
+                              // description as a smaller subtitle when present so the
+                              // estimator can scan variant rows by their material name.
+                              const cs = item.metadata_?.variant_stats?.common_start?.trim() ?? '';
+                              const hasCs = cs.length > 0;
+                              const desc = item.description || 'Unnamed item';
+                              const primary = hasCs ? cs : desc;
+                              const secondary = hasCs && desc && desc !== cs ? desc : '';
+                              return (
+                                <>
+                                  <span
+                                    className="text-content-primary truncate block"
+                                    title={hasCs ? `${cs}\n${desc}` : desc}
+                                  >
+                                    {primary}
+                                  </span>
+                                  {secondary && (
+                                    <span
+                                      className="text-2xs text-content-tertiary truncate block"
+                                      title={secondary}
+                                    >
+                                      {secondary}
+                                    </span>
+                                  )}
+                                  <span className="text-2xs text-content-quaternary font-mono">{item.code}</span>
+                                </>
+                              );
+                            })()}
                           </td>
                           <td className="px-3 py-2.5 text-center">
                             <Badge variant="neutral" size="sm">{item.unit}</Badge>

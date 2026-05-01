@@ -3176,16 +3176,29 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
   } else if (variantCommonStart) {
     composedVariantName = variantCommonStart;
   }
-  // Final name resolution: the stored name always wins when it's
-  // non-empty. The composed variant name is only a fallback for
-  // resources that have no stored name yet (e.g. fresh in-flight picks
-  // before the server roundtrip lands). This keeps user customizations
-  // and legacy abstract-resource prefixes ("Прокат листовой
-  // горячекатаный...") intact across re-renders. Cleanup of buggy
-  // pre-v2.6.31 description+label stamps is done by the one-shot
-  // ``backend/scripts/backfill_variant_prefix.py`` and at apply-time
-  // (BOQModals / BOQEditorPage compose names correctly going forward).
-  const originalName = storedName || composedVariantName;
+  // Final name resolution. Three cases:
+  //   1. No stored name yet (fresh in-flight pick) → use composed.
+  //   2. Stored name + composed name + composed extends stored with the
+  //      common_start prefix → use composed. This self-heals legacy rows
+  //      whose stamp lost the prefix (e.g. stored="C25/30 delivered",
+  //      composed="Beton, Sortenliste C C25/30 delivered") so the
+  //      estimator always sees the abstract base alongside the variable
+  //      part — what the user expects for variant resources.
+  //   3. Otherwise use stored (preserves user-renamed rows unchanged).
+  // The earlier ``backend/scripts/backfill_variant_prefix.py`` migration
+  // covers most legacy rows server-side; this client-side guard catches
+  // the remaining ones without round-tripping.
+  const storedTrim = storedName.trim();
+  const composedTrim = composedVariantName.trim();
+  const composedExtendsStored =
+    storedTrim.length > 0 &&
+    composedTrim.length > storedTrim.length &&
+    variantCommonStart.length > 0 &&
+    composedTrim.toLowerCase().endsWith(storedTrim.toLowerCase()) &&
+    composedTrim.toLowerCase().startsWith(variantCommonStart.toLowerCase());
+  const originalName = composedExtendsStored
+    ? composedVariantName
+    : (storedName || composedVariantName);
   const resourceCode = (data._resourceCode as string | undefined) || '';
 
   const handleQtyChange = useCallback(
@@ -3302,11 +3315,16 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
 
   return (
     <div
-      className={`relative flex items-stretch w-full h-full select-none group/res text-xs border-b border-border-light/50 ${
-        hasVariants
-          ? 'bg-violet-50/60 dark:bg-violet-950/25'
-          : 'bg-surface-secondary/40'
-      }`}
+      // Uniform "sub-row under a position" treatment for ALL resources
+      // (variant + plain). The very subtle background tint + inner top
+      // shadow reads as "indented sub-item" without the heavy violet
+      // wash older variants used. Variant rows still distinguish via the
+      // existing left-edge provenance bar + V-pill in the rate cell, so
+      // we don't need a separate background to call them out.
+      className="relative flex items-stretch w-full h-full select-none group/res text-xs border-b border-border-light/50 transition-colors
+                 bg-surface-secondary/35 dark:bg-surface-secondary/25
+                 shadow-[inset_0_2px_3px_-1px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_3px_-1px_rgba(0,0,0,0.30)]
+                 hover:bg-surface-secondary/55 dark:hover:bg-surface-secondary/40"
       style={{ paddingLeft: `${colWidths.leftPad}px`, paddingRight: '4px' }}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -3670,9 +3688,14 @@ function VariantHeaderResourceRow({
 
   return (
     <div
+      // Same uniform sub-row background as EditableResourceRow so variant
+      // headers and regular resources read as one nested block under the
+      // parent position. The variant identity comes from the violet
+      // provenance bar + VAR chip + "▾ N options" pill, not the bg.
       className="relative flex items-stretch w-full h-full select-none group/vh text-xs
-                 bg-violet-50/60 dark:bg-violet-950/25
+                 bg-surface-secondary/35 dark:bg-surface-secondary/25
                  border-b border-border-light/50
+                 shadow-[inset_0_2px_3px_-1px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_2px_3px_-1px_rgba(0,0,0,0.30)]
                  transition-colors"
       style={{ paddingLeft: `${colWidths.leftPad}px`, paddingRight: '4px' }}
       data-testid={`variant-header-row-${positionId}`}

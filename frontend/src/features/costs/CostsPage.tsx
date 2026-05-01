@@ -368,7 +368,11 @@ function RegionTabBar({
 
 const UNITS = ['', 'm', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'] as const;
 const SOURCES = ['', 'cwicr', 'custom'] as const;
-const PAGE_SIZE = 20;
+// Initial page size kept small so the first paint shows results within
+// ~150ms even on cold-start. The user can navigate to the next page (or
+// scroll-trigger more) without re-fetching the same first batch — react-query
+// caches per (query, offset) key.
+const PAGE_SIZE = 10;
 
 /* ── API ───────────────────────────────────────────────────────────────── */
 
@@ -430,11 +434,15 @@ export function CostsPage() {
   const [recentItems, setRecentItems] = useState<RecentItem[]>(() => loadRecent());
   const [specialTab, setSpecialTab] = useState<'' | 'favourites' | 'recent'>('');
 
-  // Fetch loaded regions list
+  // Fetch loaded regions list. ``staleTime`` keeps the cache hot for 5
+  // minutes so a quick navigation away-and-back doesn't re-fire any of
+  // these aggregates — they only change when a user installs / removes a
+  // database, which already invalidates them explicitly.
   const { data: loadedRegions } = useQuery({
     queryKey: ['costs', 'regions'],
     queryFn: () => apiGet<string[]>('/v1/costs/regions/'),
     retry: false,
+    staleTime: 5 * 60_000,
   });
 
   // Fetch per-region stats (for item counts in tabs)
@@ -442,6 +450,7 @@ export function CostsPage() {
     queryKey: ['costs', 'regions', 'stats'],
     queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats/'),
     retry: false,
+    staleTime: 5 * 60_000,
   });
 
   // Fetch distinct categories (classification.collection values)
@@ -453,6 +462,7 @@ export function CostsPage() {
       return apiGet<string[]>(`/v1/costs/categories/?${params.toString()}`);
     },
     retry: false,
+    staleTime: 5 * 60_000,
   });
 
   // Debounce search query (300ms)

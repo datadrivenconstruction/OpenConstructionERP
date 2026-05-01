@@ -297,40 +297,72 @@ class CostItemRepository:
     async def category_tree(
         self,
         region: str | None = None,
+        depth: int = 4,
+        parent_path: str | None = None,
     ) -> list[dict[str, Any]]:
-        """Aggregate cost items into a 4-level classification tree.
+        """Aggregate cost items into a classification tree.
 
-        Runs a single GROUP BY across the four classification depths and
-        nests the resulting flat rows in Python. NULL / empty values at
-        any depth coalesce into the :data:`UNSPECIFIED_CATEGORY` sentinel
-        so the frontend can localize the label.
+        Runs a single GROUP BY across the requested classification depths
+        and nests the resulting flat rows in Python. NULL / empty values
+        at any depth coalesce into the :data:`UNSPECIFIED_CATEGORY`
+        sentinel so the frontend can localize the label.
 
         Args:
             region: Optional region filter (e.g. ``"DE_BERLIN"``). When
                 ``None``, every active region contributes.
+            depth: How many classification levels to return (1..4). Lower
+                depth = much cheaper query (fewer GROUP BY columns and
+                fewer output rows). The modal opens with ``depth=2`` to
+                paint the sidebar within ~150 ms even on cold catalogs;
+                deeper levels are reachable via ``classification_path``
+                filtering on the search query, which doesn't need them
+                pre-aggregated.
+            parent_path: Optional slash-delimited prefix to scope the
+                aggregation to a sub-branch (e.g. ``"Concrete/Walls"``).
+                Reuses :func:`_split_classification_path` for empty-segment
+                wildcard semantics. Returned nodes start at ``depth+1``
+                relative to the root, but the caller renders them as if
+                they were a fresh top-level — combine with the existing
+                cached top-level tree on the client to lazily extend.
 
         Returns:
             A list of root nodes, each shaped as
             ``{"name": str, "count": int, "children": [...]}``.
         """
-        # Build the four extracted expressions and label them so we can
-        # access by name on the result rows. coalesce() doesn't help here
+        depth = max(1, min(4, depth))
+
+        # Build the extracted expressions and label them so we can access
+        # by name on the result rows. coalesce() doesn't help here
         # (json_extract returns NULL for missing keys, which IS what we
         # want to detect) — we coerce in Python instead so empty strings
         # and missing keys collapse into the same sentinel.
-        col_collection = _classification_expr("collection").label("collection")
-        col_department = _classification_expr("department").label("department")
-        col_section = _classification_expr("section").label("section")
-        col_subsection = _classification_expr("subsection").label("subsection")
+        all_cols = [
+            _classification_expr(key).label(key) for key in _CLASSIFICATION_DEPTHS
+        ]
         cnt = func.count(CostItem.id).label("cnt")
 
+        # Slice to requested depth.  The GROUP BY label list and the row
+        # tuple length follow the same slice so the Python loop below
+        # iterates the correct number of segments per row.
+        active_cols = all_cols[:depth]
+        active_keys = list(_CLASSIFICATION_DEPTHS[:depth])
+
         stmt = (
-            select(col_collection, col_department, col_section, col_subsection, cnt)
+            select(*active_cols, cnt)
             .where(CostItem.is_active.is_(True))
-            .group_by("collection", "department", "section", "subsection")
+            .group_by(*active_keys)
         )
         if region:
             stmt = stmt.where(CostItem.region == region)
+
+        # When a parent prefix is supplied, AND in equality filters at the
+        # appropriate depths so we only aggregate the sub-branch.
+        if parent_path:
+            for depth_idx, segment in enumerate(_split_classification_path(parent_path)):
+                if segment is None:
+                    continue
+                expr = _classification_expr(_CLASSIFICATION_DEPTHS[depth_idx])
+                stmt = stmt.where(expr == segment)
 
         result = await self.session.execute(stmt)
         rows = result.all()
@@ -346,12 +378,7 @@ class CostItemRepository:
             return text if text else UNSPECIFIED_CATEGORY
 
         for row in rows:
-            path = (
-                _norm(row.collection),
-                _norm(row.department),
-                _norm(row.section),
-                _norm(row.subsection),
-            )
+            path = tuple(_norm(getattr(row, key)) for key in active_keys)
             count = int(row.cnt)
             level: dict[str, dict[str, Any]] = tree
             for segment in path:

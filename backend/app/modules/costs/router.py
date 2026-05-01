@@ -538,7 +538,14 @@ async def search_cost_items(
 import time as _time
 
 _region_cache: dict[str, Any] = {"regions": None, "stats": None, "categories": None, "ts": 0}
-_CACHE_TTL = 30  # seconds — short-lived snapshot for /regions, /stats, /categories
+# 5-minute TTL on the regions/stats/categories aggregates. Originally 30 s,
+# but on databases with 100 k+ active cost items the DISTINCT/COUNT scan
+# can take 15-20 s on cold SQLite (no row cached yet). With the short TTL,
+# every navigation between /costs and elsewhere paid that cost again — the
+# user saw an empty sidebar / "loading..." for the first 15 s on every
+# return. Cache wipe still fires on import/delete via _invalidate_cost_cache,
+# so the longer TTL doesn't risk staleness.
+_CACHE_TTL = 300
 
 # The category tree is much heavier to compute (single GROUP BY across the
 # four classification depths against the full active catalog) and rarely
@@ -1242,25 +1249,44 @@ async def get_category_tree(
         default=None,
         description="Restrict the aggregation to a single region (e.g. DE_BERLIN).",
     ),
+    depth: int = Query(
+        default=4,
+        ge=1,
+        le=4,
+        description=(
+            "How many classification levels to return (1..4). The BOQ "
+            "'From Database' modal opens with depth=2 to keep the first "
+            "paint snappy on cold catalogs; deeper levels are reachable "
+            "via the search endpoint's classification_path filter."
+        ),
+    ),
+    parent_path: str | None = Query(
+        default=None,
+        description=(
+            "Optional slash-delimited prefix to scope the aggregation to "
+            "a sub-branch (e.g. 'Concrete/Walls'). Lets clients lazily "
+            "drill into a node without refetching the whole tree."
+        ),
+    ),
 ) -> list[CategoryTreeNode]:
-    """Return the 4-level classification tree for a region.
+    """Return the classification tree for a region.
 
     The tree is nested as
     ``collection → department → section → subsection``. NULL / empty
     values at any depth coalesce into the sentinel ``"__unspecified__"``;
     the frontend is expected to localize this label.
 
-    Cached for 5 minutes per region. The cache is wiped on any
-    import / delete via ``_invalidate_cost_cache()``, so post-import
-    catalogues become visible immediately on the next request.
+    Cached for 5 minutes per (region, depth, parent_path). The cache is
+    wiped on any import / delete via ``_invalidate_cost_cache()``, so
+    post-import catalogues become visible immediately on the next request.
     """
-    cache_key = f"tree::{region or '__all__'}"
+    cache_key = f"tree::{region or '__all__'}::d={depth}::p={parent_path or ''}"
     now = _time.monotonic()
     cached = _category_tree_cache.get(cache_key)
     if cached is not None and now - cached.get("ts", 0) < _CATEGORY_TREE_CACHE_TTL:
         return cached["nodes"]
 
-    raw = await service.category_tree(region=region)
+    raw = await service.category_tree(region=region, depth=depth, parent_path=parent_path)
     nodes = [CategoryTreeNode.model_validate(n) for n in raw]
     _category_tree_cache[cache_key] = {"nodes": nodes, "ts": now}
     return nodes

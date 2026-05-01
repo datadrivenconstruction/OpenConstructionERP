@@ -5,6 +5,26 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.37] — 2026-05-01
+
+### Added
+- `oe_admin` module with `POST /api/v1/admin/qa-reset` for QA-pipeline / crawler reset of the demo dataset. Triple-gated: `QA_RESET_ENABLED=1` env var + matching `QA_RESET_TOKEN` body + tenant must equal `"demo"`. Off by default; nothing fires in production unless an operator explicitly opts in.
+
+### Fixed
+- Variant resource prefix (`price_abstract_resource_common_start`) shown in From-Database modal results. Variant items now render the abstract base name as primary line and the rate-code description as a smaller subtitle, so estimators scan rows by material instead of CWICR codes.
+- Resource row self-heals legacy stored names that lost the `common_start` prefix — when `composedVariantName` extends `storedName` with the abstract base, prefer the composed form. Catches rows the v2.6.30 backfill missed without a round-trip.
+
+### Changed
+- `/costs` page initial render sized for fast first paint: `PAGE_SIZE` 20 → 10, `staleTime` 5 min on regions / stats / categories so quick navigation away-and-back no longer re-fires aggregates.
+- BOQ "From Database" modal first paint within ~150 ms: search query fetches 15 items (was 50) with IntersectionObserver auto-loading the rest as the user scrolls.
+- Resource rows visually nest under their parent position — slightly deeper background + inset top-shadow makes sub-positions read as sub-positions, not standalone rows.
+- Backend `/v1/costs/category-tree/` accepts `depth` (1..4) and `parent_path` for future lazy-tree expansion. Default behavior unchanged (depth=4, full tree).
+
+### i18n
+- 24 languages bulk-translated in `i18n-fallbacks.ts` via parallel-agent pipeline (`scripts/i18n_extract.py` + `scripts/i18n_apply.py`): ~28,000 keys across `ar/bg/cs/da/de/es/fi/fr/hi/hr/id/it/ja/ko/nl/no/pl/pt/ro/ru/sv/tr/vi/zh`. Missing-key + English-bleed detector finds rows that were silently English; agents fill them in chunks; merge step rewrites the file in one pass. `th` deferred to next release.
+- Marketing site `id` / `th` gap-filled: same-as-EN strings reduced from 349/431 to 56/56 (only proper nouns / codes remain).
+- Vietnamese backend + marketing translations completed in wave 2.
+
 ## [2.6.36] — 2026-04-30
 
 ### Added

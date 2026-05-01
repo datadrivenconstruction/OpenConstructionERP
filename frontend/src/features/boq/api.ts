@@ -756,10 +756,24 @@ export async function fetchCostSearch(
   return { items, next_cursor, has_more, total };
 }
 
-/** Fetch the category tree for a region.  Pass empty string to fetch globally. */
-export function fetchCategoryTree(region?: string): Promise<CategoryTreeNode[]> {
+/** Fetch the category tree for a region.  Pass empty string to fetch globally.
+ *
+ *  ``depth`` (1..4) limits how many classification levels the backend
+ *  aggregates — the BOQ "From Database" modal opens with ``depth=2`` to
+ *  paint the sidebar within ~150 ms even on cold catalogs, and the full
+ *  4-level tree is fetched lazily on idle to fill in deeper drill-downs.
+ *  ``parentPath`` scopes the aggregation to a sub-branch, used when the
+ *  user expands a depth=2 leaf and we need its grandchildren.
+ */
+export function fetchCategoryTree(
+  region?: string,
+  depth?: number,
+  parentPath?: string,
+): Promise<CategoryTreeNode[]> {
   const qs = new URLSearchParams();
   if (region) qs.set('region', region);
+  if (typeof depth === 'number') qs.set('depth', String(depth));
+  if (parentPath) qs.set('parent_path', parentPath);
   const suffix = qs.toString();
   return apiGet<CategoryTreeNode[]>(
     `/v1/costs/category-tree/${suffix ? `?${suffix}` : ''}`,

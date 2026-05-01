@@ -1,7 +1,7 @@
 {
   "name": "openestimate-frontend",
   "private": true,
-  "version": "2.6.36",
+  "version": "2.6.37",
   "type": "module",
   "scripts": {
     "dev": "vite",

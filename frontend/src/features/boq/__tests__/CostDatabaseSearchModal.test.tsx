@@ -153,7 +153,9 @@ describe('CostDatabaseSearchModal — paginated catalog', () => {
     const firstCallArgs = calls[0]?.[0];
     expect(firstCallArgs).toMatchObject({
       cursor: null,
-      limit: 50,
+      // Small initial page so the modal paints within ~150 ms — the
+      // IntersectionObserver loads the rest as the user scrolls.
+      limit: 15,
     });
 
     expect(await screen.findByText('Concrete C30/37 wall')).toBeInTheDocument();

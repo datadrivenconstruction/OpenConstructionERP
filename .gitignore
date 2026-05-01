@@ -147,3 +147,10 @@ desktop/src-tauri/binaries/
 # Backup files
 *.backup.*
 backend/data/dwg_uploads/
+
+# Local-only working state (not for commit)
+tmp/
+backend/_frontend_dist/
+backend/*.log.err
+.claude/settings.local.json
+i18n_audit_report.md

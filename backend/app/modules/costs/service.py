@@ -224,14 +224,24 @@ class CostItemService:
 
         return items, total, has_more, next_cursor
 
-    async def category_tree(self, region: str | None = None) -> list[dict[str, Any]]:
-        """Return the 4-level classification tree, optionally filtered by region.
+    async def category_tree(
+        self,
+        region: str | None = None,
+        depth: int = 4,
+        parent_path: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Return the classification tree, optionally filtered by region.
 
-        Caching is the router's job (``_region_cache``) — keep this layer
-        stateless so background callers (e.g. event handlers) don't share
-        a stale snapshot with HTTP clients.
+        ``depth`` (1..4) limits how many classification levels to return —
+        callers asking for a fast first paint pass ``depth=2`` and lazily
+        drill deeper with ``parent_path``. Caching is the router's job
+        (``_category_tree_cache``) — keep this layer stateless so
+        background callers (e.g. event handlers) don't share a stale
+        snapshot with HTTP clients.
         """
-        return await self.repo.category_tree(region=region)
+        return await self.repo.category_tree(
+            region=region, depth=depth, parent_path=parent_path
+        )
 
     # ── Update ────────────────────────────────────────────────────────────
 
