@@ -1012,10 +1012,10 @@ export function Changelog() {
         <div className="absolute left-[18px] top-3 bottom-3 w-px bg-border-light" />
 
         <div className="space-y-6">
-          {CHANGELOG.map((entry) => {
+          {CHANGELOG.map((entry, idx) => {
             const isCurrent = entry.version === APP_VERSION;
             return (
-            <div key={entry.version} className="relative flex gap-4">
+            <div key={`${entry.version}-${entry.date}-${idx}`} className="relative flex gap-4">
               {/* Timeline dot — emerald + pulse for the current release, blue for older */}
               <div className={`relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 ${isCurrent ? 'bg-emerald-50 border-emerald-500 dark:bg-emerald-900/20' : 'bg-oe-blue/10 border-oe-blue'}`}>
                 {isCurrent && (

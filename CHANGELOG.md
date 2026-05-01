@@ -5,10 +5,17 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.39] — 2026-05-01
+## [2.6.40] — 2026-05-01
 
-### i18n
-- Thai (`th`) bulk translation completed — 1867 keys translated end-to-end via the same parallel-agent pipeline used for the v2.6.37 sweep. Frontend `i18n-fallbacks.ts` now has full coverage across all 25 active UI languages with no English bleed.
+### Fixed
+- `NotificationBell` crashed every route with `displayItems.map is not a function` — backend returns `{items, total, unread_count}` but the React Query was typed as `Notification[]`.
+- `CommandPalette` global search 404 + envelope mismatch — frontend now hits `/v1/search/?q=…` and reads `.hits[]` instead of treating the envelope as an array.
+- `GET /api/v1/fieldreports/reports/summary/` returned 500 — JSONB workforce entries with stringy `count`/`hours` now coerced to float before arithmetic.
+- `GET /api/v1/documents/{id}/download/` returned 403 on demo seed records — `file_path` stored as relative now resolves against `UPLOAD_BASE` instead of CWD, so the security containment check passes (file-not-found still returns a clean 404).
+- Trailing-slash 404s on five endpoints called without slash before `?`: punchlist items, takeoff measurements, safety incidents (× 2), safety observations (× 2), markups stamp templates, sustainability EPD materials.
+- `fetchTeamMembers` hit a non-existent `/v1/projects/{id}/members` endpoint; now falls back to `/v1/users/?limit=100` so the punch-list assignment dropdown actually populates.
+- Duplicate React keys in `Changelog` for two adjacent v1.9.6 entries — key now combines version + date + array index.
+- SQLAlchemy connection-pool exhaustion under concurrent load — SQLite path was silently using SQLAlchemy default `pool_size=5/overflow=10` (the configured 24/10 was Postgres-only). Now applied for both backends; 50-concurrent stress test is clean.
 
 ## [2.6.38] — 2026-05-01
 

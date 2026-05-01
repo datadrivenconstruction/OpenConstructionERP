@@ -57,6 +57,44 @@ interface GlobalSearchResult {
   score: number;
 }
 
+interface UnifiedSearchHit {
+  id: string;
+  score: number;
+  title: string;
+  snippet: string;
+  text: string;
+  module: string;
+  project_id: string;
+  tenant_id: string;
+  payload: Record<string, unknown>;
+  collection: string;
+}
+
+interface UnifiedSearchResponse {
+  query: string;
+  types: string[];
+  project_id: string | null;
+  total: number;
+  hits: UnifiedSearchHit[];
+  facets: Record<string, number>;
+}
+
+function hitToResult(hit: UnifiedSearchHit): GlobalSearchResult {
+  const payload = hit.payload as Record<string, unknown> | undefined;
+  const url =
+    (typeof payload?.url === 'string' && payload.url) ||
+    (hit.module && hit.id ? `/${hit.module}/${hit.id}` : '');
+  return {
+    module: hit.module,
+    type: hit.collection,
+    id: hit.id,
+    title: hit.title,
+    subtitle: hit.snippet,
+    url,
+    score: hit.score,
+  };
+}
+
 /** Map module names from global search API to Lucide icons. */
 const GLOBAL_SEARCH_ICONS: Record<string, LucideIcon> = {
   boq: Table2,
@@ -165,9 +203,11 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     if (globalSearchTimer.current) clearTimeout(globalSearchTimer.current);
     globalSearchTimer.current = setTimeout(() => {
       setGlobalSearchLoading(true);
-      apiGet<GlobalSearchResult[]>(`/v1/search?q=${encodeURIComponent(trimmed)}&limit=10`)
+      apiGet<UnifiedSearchResponse>(
+        `/v1/search/?q=${encodeURIComponent(trimmed)}&final_limit=10`,
+      )
         .then((data) => {
-          setGlobalResults(data);
+          setGlobalResults((data.hits ?? []).map(hitToResult));
         })
         .catch(() => {
           setGlobalResults([]);

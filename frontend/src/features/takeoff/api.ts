@@ -77,7 +77,7 @@ export interface TakeoffDocumentResponse {
 export const takeoffApi = {
   /** List measurements for a project, optionally filtered by document. */
   list: (projectId: string, documentId?: string) => {
-    let url = `/v1/takeoff/measurements?project_id=${projectId}`;
+    let url = `/v1/takeoff/measurements/?project_id=${projectId}`;
     if (documentId) url += `&document_id=${encodeURIComponent(documentId)}`;
     return apiGet<MeasurementResponse[]>(url);
   },

@@ -886,8 +886,13 @@ async def download_document(
     case-insensitive filesystems and symlinks cannot escape ``UPLOAD_BASE``.
     """
     doc = await service.get_document(document_id)
-    file_path = Path(doc.file_path).resolve()
     upload_base = Path(UPLOAD_BASE).resolve()
+
+    # file_path stored in DB may be relative (demo seed records) or absolute
+    # (real uploads). Normalize relatives against UPLOAD_BASE before resolving
+    # so they don't escape the base via CWD.
+    raw = Path(doc.file_path)
+    file_path = (raw if raw.is_absolute() else upload_base / raw).resolve()
 
     # Security: path must be STRICTLY inside upload_base after full resolution.
     # ``str.startswith`` can be fooled on Windows case-insensitive FS and by

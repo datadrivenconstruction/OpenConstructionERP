@@ -145,7 +145,7 @@ export async function linkMarkupToBoq(markupId: string, positionId: string): Pro
 
 export async function fetchStampTemplates(projectId?: string): Promise<StampTemplate[]> {
   const params = projectId ? `?project_id=${projectId}` : '';
-  return apiGet<StampTemplate[]>(`/v1/markups/stamps/templates${params}`);
+  return apiGet<StampTemplate[]>(`/v1/markups/stamps/templates/${params}`);
 }
 
 export async function createStampTemplate(data: {

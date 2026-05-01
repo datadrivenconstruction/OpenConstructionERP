@@ -114,7 +114,7 @@ export async function fetchPunchItems(
   if (filters?.category) params.set('category', filters.category);
   if (filters?.assigned_to) params.set('assigned_to', filters.assigned_to);
   const res = await apiGet<PunchItem[] | { items: PunchItem[] }>(
-    `/v1/punchlist/items?${params.toString()}`,
+    `/v1/punchlist/items/?${params.toString()}`,
   );
   return Array.isArray(res) ? res : res.items ?? [];
 }
@@ -159,10 +159,25 @@ export async function fetchPunchSummary(projectId: string): Promise<PunchSummary
   return apiGet<PunchSummary>(`/v1/punchlist/summary/?project_id=${projectId}`);
 }
 
+interface UserListEntry {
+  id: string;
+  email: string;
+  full_name?: string | null;
+  is_active?: boolean;
+}
+
 export async function fetchTeamMembers(projectId: string): Promise<TeamMember[]> {
   if (!projectId) return [];
-  const res = await apiGet<TeamMember[] | { items: TeamMember[] }>(
-    `/v1/projects/${projectId}/members`,
-  );
-  return Array.isArray(res) ? res : res.items ?? [];
+  // No project-scoped /members endpoint exists (frontend was 404'ing on it);
+  // fall back to the tenant-wide user list and map onto the assignment shape.
+  const users = await apiGet<UserListEntry[] | { items: UserListEntry[] }>('/v1/users/?limit=100');
+  const list = Array.isArray(users) ? users : users.items ?? [];
+  return list
+    .filter((u) => u.is_active !== false)
+    .map((u) => ({
+      id: u.id,
+      name: u.full_name?.trim() || u.email,
+      email: u.email,
+      avatar_url: null,
+    }));
 }

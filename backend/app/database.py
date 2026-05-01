@@ -102,7 +102,6 @@ def create_engine_from_settings():
     }
 
     if _is_sqlite(url):
-        # SQLite doesn't support pool_size/max_overflow
         # Enable WAL mode for concurrent reads during writes
         from sqlalchemy import event as sa_event
         from sqlalchemy.engine import Engine
@@ -118,9 +117,13 @@ def create_engine_from_settings():
             cursor.close()
 
         kwargs["connect_args"] = {"check_same_thread": False}
-    else:
-        kwargs["pool_size"] = settings.database_pool_size
-        kwargs["max_overflow"] = settings.database_max_overflow
+
+    # Apply pool sizing for both SQLite (aiosqlite) and Postgres.
+    # AsyncAdaptedQueuePool defaults to size=5/overflow=10 which exhausts under
+    # parallel load (parallel crawlers, multi-tab clients). Honour configured
+    # pool size for both backends.
+    kwargs["pool_size"] = settings.database_pool_size
+    kwargs["max_overflow"] = settings.database_max_overflow
 
     return create_async_engine(url, **kwargs)
 

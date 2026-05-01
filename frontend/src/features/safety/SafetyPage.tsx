@@ -629,7 +629,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
   const exportMut = useMutation({
     mutationFn: () =>
       downloadExcelExport(
-        `/v1/safety/incidents/export?project_id=${projectId}`,
+        `/v1/safety/incidents/export/?project_id=${projectId}`,
         'safety_incidents.xlsx',
       ),
     onSuccess: () =>
@@ -649,7 +649,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
     queryKey: ['safety-incidents', projectId],
     queryFn: () =>
       apiGet<IncidentWire[]>(
-        `/v1/safety/incidents?project_id=${projectId}`,
+        `/v1/safety/incidents/?project_id=${projectId}`,
       ),
     select: (d): Incident[] =>
       normalizeListResponse<IncidentWire>(d).map(normaliseIncident),
@@ -1131,7 +1131,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
   const exportMut = useMutation({
     mutationFn: () =>
       downloadExcelExport(
-        `/v1/safety/observations/export?project_id=${projectId}`,
+        `/v1/safety/observations/export/?project_id=${projectId}`,
         'safety_observations.xlsx',
       ),
     onSuccess: () =>
@@ -1151,7 +1151,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
     queryKey: ['safety-observations', projectId],
     queryFn: () =>
       apiGet<ObservationWire[]>(
-        `/v1/safety/observations?project_id=${projectId}`,
+        `/v1/safety/observations/?project_id=${projectId}`,
       ),
     select: (d): Observation[] =>
       normalizeListResponse<ObservationWire>(d).map(normaliseObservation),

@@ -319,11 +319,16 @@ class FieldReportService:
             by_type[report.report_type] = by_type.get(report.report_type, 0) + 1
             total_delay_hours += report.delay_hours or 0.0
 
-            # Sum workforce hours
+            # Sum workforce hours.
+            # JSONB values from demo seed / API can arrive as strings; coerce
+            # before arithmetic to avoid TypeError on str * float.
             for entry in report.workforce or []:
                 if isinstance(entry, dict):
-                    count = entry.get("count", 0)
-                    hours = entry.get("hours", 0.0)
+                    try:
+                        count = float(entry.get("count", 0) or 0)
+                        hours = float(entry.get("hours", 0.0) or 0.0)
+                    except (TypeError, ValueError):
+                        continue
                     total_workforce_hours += count * hours
 
         return {

@@ -98,9 +98,13 @@ export function NotificationBell() {
   const unreadCount = unreadData?.count ?? 0;
 
   // Fetch last 10 notifications when dropdown opens
+  // Backend returns an envelope: { items, total, unread_count }
   const { data: notifications } = useQuery({
     queryKey: ['notifications-list'],
-    queryFn: () => apiGet<Notification[]>('/v1/notifications?limit=10'),
+    queryFn: () =>
+      apiGet<{ items: Notification[]; total: number; unread_count: number }>(
+        '/v1/notifications?limit=10',
+      ),
     enabled: open,
     staleTime: 10_000,
     retry: false,
@@ -170,7 +174,9 @@ export function NotificationBell() {
     markAllReadMutation.mutate();
   }, [markAllReadMutation]);
 
-  const displayItems = notifications ?? [];
+  const displayItems: Notification[] = Array.isArray(notifications)
+    ? (notifications as unknown as Notification[])
+    : (notifications?.items ?? []);
 
   return (
     <div className="relative" ref={ref}>

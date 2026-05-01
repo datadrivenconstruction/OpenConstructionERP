@@ -90,5 +90,5 @@ export function fetchEPDMaterials(category?: string, search?: string) {
   if (category) params.set('category', category);
   if (search) params.set('search', search);
   const qs = params.toString();
-  return apiGet<EPDMaterialsResponse>(`/v1/boq/epd-materials${qs ? `?${qs}` : ''}`);
+  return apiGet<EPDMaterialsResponse>(`/v1/boq/epd-materials/${qs ? `?${qs}` : ''}`);
 }
