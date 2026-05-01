@@ -13,6 +13,8 @@
   a { color: #2563eb; }
   .subtitle { color: #888; font-size: 14px; margin-bottom: 32px; }
   .back { display: inline-block; margin-bottom: 20px; font-size: 14px; }
+  .callout { background: #f0f9ff; border-left: 4px solid #2563eb; padding: 14px 18px; margin: 18px 0; border-radius: 4px; }
+  .callout strong { color: #1e3a8a; }
   table { border-collapse: collapse; width: 100%; margin: 12px 0; }
   th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; font-size: 14px; }
   th { background: #f5f5f5; font-weight: 600; }
@@ -20,93 +22,66 @@
 </head>
 <body>
 <a href="/" class="back">&larr; Back to OpenConstructionERP</a>
-<h1>Privacy Policy</h1>
-<p class="subtitle">Last updated: April 15, 2026</p>
+<h1>Privacy Policy — Self-Hosted Edition</h1>
+<p class="subtitle">Last updated: May 1, 2026</p>
 
-<h2>1. Who We Are (Verantwortliche Stelle)</h2>
-<p>OpenConstructionERP is developed by DataDrivenConstruction, founded by Artem Boiko.<br>
+<div class="callout">
+<strong>This is a self-hosted application.</strong> When you install OpenConstructionERP on your own server (via <code>pip install</code>, Docker, or VPS), all data you create — accounts, projects, BOQs, CAD files, costs — stays on <em>your</em> machine. DataDrivenConstruction does not see, collect, or process any of it.
+</div>
+
+<h2>1. Who We Are</h2>
+<p>OpenConstructionERP is open-source software (AGPL-3.0) developed by DataDrivenConstruction, founded by Artem Boiko.<br>
 Contact: <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a><br>
 Website: <a href="https://datadrivenconstruction.io">datadrivenconstruction.io</a></p>
 
-<h2>2. Data We Collect</h2>
+<h2>2. What This Policy Covers</h2>
+<p>This policy describes the privacy properties of the <strong>self-hosted application</strong> — the software you install and run on your own infrastructure. It does <em>not</em> cover the public demo at <a href="https://openconstructionerp.com">openconstructionerp.com</a>, which has a separate policy because that one is operated by us.</p>
 
-<h3>2.1 Data you provide during registration</h3>
+<h2>3. Data You Create In Your Local Installation</h2>
+<p>When you register an account, create projects, import CAD files, or build BOQs in your self-hosted installation:</p>
+<ul>
+<li>Your data is written to <strong>your</strong> database (PostgreSQL or SQLite, your choice).</li>
+<li>Files you upload (PDFs, drawings, models) live on <strong>your</strong> filesystem or your S3 bucket.</li>
+<li>Authentication tokens (JWT) are issued by <strong>your</strong> server and never leave it.</li>
+<li>OpenConstructionERP does <strong>not</strong> phone home, telemetry, or send analytics. Inspect the source — there are no outbound network calls except those listed in §5.</li>
+</ul>
+<p><strong>The role you assigned to this app under GDPR is "Verantwortlicher" (Controller). DataDrivenConstruction is neither a Controller nor a Processor of your project data.</strong></p>
+
+<h2>4. Personal Data Collected By The App</h2>
+<p>The application stores user-account fields (email, name, optionally company / role) in your local database — purely so users can log in and see their name in the UI. These fields are <em>your</em> data, governed by <em>your</em> privacy policy if you operate the app for others.</p>
+
+<h2>5. Outbound Network Calls</h2>
+<p>The application makes outbound HTTP calls only in these well-defined cases. All are optional or one-off:</p>
 <table>
-<tr><th>Data</th><th>Purpose</th><th>Legal basis (GDPR)</th></tr>
-<tr><td>Email address</td><td>Account login, service notifications</td><td>Art. 6(1)(b) — contract performance</td></tr>
-<tr><td>Full name</td><td>Display in the application</td><td>Art. 6(1)(b) — contract performance</td></tr>
-<tr><td>Password (hashed)</td><td>Authentication</td><td>Art. 6(1)(b) — contract performance</td></tr>
-<tr><td>Company name</td><td>Understanding user context, product improvement</td><td>Art. 6(1)(f) — legitimate interest</td></tr>
-<tr><td>Job title / role</td><td>Understanding user context, product improvement</td><td>Art. 6(1)(f) — legitimate interest</td></tr>
-<tr><td>How you found us</td><td>Marketing attribution, product improvement</td><td>Art. 6(1)(f) — legitimate interest</td></tr>
+<tr><th>Case</th><th>Destination</th><th>Triggered when</th></tr>
+<tr><td>AI features (estimation, classification)</td><td>OpenAI / Anthropic / Google APIs</td><td>You configure your own API key and call an AI feature. Prompts go to <em>your</em> chosen provider.</td></tr>
+<tr><td>CAD converter binaries</td><td>github.com/datadrivenconstruction releases</td><td>First-time install of a CAD format, downloading the converter executable.</td></tr>
+<tr><td>CWICR cost-database snapshots</td><td>github.com/datadrivenconstruction releases</td><td>You click "Install region" in <code>/costs/import</code>.</td></tr>
+<tr><td>Update check (optional)</td><td>pypi.org</td><td>Only when you run <code>pip install --upgrade openconstructionerp</code>.</td></tr>
 </table>
+<p>None of these send your project data anywhere. They only fetch software / data <em>to</em> your server.</p>
 
-<h3>2.2 Data collected automatically</h3>
-<table>
-<tr><th>Data</th><th>Purpose</th><th>Legal basis (GDPR)</th></tr>
-<tr><td>IP address</td><td>Security (rate limiting, abuse prevention), approximate geolocation</td><td>Art. 6(1)(f) — legitimate interest</td></tr>
-<tr><td>Browser user-agent</td><td>Technical support, compatibility analysis</td><td>Art. 6(1)(f) — legitimate interest</td></tr>
-<tr><td>Referrer URL</td><td>Understanding traffic sources</td><td>Art. 6(1)(f) — legitimate interest</td></tr>
-<tr><td>Browser language</td><td>Automatic language selection</td><td>Art. 6(1)(f) — legitimate interest</td></tr>
-</table>
+<h2>6. No Tracking, No Analytics</h2>
+<p>The app does not embed Google Analytics, Mixpanel, Sentry, FullStory, or any other analytics or session-replay tools. No tracking pixels. No advertising cookies. No cookie consent banner is needed because we use only essential session cookies (JWT token, language preference).</p>
 
-<h3>2.3 Project data</h3>
-<p>All data you create within the application (BOQ, documents, estimates, CAD/BIM files, photos) is stored on your server or our demo server. We do not access or analyse your project data.</p>
-
-<h2>3. How We Use Your Data</h2>
+<h2>7. Your Rights If You Run This App For Others</h2>
+<p>If you operate OpenConstructionERP as a service for end users (your team, your clients), <strong>you</strong> are the Controller under GDPR / CCPA / equivalent regimes. You should publish your own privacy policy for those users and handle data subject requests yourself. The app provides built-in tools to support this:</p>
 <ul>
-<li>To provide and operate the OpenConstructionERP service</li>
-<li>To improve the product and fix bugs</li>
-<li>To send important service notifications (security updates, breaking changes)</li>
-<li>To understand our users and improve the product experience</li>
-<li>We do <strong>NOT</strong> sell your data to third parties</li>
-<li>We do <strong>NOT</strong> use your project data for AI training</li>
-<li>We do <strong>NOT</strong> send marketing emails without separate opt-in</li>
+<li>Account export (JSON / CSV / Excel) for data portability.</li>
+<li>Account deletion that removes all associated personal data.</li>
+<li>JWT short-lived tokens + bcrypt password hashing for security.</li>
+<li>Source-available code (AGPL-3.0) for independent security audit.</li>
 </ul>
 
-<h2>4. Data Storage and Retention</h2>
-<p><strong>Self-hosted:</strong> All data stays on your server. We have no access to it.</p>
-<p><strong>Demo server:</strong> Data on our demo server (openconstructionerp.com/demo) is periodically cleaned and not backed up. Do not store production data there.</p>
-<p><strong>Retention:</strong> Account data is kept as long as your account exists. You can delete your account at any time, which removes all associated personal data.</p>
+<h2>8. Public Demo</h2>
+<p>If you tried OpenConstructionERP via the public demo at <a href="https://openconstructionerp.com">openconstructionerp.com</a>, that instance <em>is</em> operated by us. Its separate privacy policy (linked from that site) describes what we collect for the demo. Demo data is periodically wiped and is not for production use.</p>
 
-<h2>5. Third-Party Services</h2>
-<ul>
-<li><strong>AI Providers:</strong> If you configure AI features (OpenAI, Anthropic, Google), your prompts are sent to their APIs. Review their privacy policies.</li>
-<li><strong>FormSubmit:</strong> Feedback form submissions are processed via FormSubmit.co</li>
-<li><strong>GitHub:</strong> CAD converter downloads come from GitHub releases</li>
-</ul>
-<p>We do not use analytics services (Google Analytics, Mixpanel, etc.) or advertising trackers.</p>
+<h2>9. Changes</h2>
+<p>We may update this policy. Changes ride along with new releases of OpenConstructionERP and are visible in the CHANGELOG. The "Last updated" date at the top reflects the current version.</p>
 
-<h2>6. Your Rights (GDPR Art. 12-23)</h2>
-<p>You have the right to:</p>
-<ul>
-<li><strong>Access</strong> your data (export via API or UI)</li>
-<li><strong>Rectification</strong> — correct inaccurate data via your profile settings</li>
-<li><strong>Erasure</strong> — delete your account and all associated personal data</li>
-<li><strong>Data portability</strong> — all data is exportable as JSON/CSV/Excel</li>
-<li><strong>Restriction of processing</strong> — contact us to restrict processing</li>
-<li><strong>Object</strong> to processing based on legitimate interest</li>
-<li><strong>Withdraw consent</strong> at any time (does not affect prior processing)</li>
-<li><strong>Lodge a complaint</strong> with a supervisory authority</li>
-</ul>
-<p>To exercise any of these rights, contact <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a>.</p>
-
-<h2>7. Cookies</h2>
-<p>We use only essential cookies (session token, language preference). No tracking cookies. No advertising cookies. No cookie consent banner is required because we do not use non-essential cookies.</p>
-
-<h2>8. Security</h2>
-<p>Passwords are hashed with bcrypt. API access requires JWT authentication. All data transfers use HTTPS/TLS 1.3. The application source code is open-source (AGPL-3.0) for security auditing.</p>
-
-<h2>9. International Data Transfers</h2>
-<p>For self-hosted deployments, data remains on your server in your jurisdiction. For the demo server, data is stored on Hetzner servers in the EU (Germany).</p>
-
-<h2>10. Changes</h2>
-<p>We may update this policy. Changes will be posted on this page with a new "Last updated" date. Significant changes will be communicated via the application.</p>
-
-<h2>11. Contact</h2>
-<p>For privacy questions or data subject requests:<br>
+<h2>10. Contact</h2>
+<p>Questions about the software's privacy properties:<br>
 Email: <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a><br>
-Website: <a href="https://datadrivenconstruction.io">datadrivenconstruction.io</a><br>
 GitHub: <a href="https://github.com/datadrivenconstruction/OpenConstructionERP">OpenConstructionERP</a></p>
 </body>
 </html>

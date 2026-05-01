@@ -12,39 +12,52 @@
   a { color: #2563eb; }
   .subtitle { color: #888; font-size: 14px; margin-bottom: 32px; }
   .back { display: inline-block; margin-bottom: 20px; font-size: 14px; }
+  .callout { background: #f0f9ff; border-left: 4px solid #2563eb; padding: 14px 18px; margin: 18px 0; border-radius: 4px; }
+  .callout strong { color: #1e3a8a; }
 </style>
 </head>
 <body>
 <a href="/" class="back">&larr; Back to OpenConstructionERP</a>
-<h1>Terms of Service</h1>
-<p class="subtitle">Last updated: April 6, 2026</p>
+<h1>Terms — Self-Hosted Edition</h1>
+<p class="subtitle">Last updated: May 1, 2026</p>
+
+<div class="callout">
+<strong>This is a self-hosted application.</strong> When you install OpenConstructionERP on your own infrastructure, you operate it. DataDrivenConstruction is the author of the software, not a service provider for your installation.
+</div>
 
 <h2>1. License</h2>
-<p>OpenConstructionERP is open-source software licensed under <strong>AGPL-3.0</strong> (Community Edition). Commercial licenses are available for enterprise use. Contact <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a> for commercial licensing.</p>
+<p>OpenConstructionERP is open-source software licensed under <strong>AGPL-3.0</strong> (Community Edition). The full license text ships with the source. A separate Commercial License is available for organisations that need to ship modifications without AGPL obligations — contact <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a>.</p>
 
-<h2>2. Demo Server</h2>
-<p>The demo server at openconstructionerp.com/demo is provided "as is" for evaluation purposes. We do not guarantee uptime, data persistence, or backup. Do not store production or sensitive data on the demo server.</p>
-
-<h2>3. Self-Hosted Deployments</h2>
+<h2>2. Your Self-Hosted Installation</h2>
 <p>When you self-host OpenConstructionERP, you are responsible for:</p>
 <ul>
-<li>Server security and access control</li>
-<li>Data backups</li>
-<li>Compliance with local regulations (GDPR, etc.)</li>
-<li>Keeping the software updated</li>
+<li>Provisioning the server, database, and storage.</li>
+<li>Server security, network access controls, and TLS termination.</li>
+<li>Backups, disaster recovery, and data retention.</li>
+<li>Compliance with the laws applicable to your business and your users (GDPR, CCPA, sector-specific regulations).</li>
+<li>If you operate the app for end users (your team, your clients), you are the Controller / Operator under those regimes — publish your own privacy policy and terms for them.</li>
+<li>Keeping the software updated. Security advisories are published in the project's GitHub repository.</li>
 </ul>
 
-<h2>4. AI Features</h2>
-<p>AI-powered features (cost estimation, document analysis) require third-party API keys (OpenAI, Anthropic, Google). You are responsible for the costs and terms of those services. AI suggestions are not guaranteed to be accurate — always verify with professional judgment.</p>
+<h2>3. AI Features</h2>
+<p>AI features (cost estimation suggestions, document classification, BOQ generation) are <em>opt-in</em> and require you to configure your own API key for OpenAI, Anthropic, or Google. Prompts go from your server directly to the chosen provider. You are responsible for the cost and the terms of those services.</p>
+<p>AI suggestions are confidence-scored and never auto-applied — a human must always review and accept them. AI output is not guaranteed to be accurate; verify with professional judgment before committing to estimates or contracts.</p>
 
-<h2>5. CAD Converters</h2>
-<p>DDC Community Converters are provided under separate licensing. They convert CAD/BIM files (RVT, IFC, DWG, DGN) to extract element data. Converter binaries are downloaded from GitHub and run locally on your server.</p>
+<h2>4. CAD / BIM Converters</h2>
+<p>CAD converters (DDC cad2data) are downloaded from GitHub releases on first use. They run locally on your server. They are licensed separately under the DDC Community License — see the converter README for terms.</p>
 
-<h2>6. Limitation of Liability</h2>
-<p>OpenConstructionERP is provided "as is" without warranty. We are not liable for any damages arising from the use of this software, including but not limited to: incorrect cost estimates, data loss, or construction defects.</p>
+<h2>5. No Warranty, Limitation of Liability</h2>
+<p>OpenConstructionERP is provided "AS IS" without warranty of any kind, express or implied. To the maximum extent permitted by applicable law, DataDrivenConstruction disclaims all liability for damages arising from the use of the software, including but not limited to: incorrect cost estimates, data loss, downtime, or construction defects. The AGPL-3.0 license text controls in case of any conflict with this section.</p>
 
-<h2>7. Contact</h2>
-<p>Questions: <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a></p>
-<p>Website: <a href="https://datadrivenconstruction.io">datadrivenconstruction.io</a></p>
+<h2>6. Public Demo</h2>
+<p>The public demo at <a href="https://openconstructionerp.com">openconstructionerp.com</a> is a separate service operated by DataDrivenConstruction for evaluation. Its terms are linked from that site. Demo data is periodically wiped — do not use the public demo for production.</p>
+
+<h2>7. Updates To These Terms</h2>
+<p>Changes ride along with new releases of OpenConstructionERP and are visible in the CHANGELOG. Continuing to use a new version means you accept the updated terms.</p>
+
+<h2>8. Contact</h2>
+<p>Questions: <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a><br>
+Website: <a href="https://datadrivenconstruction.io">datadrivenconstruction.io</a><br>
+Source: <a href="https://github.com/datadrivenconstruction/OpenConstructionERP">github.com/datadrivenconstruction/OpenConstructionERP</a></p>
 </body>
 </html>

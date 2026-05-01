@@ -5,6 +5,11 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.38] — 2026-05-01
+
+### Changed
+- `privacy-policy.html` and `terms.html` shipped with the local self-hosted app rewritten — now state explicitly that data stays on the operator's server, that DataDrivenConstruction is not Controller / Processor of project data, and list every outbound network call (AI APIs you configure, GitHub releases for converters / CWICR, PyPI for upgrades). The marketing-site versions at openconstructionerp.com keep their SaaS-style copy because that one *is* operated by us. Self-hosted vs demo distinction made unambiguous.
+
 ## [2.6.37] — 2026-05-01
 
 ### Added
