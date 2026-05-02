@@ -62,7 +62,12 @@ def upgrade() -> None:
                 "is_active",
                 sa.Boolean(),
                 nullable=False,
-                server_default=sa.text("1"),
+                # Use sa.true() so the literal is dialect-aware: rendered as
+                # `true` on PostgreSQL, `1` on SQLite. sa.text("1") emits a
+                # raw integer literal which PostgreSQL rejects for a BOOLEAN
+                # column with: ``column "is_active" is of type boolean but
+                # default expression is of type integer``.
+                server_default=sa.true(),
             ),
             sa.Column(
                 "created_at",
