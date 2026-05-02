@@ -36,6 +36,7 @@ _REGION_CURRENCY_FALLBACK: dict[str, str] = {
     "USA_USD": "USD",
     "USA_NEWYORK": "USD",
     "CA_TORONTO": "CAD",
+    "ENG_TORONTO": "CAD",
     "MX_MEXICO": "MXN",
     "BR_SAOPAULO": "BRL",
     "AR_BUENOSAIRES": "ARS",
