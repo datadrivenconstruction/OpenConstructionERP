@@ -153,7 +153,10 @@ tmp/
 backend/_frontend_dist/
 backend/app/_frontend_dist/
 backend/*.log.err
+backend/*.log.out
 frontend/*.log.err
+frontend/*.log.out
+qa-tests/v275-probe/shots*/
 .claude/settings.local.json
 i18n_audit_report.md
 qa-report/

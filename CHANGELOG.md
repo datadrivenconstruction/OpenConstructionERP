@@ -5,6 +5,19 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.6] — 2026-05-03
+
+### Fixed — Match tab now reachable via standard click flow (browser-verified)
+- **`BIMViewer` health-stats banner is `pointer-events-none` on the container** with `pointer-events-auto` on each pill — clicks pass through the banner's negative space straight to the right-panel tabs underneath. The previous `max-w` workaround helped only on viewports with few pills; the new approach works regardless of pill count or wrap behaviour.
+- **Right BIM panel widened 340 px → 380 px** so all 5 tabs (Properties · Layers · Tools · Groups · Match) fit comfortably with `truncate` no longer collapsing the Match label down to its `Sparkles` icon. Each tab now gets ~70 px instead of ~62 px.
+- **Right BIM panel z-index bumped 15 → 25**, above the elements-loaded banner (z-20) and the auto-opening "Filtered summary" popup (z-20). Filter popup no longer occludes the Match tab.
+- **`max-w-[calc(100%-360px)]` → `max-w-[calc(100%-400px)]`** on the banner so its right edge stays clear of the wider panel even before pointer-events kick in.
+
+### Verified
+- 40 frontend tests still green; backend untouched.
+- Live browser probe (`qa-tests/v275-probe/probe_final.py`) confirms `[role=tab]:has-text("Match")` is reachable via Playwright `.click()` without any JS bypass — banner pills no longer intercept pointer events.
+- Tab strip rendering verified at 1440×900 viewport with full element-banner rendered.
+
 ## [2.7.5] — 2026-05-03
 
 Phase 3 + Phase 4 of vector match + concurrent-match perf hardening, shipped together.

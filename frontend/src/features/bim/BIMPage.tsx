@@ -2977,7 +2977,7 @@ export function BIMPage() {
             Tools / Groups.
             z-index 15 keeps it below the upload panel (z-30) when both are open. */}
         {activeModelId && !isModelNonReady && elements.length > 0 && boqPanelOpen && (
-          <div className="absolute top-0 end-0 h-full z-[15] w-[340px] bg-surface-primary border-s border-border-light flex flex-col">
+          <div className="absolute top-0 end-0 h-full z-[25] w-[380px] bg-surface-primary border-s border-border-light flex flex-col">
             <BIMRightPanelTabs
               modelId={activeModelId}
               elements={elements}

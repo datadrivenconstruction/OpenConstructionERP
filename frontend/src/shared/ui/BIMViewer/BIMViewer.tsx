@@ -2245,17 +2245,17 @@ export function BIMViewer({
           3D viewport to elements with validation_status='error', etc.
           The parent applies the predicate via onSmartFilter.
 
-          ``max-w`` reserves room for the right tab strip
-          (``BIMRightPanelTabs`` is 340 px wide → 360 px gives a 20 px
-          gap so banner pills can never sit on top of the tabs).
-          Verified by Phase 4 visual QA — the previous 280 px reserved
-          width left a 60 px overlap that made the Match tab
-          unclickable on every desktop viewport. */}
+          The container is ``pointer-events-none`` so clicks land on
+          whatever sits beneath the banner (right-panel tabs, model
+          selector, etc.). Each individual pill flips back to
+          ``pointer-events-auto`` so its own click / hover tooltip
+          still works. Verified against the v2.7.5 Match-tab regression
+          where banner pills were intercepting clicks on the 5th tab. */}
       {elementCount > 0 && (
-        <div className="absolute top-3 end-3 z-20 flex items-center gap-1.5 flex-wrap justify-end max-w-[calc(100%-360px)]">
+        <div className="absolute top-3 end-3 z-20 flex items-center gap-1.5 flex-wrap justify-end max-w-[calc(100%-400px)] pointer-events-none">
           {/* Total elements pill — not clickable, just informational */}
           <span
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-primary text-content-secondary border border-border-light shadow-sm"
+            className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-primary text-content-secondary border border-border-light shadow-sm"
             title={t('bim.element_count_title', {
               defaultValue: '{{count}} elements loaded in this model',
               count: elementCount,
@@ -2270,7 +2270,7 @@ export function BIMViewer({
             <button
               type="button"
               onClick={() => onSmartFilter?.('unlinked_boq')}
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm hover:bg-emerald-100"
+              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm hover:bg-emerald-100"
               title={t('bim.linked_count_title', {
                 defaultValue:
                   '{{linked}} of {{total}} linked to BOQ — click to show ONLY the unlinked',
@@ -2288,7 +2288,7 @@ export function BIMViewer({
             <button
               type="button"
               onClick={() => onSmartFilter?.('errors')}
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200 shadow-sm hover:bg-rose-100"
+              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200 shadow-sm hover:bg-rose-100"
               title={t('bim.errors_count_title', {
                 defaultValue: '{{count}} elements with validation errors — click to filter',
                 count: healthStats.errors,
@@ -2304,7 +2304,7 @@ export function BIMViewer({
             <button
               type="button"
               onClick={() => onSmartFilter?.('warnings')}
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 shadow-sm hover:bg-amber-100"
+              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 shadow-sm hover:bg-amber-100"
               title={t('bim.warnings_count_title', {
                 defaultValue: '{{count}} elements with validation warnings — click to filter',
                 count: healthStats.warnings,
@@ -2320,7 +2320,7 @@ export function BIMViewer({
             <button
               type="button"
               onClick={() => onSmartFilter?.('has_tasks')}
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200 shadow-sm hover:bg-amber-100"
+              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200 shadow-sm hover:bg-amber-100"
               title={t('bim.tasks_count_title', {
                 defaultValue: '{{count}} elements have linked tasks — click to filter',
                 count: healthStats.hasTasks,
@@ -2336,7 +2336,7 @@ export function BIMViewer({
             <button
               type="button"
               onClick={() => onSmartFilter?.('has_docs')}
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-violet-50 text-violet-700 border border-violet-200 shadow-sm hover:bg-violet-100"
+              className="pointer-events-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-violet-50 text-violet-700 border border-violet-200 shadow-sm hover:bg-violet-100"
               title={t('bim.docs_count_title', {
                 defaultValue: '{{count}} elements have linked documents — click to filter',
                 count: healthStats.hasDocs,
