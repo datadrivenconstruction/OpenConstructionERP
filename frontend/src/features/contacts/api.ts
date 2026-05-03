@@ -4,7 +4,7 @@
  * All endpoints are prefixed with /v1/contacts/.
  */
 
-import { apiGet, apiPost, apiPatch, apiDelete, triggerDownload } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete, triggerDownload, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -136,10 +136,13 @@ export async function exportContacts(): Promise<void> {
 
   const response = await fetch('/api/v1/contacts/export/', { method: 'GET', headers });
   if (!response.ok) {
-    let detail = 'Export failed';
+    let detail = `Export failed (HTTP ${response.status})`;
     try {
       const body = await response.json();
-      detail = body.detail || detail;
+      // FastAPI 422 returns ``detail`` as an array of objects — coercing
+      // an array to a string yields ``[object Object]``. The shared helper
+      // flattens it into a readable message ("loc: msg, …").
+      detail = extractErrorMessageFromBody(body) ?? detail;
     } catch {
       // ignore parse error
     }

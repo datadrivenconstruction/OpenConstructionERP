@@ -21,7 +21,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.rate_limiter import approval_limiter
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.changeorders.schemas import (
     ChangeOrderCreate,
     ChangeOrderItemCreate,
@@ -206,11 +206,13 @@ async def list_change_orders(
 @router.get("/{order_id}", response_model=ChangeOrderWithItems)
 async def get_change_order(
     order_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: ChangeOrderService = Depends(_get_service),
 ) -> ChangeOrderWithItems:
     """Get change order with all items."""
     order = await service.get_order(order_id)
+    await verify_project_access(order.project_id, str(user_id), session)
     return _order_to_with_items(order)
 
 
@@ -221,11 +223,14 @@ async def get_change_order(
 async def update_change_order(
     order_id: uuid.UUID,
     data: ChangeOrderUpdate,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("changeorders.update")),
     service: ChangeOrderService = Depends(_get_service),
 ) -> ChangeOrderResponse:
     """Update a change order (draft only)."""
+    existing = await service.get_order(order_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     order = await service.update_order(order_id, data)
     return _order_to_response(order)
 
@@ -236,11 +241,14 @@ async def update_change_order(
 @router.delete("/{order_id}", status_code=204)
 async def delete_change_order(
     order_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("changeorders.delete")),
     service: ChangeOrderService = Depends(_get_service),
 ) -> None:
     """Delete a change order (draft only)."""
+    existing = await service.get_order(order_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_order(order_id)
 
 

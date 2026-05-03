@@ -387,7 +387,7 @@ class FinanceService:
             )
 
         # Emit event for additional cross-module handlers
-        await event_bus.publish(
+        event_bus.publish_detached(
             "invoice.paid",
             {
                 "project_id": str(invoice.project_id),

@@ -58,6 +58,56 @@ import app.modules.takeoff.models  # noqa: E402,F401
 import app.modules.users.models  # noqa: E402,F401
 
 
+# ── Synchronous event publishing in tests ──────────────────────────────────
+# Production wraps ``event_bus.publish`` in ``asyncio.create_task`` via
+# :meth:`EventBus.publish_detached` so the SQLite single-writer lock isn't
+# held by the request session while subscribers open theirs. Tests, however,
+# typically do ``await service.X()`` then immediately assert on a captured
+# events fixture — the scheduled task hasn't yielded to the loop yet. To
+# preserve pre-v2.6.47 sync semantics for tests we shim ``publish_detached``
+# to use an immediate ``ensure_future`` + a ``run`` of pending callbacks
+# before returning, so when control comes back to the test's next line the
+# event has already fanned out to subscribers.
+from app.core.events import event_bus as _event_bus  # noqa: E402
+
+
+def _sync_publish_detached(name, data=None, source_module=None):
+    """Test-time replacement for :meth:`EventBus.publish_detached`.
+
+    Drives the publish coroutine to completion synchronously by stepping
+    the coroutine until it would yield to wait for a real I/O future.
+    All current subscribers are pure-Python (notifications/webhooks open
+    their own sessions but the test fixtures never wire those for unit
+    tests), so the coroutine runs to ``return`` on first ``send(None)``.
+    Returns a completed Future for callers that ignore the return value.
+    """
+    import asyncio as __asyncio
+
+    coro = _event_bus.publish(name, data, source_module=source_module)
+    fut: __asyncio.Future = __asyncio.Future()
+    try:
+        # Drive the coroutine. Pure subscribers (no real I/O) finish in one
+        # send. Anything that does try to yield to the loop falls back to
+        # ``ensure_future`` so we never hang the test.
+        coro.send(None)
+    except StopIteration as stop:
+        fut.set_result(stop.value)
+        return fut
+    except BaseException as exc:
+        fut.set_exception(exc)
+        return fut
+    # Coroutine yielded — fall back to scheduling so the loop can finish it.
+    try:
+        return __asyncio.ensure_future(coro)
+    except RuntimeError:
+        # No running loop in sync test context.
+        fut.set_result(None)
+        return fut
+
+
+_event_bus.publish_detached = _sync_publish_detached  # type: ignore[method-assign]
+
+
 @pytest.fixture
 def sample_boq_data():
     """Sample BOQ data for validation tests."""

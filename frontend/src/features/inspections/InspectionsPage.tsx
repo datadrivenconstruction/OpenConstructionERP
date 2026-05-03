@@ -733,7 +733,7 @@ export function InspectionsPage() {
   const exportMut = useMutation({
     mutationFn: () =>
       downloadExcelExport(
-        `/v1/inspections/export?project_id=${projectId}`,
+        `/v1/inspections/export/?project_id=${projectId}`,
         'inspections.xlsx',
       ),
     onSuccess: () =>

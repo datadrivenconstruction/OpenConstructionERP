@@ -69,7 +69,28 @@
     "vat": "MwSt",
     "add_markups": "Zuschläge hinzufügen",
     "validate": "Prüfen",
-    "export": "Exportieren"
+    "export": "Exportieren",
+    "mvp": {
+      "title": "Materialien wählen",
+      "subtitle_one": "{{count}} Position benötigt eine Auswahl",
+      "subtitle_other": "{{count}} Positionen benötigen eine Auswahl",
+      "bulk_label": "Schnellbefüllung:",
+      "bulk_median": "Median für alle",
+      "bulk_mean": "Mittelwert für alle",
+      "bulk_cheapest": "Günstigste für alle",
+      "bulk_priciest": "Teuerste für alle",
+      "slot_variant_count": "{{n}} Varianten",
+      "selected_label": "Gewählt:",
+      "default_mean": "Mittelwert",
+      "default_median": "Median",
+      "row_median": "Median · {{price}}",
+      "row_mean": "Mittelwert · {{price}}",
+      "subtotal_label": "Positionspreis",
+      "apply": "Übernehmen & in LV einfügen",
+      "batch_progress": "Artikel {{current}} von {{total}}",
+      "toast_applied_one": "{{count}} Variante übernommen",
+      "toast_applied_other": "{{count}} Varianten übernommen"
+    }
   },
   "costs": {
     "title": "Preisdatenbank",

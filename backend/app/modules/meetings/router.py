@@ -1029,11 +1029,13 @@ async def import_meeting_summary(
 @router.get("/{meeting_id}", response_model=MeetingResponse)
 async def get_meeting(
     meeting_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: MeetingService = Depends(_get_service),
 ) -> MeetingResponse:
     """Get a single meeting."""
     meeting = await service.get_meeting(meeting_id)
+    await verify_project_access(meeting.project_id, str(user_id), session)
     return _meeting_to_response(meeting)
 
 
@@ -1044,11 +1046,14 @@ async def get_meeting(
 async def update_meeting(
     meeting_id: uuid.UUID,
     data: MeetingUpdate,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("meetings.update")),
     service: MeetingService = Depends(_get_service),
 ) -> MeetingResponse:
     """Update a meeting."""
+    existing = await service.get_meeting(meeting_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     meeting = await service.update_meeting(meeting_id, data)
     return _meeting_to_response(meeting)
 
@@ -1059,11 +1064,14 @@ async def update_meeting(
 @router.delete("/{meeting_id}", status_code=204)
 async def delete_meeting(
     meeting_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("meetings.delete")),
     service: MeetingService = Depends(_get_service),
 ) -> None:
     """Delete a meeting."""
+    existing = await service.get_meeting(meeting_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_meeting(meeting_id)
 
 

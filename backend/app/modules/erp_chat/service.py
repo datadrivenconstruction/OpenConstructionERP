@@ -629,7 +629,7 @@ class ERPChatService:
                 ):
                     if msg.id is None:
                         continue
-                    await event_bus.publish(
+                    event_bus.publish_detached(
                         "erp_chat.message.created",
                         {
                             "message_id": str(msg.id),

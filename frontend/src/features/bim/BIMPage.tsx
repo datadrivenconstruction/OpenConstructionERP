@@ -51,7 +51,6 @@ import {
   LayoutGrid,
   Maximize2,
   Package,
-  HardDrive,
 } from 'lucide-react';
 import { Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -129,64 +128,6 @@ function StatPill({ label, value, icon: Icon }: { label: string; value: string |
       <Icon size={13} className="text-content-tertiary" />
       <span className="text-[11px] font-medium text-content-tertiary">{label}</span>
       <span className="text-[11px] font-bold text-content-primary tabular-nums">{value}</span>
-    </div>
-  );
-}
-
-/* ── Disk Usage Chip ─────────────────────────────────────────────────── */
-
-/** Header chip showing where conversion artifacts are stored and how much
- *  disk they occupy.  The /bim page's persistence promise — uploaded
- *  models stay viewable on revisit without re-conversion — is invisible
- *  unless we surface it; this chip is that surface.
- *
- *  Title attribute carries a richer breakdown (model count, originals
- *  retained, total bytes) for hover discovery without crowding the
- *  visible header on small displays. */
-function DiskUsageChip({
-  rootLabel,
-  artifactSizeMb,
-  originalSizeMb,
-  modelCount,
-}: {
-  rootLabel: string;
-  artifactSizeMb: number;
-  originalSizeMb: number;
-  modelCount: number;
-}) {
-  const { t } = useTranslation();
-  const fmtMb = (mb: number): string => {
-    if (mb >= 1024) return `${(mb / 1024).toFixed(2)} GB`;
-    if (mb >= 1) return `${mb.toFixed(1)} MB`;
-    if (mb > 0) return `${(mb * 1024).toFixed(0)} KB`;
-    return '0 B';
-  };
-
-  const hasOriginals = originalSizeMb > 0.001;
-  const tooltipLines = [
-    t('bim.disk_root', { defaultValue: 'Storage root' }) + `: ${rootLabel}`,
-    t('bim.disk_models', { defaultValue: 'Models' }) + `: ${modelCount}`,
-    t('bim.disk_artifacts', { defaultValue: 'Conversion artifacts' }) + `: ${fmtMb(artifactSizeMb)}`,
-    hasOriginals
-      ? t('bim.disk_originals_kept', { defaultValue: 'Originals (kept)' }) + `: ${fmtMb(originalSizeMb)}`
-      : t('bim.disk_originals_dropped', {
-          defaultValue: 'Originals dropped after conversion (production policy)',
-        }),
-  ];
-
-  return (
-    <div
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-secondary border border-border-light"
-      title={tooltipLines.join('\n')}
-      data-testid="bim-disk-usage-chip"
-    >
-      <HardDrive size={13} className="text-content-tertiary" />
-      <span className="text-[11px] font-mono text-content-tertiary truncate max-w-[120px]">
-        {rootLabel}
-      </span>
-      <span className="text-[11px] font-bold text-content-primary tabular-nums">
-        {fmtMb(artifactSizeMb + originalSizeMb)}
-      </span>
     </div>
   );
 }
@@ -2422,7 +2363,46 @@ export function BIMPage() {
             </div>
             <div>
               <h1 className="text-sm font-bold text-content-primary">{t('bim.viewer_title', { defaultValue: 'BIM Viewer' })}</h1>
-              {activeModel && <p className="text-[10px] text-content-tertiary truncate max-w-[160px] lg:max-w-[280px]">{activeModel.name}</p>}
+              {activeModel && (
+                <p
+                  className="text-[10px] text-content-tertiary truncate max-w-[160px] lg:max-w-[280px] cursor-help"
+                  title={(() => {
+                    // Disk-usage info now surfaces here on hover instead of as
+                    // an always-visible chip in the header — chip ate space and
+                    // distracted from the model name. Same data, better tucked.
+                    const data = modelsQuery.data;
+                    if (!hasModels || !data?.storage_root_label) {
+                      return activeModel.name;
+                    }
+                    const fmtMb = (mb: number): string => {
+                      if (mb >= 1024) return `${(mb / 1024).toFixed(2)} GB`;
+                      if (mb >= 1) return `${mb.toFixed(1)} MB`;
+                      if (mb > 0) return `${(mb * 1024).toFixed(0)} KB`;
+                      return '0 B';
+                    };
+                    const artifactMb = data.total_artifact_size_mb ?? 0;
+                    const originalMb = data.total_original_size_mb ?? 0;
+                    const hasOriginals = originalMb > 0.001;
+                    const lines = [
+                      activeModel.name,
+                      '',
+                      t('bim.disk_root', { defaultValue: 'Storage root' }) + `: ${data.storage_root_label}`,
+                      t('bim.disk_models', { defaultValue: 'Models' }) + `: ${models.length}`,
+                      t('bim.disk_artifacts', { defaultValue: 'Conversion artifacts' }) + `: ${fmtMb(artifactMb)}`,
+                      hasOriginals
+                        ? t('bim.disk_originals_kept', { defaultValue: 'Originals (kept)' }) + `: ${fmtMb(originalMb)}`
+                        : t('bim.disk_originals_dropped', {
+                            defaultValue: 'Originals dropped after conversion (production policy)',
+                          }),
+                      t('bim.disk_total', { defaultValue: 'Total on disk' }) + `: ${fmtMb(artifactMb + originalMb)}`,
+                    ];
+                    return lines.join('\n');
+                  })()}
+                  data-testid="bim-active-model-name"
+                >
+                  {activeModel.name}
+                </p>
+              )}
             </div>
           </div>
           {elements.length > 0 && (
@@ -2430,21 +2410,6 @@ export function BIMPage() {
               <StatPill icon={Box} label={t('bim.stat_elements', { defaultValue: 'Elements' })} value={elements.length} />
               {storeys.size > 0 && <StatPill icon={Layers} label={t('bim.stat_storeys', { defaultValue: 'Levels' })} value={storeys.size} />}
               {discips.size > 0 && <StatPill icon={Sparkles} label={t('bim.stat_disciplines', { defaultValue: 'Disciplines' })} value={discips.size} />}
-            </div>
-          )}
-          {/* Disk-usage chip — surfaces persistence: uploaded models live
-              under the storage root and stay viewable on revisit without
-              re-conversion. Only rendered when we have both a project
-              context AND at least one persisted model so the chip never
-              shows "0 B" on a fresh tenant. */}
-          {hasModels && modelsQuery.data?.storage_root_label && (
-            <div className="hidden lg:flex items-center ms-2">
-              <DiskUsageChip
-                rootLabel={modelsQuery.data.storage_root_label}
-                artifactSizeMb={modelsQuery.data.total_artifact_size_mb ?? 0}
-                originalSizeMb={modelsQuery.data.total_original_size_mb ?? 0}
-                modelCount={models.length}
-              />
             </div>
           )}
         </div>

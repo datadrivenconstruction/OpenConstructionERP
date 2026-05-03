@@ -732,6 +732,79 @@ export function BOQEditorPage() {
     return () => document.removeEventListener('openCostDbModal', handler);
   }, []);
 
+  // Idle-time prefetch for the cost-DB modal aggregates. The modal calls
+  // /v1/costs/regions/ and /v1/costs/category-tree/ on open; both are
+  // GROUP BY scans that can take 18 s (regions) and 80+ s (tree) on cold
+  // SQLite when the active catalog holds 100 k+ items. Pre-warming them
+  // while the BOQ editor is idle keeps the user's first "Add from
+  // Database" click instant. requestIdleCallback bails out gracefully on
+  // browsers that don't expose it (Safari < 16) by falling back to a
+  // 1.5 s setTimeout, late enough to not fight first paint.
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (cancelled) return;
+      try {
+        await queryClient.prefetchQuery({
+          queryKey: ['cost-regions-modal'],
+          queryFn: () => apiGet<string[]>('/v1/costs/regions/'),
+          staleTime: 5 * 60 * 1000,
+        });
+        if (cancelled) return;
+        const regions = queryClient.getQueryData<string[]>(['cost-regions-modal']) ?? [];
+        const firstRegion = regions[0];
+        if (firstRegion) {
+          const { fetchCategoryTree, fetchCostSearch } = await import('./api');
+          // Run the tree + first-page-search prefetches in parallel so we
+          // amortize round-trip latency. The modal opens both queries
+          // simultaneously when it mounts, and warming both here means
+          // the user's first click on "From Database" lands on a hot
+          // cache for the THREE heaviest calls (regions / tree / search).
+          await Promise.all([
+            queryClient.prefetchQuery({
+              queryKey: ['cost-tree', firstRegion, 2],
+              queryFn: () => fetchCategoryTree(firstRegion, 2),
+              staleTime: 5 * 60 * 1000,
+            }),
+            queryClient.prefetchInfiniteQuery({
+              queryKey: ['cost-search', firstRegion, '', ''],
+              initialPageParam: null as string | null,
+              queryFn: () =>
+                fetchCostSearch({
+                  region: firstRegion,
+                  q: undefined,
+                  classification_path: undefined,
+                  cursor: null,
+                  limit: 15,
+                }),
+              staleTime: 5 * 60 * 1000,
+            }),
+          ]);
+        }
+      } catch {
+        /* prefetch is best-effort — never block the editor on a 5xx */
+      }
+    };
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (typeof w.requestIdleCallback === 'function') {
+      idleId = w.requestIdleCallback(() => void run(), { timeout: 4000 });
+    } else {
+      timeoutId = setTimeout(() => void run(), 1500);
+    }
+    return () => {
+      cancelled = true;
+      if (idleId !== undefined && typeof w.cancelIdleCallback === 'function') {
+        w.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
+  }, [queryClient]);
+
   // Scroll to and highlight a position when ?highlight=pos_id is in URL
   // Works with both AG Grid rows (div[row-id]) and legacy table rows (tr[data-position-id])
   useEffect(() => {
@@ -3306,14 +3379,14 @@ export function BOQEditorPage() {
       {/* ── Update Rates Confirmation Dialog ────────────────────────── */}
       {showRecalcConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setShowRecalcConfirm(false)}>
-          <div className="w-full max-w-md mx-4 rounded-2xl bg-surface-primary shadow-2xl border border-border-light overflow-hidden animate-scale-in" onClick={(e) => e.stopPropagation()}>
+          <div role="dialog" aria-modal="true" aria-labelledby="boq-recalc-confirm-title" className="w-full max-w-md mx-4 rounded-2xl bg-surface-primary shadow-2xl border border-border-light overflow-hidden animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
                   <Database size={20} className="text-oe-blue" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold">{t('boq.recalc_confirm_title', { defaultValue: 'Update Unit Rates' })}</h3>
+                  <h3 id="boq-recalc-confirm-title" className="text-base font-semibold">{t('boq.recalc_confirm_title', { defaultValue: 'Update Unit Rates' })}</h3>
                   <p className="text-xs text-content-secondary">{t('boq.recalc_confirm_subtitle', { defaultValue: 'Match positions to cost database' })}</p>
                 </div>
               </div>
@@ -3347,11 +3420,14 @@ export function BOQEditorPage() {
           onClick={() => setGaebPreviewOpen(false)}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="boq-gaeb-export-title"
             className="bg-surface-elevated rounded-xl border border-border-light shadow-lg w-[420px] p-6 animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-content-primary">
+              <h3 id="boq-gaeb-export-title" className="text-sm font-semibold text-content-primary">
                 {t('boq.gaeb_export_title', { defaultValue: 'Export GAEB XML (X83)' })}
               </h3>
               <button
@@ -3456,10 +3532,13 @@ export function BOQEditorPage() {
       {showSectionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowSectionModal(false)}>
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="boq-add-section-title"
             className="bg-surface-elevated rounded-xl border border-border-light shadow-lg w-96 p-5 animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-sm font-semibold text-content-primary mb-3">
+            <h3 id="boq-add-section-title" className="text-sm font-semibold text-content-primary mb-3">
               {t('boq.add_section', { defaultValue: 'Add Section' })}
             </h3>
             <input

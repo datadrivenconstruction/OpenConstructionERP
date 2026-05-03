@@ -10,6 +10,7 @@ import {
   ReactFlow as RFComponent,
   Background,
   Controls,
+  Handle,
   MiniMap,
   useNodesState,
   useEdgesState,
@@ -182,6 +183,8 @@ function ModuleNodeComponent({ data }: { data: ModuleNodeData }) {
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       }}
     >
+      <Handle type="target" position={Position.Left} style={{ visibility: 'hidden' }} />
+      <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
       <div className="flex items-center gap-2 mb-2">
         <div
           className="w-3 h-3 rounded-full shrink-0"
@@ -227,6 +230,8 @@ function ModelNodeComponent({ data }: { data: ModelNodeData }) {
         color: NODE_TEXT,
       }}
     >
+      <Handle type="target" position={Position.Left} style={{ visibility: 'hidden' }} />
+      <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
       <div
         className="px-3 py-1.5 text-xs font-bold"
         style={{ background: `${color}20`, borderBottom: `1px solid ${color}30` }}
@@ -289,6 +294,8 @@ function RouteNodeComponent({ data }: { data: RouteNodeData }) {
         color: NODE_TEXT,
       }}
     >
+      <Handle type="target" position={Position.Left} style={{ visibility: 'hidden' }} />
+      <Handle type="source" position={Position.Right} style={{ visibility: 'hidden' }} />
       <div className="flex items-center gap-2">
         <span
           className="px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0"

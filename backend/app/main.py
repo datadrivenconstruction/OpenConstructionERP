@@ -1610,6 +1610,113 @@ def create_app() -> FastAPI:
 
         asyncio.create_task(_kpi_scheduler())
 
+        # ── Cost-DB cache pre-warm (runs once, in background) ──────────
+        # The "Add from Database" modal in the BOQ editor calls three
+        # endpoints on open: /costs/regions/, /costs/category-tree/, and
+        # /costs/search/. The first two issue full-table aggregations
+        # (SELECT DISTINCT region, GROUP BY 4 json_extract paths) that
+        # can take 18 s and 86 s respectively on cold SQLite when the
+        # active catalog holds 100 k+ rows. The user reported the modal
+        # "loading forever" — this prewarm pays the aggregation cost
+        # once at boot so every subsequent click is a cache hit.
+        async def _prewarm_cost_caches() -> None:
+            await asyncio.sleep(2)  # let other startup tasks settle
+            try:
+                import time as _ptime
+
+                from sqlalchemy import distinct, select
+
+                from app.database import async_session_factory as _cost_sf
+                from app.modules.costs.models import CostItem
+                from app.modules.costs.router import (
+                    _category_tree_cache,
+                    _region_cache,
+                )
+                from app.modules.costs.schemas import CategoryTreeNode
+                from app.modules.costs.service import CostItemService
+
+                from sqlalchemy import func as _func
+
+                async with _cost_sf() as cost_session:
+                    # 1) Distinct region list — drives the tab bar on /costs
+                    #    and the modal's region picker.
+                    r = await cost_session.execute(
+                        select(distinct(CostItem.region))
+                        .where(CostItem.is_active.is_(True))
+                        .where(CostItem.region.isnot(None))
+                        .where(CostItem.region != "")
+                    )
+                    regions = sorted(row[0] for row in r.all())
+                    _region_cache["regions"] = regions
+
+                    # 2) Per-region item-count stats — drives the count badge
+                    #    on each region tab.
+                    s = await cost_session.execute(
+                        select(
+                            CostItem.region,
+                            _func.count(CostItem.id).label("cnt"),
+                        )
+                        .where(CostItem.is_active.is_(True))
+                        .where(CostItem.region.isnot(None))
+                        .where(CostItem.region != "")
+                        .group_by(CostItem.region)
+                        .order_by(_func.count(CostItem.id).desc())
+                    )
+                    _region_cache["stats"] = [
+                        {"region": row[0], "count": row[1]} for row in s.all()
+                    ]
+
+                    # 3) Distinct top-level categories — drives the category
+                    #    filter dropdown. Warm the all-regions list (the
+                    #    page's default before any region tab is clicked).
+                    from sqlalchemy import func as __func
+                    from app.database import engine as __engine
+
+                    if "sqlite" in str(__engine.url):
+                        coll_expr = __func.json_extract(
+                            CostItem.classification, "$.collection"
+                        )
+                    else:
+                        coll_expr = CostItem.classification["collection"].as_string()
+                    c = await cost_session.execute(
+                        select(distinct(coll_expr))
+                        .where(CostItem.is_active.is_(True))
+                        .where(coll_expr.isnot(None))
+                        .where(coll_expr != "")
+                        .order_by(coll_expr)
+                    )
+                    _region_cache["categories_all"] = [
+                        row[0] for row in c.all() if row[0]
+                    ]
+                    _region_cache["ts"] = _ptime.monotonic()
+
+                    svc = CostItemService(cost_session)
+                    for reg in regions:
+                        try:
+                            raw = await svc.category_tree(region=reg, depth=4)
+                            nodes = [
+                                CategoryTreeNode.model_validate(n) for n in raw
+                            ]
+                            key = f"tree::{reg}::d=4::p="
+                            _category_tree_cache[key] = {
+                                "nodes": nodes,
+                                "ts": _ptime.monotonic(),
+                            }
+                        except Exception:
+                            logger.debug(
+                                "Pre-warm tree failed for region=%s",
+                                reg,
+                                exc_info=True,
+                            )
+                logger.info(
+                    "Cost-DB caches pre-warmed for %d regions",
+                    len(regions),
+                )
+            except Exception:
+                logger.debug("Cost-DB pre-warm failed (non-fatal)", exc_info=True)
+
+        asyncio.create_task(_prewarm_cost_caches())
+
         # ── Scheduled reports worker (1-minute tick) ────────────────────
         # Polls oe_reporting_template for rows whose ``next_run_at`` is
         # due, renders each one via the existing generate_report path,

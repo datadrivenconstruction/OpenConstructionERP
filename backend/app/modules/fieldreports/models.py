@@ -8,7 +8,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import JSON, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Date, DateTime, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -18,6 +18,13 @@ class FieldReport(Base):
     """A field report documenting on-site conditions, workforce, and activities."""
 
     __tablename__ = "oe_fieldreports_report"
+    __table_args__ = (
+        Index(
+            "ix_oe_fieldreports_report_project_type",
+            "project_id",
+            "report_type",
+        ),
+    )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),

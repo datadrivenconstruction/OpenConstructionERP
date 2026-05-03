@@ -5,6 +5,7 @@
  */
 
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { isModuleLoaded } from '@/shared/lib/moduleProbe';
 
 /* ── Types ────────────────────────────────────────────────────────────── */
 
@@ -75,8 +76,11 @@ export interface TakeoffDocumentResponse {
 /* ── API functions ────────────────────────────────────────────────────── */
 
 export const takeoffApi = {
-  /** List measurements for a project, optionally filtered by document. */
-  list: (projectId: string, documentId?: string) => {
+  /** List measurements for a project, optionally filtered by document.
+   *  /markups page calls this on mount; returns empty when oe_takeoff
+   *  is disabled so the request never 404-logs to the network panel. */
+  list: async (projectId: string, documentId?: string): Promise<MeasurementResponse[]> => {
+    if (!(await isModuleLoaded('oe_takeoff'))) return [];
     let url = `/v1/takeoff/measurements/?project_id=${projectId}`;
     if (documentId) url += `&document_id=${encodeURIComponent(documentId)}`;
     return apiGet<MeasurementResponse[]>(url);
@@ -112,8 +116,10 @@ export const takeoffApi = {
   export: (projectId: string, format: 'csv' | 'json' = 'json') =>
     apiGet<unknown>(`/v1/takeoff/measurements/export/?project_id=${projectId}&format=${format}`),
 
-  /** List uploaded takeoff documents for a project. */
-  listDocuments: (projectId?: string) => {
+  /** List uploaded takeoff documents for a project.
+   *  Returns empty when the optional `oe_takeoff` module is disabled. */
+  listDocuments: async (projectId?: string): Promise<TakeoffDocumentResponse[]> => {
+    if (!(await isModuleLoaded('oe_takeoff'))) return [];
     const url = projectId
       ? `/v1/takeoff/documents/?project_id=${encodeURIComponent(projectId)}`
       : '/v1/takeoff/documents/';
@@ -131,7 +137,7 @@ export const takeoffApi = {
     modelName: string = 'Imported from Takeoff',
   ) =>
     apiPost<{ model_id: string; element_count: number; model_name: string; project_id: string }>(
-      `/v1/takeoff/sessions/${sessionId}/save-to-project?project_id=${encodeURIComponent(projectId)}`,
+      `/v1/takeoff/sessions/${sessionId}/save-to-project/?project_id=${encodeURIComponent(projectId)}`,
       { model_name: modelName },
     ),
 };

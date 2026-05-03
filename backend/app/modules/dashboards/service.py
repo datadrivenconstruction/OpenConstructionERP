@@ -209,7 +209,7 @@ class SnapshotService:
         # 6 — publish. Wrap in a try so a buggy handler never blocks the
         # HTTP response.
         try:
-            await event_bus.publish(
+            event_bus.publish_detached(
                 event_taxonomy.SNAPSHOT_CREATED,
                 {
                     "snapshot_id": str(snapshot_id),
@@ -295,7 +295,7 @@ class SnapshotService:
             )
 
         try:
-            await event_bus.publish(
+            event_bus.publish_detached(
                 event_taxonomy.SNAPSHOT_DELETED,
                 {
                     "snapshot_id": str(snapshot_id),

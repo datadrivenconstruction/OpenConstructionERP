@@ -100,6 +100,30 @@ class EventBus:
         else:
             self._handlers[event_name].remove(handler)
 
+    def publish_detached(
+        self,
+        event_name: str,
+        data: dict[str, Any] | None = None,
+        source_module: str | None = None,
+    ) -> asyncio.Task[EventResult]:
+        """Schedule an event publish without blocking the caller.
+
+        Use this from request-handler code paths where the caller is still
+        holding an open SQLAlchemy/aiosqlite session: SQLite allows only
+        one writer at a time, so subscribers that open a second session
+        via ``async_session_factory()`` (notifications, webhooks, etc.)
+        will deadlock the outer transaction for ~30s if we ``await`` them
+        here. Detaching via :func:`asyncio.create_task` lets the request
+        commit and release the writer lock before the subscribers fire.
+
+        Returns the task so callers can ``await`` it in tests; production
+        code should fire-and-forget. Errors inside the detached task are
+        logged by :meth:`publish` itself.
+        """
+        return asyncio.create_task(
+            self.publish(event_name, data, source_module=source_module)
+        )
+
     async def publish(
         self,
         event_name: str,

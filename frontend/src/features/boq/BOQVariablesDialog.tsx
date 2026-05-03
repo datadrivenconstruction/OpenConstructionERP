@@ -171,6 +171,9 @@ export function BOQVariablesDialog({ open, onClose, boqId }: BOQVariablesDialogP
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="boq-variables-dialog-title"
         className="w-full max-w-3xl max-h-[88vh] overflow-hidden rounded-2xl bg-surface-elevated shadow-xl flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
@@ -178,7 +181,7 @@ export function BOQVariablesDialog({ open, onClose, boqId }: BOQVariablesDialogP
         <div className="flex items-center justify-between gap-3 border-b border-border-light px-5 py-3">
           <div className="flex items-center gap-2">
             <VariableIcon size={18} className="text-oe-blue" />
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 id="boq-variables-dialog-title" className="text-base font-semibold text-content-primary">
               {t('boq.variables_title', { defaultValue: 'BOQ variables' })}
             </h2>
             <span className="rounded-full bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-tertiary">

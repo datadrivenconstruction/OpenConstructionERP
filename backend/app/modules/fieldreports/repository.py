@@ -110,3 +110,63 @@ class FieldReportRepository:
         stmt = select(FieldReport).where(FieldReport.project_id == project_id)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
+
+    async def aggregates_for_project(
+        self, project_id: uuid.UUID
+    ) -> dict[str, object]:
+        """Aggregate counts and totals for the project summary.
+
+        Pushes status / report_type counts and the delay_hours sum into SQL
+        instead of hydrating every FieldReport row in Python. Workforce
+        hours still need a JSON pass — see ``workforce_for_project``.
+        """
+        total_stmt = (
+            select(func.count())
+            .select_from(FieldReport)
+            .where(FieldReport.project_id == project_id)
+        )
+        total = (await self.session.execute(total_stmt)).scalar_one()
+
+        status_rows = (
+            await self.session.execute(
+                select(FieldReport.status, func.count())
+                .where(FieldReport.project_id == project_id)
+                .group_by(FieldReport.status)
+            )
+        ).all()
+
+        type_rows = (
+            await self.session.execute(
+                select(FieldReport.report_type, func.count())
+                .where(FieldReport.project_id == project_id)
+                .group_by(FieldReport.report_type)
+            )
+        ).all()
+
+        delay_sum = (
+            await self.session.execute(
+                select(func.coalesce(func.sum(FieldReport.delay_hours), 0.0))
+                .where(FieldReport.project_id == project_id)
+            )
+        ).scalar_one()
+
+        return {
+            "total": int(total),
+            "by_status": {row[0]: row[1] for row in status_rows},
+            "by_type": {row[0]: row[1] for row in type_rows},
+            "total_delay_hours": float(delay_sum or 0.0),
+        }
+
+    async def workforce_for_project(self, project_id: uuid.UUID) -> list[list]:
+        """Return only the workforce JSON column per report.
+
+        The summary needs to walk the JSON to compute count*hours, so we
+        can't fully aggregate in SQL — but we can drop every other column
+        and skip ORM hydration.
+        """
+        stmt = (
+            select(FieldReport.workforce)
+            .where(FieldReport.project_id == project_id)
+        )
+        result = await self.session.execute(stmt)
+        return [row[0] or [] for row in result.all()]

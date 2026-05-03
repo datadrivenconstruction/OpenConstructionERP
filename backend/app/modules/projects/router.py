@@ -200,7 +200,10 @@ async def delete_project(
         raise
     except Exception as exc:
         _log.getLogger(__name__).exception("Failed to archive project %s", project_id)
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to archive project. Check server logs for details.",
+        ) from exc
 
 
 # ── Restore (un-archive) ────────────────────────────────────────────────

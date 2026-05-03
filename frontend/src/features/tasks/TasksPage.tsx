@@ -1073,15 +1073,47 @@ export function TasksPage() {
     [deleteMut, confirm, t],
   );
 
+  // Status change with optimistic update so the dragged card moves to the
+  // target column INSTANTLY — without waiting for the backend roundtrip and
+  // the subsequent React-Query refetch. Without this the UX reads as
+  // "drag does nothing": the card stays put for ~150-400ms while the PATCH
+  // is in flight, and on a slow network the user gives up before they see
+  // the move land. Rollback restores the original state if the server
+  // rejects the change.
   const statusMut = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: TaskStatus }) => updateTask(id, { status }),
-    onSuccess: () => {
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      updateTask(id, { status: status as TaskStatus }),
+    onMutate: async ({ id, status }) => {
+      await qc.cancelQueries({ queryKey: ['tasks'] });
+      const snapshots = qc.getQueriesData<Task[]>({ queryKey: ['tasks'] });
+      for (const [key, list] of snapshots) {
+        if (!list) continue;
+        qc.setQueryData<Task[]>(
+          key,
+          list.map((t) => (t.id === id ? { ...t, status: status as TaskStatus } : t)),
+        );
+      }
+      return { snapshots };
+    },
+    onError: (_err, _vars, ctx) => {
+      // Rollback every cached query we touched.
+      if (ctx?.snapshots) {
+        for (const [key, snapshot] of ctx.snapshots) {
+          qc.setQueryData(key, snapshot);
+        }
+      }
+      addToast({
+        type: 'error',
+        title: t('tasks.status_update_failed', { defaultValue: 'Could not change status' }),
+      });
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
     },
   });
 
   const handleStatusChange = useCallback(
-    (id: string, status: TaskStatus) => {
+    (id: string, status: TaskStatus | string) => {
       if (status === 'completed') {
         handleComplete(id);
       } else {
@@ -1102,10 +1134,10 @@ export function TasksPage() {
   );
 
   const handleColumnDragOver = useCallback(
-    (e: React.DragEvent, status: TaskStatus) => {
+    (e: React.DragEvent, status: TaskStatus | string) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      setDropTargetStatus(status);
+      setDropTargetStatus(status as TaskStatus);
     },
     [],
   );
@@ -1115,7 +1147,7 @@ export function TasksPage() {
   }, []);
 
   const handleColumnDrop = useCallback(
-    (e: React.DragEvent, targetStatus: TaskStatus) => {
+    (e: React.DragEvent, targetStatus: TaskStatus | string) => {
       e.preventDefault();
       const taskId = e.dataTransfer.getData('text/plain');
       setDraggedTaskId(null);
@@ -1146,7 +1178,7 @@ export function TasksPage() {
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
       const response = await fetch(
-        `/api/v1/tasks/import/file?project_id=${encodeURIComponent(projectId)}`,
+        `/api/v1/tasks/import/file/?project_id=${encodeURIComponent(projectId)}`,
         { method: 'POST', headers, body: formData },
       );
 

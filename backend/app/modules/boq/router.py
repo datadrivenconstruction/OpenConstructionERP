@@ -4712,6 +4712,7 @@ async def get_resource_summary(
                 "available_variants": None,
                 "variant_stats": None,
                 "currency": None,
+                "resource_code": None,
                 # Distinct (label, default) tuples observed across positions:
                 # if all entries agree we surface that pick; mixed → "__mixed__".
                 "variant_labels": set(),
@@ -4725,7 +4726,7 @@ async def get_resource_summary(
         entry["rates"].append(rate)
         entry["positions"].add(pos_id)
 
-        # Capture variant catalog / stats / currency on first sighting.
+        # Capture variant catalog / stats / currency / code on first sighting.
         avail = raw.get("available_variants")
         if entry["available_variants"] is None and isinstance(avail, list) and len(avail) >= 2:
             entry["available_variants"] = avail
@@ -4735,6 +4736,9 @@ async def get_resource_summary(
         cur = raw.get("currency")
         if entry["currency"] is None and isinstance(cur, str) and cur:
             entry["currency"] = cur
+        rc = raw.get("code")
+        if entry["resource_code"] is None and isinstance(rc, str) and rc.strip():
+            entry["resource_code"] = rc.strip()
 
         # Track current pick / default per position so the UI can show a
         # consistent pill (or flag "mixed" when positions disagree).
@@ -4824,11 +4828,50 @@ async def get_resource_summary(
                 current_variant_label=current_label,
                 variant_default=variant_default,
                 currency=entry["currency"],
+                resource_code=entry["resource_code"],
                 position_refs=entry["position_refs"],
             )
         )
 
     resource_items.sort(key=lambda r: r.total_cost, reverse=True)
+
+    # Dedupe variant pickers across summary rows. Two collapse scenarios:
+    #   1. Two rows share the same ``resource_code`` (CWICR
+    #      KADX_KATO_KAKASA_KATO: two component rows under KALI-RI-KATO-KANE
+    #      with identical 3-variant catalogs).
+    #   2. Two rows carry the same variant-label set even with different
+    #      codes — happens when a position persisted the synthetic top-level
+    #      resource alongside a component that mirrors it (BG_SOFIA shape:
+    #      "Стоманени конструкции" appears as both the cost item's top
+    #      variants and as component[0]).
+    # In both cases strip ``available_variants`` / ``variant_stats`` from
+    # secondary rows so the UI only renders one ▾N picker per unique
+    # catalog. Picker fan-out via ``position_refs`` covers all linked
+    # positions already.
+    seen_codes: set[str] = set()
+    seen_hashes: set[str] = set()
+    for it in resource_items:
+        if not it.available_variants:
+            continue
+        label_hash = "|".join(
+            (v.get("label") or "").strip()
+            for v in it.available_variants
+            if isinstance(v, dict)
+        )
+        already = (
+            (it.resource_code and it.resource_code in seen_codes)
+            or (label_hash and label_hash in seen_hashes)
+        )
+        if already:
+            it.available_variants = None
+            it.variant_stats = None
+            it.current_variant_label = None
+            it.variant_default = None
+        else:
+            if it.resource_code:
+                seen_codes.add(it.resource_code)
+            if label_hash:
+                seen_hashes.add(label_hash)
 
     # Build by_type summary
     by_type: dict[str, ResourceTypeSummary] = {}

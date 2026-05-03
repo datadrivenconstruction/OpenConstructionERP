@@ -478,6 +478,9 @@ export interface ResourceSummaryItem {
   /** Auto-default strategy when one was applied uniformly. */
   variant_default?: 'mean' | 'median' | null;
   currency?: string | null;
+  /** CWICR resource_code — used to dedupe ▾N pickers across summary rows
+   *  that resolve to the same abstract-resource catalog. */
+  resource_code?: string | null;
   position_refs?: ResourcePositionRef[];
 }
 
@@ -867,7 +870,7 @@ export const boqApi = {
   },
   getProjectActivity: (projectId: string, limit = 10) =>
     apiGet<{ items: ProjectActivityEntry[]; total: number }>(
-      `/v1/boq/projects/${projectId}/activity?limit=${limit}`,
+      `/v1/boq/projects/${projectId}/activity/?limit=${limit}`,
     ),
 
   /* Cost autocomplete — uses vector semantic search when available */

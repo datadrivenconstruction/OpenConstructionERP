@@ -201,7 +201,15 @@ class FieldReportService:
     # ── Status transitions ────────────────────────────────────────────────
 
     async def submit_report(self, report_id: uuid.UUID) -> FieldReport:
-        """Submit a draft report for approval (draft -> submitted)."""
+        """Submit a draft report for approval (draft -> submitted).
+
+        If the report's ``metadata.schedule_progress`` carries one or more
+        progress entries, fires ``fieldreports.report.submitted`` so the
+        schedule module can append matching :class:`ScheduleProgressEntry`
+        rows. Wiring lives in ``schedule/events.py`` — the publisher does
+        not import the schedule module to keep the dependency direction
+        one-way (schedule subscribes to fieldreports, not vice versa).
+        """
         report = await self.get_report(report_id)
         if report.status != "draft":
             raise HTTPException(
@@ -209,9 +217,31 @@ class FieldReportService:
                 detail=f"Cannot submit report with status '{report.status}' — must be draft",
             )
 
+        # Snapshot the progress payload before update_fields() expires the
+        # session — the inline metadata read might MissingGreenlet otherwise.
+        md = report.metadata_ if isinstance(report.metadata_, dict) else {}
+        schedule_progress = md.get("schedule_progress") if isinstance(md, dict) else None
+        project_id_s = str(report.project_id)
+
         await self.repo.update_fields(report_id, status="submitted")
         await self.session.refresh(report)
         logger.info("Field report submitted: %s", report_id)
+
+        if isinstance(schedule_progress, list) and schedule_progress:
+            from app.core.events import event_bus
+
+            event_bus.publish_detached(
+                "fieldreports.report.submitted",
+                {
+                    "report_id": str(report_id),
+                    "project_id": project_id_s,
+                    "report_date": str(report.report_date),
+                    "schedule_progress": schedule_progress,
+                    "submitted_by": getattr(report, "created_by", None),
+                },
+                source_module="oe_fieldreports",
+            )
+
         return report
 
     async def approve_report(self, report_id: uuid.UUID, user_id: str) -> FieldReport:
@@ -306,23 +336,18 @@ class FieldReportService:
     # ── Summary ───────────────────────────────────────────────────────────
 
     async def get_summary(self, project_id: uuid.UUID) -> dict[str, Any]:
-        """Get aggregated stats for a project's field reports."""
-        reports = await self.repo.all_for_project(project_id)
+        """Get aggregated stats for a project's field reports.
 
-        by_status: dict[str, int] = {}
-        by_type: dict[str, int] = {}
+        Counts / by_status / by_type / delay_hours come from SQL aggregates;
+        only the JSON `workforce` column is iterated in Python because
+        count*hours math doesn't survive a portable JSON_EXTRACT path.
+        """
+        agg = await self.repo.aggregates_for_project(project_id)
+        workforce_rows = await self.repo.workforce_for_project(project_id)
+
         total_workforce_hours = 0.0
-        total_delay_hours = 0.0
-
-        for report in reports:
-            by_status[report.status] = by_status.get(report.status, 0) + 1
-            by_type[report.report_type] = by_type.get(report.report_type, 0) + 1
-            total_delay_hours += report.delay_hours or 0.0
-
-            # Sum workforce hours.
-            # JSONB values from demo seed / API can arrive as strings; coerce
-            # before arithmetic to avoid TypeError on str * float.
-            for entry in report.workforce or []:
+        for entries in workforce_rows:
+            for entry in entries:
                 if isinstance(entry, dict):
                     try:
                         count = float(entry.get("count", 0) or 0)
@@ -332,11 +357,11 @@ class FieldReportService:
                     total_workforce_hours += count * hours
 
         return {
-            "total": len(reports),
-            "by_status": by_status,
-            "by_type": by_type,
+            "total": agg["total"],
+            "by_status": agg["by_status"],
+            "by_type": agg["by_type"],
             "total_workforce_hours": round(total_workforce_hours, 1),
-            "total_delay_hours": round(total_delay_hours, 1),
+            "total_delay_hours": round(float(agg["total_delay_hours"]), 1),
         }
 
     # ── PDF Export ────────────────────────────────────────────────────────

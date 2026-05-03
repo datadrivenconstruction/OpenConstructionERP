@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, InfoHint, SkeletonTable, CountryFlag, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
-import { apiGet, apiPost, apiDelete, triggerDownload } from '@/shared/lib/api';
+import { apiGet, apiPost, apiDelete, triggerDownload, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -114,10 +114,10 @@ async function downloadExcelExport(): Promise<void> {
 
   const response = await fetch('/api/v1/costs/actions/export-excel/', { method: 'GET', headers });
   if (!response.ok) {
-    let detail = 'Export failed';
+    let detail = `Export failed (HTTP ${response.status})`;
     try {
       const body = await response.json();
-      detail = body.detail || detail;
+      detail = extractErrorMessageFromBody(body) ?? detail;
     } catch {
       // ignore parse error
     }
@@ -190,12 +190,21 @@ function RegionTabBar({
   activeRegion,
   onChangeRegion,
   totalItemCount,
+  /** ``true`` while ``/v1/costs/regions/`` is still in-flight on first
+   *  paint. The endpoint does a SELECT DISTINCT scan over the active
+   *  catalog and can take 18 s on cold SQLite when 100 k+ rows are
+   *  loaded, so we MUST distinguish "still loading" from "definitely
+   *  empty" — the previous code conflated the two and showed
+   *  "No database loaded" for the entire 18 s wait, which the user
+   *  reported as "the page never loads". */
+  isLoadingRegions,
 }: {
   regions: string[];
   regionStats: RegionStat[];
   activeRegion: string;
   onChangeRegion: (region: string) => void;
   totalItemCount: number;
+  isLoadingRegions: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -232,6 +241,32 @@ function RegionTabBar({
     if (!el) return;
     el.scrollBy({ left: dir === 'left' ? -200 : 200, behavior: 'smooth' });
   }, []);
+
+  // While the regions request is still in-flight, render a tab-bar
+  // skeleton instead of the "No database loaded" empty state. Cold
+  // SQLite responds in ~18 s on 100 k+ catalogs; without this guard
+  // the user sees the empty state for the entire wait and assumes the
+  // app is broken.
+  if (isLoadingRegions && regions.length === 0) {
+    return (
+      <div
+        className="mb-5 flex items-center gap-2"
+        data-testid="costs-region-tabs-skeleton"
+        aria-busy="true"
+      >
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="h-9 w-24 rounded-t-lg bg-surface-secondary/60 animate-pulse"
+          />
+        ))}
+        <span className="ms-3 text-xs text-content-tertiary inline-flex items-center gap-2">
+          <Loader2 size={12} className="animate-spin" />
+          {t('costs.loading_databases', { defaultValue: 'Loading databases…' })}
+        </span>
+      </div>
+    );
+  }
 
   if (regions.length === 0 && totalItemCount === 0) {
     return (
@@ -438,7 +473,7 @@ export function CostsPage() {
   // minutes so a quick navigation away-and-back doesn't re-fire any of
   // these aggregates — they only change when a user installs / removes a
   // database, which already invalidates them explicitly.
-  const { data: loadedRegions } = useQuery({
+  const { data: loadedRegions, isLoading: isLoadingRegions } = useQuery({
     queryKey: ['costs', 'regions'],
     queryFn: () => apiGet<string[]>('/v1/costs/regions/'),
     retry: false,
@@ -749,6 +784,7 @@ export function CostsPage() {
         activeRegion={region}
         onChangeRegion={handleRegionChange}
         totalItemCount={total}
+        isLoadingRegions={isLoadingRegions}
       />
 
       {/* Favourites & Recent Quick Filters */}

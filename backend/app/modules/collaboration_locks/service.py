@@ -162,7 +162,7 @@ class CollabLockService:
         if acquired is not None:
             user_name = await _resolve_user_name(self.session, user_id)
             response = _to_response(acquired, user_name=user_name, now=now)
-            await event_bus.publish(
+            event_bus.publish_detached(
                 COLLAB_LOCK_ACQUIRED,
                 {
                     "lock_id": str(acquired.id),
@@ -223,7 +223,7 @@ class CollabLockService:
             )
 
         user_name = await _resolve_user_name(self.session, user_id)
-        await event_bus.publish(
+        event_bus.publish_detached(
             COLLAB_LOCK_HEARTBEAT,
             {
                 "lock_id": str(row.id),
@@ -258,7 +258,7 @@ class CollabLockService:
         deleted = await self.repo.release(lock_id, user_id=user_id)
         if deleted:
             user_name = await _resolve_user_name(self.session, user_id)
-            await event_bus.publish(
+            event_bus.publish_detached(
                 COLLAB_LOCK_RELEASED,
                 {**snapshot, "user_name": user_name},
                 source_module="collaboration_locks",
@@ -306,7 +306,7 @@ class CollabLockService:
         # publish events, so do a direct scan if there are expired rows.
         removed = await self.repo.delete_expired(now)
         for row in stale_rows:
-            await event_bus.publish(
+            event_bus.publish_detached(
                 COLLAB_LOCK_EXPIRED,
                 {
                     "lock_id": str(row.id),

@@ -84,11 +84,13 @@ async def create_transmittal(
 @router.get("/{transmittal_id}", response_model=TransmittalResponse)
 async def get_transmittal(
     transmittal_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: TransmittalService = Depends(_get_service),
 ) -> TransmittalResponse:
     """Get a single transmittal by ID."""
     transmittal = await service.get_transmittal(transmittal_id)
+    await verify_project_access(transmittal.project_id, str(user_id), session)
     return TransmittalResponse.model_validate(transmittal)
 
 
@@ -99,10 +101,13 @@ async def get_transmittal(
 async def update_transmittal(
     transmittal_id: uuid.UUID,
     data: TransmittalUpdate,
+    session: SessionDep,
     user_id: CurrentUserId,
     service: TransmittalService = Depends(_get_service),
 ) -> TransmittalResponse:
     """Update a transmittal (fails if locked after issue)."""
+    existing = await service.get_transmittal(transmittal_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     transmittal = await service.update_transmittal(transmittal_id, data)
     return TransmittalResponse.model_validate(transmittal)
 
@@ -113,10 +118,13 @@ async def update_transmittal(
 @router.delete("/{transmittal_id}", status_code=204)
 async def delete_transmittal(
     transmittal_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId,
     service: TransmittalService = Depends(_get_service),
 ) -> None:
     """Delete a draft transmittal. Issued ones return 409."""
+    existing = await service.get_transmittal(transmittal_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_transmittal(transmittal_id)
 
 

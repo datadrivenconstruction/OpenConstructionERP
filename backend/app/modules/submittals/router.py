@@ -105,10 +105,12 @@ async def create_submittal(
 )
 async def get_submittal(
     submittal_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: SubmittalService = Depends(_get_service),
 ) -> SubmittalResponse:
     submittal = await service.get_submittal(submittal_id)
+    await verify_project_access(submittal.project_id, str(user_id), session)
     return _to_response(submittal)
 
 
@@ -116,10 +118,13 @@ async def get_submittal(
 async def update_submittal(
     submittal_id: uuid.UUID,
     data: SubmittalUpdate,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("submittals.update")),
     service: SubmittalService = Depends(_get_service),
 ) -> SubmittalResponse:
+    existing = await service.get_submittal(submittal_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     submittal = await service.update_submittal(submittal_id, data)
     return _to_response(submittal)
 
@@ -127,10 +132,13 @@ async def update_submittal(
 @router.delete("/{submittal_id}", status_code=204)
 async def delete_submittal(
     submittal_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("submittals.delete")),
     service: SubmittalService = Depends(_get_service),
 ) -> None:
+    existing = await service.get_submittal(submittal_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_submittal(submittal_id)
 
 

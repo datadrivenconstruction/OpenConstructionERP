@@ -36,7 +36,7 @@ _logger_ev = logging.getLogger(__name__ + ".events")
 async def _safe_publish(name: str, data: dict, source_module: str = "oe_reporting") -> None:
     """Best-effort event publish — never blocks the caller on failure."""
     try:
-        await event_bus.publish(name, data, source_module=source_module)
+        event_bus.publish_detached(name, data, source_module=source_module)
     except Exception:
         _logger_ev.debug("Event publish skipped: %s", name)
 

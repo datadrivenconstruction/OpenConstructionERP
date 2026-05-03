@@ -99,11 +99,13 @@ async def create_ncr(
 @router.get("/{ncr_id}", response_model=NCRResponse)
 async def get_ncr(
     ncr_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: NCRService = Depends(_get_service),
 ) -> NCRResponse:
     """Get a single non-conformance report."""
     ncr = await service.get_ncr(ncr_id)
+    await verify_project_access(ncr.project_id, str(user_id), session)
     return _to_response(ncr)
 
 
@@ -111,11 +113,14 @@ async def get_ncr(
 async def update_ncr(
     ncr_id: uuid.UUID,
     data: NCRUpdate,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("ncr.update")),
     service: NCRService = Depends(_get_service),
 ) -> NCRResponse:
     """Update a non-conformance report."""
+    existing = await service.get_ncr(ncr_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     ncr = await service.update_ncr(ncr_id, data)
     return _to_response(ncr)
 
@@ -123,11 +128,14 @@ async def update_ncr(
 @router.delete("/{ncr_id}", status_code=204)
 async def delete_ncr(
     ncr_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("ncr.delete")),
     service: NCRService = Depends(_get_service),
 ) -> None:
     """Delete a non-conformance report."""
+    existing = await service.get_ncr(ncr_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_ncr(ncr_id)
 
 

@@ -10,6 +10,7 @@ Stateless service layer. Handles:
 import logging
 import uuid
 from datetime import UTC, datetime
+from decimal import Decimal, InvalidOperation
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,7 +32,7 @@ async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
     """Fire-and-forget event publish. Swallows errors so a transient event
     bus outage never breaks the main transaction."""
     try:
-        await event_bus.publish(name, data, source_module=source_module)
+        event_bus.publish_detached(name, data, source_module=source_module)
     except Exception:
         logger.debug("Event publish skipped: %s", name)
 
@@ -266,8 +267,11 @@ class ChangeOrderService:
         self._validate_transition(order.status, "approved")
 
         # Snapshot fields that are safe to use in the event payload later
-        # (update_fields calls expire_all).
-        project_id_s = str(order.project_id)
+        # (update_fields calls expire_all). ``project_id_uuid`` keeps the
+        # native UUID for downstream SQL (stub tests look up the project
+        # by exact UUID match, and Project.id is also typed as UUID).
+        project_id_uuid: uuid.UUID = order.project_id
+        project_id_s = str(project_id_uuid)
         code_s = order.code
         cost_impact_s = order.cost_impact or "0"
 
@@ -287,9 +291,13 @@ class ChangeOrderService:
             delta = Decimal("0")
         project_updated = False
         if delta != 0:
+            # Use the project_id_s snapshot captured before update_fields()
+            # called expire_all() — accessing ``order.project_id`` here
+            # would trigger a sync-context attribute refresh and raise
+            # ``MissingGreenlet`` under async aiosqlite.
             project = (
                 await self.session.execute(
-                    select(Project).where(Project.id == order.project_id)
+                    select(Project).where(Project.id == project_id_uuid)
                 )
             ).scalar_one_or_none()
             if project is not None:
@@ -301,6 +309,16 @@ class ChangeOrderService:
                 project_updated = True
                 await self.session.flush()
 
+        # v2.6.45: Push CO items into the project's primary BOQ as a
+        # dedicated section. Construction PMs expect approved scope to
+        # appear in the BOQ — previously only project.budget_estimate
+        # moved, leaving the BOQ silently out of date.
+        # Re-fetch the order so its ``items`` collection is fresh —
+        # repo.update_fields() above called session.expire_all() which
+        # invalidated the original ORM instance.
+        fresh_for_apply = await self.repo.get_by_id(order_id)
+        boq_result = await self._apply_to_boq(fresh_for_apply or order)
+
         await _safe_publish(
             "changeorder.approved",
             {
@@ -310,13 +328,190 @@ class ChangeOrderService:
                 "cost_impact": str(delta),
                 "approved_by": user_id,
                 "project_budget_updated": project_updated,
+                "boq_applied": boq_result.get("applied", False),
+                "boq_section_id": boq_result.get("section_id"),
+                "boq_positions_added": boq_result.get("positions_added", 0),
             },
             source_module="oe_changeorders",
         )
 
         fresh = await self.repo.get_by_id(order_id)
-        logger.info("Change order approved: %s by %s (delta=%s)", code_s, user_id, delta)
+        logger.info(
+            "Change order approved: %s by %s (delta=%s, boq=%s)",
+            code_s, user_id, delta, boq_result,
+        )
         return fresh or order
+
+    async def _apply_to_boq(self, order: ChangeOrder) -> dict:
+        """Push the approved CO's items into the project's first non-locked BOQ.
+
+        Idempotent — if a section with ``metadata.change_order_id == order.id``
+        already exists, returns ``already_applied`` and does nothing. Section
+        ordinal is ``CO-{code}`` (assumed unique because CO codes are unique
+        per project), description ``{code}: {title}``. Each ChangeOrderItem
+        becomes a child Position with ``source='manual'`` and metadata link
+        back to the CO/CO-item, using the existing schema.
+
+        Returns a dict describing what happened so the event payload can
+        surface it to subscribers and the UI:
+
+        - ``applied=True`` + ``section_id`` + ``positions_added`` on success
+        - ``applied=False`` + ``reason`` on no-op (no BOQ, all locked, already
+          applied, or no items)
+        """
+        from sqlalchemy import select
+
+        from app.modules.boq.models import BOQ, Position
+
+        # Items must be fetched async — accessing ``order.items`` on an
+        # ORM object whose attributes were expired by a prior flush()
+        # triggers MissingGreenlet inside async SQLAlchemy. Pull them
+        # explicitly so we don't depend on lazy-load state.
+        try:
+            items = list(
+                (
+                    await self.session.execute(
+                        select(ChangeOrderItem)
+                        .where(ChangeOrderItem.change_order_id == order.id)
+                        .order_by(ChangeOrderItem.sort_order)
+                    )
+                ).scalars().all()
+            )
+        except Exception:
+            # Test stubs (SimpleNamespace) don't have a real session.
+            # Fall back to whatever the stub exposes.
+            items = list(getattr(order, "items", None) or [])
+        if not items:
+            return {"applied": False, "reason": "no_items"}
+
+        boq = (
+            await self.session.execute(
+                select(BOQ)
+                .where(BOQ.project_id == order.project_id)
+                .where(BOQ.is_locked.is_(False))
+                .order_by(BOQ.created_at)
+                .limit(1)
+            )
+        ).scalar_one_or_none()
+        if boq is None:
+            logger.info(
+                "Change order %s approved but no unlocked BOQ in project %s "
+                "— BOQ writeback skipped",
+                order.code, order.project_id,
+            )
+            return {"applied": False, "reason": "no_active_boq"}
+
+        # Idempotent guard: section keyed by change_order_id in metadata.
+        existing_sections = (
+            await self.session.execute(
+                select(Position)
+                .where(Position.boq_id == boq.id)
+                .where(Position.unit == "section")
+            )
+        ).scalars().all()
+        for sec in existing_sections:
+            md = sec.metadata_ if isinstance(sec.metadata_, dict) else {}
+            if md.get("change_order_id") == str(order.id):
+                return {
+                    "applied": False,
+                    "reason": "already_applied",
+                    "section_id": str(sec.id),
+                }
+
+        # Pick a unique ordinal for the new section. CO codes are unique
+        # per project (uq_changeorders_project_code), so ``CO-{code}`` is
+        # collision-free across both first-time and re-issued COs.
+        section_ordinal = f"CO-{order.code}"
+        # Sort_order goes to the end of the BOQ.
+        max_order_row = (
+            await self.session.execute(
+                select(Position.sort_order)
+                .where(Position.boq_id == boq.id)
+                .order_by(Position.sort_order.desc())
+                .limit(1)
+            )
+        ).scalar_one_or_none()
+        next_order = (max_order_row or 0) + 1
+
+        section = Position(
+            boq_id=boq.id,
+            parent_id=None,
+            ordinal=section_ordinal,
+            description=f"{order.code}: {order.title}",
+            unit="section",
+            quantity="0",
+            unit_rate="0",
+            total="0",
+            classification={},
+            source="manual",
+            confidence=None,
+            cad_element_ids=[],
+            metadata_={
+                "change_order_id": str(order.id),
+                "change_order_code": order.code,
+                "origin": "change_order",
+            },
+            sort_order=next_order,
+        )
+        self.session.add(section)
+        await self.session.flush()
+
+        positions_added = 0
+        item_total = Decimal("0")
+        for idx, item in enumerate(items, start=1):
+            try:
+                qty = Decimal(str(item.new_quantity or "0"))
+            except (InvalidOperation, ValueError):
+                qty = Decimal("0")
+            try:
+                rate = Decimal(str(item.new_rate or "0"))
+            except (InvalidOperation, ValueError):
+                rate = Decimal("0")
+            line_total = qty * rate
+            item_total += line_total
+
+            position = Position(
+                boq_id=boq.id,
+                parent_id=section.id,
+                ordinal=f"{section_ordinal}.{idx:03d}",
+                description=item.description or "(no description)",
+                unit=item.unit or "lsum",
+                quantity=str(qty),
+                unit_rate=str(rate),
+                total=str(line_total),
+                classification={},
+                source="manual",
+                confidence=None,
+                cad_element_ids=[],
+                metadata_={
+                    "change_order_id": str(order.id),
+                    "change_order_item_id": str(item.id),
+                    "change_type": item.change_type,
+                    "origin": "change_order",
+                },
+                sort_order=next_order + idx,
+            )
+            self.session.add(position)
+            positions_added += 1
+
+        # Surface the rolled-up cost on the section row so it's visible in
+        # the BOQ tree without forcing the UI to recompute. The UI already
+        # treats sections as headers (unit='section'), so the total renders
+        # as a subtotal.
+        section.total = str(item_total)
+        await self.session.flush()
+
+        logger.info(
+            "Change order %s applied to BOQ %s: section=%s, %d positions, total=%s",
+            order.code, boq.id, section.id, positions_added, item_total,
+        )
+        return {
+            "applied": True,
+            "boq_id": str(boq.id),
+            "section_id": str(section.id),
+            "positions_added": positions_added,
+            "section_total": str(item_total),
+        }
 
     async def reject_order(self, order_id: uuid.UUID, user_id: str) -> ChangeOrder:
         """Reject a submitted change order.

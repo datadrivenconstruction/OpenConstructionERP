@@ -101,20 +101,29 @@ class NCRService:
         except Exception:
             logger.exception("Failed to create notification for NCR %s", ncr_number)
 
-        # Emit event for additional cross-module handlers (analytics, etc.)
-        await event_bus.publish(
-            "ncr.created",
-            {
-                "project_id": str(data.project_id),
-                "ncr_id": str(ncr.id),
-                "ncr_number": ncr_number,
-                "title": data.title,
-                "severity": data.severity,
-                "ncr_type": data.ncr_type,
-                "created_by": user_id,
-                "notify_user_ids": [],
-            },
-            source_module="ncr",
+        # Emit event for additional cross-module handlers (analytics,
+        # webhooks, smart-notifications, etc.). Detached so the request
+        # session can commit before the wildcard handlers — which open
+        # their own writers via ``async_session_factory()`` — try to run.
+        # Awaiting here on SQLite single-writer locking deadlocks the
+        # event chain for ~30s before timing out.
+        import asyncio
+
+        asyncio.create_task(
+            event_bus.publish(
+                "ncr.created",
+                {
+                    "project_id": str(data.project_id),
+                    "ncr_id": str(ncr.id),
+                    "ncr_number": ncr_number,
+                    "title": data.title,
+                    "severity": data.severity,
+                    "ncr_type": data.ncr_type,
+                    "created_by": user_id,
+                    "notify_user_ids": [],
+                },
+                source_module="ncr",
+            )
         )
 
         return ncr
@@ -220,7 +229,7 @@ class NCRService:
 
         # Emit event for variation creation when cost impact exists
         if ncr.cost_impact:
-            await event_bus.publish(
+            event_bus.publish_detached(
                 "ncr.closed_with_cost_impact",
                 {
                     "ncr_id": str(ncr.id),

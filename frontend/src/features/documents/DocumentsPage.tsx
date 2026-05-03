@@ -679,7 +679,7 @@ export function DocumentsPage() {
           }, estimatedMs / 18);
 
           const response = await fetch(
-            `/api/v1/documents/upload?project_id=${projectId}&category=${cat}`,
+            `/api/v1/documents/upload/?project_id=${projectId}&category=${cat}`,
             { method: 'POST', headers, body: formData },
           );
 

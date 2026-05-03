@@ -5,6 +5,191 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] — 2026-05-03
+
+**Stable release rolling up 14 patch iterations (2.6.41 → 2.7.0).** Single shipping artefact for all platforms (PyPI · git tag · VPS · GitHub release). All entries below — 2.6.42 through 2.6.54 — are part of this release; the per-version sections are kept for changelog continuity but ship as one tag.
+
+### Highlights since v2.6.41
+- **CWICR download fixed on Windows** (issue #104) — replaced stdlib `urllib.request` with `httpx` + `certifi`, so HTTPS downloads of region catalogs no longer fail with `CERTIFICATE_VERIFY_FAILED` on stock Windows.
+- **Cost-DB modal opens instantly** — startup pre-warm + 60-min cache + idle-time prefetch + skeleton loading state.
+- **Multi-variant resource picker** — explicit modal for cost items with multiple independent variant slots; bulk-fill chips, per-row delta vs mean, RTL-correct layout, 19 i18n keys × 5 langs.
+- **Variant resources dedupe** — three-layer fix (modal, apply-time, render-time, summary aggregator) so shared catalogs across components no longer surface as duplicate "▾N" pills; "Variant" violet-gradient chip replaces the cryptic "Materials" type chip on variant rows.
+- **Imported / cleared cost databases appear immediately** — `_invalidate_cost_cache()` now wired to `bulk_import_cost_items`, `import_cost_file`, `clear_cost_database`.
+- **5 new UI languages** — hr, id, ro, th, vi (now 24 total UI langs / ~28 k keys).
+- **QA-crawler bug sweep** — 12 + 3 fixes from automated multi-locale crawl (trailing-slash, region-delete confirm, modal a11y, …).
+- **/tasks page DnD optimistic update** — cards move between columns immediately, rollback on PATCH failure.
+- **/bim — disk-usage chip moved to hover-tooltip** — model name area no longer clutters with `data/bim/ 86.3 MB` on every project.
+- **Privacy / Terms rewritten for self-hosted edition.**
+- **Resource-row depth + GAEB audit polish** — 8 fixes: encoding, units, hierarchy, paragraphs, version detection.
+
+### Fixed — CWICR download from GitHub on Windows (issue #104)
+- **Replaced `urllib.request.urlretrieve` with `httpx.stream` + `certifi`.** Python's stdlib `ssl` on Windows ignores the OS certificate store, so every HTTPS download to `raw.githubusercontent.com` failed with `SSL: CERTIFICATE_VERIFY_FAILED: unable to get local issuer certificate` — symptom reported in #104 by skolodi (v2.6.37) trying to load `SP_BARCELONA`. New `_download_to_file()` helper uses `httpx`, which is already a project dep and ships the Mozilla CA bundle via `certifi`, so verification works on Windows without `pip install python-certifi-win32` or env-var workarounds. Streams in 1 MB chunks so the 1.1 GB Qdrant snapshot doesn't blow up RAM. Three call sites swapped: CWICR parquet download, vector-embeddings parquet download, and Qdrant snapshot download.
+
+### Fixed — Imported / cleared cost databases now appear immediately
+- **Import endpoints invalidate the cost cache.** `bulk_import_cost_items`, `import_cost_file`, and `clear_cost_database` now call `_invalidate_cost_cache()` on success — was: only `clear_region_database` and `load_cwicr_database` did, so a freshly imported region (e.g. NZ_AUCKLAND via Excel/CSV) was hidden behind a 60-min stale `_region_cache["regions"]` until the cache TTL elapsed or another invalidating call fired. User-visible symptom: "imported a database but nothing in /costs page".
+- **`_invalidate_cost_cache()` wipes all value slots, not just `ts`.** Now nulls every key in `_region_cache` (regions / stats / categories_*) explicitly so any future cache slot that doesn't piggy-back on the shared timestamp is still cleared.
+
+### Fixed — Variant resources: dedupe shared catalogs + clear "Variant" chip
+- **Dedupe ▾N pickers across components that share a `resource_code`.** CWICR rate `KADX_KATO_KAKASA_KATO` ships two resource rows ("Stahlkonstruktionen" + "Befestigungsteile für Schienen") both pointing at code `KALI-RI-KATO-KANE` with the same 3-variant catalog. Before: both BOQ rows + both summary rows showed identical "▾ 3" pills, looking like a UI bug. After: only the FIRST row per `resource_code` carries the picker; linked rows render plain. Applied at three layers: BOQ "Add from DB" apply-time (`BOQModals.tsx`), grid render-time for legacy positions (`BOQGrid.tsx`), and resource summary aggregation (`backend/app/modules/boq/router.py` — new `resource_code` field on `ResourceSummaryItem`).
+- **Dedupe top-level vs component catalogs by variant-label hash.** BG_SOFIA rate `KADX_KADX_KAKARI_KAME` ("Монтаж на метални конструкции") ships its 8-variant catalog as BOTH `metadata.variants` AND `components[0]` ("Стоманени конструкции"). The "Choose materials" modal previously rendered two slots with identical 8 options, identical price, identical −13% delta — both reading like a duplicate. Now `collectVariantSlots()` hashes each catalog by its label sequence: when the top catalog matches a component catalog the top slot is dropped, AND `BOQModals.handleAdd` skips the synthetic top-level resource it used to append (the "third extra" the user flagged), so a 2-component cost item adds exactly 2 resources to the BOQ.
+- **Multi-variant picker modal also dedupes.** `collectVariantSlots()` no longer emits two cards for the same catalog — picks fan to all linked components when the position is materialised.
+- **"Variant" type tag replaces the Material/Labor/Equipment chip on variant rows.** The left-side type chip on a BOQ resource row is now a violet-gradient "Variant" badge when the row carries a variant catalog, instead of the cryptic black "Materials" tag that didn't hint at the picker. Same chip lands on the Resource Summary panel. Reclassification still works — clicking opens the full type list — but the chip face is unambiguous about variant status. The decorative "V" circle in the resource name area is unchanged.
+
+## [2.6.53] — 2026-05-02
+
+### Performance — Cost-DB modal opens instantly
+- **Backend cost-DB cache pre-warm at startup.** New background task in `app/main.py` runs `SELECT DISTINCT region` + `regions/stats` + `categories(all)` + `category_tree(depth=4)` for every active region during the first 2 s of boot, populating `_region_cache` and `_category_tree_cache` before any request hits. The first user click on "Add from Database" or `/costs` page no longer pays the 18 s + 16 s + 86 s cold aggregation cost.
+- **Search-endpoint count(*) fast-path.** When the search call has no text/category/classification filters and no cursor (the modal's first page), the total is now read from the prewarmed `_region_cache["stats"]` instead of running `SELECT COUNT(*)` over the filtered subquery. Full-catalog count took 18 s on a 277 k-row catalog before; cache lookup is microseconds.
+- **Cache TTL bumped 5 min → 60 min.** `_CACHE_TTL` and `_CATEGORY_TREE_CACHE_TTL` raised; both are correctly wiped on import/delete via `_invalidate_cost_cache()`, so the longer hold doesn't risk staleness — it just stops the same scan from repeating every 5 min for an unchanged catalog.
+- **Modal opens with `depth=2` tree, not `depth=4`.** The cost-DB modal's classification sidebar now uses a 2-column GROUP BY (~10 s cold) instead of a 4-column GROUP BY (~85 s cold) on a 277 k-row catalog. Deeper levels are still reachable via the search endpoint's `classification_path` filter when the user clicks a level-2 leaf, so coverage isn't lost.
+- **Frontend idle-time prefetch on BOQ editor mount.** `BOQEditorPage.tsx` now prefetches `/v1/costs/regions/`, `/v1/costs/category-tree/?region=<first>&depth=2`, AND the first-page `/v1/costs/?limit=15&region=<first>` search via `requestIdleCallback` (setTimeout fallback) — all three heavy modal calls warmed in parallel via `Promise.all` while the editor is idle. React Query is hot for the FIRST CLICK on "From Database" even on a freshly-restarted backend before its server-side prewarm finishes.
+- **Modal seeds region from React Query cache synchronously.** `BOQModals.CostDatabaseSearchModal` reads the `cost-regions-modal` cache in a lazy `useState` initializer so the modal mounts with the right region (e.g. `FR_PARIS`) instead of `''`. The previous code rendered with `region=''` for one render tick before the auto-default `useEffect` ran, which fired wasted `tree?depth=2` (no region — heaviest GROUP BY) and `search?limit=15` (no region — slowest `COUNT(*)`) calls. With the cache seed, those wasted calls are eliminated when the BOQ-editor prefetch is hot.
+- **Skeleton table in the modal results pane.** Generic centered "Loading…" spinner replaced with 8 skeleton rows that mirror the actual result columns (checkbox / description / unit / qty / rate / region). Reads as "loading specific data" instead of "stuck".
+
+### Fixed — `/costs` page no longer flashes "No database loaded" while loading
+- **Skeleton vs empty-state.** `RegionTabBar` now distinguishes "still loading regions" from "actually empty" — when `loadedRegions` is `undefined` (request in-flight), shows a tab-bar skeleton with `Loading databases…` instead of the dashed-border "No database loaded" empty-state. Cold SQLite responds in 18 s on 100 k+ catalogs; the previous code conflated the two and showed the import-CTA empty-state for the entire wait, so the user reported the page as "broken / loads forever".
+
+### UX — BOQ position add: section picker + apply-to-remaining
+- **"Add to: …" footer dropdown.** Cost-DB modal footer now exposes the BOQ's existing sections in a dropdown ("[Root]" + each section by ordinal). Selecting a section files new positions under it with parent-relative ordinals (`<section>.<NNN+1>`) and threads `parent_id` into the POST body. Backend already accepted `parent_id` on `PositionCreate` since v1; the UI just wasn't surfacing it. Hidden in resource-pick mode and when the BOQ has no sections.
+- **"Apply to remaining N" CTA in the multi-variant picker.** When mid-batch with more multi-variant items waiting, the picker footer surfaces an `Apply to remaining {{count}}` button. Clicking it captures the user's slot picks and short-circuits every subsequent open in the batch — slots are matched by name across CWICR rows so concrete-grade × rebar-diameter × formwork picks carry over even when item A and item B share resource names but different variant catalogs. Trailing "Applied picks to N more items" toast on completion.
+
+## [2.6.52] — 2026-05-02
+
+### UX — Cost-database add flow deepening
+- **Inline quantity per row.** Cost-DB modal table now has a Qty column with a numeric input per row — sets `position.quantity` at POST time instead of the legacy hardcoded `1`. Eliminates the 20-cell-edit chore after a 20-item batch add. Focusing the input auto-selects the row.
+- **Live cost preview in footer.** Footer shows `≈ €X` next to the selection counter — Σ(catalog rate × qty) for everything currently selected, so a 5-item batch isn't committed blind. Updates in real time as the user toggles selection or edits quantity.
+- **Validation hints surface pre-add.** Items with `rate ≤ 0` (CWICR rows whose price never landed) and items with `unit = lump_sum` (where qty × rate is ambiguous) now show an amber `AlertCircle` next to the rate with a tooltip — same checks that the post-add quality dashboard runs, surfaced before commit.
+- **Partial-success error recovery.** Per-item POST is now wrapped in try/catch with a `failed[]` array. If 18 of 20 items POST successfully and 2 fail, the loop completes and shows a warning toast listing the casualties — was: first failure aborted the entire batch silently.
+- **Keyboard navigation in the row list.** ↓/↑ moves the highlighted row, Space toggles selection, Enter toggles (or fires Add when selection is non-empty), PageDown/PageUp jumps 10 rows, Home/End jumps to ends. Highlighted row gets an outline ring; scrollIntoView keeps it visible. Skips the handler when focus is in an input so search-as-you-type stays unaffected.
+
+## [2.6.51] — 2026-05-02
+
+### UX
+- **Multi-variant position add: explicit picker for 2+ slots.** When a CWICR cost item has multiple independent variant resources (e.g. concrete grade × rebar diameter × formwork type), `Add to BOQ` now opens a centered modal — one card per slot, bulk-fill chips (median / average / cheapest / priciest), per-row delta-vs-mean, live position subtotal. Single top-slot items keep the existing anchored popover; the legacy silent-median path is the cancel fallback. New: `frontend/src/features/costs/MultiVariantPicker.tsx` + `collectVariantSlots()` helper; `BOQModals.handleAdd` routes through it whenever there are 2+ slots or any per-component slot.
+- **Multi-variant picker hardening pass.** Two parallel deep-audit subagents flagged six concrete gaps; all addressed in this release:
+  - **RTL.** Replaced physical `mr-/ml-/text-right/text-left` with logical `me-/ms-/text-end/text-start` so Arabic users see a correctly-mirrored modal (was: header icon + price column on wrong side).
+  - **Keyboard.** Apply button receives initial focus; Enter applies (was: Esc-only).
+  - **Subtotal bug.** `slot.quantity || 1` replaced with `slot.quantity ?? 1` — a legit 0-qty slot (rebar=0 for unreinforced section) no longer inflates the position rate by treating it as 1 unit.
+  - **Dark-mode contrast.** Selected variant rows had ~1.05:1 contrast vs unselected; added `ring-1 ring-inset ring-oe-blue/30` and bumped tint to `dark:bg-blue-950/30`.
+  - **Token fix.** `border-border-medium` (undefined) → `border-border` for the unselected radio circle.
+  - **Batch progress.** Adding 5+ items with multi-slots now shows an "Item N of M" badge in the header so the user knows how many modal opens remain.
+  - **Provenance.** Position metadata stamps `ui_source: "multi_picker" | "single_popover" | "silent_default" | "no_variants"` so adoption is measurable from the audit log.
+  - **i18n.** 19 new `boq.mvp.*` keys translated for en / de / ru / ja / ar in `i18n-fallbacks.ts` (German uses statistics-correct "Mittelwert" not "Durchschnitt"; Russian has 3 plural forms; Arabic has 6 plural forms incl. zero/two).
+
+## [2.6.50] — 2026-05-02
+
+### Performance
+- **N+1 in `punchlist.get_summary`.** Counts pushed into SQL `GROUP BY`; only the closed-item timestamps still walk Python (date-diff isn't portable across SQLite + PostgreSQL). Drops full-row hydration of every punch item per stats call.
+- **N+1 in `tasks.get_task_stats`.** Same pattern — total / by_status / by_type / by_priority / overdue / completed all run as SQL aggregates. Only the JSON `checklist` column for non-completed tasks is iterated (for `avg_checklist_progress`), and only the projected column ships, not full ORM rows.
+
+### Fixed
+- **Architecture page: 3968 React Flow warnings per render → 0.** `ModuleNodeComponent`, `ModelNodeComponent`, `RouteNodeComponent` had no `<Handle />` — every edge logged "Couldn't create edge for source handle id: null" once per render cycle. Added hidden source/target handles on all three.
+- **Wider browser smoke clean — 53/53 routes.** Caught more disabled-module 404s: `/markups` calling `/v1/takeoff/measurements/`, `/dwg-takeoff` calling `/v1/dwg_takeoff/offline-readiness/`, `/project-intelligence` calling `/v1/project_intelligence/summary/`. All gated through the shared `isModuleLoaded` probe; the project-intelligence page now shows a translatable "module disabled" empty state.
+
+## [2.6.49] — 2026-05-02
+
+### Performance
+- **N+1 in `meetings.get_stats` / `get_open_actions`.** Both loaded full ORM rows for every non-cancelled meeting just to walk the JSON `action_items` column. New repo method `action_items_for_project` fetches `(id, number, title, date, action_items)` only — drops every other column and ORM hydration.
+- **N+1 in `fieldreports.get_summary`.** Same shape — full hydration of every report to compute counts. Pushed `total / by_status / by_type / total_delay_hours` into SQL `GROUP BY` + `SUM`; only the JSON `workforce` column still needs a Python pass for `count*hours`.
+- **Compound indexes added.** New migration `v2b1_compound_type_indexes`: `(project_id, meeting_type)`, `(project_id, inspection_type)`, `(project_id, report_type)`. List filters used in dashboards no longer scan the project's whole row set when a type filter is applied.
+
+### Security
+- **IDOR sweep batch 4 — markups module.** Five endpoints patched: `link_to_boq`, `get_summary`, `export_markups`, `update_stamp_template`, `delete_stamp_template`, `delete_scale`. Stamp mutation now routes through `_authorize_stamp_mutation` (project members for project-scoped templates, owner-only for predefined). Scale deletion restricted to its `created_by`. AST guard extended 86 → 96 parametrized assertions.
+
+### Fixed
+- **Wide browser smoke clean — 25/25 routes.** Disabled-module 404 noise on `/data-explorer`, `/takeoff`, `/documents` traced to frontend calling `oe_takeoff` / `oe_dwg_takeoff` endpoints regardless of load state. Extracted a shared `isModuleLoaded` probe (`shared/lib/moduleProbe.ts`); rolled out across `cad-explorer/api.ts`, `dwg-takeoff/api.ts`, `takeoff/api.ts`, `quantities/QuantitiesPage.tsx`, `bim/api.ts` (refactored from inline probe).
+- **MapLibre style noise.** `ProjectMap` switched from `liberty` to `positron` style — liberty's POI expressions tripped MapLibre's evaluator with "Expected value to be of type number, but found null instead." once per rendered card. Positron is quieter.
+- **`ProjectMap` cache poisoning.** `parseFloat` of malformed Nominatim responses could write `NaN` (serialized as `null`) into the geocode cache, then read back as null lat/lng. Added `isFiniteNumber` guard on both write and read; bad cache entries are evicted on read.
+- **CommandPalette rAF leak.** `requestAnimationFrame` for input focus on open had no cleanup — palette mount/unmount churn could fire `focus()` against a stale ref. Now `cancelAnimationFrame` on cleanup.
+
+## [2.6.48] — 2026-05-02
+
+### Performance
+- **N+1 elimination on Change Orders list.** `repository.list_for_project()` now `selectinload(ChangeOrder.items)` — was firing one extra query per row to lazy-load items. Page with 50 orders: 51 queries → 1.
+
+### Fixed
+- **BIM page console noise.** Frontend probes `/v1/modules/` once per session and skips the `/v1/takeoff/converters/` request entirely when `oe_takeoff` is disabled, instead of relying on a swallowed 404 that the browser still logs to the network panel. Browser smoke now 6/6 routes clean.
+- **Frontend timer cleanup leaks.** `BIMViewer.tsx` (geometry-progress timeout) and `BOQGrid.tsx` (3 grid-refresh setTimeouts) now track timers in refs and clear them on unmount — fast nav between BOQ/BIM pages no longer leaves orphaned callbacks running against an unmounted tree.
+
+### Security
+- **Stack-trace leak fixes.** `schedule/router.py` and `projects/router.py` 500-handlers stopped echoing `str(exc)` in `detail`; `backup/router.py` adds `from exc` to preserve the chain server-side without exposing it. Internal error messages no longer ship to clients.
+
+## [2.6.47] — 2026-05-02
+
+### Performance
+- **SQLite write-lock deadlock — system-wide fix.** Every `await event_bus.publish(...)` inside a request handler held the SQLite single-writer lock while subscribers (the wildcard webhook dispatcher and ~7 notification handlers in `core/event_handlers.py`) opened their own writer sessions. SQLite serialised the second writer; requests hung ~30s before timing out. Live probes show formerly-30s routes now ~100ms: `POST /ncr/` 101ms, `POST /fieldreports/reports/{id}/submit/` 72ms, `POST /inspections/{id}/create-ncr/` 68ms.
+- Centralised the fix in a new `EventBus.publish_detached(...)` method that wraps `publish` in `asyncio.create_task`. All 21 module-local `_safe_publish` helpers and 28 direct `await event_bus.publish(...)` callsites across 16 modules now route through it. Production semantics: subscribers fire after the request commits and releases the writer.
+- Test-time shim in `tests/conftest.py` drives the publish coroutine to completion via a single `coro.send(None)` so the existing event-capture fixtures keep their pre-detached synchronous assertion semantics. 2597 unit tests green.
+
+### Fixed
+- **Latent crash in `assemblies/service.py`** — two more lazy `from app.modules.boq.models import BOQPosition` imports (lines 709, 955) — same renamed-class bug that hit `tendering/service.py` in v2.6.46. `get_usage_stats()` and `compute_assembly_usage_by_id()` would 500 on first call. Patched to `Position as BOQPosition` alias.
+
+### Security
+- **IDOR sweep batch 3** — 3 more modules patched: `requirements` (GET/PATCH/DELETE /{set_id}), `documents` (GET/{id}, GET /{id}/download/, PATCH /{id}, DELETE /{id}), `teams` (PATCH/DELETE /{team_id}). Documents download path was the highest-impact gap — any authenticated user could pass any document UUID and stream the file. Now `verify_project_access` after fetching the resource. AST guard test extended from 68 → 86 parametrized assertions.
+
+## [2.6.46] — 2026-05-02
+
+### Added
+- **Cross-module: Tendering → Procurement auto-PO.** Awarding a tender bid now publishes `tendering.package.awarded`; a new procurement subscriber drafts a PO pre-filled with the winning supplier, line items, currency, and totals. Idempotent via `metadata.tender_package_id`. PMs no longer retype every line of the winning bid by hand. Verified live: award creates one draft PO with `metadata.origin="tender_award"`; re-firing the same award is a no-op.
+- **Cross-module: Field Reports → Schedule progress.** Submitting a field report whose `metadata.schedule_progress = [{task_id, progress_percent, notes}]` carries activity progress now publishes `fieldreports.report.submitted`; a new schedule subscriber appends a `ScheduleProgressEntry` per task and rolls the activity's `progress_pct`/`status` forward. Per-report idempotency via `Activity.metadata_.field_report_progress`. Verified live: 60% → 100% over two reports yields 2 history entries and `status=completed`.
+- **Inspection → NCR auto-suggest.** New `POST /api/v1/inspections/{id}/create-ncr/` pre-fills a Non-Conformance Report from a failed inspection with mapped `ncr_type`, severity (`critical` if any failed item is `critical: true`), location, and a description listing failed checklist items + notes. Idempotent via `linked_inspection_id`. Complements existing `/create-defect/` (punchlist) — punchlist for minor defects, NCR for formal non-conformance with root-cause/CAPA.
+
+### Fixed
+- **Latent crash in `apply_winner`.** `tendering.service.apply_winner` imported `BOQPosition` from `app.modules.boq.models`, but the class is `Position`. Every tender award has been 500'ing on the BOQ writeback step, masking the broken integration entirely. Repointed to `Position` (also for the SQLAlchemy `update()` statement); award now writes the winning unit rates back to the BOQ as designed.
+- **`create-defect` checklist parsing.** The endpoint that creates punchlist items from failed inspections looked for a non-existent `passed: bool` field on checklist items, missing every actual `response: "fail"` (the schema-defined convention). Now accepts both forms — legacy `passed` and canonical `response` in (no/fail/false/0/failed). Without this, "create defect" generated empty-description punchlist items even when the checklist had real failures.
+- **NCR-creation deadlock on SQLite.** `NCRService.create_ncr` awaited `event_bus.publish("ncr.created", ...)` before the request transaction committed; the wildcard webhook dispatcher and smart-notification subscribers (#23, #24 in `event_handlers.py`) open their own writers via `async_session_factory()`, deadlocking the SQLite single-writer lock for ~30s before the request timed out. Detached as `asyncio.create_task(...)` so subscribers run after the parent commit. Same pattern applied in v2.6.45's CO→BOQ work and v2.6.46's tendering/fieldreports subscribers.
+
+## [2.6.45] — 2026-05-02
+
+### Added
+- **Cross-module: Change Order → BOQ pushdown.** Approving a change order now appends a section `CO-{code}: {title}` plus one position per `ChangeOrderItem` into the project's primary unlocked BOQ, with `metadata.origin="change_order"` and back-reference IDs. Construction PMs previously saw `project.budget_estimate` jump on approval but no scope appearing in the BOQ — this closes that loop. Idempotent: re-approving an already-approved CO is a no-op (existing ENH-095 guard) and the section-level guard short-circuits even if the no-op were bypassed. Surfaces in the `changeorder.approved` event payload as `boq_applied / boq_section_id / boq_positions_added`. Verified live: 2 items + 1 section row land in the right BOQ; second approve adds nothing more.
+
+### Fixed
+- **Latent bug in change-order approve.** `approve_order` accessed `order.project_id` after `repo.update_fields()` had called `session.expire_all()`, which under aiosqlite raises `MissingGreenlet` (sync attribute refresh in async context) and 500'd the entire approval whenever `cost_impact != 0`. Stub-session unit tests masked it because they bypass expiration. Now uses the `project_id_uuid` snapshot captured before the update.
+
+### Notes
+- v2.7.0 backlog items previously marked open (EAC validator FK fixture, demo_credentials test failures, v260c migration idempotence) are already resolved on `main` — confirmed via direct test run; tracker stale.
+
+## [2.6.44] — 2026-05-02
+
+### Security
+- IDOR sweep batch 2 — 6 more modules patched. RFI, Submittals, Correspondence, Transmittals, Markups, Change Orders single-resource handlers (`GET/PATCH/DELETE /{id}`) now `verify_project_access` after fetching the resource, returning 404 for non-owners. 18 handlers total. Live cross-user check: admin gets 200, estimator gets 404 across rfi/submittals/correspondence/changeorders. AST anti-regression test extended from 32 → 68 parametrized assertions.
+
+### Verified (no code change)
+- `/api/v1/dashboards/presets` previously returned 500 in dev — root cause was missing local migrations `v2a0_compliance_dsl_rules` + `v2b0_preset_sync_columns` (committed in repo for v2.10/2.11 but never applied to dev DB). After `alembic upgrade head`, endpoint returns 200. Live probe of all 28 unique frontend `apiGet` paths against running v2.6.43 returns 200. Bulk-resolved 99 more stale findings in `qa-tests/improvements.json` (50 NotificationBell medium-sev + 49 silent-HTTP) — open count down from 707 to 552, with the remaining 552 all `performance`-category LCP improvement candidates rather than bugs.
+
+## [2.6.43] — 2026-05-02
+
+### Security
+- IDOR sweep across 6 modules — single-resource handlers (`GET/PATCH/DELETE /{id}`) now call `verify_project_access(resource.project_id, user_id, session)` after fetching, returning 404 (not the resource) for non-owner non-admin users. Affected: NCR (3 endpoints), Inspections (3), Meetings (3), Punchlist items (3), Risk (3), Takeoff document delete (1) — 16 handlers total. Verified live: legit owner gets 200, cross-user request gets 404 "Project not found" (matches finance/erp_chat pattern).
+
+### Fixed
+- Export functions across 7 features (`contacts`, `tasks`, `fieldreports`, `rfi`, `costs`, `costs/import`, `finance`) used `body.detail || 'Export failed'` to surface the error — but FastAPI 422 returns `detail` as an array of objects, which JS coerces to `[object Object]` in the toast. Now route through `extractErrorMessageFromBody()` which flattens 422 arrays, handles plain-string bodies, and falls back to a status-coded message (`Export failed (HTTP 500)` etc.).
+- QA-crawler nav-shape heuristic produced 43 false positives ("Open menu", project picker, Radix dropdown triggers) flagged as "did not navigate". Engine now reads `aria-haspopup` / `aria-controls` / `data-radix-collection-item` BEFORE clicking and skips the nav-shape rule for popup-trigger elements — these legitimately open overlays without changing the URL, and our overlay-detect window can briefly miss them.
+
+### Added
+- `backend/tests/unit/test_idor_router_guards.py` — AST-level anti-regression test that walks each protected handler and asserts both `session: SessionDep` accepted and `verify_project_access` called. Catches silent regressions where a refactor drops the IDOR guard without breaking the legit-owner happy path.
+
+### Verified (no code change)
+- v2.6.40-42 backend 500 sweep was effective end-to-end. Live probe of 40 distinct URLs from older QA-crawler journey logs (Search, NotificationBell unread-count, Switch Project, custom-units, system/status, fieldreports/summary, contacts/search, projects/dashboard, etc.) — all return 200/2xx with the demo token. Stale "high severity" findings in `qa-tests/improvements.json` are residue from pre-fix runs and have been bulk-resolved (76 silent-HTTP + 43 discoverability-FP + 1 IDOR fix = 120 items).
+
+## [2.6.42] — 2026-05-02
+
+### Fixed
+- 12 more trailing-slash 404/422 endpoints across `/v1/collaboration/comments`, takeoff `save-to-project`, tasks/meetings/finance/fieldreports/inspections/RFI imports & exports, BOQ project-activity, and documents upload.
+- `Costs > Import database` per-region delete button bypassed confirmation — destructive single-click that wiped a whole region's pricing data; now `window.confirm`-gated.
+- `ChangeOrders` row-level delete and `PunchList` item delete and `Photos` batch delete now require explicit user confirmation before mutating.
+- `FinancePage` EVM panel rendered KPI cards as `NaN` — the `/v1/finance/evm/` endpoint returns an envelope `{items, total}`, but the React Query was typed as a single `EVMData`. Now extracts `items[0]` (the latest snapshot) and `parseFloat`s every Decimal-as-string metric (BAC/PV/EV/AC/SPI/CPI/EAC/VAC/ETC/TCPI).
+- `ReportingPage` stale-data race when switching projects mid-fetch — six parallel stat fetches (finance/safety/tasks/RFI/schedule/procurement) could resolve out of order and overwrite the current project's data with the previous project's responses. Generation-counter ref now discards in-flight responses from stale generations.
+
+### Changed
+- 8 more modals given WCAG `role="dialog"` + `aria-modal="true"` + `aria-labelledby` for screen readers and QA-crawler modal-detect heuristic: BOQ Manual Resource, BOQ Recalc/GAEB-export/Add-section, Catalog Build-assembly/Adjust-prices, BOQ Variables, Asset Edit.
+- QA-crawler engine: post-click modal-detect timeout 400ms → 1000ms (was missing slow modals like Three.js Snapshot creator), and locale-switcher 401 noise suppressed in silent-http-error heuristic (bootstrap re-auth retries make these false positives).
+
+### Added
+- Unit tests for v2.6.40 anti-regressions: `test_documents_relative_path` (path-traversal containment), `test_database_pool_config` (SQLite pool sizing applied), `test_fieldreports` JSONB string-coercion + malformed-workforce resilience.
+- Unit test pinning the `EVMListResponse` envelope shape and Decimal-as-string serialization contract — prevents the EVM endpoint from drifting back to a bare list (root cause of the FinancePage NaN bug).
+
 ## [2.6.41] — 2026-05-01
 
 ### Fixed

@@ -295,7 +295,7 @@ async function _importSummaryRequest(
   }
 
   const url =
-    `/api/v1/meetings/import-summary?project_id=${encodeURIComponent(projectId)}` +
+    `/api/v1/meetings/import-summary/?project_id=${encodeURIComponent(projectId)}` +
     (preview ? '&preview=true' : '');
 
   const response = await fetch(url, {

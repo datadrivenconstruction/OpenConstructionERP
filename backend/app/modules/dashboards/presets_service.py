@@ -268,7 +268,7 @@ class DashboardPresetService:
         await self.repo.delete(row)
 
         try:
-            await event_bus.publish(
+            event_bus.publish_detached(
                 event_taxonomy.DASHBOARD_DELETED,
                 {
                     "dashboard_id": str(row.id),
@@ -319,7 +319,7 @@ class DashboardPresetService:
 
     async def _publish_saved(self, row: DashboardPreset) -> None:
         try:
-            await event_bus.publish(
+            event_bus.publish_detached(
                 event_taxonomy.DASHBOARD_SAVED,
                 {
                     "dashboard_id": str(row.id),

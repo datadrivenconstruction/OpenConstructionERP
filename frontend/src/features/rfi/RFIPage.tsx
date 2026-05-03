@@ -25,7 +25,7 @@ import {
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
-import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
+import { apiGet, apiPost, triggerDownload, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -653,10 +653,10 @@ async function downloadExcelExport(url: string, fallbackFilename: string): Promi
 
   const response = await fetch(`/api${url}`, { method: 'GET', headers });
   if (!response.ok) {
-    let detail = 'Export failed';
+    let detail = `Export failed (HTTP ${response.status})`;
     try {
       const body = await response.json();
-      detail = body.detail || detail;
+      detail = extractErrorMessageFromBody(body) ?? detail;
     } catch {
       // ignore parse error
     }
@@ -807,7 +807,7 @@ export function RFIPage() {
   const exportMut = useMutation({
     mutationFn: () =>
       downloadExcelExport(
-        `/v1/rfi/export?project_id=${projectId}`,
+        `/v1/rfi/export/?project_id=${projectId}`,
         'rfi_log.xlsx',
       ),
     onSuccess: () =>

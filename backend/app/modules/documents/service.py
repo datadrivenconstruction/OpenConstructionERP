@@ -236,7 +236,7 @@ class DocumentService:
         try:
             from app.core.events import event_bus
 
-            await event_bus.publish(
+            event_bus.publish_detached(
                 "document.uploaded",
                 {
                     "project_id": str(project_id),
@@ -258,7 +258,7 @@ class DocumentService:
         try:
             from app.core.events import event_bus
 
-            await event_bus.publish(
+            event_bus.publish_detached(
                 "documents.document.created",
                 {
                     "project_id": str(project_id),
@@ -368,7 +368,7 @@ class DocumentService:
         try:
             from app.core.events import event_bus
 
-            await event_bus.publish(
+            event_bus.publish_detached(
                 "documents.document.updated",
                 {
                     "project_id": str(document.project_id),
@@ -406,7 +406,7 @@ class DocumentService:
         try:
             from app.core.events import event_bus
 
-            await event_bus.publish(
+            event_bus.publish_detached(
                 "documents.document.deleted",
                 {
                     "project_id": str(project_id) if project_id else "",

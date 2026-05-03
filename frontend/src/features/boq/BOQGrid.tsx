@@ -397,6 +397,31 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   const gridWrapperRef = useRef<HTMLDivElement>(null);
   const addToast = useToastStore((s) => s.addToast);
 
+  // Track all setTimeout(..., 0) handles scheduled to refresh AG Grid cells
+  // after a state change (toggle resources, open variant picker, position
+  // variant picker). If the component unmounts mid-flight the callback would
+  // still fire and call gridApiRef.current.refreshCells on a torn-down grid,
+  // which produces silent errors in long-lived sessions. Clearing them in a
+  // cleanup effect closes that window.
+  const pendingGridRefreshesRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  const scheduleGridRefresh = useCallback(
+    (columns: string[]) => {
+      const id = setTimeout(() => {
+        pendingGridRefreshesRef.current.delete(id);
+        gridApiRef.current?.stopEditing();
+        gridApiRef.current?.refreshCells({ columns, force: true });
+      }, 0);
+      pendingGridRefreshesRef.current.add(id);
+    },
+    [],
+  );
+  useEffect(() => {
+    return () => {
+      pendingGridRefreshesRef.current.forEach((id) => clearTimeout(id));
+      pendingGridRefreshesRef.current.clear();
+    };
+  }, []);
+
   /* ── Collaboration locks (layer 1) ───────────────────────────────
    * Per-row soft lock state: positionId -> held lock object.  We
    * acquire on onCellEditingStarted and release on
@@ -490,11 +515,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       return next;
     });
     // Force AG Grid to refresh ordinal cells so chevron state updates
-    setTimeout(() => {
-      gridApiRef.current?.stopEditing();
-      gridApiRef.current?.refreshCells({ columns: ['ordinal', '_expand', 'description', 'quantity', 'unit_rate', 'total'], force: true });
-    }, 0);
-  }, []);
+    scheduleGridRefresh(['ordinal', '_expand', 'description', 'quantity', 'unit_rate', 'total']);
+  }, [scheduleGridRefresh]);
 
   /* ── Variant-picker auto-open signal ──────────────────────────────
    *  Triggered by the position-description "V" icon.  We ensure the
@@ -519,15 +541,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       // Same refresh-cells dance as toggleResources so the new resource
       // rows mount on the next tick — the row's mount-time effect then
       // sees the signal and opens the picker.
-      setTimeout(() => {
-        gridApiRef.current?.stopEditing();
-        gridApiRef.current?.refreshCells({
-          columns: ['ordinal', '_expand', 'description', 'quantity', 'unit_rate', 'total'],
-          force: true,
-        });
-      }, 0);
+      scheduleGridRefresh(['ordinal', '_expand', 'description', 'quantity', 'unit_rate', 'total']);
     },
-    [],
+    [scheduleGridRefresh],
   );
 
   const clearOpenVariantPicker = useCallback(() => setOpenVariantPickerSignal(null), []);
@@ -556,15 +572,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         return next;
       });
       setPositionVariantPicker({ positionId, anchorEl });
-      setTimeout(() => {
-        gridApiRef.current?.stopEditing();
-        gridApiRef.current?.refreshCells({
-          columns: ['ordinal', '_expand', 'description', 'quantity', 'unit_rate', 'total'],
-          force: true,
-        });
-      }, 0);
+      scheduleGridRefresh(['ordinal', '_expand', 'description', 'quantity', 'unit_rate', 'total']);
     },
-    [],
+    [scheduleGridRefresh],
   );
 
   const closePositionVariantPicker = useCallback(
@@ -932,11 +942,57 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     }>;
     if (resources.length === 0) return;
 
+    // Variant-catalog dedupe at render time. Two scenarios collapse here:
+    //
+    //   1. CWICR ships two components with the same ``resource_code`` (e.g.
+    //      KADX_KATO_KAKASA_KATO has two rows under KALI-RI-KATO-KANE with
+    //      identical 3-variant catalogs).
+    //   2. The cost item's TOP-LEVEL variant catalog was persisted as a
+    //      synthetic extra resource AND one of its components already carries
+    //      the same 8-variant catalog (real BG_SOFIA shape — рате surfaces
+    //      "Стоманени конструкции" both as the cost item's variants and as
+    //      component[0]).
+    //
+    // Both manifest as multiple resource rows showing identical ▾N pills.
+    // Strip ``available_variants`` from every row whose catalog already
+    // appeared on an earlier row (matched by either ``resource_code`` or by
+    // variant-label-set hash) so only ONE picker is rendered per unique
+    // catalog. ``BOQModals.tsx`` does the same dedupe at apply-time, but
+    // legacy positions persisted before that landed need this safety net.
+    const variantPrimaryByCode = new Map<string, number>();
+    const variantPrimaryByHash = new Map<string, number>();
+
     let resTotal = 0;
     for (let i = 0; i < resources.length; i++) {
       const r = resources[i]!;
       const rTotal = r.total ?? r.quantity * r.unit_rate;
       resTotal += rTotal;
+
+      const hasVariantCatalog =
+        Array.isArray(r.available_variants) && r.available_variants.length >= 2;
+      let variantsForThisRow = r.available_variants;
+      let variantStatsForThisRow = r.available_variant_stats;
+      if (hasVariantCatalog) {
+        const code = (r.code || '').trim();
+        const labelHash = (r.available_variants ?? [])
+          .map((v) => ((v as { label?: string }).label || '').trim())
+          .join('|');
+        const codePrimary = code ? variantPrimaryByCode.get(code) : undefined;
+        const hashPrimary = labelHash
+          ? variantPrimaryByHash.get(labelHash)
+          : undefined;
+        if (codePrimary !== undefined && codePrimary !== i) {
+          variantsForThisRow = undefined;
+          variantStatsForThisRow = undefined;
+        } else if (hashPrimary !== undefined && hashPrimary !== i) {
+          variantsForThisRow = undefined;
+          variantStatsForThisRow = undefined;
+        } else {
+          if (code) variantPrimaryByCode.set(code, i);
+          if (labelHash) variantPrimaryByHash.set(labelHash, i);
+        }
+      }
+
       const resRow: ResourceRow = {
         _isResource: true,
         _parentPositionId: pos.id,
@@ -948,8 +1004,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         _resourceRate: r.unit_rate,
         _resourceCurrency: r.currency,
         _resourceCode: r.code,
-        _resourceAvailableVariants: r.available_variants,
-        _resourceAvailableVariantStats: r.available_variant_stats,
+        _resourceAvailableVariants: variantsForThisRow,
+        _resourceAvailableVariantStats: variantStatsForThisRow,
         _resourceVariant: r.variant,
         _resourceVariantDefault: r.variant_default,
         _resourceVariantSnapshot: r.variant_snapshot,
@@ -1945,10 +2001,13 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       {manualResourceDialog && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setManualResourceDialog(null)}>
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="boq-manual-resource-title"
             className="bg-surface-elevated rounded-xl border border-border-light shadow-lg w-[380px] p-5 animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-sm font-semibold text-content-primary mb-4 flex items-center gap-2">
+            <h3 id="boq-manual-resource-title" className="text-sm font-semibold text-content-primary mb-4 flex items-center gap-2">
               <Wrench size={16} className="text-oe-blue" />
               {t('boq.add_resource_manual', { defaultValue: 'Add Resource' })}
             </h3>

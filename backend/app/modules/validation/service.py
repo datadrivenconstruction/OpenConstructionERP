@@ -140,7 +140,7 @@ class ValidationModuleService:
         try:
             from app.core.events import event_bus
 
-            await event_bus.publish(
+            event_bus.publish_detached(
                 "validation.report.created",
                 {
                     "report_id": str(db_report.id),
@@ -226,7 +226,7 @@ class ValidationModuleService:
             try:
                 from app.core.events import event_bus
 
-                await event_bus.publish(
+                event_bus.publish_detached(
                     "validation.report.deleted",
                     {"report_id": str(report_id)},
                     source_module="oe_validation",

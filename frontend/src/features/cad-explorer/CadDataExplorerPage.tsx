@@ -3094,7 +3094,7 @@ function SaveToProjectDialog({
     setSaving(true);
     try {
       const result = await apiPost<{ model_id: string; element_count: number }>(
-        `/v1/takeoff/sessions/${sessionId}/save-to-project?project_id=${encodeURIComponent(projectId)}`,
+        `/v1/takeoff/sessions/${sessionId}/save-to-project/?project_id=${encodeURIComponent(projectId)}`,
         { model_name: modelName.trim() },
       );
       addToast({

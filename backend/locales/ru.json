@@ -69,7 +69,30 @@
     "vat": "НДС",
     "add_markups": "Добавить наценки",
     "validate": "Проверить",
-    "export": "Экспорт"
+    "export": "Экспорт",
+    "mvp": {
+      "title": "Выбор материалов",
+      "subtitle_one": "{{count}} ресурс требует выбора",
+      "subtitle_few": "{{count}} ресурса требуют выбора",
+      "subtitle_many": "{{count}} ресурсов требуют выбора",
+      "bulk_label": "Быстрая заливка:",
+      "bulk_median": "Медиана для всех",
+      "bulk_mean": "Среднее для всех",
+      "bulk_cheapest": "Самые дешёвые для всех",
+      "bulk_priciest": "Самые дорогие для всех",
+      "slot_variant_count": "{{n}} вариантов",
+      "selected_label": "Выбрано:",
+      "default_mean": "средняя расценка",
+      "default_median": "медианная расценка",
+      "row_median": "Медиана · {{price}}",
+      "row_mean": "Среднее · {{price}}",
+      "subtotal_label": "Расценка позиции",
+      "apply": "Применить и добавить в смету",
+      "batch_progress": "Элемент {{current}} из {{total}}",
+      "toast_applied_one": "Выбран {{count}} вариант",
+      "toast_applied_few": "Выбрано {{count}} варианта",
+      "toast_applied_many": "Выбрано {{count}} вариантов"
+    }
   },
   "costs": {
     "title": "База расценок",

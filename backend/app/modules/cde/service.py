@@ -295,7 +295,7 @@ class CDEService:
         )
 
         # Emit event for cross-module handlers (notifications, analytics).
-        await event_bus.publish(
+        event_bus.publish_detached(
             "cde.container.promoted",
             data={
                 "project_id": str(container.project_id),

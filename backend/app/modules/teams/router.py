@@ -15,7 +15,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, SessionDep, verify_project_access
 from app.modules.teams.schemas import (
     AddMemberRequest,
     MembershipResponse,
@@ -78,10 +78,13 @@ async def create_team(
 async def update_team(
     team_id: uuid.UUID,
     data: TeamUpdate,
-    _user_id: CurrentUserId,
+    user_id: CurrentUserId,
+    session: SessionDep,
     service: TeamService = Depends(_get_service),
 ) -> TeamResponse:
     """Update team fields."""
+    existing = await service.get_team(team_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     team = await service.update_team(team_id, data)
     return TeamResponse.model_validate(team)
 
@@ -89,10 +92,13 @@ async def update_team(
 @router.delete("/{team_id}", status_code=204)
 async def delete_team(
     team_id: uuid.UUID,
-    _user_id: CurrentUserId,
+    user_id: CurrentUserId,
+    session: SessionDep,
     service: TeamService = Depends(_get_service),
 ) -> None:
     """Delete a team and all its memberships."""
+    existing = await service.get_team(team_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_team(team_id)
 
 

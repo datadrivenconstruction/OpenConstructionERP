@@ -953,6 +953,9 @@ function BuildAssemblyModal({
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="catalog-build-assembly-title"
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-2xl mx-4 overflow-hidden max-h-[85vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
@@ -963,7 +966,7 @@ function BuildAssemblyModal({
               <Layers size={18} />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 id="catalog-build-assembly-title" className="text-base font-semibold text-content-primary">
                 {t('catalog.build_assembly', { defaultValue: 'Build Assembly' })}
               </h2>
               <p className="text-xs text-content-tertiary">
@@ -1999,6 +2002,9 @@ function PriceAdjustModal({
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="catalog-adjust-prices-title"
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -2009,7 +2015,7 @@ function PriceAdjustModal({
               <TrendingUp size={18} />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-content-primary">
+              <h2 id="catalog-adjust-prices-title" className="text-base font-semibold text-content-primary">
                 {t('catalog.adjust_prices', { defaultValue: 'Adjust Prices' })}
               </h2>
               <p className="text-xs text-content-tertiary">

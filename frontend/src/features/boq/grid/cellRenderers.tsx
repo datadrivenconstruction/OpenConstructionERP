@@ -2465,17 +2465,31 @@ function ResourceTypePicker({
   value,
   onChange,
   t,
+  isVariant = false,
 }: {
   value: string;
   onChange: (next: string) => void;
   t: (key: string, opts?: Record<string, string>) => string;
+  /** Override the displayed chip label/colour with a clear "Variant" tag
+   *  when the underlying resource has a variant catalog. The dropdown still
+   *  exposes the full Material / Labor / Equipment / … list so the user can
+   *  reclassify if needed; only the BUTTON face changes. */
+  isVariant?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  const badge = RESOURCE_TYPE_BADGE[value] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-gray-100 text-gray-600', label: '?' };
-  const label = getResourceTypeLabel(value, t);
+  const baseBadge = RESOURCE_TYPE_BADGE[value] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-gray-100 text-gray-600', label: '?' };
+  const baseLabel = getResourceTypeLabel(value, t);
+  const variantLabel = t('boq.resource_type_variant_chip', { defaultValue: 'Variant' });
+  const label = isVariant ? variantLabel : baseLabel;
+  const badge = isVariant
+    ? {
+        ...baseBadge,
+        bg: 'bg-gradient-to-br from-violet-500 to-purple-600 text-white ring-1 ring-violet-300/40 shadow-[0_1px_3px_rgba(139,92,246,0.45)]',
+      }
+    : baseBadge;
 
   useEffect(() => {
     if (!open) return;
@@ -2517,8 +2531,24 @@ function ResourceTypePicker({
         className={`shrink-0 inline-flex items-center justify-center h-4 px-1.5 rounded
                     text-[9px] font-bold uppercase tracking-wider whitespace-nowrap
                     cursor-pointer outline-none border-0 focus:ring-1 focus:ring-oe-blue ${badge.bg}`}
-        title={t('boq.resource_type', { defaultValue: 'Resource type' })}
-        aria-label={t('boq.resource_type', { defaultValue: 'Resource type' })}
+        title={
+          isVariant
+            ? t('boq.resource_type_variant_tooltip', {
+                defaultValue:
+                  'Variant resource — pick from {{base}} catalog. Click to reclassify resource type.',
+                base: baseLabel,
+              })
+            : t('boq.resource_type', { defaultValue: 'Resource type' })
+        }
+        aria-label={
+          isVariant
+            ? t('boq.resource_type_variant_tooltip', {
+                defaultValue:
+                  'Variant resource — pick from {{base}} catalog. Click to reclassify resource type.',
+                base: baseLabel,
+              })
+            : t('boq.resource_type', { defaultValue: 'Resource type' })
+        }
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -3395,6 +3425,7 @@ export function EditableResourceRow({ data, ctx, colWidths }: { data: Record<str
           value={resourceType}
           onChange={handleTypeChange}
           t={ctx.t}
+          isVariant={hasVariants}
         />
       </span>
 

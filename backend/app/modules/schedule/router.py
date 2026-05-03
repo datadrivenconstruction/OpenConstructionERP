@@ -394,8 +394,11 @@ async def generate_from_boq(
     except HTTPException:
         raise
     except Exception as exc:
-        logger.error("generate_from_boq failed: %s\n%s", exc, _tb.format_exc())
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        logger.exception("generate_from_boq failed: %s", exc)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to generate schedule from BOQ. Check server logs for details.",
+        ) from exc
 
 
 @router.post(

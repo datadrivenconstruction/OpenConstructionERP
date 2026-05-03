@@ -471,6 +471,9 @@ export function BIMViewer({
    *  blob downloads — a 100MB model can take 30+ seconds and the
    *  previous spinner gave the user no signal anything was happening. */
   const [geometryProgress, setGeometryProgress] = useState<number | null>(null);
+  // Track the "hide-overlay" timeout so the cleanup effect can clear it
+  // when the component unmounts mid-load (avoids setState-on-unmounted warns).
+  const geometryProgressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /** "Placeholder geometry" banner dismissal. Session-scoped (resets on
    *  next page load). The banner appears when ANY loaded element carries
@@ -827,7 +830,13 @@ export function BIMViewer({
           // (after parsing finishes); hide the overlay one frame
           // later so the bar fully fills before disappearing.
           setGeometryProgress(1);
-          setTimeout(() => setGeometryProgress(null), 200);
+          if (geometryProgressTimeoutRef.current !== null) {
+            clearTimeout(geometryProgressTimeoutRef.current);
+          }
+          geometryProgressTimeoutRef.current = setTimeout(() => {
+            setGeometryProgress(null);
+            geometryProgressTimeoutRef.current = null;
+          }, 200);
           onGeometryLoadedRef.current?.(mgr.getMeshMatchRatio());
           // Re-fit the camera AFTER the DAE scene has been parented and
           // the next render cycle had a chance to commit world matrices.
@@ -853,6 +862,14 @@ export function BIMViewer({
           setGeometryProgress(null);
         });
     }
+    return () => {
+      // Clear the "hide overlay" timer if we unmount or re-trigger before
+      // the 200ms delay elapses — prevents setState-on-unmounted warnings.
+      if (geometryProgressTimeoutRef.current !== null) {
+        clearTimeout(geometryProgressTimeoutRef.current);
+        geometryProgressTimeoutRef.current = null;
+      }
+    };
   // Re-run when geometryUrl changes OR when elements first arrive (guard above).
   // Using elements.length as dep avoids re-triggering on data-only updates.
   // eslint-disable-next-line react-hooks/exhaustive-deps

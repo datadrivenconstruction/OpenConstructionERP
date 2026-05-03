@@ -48,7 +48,7 @@ from sqlalchemy import delete, select
 
 from app.core.csv_safety import neutralise_formula
 from app.core.rate_limiter import upload_limiter
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.takeoff.models import CadExtractionSession
 from app.modules.takeoff.schemas import (
     LinkToBoqRequest,
@@ -2787,12 +2787,26 @@ async def analyze_document(
 )
 async def delete_document(
     doc_id: str,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: TakeoffService = Depends(_get_service),
 ) -> None:
     """Delete an uploaded takeoff document."""
     doc = await service.get_document(doc_id)
     if doc is None:
         raise HTTPException(status_code=404, detail="Document not found")
+
+    # IDOR guard: enforce ownership when the doc is bound to a project.
+    # Standalone uploads (no project_id) fall back to the takeoff.delete
+    # permission gate above.
+    raw_pid = getattr(doc, "project_id", None)
+    if raw_pid:
+        try:
+            pid = uuid.UUID(str(raw_pid))
+        except (ValueError, TypeError):
+            pid = None
+        if pid is not None:
+            await verify_project_access(pid, str(user_id), session)
 
     await service.delete_document(doc_id)
 

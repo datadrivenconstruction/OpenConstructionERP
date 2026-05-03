@@ -90,10 +90,12 @@ async def create_correspondence(
 @router.get("/{correspondence_id}", response_model=CorrespondenceResponse)
 async def get_correspondence(
     correspondence_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: CorrespondenceService = Depends(_get_service),
 ) -> CorrespondenceResponse:
     correspondence = await service.get_correspondence(correspondence_id)
+    await verify_project_access(correspondence.project_id, str(user_id), session)
     return _to_response(correspondence)
 
 
@@ -101,10 +103,13 @@ async def get_correspondence(
 async def update_correspondence(
     correspondence_id: uuid.UUID,
     data: CorrespondenceUpdate,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("correspondence.update")),
     service: CorrespondenceService = Depends(_get_service),
 ) -> CorrespondenceResponse:
+    existing = await service.get_correspondence(correspondence_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     correspondence = await service.update_correspondence(correspondence_id, data)
     return _to_response(correspondence)
 
@@ -112,8 +117,11 @@ async def update_correspondence(
 @router.delete("/{correspondence_id}", status_code=204)
 async def delete_correspondence(
     correspondence_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("correspondence.delete")),
     service: CorrespondenceService = Depends(_get_service),
 ) -> None:
+    existing = await service.get_correspondence(correspondence_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_correspondence(correspondence_id)

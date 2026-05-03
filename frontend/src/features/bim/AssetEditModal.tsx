@@ -168,6 +168,9 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="asset-edit-modal-title"
         className="w-full max-w-lg overflow-hidden rounded-lg border border-border-light bg-surface-primary shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         data-testid="asset-edit-modal"
@@ -177,7 +180,7 @@ export function AssetEditModal({ asset, onClose, onSaved }: AssetEditModalProps)
             <div className="text-xs uppercase tracking-wide text-content-tertiary">
               {t('assets.edit.element', { defaultValue: 'Element' })}
             </div>
-            <div className="font-medium text-content-primary">{asset.name || asset.element_type}</div>
+            <div id="asset-edit-modal-title" className="font-medium text-content-primary">{asset.name || asset.element_type}</div>
             <div className="font-mono text-xs text-content-tertiary">{asset.stable_id}</div>
           </div>
           <button

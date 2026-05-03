@@ -69,7 +69,28 @@
     "vat": "VAT",
     "add_markups": "Add Markups",
     "validate": "Validate",
-    "export": "Export"
+    "export": "Export",
+    "mvp": {
+      "title": "Choose materials",
+      "subtitle_one": "{{count}} resource needs a choice",
+      "subtitle_other": "{{count}} resources need a choice",
+      "bulk_label": "Quick fill:",
+      "bulk_median": "Median for all",
+      "bulk_mean": "Average for all",
+      "bulk_cheapest": "Cheapest for all",
+      "bulk_priciest": "Most expensive for all",
+      "slot_variant_count": "{{n}} options",
+      "selected_label": "Picked:",
+      "default_mean": "average rate",
+      "default_median": "median rate",
+      "row_median": "Median rate · {{price}}",
+      "row_mean": "Average rate · {{price}}",
+      "subtotal_label": "Position rate",
+      "apply": "Apply & add to BOQ",
+      "batch_progress": "Item {{current}} of {{total}}",
+      "toast_applied_one": "{{count}} variant chosen",
+      "toast_applied_other": "{{count}} variants chosen"
+    }
   },
   "costs": {
     "title": "Cost Database",

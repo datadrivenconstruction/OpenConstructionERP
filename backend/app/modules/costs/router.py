@@ -515,7 +515,43 @@ async def search_cost_items(
         offset=offset,
         cursor=cursor,
     )
-    items, total, has_more, next_cursor = await service.search_costs_paginated(query)
+    # Fast-path: when no text/category filters are present and we already
+    # know the per-region totals from the prewarmed stats cache, skip the
+    # COUNT(*) over the filtered subquery on the first page. The user's
+    # bug report — "Add from Database" modal hangs — was traced to this
+    # cold-cache count: 18 s on a 277 k-row catalog. Subsequent pages use
+    # cursors which already skip the count, so this only affects page 1.
+    skip_count_via_cache = False
+    cached_total: int | None = None
+    if (
+        cursor is None
+        and not q
+        and not category
+        and not classification_path
+        and not unit
+        and not source
+        and min_rate is None
+        and max_rate is None
+    ):
+        stats = _region_cache.get("stats")
+        if isinstance(stats, list):
+            if region:
+                for entry in stats:
+                    if entry.get("region") == region:
+                        cached_total = int(entry.get("count", 0))
+                        skip_count_via_cache = True
+                        break
+            else:
+                cached_total = sum(int(e.get("count", 0)) for e in stats)
+                skip_count_via_cache = True
+
+    if skip_count_via_cache:
+        items, _, has_more, next_cursor = await service.search_costs_paginated(
+            query, skip_count=True,
+        )
+        total = cached_total
+    else:
+        items, total, has_more, next_cursor = await service.search_costs_paginated(query)
     resolved_locale = _resolve_cost_locale(locale, accept_language)
     return {
         "items": [
@@ -538,28 +574,37 @@ async def search_cost_items(
 import time as _time
 
 _region_cache: dict[str, Any] = {"regions": None, "stats": None, "categories": None, "ts": 0}
-# 5-minute TTL on the regions/stats/categories aggregates. Originally 30 s,
-# but on databases with 100 k+ active cost items the DISTINCT/COUNT scan
-# can take 15-20 s on cold SQLite (no row cached yet). With the short TTL,
-# every navigation between /costs and elsewhere paid that cost again — the
-# user saw an empty sidebar / "loading..." for the first 15 s on every
-# return. Cache wipe still fires on import/delete via _invalidate_cost_cache,
-# so the longer TTL doesn't risk staleness.
-_CACHE_TTL = 300
+# 1-hour TTL on the regions/stats/categories aggregates. Originally 30 s,
+# bumped to 5 min, then to 60 min after the BOQ "Add from Database" modal
+# was reported as taking 18 seconds to open on a cold backend. With 100 k+
+# active cost items the DISTINCT/COUNT scan can take 15-20 s on cold
+# SQLite, and the cache is correctly invalidated on import/delete via
+# ``_invalidate_cost_cache()``, so a long TTL never risks staleness.
+_CACHE_TTL = 3600
 
 # The category tree is much heavier to compute (single GROUP BY across the
 # four classification depths against the full active catalog) and rarely
 # changes between imports. Cache it longer, per-region, and key the entries
 # off a separate timestamp so it doesn't piggy-back on the 30s general TTL.
-_CATEGORY_TREE_CACHE_TTL = 300  # 5 minutes
+# Bumped from 5 min to 60 min for the same reason as ``_CACHE_TTL`` above:
+# cold tree GROUP BY can hit 80+ seconds on 100 k+ row catalogs, and the
+# cache is wiped on import via ``_invalidate_cost_cache()`` so user-visible
+# data is always fresh after a CWICR load.
+_CATEGORY_TREE_CACHE_TTL = 3600  # 60 minutes
 _category_tree_cache: dict[str, dict[str, Any]] = {}
 
 
 def _invalidate_cost_cache() -> None:
-    """Call after import/delete to force refresh on next request."""
-    _region_cache["ts"] = 0
-    # Tree cache lives in its own dict — wipe all regional snapshots so
-    # the next request rebuilds against the post-import catalog.
+    """Call after import/delete to force refresh on next request.
+
+    Wipes every value slot explicitly, not just the shared ``ts`` timestamp,
+    so future cache keys that don't piggy-back on ``ts`` are still cleared.
+    """
+    for key in list(_region_cache.keys()):
+        if key == "ts":
+            _region_cache[key] = 0
+        else:
+            _region_cache[key] = None
     _category_tree_cache.clear()
 
 
@@ -853,7 +898,6 @@ async def load_vector_from_github(
     for the given region, so users don't need to run the embedding model locally.
     """
     import time
-    import urllib.request
 
     from app.core.vector import vector_index
 
@@ -878,7 +922,7 @@ async def load_vector_from_github(
     if not local_path.exists() or local_path.stat().st_size < 1000:
         logger.info("Downloading vector data for %s from GitHub: %s", db_id, url)
         try:
-            urllib.request.urlretrieve(url, str(local_path))
+            _download_to_file(url, local_path)
             if local_path.exists() and local_path.stat().st_size > 1000:
                 github_available = True
         except Exception as exc:
@@ -1051,7 +1095,6 @@ async def restore_qdrant_snapshot(
     """
     import asyncio
     import time
-    import urllib.request
 
     from app.core.vector import _get_qdrant
 
@@ -1090,9 +1133,10 @@ async def restore_qdrant_snapshot(
             loop = asyncio.get_event_loop()
             await loop.run_in_executor(
                 None,
-                urllib.request.urlretrieve,
+                _download_to_file,
                 url,
-                str(local_path),
+                local_path,
+                600.0,
             )
         except Exception as exc:
             local_path.unlink(missing_ok=True)
@@ -1384,6 +1428,8 @@ async def bulk_import_cost_items(
 ) -> list[CostItemResponse]:
     """Bulk import cost items. Skips duplicates by code."""
     items = await service.bulk_import(data)
+    if items:
+        _invalidate_cost_cache()
     return [CostItemResponse.model_validate(i) for i in items]
 
 
@@ -1741,6 +1787,9 @@ async def import_cost_file(
         len(errors),
     )
 
+    if imported_count:
+        _invalidate_cost_cache()
+
     return {
         "imported": imported_count,
         "skipped": skipped + skipped_by_duplicate,
@@ -1804,6 +1853,35 @@ CWICR_SEARCH_PATHS = [
 _CWICR_CACHE_DIR = Path.home() / ".openestimator" / "cache"
 
 
+def _download_to_file(url: str, dest: Path, timeout: float = 120.0) -> None:
+    """Stream a URL to a local file with proper SSL trust on every platform.
+
+    Switched away from ``urllib.request.urlretrieve`` because Python's stdlib
+    ``ssl`` module on Windows does NOT read the OS certificate store. Every
+    HTTPS download to ``raw.githubusercontent.com`` fails with
+    ``CERTIFICATE_VERIFY_FAILED: unable to get local issuer certificate``
+    (issue #104, reporter skolodi v2.6.37 trying to load SP_BARCELONA).
+
+    ``httpx`` is already a project dependency and ships with ``certifi``'s
+    Mozilla CA bundle baked in, so verification just works on Windows out of
+    the box. Streams in 1 MB chunks so the 1.1 GB Qdrant snapshot doesn't
+    blow up memory.
+    """
+    import httpx
+
+    with httpx.stream(
+        "GET",
+        url,
+        follow_redirects=True,
+        timeout=timeout,
+        headers={"User-Agent": "openconstructionerp"},
+    ) as resp:
+        resp.raise_for_status()
+        with open(dest, "wb") as f:
+            for chunk in resp.iter_bytes(chunk_size=1024 * 1024):
+                f.write(chunk)
+
+
 _LAST_DOWNLOAD_ERROR: dict[str, str] = {}
 
 
@@ -1816,8 +1894,6 @@ def _download_cwicr_from_github_sync(db_id: str) -> Path | None:
     HTTPException emitted upstream can surface it instead of a generic
     "not found" message.
     """
-    import urllib.request
-
     github_path = _GITHUB_CWICR_FILES.get(db_id)
     if not github_path:
         _LAST_DOWNLOAD_ERROR[db_id] = (
@@ -1842,7 +1918,7 @@ def _download_cwicr_from_github_sync(db_id: str) -> Path | None:
 
     logger.info("Downloading CWICR %s from GitHub: %s", db_id, url)
     try:
-        urllib.request.urlretrieve(url, str(local_path))
+        _download_to_file(url, local_path)
         if local_path.exists() and local_path.stat().st_size > 1000:
             logger.info("Downloaded CWICR %s: %d bytes", db_id, local_path.stat().st_size)
             _LAST_DOWNLOAD_ERROR.pop(db_id, None)
@@ -2815,6 +2891,7 @@ async def clear_cost_database(
     await session.commit()
     count = result.rowcount  # type: ignore[union-attr]
 
+    _invalidate_cost_cache()
     return {"deleted": count, "source_filter": source or "all"}
 
 

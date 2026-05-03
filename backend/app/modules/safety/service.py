@@ -117,7 +117,7 @@ class SafetyService:
             logger.exception("Failed to create notification for safety incident %s", incident_number)
 
         # Emit event for additional cross-module handlers (analytics, etc.)
-        await event_bus.publish(
+        event_bus.publish_detached(
             "safety.incident.created",
             {
                 "project_id": str(data.project_id),
@@ -262,7 +262,7 @@ class SafetyService:
                 )
 
             # Emit event for additional cross-module handlers
-            await event_bus.publish(
+            event_bus.publish_detached(
                 "safety.observation.high_risk",
                 data={
                     "project_id": str(data.project_id),
@@ -329,7 +329,7 @@ class SafetyService:
         # Emit high-risk event if risk_score crossed the critical threshold
         new_risk_score = fields.get("risk_score", observation.risk_score)
         if new_risk_score > 15:
-            await event_bus.publish(
+            event_bus.publish_detached(
                 "safety.observation.high_risk",
                 data={
                     "project_id": str(observation.project_id),

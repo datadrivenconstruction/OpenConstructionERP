@@ -172,11 +172,13 @@ async def export_inspections(
 @router.get("/{inspection_id}", response_model=InspectionResponse)
 async def get_inspection(
     inspection_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: InspectionService = Depends(_get_service),
 ) -> InspectionResponse:
     """Get a single inspection."""
     inspection = await service.get_inspection(inspection_id)
+    await verify_project_access(inspection.project_id, str(user_id), session)
     return _to_response(inspection)
 
 
@@ -184,11 +186,14 @@ async def get_inspection(
 async def update_inspection(
     inspection_id: uuid.UUID,
     data: InspectionUpdate,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("inspections.update")),
     service: InspectionService = Depends(_get_service),
 ) -> InspectionResponse:
     """Update an inspection."""
+    existing = await service.get_inspection(inspection_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     inspection = await service.update_inspection(inspection_id, data)
     return _to_response(inspection)
 
@@ -196,11 +201,14 @@ async def update_inspection(
 @router.delete("/{inspection_id}", status_code=204)
 async def delete_inspection(
     inspection_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("inspections.delete")),
     service: InspectionService = Depends(_get_service),
 ) -> None:
     """Delete an inspection."""
+    existing = await service.get_inspection(inspection_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_inspection(inspection_id)
 
 
@@ -227,12 +235,23 @@ async def create_defect_from_inspection(
             detail="Only failed or partial inspections can create defects.",
         )
 
+    # Accept both ``passed`` (legacy) and ``response`` (schema) fields
+    # when deciding which checklist items failed. ``response`` of
+    # no/fail/false/0/failed counts as a failure.
+    def _is_failed(ci: dict) -> bool:
+        if "passed" in ci:
+            return ci.get("passed") is False
+        resp = str(ci.get("response", "")).strip().lower()
+        if not resp:
+            return False
+        return resp in {"no", "fail", "false", "0", "failed"}
+
     # Build description from failed checklist items
     checklist = inspection.checklist_data or []
     failed_items = [
-        ci.get("description", ci.get("question", "Unknown item"))
+        ci.get("question", ci.get("description", "Unknown item"))
         for ci in checklist
-        if isinstance(ci, dict) and not ci.get("passed", True)
+        if isinstance(ci, dict) and _is_failed(ci)
     ]
     description_parts = [
         f"Defect from inspection {inspection.inspection_number}: {inspection.title}",
@@ -296,6 +315,138 @@ async def create_defect_from_inspection(
             status_code=500,
             detail="Failed to create punchlist item from inspection.",
         )
+
+
+@router.post("/{inspection_id}/create-ncr/", status_code=201)
+async def create_ncr_from_inspection(
+    inspection_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("inspections.update")),
+    service: InspectionService = Depends(_get_service),
+) -> dict:
+    """Pre-fill a Non-Conformance Report from a failed inspection.
+
+    Punchlist (``create-defect``) covers minor defects; NCR is the
+    formal channel for non-conformances that need root-cause analysis,
+    corrective + preventive action, and engineer signoff. ``critical``
+    failed checklist items lift severity from ``major`` to ``critical``.
+
+    Idempotent: an NCR linked to this inspection (``linked_inspection_id``)
+    is returned as-is rather than duplicated. Re-firing on a re-failed
+    re-inspection therefore needs the prior NCR closed first.
+    """
+    inspection = await service.get_inspection(inspection_id)
+    if inspection.result not in ("fail", "partial"):
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=400,
+            detail="Only failed or partial inspections can create an NCR.",
+        )
+
+    # Idempotency check: existing NCR linked to this inspection?
+    from sqlalchemy import select
+
+    from app.modules.ncr.models import NCR
+    from app.modules.ncr.schemas import NCRCreate
+    from app.modules.ncr.service import NCRService
+
+    existing = (
+        await session.execute(
+            select(NCR).where(NCR.linked_inspection_id == str(inspection_id))
+        )
+    ).scalars().first()
+    if existing is not None:
+        return {
+            "ncr_id": str(existing.id),
+            "ncr_number": existing.ncr_number,
+            "inspection_id": str(inspection_id),
+            "status": existing.status,
+            "created": False,
+        }
+
+    # Accept both conventions: ChecklistEntry schema uses ``response``
+    # (yes/no/pass/fail/...) but some clients embed a legacy ``passed``
+    # boolean. Treat absent / yes / pass / true as passed.
+    def _is_failed(ci: dict) -> bool:
+        if "passed" in ci:
+            return ci.get("passed") is False
+        resp = str(ci.get("response", "")).strip().lower()
+        if not resp:
+            return False
+        return resp in {"no", "fail", "false", "0", "failed"}
+
+    checklist = inspection.checklist_data or []
+    failed_items = [
+        ci for ci in checklist
+        if isinstance(ci, dict) and _is_failed(ci)
+    ]
+    has_critical_failure = any(
+        bool(ci.get("critical")) for ci in failed_items
+    )
+
+    description_parts = [
+        f"Auto-generated from inspection {inspection.inspection_number}: {inspection.title}",
+    ]
+    if inspection.description:
+        description_parts.append(f"\nInspection notes: {inspection.description}")
+    if failed_items:
+        description_parts.append("\nFailed checklist items:")
+        for item in failed_items:
+            label = item.get("question") or item.get("description") or "Unknown item"
+            crit = " (critical)" if item.get("critical") else ""
+            note = item.get("notes") or ""
+            note_suffix = f" — {note}" if note else ""
+            description_parts.append(f"  - {label}{crit}{note_suffix}")
+    description = "\n".join(description_parts)
+
+    # Map inspection_type → ncr_type. Inspection types are open-text-ish
+    # (structural / electrical / plumbing / fire_safety / general / quality)
+    # whereas NCR's ncr_type is constrained to a regulated set.
+    ncr_type = "workmanship"
+    itype = (inspection.inspection_type or "").lower()
+    if itype in ("design", "documentation", "safety", "material"):
+        ncr_type = itype
+    elif itype in ("structural", "electrical", "plumbing", "fire_safety", "general", "quality"):
+        ncr_type = "workmanship"
+
+    severity = "critical" if has_critical_failure or inspection.result == "fail" else "major"
+
+    payload = NCRCreate(
+        project_id=inspection.project_id,
+        title=f"NCR from inspection {inspection.inspection_number}: {inspection.title}"[:500],
+        description=description[:10000],
+        ncr_type=ncr_type,
+        severity=severity,
+        location_description=inspection.location,
+        linked_inspection_id=str(inspection_id),
+        status="identified",
+        metadata={
+            "source": "inspection",
+            "inspection_id": str(inspection_id),
+            "inspection_number": inspection.inspection_number,
+            "inspection_type": inspection.inspection_type,
+            "inspection_result": inspection.result,
+            "failed_item_count": len(failed_items),
+            "critical_failure": has_critical_failure,
+        },
+    )
+
+    ncr_service = NCRService(session)
+    ncr = await ncr_service.create_ncr(payload, user_id=str(user_id))
+    logger.info(
+        "Created NCR %s from inspection %s (severity=%s)",
+        ncr.ncr_number, inspection_id, severity,
+    )
+    return {
+        "ncr_id": str(ncr.id),
+        "ncr_number": ncr.ncr_number,
+        "inspection_id": str(inspection_id),
+        "severity": severity,
+        "ncr_type": ncr_type,
+        "created": True,
+    }
 
 
 @router.post("/{inspection_id}/complete/", response_model=InspectionResponse)

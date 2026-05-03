@@ -30,6 +30,13 @@ import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { REGION_MAP } from '@/stores/useCostDatabaseStore';
 import { VariantPicker } from '@/features/costs/VariantPicker';
+import {
+  MultiVariantPicker,
+  collectVariantSlots,
+  type VariantSlot,
+  type MultiVariantPickerResult,
+  type SlotPick,
+} from '@/features/costs/MultiVariantPicker';
 import type { CostVariant } from '@/features/costs/api';
 import {
   fetchCategoryTree,
@@ -73,6 +80,42 @@ type VariantResolution =
 interface PendingVariantPick {
   item: CostSearchItem;
   resolve: (chosen: VariantResolution | null) => void;
+}
+
+/** Pending multi-variant pick — fires when a CostItem has 2+ independent
+ *  variant slots (top-level + per-component, or 2+ per-component slots).
+ *  The MultiVariantPicker modal renders all slots in one centered dialog so
+ *  the user makes every variant decision before the position is created. */
+interface PendingMultiVariantPick {
+  item: CostSearchItem;
+  slots: VariantSlot[];
+  positionTitle: string;
+  /** Optional progress chip for batch-add flows. Only set when the user
+   *  selected 2+ items at once and this dialog will fire sequentially. */
+  batchProgress?: { current: number; total: number };
+  /** Number of OTHER multi-variant items still queued after this one in the
+   *  current add batch. Surfaces the "Apply to remaining N" CTA in the modal
+   *  footer; clicking it short-circuits every subsequent open and re-uses
+   *  the user's slot picks (matched by slot name) across the remainder. */
+  remainingCount: number;
+  /** Pre-seeded picks when the user already chose "Apply to remaining N"
+   *  on an earlier item in this batch. Carried across by slot-name match. */
+  suggestedPicks?: Record<string, SlotPick>;
+  resolve: (result: MultiVariantPickerResult | null) => void;
+}
+
+/** One section row pulled from the structured BOQ response. Used to populate
+ *  the "Add to: …" footer dropdown so a batch can be filed under an existing
+ *  section instead of always landing as root-level positions. */
+interface BOQSectionOption {
+  id: string;
+  ordinal: string;
+  description: string;
+  /** Highest numeric suffix amongst this section's existing children — used
+   *  to compute the next sibling ordinal without a re-fetch. */
+  childMaxNum: number;
+  /** Number of existing children, surfaced in the dropdown for context. */
+  childCount: number;
 }
 
 /* ── AssemblyPickerModal ─────────────────────────────────────────────── */
@@ -301,8 +344,24 @@ export function CostDatabaseSearchModal({
   // initial result set is fast (single-region scan, ~1 s) instead of the
   // 10+ s "all databases" scan. The "All databases" tab is still rendered
   // at the end of the row so the user can opt in to the multi-region view.
-  const [region, setRegion] = useState('');
-  const regionDefaultedRef = useRef(false);
+  //
+  // The lazy initializer reads from the React Query cache synchronously —
+  // when ``BOQEditorPage``'s idle prefetch has already populated
+  // ``cost-regions-modal``, we start with the right region and skip the
+  // throwaway region='' tree + search fetches that fire before the
+  // auto-default useEffect runs. Cold cache (no prefetch yet) falls
+  // through to the empty initial value and the auto-default still works.
+  const [region, setRegion] = useState<string>(() => {
+    const cached = queryClient.getQueryData<string[]>(['cost-regions-modal']);
+    return cached?.[0] ?? '';
+  });
+  // Seed the "already defaulted" flag from the same cache lookup we used
+  // to seed `region` itself — otherwise the auto-default effect would
+  // overwrite a region the user has clicked between mount and the first
+  // useEffect tick.
+  const regionDefaultedRef = useRef<boolean>(
+    Boolean(queryClient.getQueryData<string[]>(['cost-regions-modal'])?.[0]),
+  );
   // Distinguishes user-initiated region changes (tab click) from the
   // auto-default. Path-reset only fires on user clicks — the auto-default
   // mustn't wipe a path the user clicked on before regions resolved.
@@ -317,9 +376,29 @@ export function CostDatabaseSearchModal({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isAdding, setIsAdding] = useState(false);
   const [activeVariantPick, setActiveVariantPick] = useState<PendingVariantPick | null>(null);
+  const [activeMultiVariantPick, setActiveMultiVariantPick] =
+    useState<PendingMultiVariantPick | null>(null);
+  /** Per-row quantity overrides, keyed by item id. Items absent from the
+   *  map ship as quantity=1 (the legacy default). Editing the input here
+   *  saves the user from 20 cell edits after a 20-item batch add. */
+  const [rowQuantity, setRowQuantity] = useState<Record<string, number>>({});
+  /** Keyboard-navigation cursor over the current results list. -1 means
+   *  the user hasn't engaged the keyboard yet — clicks won't render a
+   *  highlight ring then.  ↓/↑ moves; Space toggles; Enter adds. */
+  const [cursorIndex, setCursorIndex] = useState<number>(-1);
   /** Mobile-only popover for the category tree.  Hidden on >=md viewports. */
   const [mobileTreeOpen, setMobileTreeOpen] = useState(false);
+  /** Section parent for new positions. ``null`` means root-level (the legacy
+   *  default). Picked from the footer dropdown; the structured BOQ fetch
+   *  populates the option list. */
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
+  /** Cached sections list — fetched lazily when the dropdown is first opened
+   *  or when handleAdd needs the parent context. ``null`` = not yet fetched. */
+  const [boqSections, setBoqSections] = useState<BOQSectionOption[] | null>(null);
+  /** Open/closed flag for the section dropdown popover. */
+  const [sectionMenuOpen, setSectionMenuOpen] = useState(false);
   const addButtonRef = useRef<HTMLButtonElement>(null);
+  const sectionMenuRef = useRef<HTMLDivElement>(null);
   const listScrollRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const cursorErrorToastShown = useRef(false);
@@ -347,9 +426,17 @@ export function CostDatabaseSearchModal({
     isError: treeError,
     refetch: refetchTree,
   } = useQuery({
-    queryKey: ['cost-tree', region],
-    queryFn: () => fetchCategoryTree(region || undefined),
+    queryKey: ['cost-tree', region, 2],
+    // Open with depth=2 — far cheaper GROUP BY than depth=4 on cold SQLite
+    // (2 json_extract columns vs 4). Deeper levels are reachable via the
+    // search endpoint's `classification_path` filter when the user clicks
+    // a level-2 leaf, so dropping the upfront depth doesn't cost coverage.
+    // Cold-cache wall-clock: ~85 s @ depth=4 → ~10 s @ depth=2 on a 100 k+
+    // catalog, which is the difference between "modal opens" and "modal
+    // hangs" from the user's perspective.
+    queryFn: () => fetchCategoryTree(region || undefined, 2),
     staleTime: 5 * 60 * 1000,
+    enabled: regionsData !== undefined,
   });
 
   // Paginated infinite search.  Cursor-based — when ``next_cursor`` is null,
@@ -493,7 +580,85 @@ export function CostDatabaseSearchModal({
     setRegion(first);
   }, [regions]);
 
+  /** Fetch the BOQ in structured form so we get the section list pre-grouped
+   *  with each section's child positions. Used to populate the footer
+   *  "Add to: …" dropdown and to compute parent-relative ordinals at apply
+   *  time. Returned promise resolves to the cached value on subsequent calls
+   *  to avoid hammering the endpoint mid-batch. */
+  const loadSections = useCallback(async (): Promise<BOQSectionOption[]> => {
+    if (boqSections) return boqSections;
+    interface StructuredPosition {
+      id: string;
+      ordinal: string;
+      description: string;
+    }
+    interface StructuredSection {
+      id: string;
+      ordinal: string;
+      description: string;
+      positions: StructuredPosition[];
+    }
+    interface StructuredBOQ {
+      sections: StructuredSection[];
+      positions: StructuredPosition[];
+    }
+    try {
+      const data = await apiGet<StructuredBOQ>(`/v1/boq/boqs/${boqId}/structured/`);
+      const opts: BOQSectionOption[] = (data.sections ?? []).map((s) => {
+        // Numeric suffix of the highest existing child ordinal under this
+        // section, so the next sibling slot is `${maxNum + 1}`. Sections
+        // typically use a `<parent>.<NNN>` ordinal scheme (e.g. 02.001),
+        // so we read the trailing dot-segment of each child ordinal.
+        let maxNum = 0;
+        for (const p of s.positions ?? []) {
+          const tail = p.ordinal.split('.').pop() ?? '';
+          const n = parseInt(tail, 10);
+          if (!Number.isNaN(n) && n > maxNum) maxNum = n;
+        }
+        return {
+          id: s.id,
+          ordinal: s.ordinal,
+          description: s.description,
+          childMaxNum: maxNum,
+          childCount: (s.positions ?? []).length,
+        };
+      });
+      setBoqSections(opts);
+      return opts;
+    } catch {
+      // Endpoint failure shouldn't block adding — fall back to a flat root
+      // add (legacy behaviour). The dropdown stays empty so the user can't
+      // pick a phantom section.
+      setBoqSections([]);
+      return [];
+    }
+  }, [boqId, boqSections]);
 
+  // Eager-load sections once the modal mounts so the dropdown opens with
+  // an immediate list. Lightweight call (~one row per section).
+  useEffect(() => {
+    loadSections();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Close the section dropdown on outside click + Esc.
+  useEffect(() => {
+    if (!sectionMenuOpen) return;
+    function onDoc(e: MouseEvent) {
+      if (!sectionMenuRef.current?.contains(e.target as Node)) {
+        setSectionMenuOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setSectionMenuOpen(false);
+    }
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [sectionMenuOpen]);
 
   const handleSelectPath = useCallback((path: string) => {
     setSelectedPath(path);
@@ -548,59 +713,240 @@ export function CostDatabaseSearchModal({
     setIsAdding(true);
 
     try {
-      // Fetch BOQ detail to find the max existing ordinal for unique numbering
-      let nextOrdNum = 1;
-      try {
-        const boqData = await apiGet<{ positions?: Array<{ ordinal: string }> }>(
-          `/v1/boq/boqs/${boqId}`,
-        );
-        const positions = boqData.positions ?? [];
-        if (positions.length > 0) {
-          // Parse all ordinal numeric parts and find the max
-          let maxNum = 0;
-          for (const p of positions) {
-            const parts = p.ordinal.split('.');
-            for (const part of parts) {
-              const n = parseInt(part, 10);
-              if (!isNaN(n) && n > maxNum) maxNum = n;
+      // Resolve the parent context. When the user chose a section in the
+      // footer dropdown, new positions land under that section with
+      // section-relative ordinals (`<section>.<NNN+1>`). Otherwise we fall
+      // back to the legacy flat numbering where each new position lives at
+      // the BOQ root with a `<NN>.<NNN>` ordinal one slot past the highest
+      // existing numeric component.
+      const sections = await loadSections();
+      const targetSection = selectedParentId
+        ? sections.find((s) => s.id === selectedParentId) ?? null
+        : null;
+
+      let nextOrdNum = 1; // root-mode counter (legacy)
+      let nextChildNum = 1; // section-mode counter (relative to parent)
+
+      if (targetSection) {
+        nextChildNum = targetSection.childMaxNum + 1;
+      } else {
+        try {
+          const boqData = await apiGet<{ positions?: Array<{ ordinal: string }> }>(
+            `/v1/boq/boqs/${boqId}`,
+          );
+          const positions = boqData.positions ?? [];
+          if (positions.length > 0) {
+            // Parse all ordinal numeric parts and find the max
+            let maxNum = 0;
+            for (const p of positions) {
+              const parts = p.ordinal.split('.');
+              for (const part of parts) {
+                const n = parseInt(part, 10);
+                if (!isNaN(n) && n > maxNum) maxNum = n;
+              }
             }
+            nextOrdNum = maxNum + 1;
           }
-          nextOrdNum = maxNum + 1;
+        } catch {
+          /* ignore — start at 1 */
         }
-      } catch {
-        /* ignore — start at 1 */
       }
 
       const selectedItems = items.filter((i) => selected.has(i.id));
 
-      // Promise wrapper around the variant picker — used only when a cost
-      // item carries 2+ CWICR abstract-resource variants.  Cancelling the
-      // picker (Esc / Cancel / outside-click) resolves with `null` and the
-      // outer loop skips that item but continues with the rest.  Resolving
-      // with `{ kind: 'default' }` honours the "Use average" CTA and writes
-      // `variant_default` instead of a per-row pick on the position.
+      // Promise wrapper around the single-slot variant picker — used when
+      // a cost item has exactly one top-level variant slot. Cancelling
+      // resolves with `null`; "Use average" resolves with `{ kind: 'default' }`.
       const pickVariant = (item: CostSearchItem): Promise<VariantResolution | null> =>
         new Promise((resolve) => {
           setActiveVariantPick({ item, resolve });
         });
 
+      // Promise wrapper around the multi-slot picker — fires when a cost
+      // item carries 2+ independent variant slots (e.g. top-level catalog
+      // variant + per-component abstract resources, or just multiple
+      // per-component slots). The modal renders every slot at once so the
+      // user makes all decisions up-front instead of discovering buried
+      // medians via per-resource pills later. The optional `batchProgress`
+      // surfaces an "Item N of M" badge in the modal header so users know
+      // how many remain when the cost-DB selection has more than one item.
+      const pickMultiVariants = (
+        item: CostSearchItem,
+        slots: VariantSlot[],
+        batchProgress: { current: number; total: number } | undefined,
+        remainingCount: number,
+        suggestedPicks: Record<string, SlotPick> | undefined,
+      ): Promise<MultiVariantPickerResult | null> =>
+        new Promise((resolve) => {
+          setActiveMultiVariantPick({
+            item,
+            slots,
+            positionTitle: item.description || 'Position',
+            batchProgress,
+            remainingCount,
+            suggestedPicks,
+            resolve,
+          });
+        });
+
+      // Toast suppression flags are scoped per-batch — the user gets one
+      // success toast per *kind* of pick (variant / default / multi) for
+      // the entire add batch, not per-item. This keeps the screen calm
+      // when adding 5+ items but still confirms that something landed.
       let variantToastShown = false;
       let defaultToastShown = false;
+      let multiToastShown = false;
+
+      // Track position within the batch so the multi-picker header can
+      // render "Item N of M". Only items that actually open the modal
+      // count toward the progress; single-popover and zero-slot items
+      // are skipped. Pre-scan slots so the total is correct upfront.
+      const multiQueue: number[] = [];
+      const fallbackCurrencyFor = (it: CostSearchItem) =>
+        (it.currency && it.currency.trim()) ||
+        (it.region && REGION_MAP[it.region]?.currency) ||
+        'EUR';
+      selectedItems.forEach((it, idx) => {
+        const itSlots = collectVariantSlots(it, fallbackCurrencyFor(it));
+        const willOpenMulti =
+          itSlots.length >= 2 || itSlots.some((s) => s.slotId !== 'top');
+        if (willOpenMulti) multiQueue.push(idx);
+      });
+      const multiTotal = multiQueue.length;
+      let multiCurrent = 0;
+
+      // Cached picks from "Apply to remaining N items" — once the user
+      // commits via that footer button on any item in the batch, every
+      // subsequent multi-variant item skips the modal entirely. Slot
+      // matching is name-based: each new item's slots are looked up by
+      // `name` against the cached map. Slots without a match fall back to
+      // the silent median default (same as not engaging the modal). The
+      // cache key is `slot.name` rather than `slotId`, because slotIds
+      // ("comp:0", "comp:1", …) are positional and the order of variant
+      // resources can differ between catalog rows even for the same trade.
+      let cachedSlotsByName: Record<string, SlotPick> | null = null;
+      let appliedToCount = 0;
+
+      // Track per-item POST outcomes so a partial failure in a 20-item batch
+      // doesn't silently drop everything (the previous behaviour bubbled the
+      // first error to the outer catch and aborted the rest of the loop).
+      let succeeded = 0;
+      const failed: Array<{ description: string; code: string; error: string }> = [];
 
       for (const item of selectedItems) {
         const variants = item.metadata_?.variants;
         const stats = item.metadata_?.variant_stats;
-        let resolution: VariantResolution | null = null;
 
-        if (variants && variants.length >= 2 && stats) {
+        const slotFallbackCurrency = fallbackCurrencyFor(item);
+        const slots = collectVariantSlots(item, slotFallbackCurrency);
+
+        let resolution: VariantResolution | null = null;
+        let multiResult: MultiVariantPickerResult | null = null;
+
+        // Routing:
+        //   2+ slots OR ≥1 per-component slot → MultiVariantPicker (modal)
+        //   exactly 1 top-level slot          → existing anchored popover
+        //   0 slots                            → no variant flow
+        const useMultiPicker =
+          slots.length >= 2 || slots.some((s) => s.slotId !== 'top');
+
+        if (useMultiPicker) {
+          multiCurrent++;
+
+          // Fast-forward path: if the user already chose "Apply to
+          // remaining N" on an earlier item, build a picks map for THIS
+          // item by slot-name lookup and skip the modal entirely.
+          if (cachedSlotsByName) {
+            const projected: Record<string, SlotPick> = {};
+            for (const s of slots) {
+              const cached = cachedSlotsByName[s.name];
+              if (cached?.kind === 'variant') {
+                // Match by variant.index when the same index exists; else
+                // fall back to median. Different CWICR rows can carry the
+                // same slot name with disjoint variant catalogs, so a
+                // stale index would phantom-stamp a wrong rate.
+                const stillThere = s.variants.some(
+                  (v) => v.index === cached.variant.index,
+                );
+                projected[s.slotId] = stillThere
+                  ? cached
+                  : { kind: 'default', strategy: 'median' };
+              } else if (cached?.kind === 'default') {
+                projected[s.slotId] = cached;
+              } else {
+                projected[s.slotId] = { kind: 'default', strategy: 'median' };
+              }
+            }
+            multiResult = { picks: projected };
+            appliedToCount++;
+            const topPick = projected['top'];
+            if (topPick?.kind === 'variant') {
+              resolution = { kind: 'variant', variant: topPick.variant };
+            } else if (topPick?.kind === 'default') {
+              resolution = { kind: 'default', strategy: topPick.strategy };
+            }
+          } else {
+            const progress =
+              multiTotal > 1
+                ? { current: multiCurrent, total: multiTotal }
+                : undefined;
+            // Suggested picks carried over from a prior soft-pre-seed (none
+            // today; reserved for a future "remember last batch" feature).
+            const suggested: Record<string, SlotPick> | undefined = undefined;
+            const remaining = Math.max(0, multiTotal - multiCurrent);
+            const r = await pickMultiVariants(
+              item,
+              slots,
+              progress,
+              remaining,
+              suggested,
+            );
+            // Cancelled — skip THIS item but keep going with the rest.
+            if (!r) continue;
+            multiResult = r;
+            // Capture cache once the user opts in to apply-to-all. Subsequent
+            // iterations consume the cache; this one still proceeds normally.
+            if (r.applyToAll) {
+              const byName: Record<string, SlotPick> = {};
+              for (const s of slots) {
+                const p = r.picks[s.slotId];
+                if (p) byName[s.name] = p;
+              }
+              cachedSlotsByName = byName;
+            }
+            // Project the top-level pick (if present) back into the legacy
+            // resolution shape so the existing top-level resource-append
+            // block below stays untouched.
+            const topPick = r.picks['top'];
+            if (topPick?.kind === 'variant') {
+              resolution = { kind: 'variant', variant: topPick.variant };
+            } else if (topPick?.kind === 'default') {
+              resolution = { kind: 'default', strategy: topPick.strategy };
+            }
+          }
+        } else if (
+          slots.length === 1 &&
+          slots[0]?.slotId === 'top' &&
+          variants &&
+          variants.length >= 2 &&
+          stats
+        ) {
           resolution = await pickVariant(item);
-          // Cancelled — skip THIS item but keep going with the rest.
           if (!resolution) continue;
         }
 
-        const section = String(Math.floor((nextOrdNum - 1) / 999) + 1).padStart(2, '0');
-        const pos = String(((nextOrdNum - 1) % 999) + 1).padStart(3, '0');
-        const ordinal = `${section}.${pos}`;
+        let ordinal: string;
+        if (targetSection) {
+          // Section-relative ordinal: <parent>.<NNN+next>. Padded 3-digit
+          // suffix so dictionary sort matches numeric order up to 999
+          // children (which is far past any realistic per-section row count).
+          const tail = String(nextChildNum).padStart(3, '0');
+          ordinal = `${targetSection.ordinal}.${tail}`;
+        } else {
+          const section = String(Math.floor((nextOrdNum - 1) / 999) + 1).padStart(2, '0');
+          const pos = String(((nextOrdNum - 1) % 999) + 1).padStart(3, '0');
+          ordinal = `${section}.${pos}`;
+        }
         // Convert cost item components to position resources.
         //
         // Per-component variants (v2.6.30+): the backend stamps
@@ -613,6 +959,15 @@ export function CostDatabaseSearchModal({
         // resource has a working price out of the box; the amber
         // provenance bar + per-resource pill make it discoverable for
         // refinement.
+        // Track the FIRST component index per dedupe key (resource_code or
+        // first-variant-label fallback). When CWICR ships two component rows
+        // both pointing at the same abstract-resource catalog (real shape —
+        // e.g. KADX_KATO_KAKASA_KATO has two rows under code KALI-RI-KATO-KANE
+        // with identical 3-variant catalogs), the picker pill is rendered on
+        // ONLY the first row, and the rest are treated as plain rate rows.
+        // Without this dedupe the user sees two ▾3 pills that look like a
+        // bug ("different variant resources can't have the same count").
+        const variantPrimaryIdx = new Map<string, number>();
         const resources: Array<{
           name: string;
           code: string;
@@ -625,28 +980,85 @@ export function CostDatabaseSearchModal({
           variant_default?: 'mean' | 'median';
           available_variants?: CostVariant[];
           available_variant_stats?: import('@/features/costs/api').VariantStats;
-        }> = (item.components || []).map((c) => {
+        }> = (item.components || []).map((c, i) => {
           const compVariants = c.available_variants;
           const compStats = c.available_variant_stats;
           const hasCompVariants =
             Array.isArray(compVariants) &&
             compVariants.length >= 2 &&
             compStats != null;
+
+          if (!hasCompVariants) {
+            return {
+              name: c.name,
+              code: c.code || '',
+              type: c.type || 'other',
+              unit: c.unit || 'pcs',
+              quantity: c.quantity ?? 1,
+              unit_rate: c.unit_rate ?? 0,
+              total: c.cost || (c.quantity ?? 1) * (c.unit_rate ?? 0),
+            };
+          }
+
+          // Compute the dedupe key. Prefer resource_code; fall back to the
+          // first variant's label so two unrelated catalogs that happen to
+          // ship without codes don't accidentally collapse.
+          const code = (c.code || '').trim();
+          const dedupeKey = code || (compVariants![0]?.label ?? `__c${i}`);
+          const primaryIdx = variantPrimaryIdx.get(dedupeKey) ?? i;
+          if (!variantPrimaryIdx.has(dedupeKey)) {
+            variantPrimaryIdx.set(dedupeKey, i);
+          }
+          const isPrimary = primaryIdx === i;
+
+          // Linked components share the primary slot's pick — collectVariantSlots
+          // only emits one slot per dedupe key, so picks[`comp:${i}`] for a
+          // duplicate index would always be undefined.
+          const compPick = multiResult?.picks[`comp:${primaryIdx}`];
+          const qty = c.quantity ?? 1;
+
+          if (compPick?.kind === 'variant') {
+            const v = compPick.variant;
+            const cs = (compStats!.common_start || '').trim();
+            const composedName =
+              (v.full_label || '').trim() ||
+              (cs ? `${cs} ${v.label}`.trim() : v.label) ||
+              c.name;
+            return {
+              name: composedName,
+              code: c.code || '',
+              type: c.type || 'other',
+              unit: c.unit || 'pcs',
+              quantity: qty,
+              unit_rate: v.price,
+              total: qty * v.price,
+              variant: { label: v.label, price: v.price, index: v.index },
+              ...(isPrimary && {
+                available_variants: compVariants,
+                available_variant_stats: compStats,
+              }),
+            };
+          }
+
+          // Default strategy — explicit from the modal (mean | median),
+          // otherwise silent median for backwards compatibility.
+          const strategy: 'mean' | 'median' =
+            compPick?.kind === 'default' ? compPick.strategy : 'median';
+          const rate =
+            strategy === 'mean' ? compStats!.mean : compStats!.median;
           return {
             name: c.name,
             code: c.code || '',
             type: c.type || 'other',
             unit: c.unit || 'pcs',
-            quantity: c.quantity ?? 1,
-            unit_rate: c.unit_rate ?? 0,
-            total: c.cost || (c.quantity ?? 1) * (c.unit_rate ?? 0),
-            ...(hasCompVariants
-              ? {
-                  variant_default: 'median' as const,
-                  available_variants: compVariants,
-                  available_variant_stats: compStats,
-                }
-              : {}),
+            quantity: qty,
+            unit_rate: rate,
+            total: qty * rate,
+            variant_default: strategy,
+            ...(isPrimary && {
+              available_variants: compVariants,
+              available_variant_stats: compStats,
+            }),
           };
         });
 
@@ -654,6 +1066,36 @@ export function CostDatabaseSearchModal({
         const baseDescription = item.description || 'Unnamed item';
         const description = baseDescription;
         let variantMeta: Record<string, unknown> = {};
+
+        // Detect when the item's top-level catalog is mirrored on a component
+        // we already pushed (real CWICR shape — many rates list the abstract
+        // resource as both ``metadata.variants`` AND ``components[0]`` with
+        // identical 8-variant catalogs). When that happens we MUST NOT push
+        // the synthetic top-level resource below: the components already
+        // carry the rate, and adding a third line would inflate the position
+        // by double-counting the same variant. ``collectVariantSlots()``
+        // already drops the top slot from the picker UI in this case.
+        const topVariantsForCheck = item.metadata_?.variants;
+        let topMirroredOnComponent = false;
+        if (topVariantsForCheck && topVariantsForCheck.length >= 2) {
+          const topHash = topVariantsForCheck
+            .map((v) => (v.label || '').trim())
+            .join('|');
+          for (const c of item.components || []) {
+            if (
+              Array.isArray(c.available_variants) &&
+              c.available_variants.length >= 2
+            ) {
+              const compHash = c.available_variants
+                .map((v) => (v.label || '').trim())
+                .join('|');
+              if (compHash === topHash) {
+                topMirroredOnComponent = true;
+                break;
+              }
+            }
+          }
+        }
 
         // Currency for the variant resource entry — falls back to the
         // catalog's native currency, then EUR.
@@ -671,7 +1113,7 @@ export function CostDatabaseSearchModal({
         const commonStart =
           (stats?.common_start && stats.common_start.trim()) || '';
 
-        if (resolution?.kind === 'variant') {
+        if (resolution?.kind === 'variant' && !topMirroredOnComponent) {
           variantMeta = {
             variant: {
               label: resolution.variant.label,
@@ -728,7 +1170,7 @@ export function CostDatabaseSearchModal({
             available_variants: variants,
             available_variant_stats: stats,
           });
-        } else if (resolution?.kind === 'default') {
+        } else if (resolution?.kind === 'default' && !topMirroredOnComponent) {
           // Mean is the production default; median is exposed only by
           // legacy callers.  Fall back to median if mean is zero (defensive).
           const stats2 = item.metadata_!.variant_stats!;
@@ -790,12 +1232,21 @@ export function CostDatabaseSearchModal({
           variantCacheMeta.cost_item_variant_max = stats.max;
         }
 
-        await apiPost(`/v1/boq/boqs/${boqId}/positions/`, {
+        // Position quantity: the inline qty input in the cost-DB modal lets
+        // the user pick a non-default qty per row before the batch POST.
+        // Empty / cleared input falls back to 1 (the legacy default) — that
+        // mirror's the previous hardcoded value so existing tests / UX stay
+        // intact when the user doesn't engage the input.
+        const positionQty = rowQuantity[item.id] ?? 1;
+
+        try {
+          await apiPost(`/v1/boq/boqs/${boqId}/positions/`, {
           boq_id: boqId,
+          ...(targetSection ? { parent_id: targetSection.id } : {}),
           ordinal,
           description,
           unit: item.unit || 'pcs',
-          quantity: 1,
+          quantity: positionQty,
           unit_rate: unitRate,
           classification: item.classification || {},
           source: 'cost_database',
@@ -813,6 +1264,16 @@ export function CostDatabaseSearchModal({
               'EUR',
             ...variantCacheMeta,
             ...variantMeta,
+            // Provenance — which UI surface produced this position so
+            // adoption of the multi-variant modal is measurable from the
+            // server side without diffing payloads.
+            ui_source: multiResult
+              ? 'multi_picker'
+              : resolution
+                ? 'single_popover'
+                : slots.length > 0
+                  ? 'silent_default'
+                  : 'no_variants',
             ...(resources.length > 0 ? { resources } : {}),
             // Carry the catalog's scope-of-work bullets onto the new
             // position so the BOQ grid can render the (i) hint next
@@ -823,7 +1284,49 @@ export function CostDatabaseSearchModal({
               ? { scope_of_work: (item.metadata_ as Record<string, unknown>).scope_of_work }
               : {}),
           },
-        });
+          });
+          succeeded++;
+        } catch (postErr) {
+          // Per-item failure recovery: log to the failed[] array and keep
+          // iterating so a single 4xx/5xx doesn't drop the rest of the
+          // batch. The trailing summary toast lists the casualties.
+          const msg = postErr instanceof Error ? postErr.message : String(postErr);
+          failed.push({
+            description: description || item.code || 'Unnamed item',
+            code: item.code || '',
+            error: msg,
+          });
+          if (import.meta.env.DEV) console.error('Failed to POST position:', item.code, msg);
+          // Don't increment ordinal — leave the slot open for the next item.
+          continue;
+        }
+
+        // Advance the ordinal counter only on success — root or section.
+        if (targetSection) {
+          nextChildNum++;
+        } else {
+          nextOrdNum++;
+        }
+
+        if (multiResult && !multiToastShown) {
+          // Count slots where the user picked an explicit variant (not a
+          // fallback strategy). One toast per add batch — multiple
+          // positions adding sequentially share the announcement.
+          const explicitCount = Object.values(multiResult.picks).filter(
+            (p) => p.kind === 'variant',
+          ).length;
+          if (explicitCount > 0) {
+            addToast({
+              type: 'success',
+              title: t('boq.mvp.toast_applied', {
+                defaultValue: '{{count}} variant chosen',
+                defaultValue_other: '{{count}} variants chosen',
+                count: explicitCount,
+              }),
+            });
+            multiToastShown = true;
+          }
+        }
 
         if (resolution?.kind === 'variant' && !variantToastShown) {
           addToast({
@@ -847,12 +1350,63 @@ export function CostDatabaseSearchModal({
           });
           defaultToastShown = true;
         }
-
-        nextOrdNum++;
       }
-      onAdded();
+
+      // Apply-to-all summary toast — only when the user actually exercised
+      // the affordance (cachedSlotsByName non-null AND ≥1 item benefited
+      // from it). Quiet when applyToAll never engaged so single-item adds
+      // stay toast-free.
+      if (cachedSlotsByName && appliedToCount > 0) {
+        addToast({
+          type: 'success',
+          title: t('boq.mvp.toast_apply_to_remaining', {
+            defaultValue: 'Applied picks to {{count}} more item',
+            defaultValue_other: 'Applied picks to {{count}} more items',
+            count: appliedToCount,
+          }),
+        });
+      }
+
+      // Trailing summary — partial success is the new normal, not a fatal
+      // error.  Three branches:
+      //   all succeeded → existing onAdded() + close, no extra toast.
+      //   partial      → warning toast listing the first 3 failures.
+      //   all failed   → error toast (matches legacy behaviour).
+      if (failed.length === 0) {
+        onAdded();
+      } else if (succeeded > 0) {
+        const sample = failed.slice(0, 3).map((f) => f.code || f.description).join(', ');
+        const more = failed.length > 3 ? ` (+${failed.length - 3})` : '';
+        addToast({
+          type: 'warning',
+          title: t('boq.add_partial_success', {
+            defaultValue: 'Added {{ok}} of {{total}} positions',
+            ok: succeeded,
+            total: succeeded + failed.length,
+          }),
+          message: t('boq.add_partial_failed_items', {
+            defaultValue: 'Failed: {{items}}{{more}}',
+            items: sample,
+            more,
+          }),
+        });
+        onAdded();
+      } else {
+        addToast({
+          type: 'error',
+          title: t('boq.add_all_failed', {
+            defaultValue: 'Could not add any of the {{count}} positions',
+            count: failed.length,
+          }),
+          message: failed[0]?.error || '',
+        });
+      }
     } catch (err) {
-      if (import.meta.env.DEV) console.error('Failed to add positions from cost DB:', err);
+      // Outer catch only fires for unexpected exceptions OUTSIDE the per-item
+      // try (e.g. JSON.parse on the BOQ-detail fetch). Per-item POST errors
+      // are now collected in the failed[] array and surfaced via the partial-
+      // success toast above.
+      if (import.meta.env.DEV) console.error('Add-from-cost-DB outer error:', err);
       addToast({
         type: 'error',
         title: t('boq.add_failed', { defaultValue: 'Failed to add positions' }),
@@ -861,16 +1415,111 @@ export function CostDatabaseSearchModal({
     } finally {
       setIsAdding(false);
     }
-  }, [boqId, selected, items, onAdded, onSelectForResources, addToast, t]);
+  }, [
+    boqId,
+    selected,
+    items,
+    rowQuantity,
+    selectedParentId,
+    loadSections,
+    onAdded,
+    onSelectForResources,
+    addToast,
+    t,
+  ]);
 
-  // Close on Escape
+  // Modal-scoped keyboard navigation:
+  //   Esc           — close
+  //   ↓ / ↑         — move cursor over the result rows
+  //   Space         — toggle the highlighted row's selection
+  //   Enter         — toggle selection of the highlighted row (or fire Add
+  //                   when no row is highlighted but selection is non-empty)
+  //   PageDown / PageUp — jump 10 rows at a time
+  //   Home / End    — jump to first/last row
+  //
+  // The handler skips arrow / space / enter when focus is in an input,
+  // textarea, or contenteditable so typing in the search bar keeps working.
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      const target = e.target as HTMLElement | null;
+      const inEditable =
+        target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable);
+      if (inEditable) return;
+      if (items.length === 0) return;
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setCursorIndex((i) => Math.min(items.length - 1, (i < 0 ? -1 : i) + 1));
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setCursorIndex((i) => Math.max(0, (i < 0 ? items.length : i) - 1));
+          break;
+        case 'PageDown':
+          e.preventDefault();
+          setCursorIndex((i) => Math.min(items.length - 1, (i < 0 ? 0 : i) + 10));
+          break;
+        case 'PageUp':
+          e.preventDefault();
+          setCursorIndex((i) => Math.max(0, (i < 0 ? 0 : i) - 10));
+          break;
+        case 'Home':
+          e.preventDefault();
+          setCursorIndex(0);
+          break;
+        case 'End':
+          e.preventDefault();
+          setCursorIndex(items.length - 1);
+          break;
+        case ' ':
+        case 'Spacebar': {
+          e.preventDefault();
+          const idx = cursorIndex < 0 ? 0 : cursorIndex;
+          if (cursorIndex < 0) setCursorIndex(0);
+          const it = items[idx];
+          if (it) toggleSelect(it.id);
+          break;
+        }
+        case 'Enter':
+          if (cursorIndex >= 0 && cursorIndex < items.length) {
+            e.preventDefault();
+            const it = items[cursorIndex];
+            if (it) toggleSelect(it.id);
+          } else if (selected.size > 0 && !isAdding) {
+            e.preventDefault();
+            handleAdd();
+          }
+          break;
+      }
     }
     document.addEventListener('keydown', handleKeyDown, { capture: true });
     return () => document.removeEventListener('keydown', handleKeyDown, { capture: true });
-  }, [onClose]);
+  }, [onClose, items, cursorIndex, toggleSelect, selected.size, isAdding, handleAdd]);
+
+  // Reset the keyboard cursor when the result list flips (e.g. region change).
+  useEffect(() => {
+    setCursorIndex((i) => (i >= items.length ? -1 : i));
+  }, [items.length]);
+
+  // Scroll the highlighted row into view as the cursor moves. Uses the
+  // existing listScrollRef so the smooth scroll respects the modal's own
+  // scroll container instead of the page viewport.
+  useEffect(() => {
+    if (cursorIndex < 0) return;
+    const el = listScrollRef.current?.querySelector<HTMLTableRowElement>(
+      `[data-cursor-index="${cursorIndex}"]`,
+    );
+    el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [cursorIndex]);
 
   const fmtRate = (n: number) =>
     new Intl.NumberFormat(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
@@ -897,6 +1546,30 @@ export function CostDatabaseSearchModal({
 
   // Active filter chips — selected category breadcrumb + free-text query.
   const hasActiveFilters = selectedPath !== '' || query.length >= 2;
+
+  /** Live projected sum for the current selection — Σ(rate × qty) across
+   *  the items the user has selected (qty falls back to 1). Surfaces the
+   *  cumulative cost impact in the modal footer so a 5-item batch isn't
+   *  committed blind. Variant rates aren't projected here yet — the picker
+   *  will negotiate them at apply-time; this is the catalog-rate baseline. */
+  const selectionPreview = useMemo(() => {
+    if (selected.size === 0) return null;
+    let sum = 0;
+    let currency: string | null = null;
+    for (const item of items) {
+      if (!selected.has(item.id)) continue;
+      const qty = rowQuantity[item.id] ?? 1;
+      const rate = typeof item.rate === 'number' ? item.rate : 0;
+      sum += rate * qty;
+      if (!currency) {
+        currency =
+          (item.currency && item.currency.trim()) ||
+          (item.region && REGION_MAP[item.region]?.currency) ||
+          null;
+      }
+    }
+    return { total: sum, currency: currency || 'EUR' };
+  }, [selected, items, rowQuantity]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose} aria-hidden="true">
@@ -1130,9 +1803,34 @@ export function CostDatabaseSearchModal({
               data-testid="cost-results-scroll"
             >
               {isLoading ? (
-                <div className="px-6 py-8 text-center">
-                  <Loader2 size={20} className="mx-auto mb-2 animate-spin text-oe-blue" />
-                  <p className="text-xs text-content-tertiary">{t('common.loading')}</p>
+                // Show a skeleton table that mirrors the actual result
+                // columns so the modal feels populated even while the
+                // search round-trip is in flight. Cold-cache catalogs
+                // can take 1-2 s warm and 18 s cold for the first page;
+                // a generic centered spinner reads as "stuck", a
+                // skeleton reads as "loading specific data".
+                <div
+                  className="px-3 py-2"
+                  data-testid="cost-results-skeleton"
+                  aria-busy="true"
+                >
+                  <div className="space-y-1.5">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 px-2 py-2.5 rounded-md"
+                      >
+                        <div className="h-4 w-4 rounded-sm bg-surface-secondary/70 animate-pulse" />
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          <div className="h-3 rounded bg-surface-secondary/70 animate-pulse" style={{ width: `${50 + ((i * 7) % 40)}%` }} />
+                          <div className="h-2.5 rounded bg-surface-secondary/50 animate-pulse" style={{ width: `${30 + ((i * 11) % 30)}%` }} />
+                        </div>
+                        <div className="h-4 w-12 rounded bg-surface-secondary/70 animate-pulse" />
+                        <div className="h-4 w-16 rounded bg-surface-secondary/70 animate-pulse" />
+                        <div className="h-4 w-20 rounded bg-surface-secondary/70 animate-pulse" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : items.length === 0 ? (
                 regions.length === 0 && query.length < 2 && !region && !selectedPath ? (
@@ -1176,22 +1874,36 @@ export function CostDatabaseSearchModal({
                   <thead className="bg-surface-tertiary sticky top-0 z-10">
                     <tr>
                       <th className="px-3 py-2 w-8" />
-                      <th className="px-3 py-2 text-left text-xs font-medium text-content-secondary">{t('boq.description')}</th>
+                      <th className="px-3 py-2 text-start text-xs font-medium text-content-secondary">{t('boq.description')}</th>
                       <th className="px-3 py-2 text-center text-xs font-medium text-content-secondary w-16">{t('boq.unit')}</th>
-                      <th className="px-3 py-2 text-right text-xs font-medium text-content-secondary w-24">{t('costs.rate', 'Rate')}</th>
+                      <th className="px-3 py-2 text-end text-xs font-medium text-content-secondary w-20">
+                        {t('boq.quantity_short', { defaultValue: 'Qty' })}
+                      </th>
+                      <th className="px-3 py-2 text-end text-xs font-medium text-content-secondary w-24">{t('costs.rate', 'Rate')}</th>
                       <th className="px-3 py-2 text-center text-xs font-medium text-content-secondary w-20">
                         {t('boq.region', { defaultValue: 'Database' })}
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-light">
-                    {items.map((item) => {
+                    {items.map((item, idx) => {
                       const isSel = selected.has(item.id);
+                      const isCursor = cursorIndex === idx;
                       return (
                         <tr
                           key={item.id}
-                          onClick={() => toggleSelect(item.id)}
-                          className={`cursor-pointer transition-colors ${isSel ? 'bg-oe-blue-subtle/20' : 'hover:bg-surface-secondary/50'}`}
+                          data-cursor-index={idx}
+                          onClick={() => {
+                            setCursorIndex(idx);
+                            toggleSelect(item.id);
+                          }}
+                          className={
+                            'cursor-pointer transition-colors ' +
+                            (isSel ? 'bg-oe-blue-subtle/20 ' : 'hover:bg-surface-secondary/50 ') +
+                            (isCursor
+                              ? 'outline outline-1 outline-oe-blue/60 -outline-offset-1'
+                              : '')
+                          }
                         >
                           <td className="px-3 py-2.5">
                             <div className={`h-4 w-4 rounded border-2 flex items-center justify-center ${isSel ? 'border-oe-blue bg-oe-blue' : 'border-content-quaternary'}`}>
@@ -1239,7 +1951,54 @@ export function CostDatabaseSearchModal({
                           <td className="px-3 py-2.5 text-center">
                             <Badge variant="neutral" size="sm">{item.unit}</Badge>
                           </td>
-                          <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-content-primary">
+                          <td
+                            className="px-3 py-2.5 text-end"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={rowQuantity[item.id] ?? ''}
+                              placeholder="1"
+                              onChange={(e) => {
+                                const raw = e.target.value;
+                                if (raw === '') {
+                                  // Empty input → clear override so the POST falls back to 1.
+                                  setRowQuantity((cur) => {
+                                    const next = { ...cur };
+                                    delete next[item.id];
+                                    return next;
+                                  });
+                                  return;
+                                }
+                                const parsed = parseFloat(raw);
+                                if (!isNaN(parsed) && parsed >= 0) {
+                                  setRowQuantity((cur) => ({ ...cur, [item.id]: parsed }));
+                                }
+                              }}
+                              onFocus={(e) => {
+                                // Auto-select selects this row so the user sees their qty
+                                // edit reflected in the bottom "N selected" counter and
+                                // the rate × qty preview without an extra checkbox click.
+                                if (!isSel) toggleSelect(item.id);
+                                e.currentTarget.select();
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  e.currentTarget.blur();
+                                }
+                              }}
+                              aria-label={t('boq.quantity_for_item', {
+                                defaultValue: 'Quantity for {{item}}',
+                                item: item.description || item.code,
+                              })}
+                              className="w-16 h-7 px-1.5 text-xs tabular-nums text-end rounded border border-border-light bg-surface-elevated text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                              data-testid={`cost-row-qty-${item.id}`}
+                            />
+                          </td>
+                          <td className="px-3 py-2.5 text-end font-semibold tabular-nums text-content-primary">
                             <div className="inline-flex items-center gap-1.5">
                               <span>{fmtRate(item.rate)}</span>
                               {(() => {
@@ -1252,6 +2011,36 @@ export function CostDatabaseSearchModal({
                                       {t('costs.variants_count', { count: vc, defaultValue: '{{count}} variants' })}
                                     </span>
                                   </Badge>
+                                );
+                              })()}
+                              {(() => {
+                                // Validation hint surfaced pre-add — saves the user
+                                // from finding the warning later via the BOQ row's
+                                // quality dashboard. ``rate <= 0`` flags the catalog
+                                // entry whose price never landed (CWICR rows with
+                                // empty rate column); ``lump_sum`` is high-risk
+                                // because qty × rate becomes ambiguous.
+                                const lowRate = !(typeof item.rate === 'number' && item.rate > 0);
+                                const lumpSum = (item.unit || '').toLowerCase() === 'lump_sum';
+                                if (!lowRate && !lumpSum) return null;
+                                return (
+                                  <span
+                                    title={
+                                      lowRate
+                                        ? t('boq.warn_zero_rate', {
+                                            defaultValue: 'No rate — review before commit',
+                                          })
+                                        : t('boq.warn_lump_sum', {
+                                            defaultValue:
+                                              'Lump sum — quantity × rate may not match expected total',
+                                          })
+                                    }
+                                  >
+                                    <AlertCircle
+                                      size={12}
+                                      className="text-amber-500 dark:text-amber-400"
+                                    />
+                                  </span>
                                 );
                               })()}
                             </div>
@@ -1308,12 +2097,142 @@ export function CostDatabaseSearchModal({
 
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-3 border-t border-border-light bg-surface-secondary/30 shrink-0">
-          <span className="text-xs text-content-tertiary">
-            {selected.size > 0
-              ? `${selected.size} ${t('boq.items_selected', { defaultValue: 'items selected' })}`
-              : t('boq.click_to_select', { defaultValue: 'Click rows to select' })}
-          </span>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-content-tertiary">
+              {selected.size > 0
+                ? `${selected.size} ${t('boq.items_selected', { defaultValue: 'items selected' })}`
+                : t('boq.click_to_select', { defaultValue: 'Click rows to select' })}
+            </span>
+            {selectionPreview && (
+              <>
+                <span className="text-content-quaternary">·</span>
+                <span
+                  className="font-mono font-semibold tabular-nums text-content-secondary"
+                  data-testid="cost-modal-selection-preview"
+                  title={t('boq.preview_total_hint', {
+                    defaultValue:
+                      'Catalog-rate × quantity for the selection. Variant picks may adjust this.',
+                  })}
+                >
+                  ≈ {new Intl.NumberFormat(getIntlLocale(), {
+                    style: 'currency',
+                    currency: selectionPreview.currency,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  }).format(selectionPreview.total)}
+                </span>
+              </>
+            )}
+          </div>
           <div className="flex items-center gap-2">
+            {/* Section picker — hidden in resource-pick mode (the modal is
+                opened to fill `metadata.resources[]`, not to create a new
+                position) and when the BOQ has no sections at all. */}
+            {!onSelectForResources && boqSections && boqSections.length > 0 && (
+              <div ref={sectionMenuRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setSectionMenuOpen((v) => !v)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border border-border-light bg-surface-primary hover:bg-surface-hover text-content-secondary"
+                  data-testid="cost-modal-section-picker"
+                  aria-haspopup="listbox"
+                  aria-expanded={sectionMenuOpen}
+                  title={t('boq.add_to_section_hint', {
+                    defaultValue: 'Choose where new items land in the BOQ',
+                  })}
+                >
+                  <Layers size={12} className="text-content-tertiary" />
+                  <span className="text-content-tertiary">
+                    {t('boq.add_to_label', { defaultValue: 'Add to:' })}
+                  </span>
+                  <span className="font-semibold text-content-primary truncate max-w-[160px]">
+                    {selectedParentId
+                      ? (() => {
+                          const s = boqSections.find((x) => x.id === selectedParentId);
+                          return s
+                            ? `${s.ordinal} ${s.description || ''}`.trim()
+                            : t('boq.add_to_root', { defaultValue: '[Root]' });
+                        })()
+                      : t('boq.add_to_root', { defaultValue: '[Root]' })}
+                  </span>
+                  <ChevronDown size={12} className="text-content-tertiary" />
+                </button>
+                {sectionMenuOpen && (
+                  <div
+                    role="listbox"
+                    className="absolute end-0 bottom-full mb-1 z-20 min-w-[260px] max-h-72 overflow-y-auto rounded-lg border border-border bg-surface-elevated shadow-lg py-1"
+                    data-testid="cost-modal-section-menu"
+                  >
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={selectedParentId === null}
+                      onClick={() => {
+                        setSelectedParentId(null);
+                        setSectionMenuOpen(false);
+                      }}
+                      className={
+                        'w-full px-3 py-2 flex items-center justify-between gap-3 text-start hover:bg-surface-hover ' +
+                        (selectedParentId === null
+                          ? 'bg-blue-50/40 dark:bg-blue-950/20'
+                          : '')
+                      }
+                    >
+                      <span className="text-xs font-medium text-content-primary">
+                        {t('boq.add_to_root', { defaultValue: '[Root]' })}
+                      </span>
+                      <span className="text-2xs text-content-tertiary">
+                        {t('boq.add_to_root_hint', {
+                          defaultValue: 'top-level',
+                        })}
+                      </span>
+                    </button>
+                    <div className="my-1 border-t border-border-light/60" />
+                    {boqSections.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        role="option"
+                        aria-selected={selectedParentId === s.id}
+                        onClick={() => {
+                          setSelectedParentId(s.id);
+                          setSectionMenuOpen(false);
+                        }}
+                        className={
+                          'w-full px-3 py-2 flex items-center justify-between gap-3 text-start hover:bg-surface-hover ' +
+                          (selectedParentId === s.id
+                            ? 'bg-blue-50/40 dark:bg-blue-950/20'
+                            : '')
+                        }
+                        data-testid={`cost-modal-section-option-${s.id}`}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <span className="text-xs font-mono text-content-tertiary me-2">
+                            {s.ordinal}
+                          </span>
+                          <span className="text-xs text-content-primary truncate">
+                            {s.description || (
+                              <span className="italic text-content-tertiary">
+                                {t('boq.untitled_section', {
+                                  defaultValue: '(untitled)',
+                                })}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <span className="text-2xs text-content-tertiary tabular-nums shrink-0">
+                          {t('boq.section_child_count', {
+                            defaultValue: '{{count}} item',
+                            defaultValue_other: '{{count}} items',
+                            count: s.childCount,
+                          })}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <Button variant="secondary" size="sm" onClick={onClose}>
               {t('common.cancel', 'Cancel')}
             </Button>
@@ -1369,6 +2288,29 @@ export function CostDatabaseSearchModal({
           onClose={() => {
             const pending = activeVariantPick;
             setActiveVariantPick(null);
+            pending.resolve(null);
+          }}
+        />
+      )}
+
+      {/* Multi-variant picker — centered modal that handles a CostItem with
+          2+ independent variant slots in one go. Single-slot top-level picks
+          continue to use the anchored VariantPicker above. */}
+      {activeMultiVariantPick && (
+        <MultiVariantPicker
+          positionTitle={activeMultiVariantPick.positionTitle}
+          slots={activeMultiVariantPick.slots}
+          batchProgress={activeMultiVariantPick.batchProgress}
+          remainingCount={activeMultiVariantPick.remainingCount}
+          suggestedPicks={activeMultiVariantPick.suggestedPicks}
+          onApply={(result) => {
+            const pending = activeMultiVariantPick;
+            setActiveMultiVariantPick(null);
+            pending.resolve(result);
+          }}
+          onCancel={() => {
+            const pending = activeMultiVariantPick;
+            setActiveMultiVariantPick(null);
             pending.resolve(null);
           }}
         />

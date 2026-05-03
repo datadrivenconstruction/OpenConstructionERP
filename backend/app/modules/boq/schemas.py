@@ -703,6 +703,12 @@ class ResourceSummaryItem(BaseModel):
     current_variant_label: str | None = None
     variant_default: str | None = None
     currency: str | None = None
+    # CWICR resource_code — first non-empty value seen across contributing
+    # rows. Used by the frontend to dedupe variant pickers when two summary
+    # rows share an abstract-resource catalog (CWICR ships some rates with
+    # multiple human-readable component names that resolve to the same
+    # ``resource_code`` and therefore the same variant catalog).
+    resource_code: str | None = None
     position_refs: list[ResourcePositionRef] = Field(default_factory=list)
 
 

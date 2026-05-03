@@ -6,7 +6,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import JSON, ForeignKey, String, Text
+from sqlalchemy import JSON, ForeignKey, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -16,6 +16,13 @@ class QualityInspection(Base):
     """A quality inspection record with checklist and pass/fail result."""
 
     __tablename__ = "oe_inspections_inspection"
+    __table_args__ = (
+        Index(
+            "ix_oe_inspections_inspection_project_type",
+            "project_id",
+            "inspection_type",
+        ),
+    )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),

@@ -235,7 +235,7 @@ class InspectionService:
                 item for item in checklist
                 if isinstance(item, dict) and item.get("response") in ("fail", "no", "false")
             ]
-            await event_bus.publish(
+            event_bus.publish_detached(
                 "inspection.completed.failed",
                 data={
                     "project_id": str(inspection.project_id),

@@ -333,3 +333,46 @@ async def test_approve_is_idempotent() -> None:
     assert result.status == "approved"
     # No second writeback.
     assert project.budget_estimate == "50000"
+
+
+# ── v2.6.45: CO → BOQ pushdown ──────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_apply_to_boq_skips_when_no_items() -> None:
+    """``_apply_to_boq`` is a no-op when the order has no items."""
+    service, _, _ = _make_service()
+    order = _make_order(project_id=uuid.uuid4(), status="submitted")
+    # Stub session.execute will raise (no real DB) — handler must catch and
+    # fall through to the items-less branch via getattr() default.
+    order.items = None  # type: ignore[attr-defined]
+
+    result = await service._apply_to_boq(order)
+
+    assert result == {"applied": False, "reason": "no_items"}
+
+
+@pytest.mark.asyncio
+async def test_apply_to_boq_returns_no_active_boq_when_session_yields_none() -> None:
+    """When no unlocked BOQ exists for the project, ``_apply_to_boq`` skips."""
+    service, _, _ = _make_service()
+    order = _make_order(project_id=uuid.uuid4(), status="submitted")
+    # Provide one item via the fallback path — session.execute first call
+    # (ChangeOrderItem fetch) returns an empty stub; second (BOQ fetch)
+    # returns None via the existing _StubSession.execute().
+    order.items = [
+        SimpleNamespace(
+            id=uuid.uuid4(),
+            description="Extra rebar",
+            change_type="added",
+            new_quantity="100",
+            new_rate="2.5",
+            unit="kg",
+            sort_order=1,
+        )
+    ]
+
+    result = await service._apply_to_boq(order)
+
+    assert result.get("applied") is False
+    assert result.get("reason") == "no_active_boq"

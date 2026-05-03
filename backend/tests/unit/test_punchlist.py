@@ -96,6 +96,25 @@ class _StubPunchRepo:
     async def all_for_project(self, project_id: uuid.UUID) -> list[Any]:
         return [r for r in self.rows.values() if r.project_id == project_id]
 
+    async def summary_aggregates(self, project_id: uuid.UUID) -> dict[str, Any]:
+        rows = [r for r in self.rows.values() if r.project_id == project_id]
+        by_status: dict[str, int] = {}
+        by_priority: dict[str, int] = {}
+        for r in rows:
+            by_status[r.status] = by_status.get(r.status, 0) + 1
+            by_priority[r.priority] = by_priority.get(r.priority, 0) + 1
+        closed = [
+            (r.created_at, r.verified_at, r.resolved_at, r.updated_at)
+            for r in rows
+            if r.status in ("closed", "verified")
+        ]
+        return {
+            "total": len(rows),
+            "by_status": by_status,
+            "by_priority": by_priority,
+            "closed_timestamps": closed,
+        }
+
     async def count_overdue(self, project_id: uuid.UUID) -> int:
         return 0
 

@@ -546,12 +546,27 @@ function ResourceRow({
     <tr className="border-t border-border-light/30 hover:bg-surface-secondary/40 transition-colors group">
       <td className="px-4 py-2 text-content-primary font-medium">{resource.name}</td>
       <td className="px-3 py-2">
-        <span
-          className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium ${badgeStyle}`}
-        >
-          {TYPE_ICONS[resource.type] || TYPE_ICONS.other}
-          {getResourceTypeLabel(resource.type, t)}
-        </span>
+        {hasVariants ? (
+          <span
+            title={t('boq.resource_type_variant_tooltip', {
+              defaultValue:
+                'Variant resource — pick from {{base}} catalog. Click to reclassify resource type.',
+              base: getResourceTypeLabel(resource.type, t),
+            })}
+            className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium
+                       bg-gradient-to-br from-violet-500 to-purple-600 text-white
+                       ring-1 ring-violet-300/40 shadow-[0_1px_3px_rgba(139,92,246,0.45)]"
+          >
+            {t('boq.resource_type_variant_chip', { defaultValue: 'Variant' })}
+          </span>
+        ) : (
+          <span
+            className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium ${badgeStyle}`}
+          >
+            {TYPE_ICONS[resource.type] || TYPE_ICONS.other}
+            {getResourceTypeLabel(resource.type, t)}
+          </span>
+        )}
       </td>
       <td className="px-3 py-2 text-center text-content-secondary font-mono uppercase">
         {resource.unit}

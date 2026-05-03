@@ -364,11 +364,13 @@ async def batch_update_rfi_status(
 )
 async def get_rfi(
     rfi_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId,
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
     """Get a single RFI."""
     rfi = await service.get_rfi(rfi_id)
+    await verify_project_access(rfi.project_id, str(user_id), session)
     return _to_response(rfi)
 
 
@@ -376,11 +378,14 @@ async def get_rfi(
 async def update_rfi(
     rfi_id: uuid.UUID,
     data: RFIUpdate,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("rfi.update")),
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
     """Update an RFI."""
+    existing = await service.get_rfi(rfi_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     rfi = await service.update_rfi(rfi_id, data)
     return _to_response(rfi)
 
@@ -388,11 +393,14 @@ async def update_rfi(
 @router.delete("/{rfi_id}", status_code=204)
 async def delete_rfi(
     rfi_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("rfi.delete")),
     service: RFIService = Depends(_get_service),
 ) -> None:
     """Delete an RFI."""
+    existing = await service.get_rfi(rfi_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_rfi(rfi_id)
 
 

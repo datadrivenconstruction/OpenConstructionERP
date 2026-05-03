@@ -4,7 +4,7 @@
  * All endpoints are prefixed with /v1/fieldreports/.
  */
 
-import { apiGet, apiPost, apiPatch, apiDelete, triggerDownload } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete, triggerDownload, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -199,7 +199,7 @@ export async function importFieldReportsFile(
   }
 
   const response = await fetch(
-    `/api/v1/fieldreports/reports/import/file?project_id=${encodeURIComponent(projectId)}`,
+    `/api/v1/fieldreports/reports/import/file/?project_id=${encodeURIComponent(projectId)}`,
     {
       method: 'POST',
       headers,
@@ -229,14 +229,14 @@ export async function exportFieldReports(projectId: string): Promise<void> {
   }
 
   const response = await fetch(
-    `/api/v1/fieldreports/reports/export?project_id=${encodeURIComponent(projectId)}`,
+    `/api/v1/fieldreports/reports/export/?project_id=${encodeURIComponent(projectId)}`,
     { method: 'GET', headers },
   );
   if (!response.ok) {
-    let detail = 'Export failed';
+    let detail = `Export failed (HTTP ${response.status})`;
     try {
       const body = await response.json();
-      detail = body.detail || detail;
+      detail = extractErrorMessageFromBody(body) ?? detail;
     } catch {
       // ignore parse error
     }

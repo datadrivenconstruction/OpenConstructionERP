@@ -805,9 +805,14 @@ export function PunchListPage() {
 
   const handleDelete = useCallback(
     (id: string) => {
-      delMut.mutate(id);
+      const ok = window.confirm(
+        t('punchlist.confirm_delete', {
+          defaultValue: 'Delete this punch list item? This cannot be undone.',
+        }),
+      );
+      if (ok) delMut.mutate(id);
     },
-    [delMut],
+    [delMut, t],
   );
 
   return (

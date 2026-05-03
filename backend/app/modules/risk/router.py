@@ -17,7 +17,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.bulk_ops import BulkDeleteRequest, BulkStatusRequest
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.risk.schemas import (
     RiskCreate,
     RiskMatrixCell,
@@ -227,11 +227,13 @@ async def batch_update_risk_status(
 @router.get("/{risk_id}", response_model=RiskResponse)
 async def get_risk(
     risk_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: RiskService = Depends(_get_service),
 ) -> RiskResponse:
     """Get a single risk item."""
     item = await service.get_risk(risk_id)
+    await verify_project_access(item.project_id, str(user_id), session)
     return _risk_to_response(item)
 
 
@@ -242,11 +244,14 @@ async def get_risk(
 async def update_risk(
     risk_id: uuid.UUID,
     data: RiskUpdate,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("risk.update")),
     service: RiskService = Depends(_get_service),
 ) -> RiskResponse:
     """Update a risk item."""
+    existing = await service.get_risk(risk_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     item = await service.update_risk(risk_id, data)
     return _risk_to_response(item)
 
@@ -257,11 +262,14 @@ async def update_risk(
 @router.delete("/{risk_id}", status_code=204)
 async def delete_risk(
     risk_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("risk.delete")),
     service: RiskService = Depends(_get_service),
 ) -> None:
     """Delete a risk item."""
+    existing = await service.get_risk(risk_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_risk(risk_id)
 
 

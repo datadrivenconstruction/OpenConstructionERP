@@ -860,11 +860,13 @@ async def batch_delete_documents(
 @router.get("/{document_id}", response_model=DocumentResponse)
 async def get_document(
     document_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
+    session: SessionDep,
     service: DocumentService = Depends(_get_service),
 ) -> DocumentResponse:
     """Get a single document metadata."""
     doc = await service.get_document(document_id)
+    await verify_project_access(doc.project_id, user_id, session)
     return _doc_to_response(doc)
 
 
@@ -878,6 +880,7 @@ async def get_document(
 async def download_document(
     document_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     service: DocumentService = Depends(_get_service),
 ) -> FileResponse:
     """Download a document file.
@@ -886,6 +889,7 @@ async def download_document(
     case-insensitive filesystems and symlinks cannot escape ``UPLOAD_BASE``.
     """
     doc = await service.get_document(document_id)
+    await verify_project_access(doc.project_id, user_id, session)
     upload_base = Path(UPLOAD_BASE).resolve()
 
     # file_path stored in DB may be relative (demo seed records) or absolute
@@ -931,11 +935,14 @@ async def download_document(
 async def update_document(
     document_id: uuid.UUID,
     data: DocumentUpdate,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("documents.update")),
     service: DocumentService = Depends(_get_service),
 ) -> DocumentResponse:
     """Update document metadata."""
+    existing = await service.get_document(document_id)
+    await verify_project_access(existing.project_id, user_id, session)
     doc = await service.update_document(document_id, data)
     return _doc_to_response(doc)
 
@@ -946,11 +953,14 @@ async def update_document(
 @router.delete("/{document_id}", status_code=204)
 async def delete_document(
     document_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("documents.delete")),
     service: DocumentService = Depends(_get_service),
 ) -> None:
     """Delete a document and its file."""
+    existing = await service.get_document(document_id)
+    await verify_project_access(existing.project_id, user_id, session)
     await service.delete_document(document_id)
 
 

@@ -62,7 +62,26 @@
     "vat": "消費税",
     "add_markups": "請負高を追加",
     "validate": "検証",
-    "export": "エクスポート"
+    "export": "エクスポート",
+    "mvp": {
+      "title": "材料を選択",
+      "subtitle_other": "{{count}} 件のリソースで選択が必要です",
+      "bulk_label": "一括入力:",
+      "bulk_median": "すべて中央値",
+      "bulk_mean": "すべて平均値",
+      "bulk_cheapest": "すべて最安値",
+      "bulk_priciest": "すべて最高値",
+      "slot_variant_count": "{{n}} 件の候補",
+      "selected_label": "選択中:",
+      "default_mean": "平均単価",
+      "default_median": "中央値単価",
+      "row_median": "中央値 · {{price}}",
+      "row_mean": "平均値 · {{price}}",
+      "subtotal_label": "項目単価",
+      "apply": "適用して内訳書に追加",
+      "batch_progress": "{{total}} 件中 {{current}} 件目",
+      "toast_applied_other": "{{count}} 件のバリアントを選択しました"
+    }
   },
   "costs": {
     "title": "単価データベース",

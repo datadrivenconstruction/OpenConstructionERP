@@ -390,7 +390,7 @@ async def _match_cwicr_prices(
         try:
             from app.core.events import event_bus
 
-            await event_bus.publish(
+            event_bus.publish_detached(
                 "boq.prices.matched",
                 {
                     "project_id": str(project_id),

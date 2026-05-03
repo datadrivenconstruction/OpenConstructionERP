@@ -942,6 +942,13 @@ export function PhotoGalleryPage() {
 
   const handleBatchDelete = useCallback(async () => {
     if (selectedIds.size === 0) return;
+    const confirmed = window.confirm(
+      t('photos.batch_delete_confirm', {
+        defaultValue: 'Delete {{count}} photo(s)? This cannot be undone.',
+        count: selectedIds.size,
+      }),
+    );
+    if (!confirmed) return;
     setBatchDeleting(true);
     let ok = 0;
     let fail = 0;

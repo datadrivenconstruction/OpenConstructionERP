@@ -416,7 +416,7 @@ async def restore_backup(
             raise HTTPException(
                 status_code=500,
                 detail="Restore failed due to an internal error. Please check the backup file and try again.",
-            )
+            ) from exc
 
     total_imported = sum(imported.values())
     total_skipped = sum(skipped.values())

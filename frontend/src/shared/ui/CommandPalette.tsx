@@ -278,14 +278,16 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
   // Reset state when opening
   useEffect(() => {
-    if (open) {
-      setQuery('');
-      setActiveIndex(0);
-      // Small delay to let the portal mount, then focus
-      requestAnimationFrame(() => {
-        inputRef.current?.focus();
-      });
-    }
+    if (!open) return;
+    setQuery('');
+    setActiveIndex(0);
+    // Small delay to let the portal mount, then focus.
+    // Cancel on unmount / re-close so a queued frame can't fire focus()
+    // against an unmounted ref.
+    const rafId = requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(rafId);
   }, [open]);
 
   // Build results

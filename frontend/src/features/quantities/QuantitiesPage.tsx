@@ -25,6 +25,7 @@ import {
   Star,
 } from 'lucide-react';
 import { apiGet, apiPost } from '@/shared/lib/api';
+import { isModuleLoaded } from '@/shared/lib/moduleProbe';
 import { Breadcrumb } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -668,17 +669,28 @@ export function QuantitiesPage() {
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
+  // Probe whether the optional `oe_takeoff` backend module is loaded.
+  // When disabled, the converters/documents endpoints 404; gating the
+  // queries on this avoids the noisy network-panel logs.
+  const { data: takeoffLoaded } = useQuery({
+    queryKey: ['module-loaded', 'oe_takeoff'],
+    queryFn: () => isModuleLoaded('oe_takeoff'),
+    staleTime: Infinity,
+  });
+
   // Converter data from API
   const { data: convertersData } = useQuery<ConvertersResponse>({
     queryKey: ['takeoff', 'converters'],
     queryFn: () => apiGet<ConvertersResponse>('/v1/takeoff/converters/'),
     staleTime: 30_000,
+    enabled: takeoffLoaded === true,
   });
 
   // Recent documents from API
   const { data: documents } = useQuery({
     queryKey: ['takeoff', 'documents'],
     queryFn: () => apiGet<TakeoffDocument[]>('/v1/takeoff/documents/'),
+    enabled: takeoffLoaded === true,
   });
 
   const converters = convertersData?.converters ?? [];

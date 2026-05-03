@@ -24,7 +24,7 @@ _logger_ev = __import__("logging").getLogger(__name__ + ".events")
 
 async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
     try:
-        await event_bus.publish(name, data, source_module=source_module)
+        event_bus.publish_detached(name, data, source_module=source_module)
     except Exception:
         _logger_ev.debug("Event publish skipped: %s", name)
 

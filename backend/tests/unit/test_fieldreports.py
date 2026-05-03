@@ -86,6 +86,25 @@ class _StubFieldReportRepo:
     async def all_for_project(self, project_id: uuid.UUID) -> list[Any]:
         return [r for r in self.rows.values() if r.project_id == project_id]
 
+    async def aggregates_for_project(self, project_id: uuid.UUID) -> dict[str, Any]:
+        rows = [r for r in self.rows.values() if r.project_id == project_id]
+        by_status: dict[str, int] = {}
+        by_type: dict[str, int] = {}
+        delay_total = 0.0
+        for r in rows:
+            by_status[r.status] = by_status.get(r.status, 0) + 1
+            by_type[r.report_type] = by_type.get(r.report_type, 0) + 1
+            delay_total += r.delay_hours or 0.0
+        return {
+            "total": len(rows),
+            "by_status": by_status,
+            "by_type": by_type,
+            "total_delay_hours": delay_total,
+        }
+
+    async def workforce_for_project(self, project_id: uuid.UUID) -> list[list[Any]]:
+        return [r.workforce or [] for r in self.rows.values() if r.project_id == project_id]
+
     async def get_by_date(self, project_id: uuid.UUID, report_date: date) -> Any:
         for r in self.rows.values():
             if r.project_id == project_id and r.report_date == report_date:
@@ -274,6 +293,69 @@ async def test_get_summary_aggregates_workforce_and_delays() -> None:
     # Carpenter: 5 * 8 = 40, Electrician: 3 * 10 = 30
     assert summary["total_workforce_hours"] == 70.0
     assert summary["total_delay_hours"] == 3.5
+
+
+@pytest.mark.asyncio
+async def test_get_summary_coerces_jsonb_string_counts_and_hours() -> None:
+    """Regression: JSONB workforce values may arrive as strings (demo seed,
+    legacy imports). Summary must coerce ``count``/``hours`` to numbers
+    rather than crashing with ``TypeError: can't multiply str by float``.
+    """
+    service = _make_service()
+    pid = uuid.uuid4()
+
+    # Inject a row directly so we bypass Pydantic coercion and exercise the
+    # JSONB-string code path the way Postgres returns it for legacy rows.
+    raw_report = SimpleNamespace(
+        id=uuid.uuid4(),
+        project_id=pid,
+        status="submitted",
+        report_type="daily",
+        report_date=date(2026, 4, 13),
+        delay_hours=None,
+        workforce=[
+            {"trade": "Carpenter", "count": "5", "hours": "8.0"},
+            {"trade": "Electrician", "count": "3", "hours": 6.5},
+            {"trade": "Plumber", "count": None, "hours": None},
+            {"trade": "Painter", "count": "not-a-number", "hours": "1"},
+        ],
+    )
+    service.repo.rows[raw_report.id] = raw_report
+
+    summary = await service.get_summary(pid)
+    assert summary["total"] == 1
+    # Carpenter (str): 5 * 8.0 = 40.0
+    # Electrician (mixed): 3 * 6.5 = 19.5
+    # Plumber (None): 0 * 0 = 0  (None coerced to 0)
+    # Painter ("not-a-number"): skipped via except clause
+    assert summary["total_workforce_hours"] == 59.5
+    assert summary["total_delay_hours"] == 0.0
+
+
+@pytest.mark.asyncio
+async def test_get_summary_handles_empty_and_malformed_workforce() -> None:
+    """Summary must not raise when ``workforce`` is empty, ``None``, or
+    contains non-dict entries (defensive against schema drift)."""
+    service = _make_service()
+    pid = uuid.uuid4()
+
+    service.repo.rows[uuid.uuid4()] = SimpleNamespace(
+        id=uuid.uuid4(), project_id=pid, status="draft", report_type="daily",
+        report_date=date(2026, 4, 14), delay_hours=0.0, workforce=None,
+    )
+    service.repo.rows[uuid.uuid4()] = SimpleNamespace(
+        id=uuid.uuid4(), project_id=pid, status="draft", report_type="daily",
+        report_date=date(2026, 4, 15), delay_hours=0.0, workforce=[],
+    )
+    service.repo.rows[uuid.uuid4()] = SimpleNamespace(
+        id=uuid.uuid4(), project_id=pid, status="draft", report_type="daily",
+        report_date=date(2026, 4, 16), delay_hours=0.0,
+        workforce=["not-a-dict", 42, None],  # malformed entries
+    )
+
+    summary = await service.get_summary(pid)
+    assert summary["total"] == 3
+    assert summary["total_workforce_hours"] == 0.0
 
 
 # ── Delete ───────────────────────────────────────────────────────────────

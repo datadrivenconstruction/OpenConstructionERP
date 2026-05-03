@@ -314,7 +314,7 @@ export function CommentThread({ entityType, entityId, className }: CommentThread
     queryKey,
     queryFn: () =>
       apiGet<CommentListResponse>(
-        `/v1/collaboration/comments?entity_type=${encodeURIComponent(entityType)}&entity_id=${encodeURIComponent(entityId)}`,
+        `/v1/collaboration/comments/?entity_type=${encodeURIComponent(entityType)}&entity_id=${encodeURIComponent(entityId)}`,
       ),
     staleTime: 15_000,
     refetchInterval: 30_000,

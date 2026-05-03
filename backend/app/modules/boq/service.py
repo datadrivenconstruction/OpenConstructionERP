@@ -219,7 +219,7 @@ _logger_audit = logging.getLogger(__name__ + ".audit")
 async def _safe_publish(name: str, data: dict[str, Any], source_module: str = "oe_boq") -> None:
     """Publish event safely — ignores MissingGreenlet errors with SQLite async."""
     try:
-        await event_bus.publish(name, data, source_module=source_module)
+        event_bus.publish_detached(name, data, source_module=source_module)
     except Exception:
         logger_events.debug("Event publish skipped (SQLite async): %s", name)
 

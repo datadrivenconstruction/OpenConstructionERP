@@ -71,7 +71,7 @@ async def _sweep_once() -> int:
 
     for snap in snapshots:
         try:
-            await event_bus.publish(
+            event_bus.publish_detached(
                 COLLAB_LOCK_EXPIRED,
                 snap,
                 source_module="collaboration_locks",

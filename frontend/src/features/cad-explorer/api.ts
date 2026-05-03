@@ -4,6 +4,7 @@
  */
 
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
+import { isModuleLoaded } from '@/shared/lib/moduleProbe';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -175,6 +176,9 @@ export async function saveSession(
 }
 
 export async function listSessions(projectId?: string, savedOnly = false): Promise<SavedSession[]> {
+  // /data-explorer is reachable without the takeoff module installed —
+  // show an empty list instead of 404-logging to the console.
+  if (!(await isModuleLoaded('oe_takeoff'))) return [];
   const params = new URLSearchParams();
   if (projectId) params.set('project_id', projectId);
   if (savedOnly) params.set('saved_only', 'true');

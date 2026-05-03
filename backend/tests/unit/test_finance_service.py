@@ -152,8 +152,27 @@ class _StubEVMRepo:
     async def create(self, snapshot: Any) -> Any:
         if getattr(snapshot, "id", None) is None:
             snapshot.id = uuid.uuid4()
+        # SQLAlchemy server-side defaults don't fire without a real INSERT,
+        # so emulate them here so EVMSnapshotResponse.model_validate(...)
+        # doesn't choke on None timestamps.
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc)
+        if getattr(snapshot, "created_at", None) is None:
+            snapshot.created_at = now
+        if getattr(snapshot, "updated_at", None) is None:
+            snapshot.updated_at = now
         self.rows.append(snapshot)
         return snapshot
+
+    async def list(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+    ) -> tuple[list[Any], int]:
+        rows = self.rows
+        if project_id is not None:
+            rows = [s for s in rows if s.project_id == project_id]
+        return rows, len(rows)
 
 
 # ── Invoices ──────────────────────────────────────────────────────────────
@@ -295,6 +314,55 @@ async def test_create_evm_snapshot_computes_derived_metrics() -> None:
     # EAC = AC + (BAC - EV) / CPI = 480000 + 550000/0.9375
     expected_eac = Decimal("480000") + (Decimal("1000000") - Decimal("450000")) / Decimal("0.9375")
     assert Decimal(snapshot.eac) == expected_eac.quantize(Decimal("0.01"))
+
+
+@pytest.mark.asyncio
+async def test_list_evm_snapshots_returns_envelope_not_bare_list() -> None:
+    """v2.6.42 regression guard: ``list_evm_snapshots`` must return a
+    ``(items, total)`` tuple and the router must wrap it in
+    :class:`EVMListResponse`. Frontend ``FinancePage.tsx`` types the
+    response as ``{items, total}`` and pulls ``items[0]`` for the latest
+    snapshot — drifting back to a bare list breaks the EVM KPI cards
+    (BAC/PV/EV/AC/SPI/CPI render as ``NaN``)."""
+    from app.modules.finance.schemas import EVMListResponse, EVMSnapshotResponse
+
+    service = _make_service()
+    pid = uuid.uuid4()
+    await service.create_evm_snapshot(
+        EVMSnapshotCreate(
+            project_id=pid,
+            snapshot_date="2026-04-01",
+            bac="100000",
+            pv="50000",
+            ev="45000",
+            ac="48000",
+        )
+    )
+
+    result = await service.list_evm_snapshots(project_id=pid)
+    # Service contract: tuple of (items, total).
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+    items, total = result
+    assert total == 1
+    assert len(items) == 1
+
+    # Router wraps with EVMListResponse — exercise that path too.
+    response = EVMListResponse(
+        items=[EVMSnapshotResponse.model_validate(s) for s in items],
+        total=total,
+    )
+    payload = response.model_dump()
+    assert set(payload.keys()) == {"items", "total"}
+    assert payload["total"] == 1
+    assert isinstance(payload["items"], list)
+
+    # Decimal-as-string contract: every numeric metric must be a string.
+    # Frontend parseFloat()'s these — drifting to native Decimal/float
+    # serialization would silently lose precision.
+    snap = payload["items"][0]
+    for field in ("bac", "pv", "ev", "ac", "sv", "cv", "spi", "cpi", "eac", "vac", "etc", "tcpi"):
+        assert isinstance(snap[field], str), f"EVM field {field!r} must serialize as string"
 
 
 @pytest.mark.asyncio

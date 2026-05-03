@@ -44,7 +44,7 @@ async def _safe_publish(name: str, data: dict[str, Any]) -> None:
     must never break a successful CRUD or link operation.
     """
     try:
-        await event_bus.publish(name, data, source_module="oe_requirements")
+        event_bus.publish_detached(name, data, source_module="oe_requirements")
     except Exception:
         logger.debug("Failed to publish requirements event '%s'", name, exc_info=True)
 

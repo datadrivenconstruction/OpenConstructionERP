@@ -32,7 +32,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import PlainTextResponse
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.markups.schemas import (
     BoqLinkRequest,
     MarkupBulkCreate,
@@ -126,11 +126,13 @@ def _stamp_to_response(item: object) -> StampTemplateResponse:
 
 @router.get("/summary/", response_model=MarkupSummary)
 async def get_summary(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: MarkupsService = Depends(_get_service),
 ) -> MarkupSummary:
     """Aggregated markup stats for a project."""
+    await verify_project_access(project_id, str(user_id), session)
     data = await service.get_summary(project_id)
     return MarkupSummary(**data)
 
@@ -140,6 +142,7 @@ async def get_summary(
 
 @router.get("/export/")
 async def export_markups(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     format: str = Query(default="csv", pattern=r"^csv$"),
     type: str | None = Query(default=None, alias="type"),
@@ -148,6 +151,7 @@ async def export_markups(
     service: MarkupsService = Depends(_get_service),
 ) -> PlainTextResponse:
     """Export markups to CSV."""
+    await verify_project_access(project_id, str(user_id), session)
     csv_content = await service.export_to_csv(
         project_id,
         type_filter=type,
@@ -243,11 +247,13 @@ async def list_markups(
 @router.get("/{markup_id}", response_model=MarkupResponse)
 async def get_markup(
     markup_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: MarkupsService = Depends(_get_service),
 ) -> MarkupResponse:
     """Get a single markup."""
     item = await service.get_markup(markup_id)
+    await verify_project_access(item.project_id, str(user_id), session)
     return _markup_to_response(item)
 
 
@@ -255,11 +261,14 @@ async def get_markup(
 async def update_markup(
     markup_id: uuid.UUID,
     data: MarkupUpdate,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("markups.update")),
     service: MarkupsService = Depends(_get_service),
 ) -> MarkupResponse:
     """Update a markup."""
+    existing = await service.get_markup(markup_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     item = await service.update_markup(markup_id, data)
     return _markup_to_response(item)
 
@@ -267,11 +276,14 @@ async def update_markup(
 @router.delete("/{markup_id}", status_code=204)
 async def delete_markup(
     markup_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("markups.delete")),
     service: MarkupsService = Depends(_get_service),
 ) -> None:
     """Delete a markup."""
+    existing = await service.get_markup(markup_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_markup(markup_id)
 
 
@@ -282,11 +294,14 @@ async def delete_markup(
 async def link_to_boq(
     markup_id: uuid.UUID,
     data: BoqLinkRequest,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("markups.update")),
     service: MarkupsService = Depends(_get_service),
 ) -> MarkupResponse:
     """Link a measurement markup to a BOQ position."""
+    existing = await service.get_markup(markup_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     item = await service.link_to_boq(markup_id, data.position_id)
     return _markup_to_response(item)
 
@@ -334,7 +349,17 @@ async def delete_scale(
     _perm: None = Depends(RequirePermission("markups.delete")),
     service: MarkupsService = Depends(_get_service),
 ) -> None:
-    """Delete a scale config."""
+    """Delete a scale config.
+
+    Scales are scoped per document, not per project. Until documents
+    grow a project FK we restrict deletion to the user who calibrated
+    the scale — anyone else gets 403.
+    """
+    existing = await service.scale_repo.get_by_id(config_id)
+    if existing is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scale config not found")
+    if not existing.created_by or existing.created_by != str(user_id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your scale")
     await service.delete_scale(config_id)
 
 
@@ -373,15 +398,39 @@ async def list_stamp_templates(
     return [_stamp_to_response(i) for i in items]
 
 
+async def _authorize_stamp_mutation(
+    template_id: uuid.UUID,
+    user_id: str,
+    session: SessionDep,
+    service: MarkupsService,
+) -> None:
+    """Reject cross-tenant mutation of stamp templates.
+
+    Project-scoped templates (project_id set) require project membership.
+    User-private templates (project_id null) only the owner can mutate —
+    seed stamps stored with owner_id='' are read-only via this gate.
+    """
+    existing = await service.stamp_repo.get_by_id(template_id)
+    if existing is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Stamp template not found")
+    if existing.project_id is not None:
+        await verify_project_access(existing.project_id, user_id, session)
+        return
+    if not existing.owner_id or existing.owner_id != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your stamp template")
+
+
 @router.patch("/stamps/templates/{template_id}", response_model=StampTemplateResponse)
 async def update_stamp_template(
     template_id: uuid.UUID,
     data: StampTemplateUpdate,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("markups.update")),
     service: MarkupsService = Depends(_get_service),
 ) -> StampTemplateResponse:
     """Update a stamp template."""
+    await _authorize_stamp_mutation(template_id, str(user_id), session, service)
     item = await service.update_stamp(template_id, data)
     return _stamp_to_response(item)
 
@@ -389,9 +438,11 @@ async def update_stamp_template(
 @router.delete("/stamps/templates/{template_id}", status_code=204)
 async def delete_stamp_template(
     template_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("markups.delete")),
     service: MarkupsService = Depends(_get_service),
 ) -> None:
     """Delete a stamp template."""
+    await _authorize_stamp_mutation(template_id, str(user_id), session, service)
     await service.delete_stamp(template_id)

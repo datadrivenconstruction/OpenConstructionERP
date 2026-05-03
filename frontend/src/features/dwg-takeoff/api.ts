@@ -4,6 +4,7 @@
  */
 
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { isModuleLoaded } from '@/shared/lib/moduleProbe';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -184,6 +185,9 @@ export interface UpdateAnnotationPayload {
 
 export async function fetchDrawings(projectId: string): Promise<DwgDrawing[]> {
   if (!projectId) return [];
+  // /documents page lists drawings even when oe_dwg_takeoff is disabled —
+  // return empty instead of 404-logging on every project switch.
+  if (!(await isModuleLoaded('oe_dwg_takeoff'))) return [];
   return apiGet<DwgDrawing[]>(`/v1/dwg_takeoff/drawings/?project_id=${projectId}`);
 }
 
@@ -373,5 +377,13 @@ export interface DwgOfflineReadiness {
 }
 
 export async function fetchOfflineReadiness(): Promise<DwgOfflineReadiness> {
+  if (!(await isModuleLoaded('oe_dwg_takeoff'))) {
+    return {
+      ready: false,
+      converter_available: false,
+      version: null,
+      message: 'DWG takeoff module is disabled',
+    };
+  }
   return apiGet<DwgOfflineReadiness>('/v1/dwg_takeoff/offline-readiness/');
 }

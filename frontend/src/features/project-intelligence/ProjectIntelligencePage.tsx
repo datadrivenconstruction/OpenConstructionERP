@@ -16,6 +16,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { apiGet, apiPost } from '@/shared/lib/api';
+import { isModuleLoaded } from '@/shared/lib/moduleProbe';
 import { ScoreRing } from './ScoreRing';
 import { GapCard } from './GapCard';
 import { AIAdvisorPanel } from './AIAdvisorPanel';
@@ -129,6 +130,18 @@ export function ProjectIntelligencePage() {
   const fetchData = useCallback(
     async (refresh = false) => {
       if (!activeProjectId) return;
+      // The module is optional. When disabled the dashboard shows the
+      // "module disabled" empty state instead of 404-logging once per
+      // load.
+      if (!(await isModuleLoaded('oe_project_intelligence'))) {
+        setLoading(false);
+        setError(
+          t('project_intelligence.module_disabled', {
+            defaultValue: 'Project Intelligence module is disabled. Enable it from the Modules page to use this dashboard.',
+          }),
+        );
+        return;
+      }
       try {
         if (refresh) setRefreshing(true);
         else setLoading(true);

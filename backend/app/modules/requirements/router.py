@@ -28,7 +28,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.requirements.schemas import (
     GateResultResponse,
     RequirementBulkDeleteRequest,
@@ -209,11 +209,13 @@ async def list_sets(
 @router.get("/{set_id}", response_model=RequirementSetDetail)
 async def get_set(
     set_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
+    session: SessionDep,
     service: RequirementsService = Depends(_get_service),
 ) -> RequirementSetDetail:
     """Get a requirement set with all its requirements and gate results."""
     item = await service.get_set(set_id)
+    await verify_project_access(item.project_id, str(user_id), session)
     return _set_to_detail(item)
 
 
@@ -278,7 +280,8 @@ async def export_requirements(
 async def update_set(
     set_id: uuid.UUID,
     data: RequirementSetUpdate,
-    _user_id: CurrentUserId,
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("requirements.update")),
     service: RequirementsService = Depends(_get_service),
 ) -> RequirementSetResponse:
@@ -290,6 +293,8 @@ async def update_set(
     requirements own).  Project re-assignment is intentionally NOT
     supported here — sets are project-scoped at creation.
     """
+    existing = await service.get_set(set_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     try:
         item = await service.update_set(set_id, data.model_dump(exclude_unset=True))
         return _set_to_response(item)
@@ -309,11 +314,14 @@ async def update_set(
 @router.delete("/{set_id}", status_code=204)
 async def delete_set(
     set_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("requirements.delete")),
     service: RequirementsService = Depends(_get_service),
 ) -> None:
     """Delete a requirement set and all its data."""
+    existing = await service.get_set(set_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.delete_set(set_id)
 
 

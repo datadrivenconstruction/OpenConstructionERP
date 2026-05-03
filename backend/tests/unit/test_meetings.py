@@ -107,6 +107,15 @@ class _StubMeetingRepo:
     async def all_for_project(self, project_id: uuid.UUID) -> list[Any]:
         return [r for r in self.rows.values() if r.project_id == project_id]
 
+    async def action_items_for_project(
+        self, project_id: uuid.UUID
+    ) -> list[tuple[uuid.UUID, str, str, Any, list]]:
+        return [
+            (r.id, r.meeting_number, r.title, r.meeting_date, r.action_items or [])
+            for r in self.rows.values()
+            if r.project_id == project_id and r.status != "cancelled"
+        ]
+
     async def stats_for_project(self, project_id: uuid.UUID) -> dict[str, Any]:
         rows = [r for r in self.rows.values() if r.project_id == project_id]
         by_status: dict[str, int] = {}

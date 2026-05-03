@@ -39,7 +39,7 @@ import {
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
+import { apiGet, apiPost, triggerDownload, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -160,10 +160,10 @@ async function fetchBlobWithAuth(url: string, fallbackFilename: string): Promise
 
   const response = await fetch(url, { method: 'GET', headers });
   if (!response.ok) {
-    let detail = 'Export failed';
+    let detail = `Export failed (HTTP ${response.status})`;
     try {
       const body = await response.json();
-      detail = body.detail || detail;
+      detail = extractErrorMessageFromBody(body) ?? detail;
     } catch {
       // ignore parse error
     }
@@ -195,7 +195,7 @@ async function importBudgetsFile(
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const response = await fetch(
-    `/api/v1/finance/budgets/import/file?project_id=${encodeURIComponent(projectId)}`,
+    `/api/v1/finance/budgets/import/file/?project_id=${encodeURIComponent(projectId)}`,
     { method: 'POST', headers, body: formData },
   );
 
@@ -647,7 +647,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
   const exportBudgetsMut = useMutation({
     mutationFn: () =>
       fetchBlobWithAuth(
-        `/api/v1/finance/budgets/export?project_id=${encodeURIComponent(projectId)}`,
+        `/api/v1/finance/budgets/export/?project_id=${encodeURIComponent(projectId)}`,
         'budgets_export.xlsx',
       ),
     onSuccess: () =>
@@ -1293,7 +1293,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
   const exportInvoicesMut = useMutation({
     mutationFn: () =>
       fetchBlobWithAuth(
-        `/api/v1/finance/invoices/export?project_id=${encodeURIComponent(projectId)}&direction=${subTab}`,
+        `/api/v1/finance/invoices/export/?project_id=${encodeURIComponent(projectId)}&direction=${subTab}`,
         'invoices_export.xlsx',
       ),
     onSuccess: () =>
@@ -2115,10 +2115,38 @@ function EVMTab({ projectId }: { projectId: string }) {
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
+  // Backend returns EVMListResponse `{items: EVMSnapshot[], total: int}`
+  // sorted by snapshot_date DESC — the most-recent snapshot is items[0].
+  // EVM money/index fields ship as Decimal-as-string; coerce to numbers
+  // for the KPI cards. Empty list → show the "No EVM data" empty state.
   const { data: evm, isLoading } = useQuery({
     queryKey: ['finance-evm', projectId],
     queryFn: () =>
-      apiGet<EVMData>(`/v1/finance/evm/?project_id=${projectId}`),
+      apiGet<{
+        items: Array<{
+          bac: string; pv: string; ev: string; ac: string; sv: string;
+          cv: string; spi: string; cpi: string; eac: string; etc: string;
+          vac: string; tcpi: string; snapshot_date: string;
+        }>;
+        total: number;
+      }>(`/v1/finance/evm/?project_id=${projectId}`),
+    select: (resp): EVMData | null => {
+      const latest = resp?.items?.[0];
+      if (!latest) return null;
+      const num = (s: string | undefined): number => {
+        const n = Number.parseFloat(s ?? '0');
+        return Number.isFinite(n) ? n : 0;
+      };
+      return {
+        project_id: projectId,
+        bac: num(latest.bac), pv: num(latest.pv), ev: num(latest.ev),
+        ac: num(latest.ac), sv: num(latest.sv), cv: num(latest.cv),
+        spi: num(latest.spi), cpi: num(latest.cpi), eac: num(latest.eac),
+        etc: num(latest.etc), vac: num(latest.vac), tcpi: num(latest.tcpi),
+        currency: 'EUR',
+        data_date: latest.snapshot_date,
+      };
+    },
   });
 
   const snapshotMut = useMutation({

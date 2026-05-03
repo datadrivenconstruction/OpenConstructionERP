@@ -9,6 +9,7 @@
  */
 
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { isModuleLoaded } from '@/shared/lib/moduleProbe';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 
@@ -175,6 +176,13 @@ export interface BIMConverterInstallResult {
   platform?: string;
 }
 
+const EMPTY_CONVERTERS: BIMConvertersResponse = {
+  converters: [],
+  installed_count: 0,
+  total_count: 0,
+  healthy_count: 0,
+};
+
 /** List every DDC converter and its install status.  Shared with the
  *  Quantities page — use the same `['bim-converters']` query key in
  *  any component that renders converter state so cache invalidations
@@ -182,14 +190,30 @@ export interface BIMConverterInstallResult {
  *
  *  Pass `verify: true` to also run the per-converter smoke test (cached
  *  5 min server-side). Without it, every installed converter reports
- *  `health: 'unknown'` and the UI shows neutral pills. */
+ *  `health: 'unknown'` and the UI shows neutral pills.
+ *
+ *  When the `oe_takeoff` module is disabled on the server (e.g. user
+ *  toggled it off in the Modules page) the request would 404. We probe
+ *  `/v1/modules/` once per session and short-circuit — that keeps the
+ *  browser's network panel quiet instead of logging an expected 404. */
 export async function fetchBIMConverters(
   options: { verify?: boolean } = {},
 ): Promise<BIMConvertersResponse> {
+  if (!(await isModuleLoaded('oe_takeoff'))) {
+    return EMPTY_CONVERTERS;
+  }
   const url = options.verify
     ? '/v1/takeoff/converters/?verify=true'
     : '/v1/takeoff/converters/';
-  return apiGet<BIMConvertersResponse>(url);
+  try {
+    return await apiGet<BIMConvertersResponse>(url);
+  } catch (err: unknown) {
+    const status = (err as { status?: number } | null)?.status;
+    if (status === 404) {
+      return EMPTY_CONVERTERS;
+    }
+    throw err;
+  }
 }
 
 /** Force-run the smoke test for a single converter, bypassing the

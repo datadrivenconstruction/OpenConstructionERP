@@ -115,7 +115,7 @@ async def cancel_run(
     accepted = await engine_api.cancel(session, run_id, tenant_id=tenant_id)
     if accepted and pre_status not in {"cancelled", "success", "failed"}:
         try:
-            await event_bus.publish(
+            event_bus.publish_detached(
                 "eac.run.cancelled",
                 {
                     "run_id": str(run_id),
@@ -153,7 +153,7 @@ async def rerun(
         triggered_by=triggered_by,
     )
     try:
-        await event_bus.publish(
+        event_bus.publish_detached(
             "eac.run.rerun_started",
             {
                 "run_id": str(new_run.id),

@@ -66,7 +66,7 @@ async def _safe_publish(
 ) -> None:
     """Publish event safely — ignores MissingGreenlet errors with SQLite async."""
     try:
-        await event_bus.publish(name, data, source_module=source_module)
+        event_bus.publish_detached(name, data, source_module=source_module)
     except Exception:
         _logger_events.debug("Event publish skipped (SQLite async): %s", name)
 

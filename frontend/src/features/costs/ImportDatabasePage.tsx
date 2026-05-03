@@ -19,7 +19,7 @@ import {
 import { Button, Card, Badge, Breadcrumb, CountryFlag } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { apiGet, apiPost, apiDelete, triggerDownload } from '@/shared/lib/api';
+import { apiGet, apiPost, apiDelete, triggerDownload, extractErrorMessageFromBody } from '@/shared/lib/api';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -659,10 +659,10 @@ async function downloadExcelExport(): Promise<void> {
 
   const response = await fetch('/api/v1/costs/actions/export-excel/', { method: 'GET', headers });
   if (!response.ok) {
-    let detail = 'Export failed';
+    let detail = `Export failed (HTTP ${response.status})`;
     try {
       const body = await response.json();
-      detail = body.detail || detail;
+      detail = extractErrorMessageFromBody(body) ?? detail;
     } catch {
       // ignore parse error
     }
@@ -900,6 +900,13 @@ function LoadedDatabasesSection() {
                       ) : (
                         <button
                           onClick={() => {
+                            const ok = window.confirm(
+                              t('costs.confirm_delete_region', {
+                                defaultValue: 'Delete all cost items for {{region}}? This cannot be undone.',
+                                region: db?.name ?? rs.region,
+                              }),
+                            );
+                            if (!ok) return;
                             setDeletingRegion(rs.region);
                             deleteRegionMutation.mutate(rs.region);
                           }}

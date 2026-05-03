@@ -29,7 +29,7 @@ _logger_ev = __import__("logging").getLogger(__name__ + ".events")
 
 async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
     try:
-        await event_bus.publish(name, data, source_module=source_module)
+        event_bus.publish_detached(name, data, source_module=source_module)
     except Exception:
         _logger_ev.debug("Event publish skipped: %s", name)
 
@@ -183,13 +183,22 @@ class CostItemService:
     async def search_costs_paginated(
         self,
         query: CostSearchQuery,
+        *,
+        skip_count: bool = False,
     ) -> tuple[list[CostItem], int | None, bool, str | None]:
         """Search with cursor-aware pagination.
 
         Returns ``(items, total_or_None, has_more, next_cursor_or_None)``.
-        ``total`` is computed only when no cursor was supplied (first page).
+        ``total`` is computed only when no cursor was supplied (first page)
+        and the caller did NOT pass ``skip_count=True``.
         ``next_cursor`` is the encoded cursor for the next page, or ``None``
         when there is no next page.
+
+        ``skip_count`` exists for the case where the caller already knows
+        the total from another aggregate (e.g. the prewarmed
+        ``_region_cache["stats"]`` totals) and wants to skip the COUNT(*)
+        on the first page. Cursor-paginated requests still skip count
+        automatically — this flag is for first-page no-filter fast paths.
         """
         decoded_cursor: tuple[str, str] | None = None
         if query.cursor:
@@ -214,7 +223,7 @@ class CostItemService:
             offset=query.offset,
             limit=query.limit,
             cursor=decoded_cursor,
-            skip_count=decoded_cursor is not None,
+            skip_count=skip_count or decoded_cursor is not None,
         )
 
         next_cursor: str | None = None

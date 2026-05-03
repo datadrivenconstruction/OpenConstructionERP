@@ -19,7 +19,7 @@ async def _safe_publish(name: str, data: dict, source_module: str = "oe_submitta
     try:
         from app.core.events import event_bus
 
-        await event_bus.publish(name, data, source_module=source_module)
+        event_bus.publish_detached(name, data, source_module=source_module)
     except Exception as exc:
         logger.debug("Event publish failed for %s: %s", name, exc)
 

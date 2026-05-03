@@ -19,7 +19,7 @@ _logger_ev = __import__("logging").getLogger(__name__ + ".events")
 
 async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
     try:
-        await event_bus.publish(name, data, source_module=source_module)
+        event_bus.publish_detached(name, data, source_module=source_module)
     except Exception:
         _logger_ev.debug("Event publish skipped: %s", name)
 
@@ -354,7 +354,7 @@ class TenderingService:
 
         from sqlalchemy import update
 
-        from app.modules.boq.models import BOQPosition
+        from app.modules.boq.models import Position
 
         updated = 0
         for item in bid.line_items or []:
@@ -365,7 +365,7 @@ class TenderingService:
                 rate = Decimal(str(item.get("unit_rate", "0")))
             except (InvalidOperation, ValueError):
                 continue
-            pos = await self.session.get(BOQPosition, uuid.UUID(str(pos_id)))
+            pos = await self.session.get(Position, uuid.UUID(str(pos_id)))
             if pos is None:
                 continue
             try:
@@ -374,8 +374,8 @@ class TenderingService:
                 qty = Decimal("0")
             new_total = qty * rate
             await self.session.execute(
-                update(BOQPosition)
-                .where(BOQPosition.id == pos.id)
+                update(Position)
+                .where(Position.id == pos.id)
                 .values(unit_rate=str(rate), total=str(new_total))
             )
             updated += 1
