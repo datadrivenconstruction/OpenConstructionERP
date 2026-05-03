@@ -175,10 +175,59 @@ def encode_texts(texts: list[str]) -> list[list[float]]:
 
 
 async def encode_texts_async(texts: list[str]) -> list[list[float]]:
-    """Async wrapper — runs encode_texts in a thread to avoid blocking the event loop."""
+    """Async wrapper — dispatch encode based on current concurrency.
+
+    Smart routing (see ``app.core.embedding_pool``):
+        * If the configured pool is up AND another encode is currently
+          in flight, dispatch this call to the pool so the two calls
+          run on different workers in parallel.
+        * Otherwise (no in-flight calls, or pool disabled), run encode
+          inline via ``asyncio.to_thread`` — this avoids the IPC
+          overhead a process pool would add for what's already a fast
+          single call.
+
+    The smart route gives us best-of-both-worlds:
+        single-call p50 stays at ~300 ms (no pool overhead);
+        50× concurrent p95 drops because the pool absorbs the burst.
+    """
     import asyncio
 
-    return await asyncio.to_thread(encode_texts, texts)
+    # Empty input — skip both pool dispatch and the embedder altogether.
+    if not texts:
+        return []
+
+    try:
+        from app.core import embedding_pool as _pool_mod
+    except Exception:
+        _pool_mod = None  # type: ignore[assignment]
+
+    # Increment in-flight count so the NEXT concurrent caller sees
+    # ``inflight > 1`` and routes to the pool. Wrap the whole call so
+    # even on exception we decrement — a leak would mean every future
+    # call routes to the pool unnecessarily.
+    if _pool_mod is not None:
+        _pool_mod._inflight += 1
+    try:
+        # Route to pool ONLY if (a) the pool is up and (b) at least
+        # one OTHER call is in flight (so this one would otherwise
+        # serialise behind it). With ``inflight == 1`` we're alone —
+        # encode inline.
+        if (
+            _pool_mod is not None
+            and _pool_mod._pool is not None
+            and _pool_mod._inflight > 1
+        ):
+            try:
+                pooled = await _pool_mod.encode_texts_pooled(texts)
+                if pooled is not None:
+                    return pooled
+            except Exception:
+                pass
+
+        return await asyncio.to_thread(encode_texts, texts)
+    finally:
+        if _pool_mod is not None:
+            _pool_mod._inflight = max(0, _pool_mod._inflight - 1)
 
 
 # ── LanceDB (default, embedded) ───────────────────────────────────────────

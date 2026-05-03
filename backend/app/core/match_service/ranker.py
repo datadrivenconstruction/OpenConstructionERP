@@ -226,20 +226,26 @@ async def rank(
         )
 
     # Attach project context for boosts that need the project (region etc.).
-    project_obj = None
+    # Hot path: under concurrent match load this used to issue one
+    # ``ProjectRepository.get_by_id`` per request — a serialised SELECT
+    # round-trip. Boosts only read ``settings.project.region`` so we
+    # cache the region string with a 60s TTL and synthesise a tiny
+    # ``project``-shaped object for the boost layer to consume.
+    project_region: str | None = None
     try:
-        from app.modules.projects.repository import ProjectRepository
+        from app.core.match_service.region_cache import region_for
 
-        project_obj = await ProjectRepository(db).get_by_id(project_uuid)
+        project_region = await region_for(db, project_uuid)
     except Exception:
-        # Projects repo is optional for the matcher itself — boosts that
-        # care will simply skip when the row is unavailable.
+        # Cache layer is best-effort — boosts that need a region simply
+        # skip when it's unavailable.
         pass
     settings_with_project: Any = settings
     try:
-        # Best-effort attach without polluting the ORM identity map.
-        # Boosts that care about region read ``settings.project.region``.
-        settings.project = project_obj  # type: ignore[attr-defined]
+        settings.project = SimpleNamespace(  # type: ignore[attr-defined]
+            id=project_uuid,
+            region=project_region,
+        )
     except Exception:
         pass
 

@@ -1643,6 +1643,24 @@ def create_app() -> FastAPI:
         _section("Vector DB")
         _init_vector_db()
 
+        # Pre-warm the embedder + boot the inference process pool. Both
+        # are env-var-gated so dev startup stays fast unless the
+        # operator opted in. See ``app.core.embedding_pool`` for the
+        # full rationale and trade-offs.
+        try:
+            from app.core.embedding_pool import init_pool, maybe_preload_in_process
+
+            preloaded = maybe_preload_in_process()
+            workers = init_pool()
+            if preloaded or workers:
+                logger.info(
+                    "Embedding warm-up: preload=%s pool_workers=%d",
+                    preloaded,
+                    workers,
+                )
+        except Exception as exc:  # noqa: BLE001 — never fatal for startup
+            logger.warning("Embedding pool init skipped: %s", exc)
+
         # Auto-backfill the multi-collection vector store from existing
         # rows.  Detached as a background task so a slow embedding model
         # download or a large dataset doesn't delay startup — semantic
@@ -1694,6 +1712,7 @@ def create_app() -> FastAPI:
                 import time as _ptime
 
                 from sqlalchemy import distinct, select
+                from sqlalchemy import func as _func
 
                 from app.database import async_session_factory as _cost_sf
                 from app.modules.costs.models import CostItem
@@ -1703,8 +1722,6 @@ def create_app() -> FastAPI:
                 )
                 from app.modules.costs.schemas import CategoryTreeNode
                 from app.modules.costs.service import CostItemService
-
-                from sqlalchemy import func as _func
 
                 async with _cost_sf() as cost_session:
                     # 1) Distinct region list — drives the tab bar on /costs
@@ -1739,6 +1756,7 @@ def create_app() -> FastAPI:
                     #    filter dropdown. Warm the all-regions list (the
                     #    page's default before any region tab is clicked).
                     from sqlalchemy import func as __func
+
                     from app.database import engine as __engine
 
                     if "sqlite" in str(__engine.url):
@@ -1897,6 +1915,15 @@ def create_app() -> FastAPI:
             stop_sweeper()
         except Exception:
             logger.debug("collab lock sweeper stop failed", exc_info=True)
+
+        # Tear down the embedding inference pool so Ctrl-C doesn't
+        # leave orphan Python worker processes alive.
+        try:
+            from app.core.embedding_pool import shutdown_pool
+
+            shutdown_pool()
+        except Exception:
+            logger.debug("embedding pool shutdown failed", exc_info=True)
 
         await engine.dispose()
 

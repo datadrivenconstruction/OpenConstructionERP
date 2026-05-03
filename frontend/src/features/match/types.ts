@@ -99,3 +99,29 @@ export interface MatchFeedbackRequestBody {
   readonly rejected_candidates: ReadonlyArray<MatchCandidate>;
   readonly user_chose_code?: string | null;
 }
+
+/** What we send to `POST /api/v1/match/accept`.
+ *
+ * Consolidates the create-position / link-BIM / submit-feedback round-trips
+ * the frontend would otherwise stitch together — see Phase 4 spec. */
+export interface MatchAcceptRequestBody {
+  readonly project_id: string;
+  readonly element_envelope: ElementEnvelope;
+  readonly accepted_candidate: MatchCandidate;
+  readonly rejected_candidates: ReadonlyArray<MatchCandidate>;
+  readonly boq_id: string;
+  readonly parent_section_id?: string | null;
+  readonly existing_position_id?: string | null;
+  readonly quantity_override?: number | null;
+  readonly bim_element_id?: string | null;
+}
+
+/** Response from `POST /api/v1/match/accept`. */
+export interface MatchAcceptResponse {
+  readonly position_id: string;
+  readonly position_ordinal: string;
+  readonly created: boolean;
+  readonly cost_link_created: boolean;
+  readonly bim_link_created: boolean;
+  readonly audit_entry_id: string | null;
+}

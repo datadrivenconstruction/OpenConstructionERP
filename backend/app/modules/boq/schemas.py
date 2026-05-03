@@ -181,11 +181,11 @@ class PositionCreate(BaseModel):
     )
     source: str = Field(
         default="manual",
-        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff|smart_import|smart_import_ai|cad_import_ai|cost_database|assembly|cwicr|enriched)$",
+        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff|smart_import|smart_import_ai|cad_import_ai|cost_database|assembly|cwicr|enriched|ai_match)$",
         description=(
             "Data source. One of: manual, cad_import, ai_takeoff, gaeb_import, "
             "excel_import, takeoff, smart_import, smart_import_ai, cad_import_ai, "
-            "cost_database, assembly, cwicr, enriched."
+            "cost_database, assembly, cwicr, enriched, ai_match."
         ),
         examples=["manual"],
     )
@@ -265,7 +265,7 @@ class PositionUpdate(BaseModel):
     classification: dict[str, Any] | None = None
     source: str | None = Field(
         default=None,
-        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff|smart_import|smart_import_ai|cad_import_ai|cost_database|assembly|cwicr|enriched)$",
+        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff|smart_import|smart_import_ai|cad_import_ai|cost_database|assembly|cwicr|enriched|ai_match)$",
     )
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     cad_element_ids: list[str] | None = None

@@ -13,6 +13,8 @@
 
 import { apiPost } from '@/shared/lib/api';
 import type {
+  MatchAcceptRequestBody,
+  MatchAcceptResponse,
   MatchElementRequestBody,
   MatchFeedbackRequestBody,
   MatchResponse,
@@ -39,4 +41,18 @@ export async function submitMatchFeedback(
   body: MatchFeedbackRequestBody,
 ): Promise<void> {
   await apiPost<void, MatchFeedbackRequestBody>('/v1/match/feedback', body);
+}
+
+/**
+ * Accept a CWICR match — backend creates / updates a BOQ position with
+ * the matched cost item, optionally links it to a BIM element, and
+ * writes a feedback audit entry in one transaction.
+ */
+export async function acceptMatch(
+  body: MatchAcceptRequestBody,
+): Promise<MatchAcceptResponse> {
+  return apiPost<MatchAcceptResponse, MatchAcceptRequestBody>(
+    '/v1/match/accept',
+    body,
+  );
 }

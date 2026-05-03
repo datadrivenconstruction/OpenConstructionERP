@@ -4,5 +4,9 @@
 export { MatchSuggestionsPanel } from './MatchSuggestionsPanel';
 export type { MatchSuggestionsPanelProps } from './MatchSuggestionsPanel';
 export * from './types';
-export { matchElement, submitMatchFeedback } from './api';
-export { useMatchElement, useSubmitMatchFeedback } from './queries';
+export { acceptMatch, matchElement, submitMatchFeedback } from './api';
+export {
+  useAcceptMatch,
+  useMatchElement,
+  useSubmitMatchFeedback,
+} from './queries';

@@ -27,6 +27,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi, type Project, type ProjectFxRate } from './api';
 import { CURRENCY_GROUPS } from './CreateProjectPage';
 import { getVatRate } from '../boq/boqHelpers';
+import { TranslationSettingsTab } from '../translation';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -725,6 +726,13 @@ export function ProjectSettingsPage() {
           </form>
         </div>
       </Card>
+
+      {/* ── Translation (#translation deep-link) ─────────────────────────
+          Mounted as a Card section so the existing hash-pulse effect in
+          this page (originally introduced for #fx-rates) auto-scrolls and
+          highlights it on /projects/:id/settings#translation.  Linked
+          from the MatchSuggestionsPanel fallback hint. */}
+      <TranslationSettingsTab projectId={project.id} />
 
       {/* ── FX Modal ────────────────────────────────────────────────────── */}
       <FxRateModal

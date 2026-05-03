@@ -10,9 +10,11 @@
  * button press).
  */
 
-import { useMutation } from '@tanstack/react-query';
-import { matchElement, submitMatchFeedback } from './api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { acceptMatch, matchElement, submitMatchFeedback } from './api';
 import type {
+  MatchAcceptRequestBody,
+  MatchAcceptResponse,
   MatchElementRequestBody,
   MatchFeedbackRequestBody,
   MatchResponse,
@@ -29,5 +31,37 @@ export function useMatchElement() {
 export function useSubmitMatchFeedback() {
   return useMutation<void, Error, MatchFeedbackRequestBody>({
     mutationFn: submitMatchFeedback,
+  });
+}
+
+/**
+ * Mutation that accepts a CWICR match and writes the result to a BOQ
+ * position. On success we invalidate the dependent query trees so the
+ * BOQ editor and BIM linked-BOQ panel pick up the new row immediately.
+ *
+ * Invalidates:
+ *   - ``['boq', boqId]`` and the broader ``['boq']`` namespace
+ *   - ``['boq-positions-for-link', boqId]`` (AddToBOQModal share)
+ *   - ``['bim-elements']`` so the right panel's element list refetches
+ *     (the new boq_link brief is embedded inline)
+ *   - ``['bim', 'links', bimElementId]`` for the linked-BOQ panel
+ */
+export function useAcceptMatch() {
+  const qc = useQueryClient();
+  return useMutation<MatchAcceptResponse, Error, MatchAcceptRequestBody>({
+    mutationFn: acceptMatch,
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['boq'] });
+      qc.invalidateQueries({ queryKey: ['boq', variables.boq_id] });
+      qc.invalidateQueries({
+        queryKey: ['boq-positions-for-link', variables.boq_id],
+      });
+      qc.invalidateQueries({ queryKey: ['bim-elements'] });
+      if (variables.bim_element_id) {
+        qc.invalidateQueries({
+          queryKey: ['bim', 'links', variables.bim_element_id],
+        });
+      }
+    },
   });
 }

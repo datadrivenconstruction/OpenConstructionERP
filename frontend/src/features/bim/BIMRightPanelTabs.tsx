@@ -8,8 +8,9 @@
  *   - Tools: measure tool + saved views
  *   - Groups: saved element groups
  */
-import { useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { X, ClipboardList, Layers, Wrench, Folders, Sparkles } from 'lucide-react';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import {
@@ -21,8 +22,10 @@ import BIMLinkedBOQPanel from './BIMLinkedBOQPanel';
 import BIMGroupsPanel from './BIMGroupsPanel';
 import BIMLayersPanel from './BIMLayersPanel';
 import BIMToolsPanel from './BIMToolsPanel';
-import { MatchSuggestionsPanel } from '@/features/match';
+import { MatchSuggestionsPanel, useAcceptMatch } from '@/features/match';
 import type { MatchCandidate } from '@/features/match';
+import { boqApi, type BOQ } from '@/features/boq/api';
+import { useToastStore } from '@/stores/useToastStore';
 import type { BIMElementGroup } from './api';
 
 interface BIMRightPanelTabsProps {
@@ -125,7 +128,7 @@ export default function BIMRightPanelTabs({
     },
     {
       id: 'match',
-      label: t('bim.tabs.match', { defaultValue: 'Match' }),
+      label: t('bim.tab_match', { defaultValue: 'Match' }),
       icon: Sparkles,
     },
   ];
@@ -228,12 +231,21 @@ export default function BIMRightPanelTabs({
 
 /**
  * MatchTabContent — wraps MatchSuggestionsPanel with the BIM-specific
- * raw_element_data payload.  When no element is selected we show a
- * placeholder so the panel doesn't fire an empty match request.
+ * raw_element_data payload and wires the Accept button to the
+ * consolidated ``POST /api/v1/match/accept`` endpoint.
  *
- * onAccept: Phase 4 will wire this to the BOQ-link mutation.  For now
- * we just log so the wiring is end-to-end testable; the toast inside
- * the panel covers user feedback.
+ * Step 1 of the flow asks the user to pick a target BOQ — the position
+ * has to land somewhere, and we don't want to silently grab the first
+ * BOQ that loads (different teams keep multiple per project). Once a
+ * BOQ is picked, Accept fires the consolidated mutation which:
+ *   - creates / updates the BOQ position with the matched cost item
+ *   - creates a BIM element ↔ position link (best-effort)
+ *   - records feedback into the audit log
+ *
+ * Phase 4 also exposes ``autoApplyLinks`` so the panel can fire onAccept
+ * for high-confidence auto-linked candidates without a click. The flag
+ * is sourced from the per-project ``MatchProjectSettings.auto_link_enabled``
+ * toggle — Settings page wires this in Phase 0 ε.
  */
 function MatchTabContent({
   elements,
@@ -245,9 +257,30 @@ function MatchTabContent({
   projectId: string;
 }) {
   const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const acceptMutation = useAcceptMatch();
+
   const selected = selectedElementId
     ? elements.find((e) => e.id === selectedElementId)
     : null;
+
+  // ── BOQ picker — Phase 4 needs an explicit target ───────────────────
+  // The user might have multiple BOQs per project (variants, packages,
+  // versions). We default to the first one but let them switch. The
+  // dropdown is small enough to live above the candidate list without
+  // pushing it off-screen.
+  const boqsQuery = useQuery({
+    queryKey: ['boqs-for-link', projectId],
+    queryFn: () => boqApi.list(projectId),
+  });
+  const boqs: BOQ[] = useMemo(() => boqsQuery.data ?? [], [boqsQuery.data]);
+  const [userSelectedBOQId, setUserSelectedBOQId] = useState<string | null>(null);
+  const selectedBOQId = useMemo<string | null>(() => {
+    if (userSelectedBOQId && boqs.some((b) => b.id === userSelectedBOQId)) {
+      return userSelectedBOQId;
+    }
+    return boqs[0]?.id ?? null;
+  }, [boqs, userSelectedBOQId]);
 
   if (!selected) {
     return (
@@ -274,22 +307,116 @@ function MatchTabContent({
     quantities: (selected as { quantities?: Record<string, number> }).quantities ?? {},
   };
 
-  const onAccept = useCallback((candidate: MatchCandidate) => {
-    // Phase 4 will replace this with the BOQ-link mutation.  For now we
-    // just log so the wiring is observable in dev tools.
-
-    console.info('[match] accepted candidate', { candidate, element: selected.id });
-  }, [selected.id]);
+  const onAccept = async (candidate: MatchCandidate) => {
+    if (!selectedBOQId) {
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: t('match.no_boq_picked', {
+          defaultValue:
+            'Pick a target BOQ before accepting a match — there is no BOQ in this project yet.',
+        }),
+      });
+      return;
+    }
+    try {
+      // Re-build the envelope locally from the panel's response: the
+      // panel hands us a candidate, the parent hands us the project +
+      // BOQ + BIM element id. The envelope itself comes off the panel's
+      // response which has already echoed it back.
+      const envelope = {
+        source: 'bim' as const,
+        source_lang: (rawElementData.language as string) ?? 'en',
+        category: (selected.element_type as string) ?? '',
+        description: (selected.name as string) ?? '',
+        properties:
+          (rawElementData.properties as Record<string, unknown>) ?? {},
+        quantities:
+          (rawElementData.quantities as Record<string, number>) ?? {},
+        unit_hint: null,
+        classifier_hint: null,
+      };
+      const result = await acceptMutation.mutateAsync({
+        project_id: projectId,
+        element_envelope: envelope,
+        accepted_candidate: candidate,
+        rejected_candidates: [],
+        boq_id: selectedBOQId,
+        bim_element_id: selected.id,
+      });
+      addToast({
+        type: 'success',
+        title: t('match.accept_toast_title', { defaultValue: 'Match accepted' }),
+        // i18next-strict typing: when the key isn't statically known the
+        // overload resolver picks the 2-arg ``[key, defaultValue]`` form
+        // and rejects the interpolation object. Cast to ``string`` so we
+        // can pass the rich options form without losing the translation
+        // contract — the runtime behaviour is identical.
+        message: (t as (k: string, opts: Record<string, unknown>) => string)(
+          'match.accept_position_toast',
+          {
+            defaultValue:
+              'Position {{ordinal}} created — {{code}}: {{description}}',
+            ordinal: result.position_ordinal,
+            code: candidate.code,
+            description: candidate.description,
+          },
+        ),
+      });
+    } catch (err: unknown) {
+      const msg = (err as { message?: string })?.message ?? String(err);
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: msg,
+      });
+    }
+  };
 
   return (
-    <MatchSuggestionsPanel
-      source="bim"
-      projectId={projectId}
-      rawElementData={rawElementData}
-      onAccept={onAccept}
-      autoFetch
-      compact={false}
-    />
+    <div className="flex flex-col h-full">
+      <div className="px-3 py-2 border-b border-border-light bg-surface-secondary">
+        <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1">
+          {t('bim.match_target_boq', { defaultValue: 'Target BOQ' })}
+        </label>
+        <select
+          value={selectedBOQId ?? ''}
+          onChange={(e) => setUserSelectedBOQId(e.target.value || null)}
+          disabled={boqs.length === 0}
+          className="w-full px-2 py-1 text-xs rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+          data-testid="match-target-boq-select"
+        >
+          {boqs.length === 0 ? (
+            <option value="">
+              {t('bim.no_boqs', { defaultValue: 'No BOQs in this project yet' })}
+            </option>
+          ) : (
+            boqs.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))
+          )}
+        </select>
+      </div>
+      <div className="flex-1 min-h-0">
+        <MatchSuggestionsPanel
+          // Remount on element-id change so the autoFetch effect refires
+          // and the per-element rejection accumulator (Set inside the
+          // panel) doesn't leak across elements. ``rawElementData`` is a
+          // fresh object each render, so depending on it inside the
+          // panel itself would loop forever — keying on the stable
+          // ``selectedElementId`` is the surgical fix.
+          key={selectedElementId ?? 'no-selection'}
+          source="bim"
+          projectId={projectId}
+          rawElementData={rawElementData}
+          onAccept={onAccept}
+          autoFetch
+          compact={false}
+        />
+      </div>
+    </div>
   );
 }
 

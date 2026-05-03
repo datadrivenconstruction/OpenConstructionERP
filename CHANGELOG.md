@@ -5,6 +5,49 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.5] — 2026-05-03
+
+Phase 3 + Phase 4 of vector match + concurrent-match perf hardening, shipped together.
+
+### Added — Phase 3: translation download UI
+- **`TranslationSettingsTab`** at `frontend/src/features/translation/` — cache stats, dictionary table, MUSE form, IATE local-path + URL forms, in-flight task card with progress bars. Adaptive 5 s / 30 s React Query polling driven by in-flight task count so idle deployments don't burn requests.
+- **Mounted in `ProjectSettingsPage`** as a Card section with `id="translation"` so the existing `#hash` deep-link + ring-pulse pattern (originally for `#fx-rates`) drops in unchanged.
+- **`MatchSuggestionsPanel`** surfaces an info banner when `translation_used.tier_used === 'fallback'`, deep-linking to `/projects/${projectId}/settings#translation` so users can fix the fallback in one click.
+- **Client-side IATE allowlist** mirrors the backend SSRF guard (`isIateUrlAllowed()` + `IATE_ALLOWED_PREFIXES`); backend re-validates so the client check is purely advisory.
+
+### Added — Phase 4: BOQ accept + auto-link execution
+- **`POST /api/v1/match/accept`** consolidates the previous three round-trips (create/update position → BIM link → submit feedback) into one transactional call. Body carries the accepted candidate, the rejected list, target boq + parent_section, optional `existing_position_id` for the update path, optional `bim_element_id` for the link, and an optional quantity override.
+- **`accept_match()` service** writes provenance into `Position.metadata`: `cost_item_code`, `match_score`, `match_vector_score`, `match_boosts_applied`, `match_confidence_band`, `matched_at`, `matched_by_user_id` — every AI-accepted position is auditable end-to-end.
+- **AI-NNN ordinal namespace** for AI-accepted positions so they're visually distinguishable from manual entries in the BOQ grid.
+- **`source: "ai_match"`** added to `PositionCreate` / `PositionUpdate` regex allowlist.
+- **`useAcceptMatch` mutation** + cache invalidations in `frontend/src/features/match/queries.ts`; `MatchSuggestionsPanel` now wires Accept and (opt-in) auto-link with a `AUTO_APPLY_DELAY_MS=1500` confirmation window so users can intercept before the auto-link fires.
+- **BIM right panel** wires the accept flow to a BOQ picker.
+
+### Performance — concurrent match latency hardening
+- **Embedder warm pool** — `app/core/embedding_pool.py`: thread-pool by default (`OE_VECTOR_POOL_KIND=thread`), opt-in `process` for true parallel encodes. Smart routing — single calls run inline (skip pickle/IPC), concurrent calls dispatch to the pool. Sync warmup at startup so the first match request doesn't pay the model-load cost.
+- **Project-region TTL cache** with inflight de-duplication (`app/core/match_service/region_cache.py`) — boosts no longer issue one `ProjectRepository.get_by_id` SELECT per concurrent request.
+- **Server-side p95 at 50× concurrency: 4958ms → 2511ms (−49 %).** Throughput +72 %. Client-side p95 still gated on the LanceDB single-process read lock — flagged as architectural follow-up.
+
+### Fixed — translation cache LRU correctness
+- **LRU keyed on cache path** — module-level LRU keys now include the SQLite path so two callers using different cache files (production vs per-test temp DBs) cannot collide on identical `(text, src, tgt, domain)`. Surfaced as a real cross-test pollution while wiring the perf-hardening tests.
+- **`mark_used()` invalidates the LRU row** — usage_count / last_used_at bumps are now visible on the next `get()` instead of being shadowed by the stale row that was cached at insert time.
+
+### Fixed — Phase 4 visual QA findings (36-screenshot capture, 14 findings)
+- **Match tab no longer occluded by the BIM elements-loaded banner.** `BIMViewer.tsx` health-stats banner reserved 280 px for the right tab strip but the strip is 340 px wide, leaving a 60 px overlap that made the Match tab unclickable on every desktop viewport. Bumped the reserved width to 360 px so the banner can never sit on top of the tabs.
+- **Stale match candidates on element switch.** `MatchSuggestionsPanel` is now keyed on `selectedElementId`, so picking element B after element A refires the autoFetch effect and resets the per-element rejection accumulator instead of showing element A's results until manual refresh.
+- **`ScoreBadge` boost-breakdown now reaches touch + screen-reader users.** Tooltip toggles on `onClick` (was hover-only), exposes `aria-describedby` + `aria-expanded`, and assigns the tooltip a stable `id` for the description link. Keyboard focus path unchanged.
+- **`bim.tabs.match` → `bim.tab_match`** — naming consistency with the four other BIM tab keys (`tab_properties`, `tab_layers`, `tab_tools`, `tab_groups`).
+
+### Tests
+- 18 backend integration tests for `accept_match` (`tests/integration/test_match_accept.py`).
+- 39 perf / cache / region tests (`tests/unit/test_translation_cache_lru.py`, `test_project_region_cache.py`, `test_vector_warmpool.py`, `tests/perf/test_match_concurrency.py`).
+- 4 frontend BOQ-wiring tests + 3 a11y assertions; 12 translation-tab unit + 3 axe tests.
+
+### Known limitations (deferred follow-ups from Phase 4 QA)
+- **`match.*` translation keys exist only as `defaultValue`** in source — non-English locales fall back to English. Same project-wide pattern as the other BIM tab labels; out of scope for v2.7.5, tracked for the next i18n sweep.
+- **`BIMRightPanelTabs` does not mount on mobile (390 × 844)** — Match tab unreachable on mobile. Either intentional (desktop-only feature) or a long-standing regression; needs investigation before adding a "Desktop only" banner or a responsive variant.
+- **`MatchSuggestionsPanel`'s `selectedElementId` flow only works on desktop today** — mobile is blocked on the same panel-mount issue above.
+
 ## [2.7.4] — 2026-05-03
 
 ### Added — Phase 2 of vector match: `MatchSuggestionsPanel` frontend

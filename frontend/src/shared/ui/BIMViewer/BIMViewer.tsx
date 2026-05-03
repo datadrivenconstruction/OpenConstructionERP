@@ -2243,9 +2243,16 @@ export function BIMViewer({
       {/* Health stats banner — top-right, multi-pill clickable counts.
           The pills are smart filters: clicking "Errors" narrows the
           3D viewport to elements with validation_status='error', etc.
-          The parent applies the predicate via onSmartFilter. */}
+          The parent applies the predicate via onSmartFilter.
+
+          ``max-w`` reserves room for the right tab strip
+          (``BIMRightPanelTabs`` is 340 px wide → 360 px gives a 20 px
+          gap so banner pills can never sit on top of the tabs).
+          Verified by Phase 4 visual QA — the previous 280 px reserved
+          width left a 60 px overlap that made the Match tab
+          unclickable on every desktop viewport. */}
       {elementCount > 0 && (
-        <div className="absolute top-3 end-3 z-20 flex items-center gap-1.5 flex-wrap justify-end max-w-[calc(100%-280px)]">
+        <div className="absolute top-3 end-3 z-20 flex items-center gap-1.5 flex-wrap justify-end max-w-[calc(100%-360px)]">
           {/* Total elements pill — not clickable, just informational */}
           <span
             className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-primary text-content-secondary border border-border-light shadow-sm"

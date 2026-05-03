@@ -66,7 +66,23 @@ export interface MatchSuggestionsPanelProps {
   compact?: boolean;
   /** Optional className passthrough on the outer wrapper. */
   className?: string;
+  /**
+   * When ``true`` and the response carries ``auto_linked``, the panel
+   * automatically calls ``onAccept`` after a short confirmation delay
+   * so the user can read the green banner before the link commits.
+   * The delay is :data:`AUTO_APPLY_DELAY_MS`. Default ``false`` — the
+   * existing manual-accept flow is preserved.
+   *
+   * Wire to the per-project ``MatchProjectSettings.auto_link_enabled``
+   * toggle so each tenant decides whether automation kicks in.
+   */
+  autoApplyLinks?: boolean;
 }
+
+/** Confirmation delay before the panel auto-fires ``onAccept`` for an
+ *  auto-linked candidate. Long enough for the user to read the green
+ *  banner, short enough that the next-element flow stays snappy. */
+const AUTO_APPLY_DELAY_MS = 1500;
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
@@ -114,6 +130,7 @@ export function MatchSuggestionsPanel({
   autoFetch = true,
   compact = false,
   className,
+  autoApplyLinks = false,
 }: MatchSuggestionsPanelProps) {
   const { t } = useTranslation();
   const matchMutation = useMatchElement();
@@ -182,19 +199,24 @@ export function MatchSuggestionsPanel({
       }
 
       // 2) Notify the parent — the parent decides what to do (BOQ link
-      //    in Phase 4).  We swallow the parent's promise rejection so a
+      //    in Phase 4+).  We swallow the parent's promise rejection so a
       //    bad parent handler doesn't break the panel.
       void Promise.resolve(onAccept?.(candidate)).catch(() => {});
 
-      // 3) User-visible confirmation.  Phase 4 will replace the toast
-      //    copy when we wire to BOQ.
-      useToastStore.getState().addToast({
-        type: 'success',
-        title: t('match.accept_toast_title', { defaultValue: 'Match accepted' }),
-        message: t('match.accept_toast_message', {
-          defaultValue: 'Linked to BOQ — coming in Phase 4',
-        }),
-      });
+      // 3) User-visible confirmation. When the parent supplies an
+      //    ``onAccept`` callback it owns the success toast (it has more
+      //    context — position ordinal, BOQ id, etc). Without a parent
+      //    handler we fall back to a neutral acknowledgement so the
+      //    panel still feels alive.
+      if (!onAccept) {
+        useToastStore.getState().addToast({
+          type: 'success',
+          title: t('match.accept_toast_title', { defaultValue: 'Match accepted' }),
+          message: t('match.accept_toast_recorded', {
+            defaultValue: 'Match recorded — feedback submitted.',
+          }),
+        });
+      }
     },
     [
       response,
@@ -214,6 +236,32 @@ export function MatchSuggestionsPanel({
       return next;
     });
   }, []);
+
+  /* ── Auto-apply for auto-linked candidates ─────────────────────────────
+   *
+   * When the per-project ``auto_link_enabled`` setting is on AND the
+   * backend flagged a candidate as ``auto_linked``, we fire ``onAccept``
+   * automatically after a short confirmation delay so the user sees the
+   * green banner before the link commits. The delay is cancellable —
+   * if the response identity changes (refresh / next element / panel
+   * unmount) the timer never fires. */
+  const autoLinkedRef = useRef<string | null>(null);
+  const autoLinkedCandidate = response?.auto_linked ?? null;
+  useEffect(() => {
+    if (!autoApplyLinks) return undefined;
+    if (!autoLinkedCandidate) return undefined;
+    // Skip when the user already rejected the auto-link candidate this
+    // session (rare, but possible on refresh + reject).
+    if (rejectedCodes.has(autoLinkedCandidate.code)) return undefined;
+    // Skip when we already auto-applied this exact code for the current
+    // response — guards against double-fires on re-render.
+    if (autoLinkedRef.current === autoLinkedCandidate.code) return undefined;
+    const timer = setTimeout(() => {
+      autoLinkedRef.current = autoLinkedCandidate.code;
+      handleAccept(autoLinkedCandidate);
+    }, AUTO_APPLY_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [autoApplyLinks, autoLinkedCandidate, rejectedCodes, handleAccept]);
 
   const handleToggleReranker = useCallback(() => {
     const next = !useReranker;
@@ -264,6 +312,37 @@ export function MatchSuggestionsPanel({
         hasAutoLink={Boolean(response?.auto_linked)}
         compact={compact}
       />
+
+      {/* Fallback hint: when the cascade fell through to monolingual
+          matching (no MUSE/IATE pair, no cache hit, LLM tier missing
+          or off), nudge the user to download a dictionary so future
+          matches go through a real translator.  Routes to the
+          Translation section of Project Settings via the #translation
+          deep-link added in Phase 3. */}
+      {response?.translation_used?.tier_used === 'fallback' && !compact && (
+        <div
+          className="flex items-start gap-2 px-3 py-2 border-b border-border-light bg-amber-50 text-amber-900 text-[11px] dark:bg-amber-900/20 dark:text-amber-200"
+          role="status"
+          data-testid="match-fallback-hint"
+        >
+          <Info size={11} className="mt-0.5 shrink-0" aria-hidden="true" />
+          <span className="flex-1">
+            {t('match.fallback_hint', {
+              defaultValue:
+                'Translation cascade fell back to monolingual matching.',
+            })}{' '}
+            <a
+              href={`/projects/${projectId}/settings#translation`}
+              className="font-medium text-oe-blue hover:underline"
+              data-testid="match-fallback-hint-link"
+            >
+              {t('match.fallback_hint_link', {
+                defaultValue: 'Download dictionary →',
+              })}
+            </a>
+          </span>
+        </div>
+      )}
 
       <div className="flex-1 min-h-0 overflow-y-auto">
         {isLoading && <SkeletonList compact={compact} />}
@@ -698,18 +777,26 @@ function ScoreBadge({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const boosts = Object.entries(candidate.boosts_applied);
+  const tooltipId = `match-boosts-tooltip-${candidate.code}`;
 
   return (
     <span
       className="relative inline-flex items-center"
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
-      onFocus={() => setOpen(true)}
-      onBlur={() => setOpen(false)}
     >
       <button
         type="button"
         aria-label={ariaLabel}
+        aria-describedby={open ? tooltipId : undefined}
+        aria-expanded={open}
+        // ``onClick`` toggles the popover so touch users (no hover, no
+        // ``onMouseEnter``) and screen-reader users still get the boost
+        // breakdown. ``onFocus``/``onBlur`` keep keyboard navigation
+        // working.
+        onClick={() => setOpen((prev) => !prev)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
         className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-surface-tertiary border border-border-light text-content-secondary"
         data-testid={`match-score-badge-${candidate.code}`}
       >
@@ -718,6 +805,7 @@ function ScoreBadge({
       </button>
       {open && (
         <div
+          id={tooltipId}
           role="tooltip"
           data-testid={`match-boosts-tooltip-${candidate.code}`}
           className="absolute right-0 top-full mt-1 z-10 min-w-[180px] rounded-md border border-border-light bg-surface-primary shadow-lg p-2 text-[10px]"

@@ -10,6 +10,15 @@ An Alembic migration (see ``alembic/versions/v280_translation_cache.py``)
 single-file layout (e.g. multi-tenant SaaS where every artefact must be
 backed up together). Both code paths use the same column names so a
 future merge is straightforward.
+
+In-process LRU
+==============
+Even with the SQLite cache, every translate() under concurrent match
+load issues an OS-level SELECT — for 50 walls of identical material in
+one batch that's 50 SELECTs on identical keys. We layer an in-process
+LRU cache on top so a single SELECT round-trip is amortised across
+the whole batch. The LRU is invalidated on every ``upsert()`` so a
+new translation written by one request is visible to the next one.
 """
 
 from __future__ import annotations
@@ -19,11 +28,100 @@ import datetime as dt
 import hashlib
 import logging
 import sqlite3
+import threading
+from collections import OrderedDict
 from typing import Any
 
 from app.core.translation.paths import cache_db_path
 
 logger = logging.getLogger(__name__)
+
+
+# ── In-process LRU on top of the SQLite cache ───────────────────────────
+#
+# Bounded by ``_LRU_MAXSIZE`` (~1k entries — a few MB at most for typical
+# construction-domain phrases). Each entry is the dict shape returned by
+# :meth:`TranslationCache.get` so the cache layer above can pretend it
+# came straight from SQLite. A ``None`` sentinel marks "looked up but
+# missed" so we don't re-query SQLite for a known cold key.
+#
+# Key shape ``(db_path, text_hash, src, tgt, domain)`` — the path prefix
+# is critical for test isolation: every pytest creates its own temp
+# SQLite file, but module-level state outlives the test, so without the
+# path two tests with identical ``(text, src, tgt, domain)`` would hand
+# each other stale rows from a long-deleted DB.
+_LRU_MAXSIZE = 1024
+_LRUKey = tuple[str, str, str, str, str]
+_lru: OrderedDict[_LRUKey, dict[str, Any] | None] = OrderedDict()
+# Reverse index ``row_id → key`` so ``mark_used`` (which only knows the
+# row id) can invalidate the matching LRU entry. Without this, a hit
+# that bumps ``usage_count`` in SQLite would still serve the stale
+# ``usage_count`` from the LRU on the next ``get()``.
+_lru_by_row_id: dict[int, _LRUKey] = {}
+_lru_lock = threading.Lock()
+
+
+def _lru_get(key: _LRUKey) -> tuple[bool, dict[str, Any] | None]:
+    """Return ``(hit, value)`` — caller distinguishes "miss" from "known None"."""
+    with _lru_lock:
+        if key not in _lru:
+            return False, None
+        value = _lru.pop(key)
+        _lru[key] = value
+        return True, value
+
+
+def _lru_put(key: _LRUKey, value: dict[str, Any] | None) -> None:
+    with _lru_lock:
+        if key in _lru:
+            old = _lru.pop(key)
+            if old and "id" in old:
+                _lru_by_row_id.pop(int(old["id"]), None)
+        _lru[key] = value
+        if value and "id" in value:
+            _lru_by_row_id[int(value["id"])] = key
+        while len(_lru) > _LRU_MAXSIZE:
+            _, evicted = _lru.popitem(last=False)
+            if evicted and "id" in evicted:
+                _lru_by_row_id.pop(int(evicted["id"]), None)
+
+
+def _lru_invalidate(key: _LRUKey | None = None) -> None:
+    """Drop one or all entries from the in-process LRU.
+
+    Called on every ``upsert()`` so a write is visible on the next
+    ``get()`` from any other coroutine — without this, a freshly cached
+    translation would be hidden by a stale ``None`` sentinel for as
+    long as the entry stayed in the LRU.
+    """
+    with _lru_lock:
+        if key is None:
+            _lru.clear()
+            _lru_by_row_id.clear()
+        else:
+            old = _lru.pop(key, None)
+            if old and "id" in old:
+                _lru_by_row_id.pop(int(old["id"]), None)
+
+
+def _lru_invalidate_by_row_id(row_id: int) -> None:
+    """Drop the LRU entry that points at ``row_id``.
+
+    ``mark_used`` only knows the row id, not the (text, src, tgt, domain)
+    tuple — without this hook, a usage_count bump would persist to
+    SQLite but stay invisible to subsequent ``get()`` calls served by
+    the LRU.
+    """
+    with _lru_lock:
+        key = _lru_by_row_id.pop(row_id, None)
+        if key is not None:
+            _lru.pop(key, None)
+
+
+def lru_stats() -> dict[str, int]:
+    """Stats for tests / observability."""
+    with _lru_lock:
+        return {"entries": len(_lru), "maxsize": _LRU_MAXSIZE}
 
 
 _SCHEMA = """
@@ -95,8 +193,18 @@ class TranslationCache:
     async def get(
         self, text: str, source_lang: str, target_lang: str, domain: str
     ) -> dict[str, Any] | None:
-        """Return cached row as a dict, or ``None`` if no hit."""
+        """Return cached row as a dict, or ``None`` if no hit.
+
+        Backed by an in-process LRU keyed on ``(text_hash, src, tgt,
+        domain)`` so 50 concurrent match requests with identical
+        envelopes do one SQLite SELECT, not 50.
+        """
         h = _hash(text)
+        key = (self._path, h, source_lang, target_lang, domain)
+
+        hit, cached = _lru_get(key)
+        if hit:
+            return cached
 
         def _do() -> dict[str, Any] | None:
             con = sqlite3.connect(self._path)
@@ -115,7 +223,9 @@ class TranslationCache:
             finally:
                 con.close()
 
-        return await self._run(_do)
+        result = await self._run(_do)
+        _lru_put(key, result)
+        return result
 
     async def upsert(
         self,
@@ -135,6 +245,7 @@ class TranslationCache:
         """
         h = _hash(text)
         now = _now_iso()
+        key = (self._path, h, source_lang, target_lang, domain)
 
         def _do() -> None:
             con = sqlite3.connect(self._path)
@@ -175,6 +286,10 @@ class TranslationCache:
                 con.close()
 
         await self._run(_do)
+        # Invalidate the LRU entry so the next ``get()`` reads the
+        # freshly written row instead of a stale "None" sentinel from
+        # a previous miss.
+        _lru_invalidate(key)
 
     async def mark_used(self, row_id: int) -> None:
         """Bump ``usage_count`` and refresh ``last_used_at`` on a hit."""
@@ -194,6 +309,10 @@ class TranslationCache:
                 con.close()
 
         await self._run(_do)
+        # Drop the LRU entry so the next ``get()`` reads the freshly
+        # bumped ``usage_count``/``last_used_at`` from SQLite instead
+        # of the row that was cached at insert time.
+        _lru_invalidate_by_row_id(int(row_id))
 
     async def stats(self) -> dict[str, Any]:
         """Return basic counts for the status endpoint."""

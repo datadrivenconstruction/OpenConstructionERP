@@ -237,6 +237,20 @@ class ProjectService:
         # Refresh the project object
         await self.session.refresh(project)
 
+        # If the region changed, drop it from the match-service region
+        # cache so the boost layer sees the new value on the very next
+        # match request — without this we'd carry stale region data for
+        # up to 60 s after the PATCH.
+        if "region" in fields:
+            try:
+                from app.core.match_service.region_cache import (
+                    clear_project_region_cache,
+                )
+
+                clear_project_region_cache(project_id)
+            except Exception:
+                pass
+
         await _safe_publish(
             "projects.project.updated",
             {
