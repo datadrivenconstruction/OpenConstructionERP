@@ -9,13 +9,13 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [▶ Watch the 12-min walkthrough](https://www.youtube.com/watch?v=X06cIaroAeI) · [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.6.10-green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.6.10)
+[![Version](https://img.shields.io/github/v/release/datadrivenconstruction/OpenConstructionERP?label=version&color=green)](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest)
 [![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=informational&label=pypi)](https://pypi.org/project/openconstructionerp/)
 [![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp)
 [![Stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&logo=github)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers)
 <br/>
 [![Last commit](https://img.shields.io/github/last-commit/datadrivenconstruction/OpenConstructionERP?color=informational)](https://github.com/datadrivenconstruction/OpenConstructionERP/commits/main)
-![Languages](https://img.shields.io/badge/languages-21-orange)
+![Languages](https://img.shields.io/badge/languages-24-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 
 <img src="docs/screenshots/hero-overview.jpg" alt="OpenConstructionERP — Dashboard Overview" width="800" />
@@ -26,7 +26,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 
 <sub>🎬 <b>1-minute teaser above</b> · for the full 12-minute walkthrough → <a href="https://www.youtube.com/watch?v=X06cIaroAeI"><b>watch on YouTube</b></a> · onboarding → BoQ → BIM → DWG → PDF → AI → dashboard</sub>
 
-*100% open source · 55,000+ cost items · AI estimation · 21 languages · Self-hosted*
+*100% open source · 55,000+ cost items · AI estimation · 24 languages · Self-hosted*
 
 </div>
 
@@ -134,46 +134,47 @@ Star OpenConstructionERP on GitHub and be instantly notified of new releases.
 
 ---
 
-## ✨ What's New in v2.0.0
+## ✨ What's New in v2.7.0
 
-The second stable release — shipped **April 20, 2026**. Supersedes the entire 1.x line.
+The latest stable release — shipped **May 3, 2026**. Rolls up 14 patch iterations (2.6.42 → 2.6.54) into one stable minor.
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-**🔧 Reliability**
-- AI Chat SSE streams survive middleware cancellation
-- AI API keys survive backend restarts (absolute-path `.env` loading, Fernet decryption gating)
-- DWG Takeoff respects DXF `$INSUNITS` end-to-end
-- BIM Linked-BOQ panel populates via new aggregate endpoint
-- 48 backend integration tests fixed — 61/61 green
+**🐛 Reliability**
+- CWICR catalog download fixed on stock Windows Python ([#104](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/104)) — `httpx` + `certifi` replaces `urllib`, kills `CERTIFICATE_VERIFY_FAILED`
+- Cost-DB cache invalidation wired through every import / clear path — newly imported regions appear instantly
+- Tasks board cards move between columns via optimistic update with rollback on PATCH fail
+- Cost-DB modal opens instantly: startup pre-warm, 60-min cache, idle-time prefetch
 
-**🧩 Module Developer Experience**
-- `MODULES.md` at repo root — single entry point
-- New in-app `/modules/developer-guide` page
-- **"+ Add module"** CTA in the sidebar
-- Covers backend Python + frontend React scaffolding
+**🌍 Internationalisation**
+- 24 UI languages now (added Croatian, Indonesian, Romanian, Thai, Vietnamese)
+- ~28 k translation keys covered across all locales
+- BOQ resource type chips translated × 21 locales
+- Privacy / Terms rewritten for self-hosted edition
 
 </td>
 <td width="50%" valign="top">
 
-**📊 CAD-BIM BI Explorer**
-- Renamed from *CAD-BIM Explorer*
-- KPI strip: Elements · Volume · Area · Length · Weight · Categories · Levels
-- Power-BI-style data bars in pivot cells
-- Slicers, saved views, drill-down from charts
+**🎨 BOQ & estimation**
+- Multi-variant resource picker — explicit modal for cost items with multiple independent variant slots (concrete grade × rebar × formwork)
+- Variant resources dedupe across modal · apply-time · render-time · summary layers
+- Violet **Variant** chip replaces cryptic *Materials* tag on variant rows
+- Bulk-fill chips (median / average / cheapest / priciest), per-row delta-vs-mean
+- RTL-correct layout, full keyboard navigation
 
 **✨ UX Polish**
-- Dashboard: Quick Start is now pure-navigation, explicit *New Estimate* button, Quality Score icon + click-through
-- About page: Artem Boiko avatar, DDC logo, full-width clickable book banner, LinkedIn / Telegram / X community block
-- Layered DDC provenance watermarks for copyright enforcement
+- BIM disk-usage chip moved to hover-tooltip (no more `data/bim/ 86.3 MB` cluttering project name)
+- QA-crawler bug sweep: 12 + 3 fixes from automated multi-locale crawl
+- Skeleton table in cost-DB modal results pane
+- "Add to: section" footer dropdown in cost-DB modal
 
 </td>
 </tr>
 </table>
 
-See the [full v2.0.0 changelog](CHANGELOG.md#200--2026-04-20) or the [v2.0.0 GitHub release](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.0.0).
+See the [full v2.7.0 changelog](CHANGELOG.md#270--2026-05-03) or the [v2.7.0 GitHub release](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/tag/v2.7.0).
 
 ---
 
