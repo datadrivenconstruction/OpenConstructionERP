@@ -5,6 +5,48 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0](https://github.com/datadrivenconstruction/OpenConstructionERP/compare/v2.6.11...v2.7.0) (2026-05-03)
+
+
+### Features
+
+* **boq:** formula engine — pos(), $VAR, if(), unit converters, cycle detection ([9990dbd](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/9990dbdf1aec307e43c0117e39a62bd6e1c31f85))
+* **boq:** resource type chips translated across all 21 locales ([362a7e9](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/362a7e904259429035dcf3828240d107ee6883b0))
+* **boq:** variant re-pick on resource rows + provenance markers ([37c6cb2](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/37c6cb23a0a5dd2feb3c796e0220a2b041aa0a4b))
+* **gaeb:** deep audit + 8 fixes — encoding, units, hierarchy, paragraphs, version ([7ca05df](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/7ca05df05672ecfa1ac3c519e46145ebb7a0eb0e))
+* v2.6.15 — provenance markers across exporters and runtime artifacts ([36a7753](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/36a7753ffe57404f187a39d1b9952603573f71be))
+* v2.6.16 — CWICR variants UI + RBAC [#101](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/101) fix + curated demos ([b98776f](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/b98776ff143f928fbae68f21b38b8ac9b4543dec))
+* v2.6.17 — BOQ unit catalogue + resource-row UX bundle ([9fbb08c](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/9fbb08c23fe1493e6cb1e8c410e847c377865373))
+* v2.6.18 — BOQ resource calc fix + position/resource alignment ([15c233c](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/15c233c7ccdaf4f52e8311e16009395141a85215))
+* v2.6.20 — IFC black fix + BOQ row alignment + resource formulas + Gemini 2.5 ([2421cf8](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/2421cf82e4b321143682b36fc09681f4aaded0fc)), closes [#103](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/103)
+* v2.6.21 — server-side custom-units + resource-name race fix ([136a439](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/136a4393786a7839cabff3e90ad78edb46e63a1d))
+* v2.6.22 — BIM viewer error visibility + DWG/DGN install fix + demo login fix ([5d6f85a](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/5d6f85a98a9b9d3a2d2c4e67d4fe4583cd1d77ea))
+* v2.6.23 — CWICR 30 regions + BIM converter health verify + variants polish + BOQ edit lag fix ([df61e04](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/df61e04fbdc068a7394e0449cb1de4f9630b3c8a))
+* v2.6.24 — RBAC fix unblocks BOQ position add + Phase A presets + Phase B variables ([a182c9f](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/a182c9f59e45c41ec69803e924b6440a93fc15d3))
+* v2.6.25 — per-resource CWICR variants + VariantPicker UX redesign ([44e0f66](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/44e0f66456b7345cf3838561c99feafa11ab6261))
+* v2.6.28 + BIM persistence redesign + CWICR translations ([0887ce3](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/0887ce3d7c2c76cfa23d0da7bded51f79df7feb7))
+
+
+### Bug Fixes
+
+* **boq:** variant picker currency falls back to region currency, not USD ([df2d6ed](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/df2d6ed1a8d7192c56092d2d2d82158262ee9a16))
+* restore useFxRatesStore (lost during rebase) ([1e9e56f](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/1e9e56f0fcf76752d300f21c37bc50ccd632d532))
+* v2.6.19 — resource name/qty alignment (remove double-padding from Inline*Input wrappers) ([eafff54](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/eafff5449e82ac053162bc068335ffe3ef8f2adf))
+* v2.6.26 — ton unit alias + region-key flags + converter panel dismiss ([089cdca](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/089cdca6d2e0f332a2ad046a535a51d02f7725ef))
+* v2.6.26 follow-up — kill the "first 2 letters of region" flag fallback ([8b7986a](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/8b7986ab7c95db65288408b9b7948a7dd09f21b2))
+* v2.6.27 — Windows-safe SVG flags + CWICR download diagnostics ([342df8c](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/342df8c4981bf52a0fcebe69d25803d2b68029a3))
+* **v2.6.29:** LANG-AUTODETECT + AUTO-PROJECT + DUAL-UPLOAD-PDF ([a0727dc](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/a0727dcc377841806341ab1c11599731c9a1fbea))
+
+
+### Documentation
+
+* **readme:** refresh badges + What's New for v2.7.0 ([b206ccb](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/b206ccbf368d9a2832481b5ef488b845e28e096e))
+
+
+### Miscellaneous
+
+* gitignore qa-report/ (qa-crawler local artifacts) ([1da829c](https://github.com/datadrivenconstruction/OpenConstructionERP/commit/1da829cb8931550b39c456b41a74e0a6668a8ee1))
+
 ## [2.7.0] — 2026-05-03
 
 **Stable release rolling up 14 patch iterations (2.6.41 → 2.7.0).** Single shipping artefact for all platforms (PyPI · git tag · VPS · GitHub release). All entries below — 2.6.42 through 2.6.54 — are part of this release; the per-version sections are kept for changelog continuity but ship as one tag.
