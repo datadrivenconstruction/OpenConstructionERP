@@ -1,0 +1,20 @@
+{
+  "_comment": "Initial zero baseline — populated on first clean run after the match service ships. CI compares against this and fails when current metrics drop > 5% absolute.",
+  "_updated": "2026-05-03",
+  "_match_service_version": "stub",
+  "mrr": 0.0,
+  "mrr.bim": 0.0,
+  "mrr.dwg": 0.0,
+  "mrr.pdf": 0.0,
+  "mrr.photo": 0.0,
+  "top_1_accuracy": 0.0,
+  "top_1_accuracy.bim": 0.0,
+  "top_1_accuracy.dwg": 0.0,
+  "top_1_accuracy.pdf": 0.0,
+  "top_1_accuracy.photo": 0.0,
+  "top_5_recall": 0.0,
+  "top_5_recall.bim": 0.0,
+  "top_5_recall.dwg": 0.0,
+  "top_5_recall.pdf": 0.0,
+  "top_5_recall.photo": 0.0
+}

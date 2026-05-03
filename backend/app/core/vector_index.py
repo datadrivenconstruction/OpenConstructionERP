@@ -82,6 +82,14 @@ COLLECTION_BIM_ELEMENTS = "oe_bim_elements"
 COLLECTION_VALIDATION = "oe_validation"
 COLLECTION_CHAT = "oe_chat"
 COLLECTION_REQUIREMENTS = "oe_requirements"
+# Cost catalog (CWICR / RSMeans / custom) — feeds the element→catalog
+# match feature.  Embeds with the multilingual-e5-small ``passage:``
+# prefix so cross-language recall stays high; queries are issued via
+# the cost adapter's ``search`` method which applies the matching
+# ``query:`` prefix before encoding.  Distinct from the legacy
+# ``cost_items`` LanceDB table (singular collection schema, all-MiniLM)
+# which is kept for backwards-compatibility with pre-built snapshots.
+COLLECTION_COSTS = "oe_cost_items"
 
 #: Ordered tuple used by :func:`unified_search` to fan out to every
 #: registered collection when the caller doesn't specify ``types``.
@@ -94,6 +102,7 @@ ALL_COLLECTIONS: tuple[str, ...] = (
     COLLECTION_REQUIREMENTS,
     COLLECTION_VALIDATION,
     COLLECTION_CHAT,
+    COLLECTION_COSTS,
 )
 
 #: Map collection name → human-readable module label.  Used by the
@@ -107,6 +116,7 @@ COLLECTION_LABELS: dict[str, str] = {
     COLLECTION_REQUIREMENTS: "Requirements",
     COLLECTION_VALIDATION: "Validation",
     COLLECTION_CHAT: "Chat",
+    COLLECTION_COSTS: "Cost Catalog",
 }
 
 

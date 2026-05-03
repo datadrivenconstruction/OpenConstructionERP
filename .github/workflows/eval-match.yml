@@ -1,0 +1,129 @@
+name: Eval — element-to-CWICR match quality
+
+# Runs the eval harness whenever the match service or its vector adapter
+# is touched, and nightly with the full LLM judge enabled (capped at
+# EVAL_AI_MAX_COST_USD).
+#
+# Quick mode (PRs): rule-based judge only, zero cost.
+# Nightly mode: real LLM judge, hard-capped USD spend.
+
+on:
+  pull_request:
+    paths:
+      - "backend/app/core/match_service/**"
+      - "backend/app/modules/costs/vector_adapter.py"
+      - "backend/tests/eval/**"
+  push:
+    branches: [main]
+    paths:
+      - "backend/app/core/match_service/**"
+      - "backend/app/modules/costs/vector_adapter.py"
+      - "backend/tests/eval/**"
+  schedule:
+    # Nightly at 03:17 UTC — odd minute to avoid GH cron stampede.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      use_llm_judge:
+        description: "Use the LLM judge (paid, capped by EVAL_AI_MAX_COST_USD)"
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  eval-quick:
+    # PR / push runs — rule-based judge, no LLM cost
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    name: Eval (rule-based judge, no LLM cost)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Create empty frontend dist (hatchling force-include)
+        run: |
+          mkdir -p ../frontend/dist
+          touch ../frontend/dist/.gitkeep
+
+      - name: Install backend with [dev,vector]
+        run: pip install -e ".[dev,vector]" pyyaml
+
+      - name: Run harness meta-tests
+        run: python -m pytest tests/eval/test_eval_harness.py -v
+
+      - name: Run eval (no-LLM mode) and compare to baseline
+        env:
+          EVAL_AI_MAX_COST_USD: "0.00"
+        run: |
+          python -m tests.eval.runner \
+            --golden tests/eval/golden_set.yaml \
+            --baseline tests/eval/baseline.json \
+            --out /tmp/eval-report.json \
+            --judge=false \
+            --threshold 0.05
+
+      - name: Upload eval report artefact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report-${{ github.run_id }}
+          path: /tmp/eval-report.json
+          if-no-files-found: ignore
+
+  eval-nightly-llm:
+    # Nightly + manual dispatch — full LLM judge, hard-capped USD spend.
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.use_llm_judge == true)
+    name: Eval nightly (LLM judge, capped)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Create empty frontend dist (hatchling force-include)
+        run: |
+          mkdir -p ../frontend/dist
+          touch ../frontend/dist/.gitkeep
+
+      - name: Install backend with [dev,vector]
+        run: pip install -e ".[dev,vector]" pyyaml
+
+      - name: Run eval with LLM judge
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          EVAL_AI_MAX_COST_USD: "2.00"
+        run: |
+          python -m tests.eval.runner \
+            --golden tests/eval/golden_set.yaml \
+            --baseline tests/eval/baseline.json \
+            --out /tmp/eval-report-nightly.json \
+            --judge=true \
+            --threshold 0.05
+
+      - name: Upload nightly eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report-nightly-${{ github.run_id }}
+          path: /tmp/eval-report-nightly.json
+          if-no-files-found: ignore

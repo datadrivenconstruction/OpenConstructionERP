@@ -5,6 +5,31 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.2] — 2026-05-03
+
+### Added — Phase 0 of vector match foundation (v2.8.0 prep)
+- **Cost-items vector adapter** — `oe_cost_items` LanceDB collection, multilingual-e5-small embeddings with passage:/query: prefixes, event-bus reindex on CRUD, gated `POST /api/v1/admin/cost-vector-reindex` endpoint, async startup backfill.
+- **Translation cascade service** — `app/core/translation/` with 4-tier (MUSE/IATE lookup → SQLite cache → LLM via ai_client → fallback), phrase-aware tokenization preserving construction codes (C30/37, IPE100), `POST /api/v1/translation/translate` + lookup-table download/status endpoints.
+- **MatchProjectSettings model** — per-project target_language / classifier (din276/nrm/masterformat/none) / auto_link_threshold / mode (manual/auto) / sources_enabled. Lazy-init on first GET, audit-logged updates.
+- **Match service core** — `app/core/match_service/` with universal envelope, ranker (translation → vector search → 4 boosts → auto-link gate), opt-in LLM reranker with cost cap, 4 source extractors (BIM + PDF functional, DWG + photo stubs marked for v2.8 follow-up), feedback loop. `POST /api/v1/match/element` + `POST /api/v1/match/feedback`.
+- **Eval harness** — `tests/eval/` with 30+ realistic golden-set entries, AI-as-judge with rule-based fallback, runner with metrics (top-1 acc, top-5 recall, MRR), `.github/workflows/eval-match.yml` CI workflow.
+
+### Security
+- **SSRF guard on IATE downloader** — host allowlist (iate.europa.eu / DDC mirrors / OE_IATE_EXTRA_HOSTS env var) + `follow_redirects=False`. Without this an authenticated user could pivot the backend to fetch cloud-metadata or internal services.
+- **Cross-user task leakage fixed** in `GET /api/v1/translation/lookup-tables/status` — now filters in-flight tasks by owner so users can't see each other's task ids / error strings (which can leak filesystem paths).
+
+### Fixed (verification pass)
+- **Region boost** for fully-qualified projects (e.g. `DE_BERLIN`) — was returning a bare string that iterated character-by-character; now returns exact code as a single-element tuple. Real ranking-quality regression for pinned-city projects.
+- **Sentinel UUID FK violation** in `match_element` — wraps `get_or_create_match_settings` in try/except with transient-defaults fallback so eval harness and stale callers no longer surface 500.
+- **`POST /api/v1/match/element` with bogus source** now 422 instead of 500 (Pydantic Literal validator on `source`).
+- **Classifier reverse-substring fallback** removed — `"33"` no longer matches `"330.10.020"`. Forward containment only, min 3 characters.
+- **Deterministic tie-breaking** in ranker — secondary sort key on `code` so auto-link winner is stable across reruns.
+- **`tests/unit/test_costs_vector_adapter.py`** — switched `del sys.modules; import_module` to `importlib.reload(...)` to avoid orphaning module references and breaking downstream monkeypatches.
+- **Alembic single-head** restored — translation-cache migration repointed onto `v2b1_compound_type_indexes`.
+
+### Tests
+- 194 Phase 0 tests added across unit / integration / eval / perf (118 baseline + 70 edge cases + 6 region regression).
+
 ## [2.7.1] — 2026-05-03
 
 ### Added — Pareto / ABC analysis on the resource summary (Issue #106)

@@ -559,3 +559,208 @@ class MilestoneResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+
+# ── Match-settings schemas (v2.8.0) ──────────────────────────────────────
+
+
+_LANGUAGE_CODE_RE = re.compile(r"^[A-Za-z]{2}$")
+
+
+def _validate_classifier(value: str) -> str:
+    """Reject classifier values not in the allow-list."""
+    from app.modules.projects.models import MATCH_ALLOWED_CLASSIFIERS
+
+    cleaned = value.strip().lower()
+    if cleaned not in MATCH_ALLOWED_CLASSIFIERS:
+        raise ValueError(
+            f"classifier must be one of {sorted(MATCH_ALLOWED_CLASSIFIERS)}; got '{value}'"
+        )
+    return cleaned
+
+
+def _validate_mode(value: str) -> str:
+    """Reject mode values outside ``manual``/``auto``."""
+    from app.modules.projects.models import MATCH_ALLOWED_MODES
+
+    cleaned = value.strip().lower()
+    if cleaned not in MATCH_ALLOWED_MODES:
+        raise ValueError(
+            f"mode must be one of {sorted(MATCH_ALLOWED_MODES)}; got '{value}'"
+        )
+    return cleaned
+
+
+def _clamp_threshold(value: float) -> float:
+    """Clamp ``auto_link_threshold`` into the [0.0, 1.0] range.
+
+    We clamp rather than reject to keep the UI forgiving — a slider that
+    drifts to 1.01 due to floating-point UI math should not 422.
+    """
+    if value < 0.0:
+        return 0.0
+    if value > 1.0:
+        return 1.0
+    return float(value)
+
+
+def _validate_sources(value: list[str]) -> list[str]:
+    """Validate ``sources_enabled`` entries against the allow-list.
+
+    Empty list is allowed (the user can disable every source explicitly).
+    Duplicates are silently de-duplicated; case-folded to lowercase.
+    """
+    from app.modules.projects.models import MATCH_ALLOWED_SOURCES
+
+    if not isinstance(value, list):
+        raise ValueError("sources_enabled must be a list of strings")
+    seen: set[str] = set()
+    cleaned: list[str] = []
+    for entry in value:
+        if not isinstance(entry, str):
+            raise ValueError("sources_enabled entries must be strings")
+        token = entry.strip().lower()
+        if not token:
+            continue
+        if token not in MATCH_ALLOWED_SOURCES:
+            raise ValueError(
+                f"sources_enabled: '{entry}' is not one of "
+                f"{sorted(MATCH_ALLOWED_SOURCES)}"
+            )
+        if token in seen:
+            continue
+        seen.add(token)
+        cleaned.append(token)
+    return cleaned
+
+
+def _validate_target_language(value: str) -> str:
+    """Validate ISO-639 two-letter language code (case-insensitive)."""
+    cleaned = value.strip().lower()
+    if not _LANGUAGE_CODE_RE.match(cleaned):
+        raise ValueError(
+            f"target_language must be a 2-letter ISO-639 code; got '{value}'"
+        )
+    return cleaned
+
+
+class MatchProjectSettingsBase(BaseModel):
+    """All match-settings fields with their canonical defaults.
+
+    Used as the canonical shape — both ``Read`` and the Update schema
+    derive their field set from this class so adding a new field stays
+    one edit instead of three.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    target_language: str = Field(
+        default="en",
+        min_length=2,
+        max_length=8,
+        description="ISO-639 two-letter target catalog language (e.g. 'de', 'bg', 'en').",
+    )
+    classifier: str = Field(
+        default="none",
+        description="Classification standard: 'none' (default), 'din276', 'nrm', 'masterformat'.",
+    )
+    auto_link_threshold: float = Field(
+        default=0.85,
+        ge=0.0,
+        le=1.0,
+        description="Confidence threshold (0.0-1.0). Above this auto-links when enabled.",
+    )
+    auto_link_enabled: bool = Field(
+        default=False,
+        description="Master toggle — false forces every match to manual confirmation.",
+    )
+    mode: str = Field(
+        default="manual",
+        description="'manual' (user confirms each match) or 'auto'.",
+    )
+    sources_enabled: list[str] = Field(
+        default_factory=lambda: ["bim", "pdf", "dwg", "photo"],
+        description="Subset of ['bim','pdf','dwg','photo'] — sources the matcher consumes.",
+    )
+
+    @field_validator("target_language", mode="after")
+    @classmethod
+    def _check_language(cls, v: str) -> str:
+        return _validate_target_language(v)
+
+    @field_validator("classifier", mode="after")
+    @classmethod
+    def _check_classifier(cls, v: str) -> str:
+        return _validate_classifier(v)
+
+    @field_validator("mode", mode="after")
+    @classmethod
+    def _check_mode(cls, v: str) -> str:
+        return _validate_mode(v)
+
+    @field_validator("auto_link_threshold", mode="after")
+    @classmethod
+    def _check_threshold(cls, v: float) -> float:
+        return _clamp_threshold(v)
+
+    @field_validator("sources_enabled", mode="after")
+    @classmethod
+    def _check_sources(cls, v: list[str]) -> list[str]:
+        return _validate_sources(v)
+
+
+class MatchProjectSettingsRead(BaseModel):
+    """Match settings as returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    target_language: str
+    classifier: str
+    auto_link_threshold: float
+    auto_link_enabled: bool
+    mode: str
+    sources_enabled: list[str] = Field(default_factory=list)
+    created_at: datetime
+    updated_at: datetime
+
+
+class MatchProjectSettingsUpdate(BaseModel):
+    """Partial update — every field optional for PATCH semantics."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    target_language: str | None = Field(
+        default=None, min_length=2, max_length=8,
+    )
+    classifier: str | None = None
+    auto_link_threshold: float | None = Field(default=None, ge=0.0, le=1.0)
+    auto_link_enabled: bool | None = None
+    mode: str | None = None
+    sources_enabled: list[str] | None = None
+
+    @field_validator("target_language", mode="after")
+    @classmethod
+    def _check_language(cls, v: str | None) -> str | None:
+        return None if v is None else _validate_target_language(v)
+
+    @field_validator("classifier", mode="after")
+    @classmethod
+    def _check_classifier(cls, v: str | None) -> str | None:
+        return None if v is None else _validate_classifier(v)
+
+    @field_validator("mode", mode="after")
+    @classmethod
+    def _check_mode(cls, v: str | None) -> str | None:
+        return None if v is None else _validate_mode(v)
+
+    @field_validator("auto_link_threshold", mode="after")
+    @classmethod
+    def _check_threshold(cls, v: float | None) -> float | None:
+        return None if v is None else _clamp_threshold(v)
+
+    @field_validator("sources_enabled", mode="after")
+    @classmethod
+    def _check_sources(cls, v: list[str] | None) -> list[str] | None:
+        return None if v is None else _validate_sources(v)

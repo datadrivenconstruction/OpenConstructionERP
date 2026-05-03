@@ -3,17 +3,34 @@
 """Project ORM models.
 
 Tables:
-    oe_projects_project    — construction estimation projects
-    oe_projects_wbs        — work breakdown structure nodes
-    oe_projects_milestone  — project milestones (payment, approval, handover)
+    oe_projects_project          — construction estimation projects
+    oe_projects_wbs              — work breakdown structure nodes
+    oe_projects_milestone        — project milestones (payment, approval, handover)
+    oe_projects_match_settings   — per-project element-to-CWICR auto-match settings
 """
 
 import uuid
 
-from sqlalchemy import JSON, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
+
+# ── Match-settings defaults (v2.8.0) ─────────────────────────────────────
+# Module-level constants so the model, schemas, service, and Alembic
+# migration all share a single source of truth — no magic numbers.
+MATCH_DEFAULT_TARGET_LANGUAGE: str = "en"
+MATCH_DEFAULT_CLASSIFIER: str = "none"
+MATCH_DEFAULT_AUTO_LINK_THRESHOLD: float = 0.85
+MATCH_DEFAULT_AUTO_LINK_ENABLED: bool = False
+MATCH_DEFAULT_MODE: str = "manual"
+MATCH_DEFAULT_SOURCES: tuple[str, ...] = ("bim", "pdf", "dwg", "photo")
+
+MATCH_ALLOWED_CLASSIFIERS: frozenset[str] = frozenset(
+    {"none", "din276", "nrm", "masterformat"},
+)
+MATCH_ALLOWED_MODES: frozenset[str] = frozenset({"manual", "auto"})
+MATCH_ALLOWED_SOURCES: frozenset[str] = frozenset(MATCH_DEFAULT_SOURCES)
 
 
 class Project(Base):
@@ -225,3 +242,87 @@ class ProjectMilestone(Base):
 
     def __repr__(self) -> str:
         return f"<ProjectMilestone {self.name} ({self.status})>"
+
+
+class MatchProjectSettings(Base):
+    """Per-project settings for the element-to-CWICR auto-match pipeline.
+
+    Captures the user's choices for the BIM/PDF/DWG/photo → catalog matcher:
+
+    * ``target_language`` — ISO-639 two-letter code of the CWICR catalog
+      slice to search against (e.g. ``de``, ``bg``, ``en``). Free-form so
+      newly seeded languages don't require a schema bump.
+    * ``classifier`` — optional classification standard the matcher should
+      bias towards (``din276`` / ``nrm`` / ``masterformat``) or ``none``
+      to skip classification altogether (per A4 decision).
+    * ``auto_link_threshold`` — float in ``[0.0, 1.0]``; matches with a
+      score above this are auto-linked (only when ``auto_link_enabled``).
+    * ``auto_link_enabled`` — master toggle. False forces every match to
+      go through human confirmation regardless of the threshold.
+    * ``mode`` — ``manual`` (default) or ``auto``. The user must opt in
+      to fully-automated linking.
+    * ``sources_enabled`` — JSON list, subset of
+      ``["bim", "pdf", "dwg", "photo"]``. Sources omitted from this list
+      are skipped by the matcher service.
+
+    One-to-one with :class:`Project` via the ``project_id`` unique FK.
+    Cascade-delete on the project mirrors the WBS/milestone behaviour:
+    when a project is hard-deleted its match settings go with it.
+    """
+
+    __tablename__ = "oe_projects_match_settings"
+    __table_args__ = (
+        UniqueConstraint(
+            "project_id",
+            name="uq_oe_projects_match_settings_project_id",
+        ),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    target_language: Mapped[str] = mapped_column(
+        String(8),
+        nullable=False,
+        default=MATCH_DEFAULT_TARGET_LANGUAGE,
+        server_default=MATCH_DEFAULT_TARGET_LANGUAGE,
+    )
+    classifier: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default=MATCH_DEFAULT_CLASSIFIER,
+        server_default=MATCH_DEFAULT_CLASSIFIER,
+    )
+    auto_link_threshold: Mapped[float] = mapped_column(
+        Float,
+        nullable=False,
+        default=MATCH_DEFAULT_AUTO_LINK_THRESHOLD,
+        server_default=str(MATCH_DEFAULT_AUTO_LINK_THRESHOLD),
+    )
+    auto_link_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=MATCH_DEFAULT_AUTO_LINK_ENABLED,
+        server_default="0",
+    )
+    mode: Mapped[str] = mapped_column(
+        String(16),
+        nullable=False,
+        default=MATCH_DEFAULT_MODE,
+        server_default=MATCH_DEFAULT_MODE,
+    )
+    sources_enabled: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=lambda: list(MATCH_DEFAULT_SOURCES),
+        server_default='["bim", "pdf", "dwg", "photo"]',
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<MatchProjectSettings project={self.project_id} "
+            f"mode={self.mode} classifier={self.classifier}>"
+        )

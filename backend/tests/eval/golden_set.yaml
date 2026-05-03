@@ -1,0 +1,476 @@
+# Golden ground-truth pairs for element-to-CWICR vector match evaluation.
+#
+# How to add a new entry
+# ----------------------
+# 1. Pick a unique ``id`` of the form ``<source>-NNN`` (bim, pdf, dwg, photo).
+# 2. Fill ``element_info`` with the realistic data the upstream pipeline
+#    would emit for that source. BIM elements come straight from the
+#    canonical-format ``properties`` + ``geometry`` dicts; PDF/DWG/photo
+#    rows mimic the OCR + CV pipeline output (``description`` text + a
+#    couple of derived dimensions).
+# 3. ``target_language`` is the locale the matcher should query CWICR
+#    in — usually ``de`` for DACH projects, ``en`` for international,
+#    ``ru`` for FSU. CWICR ships nine languages; pick the one your
+#    realistic project would target.
+# 4. ``classifier`` is the classification system the candidate must
+#    map to. Use ``din276`` for DACH cost groups, ``nrm`` for UK,
+#    ``masterformat`` for North America, or ``null`` for source-agnostic.
+# 5. ``ground_truth.cwicr_position_codes`` is a *list* — any of the
+#    listed codes counts as a correct top-1. The matcher returns the
+#    most-confident code; if it matches *any* entry in this list we
+#    score it as correct. Codes use the realistic DIN-276 hierarchical
+#    form ``KG.LL.PPP`` (cost group . level . position) that CWICR
+#    publishes in its DACH catalogue. The matching CWICR row IDs
+#    (e.g. ``KALI-RI-KALI-MERI_KAKAKAME``) are mirror-stored in the
+#    matcher's payload so this code-form is queryable.
+# 6. ``acceptable_cost_range_eur_per_m2`` (or ``_per_unit``) bounds the
+#    plausible unit-rate window. The judge uses this to detect a
+#    candidate that's "right code, absurd price" (a bad source row).
+#
+# 30+ realistic entries follow. Spread:
+#   * BIM   x10 — walls, slabs, columns, foundations, doors, windows,
+#                 HVAC duct, plumbing pipe, roof, insulation
+#   * PDF   x8  — paint, tiles, flooring, screed, MEP, finishing
+#   * DWG   x6  — partitions, structural steel, masonry, façade
+#   * photo x6  — site photos with ambiguous descriptions, rare materials
+#
+# Corner cases (multilingual, ambiguous, rare): photo-005, pdf-007, bim-010.
+
+# ── BIM (10 entries) ────────────────────────────────────────────────────────
+
+- id: bim-001
+  source: bim
+  element_info:
+    category: wall
+    material: "Concrete C30/37"
+    thickness_m: 0.24
+    height_m: 3.0
+    area_m2: 37.5
+    fire_rating: F90
+    language: en
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["330.10.020", "330.10.021", "330.10.022"]
+    acceptable_cost_range_eur_per_m2: [80, 200]
+
+- id: bim-002
+  source: bim
+  element_info:
+    category: wall
+    material: "Mauerwerk Kalksandstein KS 12-1.4"
+    thickness_m: 0.175
+    height_m: 2.75
+    area_m2: 28.0
+    language: de
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["331.20.010", "331.20.011"]
+    acceptable_cost_range_eur_per_m2: [55, 140]
+
+- id: bim-003
+  source: bim
+  element_info:
+    category: slab
+    material: "Reinforced concrete C25/30"
+    thickness_m: 0.20
+    area_m2: 85.0
+    volume_m3: 17.0
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["350.10.010", "350.10.011"]
+    acceptable_cost_range_eur_per_m2: [110, 240]
+
+- id: bim-004
+  source: bim
+  element_info:
+    category: foundation
+    material: "Strip foundation, concrete C20/25"
+    width_m: 0.60
+    depth_m: 0.80
+    length_m: 42.0
+    volume_m3: 20.16
+    language: en
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["322.10.010", "322.10.020"]
+    acceptable_cost_range_eur_per_unit: [180, 360]  # per m3
+
+- id: bim-005
+  source: bim
+  element_info:
+    category: column
+    material: "Reinforced concrete column C30/37"
+    cross_section_m: [0.30, 0.30]
+    height_m: 3.50
+    volume_m3: 0.315
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["340.10.010", "340.10.011"]
+    acceptable_cost_range_eur_per_unit: [220, 480]  # per m3
+
+- id: bim-006
+  source: bim
+  element_info:
+    category: door
+    material: "Solid wood interior door"
+    width_m: 0.90
+    height_m: 2.10
+    fire_rating: F30
+    quantity: 1
+    language: en
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["344.10.010", "344.10.020"]
+    acceptable_cost_range_eur_per_unit: [180, 700]
+
+- id: bim-007
+  source: bim
+  element_info:
+    category: window
+    material: "Triple-glazed aluminium window, Uw=0.9"
+    width_m: 1.20
+    height_m: 1.40
+    area_m2: 1.68
+    quantity: 1
+    language: en
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["334.10.010", "334.10.020"]
+    acceptable_cost_range_eur_per_m2: [350, 950]
+
+- id: bim-008
+  source: bim
+  element_info:
+    category: hvac_duct
+    material: "Galvanised steel rectangular duct"
+    cross_section_m: [0.40, 0.20]
+    length_m: 25.0
+    insulation: "Mineral wool 30 mm"
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["432.10.010", "432.10.020"]
+    acceptable_cost_range_eur_per_unit: [55, 180]  # per m
+
+- id: bim-009
+  source: bim
+  element_info:
+    category: pipe
+    material: "Copper potable water pipe DN20"
+    diameter_mm: 22
+    length_m: 38.0
+    insulation: "PE foam 13 mm"
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["411.10.010", "411.10.020"]
+    acceptable_cost_range_eur_per_unit: [18, 60]  # per m
+
+- id: bim-010
+  source: bim
+  element_info:
+    category: insulation
+    material: "Vakuumdämmpaneel VIP 20 mm"  # rare material — corner case
+    thickness_m: 0.020
+    area_m2: 32.0
+    thermal_conductivity_w_mk: 0.007
+    language: de
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["361.30.090", "361.30.091"]
+    acceptable_cost_range_eur_per_m2: [120, 380]
+
+# ── PDF (8 entries) ─────────────────────────────────────────────────────────
+
+- id: pdf-001
+  source: pdf
+  element_info:
+    description: "Wandanstrich Dispersionsfarbe weiß, 2 Anstriche"
+    unit: m2
+    quantity: 220.0
+    language: de
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["363.10.010", "363.10.020"]
+    acceptable_cost_range_eur_per_m2: [4, 18]
+
+- id: pdf-002
+  source: pdf
+  element_info:
+    description: "Wall tiles, ceramic, glazed, 30x60 cm, including adhesive and grout"
+    unit: m2
+    quantity: 65.0
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["363.20.010", "363.20.020"]
+    acceptable_cost_range_eur_per_m2: [38, 130]
+
+- id: pdf-003
+  source: pdf
+  element_info:
+    description: "Bodenbelag Linoleum 2.5 mm verklebt"
+    unit: m2
+    quantity: 110.0
+    language: de
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["352.40.010", "352.40.020"]
+    acceptable_cost_range_eur_per_m2: [28, 70]
+
+- id: pdf-004
+  source: pdf
+  element_info:
+    description: "Cement screed CT-C25-F4, thickness 60 mm, including reinforcement mesh"
+    unit: m2
+    quantity: 92.0
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["352.30.010", "352.30.020"]
+    acceptable_cost_range_eur_per_m2: [22, 55]
+
+- id: pdf-005
+  source: pdf
+  element_info:
+    description: "Electrical socket outlet, double, flush-mounted, including wiring"
+    unit: pcs
+    quantity: 24
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["445.10.010", "445.10.020"]
+    acceptable_cost_range_eur_per_unit: [28, 95]
+
+- id: pdf-006
+  source: pdf
+  element_info:
+    description: "Suspended gypsum ceiling, 12.5 mm, on metal sub-frame, including paint"
+    unit: m2
+    quantity: 75.0
+    language: en
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["353.10.010", "353.10.020"]
+    acceptable_cost_range_eur_per_m2: [42, 110]
+
+- id: pdf-007
+  source: pdf
+  element_info:
+    # Highly ambiguous — multiple plausible matches (sealant, gasket, EPDM)
+    description: "Dichtungsband selbstklebend"
+    unit: m
+    quantity: 180.0
+    language: de
+  target_language: de
+  classifier: null
+  ground_truth:
+    cwicr_position_codes: ["363.40.090", "363.40.091", "363.40.092"]
+    acceptable_cost_range_eur_per_unit: [1.5, 12]
+
+- id: pdf-008
+  source: pdf
+  element_info:
+    description: "Радиатор стальной панельный 22-500-1000, с подключением"
+    unit: pcs
+    quantity: 14
+    language: ru
+  target_language: ru
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["422.10.010", "422.10.020"]
+    acceptable_cost_range_eur_per_unit: [110, 320]
+
+# ── DWG (6 entries) ─────────────────────────────────────────────────────────
+
+- id: dwg-001
+  source: dwg
+  element_info:
+    description: "Drywall partition, double-sided 12.5 mm gypsum, 100 mm metal stud"
+    layer: "A-WALL-PRTN"
+    length_m: 18.5
+    height_m: 2.80
+    area_m2: 51.8
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["331.30.010", "331.30.020"]
+    acceptable_cost_range_eur_per_m2: [40, 95]
+
+- id: dwg-002
+  source: dwg
+  element_info:
+    description: "Structural steel beam IPE 240, S235JR"
+    layer: "S-BEAM"
+    length_m: 6.0
+    cross_section: "IPE240"
+    weight_kg_per_m: 30.7
+    language: en
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["340.20.010", "340.20.020"]
+    acceptable_cost_range_eur_per_unit: [3.2, 7.5]  # per kg fab+install
+
+- id: dwg-003
+  source: dwg
+  element_info:
+    description: "Brick masonry wall, clay brick NF, 240 mm thick, mortar M10"
+    layer: "A-WALL-MASN"
+    length_m: 22.4
+    height_m: 3.0
+    area_m2: 67.2
+    language: en
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["331.10.010", "331.10.020"]
+    acceptable_cost_range_eur_per_m2: [85, 180]
+
+- id: dwg-004
+  source: dwg
+  element_info:
+    description: "Aluminium curtain wall, structural glazing, U=1.4 W/m²K"
+    layer: "A-FACD-CURT"
+    area_m2: 145.0
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["334.20.010", "334.20.020"]
+    acceptable_cost_range_eur_per_m2: [620, 1450]
+
+- id: dwg-005
+  source: dwg
+  element_info:
+    description: "Reinforced concrete retaining wall, h=3.5 m, C30/37 with rebar BSt500S"
+    layer: "S-WALL-RETN"
+    length_m: 28.0
+    height_m: 3.50
+    thickness_m: 0.30
+    volume_m3: 29.4
+    language: en
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["322.20.010", "322.20.020"]
+    acceptable_cost_range_eur_per_unit: [320, 720]  # per m3
+
+- id: dwg-006
+  source: dwg
+  element_info:
+    description: "Bituminous roof waterproofing, 2-layer SBS membrane, with primer"
+    layer: "A-ROOF-WPRF"
+    area_m2: 320.0
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["362.10.010", "362.10.020"]
+    acceptable_cost_range_eur_per_m2: [22, 65]
+
+# ── Photo (6 entries) — site photos with CV-extracted descriptions ──────────
+
+- id: photo-001
+  source: photo
+  element_info:
+    description: "Cast-in-place concrete column visible, formwork stripped, ~30x30 cm"
+    cv_confidence: 0.78
+    estimated_quantity: 1
+    estimated_unit: pcs
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["340.10.010", "340.10.011"]
+    acceptable_cost_range_eur_per_unit: [220, 480]  # per m3
+
+- id: photo-002
+  source: photo
+  element_info:
+    description: "Exterior brick wall under construction, red clay brick visible"
+    cv_confidence: 0.82
+    estimated_area_m2: 12.0
+    language: en
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["331.10.010", "331.10.020"]
+    acceptable_cost_range_eur_per_m2: [85, 180]
+
+- id: photo-003
+  source: photo
+  element_info:
+    description: "Bathroom tiling in progress, ceramic floor tiles 30x30 cm"
+    cv_confidence: 0.71
+    estimated_area_m2: 6.5
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["352.50.010", "352.50.020"]
+    acceptable_cost_range_eur_per_m2: [38, 110]
+
+- id: photo-004
+  source: photo
+  element_info:
+    description: "HVAC ductwork visible above suspended ceiling, ~400x200 mm rectangular galvanised"
+    cv_confidence: 0.66
+    estimated_length_m: 8.0
+    language: en
+  target_language: en
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["432.10.010", "432.10.020"]
+    acceptable_cost_range_eur_per_unit: [55, 180]  # per m
+
+- id: photo-005
+  source: photo
+  element_info:
+    # Very ambiguous — could be many things
+    description: "Concrete element on site, possibly precast"
+    cv_confidence: 0.41
+    language: en
+  target_language: en
+  classifier: null
+  ground_truth:
+    cwicr_position_codes:
+      - "340.10.010"
+      - "340.10.011"
+      - "350.10.010"
+      - "350.10.011"
+      - "322.10.010"
+    acceptable_cost_range_eur_per_unit: [180, 720]
+
+- id: photo-006
+  source: photo
+  element_info:
+    # Rare material — natural slate roofing
+    description: "Natural slate roof tiles, hand-laid, traditional German rectangular pattern"
+    cv_confidence: 0.74
+    estimated_area_m2: 95.0
+    language: en
+  target_language: de
+  classifier: din276
+  ground_truth:
+    cwicr_position_codes: ["362.20.010", "362.20.020"]
+    acceptable_cost_range_eur_per_m2: [85, 230]

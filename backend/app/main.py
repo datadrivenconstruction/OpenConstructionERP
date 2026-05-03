@@ -172,6 +172,7 @@ async def _auto_backfill_vector_collections() -> None:
             COLLECTION_BIM_ELEMENTS,
             COLLECTION_BOQ,
             COLLECTION_CHAT,
+            COLLECTION_COSTS,
             COLLECTION_DOCUMENTS,
             COLLECTION_REQUIREMENTS,
             COLLECTION_RISKS,
@@ -352,6 +353,69 @@ async def _auto_backfill_vector_collections() -> None:
                 adapter,
                 options=options,
             )
+
+        # ── Cost catalog (oe_cost_items) ─────────────────────────────────
+        # The cost adapter needs the E5 ``passage:`` prefix at encode time
+        # so it can't go through ``reindex_collection`` (which uses the
+        # adapter's plain ``to_text``).  Run a dedicated delta pass that
+        # uses the cost-specific helper instead.
+        try:
+            import os as _os
+
+            from app.modules.costs import vector_adapter as _cost_vec
+            from app.modules.costs.events import (
+                _delta_reindex_all_active as _cost_reindex_active,
+            )
+            from app.modules.costs.models import CostItem as _CostItem
+
+            force_backfill = _os.environ.get(
+                "OE_COST_VECTOR_FORCE_BACKFILL", ""
+            ).strip() in ("1", "true", "True", "yes")
+
+            indexed_count = await _cost_vec.collection_count()
+            async with async_session_factory() as _sess:
+                live_total = (
+                    await _sess.execute(
+                        select(func.count())
+                        .select_from(_CostItem)
+                        .where(_CostItem.is_active.is_(True))
+                    )
+                ).scalar_one() or 0
+
+            if not live_total:
+                logger.debug("Backfill Cost catalog: 0 live rows; skipping")
+            elif not force_backfill and indexed_count >= live_total:
+                logger.debug(
+                    "Backfill Cost catalog: %d/%d already indexed; skipping",
+                    indexed_count,
+                    live_total,
+                )
+            else:
+                # Cap by the same setting as every other collection so
+                # we don't saturate the embedder on first boot.
+                if cap > 0 and live_total > cap:
+                    logger.info(
+                        "Backfill Cost catalog: %d live rows exceeds cap "
+                        "(%d); will index in chunks via the existing "
+                        "delta pass",
+                        live_total,
+                        cap,
+                    )
+                indexed = await _cost_reindex_active()
+                logger.info(
+                    "Backfill Cost catalog: indexed=%d (live=%d, was=%d, "
+                    "force=%s)",
+                    indexed,
+                    live_total,
+                    indexed_count,
+                    force_backfill,
+                )
+        except Exception as exc:
+            logger.debug("Backfill Cost catalog skipped: %s", exc)
+
+        # Sentinel — keeps imports above flagged as used by ruff F401 even
+        # if a future refactor drops one of the targeted collections.
+        _ = COLLECTION_COSTS
 
         logger.info("Vector auto-backfill pass complete")
     except Exception as exc:  # noqa: BLE001
@@ -843,6 +907,11 @@ def create_app() -> FastAPI:
     from app.core.sidebar_badges_router import router as sidebar_badges_router
 
     app.include_router(sidebar_badges_router)
+
+    # Translation service (element → catalog cross-lingual normalisation)
+    from app.core.translation.router import router as translation_router
+
+    app.include_router(translation_router, prefix="/api/v1")
 
     # Store startup time for uptime calculation
     _startup_time: float = time.time()
