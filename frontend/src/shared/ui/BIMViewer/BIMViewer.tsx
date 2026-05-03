@@ -9,6 +9,7 @@
 
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MatchSuggestionsPanel } from '@/features/match';
 import clsx from 'clsx';
 import {
   Home,
@@ -42,6 +43,7 @@ import {
   Tag,
   Settings,
   Camera,
+  Sparkles,
 } from 'lucide-react';
 import { fetchBIMElementProperties } from '@/features/bim/api';
 import { SceneManager } from './SceneManager';
@@ -459,7 +461,7 @@ export function BIMViewer({
   /** Keyboard shortcut overlay toggle (press ? to show). */
   const [showShortcuts, setShowShortcuts] = useState(false);
   /** Properties panel active tab. */
-  const [propsTab, setPropsTab] = useState<'key' | 'all' | 'links' | 'validation'>('key');
+  const [propsTab, setPropsTab] = useState<'key' | 'all' | 'links' | 'validation' | 'match'>('key');
   /** Parquet/DuckDB "all properties" expansion state. */
   const [parquetProps, setParquetProps] = useState<Record<string, unknown> | null>(null);
   const [parquetLoading, setParquetLoading] = useState(false);
@@ -2917,6 +2919,7 @@ export function BIMViewer({
               ['key', t('bim.tab_properties', { defaultValue: 'Properties' })] as const,
               ['links', t('bim.tab_links', { defaultValue: 'Links' })] as const,
               ['validation', t('bim.tab_check', { defaultValue: 'Check' })] as const,
+              ['match', t('bim.tab_match', { defaultValue: 'Match' })] as const,
             ]).map(([id, label]) => (
               <button
                 key={id}
@@ -2927,12 +2930,13 @@ export function BIMViewer({
                     handleFetchAllProperties();
                   }
                 }}
-                className={`flex-1 py-2 text-xs font-semibold transition-colors border-b-2 ${
+                className={`flex-1 py-2 text-xs font-semibold transition-colors border-b-2 inline-flex items-center justify-center gap-1 ${
                   propsTab === id
                     ? 'border-oe-blue text-oe-blue'
                     : 'border-transparent text-content-tertiary hover:text-content-secondary'
                 }`}
               >
+                {id === 'match' && <Sparkles size={11} />}
                 {label}
                 {id === 'links' && (selectedElement.boq_links?.length ?? 0) > 0 && (
                   <span className="ml-1 text-[10px] text-oe-blue">
@@ -3121,6 +3125,34 @@ export function BIMViewer({
                   </div>
                 )}
               </>
+            )}
+
+            {/* ── Tab: Match (CWICR vector matcher) ──────────────────
+                Suggests CWICR cost-positions for the selected element.
+                ``key={selectedElement.id}`` forces the panel to remount
+                on element switch so the autoFetch effect refires and
+                the per-element rejection accumulator doesn't leak. */}
+            {propsTab === 'match' && (
+              <div className="-mx-3 -mb-3 h-[420px]">
+                <MatchSuggestionsPanel
+                  key={selectedElement.id}
+                  source="bim"
+                  projectId={projectId}
+                  rawElementData={{
+                    id: selectedElement.id,
+                    element_type: selectedElement.element_type,
+                    name: selectedElement.name,
+                    properties:
+                      (selectedElement as { properties?: Record<string, unknown> })
+                        .properties ?? {},
+                    quantities:
+                      (selectedElement as { quantities?: Record<string, number> })
+                        .quantities ?? {},
+                  }}
+                  autoFetch
+                  compact
+                />
+              </div>
             )}
 
             {/* ── Tab: Links ──────────────────────────────────────── */}

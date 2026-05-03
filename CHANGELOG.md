@@ -5,6 +5,20 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.7] — 2026-05-03
+
+### Fixed — Match tab now lives in the Element Inspector users actually see
+Phase 4 mounted the Match panel into a separate `BIMRightPanelTabs` component (Properties/Layers/Tools/Groups/Match) that only opens when the user explicitly toggles the "Linked BOQ" button in the BIM toolbar. Visual QA confirmed real users never get there: when they click an element, the auto-opening **Element Inspector** (Properties/Links/Check, inside `BIMViewer.tsx`) is what they expect to see — and Match was missing from it.
+
+- **Added a 4th "Match ✨" tab** directly inside the Element Inspector right next to Properties/Links/Check. The instant a user picks a BIM element, the inspector pops up with all four tabs and the Match panel is one click away — no Linked-BOQ toggle, no separate panel to discover.
+- The standalone `BIMRightPanelTabs` keeps its Match tab too — the two surfaces are now consistent (anywhere the user is, Match is visible) so we don't have to choose one path.
+- Panel renders with `compact` mode and remounts on `selectedElement.id` change so the per-element rejection accumulator never leaks across selections.
+
+### Verified
+- 40/40 frontend tests still pass; backend untouched.
+- TS strict clean (`tsc --noEmit` exit 0).
+- Vite HMR confirmed serving the updated `BIMViewer.tsx` with the new tab + Match panel imports.
+
 ## [2.7.6] — 2026-05-03
 
 ### Fixed — Match tab now reachable via standard click flow (browser-verified)
