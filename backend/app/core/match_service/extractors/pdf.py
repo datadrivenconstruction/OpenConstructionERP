@@ -16,7 +16,31 @@ from __future__ import annotations
 from typing import Any
 
 from app.core.match_service.envelope import ElementEnvelope
-from app.core.match_service.extractors._helpers import build_envelope_base
+from app.core.match_service.extractors._helpers import (
+    build_envelope_base,
+    extract_classifier_hint,
+)
+from app.modules.cad.classification_mapper import (
+    enrich_classification,
+    get_supported_standards,
+)
+
+
+def _auto_classifier_hint_from_category(category: str) -> dict[str, str] | None:
+    """Coarse classifier hint from category alone (no material).
+
+    Useful for PDF takeoff and DWG layer-derived elements where the
+    material is rarely surfaced in the raw row. Falls back to ``None``
+    when even the coarse map has no entry.
+    """
+    if not category:
+        return None
+    out: dict[str, str] = {}
+    for standard in get_supported_standards():
+        code = enrich_classification(category, standard=standard)
+        if code:
+            out[standard] = code
+    return out or None
 
 
 def _quantities_from_takeoff(raw: dict[str, Any]) -> dict[str, float]:
@@ -72,10 +96,20 @@ def _quantities_from_takeoff(raw: dict[str, Any]) -> dict[str, float]:
 
 
 def extract(raw: dict[str, Any]) -> ElementEnvelope:
-    """Build an :class:`ElementEnvelope` from a takeoff/PDF element dict."""
+    """Build an :class:`ElementEnvelope` from a takeoff/PDF element dict.
+
+    PDF takeoff rarely surfaces a structured material — we only have a
+    free-form description. So we hint at classification using the
+    category alone (coarse 3-digit DIN / 1-2-segment NRM / 6-digit
+    MasterFormat) when an upstream ``classification`` is missing.
+    """
     description = str(raw.get("description") or raw.get("annotation") or "").strip()
     category = str(raw.get("category") or raw.get("type") or "").strip()
     unit_hint = str(raw.get("unit") or raw.get("measurement_unit") or "").strip() or None
+
+    classifier_hint = extract_classifier_hint(raw)
+    if classifier_hint is None:
+        classifier_hint = _auto_classifier_hint_from_category(category)
 
     return build_envelope_base(
         source="pdf",
@@ -91,4 +125,5 @@ def extract(raw: dict[str, Any]) -> ElementEnvelope:
         },
         quantities=_quantities_from_takeoff(raw),
         unit_hint=unit_hint,
+        classifier_hint=classifier_hint,
     )

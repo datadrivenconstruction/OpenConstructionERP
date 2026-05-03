@@ -25,8 +25,42 @@ from typing import Any
 from app.core.match_service.envelope import ElementEnvelope
 from app.core.match_service.extractors._helpers import (
     build_envelope_base,
+    extract_classifier_hint,
     extract_quantities,
 )
+from app.modules.cad.classification_mapper import (
+    enrich_classification,
+    get_supported_standards,
+)
+
+
+def _auto_classifier_hint(
+    raw: dict[str, Any],
+    properties: dict[str, Any],
+) -> dict[str, str] | None:
+    """Build a ``{din276/nrm/masterformat}`` hint from category + material.
+
+    Falls through to ``None`` when the category isn't recognised by any
+    of the coarse maps. We always populate all three standards (when a
+    code is available) so the matcher's classifier boost picks up the
+    one selected via ``settings.classifier`` without re-running.
+    """
+    category = str(raw.get("category") or "").strip()
+    if not category:
+        return None
+    material = properties.get("material")
+    fire_rating = properties.get("fire_rating")
+    out: dict[str, str] = {}
+    for standard in get_supported_standards():
+        code = enrich_classification(
+            category,
+            material=str(material) if material else None,
+            fire_rating=str(fire_rating) if fire_rating else None,
+            standard=standard,
+        )
+        if code:
+            out[standard] = code
+    return out or None
 
 
 def _synthesise_description(raw: dict[str, Any]) -> str:
@@ -73,9 +107,24 @@ def _synthesise_description(raw: dict[str, Any]) -> str:
 
 
 def extract(raw: dict[str, Any]) -> ElementEnvelope:
-    """Build an :class:`ElementEnvelope` for a BIM canonical-format element."""
+    """Build an :class:`ElementEnvelope` for a BIM canonical-format element.
+
+    When the raw dict already carries a ``classification`` block (legacy
+    BIM imports that ran through DDC's ``cad2data`` enricher), we honour
+    it as-is. When it doesn't, we synthesise a hint from category +
+    material via :func:`enrich_classification` so the matcher's
+    classifier boost has something to anchor on for fresh imports.
+    """
     properties = raw.get("properties") if isinstance(raw.get("properties"), dict) else {}
     description = _synthesise_description(raw)
+
+    # Prefer an explicit classification block on the raw dict (existing
+    # behaviour); fall back to the material-aware auto-hint only when no
+    # classification was supplied upstream.
+    classifier_hint = extract_classifier_hint(raw)
+    if classifier_hint is None:
+        classifier_hint = _auto_classifier_hint(raw, properties)
+
     return build_envelope_base(
         source="bim",
         raw=raw,
@@ -84,4 +133,5 @@ def extract(raw: dict[str, Any]) -> ElementEnvelope:
         source_lang=str(raw.get("language") or properties.get("language") or "en"),
         properties=dict(properties),
         quantities=extract_quantities(raw),
+        classifier_hint=classifier_hint,
     )

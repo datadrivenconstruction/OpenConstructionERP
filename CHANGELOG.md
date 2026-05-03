@@ -5,6 +5,13 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.3] — 2026-05-03
+
+### Added — Phase 1 of vector match: material-aware classification enrichment
+- **`enrich_classification(category, material, fire_rating, structural)`** in `app/modules/cad/classification_mapper.py` — DE/EN material synonym folding (Beton/Stahlbeton/concrete; Ziegel/Mauerwerk/brick; Holz/timber/wood; Stahl/steel; Trockenbau/Gipskarton/drywall; aluminium; glass) + deeper DIN276 / NRM / MasterFormat codes when material is known. Falls back to coarse 3-digit DIN code when the material is proprietary/unknown. Codes aligned with the golden-set fixture so the matcher's classifier boost can fire on real CWICR rows.
+- **BIM / PDF / DWG extractors auto-derive `classifier_hint`** — when raw imported data has no `classification` block, the extractor calls `enrich_classification` for all three standards and the matcher's `classifier_match` boost rewards the right CWICR position. Pre-classified imports keep their existing codes — no override.
+- **77 new tests** (61 unit + 16 integration). 2666 other unit tests still pass, no regressions.
+
 ## [2.7.2] — 2026-05-03
 
 ### Added — Phase 0 of vector match foundation (v2.8.0 prep)

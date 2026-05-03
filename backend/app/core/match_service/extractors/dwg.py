@@ -19,7 +19,31 @@ from __future__ import annotations
 from typing import Any
 
 from app.core.match_service.envelope import ElementEnvelope
-from app.core.match_service.extractors._helpers import build_envelope_base
+from app.core.match_service.extractors._helpers import (
+    build_envelope_base,
+    extract_classifier_hint,
+)
+from app.modules.cad.classification_mapper import (
+    enrich_classification,
+    get_supported_standards,
+)
+
+
+def _auto_classifier_hint_from_category(category: str) -> dict[str, str] | None:
+    """Coarse classifier hint from category alone (no material).
+
+    DWG layer parsing produces a category but no material; we still
+    return a useful coarse hint so the matcher's classifier boost can
+    differentiate (e.g.) "wall" candidates from "duct" candidates.
+    """
+    if not category:
+        return None
+    out: dict[str, str] = {}
+    for standard in get_supported_standards():
+        code = enrich_classification(category, standard=standard)
+        if code:
+            out[standard] = code
+    return out or None
 
 
 def _category_from_layer(layer: str) -> str:
@@ -71,6 +95,10 @@ def extract(raw: dict[str, Any]) -> ElementEnvelope:
         if key in raw and raw[key] not in (None, ""):
             properties[key] = raw[key]
 
+    classifier_hint = extract_classifier_hint(raw)
+    if classifier_hint is None:
+        classifier_hint = _auto_classifier_hint_from_category(category)
+
     return build_envelope_base(
         source="dwg",
         raw=raw,
@@ -78,4 +106,5 @@ def extract(raw: dict[str, Any]) -> ElementEnvelope:
         category=category,
         source_lang=str(raw.get("language") or "en"),
         properties=properties,
+        classifier_hint=classifier_hint,
     )
