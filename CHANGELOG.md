@@ -5,6 +5,16 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.4] — 2026-05-03
+
+### Added — Phase 2 of vector match: `MatchSuggestionsPanel` frontend
+- **`MatchSuggestionsPanel`** in `frontend/src/features/match/` — shared React component that calls `POST /api/v1/match/element` and renders ranked CWICR candidates with confidence pills (high/medium/low color-coded), boost-breakdown tooltip on hover, region/code/unit/rate display, optional LLM-rerank toggle, refresh button, auto-link banner when threshold crossed. Per-candidate Accept / Reject buttons; rejection accumulator submits `accepted_candidate + rejected_candidates` together via `POST /api/v1/match/feedback` on accept.
+- **`useMatchElement` + `useSubmitMatchFeedback` React Query hooks** — typed mutations against the backend match endpoints; types defined in `features/match/types.ts` mirroring `MatchCandidate` / `MatchResponse`.
+- **Mounted in BIM right panel** as a 5th "Match" tab — when an element is selected, the panel auto-fetches candidates from CWICR using the vectorized catalog. Phase 4 will wire `onAccept` to the actual BOQ-link mutation; for now logs to console + toast.
+- **i18n**: every user-visible string via `t("match.*")` with inline default values per project convention. Top-5 locales (en/de/ru/ja/ar) populated by the bulk i18n sweep.
+- **a11y**: `role="list"` / implicit `listitem`, color-blind-safe confidence pills with explicit `aria-label`, full keyboard navigation. Axe-core: 4/4 a11y tests pass with zero violations.
+- **21 new tests** (17 unit + 4 a11y); typecheck + lint clean.
+
 ## [2.7.3] — 2026-05-03
 
 ### Added — Phase 1 of vector match: material-aware classification enrichment

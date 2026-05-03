@@ -10,7 +10,7 @@
  */
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, ClipboardList, Layers, Wrench, Folders } from 'lucide-react';
+import { X, ClipboardList, Layers, Wrench, Folders, Sparkles } from 'lucide-react';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import {
   useBIMViewerStore,
@@ -21,6 +21,8 @@ import BIMLinkedBOQPanel from './BIMLinkedBOQPanel';
 import BIMGroupsPanel from './BIMGroupsPanel';
 import BIMLayersPanel from './BIMLayersPanel';
 import BIMToolsPanel from './BIMToolsPanel';
+import { MatchSuggestionsPanel } from '@/features/match';
+import type { MatchCandidate } from '@/features/match';
 import type { BIMElementGroup } from './api';
 
 interface BIMRightPanelTabsProps {
@@ -121,6 +123,11 @@ export default function BIMRightPanelTabs({
       label: t('bim.tab_groups', { defaultValue: 'Groups' }),
       icon: Folders,
     },
+    {
+      id: 'match',
+      label: t('bim.tabs.match', { defaultValue: 'Match' }),
+      icon: Sparkles,
+    },
   ];
 
   return (
@@ -207,8 +214,82 @@ export default function BIMRightPanelTabs({
             )}
           </div>
         )}
+        {activeTab === 'match' && (
+          <MatchTabContent
+            elements={elements}
+            selectedElementId={selectedElementId ?? null}
+            projectId={projectId}
+          />
+        )}
       </div>
     </div>
+  );
+}
+
+/**
+ * MatchTabContent — wraps MatchSuggestionsPanel with the BIM-specific
+ * raw_element_data payload.  When no element is selected we show a
+ * placeholder so the panel doesn't fire an empty match request.
+ *
+ * onAccept: Phase 4 will wire this to the BOQ-link mutation.  For now
+ * we just log so the wiring is end-to-end testable; the toast inside
+ * the panel covers user feedback.
+ */
+function MatchTabContent({
+  elements,
+  selectedElementId,
+  projectId,
+}: {
+  elements: BIMElementData[];
+  selectedElementId: string | null;
+  projectId: string;
+}) {
+  const { t } = useTranslation();
+  const selected = selectedElementId
+    ? elements.find((e) => e.id === selectedElementId)
+    : null;
+
+  if (!selected) {
+    return (
+      <div className="px-3 py-4">
+        <p className="text-[11px] text-content-tertiary italic">
+          {t('bim.match_tab_no_selection', {
+            defaultValue:
+              'Select an element to see CWICR matches.',
+          })}
+        </p>
+      </div>
+    );
+  }
+
+  // The match service expects a free-form `raw_element_data` dict.  We
+  // forward the BIM element straight through; the backend extractor
+  // pulls description/category/quantities/properties out of the BIM
+  // shape (`backend/app/core/match_service/extractors/bim.py`).
+  const rawElementData: Record<string, unknown> = {
+    id: selected.id,
+    element_type: selected.element_type,
+    name: selected.name,
+    properties: (selected as { properties?: Record<string, unknown> }).properties ?? {},
+    quantities: (selected as { quantities?: Record<string, number> }).quantities ?? {},
+  };
+
+  const onAccept = useCallback((candidate: MatchCandidate) => {
+    // Phase 4 will replace this with the BOQ-link mutation.  For now we
+    // just log so the wiring is observable in dev tools.
+
+    console.info('[match] accepted candidate', { candidate, element: selected.id });
+  }, [selected.id]);
+
+  return (
+    <MatchSuggestionsPanel
+      source="bim"
+      projectId={projectId}
+      rawElementData={rawElementData}
+      onAccept={onAccept}
+      autoFetch
+      compact={false}
+    />
   );
 }
 

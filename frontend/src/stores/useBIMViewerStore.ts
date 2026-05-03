@@ -7,7 +7,12 @@
  */
 import { create } from 'zustand';
 
-export type BIMRightPanelTab = 'properties' | 'layers' | 'tools' | 'groups';
+export type BIMRightPanelTab =
+  | 'properties'
+  | 'layers'
+  | 'tools'
+  | 'groups'
+  | 'match';
 
 const ASSET_CARD_KEY = 'oe_bim_asset_card_enabled';
 
