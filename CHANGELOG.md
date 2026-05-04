@@ -5,6 +5,11 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.6] — 2026-05-04
+
+### Fixed
+- Registration form now shows a clear "Account created. An administrator needs to activate it" message when the server returns `is_active=false` (gated registration mode). Previously the form auto-attempted login, hit the same generic 401, and dumped users at /login with no idea what went wrong.
+
 ## [2.8.5] — 2026-05-04
 
 ### Fixed

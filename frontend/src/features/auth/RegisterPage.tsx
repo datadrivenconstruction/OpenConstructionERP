@@ -76,6 +76,24 @@ export function RegisterPage() {
         return;
       }
 
+      // The registration endpoint returns the user record. In gated modes
+      // (admin-approve / email-verify) the new account comes back with
+      // is_active=false and the immediate login attempt 401s with the
+      // same generic "Invalid email or password" used for bad creds, so
+      // without this branch users get a confusing dead-end. Surface a
+      // clear pending-activation message instead.
+      const regBody = await regRes.json().catch(() => null);
+      if (regBody && regBody.is_active === false) {
+        setError(
+          t(
+            'auth.registration_pending_activation',
+            'Account created. An administrator needs to activate it before you can log in. ' +
+              'For local installs, set OE_REGISTRATION_MODE=open in your .env to skip this step.',
+          ),
+        );
+        return;
+      }
+
       const loginRes = await fetch('/api/v1/users/auth/login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
