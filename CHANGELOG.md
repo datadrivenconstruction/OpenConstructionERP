@@ -5,6 +5,24 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.3] — 2026-05-04
+
+### Fixed — Catalogue load now populates BOTH cost layers
+- `/setup/databases` only called `/v1/costs/load-cwicr/` and silently skipped `/v1/catalog/import/`. Sidebar shows both "Cost Database" and "Resource Catalog" — they're separate tables (`oe_costs_item` vs `oe_catalog_resource`) — but only the first got data. Users saw the success toast, navigated to "Resource Catalog", found it empty, and concluded the load had failed.
+- `handleLoadRegion` and `handleLoadAll` now `Promise.all` both endpoints. Catalog import is best-effort (some regions ship only the cost layer). Single combined toast: "X cost items · Y catalog resources" with 8 s duration.
+- Both `['costs']` and `['catalog']` query keys invalidated on success.
+
+### Added — Deep links from setup → DB browsers
+- Region cards now show inline `View cost items →` and `View resources →` after load, linking to `/costs?region=<id>` and `/catalog?region=<id>`.
+- `CostsPage` and `CatalogPage` read the `?region=` URL parameter on mount, pre-select the filter, then strip the param so reloads don't re-force it.
+- `/setup/databases?vectorize=<id>` deep-link from the Match panel scrolls to the targeted card with a 2.4 s blue ring + hint toast.
+
+### Improved
+- Match panel catalogue picker: replaced mouse-only `onMouseLeave` with proper pointerdown-outside + `Escape` handlers, plus `role="listbox"` + `aria-label`. Touch and keyboard users no longer end up with a stuck dropdown.
+
+### Tests
+- 5 new unit tests for `_looks_like_fixture` heuristic (TEST- prefix, A001-style codes, canned descriptions, real CWICR pass-through, missing-code edge case) + cache reset.
+
 ## [2.8.2] — 2026-05-04
 
 ### Added — Per-project CWICR catalogue binding for the matcher

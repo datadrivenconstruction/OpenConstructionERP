@@ -640,11 +640,33 @@ function CatalogBindingBar({
   const queryClient = useQueryClient();
   const [picking, setPicking] = useState(false);
   const [saving, setSaving] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const { data: loaded = [] } = useQuery<LoadedDatabase[]>({
     queryKey: ['costs', 'loaded-databases'],
     queryFn: listLoadedDatabases,
     staleTime: 30_000,
   });
+
+  // Close the picker on Escape or any pointerdown outside the bar — the
+  // earlier ``onMouseLeave`` only handled mouse movement away and left
+  // tab/touch users with a stuck dropdown.
+  useEffect(() => {
+    if (!picking) return;
+    const onPointerDown = (e: globalThis.PointerEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) {
+        setPicking(false);
+      }
+    };
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key === 'Escape') setPicking(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [picking]);
 
   const handlePick = useCallback(
     async (id: string | null) => {
@@ -684,6 +706,7 @@ function CatalogBindingBar({
 
   return (
     <div
+      ref={containerRef}
       className={clsx(
         'relative flex items-center gap-2 px-3 border-b border-border-light bg-surface-tertiary',
         compact ? 'py-1' : 'py-1.5',
@@ -734,7 +757,10 @@ function CatalogBindingBar({
         <div
           className="absolute top-full right-3 mt-1 z-30 w-64 max-w-xs rounded border border-border-light bg-surface shadow-lg p-1"
           data-testid="match-catalog-picker"
-          onMouseLeave={() => setPicking(false)}
+          role="listbox"
+          aria-label={t('match.catalog_picker_aria', {
+            defaultValue: 'Pick a CWICR catalogue',
+          })}
         >
           {loaded.length === 0 ? (
             <div className="text-[11px] text-content-secondary px-2 py-2">

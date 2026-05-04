@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Database,
   Loader2,
@@ -160,6 +160,7 @@ function RegionCard({
 
   return (
     <div
+      data-region={db.id}
       className={`
         relative flex flex-col rounded-xl border transition-all duration-normal ease-oe
         ${
@@ -219,6 +220,29 @@ function RegionCard({
           <Loader2 size={16} className="animate-spin text-oe-blue shrink-0" />
         )}
       </button>
+      {status === 'loaded' && (
+        <div className="flex items-center gap-2 px-3.5 pb-2 pt-0">
+          <Link
+            to={`/costs?region=${db.id}`}
+            className="text-2xs text-oe-blue hover:underline font-medium"
+            data-testid={`region-view-costs-${db.id}`}
+          >
+            {t('setup.view_in_costs', {
+              defaultValue: 'View cost items →',
+            })}
+          </Link>
+          <span className="text-2xs text-content-quaternary">·</span>
+          <Link
+            to={`/catalog?region=${db.id}`}
+            className="text-2xs text-oe-blue hover:underline font-medium"
+            data-testid={`region-view-catalog-${db.id}`}
+          >
+            {t('setup.view_in_catalog', {
+              defaultValue: 'View resources →',
+            })}
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
@@ -307,6 +331,7 @@ export function DatabaseSetupPage() {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // ── Database status tracking ──
   const [dbStatuses, setDbStatuses] = useState<Record<string, CardStatus>>(() => {
@@ -356,7 +381,57 @@ export function DatabaseSetupPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [regionStats]);
 
+  // Deep-link from the Match panel: ``?vectorize=DE_BERLIN`` scrolls to
+  // the targeted region card and surfaces a hint toast. We intentionally
+  // do NOT auto-trigger the load — auto-actions on URL params are jarring
+  // when the user lands here from a stale tab. The toast points at the
+  // load button so the action is one obvious click away.
+  useEffect(() => {
+    const target = searchParams.get('vectorize');
+    if (!target) return;
+    const known = CWICR_DATABASES.find((d) => d.id === target);
+    if (!known) return;
+    const node = document.querySelector(`[data-region="${target}"]`);
+    if (node) {
+      node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      node.classList.add('ring-2', 'ring-oe-blue', 'ring-offset-2');
+      window.setTimeout(() => {
+        node.classList.remove('ring-2', 'ring-oe-blue', 'ring-offset-2');
+      }, 2400);
+    }
+    const isLoaded = (regionStats ?? []).some((r) => r.region === target && r.count > 0);
+    addToast({
+      type: 'info',
+      title: t('setup.vectorize_target_title', {
+        defaultValue: `Click "${known.name}" to vectorise`,
+        catalog: known.name,
+      }),
+      message: isLoaded
+        ? t('setup.vectorize_already_loaded', {
+            defaultValue:
+              'Catalogue already loaded — click the card to refresh and (re)build vectors.',
+          })
+        : t('setup.vectorize_not_loaded', {
+            defaultValue:
+              'Catalogue not yet loaded — click the card to load and build vectors.',
+          }),
+    });
+    // Clear the param so reloading the page doesn't re-toast.
+    searchParams.delete('vectorize');
+    setSearchParams(searchParams, { replace: true });
+  // Intentionally one-shot: only on mount with the initial regionStats.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Load a single region ──
+  // One click loads BOTH layers — abstract cost items (oe_costs_item via
+  // ``/v1/costs/load-cwicr/``) AND the priced resource catalogue
+  // (oe_catalog_resource via ``/v1/catalog/import/``). They're separate
+  // tables with different shapes, but share the same CWICR origin and
+  // both surfaces ("Cost Database" and "Resource Catalog" in the
+  // sidebar) need data populated for the user to see anything. Earlier
+  // version only loaded /costs, so /catalog stayed empty after the
+  // success toast — confused users into thinking the load failed.
   const handleLoadRegion = useCallback(
     async (db: CWICRDatabase) => {
       if (dbStatuses[db.id] === 'loading') return;
@@ -365,37 +440,59 @@ export function DatabaseSetupPage() {
       setSingleLoading(true);
 
       try {
-        const data = await apiPost<Record<string, unknown>>(`/v1/costs/load-cwicr/${db.id}`);
+        // Run both imports in parallel. Catalog import is treated as
+        // best-effort: not every region ships a priced catalogue file
+        // and we still want the costs layer to count as success.
+        const [costsData, catalogData] = await Promise.all([
+          apiPost<Record<string, unknown>>(`/v1/costs/load-cwicr/${db.id}`),
+          apiPost<{ imported: number; skipped: number; region: string }>(
+            `/v1/catalog/import/${db.id}`,
+          ).catch((e: unknown) => {
+            // eslint-disable-next-line no-console
+            console.warn(`[setup] catalog import for ${db.id} failed:`, e);
+            return null;
+          }),
+        ]);
 
-        const imported = (data.imported as number) ?? 0;
-        const totalItems = (data.total_items as number) ?? imported;
-        const status = data.status as string | undefined;
+        const imported = (costsData.imported as number) ?? 0;
+        const totalItems = (costsData.total_items as number) ?? imported;
+        const status = costsData.status as string | undefined;
+        const catalogImported = catalogData?.imported ?? 0;
 
         setDbStatuses((prev) => ({ ...prev, [db.id]: 'loaded' }));
         setDbItemCounts((prev) => ({ ...prev, [db.id]: totalItems || imported }));
         addLoadedDatabase(db.id);
 
-        if (status === 'already_loaded') {
-          addToast({
-            type: 'info',
-            title: `${db.name}`,
-            message: `${totalItems.toLocaleString()} ${t('setup.items_available', { defaultValue: 'items already available' })}`,
-          });
-        } else {
-          addToast({
-            type: 'success',
-            title: t('setup.db_loaded', { defaultValue: 'Database loaded' }),
-            message: `${db.name}: ${imported.toLocaleString()} ${t('setup.items_imported', { defaultValue: 'items imported' })}`,
-          });
-        }
+        // Single combined toast with longer duration so the user has
+        // time to follow the "View →" links surfaced on the card.
+        const lines = [
+          `${(totalItems || imported).toLocaleString()} ${t('setup.cost_items', { defaultValue: 'cost items' })}`,
+          catalogData
+            ? `${catalogImported.toLocaleString()} ${t('setup.catalog_resources', { defaultValue: 'catalog resources' })}`
+            : t('setup.catalog_unavailable', { defaultValue: 'catalogue not available for this region' }),
+        ];
+        addToast(
+          {
+            type: status === 'already_loaded' ? 'info' : 'success',
+            title: status === 'already_loaded'
+              ? t('setup.db_already_loaded', { defaultValue: `${db.name} already loaded` })
+              : t('setup.db_loaded', { defaultValue: `Loaded ${db.name}` }),
+            message: lines.join(' · '),
+          },
+          { duration: 8000 },
+        );
 
         // Trigger vector indexing in background
         apiPost('/v1/costs/vector/index/').catch(() => {
           // Non-critical
         });
 
-        // Invalidate cost queries
+        // Invalidate BOTH costs and catalog so /costs and /catalog pages
+        // refetch the moment the user navigates there. Without the
+        // catalog invalidation, the Resource Catalog page kept showing
+        // its previous (sparse) state and looked broken.
         queryClient.invalidateQueries({ queryKey: ['costs'] });
+        queryClient.invalidateQueries({ queryKey: ['catalog'] });
       } catch (err: unknown) {
         setDbStatuses((prev) => ({ ...prev, [db.id]: 'failed' }));
         const detail = err instanceof Error ? err.message : 'Failed to load database';
@@ -425,7 +522,13 @@ export function DatabaseSetupPage() {
       setSingleLoading(true);
 
       try {
-        const data = await apiPost<Record<string, unknown>>(`/v1/costs/load-cwicr/${db.id}`);
+        // Run both layers in parallel — same shape as ``handleLoadRegion``.
+        const [data, _catalog] = await Promise.all([
+          apiPost<Record<string, unknown>>(`/v1/costs/load-cwicr/${db.id}`),
+          apiPost<{ imported: number; skipped: number; region: string }>(
+            `/v1/catalog/import/${db.id}`,
+          ).catch(() => null),
+        ]);
 
         const imported = (data.imported as number) ?? 0;
         const totalItems = (data.total_items as number) ?? imported;
@@ -441,6 +544,7 @@ export function DatabaseSetupPage() {
     // Trigger vector indexing once at the end
     apiPost('/v1/costs/vector/index/').catch(() => {});
     queryClient.invalidateQueries({ queryKey: ['costs'] });
+    queryClient.invalidateQueries({ queryKey: ['catalog'] });
 
     setLoadAllActive(false);
     setSingleLoading(false);

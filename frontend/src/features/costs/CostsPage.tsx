@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search,
   Copy,
@@ -442,12 +442,19 @@ export function CostsPage() {
   const activeRegion = useCostDatabaseStore((s) => s.activeRegion);
   const setActiveRegion = useCostDatabaseStore((s) => s.setActiveRegion);
 
+  // ?region=DE_BERLIN deep-link from /setup/databases — pre-selects the
+  // region filter on mount so the user lands directly on the items they
+  // just imported. We only read the param ONCE on mount to avoid fighting
+  // user-driven changes after that.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const regionFromUrl = searchParams.get('region') ?? '';
+
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [unit, setUnit] = useState('');
   const [source, setSource] = useState('');
   const [category, setCategory] = useState('');
-  const [region, setRegion] = useState<string>(activeRegion);
+  const [region, setRegion] = useState<string>(regionFromUrl || activeRegion);
   const [offset, setOffset] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -468,6 +475,18 @@ export function CostsPage() {
   const [favourites, setFavourites] = useState<Set<string>>(() => loadFavourites());
   const [recentItems, setRecentItems] = useState<RecentItem[]>(() => loadRecent());
   const [specialTab, setSpecialTab] = useState<'' | 'favourites' | 'recent'>('');
+
+  // One-shot: if mounted with ``?region=X``, push it to the global store
+  // so the tab strip highlights it, then strip the param so a reload
+  // doesn't keep forcing the filter back over user changes.
+  useEffect(() => {
+    if (!regionFromUrl) return;
+    setActiveRegion(regionFromUrl);
+    setRegion(regionFromUrl);
+    searchParams.delete('region');
+    setSearchParams(searchParams, { replace: true });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Fetch loaded regions list. ``staleTime`` keeps the cache hot for 5
   // minutes so a quick navigation away-and-back doesn't re-fire any of

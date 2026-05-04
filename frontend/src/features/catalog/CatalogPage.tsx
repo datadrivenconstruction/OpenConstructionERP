@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search,
   ChevronDown,
@@ -1168,13 +1168,28 @@ export function CatalogPage() {
 
   const navigate = useNavigate();
 
+  // ?region=DE_BERLIN deep-link from /setup/databases — pre-selects the
+  // region filter on mount so the user lands directly on the resources
+  // they just imported.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const regionFromUrl = searchParams.get('region') ?? '';
+
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [resourceType, setResourceType] = useState('');
   const [category, setCategory] = useState('');
   const [unit, setUnit] = useState('');
-  const [region, setRegion] = useState('');
+  const [region, setRegion] = useState(regionFromUrl);
   const [offset, setOffset] = useState(0);
+
+  // Strip the region param after one-shot apply so the filter doesn't
+  // get re-forced on every render or refresh.
+  useEffect(() => {
+    if (!regionFromUrl) return;
+    searchParams.delete('region');
+    setSearchParams(searchParams, { replace: true });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [copiedId, setCopiedId] = useState<string | null>(null);

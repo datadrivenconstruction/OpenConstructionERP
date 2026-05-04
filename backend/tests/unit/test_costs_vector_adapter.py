@@ -778,3 +778,82 @@ async def test_reindex_all_batches_correctly() -> None:
     assert upsert_calls == [3, 3, 1]
     assert result["indexed"] == 7
     assert result["collection"] == COLLECTION_COSTS
+
+
+# ── Fixture-detection heuristic (v2.8.2) ─────────────────────────────────
+
+
+def test_looks_like_fixture_detects_short_alpha_digit_codes() -> None:
+    """``_looks_like_fixture`` flags codes that match the test-fixture
+    pattern ``^[A-Z]\\d{3}$`` (e.g. ``A001``)."""
+    from app.modules.costs.vector_adapter import _looks_like_fixture
+
+    # Reset the lazy regex so a previous test can't leave it in place.
+    import app.modules.costs.vector_adapter as va
+    va._FIXTURE_CODE_RE = None
+
+    assert _looks_like_fixture({"code": "A001", "description": "anything"}) is True
+    assert _looks_like_fixture({"code": "Z999"}) is True
+    assert _looks_like_fixture({"code": "TEST-deadbeef", "description": "x"}) is True
+
+
+def test_looks_like_fixture_detects_canned_descriptions() -> None:
+    """Even with a real-looking code, canned fixture descriptions trip
+    the heuristic so we don't serve seed data to end users."""
+    from app.modules.costs.vector_adapter import _looks_like_fixture
+    import app.modules.costs.vector_adapter as va
+    va._FIXTURE_CODE_RE = None
+
+    assert _looks_like_fixture(
+        {"code": "330.10.020", "description": "desc some sample"},
+    ) is True
+    assert _looks_like_fixture(
+        {"code": "330.10.020", "description": "Test concrete C30/37"},
+    ) is True
+
+
+def test_looks_like_fixture_passes_real_cwicr_codes() -> None:
+    """Real CWICR codes use multi-segment hyphens / underscores and full
+    descriptions — they must not be flagged as fixtures."""
+    from app.modules.costs.vector_adapter import _looks_like_fixture
+    import app.modules.costs.vector_adapter as va
+    va._FIXTURE_CODE_RE = None
+
+    assert _looks_like_fixture(
+        {
+            "code": "KAPU-ME-KARI-KASA",
+            "description": "Heavy concrete mixes",
+        },
+    ) is False
+    assert _looks_like_fixture(
+        {
+            "code": "330.10.020",
+            "description": "Stahlbetonwand C30/37, 24cm",
+        },
+    ) is False
+
+
+def test_looks_like_fixture_handles_missing_code() -> None:
+    """Empty / missing code short-circuits to False — no false-positive."""
+    from app.modules.costs.vector_adapter import _looks_like_fixture
+    import app.modules.costs.vector_adapter as va
+    va._FIXTURE_CODE_RE = None
+
+    assert _looks_like_fixture({}) is False
+    assert _looks_like_fixture({"code": ""}) is False
+    assert _looks_like_fixture({"description": "Heavy concrete mixes"}) is False
+
+
+# ── Catalog dominant language cache ──────────────────────────────────────
+
+
+def test_clear_catalog_language_cache_resets_state() -> None:
+    """Tests + module reloads call ``clear_catalog_language_cache`` to
+    drop the 5-minute TTL cache so fresh queries take effect."""
+    import app.modules.costs.vector_adapter as va
+
+    va._catalog_lang_cache = ("ru", 99999.0)
+    assert va._catalog_lang_cache is not None
+
+    va.clear_catalog_language_cache()
+    assert va._catalog_lang_cache is None
