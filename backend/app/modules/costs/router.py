@@ -1351,6 +1351,62 @@ async def list_available_databases() -> list[dict]:
     ]
 
 
+# ── Loaded CWICR databases (with vectorisation status) ────────────────────
+
+
+@router.get("/loaded-databases/")
+async def list_loaded_databases(
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> list[dict]:
+    """List CWICR catalogues that are *actually loaded* into the SQL table.
+
+    Returns one entry per region with both the SQL row count and the
+    LanceDB vector count, so the Match-panel selector can surface three
+    distinct UI states without an extra round-trip:
+
+    * ``count == 0``                              — never happens (the
+                                                    catalogue wouldn't be
+                                                    listed) but guarded.
+    * ``count > 0`` and ``vectorized_count == 0`` — "Catalogue loaded but
+                                                    not vectorised yet"
+    * ``count > 0`` and ``vectorized_count > 0``  — ready for matching
+
+    Cheap: the SQL count comes from a single ``GROUP BY region`` against
+    the indexed ``region`` column; the vector count is a substring-LIKE
+    on the LanceDB ``payload`` column, capped at the table size and
+    short-circuited when LanceDB is unavailable.
+    """
+    _ = user_id  # auth required via dependency; unused beyond that
+    from sqlalchemy import func, select  # noqa: PLC0415
+    from app.core.vector import vector_count_with_payload_substring  # noqa: PLC0415
+    from app.core.vector_index import COLLECTION_COSTS  # noqa: PLC0415
+    from app.modules.costs.models import CostItem  # noqa: PLC0415
+
+    result = await session.execute(
+        select(CostItem.region, func.count(CostItem.id).label("cnt"))
+        .where(CostItem.is_active.is_(True))
+        .where(CostItem.region.isnot(None))
+        .where(CostItem.region != "")
+        .group_by(CostItem.region)
+        .order_by(func.count(CostItem.id).desc())
+    )
+    out: list[dict] = []
+    for region, sql_count in result.all():
+        if not region or sql_count <= 0:
+            continue
+        vectorized = vector_count_with_payload_substring(COLLECTION_COSTS, region)
+        out.append(
+            {
+                "id": region,
+                "count": int(sql_count),
+                "vectorized_count": int(vectorized),
+                "ready": vectorized > 0,
+            }
+        )
+    return out
+
+
 # ── Get by ID ─────────────────────────────────────────────────────────────
 
 

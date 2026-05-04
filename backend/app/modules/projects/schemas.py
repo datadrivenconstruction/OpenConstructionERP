@@ -682,6 +682,15 @@ class MatchProjectSettingsBase(BaseModel):
         default_factory=lambda: ["bim", "pdf", "dwg", "photo"],
         description="Subset of ['bim','pdf','dwg','photo'] — sources the matcher consumes.",
     )
+    cost_database_id: str | None = Field(
+        default=None,
+        max_length=32,
+        description=(
+            "Selected CWICR catalogue ID (e.g. 'RU_STPETERSBURG', 'DE_BERLIN'). "
+            "Null = no catalogue picked yet — match endpoint returns "
+            "'no_catalog_selected' and the UI surfaces an explicit picker."
+        ),
+    )
 
     @field_validator("target_language", mode="after")
     @classmethod
@@ -722,6 +731,7 @@ class MatchProjectSettingsRead(BaseModel):
     auto_link_enabled: bool
     mode: str
     sources_enabled: list[str] = Field(default_factory=list)
+    cost_database_id: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -739,6 +749,7 @@ class MatchProjectSettingsUpdate(BaseModel):
     auto_link_enabled: bool | None = None
     mode: str | None = None
     sources_enabled: list[str] | None = None
+    cost_database_id: str | None = Field(default=None, max_length=32)
 
     @field_validator("target_language", mode="after")
     @classmethod

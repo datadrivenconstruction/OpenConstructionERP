@@ -429,3 +429,92 @@ async def test_admin_bypass_can_read_other_projects(
 
     resp = await client.get(f"/api/v1/projects/{project_id}/match-settings")
     assert resp.status_code == 200, resp.text
+
+
+# ── v2.8.2 cost_database_id binding ───────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_default_cost_database_id_is_null(
+    client: AsyncClient, project_owned_by,
+) -> None:
+    """Fresh projects start with no catalogue picked — UI shows the picker."""
+    user_id, project_id = await project_owned_by()
+    _set_acting_user(user_id)
+
+    resp = await client.get(f"/api/v1/projects/{project_id}/match-settings")
+    assert resp.status_code == 200
+    assert resp.json()["cost_database_id"] is None
+
+
+@pytest.mark.asyncio
+async def test_patch_cost_database_id_round_trip(
+    client: AsyncClient, project_owned_by,
+) -> None:
+    """PATCH writes cost_database_id; subsequent GET reads it back."""
+    user_id, project_id = await project_owned_by()
+    _set_acting_user(user_id)
+
+    resp = await client.patch(
+        f"/api/v1/projects/{project_id}/match-settings",
+        json={"cost_database_id": "RU_STPETERSBURG"},
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["cost_database_id"] == "RU_STPETERSBURG"
+
+    resp_get = await client.get(f"/api/v1/projects/{project_id}/match-settings")
+    assert resp_get.json()["cost_database_id"] == "RU_STPETERSBURG"
+
+
+@pytest.mark.asyncio
+async def test_patch_cost_database_id_can_clear(
+    client: AsyncClient, project_owned_by,
+) -> None:
+    """Sending null clears the binding — returns project to no_catalog_selected."""
+    user_id, project_id = await project_owned_by()
+    _set_acting_user(user_id)
+
+    await client.patch(
+        f"/api/v1/projects/{project_id}/match-settings",
+        json={"cost_database_id": "DE_BERLIN"},
+    )
+    resp = await client.patch(
+        f"/api/v1/projects/{project_id}/match-settings",
+        json={"cost_database_id": None},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["cost_database_id"] is None
+
+
+@pytest.mark.asyncio
+async def test_patch_rejects_oversized_cost_database_id(
+    client: AsyncClient, project_owned_by,
+) -> None:
+    """The 32-char Pydantic bound matches the SQL column width."""
+    user_id, project_id = await project_owned_by()
+    _set_acting_user(user_id)
+
+    resp = await client.patch(
+        f"/api/v1/projects/{project_id}/match-settings",
+        json={"cost_database_id": "A" * 33},
+    )
+    assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_reset_clears_cost_database_id(
+    client: AsyncClient, project_owned_by,
+) -> None:
+    """``reset`` returns cost_database_id to ``None`` along with everything else."""
+    user_id, project_id = await project_owned_by()
+    _set_acting_user(user_id)
+
+    await client.patch(
+        f"/api/v1/projects/{project_id}/match-settings",
+        json={"cost_database_id": "BG_SOFIA"},
+    )
+    resp = await client.post(
+        f"/api/v1/projects/{project_id}/match-settings/reset",
+    )
+    assert resp.status_code == 200
+    assert resp.json()["cost_database_id"] is None

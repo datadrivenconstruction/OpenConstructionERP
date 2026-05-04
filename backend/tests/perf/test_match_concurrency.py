@@ -31,6 +31,20 @@ from sqlalchemy.ext.asyncio import (
 # ── Shared harness ──────────────────────────────────────────────────────
 
 
+@pytest.fixture(autouse=True)
+def _bypass_catalog_gate(monkeypatch):
+    """v2.8.2 — bypass the catalogue gate so concurrency tests exercise
+    the real translation/cache/ranker paths instead of an early return."""
+    async def _ok(*_args, **_kwargs):
+        return "ok", 1, 1
+
+    monkeypatch.setattr(
+        "app.core.match_service.ranker._resolve_catalog_status",
+        _ok,
+        raising=True,
+    )
+
+
 @pytest_asyncio.fixture
 async def engine_factory() -> AsyncGenerator[tuple[Any, Any, Path], None]:
     tmp_db = Path(tempfile.mkdtemp()) / "match_perf.db"

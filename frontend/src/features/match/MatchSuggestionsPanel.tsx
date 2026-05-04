@@ -36,14 +36,21 @@ import {
   Wand2,
   Info,
   ShieldCheck,
+  Database,
+  AlertTriangle,
+  Loader2,
 } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import { useToastStore } from '@/stores/useToastStore';
+import { listLoadedDatabases, setProjectCatalog } from './api';
 import { useMatchElement, useSubmitMatchFeedback } from './queries';
 import type {
+  LoadedDatabase,
   MatchCandidate,
   MatchResponse,
   MatchSource,
+  MatchStatus,
 } from './types';
 
 /* ── Props ─────────────────────────────────────────────────────────────── */
@@ -295,6 +302,13 @@ export function MatchSuggestionsPanel({
   const hasResults = !isLoading && visibleCandidates.length > 0;
   const isEmpty = !isLoading && visibleCandidates.length === 0;
   const autoLinkedCode = response?.auto_linked?.code ?? null;
+  const catalogStatus: MatchStatus = response?.status ?? 'ok';
+  const catalogId = response?.catalog_id ?? null;
+  const catalogCount = response?.catalog_count ?? 0;
+  const catalogVecCount = response?.catalog_vectorized_count ?? 0;
+  // Treat any non-``ok`` status as a hard empty state — the user must
+  // pick a catalogue / vectorise / load one before candidates make sense.
+  const blockedByCatalog = catalogStatus !== 'ok';
 
   return (
     <section
@@ -302,6 +316,16 @@ export function MatchSuggestionsPanel({
       aria-label={t('match.panel_aria', { defaultValue: 'Match suggestions panel' })}
       data-testid="match-suggestions-panel"
     >
+      <CatalogBindingBar
+        projectId={projectId}
+        catalogId={catalogId}
+        catalogCount={catalogCount}
+        vectorizedCount={catalogVecCount}
+        status={catalogStatus}
+        compact={compact}
+        onChanged={() => fireMatch()}
+      />
+
       <Header
         translationUsed={response?.translation_used ?? null}
         useReranker={useReranker}
@@ -347,7 +371,14 @@ export function MatchSuggestionsPanel({
       <div className="flex-1 min-h-0 overflow-y-auto">
         {isLoading && <SkeletonList compact={compact} />}
 
-        {isEmpty && (
+        {isEmpty && blockedByCatalog && (
+          <CatalogBlockedState
+            status={catalogStatus}
+            catalogId={catalogId}
+          />
+        )}
+
+        {isEmpty && !blockedByCatalog && (
           <EmptyState projectId={projectId} hadResponse={Boolean(response)} />
         )}
 
@@ -582,6 +613,285 @@ function EmptyState({
       </a>
     </div>
   );
+}
+
+/* ── Catalog binding bar (always visible, shows current catalog) ───────── */
+
+interface CatalogBindingBarProps {
+  projectId: string;
+  catalogId: string | null;
+  catalogCount: number;
+  vectorizedCount: number;
+  status: MatchStatus;
+  compact: boolean;
+  onChanged: () => void;
+}
+
+function CatalogBindingBar({
+  projectId,
+  catalogId,
+  catalogCount,
+  vectorizedCount,
+  status,
+  compact,
+  onChanged,
+}: CatalogBindingBarProps) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [picking, setPicking] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { data: loaded = [] } = useQuery<LoadedDatabase[]>({
+    queryKey: ['costs', 'loaded-databases'],
+    queryFn: listLoadedDatabases,
+    staleTime: 30_000,
+  });
+
+  const handlePick = useCallback(
+    async (id: string | null) => {
+      setSaving(true);
+      try {
+        await setProjectCatalog(projectId, id);
+        // Invalidate match-settings cache so any other surface (settings
+        // dialog, BOQ editor) sees the new binding without a manual reload.
+        await queryClient.invalidateQueries({
+          queryKey: ['projects', projectId, 'match-settings'],
+        });
+        setPicking(false);
+        onChanged();
+      } catch (e) {
+        useToastStore.getState().addToast({
+          type: 'error',
+          title: t('match.catalog_pick_error_title', {
+            defaultValue: 'Could not change catalogue',
+          }),
+          message: e instanceof Error ? e.message : String(e),
+        });
+      } finally {
+        setSaving(false);
+      }
+    },
+    [projectId, queryClient, onChanged, t],
+  );
+
+  const ready = status === 'ok';
+  const labelClass = clsx(
+    'inline-flex items-center gap-1.5 rounded border px-1.5 py-0.5 font-mono',
+    compact ? 'text-[10px]' : 'text-[11px]',
+    ready
+      ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200'
+      : 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200',
+  );
+
+  return (
+    <div
+      className={clsx(
+        'relative flex items-center gap-2 px-3 border-b border-border-light bg-surface-tertiary',
+        compact ? 'py-1' : 'py-1.5',
+      )}
+      data-testid="match-catalog-bar"
+    >
+      <Database
+        size={compact ? 11 : 12}
+        className="text-content-tertiary shrink-0"
+        aria-hidden="true"
+      />
+      {catalogId ? (
+        <span className={labelClass} data-testid="match-catalog-badge">
+          {catalogId}
+          <span className="font-sans text-[10px] text-content-secondary">
+            · {catalogCount.toLocaleString()}
+            {vectorizedCount > 0 && (
+              <> / {vectorizedCount.toLocaleString()} vec</>
+            )}
+          </span>
+        </span>
+      ) : (
+        <span className="text-[11px] text-amber-700 dark:text-amber-300 font-medium">
+          {t('match.no_catalog_picked', {
+            defaultValue: 'No catalogue selected',
+          })}
+        </span>
+      )}
+
+      <div className="flex-1" />
+
+      <button
+        type="button"
+        onClick={() => setPicking((p) => !p)}
+        disabled={saving}
+        className={clsx(
+          'rounded px-2 py-0.5 hover:bg-surface-secondary text-content-secondary hover:text-content-primary disabled:opacity-40',
+          compact ? 'text-[10px]' : 'text-[11px]',
+        )}
+        data-testid="match-catalog-change"
+      >
+        {catalogId
+          ? t('match.catalog_change', { defaultValue: 'Change' })
+          : t('match.catalog_pick', { defaultValue: 'Select catalogue' })}
+      </button>
+
+      {picking && (
+        <div
+          className="absolute top-full right-3 mt-1 z-30 w-64 max-w-xs rounded border border-border-light bg-surface shadow-lg p-1"
+          data-testid="match-catalog-picker"
+          onMouseLeave={() => setPicking(false)}
+        >
+          {loaded.length === 0 ? (
+            <div className="text-[11px] text-content-secondary px-2 py-2">
+              {t('match.no_catalogs_loaded_short', {
+                defaultValue: 'No catalogues loaded.',
+              })}
+              <a
+                href="/setup/databases"
+                className="ml-1 text-oe-blue hover:underline"
+              >
+                {t('match.load_catalog_link', { defaultValue: 'Load one →' })}
+              </a>
+            </div>
+          ) : (
+            <ul role="list" className="max-h-60 overflow-y-auto">
+              {loaded.map((db) => (
+                <li key={db.id}>
+                  <button
+                    type="button"
+                    onClick={() => handlePick(db.id)}
+                    disabled={saving}
+                    className={clsx(
+                      'w-full flex items-center gap-2 px-2 py-1 rounded text-left hover:bg-surface-tertiary',
+                      catalogId === db.id && 'bg-surface-secondary',
+                    )}
+                    data-testid={`match-catalog-option-${db.id}`}
+                  >
+                    <span className="font-mono text-[11px] text-content-primary">
+                      {db.id}
+                    </span>
+                    <span className="text-[10px] text-content-secondary">
+                      {db.count.toLocaleString()}
+                    </span>
+                    {db.vectorized_count > 0 ? (
+                      <span className="ml-auto text-[10px] text-emerald-700 dark:text-emerald-300">
+                        ✓ {db.vectorized_count.toLocaleString()} vec
+                      </span>
+                    ) : (
+                      <span className="ml-auto text-[10px] text-amber-700 dark:text-amber-300">
+                        not vectorised
+                      </span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Catalog-blocked empty states (3 explicit cases) ───────────────────── */
+
+function CatalogBlockedState({
+  status,
+  catalogId,
+}: {
+  status: MatchStatus;
+  catalogId: string | null;
+}) {
+  const { t } = useTranslation();
+
+  if (status === 'no_catalogs_loaded') {
+    return (
+      <div
+        className="flex flex-col items-center justify-center text-center px-6 py-10"
+        data-testid="match-state-no-catalogs-loaded"
+      >
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+          <Database size={18} aria-hidden="true" />
+        </div>
+        <h3 className="text-sm font-semibold text-content-primary">
+          {t('match.state_no_catalogs_title', {
+            defaultValue: 'No CWICR catalogue loaded',
+          })}
+        </h3>
+        <p className="mt-1.5 max-w-xs text-xs text-content-secondary">
+          {t('match.state_no_catalogs_body', {
+            defaultValue:
+              'Matching needs at least one regional catalogue. Load one to get started — it takes about a minute.',
+          })}
+        </p>
+        <a
+          href="/setup/databases"
+          className="mt-3 inline-flex items-center gap-1 rounded bg-oe-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-oe-blue/90"
+          data-testid="match-state-load-catalog-cta"
+        >
+          {t('match.state_no_catalogs_cta', {
+            defaultValue: 'Load a catalogue →',
+          })}
+        </a>
+      </div>
+    );
+  }
+
+  if (status === 'no_catalog_selected') {
+    return (
+      <div
+        className="flex flex-col items-center justify-center text-center px-6 py-10"
+        data-testid="match-state-no-catalog-selected"
+      >
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+          <AlertTriangle size={18} aria-hidden="true" />
+        </div>
+        <h3 className="text-sm font-semibold text-content-primary">
+          {t('match.state_no_pick_title', {
+            defaultValue: 'Select a catalogue',
+          })}
+        </h3>
+        <p className="mt-1.5 max-w-xs text-xs text-content-secondary">
+          {t('match.state_no_pick_body', {
+            defaultValue:
+              'This project has no CWICR catalogue selected yet. Pick one in the bar above — matches always come from a single explicit catalogue.',
+          })}
+        </p>
+      </div>
+    );
+  }
+
+  if (status === 'catalog_not_vectorized') {
+    return (
+      <div
+        className="flex flex-col items-center justify-center text-center px-6 py-10"
+        data-testid="match-state-not-vectorized"
+      >
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+          <Loader2 size={18} aria-hidden="true" />
+        </div>
+        <h3 className="text-sm font-semibold text-content-primary">
+          {t('match.state_not_vectorized_title', {
+            defaultValue: 'Catalogue not vectorised yet',
+          })}
+        </h3>
+        <p className="mt-1.5 max-w-xs text-xs text-content-secondary">
+          {t('match.state_not_vectorized_body', {
+            defaultValue:
+              '{{catalog}} is loaded but its rows are not embedded yet. Vectorisation is a one-time step (about 2–5 minutes for 55k items) and unlocks semantic matching.',
+            catalog: catalogId ?? '—',
+          })}
+        </p>
+        <a
+          href={`/setup/databases?vectorize=${encodeURIComponent(catalogId ?? '')}`}
+          className="mt-3 inline-flex items-center gap-1 rounded bg-oe-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-oe-blue/90"
+          data-testid="match-state-vectorize-cta"
+        >
+          {t('match.state_vectorize_cta', {
+            defaultValue: 'Start vectorisation →',
+          })}
+        </a>
+      </div>
+    );
+  }
+
+  // Defensive default — shouldn't be reachable.
+  return null;
 }
 
 /* ── Candidate card ────────────────────────────────────────────────────── */

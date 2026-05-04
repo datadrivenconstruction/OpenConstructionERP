@@ -892,3 +892,43 @@ def vector_count_collection(collection_name: str) -> int:
         except Exception:
             return 0
     return _lancedb_count_generic(collection_name)
+
+
+def vector_count_with_payload_substring(
+    collection_name: str, substring: str,
+) -> int:
+    """Count vectors whose stringified payload contains ``substring``.
+
+    Used to surface per-catalogue vectorisation progress to the UI: we
+    embed payload as a JSON string with the catalogue's region code in
+    it, so a LIKE substring is enough to count "how many vectors come
+    from this catalogue" without parsing JSON server-side.
+
+    Returns 0 on any failure path so the caller can keep the call site
+    one-line.
+    """
+    if not substring:
+        return 0
+    # Sanitise: only allow CWICR-style ids (LETTERS/digits/underscore)
+    # so a malicious caller can't inject SQL into the LanceDB filter
+    # expression. The whitelist is intentionally tight — every legitimate
+    # CWICR id matches it (e.g. ``RU_STPETERSBURG``, ``USA_USD``).
+    import re  # noqa: PLC0415
+    if not re.fullmatch(r"[A-Z0-9_]{1,32}", substring):
+        return 0
+    if _backend() == "qdrant":
+        # Qdrant filter API requires a typed PayloadSelector; for the
+        # purposes of this UI counter we fall back to the unfiltered
+        # collection count, which over-reports but doesn't break.
+        return vector_count_collection(collection_name)
+    db = _get_lancedb()
+    if db is None:
+        return 0
+    try:
+        if collection_name not in db.table_names():
+            return 0
+        tbl = db.open_table(collection_name)
+        return int(tbl.count_rows(filter=f"payload LIKE '%{substring}%'"))
+    except Exception as exc:
+        logger.debug("vector_count_with_payload_substring failed: %s", exc)
+        return 0

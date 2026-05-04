@@ -11,8 +11,9 @@
  * Accept-Language, error extraction and JSON serialization.
  */
 
-import { apiPost } from '@/shared/lib/api';
+import { apiGet, apiPatch, apiPost } from '@/shared/lib/api';
 import type {
+  LoadedDatabase,
   MatchAcceptRequestBody,
   MatchAcceptResponse,
   MatchElementRequestBody,
@@ -55,4 +56,30 @@ export async function acceptMatch(
     '/v1/match/accept',
     body,
   );
+}
+
+/**
+ * List CWICR catalogues that are *actually loaded* into the SQL table,
+ * with both row and vector counts so the UI can render the three
+ * empty-state CTAs (no-catalog / not-vectorised / ready).
+ */
+export async function listLoadedDatabases(): Promise<LoadedDatabase[]> {
+  return apiGet<LoadedDatabase[]>('/v1/costs/loaded-databases/');
+}
+
+/**
+ * Bind the project's match settings to a specific CWICR catalogue.
+ * Pass ``null`` to clear the binding (returns the project to the
+ * "no catalog selected" empty state).
+ */
+export async function setProjectCatalog(
+  projectId: string,
+  catalogId: string | null,
+): Promise<{ cost_database_id: string | null }> {
+  return apiPatch<
+    { cost_database_id: string | null },
+    { cost_database_id: string | null }
+  >(`/v1/projects/${projectId}/match-settings`, {
+    cost_database_id: catalogId,
+  });
 }

@@ -419,6 +419,7 @@ def _settings_snapshot(row: object) -> dict:
         "auto_link_enabled": getattr(row, "auto_link_enabled", None),
         "mode": getattr(row, "mode", None),
         "sources_enabled": list(getattr(row, "sources_enabled", []) or []),
+        "cost_database_id": getattr(row, "cost_database_id", None),
     }
 
 
@@ -535,6 +536,7 @@ async def reset_match_settings(
     row.auto_link_enabled = MATCH_DEFAULT_AUTO_LINK_ENABLED
     row.mode = MATCH_DEFAULT_MODE
     row.sources_enabled = list(MATCH_DEFAULT_SOURCES)
+    row.cost_database_id = None
     await db.flush()
     await db.refresh(row)
 

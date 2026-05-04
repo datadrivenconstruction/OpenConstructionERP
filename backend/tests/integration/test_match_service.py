@@ -40,6 +40,26 @@ from app.core.match_service.config import BOOST_WEIGHTS
 # ── Fixtures ──────────────────────────────────────────────────────────────
 
 
+@pytest.fixture(autouse=True)
+def _bypass_catalog_gate(monkeypatch):
+    """v2.8.2 — short-circuit the per-project catalogue gate.
+
+    These tests predate the ``cost_database_id`` binding and exercise the
+    ranker's *post-gate* behaviour (translation, vector search, boosts).
+    Stub the resolver to ``ok`` so they keep covering what they were
+    written for; the binding itself is exercised in
+    ``test_match_catalog_binding``.
+    """
+    async def _ok(*_args, **_kwargs):
+        return "ok", 1, 1
+
+    monkeypatch.setattr(
+        "app.core.match_service.ranker._resolve_catalog_status",
+        _ok,
+        raising=True,
+    )
+
+
 def _register_minimal_models() -> None:
     """Pull projects + users + audit models into Base.metadata."""
     import app.core.audit  # noqa: F401  — AuditEntry table

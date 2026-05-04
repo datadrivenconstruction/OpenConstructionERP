@@ -5,6 +5,24 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.2] — 2026-05-04
+
+### Added — Per-project CWICR catalogue binding for the matcher
+- New nullable `cost_database_id` on `oe_projects_match_settings` (alembic v282) — explicit per-project pick (`RU_STPETERSBURG`, `DE_BERLIN`, …); no auto-pick from `project.region`.
+- `MatchResponse.status` envelope: `ok` / `no_catalog_selected` / `catalog_not_vectorized` / `no_catalogs_loaded` — UI renders distinct empty states with targeted CTAs instead of silent zero-results.
+- `GET /api/v1/costs/loaded-databases/` — per-region SQL count + LanceDB vector count + ready flag.
+- `<CatalogBindingBar>` always visible at the top of the Match panel: badge ("📚 RU_STPETERSBURG · 55,719 / 1,000 vec"), dropdown picker driven by the new endpoint, click-to-rebind with React Query invalidation.
+- SQL `ILIKE` lexical fallback in `app.modules.costs.vector_adapter.search()` when LanceDB is empty / fixture-only / encoder unavailable, so users see real CWICR rows instead of an empty pane while ops backfills the index.
+
+### Fixed
+- Stale `cost_database_id` (pointing at an unloaded region) now degrades to `no_catalog_selected` when other catalogues are loaded — previously claimed `no_catalogs_loaded`, sending the user to a "load a catalogue" CTA while their other catalogues sat right there.
+- `<CatalogBindingBar>` picker dropdown got `position: absolute` against a non-positioned ancestor (`mt-32 right-3` placed it ~128 px below random parent). Added `relative` parent + `top-full mt-1` so it now drops below the bar reliably.
+
+### Verified
+- 224+ backend tests green (incl. 12 new tests in `test_match_catalog_binding.py` covering all 4 envelope states + SQL-injection whitelist on `vector_count_with_payload_substring`, plus 5 new tests in `test_match_settings.py` for the PATCH/GET round-trip + reset).
+- Smoke-tested all four `MatchResponse.status` paths against a real backend with two loaded catalogues.
+- TS strict clean (`tsc --noEmit` exit 0). Vite production build succeeds.
+
 ## [2.7.7] — 2026-05-03
 
 ### Fixed — Match tab now lives in the Element Inspector users actually see

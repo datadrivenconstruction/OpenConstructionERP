@@ -320,9 +320,21 @@ class MatchProjectSettings(Base):
         default=lambda: list(MATCH_DEFAULT_SOURCES),
         server_default='["bim", "pdf", "dwg", "photo"]',
     )
+    # CWICR catalogue ID the project matches against
+    # (e.g. "RU_STPETERSBURG", "DE_BERLIN", "USA_USD"). Nullable: a freshly
+    # created project has no binding — match endpoint returns a structured
+    # ``no_catalog_selected`` error and the UI surfaces an explicit picker.
+    # No auto-pick from ``project.region`` because regions are coarse tags
+    # (DACH / EU / US) while catalogue IDs are city-level (DE_BERLIN).
+    cost_database_id: Mapped[str | None] = mapped_column(
+        String(32),
+        nullable=True,
+        default=None,
+    )
 
     def __repr__(self) -> str:
         return (
             f"<MatchProjectSettings project={self.project_id} "
-            f"mode={self.mode} classifier={self.classifier}>"
+            f"mode={self.mode} classifier={self.classifier} "
+            f"catalog={self.cost_database_id}>"
         )

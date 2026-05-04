@@ -37,6 +37,20 @@ from sqlalchemy.ext.asyncio import (
 # ── Shared fixtures ──────────────────────────────────────────────────────────
 
 
+@pytest.fixture(autouse=True)
+def _bypass_catalog_gate(monkeypatch):
+    """v2.8.2 — short-circuit the catalogue gate so the perf tests measure
+    the ranker's hot path, not a one-line early return."""
+    async def _ok(*_args, **_kwargs):
+        return "ok", 1, 1
+
+    monkeypatch.setattr(
+        "app.core.match_service.ranker._resolve_catalog_status",
+        _ok,
+        raising=True,
+    )
+
+
 def _register_minimal_models() -> None:
     import app.core.audit  # noqa: F401
     import app.modules.projects.models  # noqa: F401

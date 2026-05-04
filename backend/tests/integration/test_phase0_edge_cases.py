@@ -47,6 +47,20 @@ from sqlalchemy.ext.asyncio import (
 # ── Shared fixtures ──────────────────────────────────────────────────────────
 
 
+@pytest.fixture(autouse=True)
+def _bypass_catalog_gate(monkeypatch):
+    """v2.8.2 — see ``test_match_service``. These edge-case tests target
+    the post-gate ranker behaviour, not catalogue binding."""
+    async def _ok(*_args, **_kwargs):
+        return "ok", 1, 1
+
+    monkeypatch.setattr(
+        "app.core.match_service.ranker._resolve_catalog_status",
+        _ok,
+        raising=True,
+    )
+
+
 def _register_minimal_models() -> None:
     """Pull projects + users + audit models into Base.metadata."""
     import app.core.audit  # noqa: F401

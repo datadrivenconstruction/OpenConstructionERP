@@ -82,6 +82,13 @@ export interface MatchRequestEcho {
   readonly use_reranker: boolean;
 }
 
+/** Catalogue-binding status — drives explicit empty states in the panel. */
+export type MatchStatus =
+  | 'ok'
+  | 'no_catalog_selected'
+  | 'catalog_not_vectorized'
+  | 'no_catalogs_loaded';
+
 export interface MatchResponse {
   readonly request: MatchRequestEcho;
   readonly candidates: ReadonlyArray<MatchCandidate>;
@@ -89,6 +96,20 @@ export interface MatchResponse {
   readonly auto_linked: MatchCandidate | null;
   readonly took_ms: number;
   readonly cost_usd: number;
+  /** v2.8.2: ``ok`` = candidates returned; everything else is a structured
+   *  empty state the panel renders explicitly with a CTA. */
+  readonly status?: MatchStatus;
+  readonly catalog_id?: string | null;
+  readonly catalog_count?: number;
+  readonly catalog_vectorized_count?: number;
+}
+
+/** Single entry in `GET /api/v1/costs/loaded-databases/`. */
+export interface LoadedDatabase {
+  readonly id: string;
+  readonly count: number;
+  readonly vectorized_count: number;
+  readonly ready: boolean;
 }
 
 /** What we send to `POST /api/v1/match/feedback`. */

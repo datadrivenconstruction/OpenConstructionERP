@@ -143,6 +143,152 @@ _PASSAGE_PREFIX = "passage: "
 _QUERY_PREFIX = "query: "
 
 
+# ── SQL lexical fallback ────────────────────────────────────────────────
+#
+# LanceDB ``oe_cost_items`` is rebuilt off-line via the admin reindex
+# endpoint or the startup auto-backfill. Until that completes, the
+# collection may be empty (fresh install) or contain stale test fixtures
+# (legacy seed). To avoid serving fixtures or empty results to end
+# users, ``search()`` falls back to a SQL ``ILIKE`` lookup over the
+# real :class:`CostItem` rows — slower than vector search and lower
+# recall, but guaranteed to return real CWICR codes + descriptions.
+#
+# The fallback fires when:
+#   * the LanceDB hit list is empty, OR
+#   * every payload in the hit list looks like a test fixture
+#     (id starts with ``TEST-`` or code matches ``^[A-Z][0-9]{3}$``).
+#
+# Once the reindex completes the LanceDB hits become richer than the
+# fixtures and the fallback is skipped automatically.
+
+_FIXTURE_CODE_RE = None  # lazy compile on first use
+
+
+def _looks_like_fixture(payload: dict[str, Any]) -> bool:
+    """Heuristic: is this LanceDB hit a test fixture, not real CWICR?"""
+    global _FIXTURE_CODE_RE
+    if _FIXTURE_CODE_RE is None:
+        import re
+        _FIXTURE_CODE_RE = re.compile(r"^[A-Z]\d{3}$|^TEST-[a-f0-9]{6,}$")
+    code = str(payload.get("code", "") or "")
+    if not code:
+        return False
+    if _FIXTURE_CODE_RE.match(code):
+        return True
+    desc = str(payload.get("description", "") or "")
+    if desc.startswith("desc ") or desc == "Test concrete C30/37":
+        return True
+    return False
+
+
+async def _sql_lexical_search(
+    query: str,
+    *,
+    limit: int,
+    region: str | None,
+    language: str | None,
+) -> list[dict[str, Any]]:
+    """ILIKE fallback over the real :class:`CostItem` SQL table.
+
+    Splits the query into tokens, picks the 4 longest discriminative
+    ones, and matches any of them in the description. Score is the
+    fraction of tokens hit (0.0–0.6) so vector hits always outrank a
+    lexical fallback when both are available.
+
+    The ``language`` filter is permissive: if the strict filter yields
+    zero results, it is dropped on the second pass — the fallback's
+    purpose is to surface *some* real CWICR rows even when the project's
+    target language doesn't match what the catalogue ships (the real
+    catalogue is RU + BG today; English projects would otherwise get
+    empty results until the operator imports an EN catalogue).
+    """
+    text = (query or "").strip()
+    if not text:
+        return []
+    try:
+        from sqlalchemy import or_, select  # noqa: PLC0415
+        from app.database import async_session_factory  # noqa: PLC0415
+        from app.modules.costs.models import CostItem  # noqa: PLC0415
+    except Exception as exc:  # pragma: no cover — defensive
+        logger.debug("cost-vector lexical: SQL imports failed: %s", exc)
+        return []
+
+    # Strip punctuation so a query like "Roof Metal Panels, sheet" doesn't
+    # produce the literal token "panels," — ILIKE %panels,% would only
+    # match descriptions containing the trailing comma. Caller is
+    # responsible for handing us a query in the *catalogue's* language;
+    # this is a narrow lexical search, not a translator.
+    import re  # noqa: PLC0415
+
+    cleaned = re.sub(r"[^\w\s]", " ", text, flags=re.UNICODE)
+    tokens = sorted(
+        {t.lower() for t in cleaned.split() if len(t) >= 3},
+        key=len,
+        reverse=True,
+    )[:6]
+    if not tokens:
+        return []
+
+    try:
+        async with async_session_factory() as session:
+            stmt = select(CostItem).where(CostItem.is_active.is_(True))
+            if region:
+                stmt = stmt.where(CostItem.region == region)
+            stmt = stmt.where(
+                or_(*[CostItem.description.ilike(f"%{t}%") for t in tokens])
+            )
+            # Over-fetch so the in-Python token-coverage score has a real
+            # chance to surface descriptions that match *several* tokens,
+            # not just whatever PK-ordered first row matches one. The
+            # cap keeps the round-trip bounded.
+            stmt = stmt.limit(max(limit * 30, 200))
+            rows = list((await session.execute(stmt)).scalars().all())
+    except Exception as exc:
+        logger.debug("cost-vector lexical: query failed: %s", exc)
+        return []
+
+    def _row_to_hit_with_count(
+        row: CostItem, hits_count: int, total_tokens: int,
+    ) -> dict[str, Any]:
+        # Score band 0.3 - 0.6 — always below typical vector hits (≥0.7),
+        # so the lexical fallback never fights a real vector candidate.
+        denom = max(1, total_tokens)
+        score = 0.3 + 0.3 * (hits_count / denom)
+        row_lang = _REGION_LANGUAGE.get((row.region or "").upper(), "en")
+        payload: dict[str, Any] = {
+            "code": row.code or "",
+            "description": row.description or "",
+            "unit": row.unit or "",
+            "unit_cost": float(row.rate or 0.0),
+            "currency": row.currency or "",
+            "region_code": row.region or "",
+            "source": row.source or "cwicr",
+            "language": row_lang,
+        }
+        return {
+            "id": str(row.id),
+            "score": round(score, 3),
+            "text": row.description or "",
+            "payload": payload,
+        }
+
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        desc_lower = (row.description or "").lower()
+        hits = sum(1 for t in tokens if t in desc_lower)
+        if hits == 0:
+            continue
+        out.append(_row_to_hit_with_count(row, hits, len(tokens)))
+
+    out.sort(key=lambda h: -h["score"])
+    logger.info(
+        "cost-vector lexical: query=%r tokens=%d region=%s returning=%d/%d",
+        text[:80], len(tokens), region or "any",
+        min(len(out), limit), len(out),
+    )
+    return out[:limit]
+
+
 # ── Adapter ──────────────────────────────────────────────────────────────
 
 
@@ -418,9 +564,13 @@ async def search(
     text = (query or "").strip()
     if not text:
         return []
+    # Fast SQL fallback when the optional [vector] extra is missing — the
+    # cost-vector feature degrades but real CWICR rows still surface.
     if not _vector_available():
         _warn_missing_backend("search")
-        return []
+        return await _sql_lexical_search(
+            query, limit=limit, region=region, language=language,
+        )
 
     try:
         from app.core.vector import (  # noqa: PLC0415
@@ -430,10 +580,18 @@ async def search(
 
         vectors = await encode_texts_async([_QUERY_PREFIX + text])
     except Exception as exc:
-        logger.debug("cost-vector search: encode failed: %s", exc)
-        return []
+        # Encoder unavailable (model load failed, fastembed/sentence-transformers
+        # missing wheels, GPU OOM, etc.) — fall straight through to lexical
+        # so the user still sees real CWICR codes/descriptions instead of an
+        # empty pane while ops fixes the encoder backend.
+        logger.info("cost-vector search: encode failed (%s); using SQL fallback", exc)
+        return await _sql_lexical_search(
+            query, limit=limit, region=region, language=language,
+        )
     if not vectors:
-        return []
+        return await _sql_lexical_search(
+            query, limit=limit, region=region, language=language,
+        )
 
     # Pull a wider window when payload-side filters are active so we
     # still have ``limit`` results after filtering — capped at 5x the
@@ -452,6 +610,7 @@ async def search(
         return []
 
     out: list[dict[str, Any]] = []
+    fixture_count = 0
     for raw in raw_hits:
         payload_raw = raw.get("payload")
         payload: dict[str, Any]
@@ -465,6 +624,10 @@ async def search(
                 payload = {}
         else:
             payload = {}
+
+        if _looks_like_fixture(payload):
+            fixture_count += 1
+            continue
 
         if region and payload.get("region_code", "") != region:
             continue
@@ -483,6 +646,20 @@ async def search(
         )
         if len(out) >= limit:
             break
+
+    # Trip the SQL lexical fallback when LanceDB returned nothing or
+    # only fixtures — this is what real CWICR users see today, before
+    # the admin reindex completes.
+    if not out:
+        if fixture_count:
+            logger.info(
+                "cost-vector search: %d fixture hits filtered, falling back to SQL lexical",
+                fixture_count,
+            )
+        sql_hits = await _sql_lexical_search(
+            query, limit=limit, region=region, language=language,
+        )
+        return sql_hits
 
     return out
 
@@ -534,3 +711,76 @@ async def collection_count() -> int:
         return int(vector_count_collection(COLLECTION_COSTS) or 0)
     except Exception:
         return 0
+
+
+# ── Catalog-language detection ───────────────────────────────────────────
+#
+# The match service needs to know what language the *catalogue* ships in
+# so it can translate the user's query before searching. Project settings
+# default ``target_language`` to "en", but a tenant's catalogue may be
+# RU + BG (CWICR ships per-region, with descriptions in the regional
+# language). Without this hook, an English BIM-element name never matches
+# Russian descriptions and the Match panel stays empty.
+#
+# The lookup is one ``GROUP BY region`` SELECT; we cache the answer for
+# 5 minutes per process. Catalogues don't shift language mid-session, so
+# the staleness window is generous.
+
+_catalog_lang_cache: tuple[str | None, float] | None = None
+_CATALOG_LANG_TTL = 300.0  # 5 minutes
+
+
+async def catalog_dominant_language() -> str | None:
+    """Return the ISO-639 code most catalogue rows are written in.
+
+    ``None`` when the catalogue is empty or the lookup fails — callers
+    should treat ``None`` as "skip the catalogue-language override and
+    keep the project's configured target_language".
+
+    Pure read, idempotent, cached. Safe to call from the hot match path.
+    """
+    global _catalog_lang_cache
+    now = time.monotonic()
+    if _catalog_lang_cache is not None:
+        lang, expires = _catalog_lang_cache
+        if now < expires:
+            return lang
+
+    try:
+        from sqlalchemy import func, select  # noqa: PLC0415
+        from app.database import async_session_factory  # noqa: PLC0415
+        from app.modules.costs.models import CostItem  # noqa: PLC0415
+    except Exception:  # pragma: no cover — defensive
+        return None
+
+    try:
+        async with async_session_factory() as session:
+            stmt = (
+                select(CostItem.region, func.count().label("c"))
+                .where(CostItem.is_active.is_(True))
+                .group_by(CostItem.region)
+                .order_by(func.count().desc())
+                .limit(8)
+            )
+            rows = list((await session.execute(stmt)).all())
+    except Exception as exc:
+        logger.debug("catalog_dominant_language: query failed: %s", exc)
+        _catalog_lang_cache = (None, now + 60.0)  # short TTL on failure
+        return None
+
+    by_lang: dict[str, int] = {}
+    for region, count in rows:
+        lang = _REGION_LANGUAGE.get((region or "").upper(), "en")
+        by_lang[lang] = by_lang.get(lang, 0) + int(count or 0)
+    if not by_lang:
+        _catalog_lang_cache = (None, now + _CATALOG_LANG_TTL)
+        return None
+    dominant = max(by_lang.items(), key=lambda kv: kv[1])[0]
+    _catalog_lang_cache = (dominant, now + _CATALOG_LANG_TTL)
+    return dominant
+
+
+def clear_catalog_language_cache() -> None:
+    """Reset the catalog-language TTL cache. Tests + import path use this."""
+    global _catalog_lang_cache
+    _catalog_lang_cache = None

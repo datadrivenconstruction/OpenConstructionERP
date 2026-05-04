@@ -123,6 +123,14 @@ class MatchRequest(BaseModel):
     use_reranker: bool = False
 
 
+MatchStatus = Literal[
+    "ok",
+    "no_catalog_selected",
+    "catalog_not_vectorized",
+    "no_catalogs_loaded",
+]
+
+
 class MatchResponse(BaseModel):
     """Outbound match response.
 
@@ -131,6 +139,19 @@ class MatchResponse(BaseModel):
     crossed the configured ``auto_link_threshold``. The matcher itself
     never writes the link into BOQ — that's a separate confirmed-action
     step (Phase 4).
+
+    ``status`` is the structured signal the UI uses to render explicit
+    empty states instead of letting the user wonder why ``candidates``
+    is ``[]``:
+
+    * ``ok``                     — search ran, candidates returned (may be 0).
+    * ``no_catalog_selected``    — project hasn't picked a CWICR catalogue yet.
+    * ``catalog_not_vectorized`` — picked catalogue has zero vectors indexed.
+    * ``no_catalogs_loaded``     — no CWICR catalogue has been loaded at all.
+
+    ``catalog_id`` and ``catalog_count`` mirror the picked catalogue so the
+    UI can render the badge ("📚 RU_STPETERSBURG · 55,719 / 1,000 vectorised")
+    without an extra round-trip.
     """
 
     model_config = ConfigDict(extra="ignore", arbitrary_types_allowed=True)
@@ -141,3 +162,7 @@ class MatchResponse(BaseModel):
     auto_linked: MatchCandidate | None = None
     took_ms: int = 0
     cost_usd: float = 0.0
+    status: MatchStatus = "ok"
+    catalog_id: str | None = None
+    catalog_count: int = 0
+    catalog_vectorized_count: int = 0

@@ -38,6 +38,7 @@ from app.core.match_service.envelope import (
     MatchCandidate,
     MatchRequest,
     MatchResponse,
+    MatchStatus,
     confidence_band_for,
 )
 from app.core.translation import TranslationResult, translate
@@ -45,6 +46,125 @@ from app.modules.costs import vector_adapter as cost_vector
 from app.modules.projects.service import get_or_create_match_settings
 
 logger = logging.getLogger(__name__)
+
+
+# ── Catalogue → ISO-639 language ─────────────────────────────────────────
+#
+# Maps every CWICR catalogue ID we know about to the language its
+# descriptions are written in. This is the *target* language for the
+# translation cascade — an English BIM element name is rewritten into,
+# say, Russian before searching the RU_STPETERSBURG catalogue. Missing
+# keys fall back to ``"en"`` so a freshly-onboarded catalogue still
+# searches; the worst case is one less translation pass, not a crash.
+_CATALOG_LANGUAGE: dict[str, str] = {
+    "RU_STPETERSBURG": "ru",
+    "BG_SOFIA":        "bg",
+    "DE_BERLIN":       "de",
+    "USA_USD":         "en",
+    "UK_GBP":          "en",
+    "ENG_TORONTO":     "en",
+    "AU_SYDNEY":       "en",
+    "NZ_AUCKLAND":     "en",
+    "ZA_JOHANNESBURG": "en",
+    "FR_PARIS":        "fr",
+    "SP_BARCELONA":    "es",
+    "MX_MEXICOCITY":   "es",
+    "PT_SAOPAULO":     "pt",
+    "IT_ROME":         "it",
+    "NL_AMSTERDAM":    "nl",
+    "PL_WARSAW":       "pl",
+    "CS_PRAGUE":       "cs",
+    "HR_ZAGREB":       "hr",
+    "RO_BUCHAREST":    "ro",
+    "SV_STOCKHOLM":    "sv",
+    "TR_ISTANBUL":     "tr",
+    "AR_DUBAI":        "ar",
+    "ZH_SHANGHAI":     "zh",
+    "JA_TOKYO":        "ja",
+    "KO_SEOUL":        "ko",
+    "HI_MUMBAI":       "hi",
+    "ID_JAKARTA":      "id",
+    "TH_BANGKOK":      "th",
+    "VI_HANOI":        "vi",
+    "NG_LAGOS":        "en",
+}
+
+
+async def _resolve_catalog_status(
+    db,
+    catalog_id: str | None,
+) -> tuple[MatchStatus, int, int]:
+    """Resolve the ``catalog_id`` to a structured (status, count, vec) tuple.
+
+    Returns:
+        ``("ok", sql_count, vector_count)``           — catalogue ready to search.
+        ``("no_catalog_selected", 0, 0)``             — settings.cost_database_id is null.
+        ``("no_catalogs_loaded", 0, 0)``              — no catalogue loaded at all.
+        ``("catalog_not_vectorized", sql_count, 0)``  — picked, loaded, no vectors.
+
+    The match endpoint short-circuits on every non-``ok`` status with an
+    empty candidate list and the matching status code so the UI can
+    render an explicit empty state instead of a misleading no-results.
+    """
+    from sqlalchemy import func, select  # noqa: PLC0415
+
+    from app.modules.costs.models import CostItem  # noqa: PLC0415
+
+    if not catalog_id:
+        # Decide between "no catalog selected" vs "nothing loaded at all"
+        # so the UI can offer the right CTA. One COUNT roundtrip — cheap.
+        try:
+            total_loaded = (
+                await db.execute(
+                    select(func.count(CostItem.id)).where(CostItem.is_active.is_(True))
+                )
+            ).scalar() or 0
+        except Exception:
+            total_loaded = 0
+        if total_loaded == 0:
+            return "no_catalogs_loaded", 0, 0
+        return "no_catalog_selected", 0, 0
+
+    try:
+        sql_count = (
+            await db.execute(
+                select(func.count(CostItem.id))
+                .where(CostItem.is_active.is_(True))
+                .where(CostItem.region == catalog_id)
+            )
+        ).scalar() or 0
+    except Exception as exc:
+        logger.warning("match_service: catalog count failed for %s: %s", catalog_id, exc)
+        sql_count = 0
+
+    if sql_count == 0:
+        # Picked id doesn't exist in the SQL table. If *other* catalogues
+        # are loaded, fall back to ``no_catalog_selected`` so the UI shows
+        # the picker bar (the user can recover with one click) — never
+        # claim "no catalogues loaded" while RU/BG/etc are sitting right
+        # there. Only return ``no_catalogs_loaded`` when truly empty.
+        try:
+            total_loaded = (
+                await db.execute(
+                    select(func.count(CostItem.id)).where(CostItem.is_active.is_(True))
+                )
+            ).scalar() or 0
+        except Exception:
+            total_loaded = 0
+        if total_loaded == 0:
+            return "no_catalogs_loaded", 0, 0
+        return "no_catalog_selected", 0, 0
+
+    try:
+        from app.core.vector import vector_count_with_payload_substring  # noqa: PLC0415
+        from app.core.vector_index import COLLECTION_COSTS  # noqa: PLC0415
+        vec_count = vector_count_with_payload_substring(COLLECTION_COSTS, catalog_id)
+    except Exception:
+        vec_count = 0
+
+    if vec_count == 0:
+        return "catalog_not_vectorized", int(sql_count), 0
+    return "ok", int(sql_count), int(vec_count)
 
 
 # ── Query construction ───────────────────────────────────────────────────
@@ -251,8 +371,39 @@ async def rank(
 
     envelope = req.envelope
 
+    # ── Catalogue binding (v2.8.2) ───────────────────────────────────
+    # Match runs against ONE explicitly-selected CWICR catalogue. No
+    # auto-pick from ``project.region`` — those are coarse tags
+    # (DACH/EU/US) while catalogue ids are city-level (DE_BERLIN). When
+    # ``cost_database_id`` is null we surface a structured error envelope
+    # so the UI can render an explicit picker; the same applies when the
+    # picked catalogue is empty or has no vectors yet.
+    catalog_id: str | None = (
+        getattr(settings, "cost_database_id", None) or None
+    )
+    catalog_status, catalog_count, catalog_vec = await _resolve_catalog_status(
+        db, catalog_id,
+    )
+    if catalog_status != "ok":
+        return MatchResponse(
+            request=req,
+            candidates=[],
+            translation_used=None,
+            auto_linked=None,
+            took_ms=int((time.perf_counter() - started) * 1000),
+            cost_usd=cost_usd,
+            status=catalog_status,
+            catalog_id=catalog_id,
+            catalog_count=catalog_count,
+            catalog_vectorized_count=catalog_vec,
+        )
+
     # ── Translation (γ) ──────────────────────────────────────────────
-    target_language = (settings.target_language or "en").lower()
+    # Translate the envelope into the *catalogue's* dominant language.
+    # The project's configured ``target_language`` is ignored on this
+    # path — it would only matter if the project switches catalogues
+    # mid-flow, in which case the new catalogue's language wins.
+    target_language = _CATALOG_LANGUAGE.get(catalog_id or "", "en")
     translated_envelope, translation_used = await _maybe_translate(
         envelope, target_language, user_settings=ai_settings,
     )
@@ -269,14 +420,24 @@ async def rank(
             auto_linked=None,
             took_ms=int((time.perf_counter() - started) * 1000),
             cost_usd=cost_usd,
+            status="ok",
+            catalog_id=catalog_id,
+            catalog_count=catalog_count,
+            catalog_vectorized_count=catalog_vec,
         )
 
     fetch = max(req.top_k, req.top_k * SEARCH_OVERFETCH)
     try:
+        # Region filter pins the search to the user's chosen catalogue.
+        # Language filter is intentionally NOT passed: the LanceDB
+        # collection only stores the catalogue's native language and
+        # we already ensured ``catalog_id`` is loaded — passing
+        # ``language`` would just risk filtering out valid hits when
+        # the language-tag column is sparse on legacy fixtures.
         hits = await cost_vector.search(
             query_text,
             limit=fetch,
-            language=target_language or None,
+            region=catalog_id,
         )
     except Exception as exc:  # pragma: no cover — defensive
         logger.warning("match_service: vector search failed: %s", exc)
@@ -332,4 +493,8 @@ async def rank(
         auto_linked=auto_linked,
         took_ms=int((time.perf_counter() - started) * 1000),
         cost_usd=cost_usd,
+        status="ok",
+        catalog_id=catalog_id,
+        catalog_count=catalog_count,
+        catalog_vectorized_count=catalog_vec,
     )
