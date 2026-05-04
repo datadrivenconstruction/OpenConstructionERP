@@ -405,15 +405,20 @@ export function BOQListPage() {
     staleTime: 5 * 60_000,
   });
 
+  // When the URL pins a single project, only fetch that project's BOQs —
+  // not every project's. On prod with 50+ projects, the parallel fan-out
+  // was costing 1-2s of skeleton state for no reason.
+  const scopedProjects = projectIdFromUrl
+    ? projects?.filter((p) => p.id === projectIdFromUrl)
+    : projects;
+
   const { data: allBoqs, isLoading: boqLoading } = useQuery({
-    queryKey: ['all-boqs', projects?.map((p) => p.id).join(',')],
+    queryKey: ['all-boqs', scopedProjects?.map((p) => p.id).join(',')],
     queryFn: async () => {
-      if (!projects || projects.length === 0) return [];
+      if (!scopedProjects || scopedProjects.length === 0) return [];
 
       // Fetch all BOQs in parallel (one request per project, no N+1 for grand_total)
-      // projectMap available if per-project lookups are needed later
-      // const projectMap = new Map(projects.map((p) => [p.id, p]));
-      const fetches = projects.map(async (p) => {
+      const fetches = scopedProjects.map(async (p) => {
         try {
           const boqs = await apiGet<BOQ[]>(`/v1/boq/boqs/?project_id=${p.id}`);
           return boqs.map((b) => ({
@@ -433,7 +438,7 @@ export function BOQListPage() {
       const results = await Promise.all(fetches);
       return results.flat();
     },
-    enabled: !!projects && projects.length > 0,
+    enabled: !!scopedProjects && scopedProjects.length > 0,
   });
 
   // Seed demo presence when collaboration module is enabled and BOQs load

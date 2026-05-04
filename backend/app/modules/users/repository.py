@@ -82,15 +82,28 @@ class UserRepository:
         return (await self.session.execute(stmt)).scalar_one()
 
     async def has_admin(self) -> bool:
-        """Return True if at least one active admin user exists.
+        """Return True if at least one *real* active admin user exists.
 
-        Used by the registration bootstrap: if no admin is present in the DB
-        (fresh install, or only seed/demo viewer users exist), the next
-        person to register via the public API is promoted to admin. Once
-        any admin is on record, subsequent self-registered users default
-        to the configured viewer role.
+        Used by the registration bootstrap: if no real admin is present in
+        the DB (fresh install — only seed/demo accounts), the next person
+        to register via the public API is promoted to admin. Once a real
+        admin is on record, subsequent self-registered users default to
+        the configured viewer role.
+
+        The seeded demo account ``demo@openestimator.io`` is intentionally
+        excluded: a fresh ``pip install openconstructionerp`` ships with
+        that admin already in the DB, and counting it would dead-lock the
+        bootstrap path — every self-registered user would be created
+        dormant in admin-approve mode with no real admin around to flip
+        them active. Excluding it lets the first registrant claim admin
+        like the bootstrap was always meant to.
         """
-        stmt = select(User.id).where(User.role == "admin", User.is_active.is_(True)).limit(1)
+        stmt = (
+            select(User.id)
+            .where(User.role == "admin", User.is_active.is_(True))
+            .where(~User.email.like("%@openestimator.io"))
+            .limit(1)
+        )
         return (await self.session.execute(stmt)).scalar_one_or_none() is not None
 
 

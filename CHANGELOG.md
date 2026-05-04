@@ -5,6 +5,15 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.5] — 2026-05-04
+
+### Fixed
+- Fresh-install registration: the seeded `demo@openestimator.io` admin no longer blocks the bootstrap path. First real self-registered user is now correctly promoted to admin and `is_active=True`, regardless of `OE_REGISTRATION_MODE`. Previously, every `pip install openconstructionerp` left new users dormant with no path forward.
+- `/projects/:projectId/boq` only fetches that project's BOQs instead of fanning out to every project, cutting skeleton time on prod (50+ projects) from ~2 s to one round-trip.
+
+### Tests
+- New regression: `test_demo_admin_seed_does_not_block_bootstrap` covers the dormant-user gotcha.
+
 ## [2.8.4] — 2026-05-04
 
 ### Fixed

@@ -139,3 +139,50 @@ async def test_non_admin_seed_does_not_block_bootstrap(session):
     assert first.role == "admin", (
         "Pre-seeded viewer must not block first real user from becoming admin"
     )
+
+
+@pytest.mark.asyncio
+async def test_demo_admin_seed_does_not_block_bootstrap(session):
+    """The seeded demo admin (demo@openestimator.io) must not block the
+    first real registrant from claiming admin.
+
+    Without this carve-out, every fresh ``pip install openconstructionerp``
+    leaves the user permanently dormant: ``_seed_demo_account`` puts an
+    ``admin`` row at boot, ``has_admin()`` returns True, and in the
+    default ``admin-approve`` mode the next self-registered user is
+    inactive with no real admin around to flip them.
+    """
+    import uuid as _uuid
+
+    from app.modules.users.models import User
+    from app.modules.users.repository import UserRepository
+    from app.modules.users.service import hash_password
+
+    demo = User(
+        id=_uuid.uuid4(),
+        email="demo@openestimator.io",
+        hashed_password=hash_password("DemoPass1234!"),
+        full_name="Demo User",
+        role="admin",
+        locale="en",
+        is_active=True,
+        metadata_={},
+    )
+    session.add(demo)
+    await session.commit()
+
+    repo = UserRepository(session)
+    assert await repo.has_admin() is False, (
+        "has_admin must ignore the seeded demo@openestimator.io admin"
+    )
+
+    first = await _service(session).register(
+        _payload(f"first-{_uuid.uuid4().hex[:6]}@bootstrap.io")
+    )
+    await session.commit()
+    assert first.role == "admin", (
+        "First real user must claim admin even when demo seed is present"
+    )
+    assert first.is_active is True, (
+        "Bootstrap admin must be is_active=True regardless of registration_mode"
+    )
