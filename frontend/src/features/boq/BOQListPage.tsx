@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import {
   Table, Table2, ArrowRight, Copy, Trash2, Plus,
   Search, ArrowUpDown, ChevronDown, GitCompareArrows, X, Loader2,
@@ -300,6 +300,9 @@ export function BOQListPage() {
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  // /projects/:projectId/boq deep-link — pre-filter to that project so the
+  // list isn't a tour through every project's BOQs first.
+  const { projectId: projectIdFromUrl } = useParams<{ projectId?: string }>();
 
   // Create BOQ modal
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -325,6 +328,7 @@ export function BOQListPage() {
     } catch { return ''; }
   });
   const [projectFilter, setProjectFilter] = useState(() => {
+    if (projectIdFromUrl) return projectIdFromUrl;
     if (activeProjectId) return activeProjectId;
     try {
       const saved = JSON.parse(localStorage.getItem('oe_boq_filters') ?? '{}');

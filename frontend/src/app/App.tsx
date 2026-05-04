@@ -397,6 +397,7 @@ export default function App() {
         <Route path="/projects/:projectId" element={<P title="Project"><ProjectDetailPage /></P>} />
         <Route path="/projects/:projectId/settings" element={<P title="Project Settings"><ProjectSettingsPage /></P>} />
         <Route path="/projects/:projectId/boq/new" element={<P title="New BOQ"><CreateBOQPage /></P>} />
+        <Route path="/projects/:projectId/boq" element={<P title="Bill of Quantities"><BOQListPage /></P>} />
 
         <Route path="/boq" element={<P title="Bill of Quantities"><BOQListPage /></P>} />
         <Route path="/boq/:boqId" element={<P title="BOQ Editor"><BOQEditorPage /></P>} />

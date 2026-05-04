@@ -499,6 +499,23 @@ export function CostsPage() {
     staleTime: 5 * 60_000,
   });
 
+  // Auto-pick a region when the page mounts with no region selected and
+  // there are loaded regions available. Without this fallback the user
+  // sees an "No database loaded" empty state even when /setup/databases
+  // already populated rows — the page just hadn't been told which one to
+  // show. We only auto-pick once, and only if the user has not already
+  // chosen something via the global store or the URL.
+  useEffect(() => {
+    if (region) return;
+    if (regionFromUrl) return;
+    if (activeRegion) return;
+    const first = loadedRegions?.[0];
+    if (!first) return;
+    setRegion(first);
+    setActiveRegion(first);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadedRegions]);
+
   // Fetch per-region stats (for item counts in tabs)
   const { data: regionStats } = useQuery({
     queryKey: ['costs', 'regions', 'stats'],

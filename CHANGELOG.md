@@ -5,6 +5,13 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.4] — 2026-05-04
+
+### Fixed
+- `/costs` and `/catalog` now auto-pick the first loaded region when none is selected. Previously the page showed a "No database loaded" empty state even when /setup/databases had already populated rows, because the picker waited for an explicit selection.
+- Sidebar version label now reads from `frontend/package.json` correctly. v2.8.3 wheel shipped with the sidebar baked at "v2.8.2" because `npm run build` ran before the package bump.
+- `/projects/:projectId/boq` route added — previously 404'd. Pre-filters the BOQ list to the project so users coming from the project detail page don't have to re-pick the project.
+
 ## [2.8.3] — 2026-05-04
 
 ### Fixed — Catalogue load now populates BOTH cost layers

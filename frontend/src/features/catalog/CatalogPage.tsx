@@ -1221,6 +1221,21 @@ export function CatalogPage() {
     retry: false,
   });
 
+  // Auto-pick a region when no filter is active and rows exist somewhere.
+  // Mirrors the CostsPage fallback so a user landing on /catalog after
+  // /setup/databases doesn't see "0 resources" when the just-loaded region
+  // is sitting one click away.
+  useEffect(() => {
+    if (region) return;
+    if (regionFromUrl) return;
+    const first = (regionStats ?? [])
+      .map((r) => r.region)
+      .find((r): r is string => Boolean(r));
+    if (!first) return;
+    setRegion(first);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [regionStats]);
+
   // Fetch resources
   const searchUrl = buildSearchUrl(debouncedQuery, resourceType, category, unit, region, offset);
   const { data, isLoading, isFetching } = useQuery({
