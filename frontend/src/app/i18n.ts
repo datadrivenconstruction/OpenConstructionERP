@@ -19,6 +19,7 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'cs', name: 'Čeština', english: 'Czech', flag: '🇨🇿', country: 'cz' },
   { code: 'ja', name: '日本語', english: 'Japanese', flag: '🇯🇵', country: 'jp' },
   { code: 'ko', name: '한국어', english: 'Korean', flag: '🇰🇷', country: 'kr' },
+  { code: 'mn', name: 'Монгол', english: 'Mongolian', flag: '🇲🇳', country: 'mn' },
   { code: 'sv', name: 'Svenska', english: 'Swedish', flag: '🇸🇪', country: 'se' },
   { code: 'no', name: 'Norsk', english: 'Norwegian', flag: '🇳🇴', country: 'no' },
   { code: 'da', name: 'Dansk', english: 'Danish', flag: '🇩🇰', country: 'dk' },
@@ -122,6 +123,13 @@ function resolveInitialLanguage(): string {
   const supported = SUPPORTED_LANGUAGES.map((l) => l.code);
   const isValid = (code: string | null | undefined): code is string =>
     !!code && supported.includes(code);
+  const hostDefaultFor = (hostname: string): string | null => {
+    const normalized = hostname.toLowerCase();
+    if (normalized === 'frappe.mn' || normalized.endsWith('.frappe.mn')) {
+      return 'mn';
+    }
+    return null;
+  };
 
   if (typeof window === 'undefined') return 'en';
 
@@ -148,11 +156,15 @@ function resolveInitialLanguage(): string {
     // localStorage unavailable — fall through.
   }
 
-  // 3. Browser locale (strip region: "de-CH" → "de").
+  // 3. Host-level default for dedicated localized deployments.
+  const hostDefault = hostDefaultFor(window.location.hostname);
+  if (isValid(hostDefault)) return hostDefault;
+
+  // 4. Browser locale (strip region: "de-CH" → "de").
   const browserLang = (navigator.language || 'en').split('-')[0];
   if (isValid(browserLang)) return browserLang;
 
-  // 4. Final fallback.
+  // 5. Final fallback.
   return 'en';
 }
 

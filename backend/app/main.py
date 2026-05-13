@@ -54,7 +54,6 @@ _BUILD_HASH = _hashlib.sha256(
 from datetime import UTC
 from pathlib import Path
 
-import structlog
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -67,23 +66,22 @@ logger = logging.getLogger(__name__)
 
 def configure_logging(settings: Settings) -> None:
     """‌⁠‍Configure structured logging."""
-    structlog.configure(
-        processors=[
-            structlog.contextvars.merge_contextvars,
-            structlog.stdlib.filter_by_level,
-            structlog.stdlib.add_logger_name,
-            structlog.stdlib.add_log_level,
-            structlog.processors.TimeStamper(fmt="iso"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            structlog.dev.ConsoleRenderer() if settings.app_debug else structlog.processors.JSONRenderer(),
-        ],
-        wrapper_class=structlog.stdlib.BoundLogger,
-        context_class=dict,
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        cache_logger_on_first_use=True,
-    )
-    logging.basicConfig(level=getattr(logging, settings.log_level), format="%(message)s")
+    level_name = str(settings.log_level).upper()
+    level = getattr(logging, level_name, logging.INFO)
+    root_logger = logging.getLogger()
+    root_logger.handlers.clear()
+    root_logger.setLevel(level)
+
+    handler = logging.StreamHandler()
+    if settings.app_debug:
+        formatter = logging.Formatter(
+            fmt="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+            datefmt="%Y-%m-%dT%H:%M:%S%z",
+        )
+    else:
+        formatter = logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s")
+    handler.setFormatter(formatter)
+    root_logger.addHandler(handler)
 
 
 def _init_vector_db() -> None:

@@ -115,7 +115,7 @@ def get_embedder():
         from sentence_transformers import SentenceTransformer
     except Exception as exc:
         if not _embedder_tried:
-            logger.warning("sentence-transformers not installed: %s", exc)
+            logger.info("sentence-transformers not installed; local embedding generation disabled: %s", exc)
             _embedder_tried = True
         return None
 
