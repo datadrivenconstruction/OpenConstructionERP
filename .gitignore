@@ -147,8 +147,6 @@ desktop/src-tauri/binaries/
 # Backup files
 *.backup.*
 backend/data/dwg_uploads/
-backend/data/dwg_entities/
-backend/data/dwg_thumbnails/
 
 # Local-only working state (not for commit)
 tmp/
@@ -162,36 +160,3 @@ qa-tests/v275-probe/shots*/
 .claude/settings.local.json
 i18n_audit_report.md
 qa-report/
-
-# Internal audit reports — never commit
-.claude/audit/
-
-# Internal Claude planning/research/services — NEVER commit
-# (These can contain commit hashes, ports, and architectural detail
-# useful to someone targeting a specific deploy.)
-.claude/PRD_MODULES_18.md
-.claude/HANDOVER_NEXT_SESSION.md
-.claude/backend.md
-.claude/frontend.md
-.claude/research/
-.claude/services/
-.claude/scheduled_tasks.lock
-.claude/qa_parts_*/
-.claude/qa-parts-*/
-.claude/qa_report/
-.claude/qa-reports/
-.claude/audit_reports/
-.claude/security_audit/
-
-# Ad-hoc QA/test scripts that hit a hardcoded localhost — not real tests
-backend/qa_api_test.py
-backend/qa_ai_test.py
-backend/test_all_modules.py
-backend/test_final_qa.py
-backend/test_full.py
-backend/test_upload.dxf
-backend/tmp_api.json
-
-# Heavy sample data — fetched on demand, not committed
-data/bim/
-docs/media/*.mp4
