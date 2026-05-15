@@ -378,11 +378,11 @@ function AIConfigurationCard() {
   const testMutation = useMutation({
     mutationFn: async () => {
       if (hasUnsavedKey && apiKeyInput.trim()) {
-        const update: Record<string, string | null> = { preferred_model: selectedProvider };
+        const update: Record<string, string | null> = { preferred_model: customModel || selectedProvider };
         update[`${selectedProvider}_api_key`] = apiKeyInput.trim();
         await aiApi.updateSettings(update as Parameters<typeof aiApi.updateSettings>[0]);
       }
-      return aiApi.testConnection(selectedProvider);
+      return aiApi.testConnection(selectedProvider, customModel || undefined);
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['ai-settings'] });

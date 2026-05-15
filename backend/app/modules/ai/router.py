@@ -308,7 +308,7 @@ async def test_ai_connection(
 ) -> dict:
     """Test an AI provider connection by sending a minimal request.
 
-    Body: ``{provider: "anthropic" | "openai" | "gemini"}``
+    Body: ``{provider: "anthropic" | "openai" | "gemini", model?: "..."}``
 
     Returns success status and response latency.
     """
@@ -317,6 +317,7 @@ async def test_ai_connection(
         "together", "fireworks", "perplexity", "cohere", "ai21", "xai",
     )
     provider = body.get("provider", "").strip()
+    model = body.get("model") or None
     if provider not in _VALID_PROVIDERS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -351,15 +352,18 @@ async def test_ai_connection(
             "latency_ms": None,
         }
 
-    # Make a minimal test call
+    # Make a minimal test call — use the model from the request body if
+    # provided, otherwise fall back to the user's stored preferred_model.
     try:
         t0 = time.monotonic()
+        test_model = model or (settings.preferred_model if settings else None)
         await call_ai(
             provider=provider,
             api_key=api_key,
             system="You are a test assistant.",
             prompt="Reply with exactly: OK",
             max_tokens=10,
+            model=test_model,
         )
         latency_ms = int((time.monotonic() - t0) * 1000)
         return {

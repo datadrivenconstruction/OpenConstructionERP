@@ -160,8 +160,8 @@ export const aiApi = {
   updateSettings: (data: AISettingsUpdate) =>
     apiPatch<AISettings, AISettingsUpdate>('/v1/ai/settings/', data),
 
-  testConnection: (provider: AIProvider) =>
-    apiPost<AITestResult, { provider: AIProvider }>('/v1/ai/settings/test/', { provider }),
+  testConnection: (provider: AIProvider, model?: string) =>
+    apiPost<AITestResult, { provider: AIProvider; model?: string }>('/v1/ai/settings/test/', { provider, model }),
 
   quickEstimate: (data: QuickEstimateRequest) =>
     apiPost<EstimateJobResponse, QuickEstimateRequest>('/v1/ai/quick-estimate/', data),

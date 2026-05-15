@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: oe
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set — generate with: openssl rand -base64 24}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: openestimate
     volumes:
       - pg_data:/var/lib/postgresql/data
@@ -58,7 +58,7 @@ services:
       DATABASE_URL: postgresql+asyncpg://oe:${POSTGRES_PASSWORD}@postgres:5432/openestimate
       DATABASE_SYNC_URL: postgresql://oe:${POSTGRES_PASSWORD}@postgres:5432/openestimate
       # Security — required, no default. Compose fails fast if blank.
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set — generate with: openssl rand -hex 32}
+      JWT_SECRET: ${JWT_SECRET}
       # Frontend serving
       SERVE_FRONTEND: "true"
       ALLOWED_ORIGINS: "http://localhost:8080,http://localhost"
