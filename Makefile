@@ -1,4 +1,4 @@
-.PHONY: help dev dev-backend dev-frontend dev-unix stop test lint format migrate seed seed-cwicr-v3 build
+.PHONY: help dev dev-backend dev-frontend dev-unix stop test lint format migrate seed seed-cwicr-v3 build backup restore
 
 # ─── Variables ──────────────────────────────────────────────────────────────
 BACKEND_DIR = backend
@@ -151,6 +151,13 @@ build-unified: ## Build single all-in-one Docker image
 build-wheel: ## Build Python wheel (pip installable)
 	cd $(FRONTEND_DIR) && npm ci && npm run build
 	cd $(BACKEND_DIR) && pip install build && python -m build
+
+# ─── Backup & Restore ────────────────────────────────────────────────────────
+backup: ## Backup all data volumes (creates ./backups/ocerp_backup_<timestamp>.tar.gz)
+	./scripts/backup_volumes.sh
+
+restore: ## Restore volumes from backup (usage: make restore BACKUP_FILE=./backups/ocerp_backup_xxx.tar.gz)
+	./scripts/restore_volumes.sh $(BACKUP_FILE)
 
 # ─── Utilities ──────────────────────────────────────────────────────────────
 clean: ## Clean build artifacts

@@ -33,7 +33,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8082',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         // 30 minutes. Catalogue v3 installs (`/costs/catalogues-v3/{id}/install`)
         // download a 200–500 MB snapshot from Hugging Face, stream it
