@@ -1,5 +1,8 @@
 # Cost Database Import — Resource-Based Costing
 
+**Audience:** OCERP operators and end users  
+**Full methodology:** For the complete guide on building regional cost databases from external sources (architecture, validation, source mapping), see [`docs/US_COST_DATABASE_METHODOLOGY.md`](US_COST_DATABASE_METHODOLOGY.md)
+
 This guide explains how to extend OpenConstructionERP's cost database with your own data using **resource-based costing methodology**. It covers two paths:
 
 - **Flat-row import** (`.xlsx` / `.csv` via `POST /api/v1/costs/import/file/`) — fast onboarding of an existing rate sheet
