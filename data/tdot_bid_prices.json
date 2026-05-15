@@ -1,0 +1,114 @@
+[
+  {
+    "tdot_item_no": "203-01",
+    "description": "Road & Drainage Excavation (Unclassified)",
+    "unit": "CY",
+    "avg_bid_price": 21.42,
+    "year": 2024,
+    "source": "TDOT Average Unit Bid Prices 2024"
+  },
+  {
+    "tdot_item_no": "203-01",
+    "description": "Road & Drainage Excavation (Unclassified)",
+    "unit": "CY",
+    "avg_bid_price": 30.65,
+    "year": 2025,
+    "source": "TDOT Average Unit Bid Prices 2025"
+  },
+  {
+    "tdot_item_no": "203-03",
+    "description": "Borrow Excavation (Unclassified)",
+    "unit": "CY",
+    "avg_bid_price": 28.24,
+    "year": 2024,
+    "source": "TDOT Average Unit Bid Prices 2024"
+  },
+  {
+    "tdot_item_no": "202-03.01",
+    "description": "Removal of Asphalt Pavement",
+    "unit": "SY",
+    "avg_bid_price": 11.56,
+    "year": 2024,
+    "source": "TDOT Average Unit Bid Prices 2024"
+  },
+  {
+    "tdot_item_no": "202-03.01",
+    "description": "Removal of Asphalt Pavement",
+    "unit": "SY",
+    "avg_bid_price": 13.34,
+    "year": 2025,
+    "source": "TDOT Average Unit Bid Prices 2025"
+  },
+  {
+    "tdot_item_no": "202-03",
+    "description": "Removal of Rigid Pavement, Sidewalk, etc.",
+    "unit": "SY",
+    "avg_bid_price": 85.03,
+    "year": 2024,
+    "source": "TDOT Average Unit Bid Prices 2024"
+  },
+  {
+    "tdot_item_no": "202-03",
+    "description": "Removal of Rigid Pavement, Sidewalk, etc.",
+    "unit": "SY",
+    "avg_bid_price": 41.03,
+    "year": 2025,
+    "source": "TDOT Average Unit Bid Prices 2025"
+  },
+  {
+    "tdot_item_no": "202-06.01",
+    "description": "Removal of Buildings (avg of 4 contracts)",
+    "unit": "LS",
+    "avg_bid_price": 24977.50,
+    "year": 2024,
+    "source": "TDOT Average Unit Bid Prices 2024"
+  },
+  {
+    "tdot_item_no": "710-02",
+    "description": "Aggregate Underdrains (With Pipe) [French Drain]",
+    "unit": "LF",
+    "avg_bid_price": 15.32,
+    "year": 2024,
+    "source": "TDOT Average Unit Bid Prices 2024"
+  },
+  {
+    "tdot_item_no": "710-04",
+    "description": "Filter Cloth Underdrain (With Pipe) [French Drain]",
+    "unit": "LF",
+    "avg_bid_price": 26.31,
+    "year": 2024,
+    "source": "TDOT Average Unit Bid Prices 2024"
+  },
+  {
+    "tdot_item_no": "795-01.02",
+    "description": "4\" DIP Slip Joint Water Line",
+    "unit": "LF",
+    "avg_bid_price": 130.00,
+    "year": 2024,
+    "source": "TDOT Average Unit Bid Prices 2024"
+  },
+  {
+    "tdot_item_no": "795-03.02",
+    "description": "2\" PVC Water Line",
+    "unit": "LF",
+    "avg_bid_price": 39.50,
+    "year": 2024,
+    "source": "TDOT Average Unit Bid Prices 2024"
+  },
+  {
+    "tdot_item_no": "797-05.51",
+    "description": "8\" PVC Gravity Sewer 0ft-6ft Depth",
+    "unit": "LF",
+    "avg_bid_price": 201.42,
+    "year": 2024,
+    "source": "TDOT Average Unit Bid Prices 2024"
+  },
+  {
+    "tdot_item_no": "710-09.02",
+    "description": "6\" Pipe Underdrain",
+    "unit": "LF",
+    "avg_bid_price": 40.50,
+    "year": 2024,
+    "source": "TDOT Average Unit Bid Prices 2024"
+  }
+]

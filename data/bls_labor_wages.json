@@ -1,0 +1,80 @@
+[
+  {
+    "soc_code": "47-2061",
+    "occupation": "Construction Laborers",
+    "mean_hourly_wage": 22.45,
+    "median_hourly_wage": 18.96,
+    "unit": "hr",
+    "region": "Nashville TN MSA",
+    "msa_code": "34980",
+    "msa_name": "Nashville-Davidson-Murfreesboro-Franklin, TN",
+    "source": "BLS OEWS May 2024 Metropolitan Area Estimates",
+    "source_url": "https://www.bls.gov/oes/tables.htm"
+  },
+  {
+    "soc_code": "47-2073",
+    "occupation": "Operating Engineers and Other Construction Equipment Operators",
+    "mean_hourly_wage": 25.58,
+    "median_hourly_wage": 22.21,
+    "unit": "hr",
+    "region": "Nashville TN MSA",
+    "msa_code": "34980",
+    "msa_name": "Nashville-Davidson-Murfreesboro-Franklin, TN",
+    "source": "BLS OEWS May 2024 Metropolitan Area Estimates"
+  },
+  {
+    "soc_code": "47-2151",
+    "occupation": "Pipelayers",
+    "mean_hourly_wage": 22.77,
+    "median_hourly_wage": 18.66,
+    "unit": "hr",
+    "region": "Nashville TN MSA",
+    "msa_code": "34980",
+    "msa_name": "Nashville-Davidson-Murfreesboro-Franklin, TN",
+    "source": "BLS OEWS May 2024 Metropolitan Area Estimates"
+  },
+  {
+    "soc_code": "47-2051",
+    "occupation": "Cement Masons and Concrete Finishers",
+    "mean_hourly_wage": 24.15,
+    "median_hourly_wage": 21.31,
+    "unit": "hr",
+    "region": "Nashville TN MSA",
+    "msa_code": "34980",
+    "msa_name": "Nashville-Davidson-Murfreesboro-Franklin, TN",
+    "source": "BLS OEWS May 2024 Metropolitan Area Estimates"
+  },
+  {
+    "soc_code": "37-3013",
+    "occupation": "Tree Trimmers and Pruners",
+    "mean_hourly_wage": 24.67,
+    "median_hourly_wage": 25.23,
+    "unit": "hr",
+    "region": "Nashville TN MSA",
+    "msa_code": "34980",
+    "msa_name": "Nashville-Davidson-Murfreesboro-Franklin, TN",
+    "source": "BLS OEWS May 2024 Metropolitan Area Estimates"
+  },
+  {
+    "soc_code": "47-2111",
+    "occupation": "Electricians",
+    "mean_hourly_wage": 29.83,
+    "median_hourly_wage": 29.18,
+    "unit": "hr",
+    "region": "Nashville TN MSA",
+    "msa_code": "34980",
+    "msa_name": "Nashville-Davidson-Murfreesboro-Franklin, TN",
+    "source": "BLS OEWS May 2024 Metropolitan Area Estimates"
+  },
+  {
+    "soc_code": "47-2152",
+    "occupation": "Plumbers, Pipefitters, and Steamfitters",
+    "mean_hourly_wage": 29.46,
+    "median_hourly_wage": 27.26,
+    "unit": "hr",
+    "region": "Nashville TN MSA",
+    "msa_code": "34980",
+    "msa_name": "Nashville-Davidson-Murfreesboro-Franklin, TN",
+    "source": "BLS OEWS May 2024 Metropolitan Area Estimates"
+  }
+]

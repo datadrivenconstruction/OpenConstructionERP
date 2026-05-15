@@ -1,0 +1,144 @@
+[
+  {
+    "equipment_code": "EXC-20T",
+    "name": "Hydraulic Excavator, Crawler, 20-ton class (CAT 320, 1.56 CY)",
+    "ownership_rate": 17.00,
+    "operating_rate": 43.94,
+    "total_hourly_rate": 60.94,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast",
+    "notes": "Average condition. Ownership rate includes depreciation + FCCM."
+  },
+  {
+    "equipment_code": "EXC-30T",
+    "name": "Hydraulic Excavator, Crawler, 30-ton class (CAT 326F, 0.69 CY)",
+    "ownership_rate": 20.77,
+    "operating_rate": 52.81,
+    "total_hourly_rate": 73.58,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "EXC-45T",
+    "name": "Hydraulic Excavator, Crawler, 45-ton class (CAT 335F CR, 2.01 CY)",
+    "ownership_rate": 27.51,
+    "operating_rate": 59.46,
+    "total_hourly_rate": 86.97,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "DOZ-D5",
+    "name": "Bulldozer D5 class (CAT D5K2 LGP, 104 HP, 3.06 CY blade)",
+    "ownership_rate": 19.17,
+    "operating_rate": 46.48,
+    "total_hourly_rate": 65.65,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "DOZ-D6",
+    "name": "Bulldozer D6 class (CAT D6N XL, 182 HP, 4.30 CY semi-U blade)",
+    "ownership_rate": 26.88,
+    "operating_rate": 71.37,
+    "total_hourly_rate": 98.25,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "DOZ-D7",
+    "name": "Bulldozer D7 class (CAT D7E, 270 HP, 8.98 CY semi-U blade)",
+    "ownership_rate": 50.47,
+    "operating_rate": 121.63,
+    "total_hourly_rate": 172.10,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "LDR-3CY",
+    "name": "Wheel Loader, 3.0 CY (CASE 721G, 195 HP, articulated 4x4)",
+    "ownership_rate": 25.51,
+    "operating_rate": 56.65,
+    "total_hourly_rate": 82.16,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "LDR-5CY",
+    "name": "Wheel Loader, 4.5 CY (CASE 821G, 230 HP, articulated 4x4)",
+    "ownership_rate": 30.64,
+    "operating_rate": 75.13,
+    "total_hourly_rate": 105.77,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "DTK-26T",
+    "name": "Off-Highway Dump Truck, Articulated, 26.5-ton (CAT 725C2, 19.6 CY)",
+    "ownership_rate": 28.19,
+    "operating_rate": 85.00,
+    "total_hourly_rate": 113.19,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "DTK-42T",
+    "name": "Off-Highway Dump Truck, Rigid, 42-ton (CAT 770G, 32.9 CY, 515 HP)",
+    "ownership_rate": 46.41,
+    "operating_rate": 109.78,
+    "total_hourly_rate": 156.19,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "CMP-5T",
+    "name": "Vibratory Roller, 5.2-ton (BOMAG BW138AD-5, double drum, 54.3\" wide)",
+    "ownership_rate": 8.89,
+    "operating_rate": 21.84,
+    "total_hourly_rate": 30.73,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "CMP-10T",
+    "name": "Vibratory Roller, 10.2-ton (BOMAG BW151AD-5, double drum, 66.1\" wide)",
+    "ownership_rate": 20.56,
+    "operating_rate": 44.28,
+    "total_hourly_rate": 64.84,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "GRD-12FT",
+    "name": "Motor Grader, 12-ft blade (CAT 120-M2, 145 HP, articulated 6x4)",
+    "ownership_rate": 19.63,
+    "operating_rate": 46.00,
+    "total_hourly_rate": 65.63,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast"
+  },
+  {
+    "equipment_code": "BRK-90LB",
+    "name": "Pavement Breaker, 90-lb, hand-held + 100 CFM compressor",
+    "ownership_rate": 0.28,
+    "operating_rate": 20.47,
+    "total_hourly_rate": 20.75,
+    "unit": "hr",
+    "region": "USA_SOUTHEAST",
+    "source": "USACE EP 1110-1-8, Dec 2022, Region 3 Southeast",
+    "notes": "Tool ($0.75/hr) + compressor estimate ($20/hr). Compressor rate estimated from portable air compressor class."
+  }
+]

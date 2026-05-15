@@ -1,0 +1,21 @@
+[
+  {
+    "code": "CON-CUR-01",
+    "description": "Concrete curb and gutter, formed and poured, 3500 PSI, including subgrade prep, 4\" #2A stone base, expansion joints, and curing",
+    "unit": "LF",
+    "rate": 14.67,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "03", "section": "3000", "category": "Cast-in-Place Concrete" },
+    "components": [],
+    "tags": ["concrete", "curb", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.24,
+      "equipment_hours_est": 0.035,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build",
+      "tdot_comparison": { "tdot_item": "608-01", "tdot_rate_2024": null, "note": "pending TDOT lookup" }
+    }
+  }
+]

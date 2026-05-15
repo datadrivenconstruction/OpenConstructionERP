@@ -1,0 +1,115 @@
+[
+  {
+    "material_code": "MAT-CON-DIS",
+    "description": "Concrete disposal/recycling",
+    "unit": "ton",
+    "rate": 65.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate",
+    "source_note": "Nashville area disposal facility pricing"
+  },
+  {
+    "material_code": "MAT-ASP-DIS",
+    "description": "Asphalt disposal/recycling",
+    "unit": "ton",
+    "rate": 55.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-DEB-DIS",
+    "description": "Mixed demolition debris disposal (wood, drywall, misc)",
+    "unit": "ton",
+    "rate": 85.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-FILL",
+    "description": "Structural fill dirt",
+    "unit": "CY",
+    "rate": 12.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-57-STONE",
+    "description": "#57 stone (3/4\" - 1\" crushed limestone)",
+    "unit": "CY",
+    "rate": 45.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-8-STONE",
+    "description": "#8 stone (3/8\" - 1/2\" washed gravel)",
+    "unit": "CY",
+    "rate": 55.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-SAND",
+    "description": "Sand bedding material",
+    "unit": "CY",
+    "rate": 35.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-GEOTEX",
+    "description": "Geotextile fabric (non-woven, 6 oz)",
+    "unit": "SF",
+    "rate": 0.85,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-PVC-4",
+    "description": "4\" PVC pipe (SDR-35 / Sched 40)",
+    "unit": "LF",
+    "rate": 3.50,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-PVC-6",
+    "description": "6\" PVC pipe (SDR-35 / Sched 40)",
+    "unit": "LF",
+    "rate": 5.25,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-DUMP-30",
+    "description": "Dumpster rental (30 yd roll-off, 7-day)",
+    "unit": "EA",
+    "rate": 650.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-SILT-FENCE",
+    "description": "Silt fence fabric",
+    "unit": "LF",
+    "rate": 0.85,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-STL-POST",
+    "description": "Steel posts (6 ft T-post)",
+    "unit": "EA",
+    "rate": 4.50,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-WIRE-BACK",
+    "description": "Wire backing for silt fence",
+    "unit": "LF",
+    "rate": 0.45,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  }
+]
