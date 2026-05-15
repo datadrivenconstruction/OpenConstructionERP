@@ -48,6 +48,19 @@ make db-reset         # DESTRUCTIVE: drop + recreate + migrate + seed
 # Single module: make module-test NAME=oe_boq
 ```
 
+## Importing Cost Data & Catalog Resources
+
+See `docs/cost-database-import.md` for full details on:
+- Flat-row import (CSV / Excel via `POST /api/v1/costs/import/file/`)
+- Resource-based recipe import (JSON via `POST /api/v1/costs/items`)
+- **Bulk JSON import from ZIP packages** (e.g. `tn_import_package.zip`) with catalog extraction
+
+Key scripts:
+- `scripts/import_tennessee_costs.py` — authenticated bulk import + validation + component code generation + catalog extraction trigger
+- `backend/app/scripts/extract_tennessee_catalog.py` — region-specific catalog extraction (commit-safe)
+
+> Architecture note: the "My Catalog" tab (`/catalog`) only shows `region='CUSTOM'` resources. Imported regional data appears as a separate region tab (e.g. `USA_TENNESSEE`).
+
 ## Local Dev Infrastructure (Docker)
 
 For day-to-day development with persistent data and hot-reload:

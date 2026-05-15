@@ -203,6 +203,165 @@ The smoke-test script `scripts/test_cost_import.py` performs all three checks pl
 
 ---
 
+## Method 3 — Bulk JSON import with catalog extraction (ZIP packages)
+
+Use this when you receive a packaged cost database (e.g. `tn_import_package.zip`) containing JSON files with full resource-based `components[]` arrays. This is the workflow used for importing regional data such as the Tennessee sitework and utilities cost sets.
+
+### What this workflow does
+
+1. **Bulk-import cost items** into `oe_costs_item` via `POST /api/v1/costs/bulk/`
+2. **Auto-generate component `code` fields** if missing (required for catalog extraction)
+3. **Extract catalog resources** from the imported cost item components so they become reusable in assemblies and the Resource Catalog
+
+### Step-by-step
+
+#### 1. Prepare the data
+
+Unzip the package and inspect the JSON files:
+
+```bash
+unzip -o tn_import_package.zip -d /tmp/tn_import
+ls /tmp/tn_import/tn_import_package/data/
+# us_tn_sitework_costs.json
+# us_tn_concrete_utilities_costs.json
+# material_rates.json
+```
+
+Each JSON file is a list of cost items. Example item shape:
+
+```json
+{
+  "code": "DEM-HSE-01",
+  "description": "Demolition of wood-frame residential structure...",
+  "unit": "SF",
+  "rate": 10.33,
+  "currency": "USD",
+  "region": "USA_TENNESSEE",
+  "source": "manual",
+  "classification": {"division": "02", "section": "4100", "category": "Selective Demolition"},
+  "components": [
+    {"type": "labor", "name": "Demolition crew labor...", "quantity": 0.12, "unit_rate": 22.45, "cost": 2.69, "unit": "hr"},
+    {"type": "equipment", "name": "Hydraulic Excavator 30-ton...", "quantity": 0.06, "unit_rate": 73.58, "cost": 4.41, "unit": "hr"},
+    {"type": "material", "name": "Dumpster rental...", "quantity": 0.003, "unit_rate": 650.00, "cost": 1.95, "unit": "EA"}
+  ],
+  "tags": ["demolition", "residential", "sitework", "nashville", "tn"],
+  "metadata": {"labor_hours": 0.12, "equipment_hours": 0.06, "validation_status": "pilot"}
+}
+```
+
+> **Important**: Each component **must have a `code`** for catalog extraction to work. If the source data omits `code` fields, the import script auto-generates them as `TN-{TYPE}-{slug}`.
+
+#### 2. Run the import script
+
+Use `scripts/import_tennessee_costs.py` (or adapt it for your region):
+
+```bash
+python scripts/import_tennessee_costs.py \
+  --email sergeilapp@gmail.com \
+  --password "your-password" \
+  --port 8000 \
+  --data-dir /tmp/tn_import/tn_import_package/data
+```
+
+This will:
+- Authenticate via `POST /api/v1/users/auth/login/`
+- Validate `rate == sum(components.cost)` for each item
+- Generate component codes if missing
+- Bulk-import via `POST /api/v1/costs/bulk/`
+- Verify items exist in the database
+
+#### 3. Extract catalog resources
+
+After cost items are imported, extract their components into the Resource Catalog so they can be reused in assemblies:
+
+```bash
+cd backend
+python -m app.scripts.extract_tennessee_catalog
+```
+
+Or call the API directly (requires `catalog.extract` permission, i.e. Manager/Admin role):
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/catalog/extract/" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+The extraction aggregates components by `(code, type)` across all active cost items, computes average/min/max rates, categorises resources, and inserts them into `oe_catalog_resource`.
+
+#### 4. Verify
+
+```bash
+# Cost items
+curl -s "http://localhost:8000/api/v1/costs/?region=USA_TENNESSEE&limit=5" \
+  -H "Authorization: Bearer $TOKEN" | jq '.total'
+
+# Catalog resources for the region
+curl -s "http://localhost:8000/api/v1/catalog/?region=USA_TENNESSEE&limit=5" \
+  -H "Authorization: Bearer $TOKEN" | jq '.total'
+
+# Loaded regions
+curl -s "http://localhost:8000/api/v1/catalog/regions/" \
+  -H "Authorization: Bearer $TOKEN" | jq .
+```
+
+### Architecture: Cost Database vs. Resource Catalog vs. "My Catalog"
+
+| Layer | Table | What it stores | Source |
+|-------|-------|---------------|--------|
+| **Cost Database** | `oe_costs_item` | Work positions / compositions with rates and component breakdowns | Bulk import, CSV, CWICR, manual |
+| **Resource Catalog** | `oe_catalog_resource` | Extracted leaf resources (materials, equipment, labour, operators) with prices | Extracted from cost item `components[]`, or GitHub CSV import |
+| **"My Catalog"** | `oe_catalog_resource` (region=`CUSTOM`) | User-created custom resources added one-by-one via the UI | Manual creation via `POST /api/v1/catalog/` |
+
+**Key point**: The "My Catalog" tab on `/catalog` only shows resources with `region='CUSTOM'`. Your imported regional data (e.g. `USA_TENNESSEE`) appears as a **separate region tab**, not under "My Catalog".
+
+### Why component codes matter
+
+The catalog extraction service (`CatalogResourceService.import_region_from_costs`) groups components by their `code` field:
+
+```python
+code = comp.get("code", "")
+if not code:
+    continue  # SKIP — component without code is invisible to the catalog
+```
+
+Without codes, components are silently skipped during extraction. The import script auto-generates codes using a slugified name hash:
+
+```python
+base = f"TN-{comp['type'][:3].upper()}-{slugify(comp['name'])}"
+```
+
+### Check existing data before importing
+
+Always verify whether the target region already has data:
+
+```bash
+# Check cost items
+curl -s "http://localhost:8000/api/v1/costs/?region=USA_TENNESSEE&limit=1" \
+  -H "Authorization: Bearer $TOKEN" | jq '.total'
+
+# Check catalog resources
+sqlite3 openestimate.db "SELECT COUNT(*) FROM oe_catalog_resource WHERE region='USA_TENNESSEE';"
+```
+
+The bulk import API skips duplicates by `code` within the same region, so re-running is safe. To force a clean re-import, delete the region first:
+
+```bash
+# Delete catalog resources for region
+curl -X DELETE "http://localhost:8000/api/v1/catalog/region/USA_TENNESSEE" \
+  -H "Authorization: Bearer $TOKEN"
+
+# Delete cost items for region (no bulk-delete endpoint — use direct SQL or delete individually)
+```
+
+### Scripts shipped with this repository
+
+| File | Purpose |
+|---|---|
+| `scripts/import_tennessee_costs.py` | Authenticated bulk import + validation + catalog extraction trigger for ZIP packages |
+| `backend/app/scripts/extract_tennessee_catalog.py` | Standalone backend script for region-specific catalog extraction with explicit `session.commit()` |
+
+---
+
 ## Reference templates shipped with this repository
 
 | File | Purpose |
