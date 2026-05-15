@@ -131,6 +131,124 @@ async def list_ai_providers() -> list[dict[str, Any]]:
     return _AI_PROVIDERS
 
 
+# ── Available Models ─────────────────────────────────────────────────────────
+
+_KNOWN_MODELS: dict[str, list[dict[str, str]]] = {
+    "anthropic": [
+        {"id": "claude-sonnet-4-20250514", "name": "Claude Sonnet 4"},
+        {"id": "claude-opus-4-20250514", "name": "Claude Opus 4"},
+        {"id": "claude-3-5-sonnet-20241022", "name": "Claude 3.5 Sonnet"},
+        {"id": "claude-3-5-haiku-20241022", "name": "Claude 3.5 Haiku"},
+    ],
+    "openai": [
+        {"id": "gpt-4o", "name": "GPT-4o"},
+        {"id": "gpt-4o-mini", "name": "GPT-4o Mini"},
+        {"id": "o1", "name": "o1"},
+        {"id": "o3-mini", "name": "o3 Mini"},
+        {"id": "gpt-4.1", "name": "GPT-4.1"},
+        {"id": "gpt-4.1-mini", "name": "GPT-4.1 Mini"},
+    ],
+    "gemini": [
+        {"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash"},
+        {"id": "gemini-2.5-pro", "name": "Gemini 2.5 Pro"},
+        {"id": "gemini-2.0-flash", "name": "Gemini 2.0 Flash"},
+    ],
+    "mistral": [
+        {"id": "mistral-large-latest", "name": "Mistral Large"},
+        {"id": "mistral-small-latest", "name": "Mistral Small"},
+        {"id": "codestral-latest", "name": "Codestral"},
+    ],
+    "groq": [
+        {"id": "llama-3.3-70b-versatile", "name": "Llama 3.3 70B"},
+        {"id": "llama-3.1-8b-instant", "name": "Llama 3.1 8B"},
+        {"id": "mixtral-8x7b-32768", "name": "Mixtral 8x7B"},
+        {"id": "gemma2-9b-it", "name": "Gemma 2 9B"},
+    ],
+    "deepseek": [
+        {"id": "deepseek-chat", "name": "DeepSeek Chat"},
+        {"id": "deepseek-reasoner", "name": "DeepSeek Reasoner"},
+    ],
+}
+
+
+@router.get(
+    "/models/",
+    summary="List available AI models for the current provider",
+    description="Returns a list of models available for the user's configured "
+    "AI provider. For OpenRouter, fetches live from the API. For other "
+    "providers, returns a curated list of known models.",
+)
+@router.get(
+    "/models",
+    summary="List available AI models for the current provider",
+    description="Returns a list of models available for the user's configured "
+    "AI provider. For OpenRouter, fetches live from the API. For other "
+    "providers, returns a curated list of known models.",
+)
+async def list_ai_models(
+    user_id: CurrentUserId,
+    session: AsyncSession = Depends(get_db),
+) -> list[dict[str, str]]:
+    """‌⁠‍Return available models for the user's AI provider."""
+    import httpx
+
+    from app.modules.ai.ai_client import resolve_provider_and_key
+    from app.modules.ai.repository import AISettingsRepository
+
+    settings_repo = AISettingsRepository(session)
+    uid = uuid.UUID(user_id)
+    settings = await settings_repo.get_by_user_id(uid)
+
+    if not settings:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No AI provider configured.",
+        )
+
+    provider, api_key, _ = resolve_provider_and_key(settings)
+
+    # OpenRouter: fetch live model list from API
+    if provider == "openrouter":
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get(
+                    "https://openrouter.ai/api/v1/models",
+                    headers={"Authorization": f"Bearer {api_key}"},
+                )
+                resp.raise_for_status()
+                data = resp.json()
+
+            models = []
+            for m in data.get("data", []):
+                mid = m.get("id", "")
+                # Only include text-generation models
+                if not mid or m.get("architecture", {}).get("modality") == "embeddings+text":
+                    continue
+                models.append({
+                    "id": mid,
+                    "name": m.get("name", mid),
+                })
+
+            # Sort by name for readability
+            models.sort(key=lambda x: x["name"].lower())
+            return models
+        except Exception as exc:
+            logger.warning("Failed to fetch OpenRouter models: %s", exc)
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Could not fetch models from OpenRouter: {exc}",
+            ) from exc
+
+    # Other providers: return known models
+    if provider in _KNOWN_MODELS:
+        return _KNOWN_MODELS[provider]
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=f"No model list available for provider: {provider}",
+    )
+
+
 # ── AI Settings ──────────────────────────────────────────────────────────────
 
 

@@ -155,6 +155,8 @@ function getAuthHeaders(): Record<string, string> {
 export const aiApi = {
   getSettings: () => apiGet<AISettings>('/v1/ai/settings/'),
 
+  getModels: () => apiGet<Array<{ id: string; name: string }>>('/v1/ai/models/'),
+
   updateSettings: (data: AISettingsUpdate) =>
     apiPatch<AISettings, AISettingsUpdate>('/v1/ai/settings/', data),
 

@@ -301,6 +301,31 @@ function AIConfigurationCard() {
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [hasUnsavedKey, setHasUnsavedKey] = useState(false);
+  const [customModel, setCustomModel] = useState('');
+  const [modelSearch, setModelSearch] = useState('');
+  const [modelDropdownOpen, setModelDropdownOpen] = useState(false);
+
+  // Fetch available models for the selected provider
+  const { data: availableModels = [], isLoading: modelsLoading } = useQuery({
+    queryKey: ['ai-models', selectedProvider],
+    queryFn: async () => {
+      try {
+        const res = await aiApi.getModels();
+        return res as Array<{ id: string; name: string }>;
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!selectedProvider,
+    staleTime: 10 * 60 * 1000, // 10 min
+  });
+
+  const filteredModels = availableModels.filter((m) =>
+    modelSearch
+      ? m.id.toLowerCase().includes(modelSearch.toLowerCase()) ||
+        m.name.toLowerCase().includes(modelSearch.toLowerCase())
+      : true,
+  ).slice(0, 50); // Cap at 50 for performance
 
   // Fetch current settings
   const { data: settings } = useQuery({
@@ -332,7 +357,16 @@ function AIConfigurationCard() {
         yandex: 'yandex',
       };
       const matched = Object.entries(providerMap).find(([key]) => model.includes(key));
-      if (matched) setSelectedProvider(matched[1]);
+      if (matched) {
+        setSelectedProvider(matched[1]);
+        // If the preferred_model looks like a real model ID (contains '/'),
+        // treat it as a custom model override.
+        if (model.includes('/')) {
+          setCustomModel(model);
+        } else {
+          setCustomModel('');
+        }
+      }
     } else if (settings?.provider) {
       setSelectedProvider(settings.provider);
     }
@@ -421,9 +455,21 @@ function AIConfigurationCard() {
     setApiKeyInput('');
     setHasUnsavedKey(false);
     setShowKey(false);
+    setCustomModel('');
+    setModelSearch('');
+    setModelDropdownOpen(false);
     aiApi.updateSettings({ preferred_model: provider }).then(() => {
       queryClient.invalidateQueries({ queryKey: ['ai-settings'] });
     }).catch(() => { /* ignore — will save on next explicit Save */ });
+  }, [queryClient]);
+
+  const handleModelSelect = useCallback((modelId: string) => {
+    setCustomModel(modelId);
+    setModelDropdownOpen(false);
+    setModelSearch('');
+    aiApi.updateSettings({ preferred_model: modelId }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['ai-settings'] });
+    }).catch(() => { /* ignore */ });
   }, [queryClient]);
 
   const handleKeyChange = useCallback((value: string) => {
@@ -514,6 +560,97 @@ function AIConfigurationCard() {
                 );
               })}
             </div>
+          </div>
+
+          {/* Model selector */}
+          <div>
+            <label className="text-sm font-medium text-content-primary block mb-1">
+              {t('settings.ai_model', { defaultValue: 'Model' })}
+            </label>
+            <p className="text-xs text-content-tertiary mb-3">
+              {selectedProvider === 'openrouter'
+                ? t('settings.ai_model_help_openrouter', { defaultValue: 'Choose from 300+ models via OpenRouter, or enter a custom model ID.' })
+                : t('settings.ai_model_help_other', { defaultValue: 'Select the specific model to use for this provider.' })}
+            </p>
+
+            <div className="relative">
+              {/* Search input / dropdown trigger */}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={modelSearch || customModel}
+                    onChange={(e) => {
+                      setModelSearch(e.target.value);
+                      setCustomModel(e.target.value);
+                      setModelDropdownOpen(true);
+                    }}
+                    onFocus={() => setModelDropdownOpen(true)}
+                    onBlur={() => {
+                      // Delay close so clicks on items register
+                      setTimeout(() => setModelDropdownOpen(false), 150);
+                    }}
+                    placeholder={modelSearch ? t('settings.ai_model_search', { defaultValue: 'Search models…' }) : (customModel || t('settings.ai_model_placeholder', { defaultValue: 'Select or type a model ID…' }))}
+                    className="w-full rounded-lg border-2 border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none transition-colors duration-fast"
+                  />
+                  {modelsLoading && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-content-tertiary border-t-oe-blue" />
+                    </div>
+                  )}
+                </div>
+                {customModel && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCustomModel('');
+                      setModelSearch('');
+                      aiApi.updateSettings({ preferred_model: selectedProvider }).then(() => {
+                        queryClient.invalidateQueries({ queryKey: ['ai-settings'] });
+                      }).catch(() => { /* ignore */ });
+                    }}
+                    className="rounded-lg border-2 border-border-light bg-surface-primary px-3 py-2 text-xs text-content-tertiary hover:text-content-primary hover:border-border transition-colors duration-fast"
+                    title={t('settings.ai_model_reset', { defaultValue: 'Reset to default model' })}
+                  >
+                    {t('settings.ai_model_reset_btn', { defaultValue: 'Reset' })}
+                  </button>
+                )}
+              </div>
+
+              {/* Dropdown */}
+              {modelDropdownOpen && filteredModels.length > 0 && (
+                <div className="absolute z-50 mt-1 w-full max-h-64 overflow-y-auto rounded-xl border-2 border-border-light bg-surface-primary shadow-lg">
+                  {filteredModels.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onMouseDown={() => handleModelSelect(m.id)}
+                      className={`w-full px-3 py-2 text-left text-sm transition-colors duration-fast ${
+                        customModel === m.id
+                          ? 'bg-oe-blue-subtle text-oe-blue'
+                          : 'text-content-primary hover:bg-surface-secondary'
+                      }`}
+                    >
+                      <span className="font-mono text-xs">{m.id}</span>
+                      {m.name !== m.id && (
+                        <span className="ml-2 text-xs text-content-tertiary">{m.name}</span>
+                      )}
+                    </button>
+                  ))}
+                  {filteredModels.length >= 50 && (
+                    <div className="px-3 py-1.5 text-xs text-content-tertiary border-t border-border-light">
+                      {t('settings.ai_model_more', { defaultValue: 'Type to search for more…' })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {customModel && customModel.includes('/') && (
+              <p className="mt-1.5 text-xs text-oe-blue">
+                {t('settings.ai_model_custom', { defaultValue: 'Using custom model:' })} <span className="font-mono">{customModel}</span>
+              </p>
+            )}
           </div>
 
           {/* API Key input */}
