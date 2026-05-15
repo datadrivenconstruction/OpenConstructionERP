@@ -134,7 +134,6 @@ async def llm_translate(
             system=_SYSTEM,
             prompt=prompt,
             model=preferred_model,
-            prompt=prompt,
             # Construction terms are short — cap response length so a
             # confused LLM can't generate paragraphs and inflate cost.
             max_tokens=128,

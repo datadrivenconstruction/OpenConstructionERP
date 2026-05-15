@@ -326,9 +326,14 @@ async def call_openai_compatible(
         msg = f"Unknown OpenAI-compatible provider: {provider}"
         raise ValueError(msg)
 
-    # Use caller-provided model if available, otherwise fall back to the
-    # provider's hardcoded default from _OPENAI_COMPAT_CONFIG.
-    model_name = model or config["model"]
+    # Use caller-provided model if it looks like a real model ID (contains
+    # a slash, e.g. "qwen/qwen3.6-flash").  Provider names like "openrouter"
+    # or "claude-sonnet" are preference hints, not actual model IDs — fall
+    # back to the provider's hardcoded default in those cases.
+    if model and "/" in model:
+        model_name = model
+    else:
+        model_name = config["model"]
 
     headers: dict[str, str] = {
         "Authorization": f"Bearer {api_key}",
