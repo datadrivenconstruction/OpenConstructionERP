@@ -187,7 +187,7 @@ _KNOWN_MODELS: dict[str, list[dict[str, str]]] = {
 )
 async def list_ai_models(
     user_id: CurrentUserId,
-    session: AsyncSession = Depends(get_db),
+    session: SessionDep,
 ) -> list[dict[str, str]]:
     """‌⁠‍Return available models for the user's AI provider."""
     import httpx
