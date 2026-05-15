@@ -26,6 +26,7 @@ interface RegionInfo {
 
 export const REGION_MAP: Record<string, RegionInfo> = {
   USA_USD: { label: 'USA (USD)', name: 'United States', flag: 'us', currency: 'USD' },
+  USA_TENNESSEE: { label: 'USA Tennessee (USD)', name: 'Tennessee', flag: 'us', currency: 'USD' },
   UK_GBP: { label: 'UK (GBP)', name: 'United Kingdom', flag: 'gb', currency: 'GBP' },
   DE_BERLIN: { label: 'Germany (EUR)', name: 'Germany / DACH', flag: 'de', currency: 'EUR' },
   ENG_TORONTO: { label: 'Canada (CAD)', name: 'Canada / International', flag: 'ca', currency: 'CAD' },

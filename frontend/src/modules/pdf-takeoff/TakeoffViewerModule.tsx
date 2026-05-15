@@ -55,6 +55,7 @@ import clsx from 'clsx';
 import { useToastStore } from '../../stores/useToastStore';
 import { useProjectContextStore } from '../../stores/useProjectContextStore';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { usePreferencesStore } from '../../stores/usePreferencesStore';
 import { boqApi, type CreatePositionData, type Position } from '../../features/boq/api';
 import { takeoffApi } from '../../features/takeoff/api';
 import { apiGet } from '../../shared/lib/api';
@@ -228,7 +229,9 @@ export default function TakeoffViewerModule({
   const [countLabel, setCountLabel] = useState(t('takeoff_viewer.default_count_label', { defaultValue: 'Element‌⁠‍' }));
 
   // Scale
-  const [scale, setScale] = useState<ScaleConfig>({ pixelsPerUnit: 100, unitLabel: 'm' });
+  const measurementSystem = usePreferencesStore((s) => s.measurementSystem);
+  const defaultUnit = measurementSystem === 'imperial' ? 'ft' : 'm';
+  const [scale, setScale] = useState<ScaleConfig>({ pixelsPerUnit: 100, unitLabel: defaultUnit });
   const [showScaleDialog, setShowScaleDialog] = useState(false);
   const [scaleRefPixels, setScaleRefPixels] = useState(0);
   const [scaleRefReal, setScaleRefReal] = useState(1);
@@ -1446,14 +1449,13 @@ export default function TakeoffViewerModule({
       setShowCalibrationDialog(false);
       setScalePoints([]);
       setIsCalibrated(true);
-      // Cache the derived "real length in meters" for the badge display.
-      // CalibrationDialog already converted to meters via deriveScale().
-      const meters = calibrationPixels > 0 ? calibrationPixels / nextScale.pixelsPerUnit : 0;
-      setLastCalibration({ realLength: meters, unit: 'm' });
+      const unit = nextScale.unitLabel as 'm' | 'mm' | 'ft' | 'in';
+      const realLength = calibrationPixels > 0 ? calibrationPixels / nextScale.pixelsPerUnit : 0;
+      setLastCalibration({ realLength, unit });
       addToast({
         type: 'success',
         title: t('takeoff_viewer.calibrated', { defaultValue: 'Scale calibrated' }),
-        message: `${formatScaleRatio(nextScale)} · ${meters.toFixed(2)} m`,
+        message: `${formatScaleRatio(nextScale)} · ${realLength.toFixed(2)} ${unit}`,
       });
     },
     [addToast, t, calibrationPixels],
@@ -1757,7 +1759,11 @@ export default function TakeoffViewerModule({
       let ordinalCounter = 1;
       const exportableMeasurements = measurements.filter((m) => !isAnnotationType(m.type));
       for (const m of exportableMeasurements) {
-        const unitMap: Record<string, string> = { m: 'm', 'm\u00B2': 'm2', 'm\u00B3': 'm3', pcs: 'pcs' };
+        const unitMap: Record<string, string> = {
+          m: 'm', 'm\u00B2': 'm2', 'm\u00B3': 'm3',
+          ft: 'ft', 'ft\u00B2': 'ft2', 'ft\u00B3': 'ft3',
+          pcs: 'pcs',
+        };
         const posData: CreatePositionData = {
           boq_id: selectedBoqId,
           ordinal: `TK.${String(ordinalCounter++).padStart(3, '0')}`,
@@ -1807,7 +1813,11 @@ export default function TakeoffViewerModule({
 
   /** Canonical unit normalization — maps display glyph → canonical backend unit. */
   const normalizeUnit = useCallback((unit: string) => {
-    const map: Record<string, string> = { m: 'm', 'm\u00B2': 'm2', 'm\u00B3': 'm3', pcs: 'pcs' };
+    const map: Record<string, string> = {
+      m: 'm', 'm\u00B2': 'm2', 'm\u00B3': 'm3',
+      ft: 'ft', 'ft\u00B2': 'ft2', 'ft\u00B3': 'ft3',
+      pcs: 'pcs',
+    };
     return map[unit] ?? unit;
   }, []);
 

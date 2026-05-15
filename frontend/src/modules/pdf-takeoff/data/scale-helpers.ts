@@ -89,18 +89,20 @@ export function formatMeasurement(value: number, unit: string): string {
 
 /** Derive scale from a known reference measurement.
  *  pixelLength = measured pixel distance on drawing
- *  realLength  = known real-world length in meters
+ *  realLength  = known real-world length (in the given unit)
+ *  unit        = display unit label (defaults to 'm')
  */
 export function deriveScale(
   pixelLength: number,
   realLength: number,
+  unit?: string,
 ): ScaleConfig {
   if (realLength <= 0 || pixelLength <= 0) {
-    return { pixelsPerUnit: 1, unitLabel: 'm' };
+    return { pixelsPerUnit: 1, unitLabel: unit ?? 'm' };
   }
   return {
     pixelsPerUnit: pixelLength / realLength,
-    unitLabel: 'm',
+    unitLabel: unit ?? 'm',
   };
 }
 

@@ -18,9 +18,9 @@ import { X, Ruler } from 'lucide-react';
 import {
   type CalibrationUnit,
   deriveScale,
-  toMeters,
   type ScaleConfig,
 } from '../../../modules/pdf-takeoff/data/scale-helpers';
+import { usePreferencesStore } from '@/stores/usePreferencesStore';
 
 export interface CalibrationDialogProps {
   /** Measured pixel distance between the two picked points. */
@@ -47,11 +47,13 @@ export function CalibrationDialog({
   onConfirm,
   onCancel,
   initialRealLength = 1,
-  initialUnit = 'm',
+  initialUnit,
 }: CalibrationDialogProps) {
   const { t } = useTranslation();
+  const measurementSystem = usePreferencesStore((s) => s.measurementSystem);
+  const defaultUnit: CalibrationUnit = initialUnit ?? (measurementSystem === 'imperial' ? 'ft' : 'm');
   const [realLength, setRealLength] = useState<string>(String(initialRealLength));
-  const [unit, setUnit] = useState<CalibrationUnit>(initialUnit);
+  const [unit, setUnit] = useState<CalibrationUnit>(defaultUnit);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -63,8 +65,7 @@ export function CalibrationDialog({
 
   const handleConfirm = () => {
     if (!isValid) return;
-    const meters = toMeters(parsed, unit);
-    onConfirm(deriveScale(pixelDistance, meters));
+    onConfirm(deriveScale(pixelDistance, parsed, unit));
   };
 
   return (

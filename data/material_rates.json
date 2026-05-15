@@ -111,5 +111,109 @@
     "rate": 0.45,
     "region": "USA_TENNESSEE",
     "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-CON-3500",
+    "description": "Ready-mix concrete, 3500 PSI, delivered",
+    "unit": "CY",
+    "rate": 225.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-ASP-HM",
+    "description": "Hot mix asphalt (surface course)",
+    "unit": "TON",
+    "rate": 135.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-2A-STONE",
+    "description": "#2A stone (crusher run, 3/4\" minus)",
+    "unit": "CY",
+    "rate": 40.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-CON-FORMS",
+    "description": "Form lumber + stakes for curb",
+    "unit": "LF",
+    "rate": 1.50,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-CON-JOINTS",
+    "description": "Expansion joint + curing compound",
+    "unit": "LF",
+    "rate": 0.40,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-PVC-3",
+    "description": "3\" PVC schedule 40 pipe",
+    "unit": "LF",
+    "rate": 2.50,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-PVC-15",
+    "description": "1.5\" PVC schedule 40 pipe",
+    "unit": "LF",
+    "rate": 1.50,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-STONE-DUST",
+    "description": "Stone dust / crusher run screenings",
+    "unit": "CY",
+    "rate": 28.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-RCP-18",
+    "description": "18\" reinforced concrete pipe (Class III)",
+    "unit": "LF",
+    "rate": 22.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-HDW-18",
+    "description": "Precast concrete headwall for 18\" RCP",
+    "unit": "EA",
+    "rate": 800.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-CORR-4",
+    "description": "4\" corrugated perforated HDPE pipe",
+    "unit": "LF",
+    "rate": 2.25,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-VB-10MIL",
+    "description": "Vapor barrier, 10 mil polyethylene",
+    "unit": "SF",
+    "rate": 0.25,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
+  },
+  {
+    "material_code": "MAT-RIP-RAP",
+    "description": "Rip rap stone / outlet protection",
+    "unit": "CY",
+    "rate": 45.00,
+    "region": "USA_TENNESSEE",
+    "source": "market_estimate"
   }
 ]

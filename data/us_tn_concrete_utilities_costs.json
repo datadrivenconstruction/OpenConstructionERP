@@ -3,19 +3,339 @@
     "code": "CON-CUR-01",
     "description": "Concrete curb and gutter, formed and poured, 3500 PSI, including subgrade prep, 4\" #2A stone base, expansion joints, and curing",
     "unit": "LF",
-    "rate": 14.67,
+    "rate": 15.20,
     "currency": "USD",
     "source": "manual",
     "region": "USA_TENNESSEE",
     "classification": { "division": "03", "section": "3000", "category": "Cast-in-Place Concrete" },
-    "components": [],
-    "tags": ["concrete", "curb", "sitework", "nashville", "tn"],
+    "components": [
+      { "type": "labor", "name": "Cement Mason/Finisher (forming and placing, SOC 47-2051)", "quantity": 0.10, "unit_rate": 24.15, "cost": 2.42, "unit": "hr" },
+      { "type": "labor", "name": "Construction Laborer (subgrade prep and place, SOC 47-2061)", "quantity": 0.05, "unit_rate": 22.45, "cost": 1.12, "unit": "hr" },
+      { "type": "equipment", "name": "Vibratory Roller 5.2-ton (BOMAG BW138AD-5, int. compaction)", "quantity": 0.01, "unit_rate": 30.73, "cost": 0.31, "unit": "hr" },
+      { "type": "material", "name": "Ready-mix concrete, 3500 PSI, delivered (0.042 CY/LF)", "quantity": 0.042, "unit_rate": 225.00, "cost": 9.45, "unit": "CY" },
+      { "type": "material", "name": "Form lumber + stakes for curb", "quantity": 1.00, "unit_rate": 1.50, "cost": 1.50, "unit": "LF" },
+      { "type": "material", "name": "Expansion joint + curing compound", "quantity": 1.00, "unit_rate": 0.40, "cost": 0.40, "unit": "LF" }
+    ],
+    "tags": ["concrete", "curb", "paving", "sitework", "nashville", "tn"],
     "metadata": {
-      "labor_hours_est": 0.24,
-      "equipment_hours_est": 0.035,
+      "labor_hours_est": 0.16,
+      "equipment_hours_est": 0.01,
       "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
       "validation_status": "pending_build",
       "tdot_comparison": { "tdot_item": "608-01", "tdot_rate_2024": null, "note": "pending TDOT lookup" }
+    }
+  },
+  {
+    "code": "CON-RCB-01",
+    "description": "Concrete ribbon curb (perimeter), formed and poured, 3500 PSI, single-sided form, narrow profile",
+    "unit": "LF",
+    "rate": 9.81,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "03", "section": "3000", "category": "Cast-in-Place Concrete" },
+    "components": [
+      { "type": "labor", "name": "Cement Mason/Finisher (forming and placing, SOC 47-2051)", "quantity": 0.07, "unit_rate": 24.15, "cost": 1.69, "unit": "hr" },
+      { "type": "labor", "name": "Construction Laborer (subgrade prep and place, SOC 47-2061)", "quantity": 0.03, "unit_rate": 22.45, "cost": 0.67, "unit": "hr" },
+      { "type": "equipment", "name": "Vibratory Roller 5.2-ton (BOMAG BW138AD-5, int. compaction)", "quantity": 0.005, "unit_rate": 30.73, "cost": 0.15, "unit": "hr" },
+      { "type": "material", "name": "Ready-mix concrete, 3500 PSI, delivered (0.024 CY/LF)", "quantity": 0.024, "unit_rate": 225.00, "cost": 5.40, "unit": "CY" },
+      { "type": "material", "name": "Form lumber + stakes for ribbon curb", "quantity": 1.00, "unit_rate": 1.50, "cost": 1.50, "unit": "LF" },
+      { "type": "material", "name": "Expansion joint + curing compound", "quantity": 1.00, "unit_rate": 0.40, "cost": 0.40, "unit": "LF" }
+    ],
+    "tags": ["concrete", "ribbon_curb", "paving", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.10,
+      "equipment_hours_est": 0.005,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build",
+      "tdot_comparison": { "tdot_item": "608-01", "tdot_rate_2024": null, "note": "pending TDOT lookup" }
+    }
+  },
+  {
+    "code": "ASP-PAV-01",
+    "description": "Asphalt pavement, 3.5\" hot mix surface course, placed and compacted, includes tack coat",
+    "unit": "SF",
+    "rate": 5.56,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "03", "section": "3210", "category": "Asphalt Paving" },
+    "components": [
+      { "type": "labor", "name": "Cement Mason/Finisher (screed and hand finish, SOC 47-2051)", "quantity": 0.008, "unit_rate": 24.15, "cost": 0.19, "unit": "hr" },
+      { "type": "labor", "name": "Operating Engineer (paver operator, SOC 47-2073)", "quantity": 0.006, "unit_rate": 25.58, "cost": 0.15, "unit": "hr" },
+      { "type": "equipment", "name": "Asphalt Paver (3-4 ton hopper, 10-12ft screed)", "quantity": 0.006, "unit_rate": 89.00, "cost": 0.53, "unit": "hr" },
+      { "type": "equipment", "name": "Vibratory Roller 10.2-ton (BOMAG BW151AD-5, compaction)", "quantity": 0.003, "unit_rate": 64.84, "cost": 0.19, "unit": "hr" },
+      { "type": "material", "name": "Hot mix asphalt (surface course, 3.5\" = 0.1125 ton/SF)", "quantity": 0.1125, "unit_rate": 135.00, "cost": 4.05, "unit": "TON" },
+      { "type": "material", "name": "Stone base, 8\" #2A crushed aggregate, placed and compacted", "quantity": 0.67, "unit_rate": 40.00, "cost": 0.27, "unit": "CY" },
+      { "type": "material", "name": "Tack coat (SS-1h emulsion, 0.05 gal/SF)", "quantity": 0.05, "unit_rate": 3.50, "cost": 0.18, "unit": "GAL" }
+    ],
+    "tags": ["asphalt", "paving", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.014,
+      "equipment_hours_est": 0.009,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build",
+      "tdot_comparison": { "tdot_item": "307-01.01 (4\" HM)", "tdot_rate_2024": null, "note": "pending TDOT lookup" }
+    }
+  },
+  {
+    "code": "STN-BSE-01",
+    "description": "Stone base, 8\" crushed aggregate (#2A), placed and compacted to 95% standard Proctor",
+    "unit": "SF",
+    "rate": 1.62,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "03", "section": "3210", "category": "Aggregate Base" },
+    "components": [
+      { "type": "labor", "name": "Operating Engineer (grader operator, SOC 47-2073)", "quantity": 0.002, "unit_rate": 25.58, "cost": 0.05, "unit": "hr" },
+      { "type": "labor", "name": "Construction Laborer (spread and compact, SOC 47-2061)", "quantity": 0.004, "unit_rate": 22.45, "cost": 0.09, "unit": "hr" },
+      { "type": "equipment", "name": "Motor Grader 12-ft blade (CAT 120-M2, spread)", "quantity": 0.002, "unit_rate": 65.63, "cost": 0.13, "unit": "hr" },
+      { "type": "equipment", "name": "Vibratory Roller 10.2-ton (BOMAG BW151AD-5, compaction)", "quantity": 0.002, "unit_rate": 64.84, "cost": 0.13, "unit": "hr" },
+      { "type": "material", "name": "#2A stone (crusher run, 3/4\" minus, 8\" loose = 0.67 CY/SF)", "quantity": 0.67, "unit_rate": 40.00, "cost": 1.22, "unit": "CY" }
+    ],
+    "tags": ["stone", "base", "aggregate", "paving", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.006,
+      "equipment_hours_est": 0.004,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build",
+      "tdot_comparison": { "tdot_item": "303-01 (6\" base)", "tdot_rate_2024": null, "note": "pending TDOT lookup" }
+    }
+  },
+  {
+    "code": "UT-ELC-01",
+    "description": "Electrical conduit, 3\" PVC schedule 40, installed in trench with stone dust bed and warning tape",
+    "unit": "LF",
+    "rate": 16.01,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "33", "section": "2600", "category": "Electrical Utilities" },
+    "components": [
+      { "type": "labor", "name": "Operating Engineer (excavator operator, SOC 47-2073)", "quantity": 0.08, "unit_rate": 25.58, "cost": 2.05, "unit": "hr" },
+      { "type": "labor", "name": "Construction Laborer (trench crew, SOC 47-2061)", "quantity": 0.12, "unit_rate": 22.45, "cost": 2.69, "unit": "hr" },
+      { "type": "labor", "name": "Electrician (conduit installation, SOC 47-2111)", "quantity": 0.06, "unit_rate": 29.83, "cost": 1.79, "unit": "hr" },
+      { "type": "equipment", "name": "Hydraulic Excavator 20-ton (CAT 320, trenching)", "quantity": 0.07, "unit_rate": 60.94, "cost": 4.27, "unit": "hr" },
+      { "type": "equipment", "name": "Vibratory Roller 5.2-ton (BOMAG BW138AD-5, backfill compaction)", "quantity": 0.04, "unit_rate": 30.73, "cost": 1.23, "unit": "hr" },
+      { "type": "material", "name": "3\" PVC schedule 40 pipe", "quantity": 1.05, "unit_rate": 2.50, "cost": 2.63, "unit": "LF" },
+      { "type": "material", "name": "Stone dust / crusher run screenings (6\" pipe bed)", "quantity": 0.04, "unit_rate": 28.00, "cost": 1.12, "unit": "CY" },
+      { "type": "material", "name": "Detectable warning tape (red, utility line)", "quantity": 1.00, "unit_rate": 0.23, "cost": 0.23, "unit": "LF" }
+    ],
+    "tags": ["electrical", "conduit", "utility", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.26,
+      "equipment_hours_est": 0.11,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build"
+    }
+  },
+  {
+    "code": "UT-COM-01",
+    "description": "Communications conduit, 1.5\" PVC schedule 40, pipe only (shares trench with UT-ELC-01, no separate trench cost)",
+    "unit": "LF",
+    "rate": 3.52,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "33", "section": "2700", "category": "Communications" },
+    "components": [
+      { "type": "labor", "name": "Construction Laborer (pull wire/conduit, SOC 47-2061)", "quantity": 0.02, "unit_rate": 22.45, "cost": 0.45, "unit": "hr" },
+      { "type": "labor", "name": "Electrician (conduit installation, SOC 47-2111)", "quantity": 0.05, "unit_rate": 29.83, "cost": 1.49, "unit": "hr" },
+      { "type": "material", "name": "1.5\" PVC schedule 40 pipe", "quantity": 1.05, "unit_rate": 1.50, "cost": 1.58, "unit": "LF" }
+    ],
+    "tags": ["communications", "conduit", "utility", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.07,
+      "equipment_hours_est": 0.00,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build",
+      "note": "Shares trench with UT-ELC-01; no separate trench labor/equipment"
+    }
+  },
+  {
+    "code": "UT-GAS-01",
+    "description": "Gas line trench, 3' wide x 3' deep, with stone dust backfill and warning tape (pipe installation by others)",
+    "unit": "LF",
+    "rate": 23.54,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "31", "section": "2300", "category": "Earthwork" },
+    "components": [
+      { "type": "labor", "name": "Operating Engineer (excavator operator, SOC 47-2073)", "quantity": 0.12, "unit_rate": 25.58, "cost": 3.07, "unit": "hr" },
+      { "type": "labor", "name": "Construction Laborer (trench crew, SOC 47-2061)", "quantity": 0.15, "unit_rate": 22.45, "cost": 3.37, "unit": "hr" },
+      { "type": "equipment", "name": "Hydraulic Excavator 20-ton (CAT 320, trenching)", "quantity": 0.10, "unit_rate": 60.94, "cost": 6.09, "unit": "hr" },
+      { "type": "equipment", "name": "Vibratory Roller 5.2-ton (BOMAG BW138AD-5, backfill compaction)", "quantity": 0.05, "unit_rate": 30.73, "cost": 1.54, "unit": "hr" },
+      { "type": "material", "name": "Stone dust / crusher run screenings (backfill, 0.33 CY/LF)", "quantity": 0.33, "unit_rate": 28.00, "cost": 9.24, "unit": "CY" },
+      { "type": "material", "name": "Detectable warning tape (yellow, gas line)", "quantity": 1.00, "unit_rate": 0.23, "cost": 0.23, "unit": "LF" }
+    ],
+    "tags": ["gas", "trench", "utility", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.27,
+      "equipment_hours_est": 0.15,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build",
+      "note": "Trench only; gas pipe installation by others"
+    }
+  },
+  {
+    "code": "STR-RCP-18",
+    "description": "18\" reinforced concrete pipe (Class III), installed in trench with full bedding and granular backfill",
+    "unit": "LF",
+    "rate": 44.67,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "33", "section": "4600", "category": "Storm Drainage" },
+    "components": [
+      { "type": "labor", "name": "Operating Engineer (excavator operator, SOC 47-2073)", "quantity": 0.10, "unit_rate": 25.58, "cost": 2.56, "unit": "hr" },
+      { "type": "labor", "name": "Pipelayer (pipe installation, SOC 47-2151)", "quantity": 0.15, "unit_rate": 22.77, "cost": 3.42, "unit": "hr" },
+      { "type": "labor", "name": "Construction Laborer (backfill/compaction, SOC 47-2061)", "quantity": 0.12, "unit_rate": 22.45, "cost": 2.69, "unit": "hr" },
+      { "type": "equipment", "name": "Hydraulic Excavator 20-ton (CAT 320, trenching and setting)", "quantity": 0.09, "unit_rate": 60.94, "cost": 5.48, "unit": "hr" },
+      { "type": "equipment", "name": "Vibratory Roller 5.2-ton (BOMAG BW138AD-5, compaction)", "quantity": 0.05, "unit_rate": 30.73, "cost": 1.54, "unit": "hr" },
+      { "type": "material", "name": "18\" reinforced concrete pipe (Class III)", "quantity": 1.05, "unit_rate": 22.00, "cost": 23.10, "unit": "LF" },
+      { "type": "material", "name": "Stone dust / crusher run screenings (pipe bedding, 0.06 CY/LF)", "quantity": 0.06, "unit_rate": 28.00, "cost": 1.68, "unit": "CY" },
+      { "type": "material", "name": "Granular backfill (0.15 CY/LF)", "quantity": 0.15, "unit_rate": 28.00, "cost": 4.20, "unit": "CY" }
+    ],
+    "tags": ["storm", "pipe", " RCP", "drainage", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.37,
+      "equipment_hours_est": 0.14,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build",
+      "tdot_comparison": { "tdot_item": "706-03.11 (18\" RCP)", "tdot_rate_2024": null, "note": "pending TDOT lookup" }
+    }
+  },
+  {
+    "code": "STR-HDW-01",
+    "description": "Precast concrete headwall with outlet protection and rip rap apron, for 18\" RCP",
+    "unit": "EA",
+    "rate": 1101.74,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "33", "section": "4600", "category": "Storm Drainage" },
+    "components": [
+      { "type": "labor", "name": "Operating Engineer (excavator operator, SOC 47-2073)", "quantity": 1.0, "unit_rate": 25.58, "cost": 25.58, "unit": "hr" },
+      { "type": "labor", "name": "Pipelayer (headwall setting, SOC 47-2151)", "quantity": 1.5, "unit_rate": 22.77, "cost": 34.16, "unit": "hr" },
+      { "type": "labor", "name": "Construction Laborer (rip rap placement, SOC 47-2061)", "quantity": 1.0, "unit_rate": 22.45, "cost": 22.45, "unit": "hr" },
+      { "type": "equipment", "name": "Hydraulic Excavator 30-ton (CAT 326F, setting headwall)", "quantity": 1.0, "unit_rate": 73.58, "cost": 73.58, "unit": "hr" },
+      { "type": "equipment", "name": "Hydraulic Excavator 20-ton (CAT 320, rip rap placement)", "quantity": 0.5, "unit_rate": 60.94, "cost": 30.47, "unit": "hr" },
+      { "type": "material", "name": "Precast concrete headwall for 18\" RCP", "quantity": 1.00, "unit_rate": 800.00, "cost": 800.00, "unit": "EA" },
+      { "type": "material", "name": "Rip rap stone / outlet protection (2 CY)", "quantity": 2.00, "unit_rate": 45.00, "cost": 90.00, "unit": "CY" },
+      { "type": "material", "name": "Geotextile fabric (30 SF)", "quantity": 30.00, "unit_rate": 0.85, "cost": 25.50, "unit": "SF" }
+    ],
+    "tags": ["storm", "headwall", "outlet", "drainage", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 3.5,
+      "equipment_hours_est": 1.5,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build",
+      "tdot_comparison": { "tdot_item": "601-03.1 (headwall)", "tdot_rate_2024": null, "note": "pending TDOT lookup" }
+    }
+  },
+  {
+    "code": "EXC-CRW-01",
+    "description": "Crawlspace and footer excavation, precision grade to ±1/4\", stockpile on site",
+    "unit": "CY",
+    "rate": 8.88,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "31", "section": "2300", "category": "Earthwork" },
+    "components": [
+      { "type": "labor", "name": "Operating Engineer (excavator operator, SOC 47-2073)", "quantity": 0.035, "unit_rate": 25.58, "cost": 0.90, "unit": "hr" },
+      { "type": "labor", "name": "Construction Laborer (precision grade and check, SOC 47-2061)", "quantity": 0.08, "unit_rate": 22.45, "cost": 1.80, "unit": "hr" },
+      { "type": "labor", "name": "Construction Laborer (stockpile and handle, SOC 47-2061)", "quantity": 0.06, "unit_rate": 22.45, "cost": 1.35, "unit": "hr" },
+      { "type": "equipment", "name": "Hydraulic Excavator 30-ton (CAT 326F)", "quantity": 0.035, "unit_rate": 73.58, "cost": 2.58, "unit": "hr" },
+      { "type": "equipment", "name": "Vibratory Roller 5.2-ton (BOMAG BW138AD-5, proof roll)", "quantity": 0.015, "unit_rate": 30.73, "cost": 0.46, "unit": "hr" },
+      { "type": "equipment", "name": "Wheel Loader 3.0 CY (CASE 721G, stockpile)", "quantity": 0.02, "unit_rate": 82.16, "cost": 1.64, "unit": "hr" },
+      { "type": "material", "name": "Grade stakes, string line, marking paint", "quantity": 0.10, "unit_rate": 1.50, "cost": 0.15, "unit": "EA" }
+    ],
+    "tags": ["excavation", "crawlspace", "foundation", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.175,
+      "equipment_hours_est": 0.07,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build",
+      "tdot_comparison": { "tdot_item": "203-01", "tdot_rate_2024": null, "note": "pending TDOT lookup" }
+    }
+  },
+  {
+    "code": "DRN-PRM-01",
+    "description": "Foundation perimeter drain, 4\" corrugated perforated HDPE pipe, geotextile wrap, #57 stone",
+    "unit": "LF",
+    "rate": 19.19,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "33", "section": "4600", "category": "Storm Drainage" },
+    "components": [
+      { "type": "labor", "name": "Operating Engineer (excavator operator, SOC 47-2073)", "quantity": 0.06, "unit_rate": 25.58, "cost": 1.53, "unit": "hr" },
+      { "type": "labor", "name": "Pipelayer (pipe installation, SOC 47-2151)", "quantity": 0.07, "unit_rate": 22.77, "cost": 1.59, "unit": "hr" },
+      { "type": "labor", "name": "Construction Laborer (backfill and wrap, SOC 47-2061)", "quantity": 0.06, "unit_rate": 22.45, "cost": 1.35, "unit": "hr" },
+      { "type": "equipment", "name": "Hydraulic Excavator 20-ton (CAT 320, trenching)", "quantity": 0.06, "unit_rate": 60.94, "cost": 3.66, "unit": "hr" },
+      { "type": "equipment", "name": "Vibratory Roller 5.2-ton (BOMAG BW138AD-5, compaction)", "quantity": 0.03, "unit_rate": 30.73, "cost": 0.92, "unit": "hr" },
+      { "type": "material", "name": "4\" corrugated perforated HDPE pipe", "quantity": 1.05, "unit_rate": 2.25, "cost": 2.36, "unit": "LF" },
+      { "type": "material", "name": "#57 stone (3/4\"-1\" crushed limestone, 4\" pipe zone)", "quantity": 0.04, "unit_rate": 45.00, "cost": 1.80, "unit": "CY" },
+      { "type": "material", "name": "Geotextile fabric (non-woven, 6 oz, trench wrap, 4 SF/LF)", "quantity": 4.00, "unit_rate": 0.85, "cost": 3.40, "unit": "SF" },
+      { "type": "material", "name": "Sand bedding material (2\" pipe zone)", "quantity": 0.02, "unit_rate": 35.00, "cost": 0.70, "unit": "CY" },
+      { "type": "material", "name": "PVC fittings and connectors (per LF allowance)", "quantity": 1.00, "unit_rate": 1.88, "cost": 1.88, "unit": "LF" }
+    ],
+    "tags": ["drainage", "perimeter", "foundation", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.19,
+      "equipment_hours_est": 0.09,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build",
+      "tdot_comparison": { "tdot_item": "710-04", "tdot_rate_2024": null, "note": "pending TDOT lookup" }
+    }
+  },
+  {
+    "code": "GRD-CRW-01",
+    "description": "Fine grade crawlspace + 10 mil vapor barrier + 4\" #57 stone over vapor barrier",
+    "unit": "SF",
+    "rate": 2.28,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "31", "section": "2200", "category": "Earthwork" },
+    "components": [
+      { "type": "labor", "name": "Operating Engineer (grader/finisher operator, SOC 47-2073)", "quantity": 0.001, "unit_rate": 25.58, "cost": 0.03, "unit": "hr" },
+      { "type": "labor", "name": "Construction Laborer (vapor barrier and stone placement, SOC 47-2061)", "quantity": 0.003, "unit_rate": 22.45, "cost": 0.07, "unit": "hr" },
+      { "type": "equipment", "name": "Bulldozer D6 class (CAT D6N XL, fine grade)", "quantity": 0.001, "unit_rate": 98.25, "cost": 0.10, "unit": "hr" },
+      { "type": "equipment", "name": "Vibratory Roller 5.2-ton (BOMAG BW138AD-5, stone compaction)", "quantity": 0.001, "unit_rate": 30.73, "cost": 0.03, "unit": "hr" },
+      { "type": "material", "name": "Vapor barrier, 10 mil polyethylene", "quantity": 1.00, "unit_rate": 0.25, "cost": 0.25, "unit": "SF" },
+      { "type": "material", "name": "#57 stone (3/4\"-1\" crushed limestone, 4\" = 0.04 CY/SF)", "quantity": 0.04, "unit_rate": 45.00, "cost": 1.80, "unit": "CY" }
+    ],
+    "tags": ["grading", "crawlspace", "vapor_barrier", "foundation", "sitework", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.004,
+      "equipment_hours_est": 0.002,
+      "data_sources": ["USACE EP 1110-1-8 (Region 3 Southeast)", "BLS OEWS May 2024 Nashville MSA"],
+      "validation_status": "pending_build"
+    }
+  },
+  {
+    "code": "EQP-RNT-HMR",
+    "description": "Excavator 30T with hydraulic hammer, monthly rental rate (176 hr month, rates include all operating costs)",
+    "unit": "MO",
+    "rate": 13499.20,
+    "currency": "USD",
+    "source": "manual",
+    "region": "USA_TENNESSEE",
+    "classification": { "division": "01", "section": "4100", "category": "Equipment" },
+    "components": [
+      { "type": "equipment", "name": "Hydraulic Excavator 30-ton with hydraulic hammer (CAT 326F + BRK-90LB equivalent)", "quantity": 176.00, "unit_rate": 76.70, "cost": 13499.20, "unit": "hr" }
+    ],
+    "tags": ["equipment", "rental", "excavator", "hydraulic_hammer", "nashville", "tn"],
+    "metadata": {
+      "labor_hours_est": 0.0,
+      "equipment_hours_est": 176.0,
+      "data_sources": ["Market estimate based on USACE EP 1110-1-8 (Region 3 Southeast)"],
+      "validation_status": "pending_build",
+      "note": "Monthly rate based on 176 hr/month. Hourly rate derived from USACE 30T ($73.58/hr) + estimated hammer operating cost"
     }
   }
 ]
