@@ -78,6 +78,7 @@ import { CataloguesPanelCard } from './CataloguesPanelCard';
 import { QdrantHealthCard } from './QdrantHealthCard';
 import { unwrapCataloguesPayload } from './catalogues-payload';
 import { MatchWizard } from './MatchWizard';
+import { MatchPipeline } from './MatchPipeline';
 import { MatchProgressCard } from './MatchProgressCard';
 import { MatchDetailPanel } from './MatchDetailPanel';
 import { NewSessionFromExcelModal } from './NewSessionFromExcelModal';
@@ -2127,6 +2128,90 @@ export function MatchElementsPage() {
 
       <ProjectContextCard projectId={projectId} />
 
+      {/* Pipeline entry card — the headline path. Shown when a project
+          is picked but no session is active yet. One click creates a
+          session and drops the user straight into the visible 7-stage
+          pipeline. The legacy step-wizard stays below for power users
+          who want to pre-pick catalogue / source / construction stage. */}
+      {projectId && !sessionId && !matchInFlight && (
+        <div className="mt-2 rounded-xl border border-indigo-200/70 dark:border-indigo-800/50 bg-gradient-to-br from-indigo-50/80 via-white to-white dark:from-indigo-950/30 dark:via-surface-primary dark:to-surface-primary p-4 shadow-sm">
+          <div className="flex items-start gap-3 flex-wrap">
+            <span className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200 inline-flex items-center justify-center shrink-0">
+              <Layers className="w-5 h-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-bold text-content-primary">
+                {t(
+                  'match_elements.pipeline.intro_title',
+                  'Open the visible match pipeline',
+                )}
+              </h3>
+              <p className="text-xs text-content-secondary mt-0.5 leading-relaxed">
+                {t(
+                  'match_elements.pipeline.intro_blurb',
+                  'Seven steps from CAD file to priced BoQ — Convert, Load, Schema, Filter, Group, Match, Rollup. Every step is visible, explained, and tunable (prompts, LLM provider, group keys).',
+                )}
+              </p>
+              <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                {[
+                  'Convert',
+                  'Load',
+                  'Schema',
+                  'Filter',
+                  'Group',
+                  'Match',
+                  'Rollup',
+                ].map((s, i) => (
+                  <span
+                    key={s}
+                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-content-tertiary"
+                  >
+                    <span className="px-1.5 py-0.5 rounded bg-surface-secondary border border-border">
+                      {i + 1}. {s}
+                    </span>
+                    {i < 6 && (
+                      <ChevronsRight className="w-2.5 h-2.5 opacity-50" />
+                    )}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5 shrink-0">
+              <button
+                onClick={() => createSessionMut.mutate()}
+                disabled={createSessionMut.isPending}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold bg-oe-blue text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {createSessionMut.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <PlayCircle className="w-4 h-4" />
+                )}
+                {t(
+                  'match_elements.pipeline.intro_cta',
+                  'Open the pipeline',
+                )}
+              </button>
+              {(sessionsQ.data?.length ?? 0) > 0 && (
+                <button
+                  onClick={() => {
+                    const last = sessionsQ.data?.[0];
+                    if (last) setSessionId(last.id);
+                  }}
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-border text-content-secondary hover:bg-surface-secondary"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  {t(
+                    'match_elements.pipeline.intro_resume',
+                    'Resume last session',
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* New wizard entry — visible only when no session is active.
           The wizard guides the user through stage → catalogue → source →
           run, then sets sessionId via onComplete to drop them into the
@@ -2209,6 +2294,14 @@ export function MatchElementsPage() {
 
       {projectId && sessionId && !matchInFlight && (
         <>
+          {/* Visible 7-stage pipeline — the headline UX. Sits above the
+              classic toolset so the estimator sees every step (Convert →
+              Load → Schema → Filter → Group → Match → Rollup), each with
+              status, output preview and a per-stage Adjust panel for
+              prompts / LLM provider / knobs. Collapsible — collapsing it
+              returns to the legacy single-shot flow below. */}
+          <MatchPipeline sessionId={sessionId} />
+
           {/* System-readiness row — three status cards (Catalogues +
               Embedder + Analytics) share a single horizontal row at lg+,
               stack vertically on smaller screens. Before this change they

@@ -61,13 +61,19 @@ from app.modules.projects.member_schemas import (
     AddProjectMemberRequest,
     ProjectMemberResponse,
 )
+from app.modules.projects import profile_service
 from app.modules.projects.schemas import (
+    FocusModePatch,
     MatchProjectSettingsRead,
     MatchProjectSettingsUpdate,
     MilestoneCreate,
     MilestoneResponse,
     MilestoneUpdate,
+    PresetRead,
+    ProfileSpec,
+    ProjectModuleRead,
     ProjectCreate,
+    ProjectProfileResult,
     ProjectResponse,
     ProjectUpdate,
     WBSCreate,
@@ -2542,3 +2548,147 @@ async def get_share_file(
             "X-Bundle-Format": "share-link",
         },
     )
+
+
+# ── Project setup wizard / profile (Slice 1) ──────────────────────────────
+#
+# Presentation-only module gating. Writing a ``ProjectProfile`` +
+# ``ProjectModule`` rows never unloads a module or blocks its API — it
+# only feeds the sidebar's visual emphasis (numbered route line for
+# enabled modules, greyed for the rest) and the wizard's live preview.
+# ``focus_mode_enabled=False`` returns the project to the legacy
+# "everything ungreyed" view. ``/wizard/presets`` is a two-segment
+# literal so it can never be shadowed by the one-segment
+# ``GET /{project_id}`` route above.
+
+
+def _user_uuid(user_id: str | None) -> uuid.UUID | None:
+    """Best-effort JWT-sub → UUID for the ``created_by`` audit column."""
+    if not user_id:
+        return None
+    try:
+        return uuid.UUID(str(user_id))
+    except (ValueError, TypeError):
+        return None
+
+
+@router.get(
+    "/wizard/presets",
+    response_model=list[PresetRead],
+    summary="List setup-wizard presets",
+    description="The deterministic preset library (BIM QC, Cost Estimation, "
+    "Full Lifecycle, …). Each preset resolves to its full module set so the "
+    "wizard's right-pane preview renders without a second call.",
+)
+async def list_wizard_presets(
+    user_id: CurrentUserId,
+) -> list[PresetRead]:
+    return profile_service.list_presets()
+
+
+@router.get(
+    "/{project_id}/profile",
+    response_model=ProjectProfileResult,
+    summary="Get a project's setup profile + resolved modules",
+)
+async def get_project_profile(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    service: ProjectService = Depends(_get_service),
+) -> ProjectProfileResult:
+    await _verify_project_owner(service, project_id, user_id, payload)
+    result = await profile_service.get_profile(service.session, project_id)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="This project has no setup profile yet. Run the wizard "
+            "(POST /{project_id}/profile) or GET /{project_id}/modules to "
+            "retrofit a default.",
+        )
+    return result
+
+
+@router.post(
+    "/{project_id}/profile",
+    response_model=ProjectProfileResult,
+    summary="Apply wizard answers to a project",
+    description="Upsert the profile and replace the project's module "
+    "assignment rows. Idempotent — re-posting recomputes from scratch.",
+)
+async def apply_project_profile(
+    project_id: uuid.UUID,
+    spec: ProfileSpec,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    service: ProjectService = Depends(_get_service),
+) -> ProjectProfileResult:
+    await _verify_project_owner(service, project_id, user_id, payload)
+    return await profile_service.apply_profile(
+        service.session, project_id, spec, _user_uuid(user_id),
+    )
+
+
+@router.post(
+    "/{project_id}/profile/recompute",
+    response_model=ProjectProfileResult,
+    summary="Re-run scoring with the stored profile",
+    description="Use after a module is added to the platform or scoring "
+    "weights are recalibrated. Keeps the saved wizard answers.",
+)
+async def recompute_project_profile(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    service: ProjectService = Depends(_get_service),
+) -> ProjectProfileResult:
+    await _verify_project_owner(service, project_id, user_id, payload)
+    try:
+        return await profile_service.recompute(service.session, project_id)
+    except LookupError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc),
+        ) from exc
+
+
+@router.patch(
+    "/{project_id}/profile/focus-mode",
+    response_model=ProjectProfileResult,
+    summary="Toggle the numbered/greyed sidebar focus mode",
+    description="Master switch. False = legacy view (every module ungreyed, "
+    "no route line). Auto-retrofits a default profile if none exists.",
+)
+async def set_project_focus_mode(
+    project_id: uuid.UUID,
+    body: FocusModePatch,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    service: ProjectService = Depends(_get_service),
+) -> ProjectProfileResult:
+    await _verify_project_owner(service, project_id, user_id, payload)
+    return await profile_service.set_focus_mode(
+        service.session, project_id, body.focus_mode_enabled,
+    )
+
+
+@router.get(
+    "/{project_id}/modules",
+    response_model=list[ProjectModuleRead],
+    summary="Resolved module assignments for the sidebar",
+    description="Phase-ordered, ordinal-numbered module rows. Retrofits a "
+    "default profile (focus mode off — legacy view) for projects created "
+    "before the wizard existed, so the sidebar always has data.",
+)
+async def list_project_modules(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    service: ProjectService = Depends(_get_service),
+) -> list[ProjectModuleRead]:
+    await _verify_project_owner(service, project_id, user_id, payload)
+    result = await profile_service.get_profile(service.session, project_id)
+    if result is None:
+        result = await profile_service.ensure_default_profile(
+            service.session, project_id,
+        )
+    return result.modules

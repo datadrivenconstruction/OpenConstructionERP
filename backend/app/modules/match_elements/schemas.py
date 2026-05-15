@@ -447,3 +447,105 @@ class AnalyticsResponse(BaseModel):
     by_ifc_class: list[AnalyticsBreakdown] = Field(default_factory=list)
     # Alerts
     alerts: list[AnalyticsAlert] = Field(default_factory=list)
+
+
+# ── Visible pipeline (v3034 — 7-stage match wizard) ──────────────────────
+
+StageName = Literal[
+    "convert", "load", "schema", "filter", "group", "match", "rollup",
+]
+StageStatus = Literal["pending", "running", "done", "error", "stale", "skipped"]
+
+
+class StageState(BaseModel):
+    """One stage row in the visible match pipeline timeline."""
+
+    stage_name: StageName
+    title: str
+    subtitle: str
+    explainer: str
+    uses_llm: bool
+    prompt_key: str | None = None
+    status: StageStatus
+    inputs: dict[str, Any] = Field(default_factory=dict)
+    output: dict[str, Any] = Field(default_factory=dict)
+    error: str | None = None
+    took_ms: int | None = None
+    prompt_template_id: str | None = None
+    llm_provider: str | None = None
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class StageListResponse(BaseModel):
+    session_id: uuid.UUID
+    stages: list[StageState]
+
+
+class RunStageRequest(BaseModel):
+    """Re-run a single stage, optionally with tuned knobs.
+
+    All fields are optional — an empty body re-runs the stage with the
+    state already stored on its row (or the session defaults if it has
+    never run). ``inputs`` replaces the stage's stored inputs envelope.
+    """
+
+    inputs: dict[str, Any] | None = None
+    prompt_template_id: uuid.UUID | None = None
+    llm_provider: str | None = None
+
+
+class RunStageResponse(BaseModel):
+    stage_name: StageName
+    status: StageStatus
+    output: dict[str, Any] = Field(default_factory=dict)
+    error: str | None = None
+    took_ms: int | None = None
+
+
+class PromptTemplateRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    key: str
+    name: str
+    description: str | None = None
+    system_prompt: str
+    user_template: str
+    allowed_providers: str | None = None
+    version: int
+    is_system: bool
+    created_by: uuid.UUID | None = None
+    forked_from_id: uuid.UUID | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class PromptTemplateCreate(BaseModel):
+    """Create a user prompt — typically a fork of a system prompt.
+
+    Pass ``forked_from_id`` to record provenance; the UI shows
+    "edited from <system prompt name>". ``key`` must be one of the
+    stage hook keys (``schema.header_aggregation``,
+    ``filter.building_classifier``, ``group.key_picker``,
+    ``match.cost_agent``).
+    """
+
+    key: str
+    name: str
+    description: str | None = None
+    system_prompt: str = ""
+    user_template: str
+    allowed_providers: str | None = None
+    forked_from_id: uuid.UUID | None = None
+
+
+class PromptTemplateUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    system_prompt: str | None = None
+    user_template: str | None = None
+    allowed_providers: str | None = None
+
+

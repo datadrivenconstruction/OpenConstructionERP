@@ -300,6 +300,29 @@ export async function installBIMConverter(
   );
 }
 
+/** Lightweight progress poll for an in-flight converter install.
+ *  Returns ``{active: false}`` when no install is running, or
+ *  ``{active: true, stage, current, total, bytes_done, file, started_at}``
+ *  while files are downloading. The frontend polls every 500 ms while
+ *  the install mutation is pending. */
+export interface BIMConverterInstallProgress {
+  active: boolean;
+  stage?: 'listing' | 'downloading' | 'verifying';
+  current?: number;
+  total?: number;
+  bytes_done?: number;
+  file?: string | null;
+  started_at?: number;
+}
+
+export async function fetchBIMConverterInstallProgress(
+  converterId: string,
+): Promise<BIMConverterInstallProgress> {
+  return apiGet<BIMConverterInstallProgress>(
+    `/v1/takeoff/converters/${encodeURIComponent(converterId)}/install-progress/`,
+  );
+}
+
 /* ── API Functions ─────────────────────────────────────────────────────── */
 
 /** Fetch all BIM models for a project. */

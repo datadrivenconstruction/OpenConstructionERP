@@ -140,6 +140,69 @@ export interface ProjectDashboard {
   punch_items: Record<string, number>;
 }
 
+/* ── Project setup wizard / profile (Slice 1+2) ──────────────────────── */
+
+/** One preset card for the wizard's preset step. Mirrors backend
+ *  `PresetRead`. `modules` is the resolved full set so the live preview
+ *  renders without a second round-trip. */
+export interface WizardPreset {
+  id: string;
+  icon: string;
+  label_key: string;
+  label_en: string;
+  blurb_en: string;
+  modules: string[];
+  module_count: number;
+}
+
+/** Wizard answers → applied to a project. Mirrors backend `ProfileSpec`. */
+export interface ProfileSpec {
+  preset: string;
+  activity: string[];
+  phases: string[];
+  role?: string | null;
+  size?: string | null;
+  region?: string | null;
+  language?: string | null;
+  extensions_enabled: string[];
+  focus_mode_enabled: boolean;
+  setup_completion?: Record<string, unknown>;
+  /** Force a module on/off after scoring, e.g. {"finance": true}. */
+  manual_overrides?: Record<string, boolean>;
+}
+
+export interface ProjectModule {
+  module_name: string;
+  enabled: boolean;
+  tier: 'must' | 'recommended' | 'optional' | 'hidden';
+  score: number;
+  phase: string;
+  source: string;
+  ordinal?: number | null;
+  why?: string | null;
+}
+
+export interface ProjectProfile {
+  project_id: string;
+  preset: string;
+  activity: string[];
+  phases: string[];
+  role?: string | null;
+  size?: string | null;
+  region?: string | null;
+  language?: string | null;
+  extensions_enabled: string[];
+  focus_mode_enabled: boolean;
+  setup_completion: Record<string, unknown>;
+}
+
+export interface ProjectProfileResult {
+  profile: ProjectProfile;
+  modules: ProjectModule[];
+  enabled_count: number;
+  must_count: number;
+}
+
 export const projectsApi = {
   list: () => apiGet<Project[]>('/v1/projects/'),
   get: (id: string) => apiGet<Project>(`/v1/projects/${id}`),
@@ -158,4 +221,19 @@ export const projectsApi = {
   duplicate: (id: string) =>
     apiPost<Project>(`/v1/projects/${id}/duplicate/`, {}),
   dashboard: (id: string) => apiGet<ProjectDashboard>(`/v1/projects/${id}/dashboard/`),
+
+  /* ── setup wizard / profile ─────────────────────────────────────── */
+  wizardPresets: () => apiGet<WizardPreset[]>('/v1/projects/wizard/presets'),
+  getProfile: (id: string) =>
+    apiGet<ProjectProfileResult>(`/v1/projects/${id}/profile`),
+  applyProfile: (id: string, spec: ProfileSpec) =>
+    apiPost<ProjectProfileResult>(`/v1/projects/${id}/profile`, spec),
+  recomputeProfile: (id: string) =>
+    apiPost<ProjectProfileResult>(`/v1/projects/${id}/profile/recompute`, {}),
+  setFocusMode: (id: string, enabled: boolean) =>
+    apiPatch<ProjectProfileResult>(`/v1/projects/${id}/profile/focus-mode`, {
+      focus_mode_enabled: enabled,
+    }),
+  listModules: (id: string) =>
+    apiGet<ProjectModule[]>(`/v1/projects/${id}/modules`),
 };

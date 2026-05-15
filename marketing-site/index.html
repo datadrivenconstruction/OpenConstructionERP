@@ -11162,14 +11162,14 @@
             "@type": "HowToStep",
             "position": 2,
             "name": "Run the install command",
-            "text": "Pip path: run 'pip install openconstructionerp'. Docker path: run 'docker compose up' inside a checkout of the repo. Shell path: run 'curl -fsSL get.openconstructionerp.com | sh'. Each path bootstraps PostgreSQL (or SQLite for dev), seeds the CWICR cost database with 55,000+ items, and starts the API at port 8000.",
+            "text": "Pip path: run 'pip install openconstructionerp' (SQLite, no extra services). Docker path: 'git clone https://github.com/datadrivenconstruction/OpenConstructionERP && cd OpenConstructionERP && make quickstart'. Shell path: 'curl -fsSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.sh | bash' (auto-detects Docker / uv / pip). Each path bootstraps the database, seeds the CWICR cost database with 55,000+ items, and serves the app at port 8080.",
             "url": "https://openconstructionerp.com/#install"
           },
           {
             "@type": "HowToStep",
             "position": 3,
             "name": "Open the app",
-            "text": "Visit http://localhost:8000 in a browser. Log in with the demo credentials shown in the installer output, or self-register the first admin account. The full ERP — BOQ, takeoff, schedules, tenders, contracts, validation, reporting — is immediately available."
+            "text": "Visit http://localhost:8080 in a browser (pip, Docker and the one-line installer all serve there; the clone-and-npm dev setup runs on http://localhost:5173). Log in with the demo credentials shown in the installer output, or self-register the first admin account. The full ERP — BOQ, takeoff, schedules, tenders, contracts, validation, reporting — is immediately available."
           }
         ]
       },
@@ -11581,8 +11581,8 @@
       <div class="install-wrap" id="install-wrap">
         <div class="install-tabs" role="tablist" aria-label="Install method">
           <button type="button" class="install-tab is-active" data-cmd="pip install openconstructionerp" role="tab" aria-selected="true">pip</button>
-          <button type="button" class="install-tab" data-cmd="docker compose up" role="tab" aria-selected="false">docker</button>
-          <button type="button" class="install-tab" data-cmd="curl -fsSL get.openconstructionerp.com | sh" role="tab" aria-selected="false">curl</button>
+          <button type="button" class="install-tab" data-cmd="git clone https://github.com/datadrivenconstruction/OpenConstructionERP &amp;&amp; cd OpenConstructionERP &amp;&amp; make quickstart" role="tab" aria-selected="false">docker</button>
+          <button type="button" class="install-tab" data-cmd="curl -fsSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.sh | bash" role="tab" aria-selected="false">curl</button>
         </div>
         <div class="install-block" id="install-block">
           <div class="copy-toast" id="copy-toast">COPIED</div>
@@ -15590,11 +15590,11 @@ manifest = <span class="tok-fn">ModuleManifest</span>(
             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4"/><path d="M12 18v4"/><circle cx="12" cy="12" r="4"/></svg>
             pip
           </button>
-          <button type="button" class="final-install-tab" data-cmd="docker compose up" role="tab" aria-selected="false">
+          <button type="button" class="final-install-tab" data-cmd="git clone https://github.com/datadrivenconstruction/OpenConstructionERP &amp;&amp; cd OpenConstructionERP &amp;&amp; make quickstart" role="tab" aria-selected="false">
             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="5" height="5"/><rect x="9" y="8" width="5" height="5"/><rect x="15" y="8" width="5" height="5"/><rect x="9" y="2" width="5" height="5"/><path d="M3 13v3a3 3 0 0 0 3 3h13a4 4 0 0 0 4-4v-2H3z"/></svg>
             docker
           </button>
-          <button type="button" class="final-install-tab" data-cmd="curl -fsSL get.openconstructionerp.com | sh" role="tab" aria-selected="false">
+          <button type="button" class="final-install-tab" data-cmd="curl -fsSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.sh | bash" role="tab" aria-selected="false">
             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
             curl
           </button>

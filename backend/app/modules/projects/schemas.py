@@ -814,3 +814,84 @@ class MatchProjectSettingsUpdate(BaseModel):
     @classmethod
     def _check_sources(cls, v: list[str] | None) -> list[str] | None:
         return None if v is None else _validate_sources(v)
+
+
+# ── Project-creation wizard (Slice 1 — profile + presets + modules) ──────
+
+
+class PresetRead(BaseModel):
+    """One preset card for the wizard's step 1."""
+
+    id: str
+    icon: str
+    label_key: str
+    label_en: str
+    blurb_en: str
+    # Resolved full module set (ALWAYS_ON ∪ extras) so the right-pane
+    # live preview can render without a second call.
+    modules: list[str]
+    module_count: int
+
+
+class ProfileSpec(BaseModel):
+    """Wizard answers → apply to a project (POST body)."""
+
+    preset: str = "custom"
+    activity: list[str] = Field(default_factory=list)
+    phases: list[str] = Field(default_factory=list)
+    role: str | None = None
+    size: str | None = None
+    region: str | None = None
+    language: str | None = None
+    extensions_enabled: list[str] = Field(default_factory=list)
+    focus_mode_enabled: bool = True
+    setup_completion: dict[str, Any] = Field(default_factory=dict)
+    # Optional manual overrides applied AFTER scoring: force a module on
+    # / off regardless of tier. {"finance": true, "safety": false}
+    manual_overrides: dict[str, bool] = Field(default_factory=dict)
+
+
+class ProjectModuleRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    module_name: str
+    enabled: bool
+    tier: str
+    score: int
+    phase: str
+    source: str
+    ordinal: int | None = None
+    why: str | None = None
+
+
+class ProjectProfileRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    project_id: UUID
+    preset: str
+    activity: list[str]
+    phases: list[str]
+    role: str | None
+    size: str | None
+    region: str | None
+    language: str | None
+    extensions_enabled: list[str]
+    focus_mode_enabled: bool
+    setup_completion: dict[str, Any]
+
+
+class ProjectProfileResult(BaseModel):
+    """Profile + the resolved module assignment (apply / get response)."""
+
+    profile: ProjectProfileRead
+    modules: list[ProjectModuleRead]
+    enabled_count: int
+    must_count: int
+
+
+class FocusModePatch(BaseModel):
+    """Master switch for the numbered/greyed sidebar mode."""
+
+    focus_mode_enabled: bool
+
+

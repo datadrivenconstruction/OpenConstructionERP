@@ -30,7 +30,24 @@ from app.modules.takeoff.router import (
     _MAX_DOWNLOAD_BYTES,
     _check_download_url_allowed,
     _download_one_file,
+    _verify_pe_executable,
 )
+
+
+def _minimal_pe(pe_off: int = 0x80) -> bytes:
+    """Build the smallest buffer that satisfies the PE structural
+    checks: 'MZ' at 0, e_lfanew (LE uint32 @0x3C) → ``pe_off``,
+    'PE\\0\\0' at ``pe_off``, plus a DOS stub containing real newline
+    (0x0A) bytes so a CRLF-mangle replace actually shifts the header
+    (mirrors a genuine binary; an all-zero stub would make the
+    corruption test a no-op)."""
+    buf = bytearray(b"MZ" + b"\x00" * (0x40 - 2))
+    buf[0x3C:0x40] = pe_off.to_bytes(4, "little")
+    # DOS stub with embedded 0x0A bytes, padded out to pe_off.
+    stub = b"This program cannot be run in DOS mode.\x0d\x0a\x0a$"
+    buf += stub + b"\x00" * (pe_off - len(buf) - len(stub))
+    buf += b"PE\x00\x00" + b"\x00" * 64  # header + padding so size > pe_off+4
+    return bytes(buf)
 
 
 # ── A2: host allow-list --------------------------------------------------
@@ -197,6 +214,55 @@ def test_streaming_writes_small_body_through(
     )
     assert written == len(body)
     assert target.read_bytes() == body
+
+
+# ── PE integrity gate (WinError 216 root-cause defence) -----------------
+
+
+def test_verify_accepts_well_formed_pe(tmp_path: Path) -> None:
+    """A structurally valid PE returns ``None`` (no problem)."""
+    p = tmp_path / "RvtExporter.exe"
+    p.write_bytes(_minimal_pe())
+    assert _verify_pe_executable(p) is None
+
+
+def test_verify_rejects_missing_mz(tmp_path: Path) -> None:
+    """A renamed ZIP / HTML error page (no 'MZ') is rejected."""
+    p = tmp_path / "RvtExporter.exe"
+    p.write_bytes(b"PK\x03\x04" + b"\x00" * 200)
+    reason = _verify_pe_executable(p)
+    assert reason is not None and "MZ" in reason
+
+
+def test_verify_rejects_crlf_mangled_binary(tmp_path: Path) -> None:
+    """The exact WinError 216 corruption: every 0x0A rewritten as
+    0x0D 0x0A shifts the PE header so the signature is no longer where
+    e_lfanew points. This MUST be caught at install time."""
+    mangled = _minimal_pe().replace(b"\x0a", b"\x0d\x0a")
+    p = tmp_path / "RvtExporter.exe"
+    p.write_bytes(mangled)
+    reason = _verify_pe_executable(p)
+    assert reason is not None and "PE signature" in reason
+
+
+def test_verify_rejects_truncated_file(tmp_path: Path) -> None:
+    """A truncated download (smaller than the DOS header) is rejected."""
+    p = tmp_path / "RvtExporter.exe"
+    p.write_bytes(b"MZ" + b"\x00" * 8)
+    assert _verify_pe_executable(p) is not None
+
+
+def test_verify_rejects_e_lfanew_past_eof(tmp_path: Path) -> None:
+    """e_lfanew pointing beyond the file (truncation/corruption) fails
+    before we try to seek to a bogus offset."""
+    # Valid 64-byte DOS header whose e_lfanew claims the PE header is
+    # at 0x9000 — but the file is only 64 bytes.
+    buf = bytearray(b"MZ" + b"\x00" * (0x40 - 2))
+    buf[0x3C:0x40] = (0x9000).to_bytes(4, "little")
+    p = tmp_path / "RvtExporter.exe"
+    p.write_bytes(bytes(buf))
+    reason = _verify_pe_executable(p)
+    assert reason is not None and "e_lfanew" in reason
 
 
 # ── A9: symlink/TOCTOU ---------------------------------------------------

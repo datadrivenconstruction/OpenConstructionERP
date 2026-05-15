@@ -377,3 +377,139 @@ class MatchSearchLog(Base):
             f"hits={self.hits_count} tier={self.relax_tier_used} "
             f"top={self.top_score}>"
         )
+
+
+class MatchStageState(Base):
+    """Per-session × per-stage runtime state for the visible pipeline.
+
+    The pipeline has seven named stages — ``convert``, ``load``, ``schema``,
+    ``filter``, ``group``, ``match``, ``rollup``. Each gets exactly one row
+    per session; ``status`` advances pending → running → done | error so
+    the UI can render a status pill, an output preview, and a "Re-run from
+    here" button per stage.
+
+    ``inputs`` and ``output`` are JSON envelopes the stage runner writes —
+    inputs capture the knobs (group_by, filter expression, prompt body,
+    LLM provider, threshold) so the user can tweak and re-run; output
+    captures a small preview (row count, sample rows, score histogram)
+    plus pointers into the underlying tables (matched group_ids, etc.).
+    The full element/candidate payload stays in the existing tables —
+    this row is the audit + control surface.
+    """
+
+    __tablename__ = "oe_match_elements_stage"
+    __table_args__ = (
+        UniqueConstraint("session_id", "stage_name", name="uq_match_stage_session_name"),
+        Index("ix_match_stage_session", "session_id"),
+        Index("ix_match_stage_status", "status"),
+    )
+
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_match_elements_session.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    stage_name: Mapped[str] = mapped_column(String(32), nullable=False)
+    # pending | running | done | error | skipped
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="pending", server_default="pending",
+    )
+    # Stage-specific knobs (group_by override, filter expression, prompt
+    # template id, LLM provider/model, threshold...). Default = inherited
+    # from session config.
+    inputs: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=dict, server_default="{}",
+    )
+    # Stage output envelope — never the raw payload, just a small preview:
+    # element_count, sample rows, top-N scores, summary metrics. Used by
+    # the StageCard to render the "what happened" panel without a second
+    # roundtrip.
+    output: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=dict, server_default="{}",
+    )
+    # Last error message when status == "error", or NULL otherwise.
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    took_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # ``oe_match_elements_prompt_template.id`` when the stage uses an LLM
+    # prompt. NULL for non-LLM stages (load, schema, group, rollup).
+    prompt_template_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(), nullable=True,
+    )
+    # LLM provider/model — only set when prompt_template_id is set. e.g.
+    # ``"anthropic/claude-sonnet-4-6"``, ``"openai/gpt-4o"``,
+    # ``"local/ollama-mistral"``.
+    llm_provider: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True,
+    )
+    finished_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True,
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<MatchStageState session={self.session_id} "
+            f"stage={self.stage_name} status={self.status}>"
+        )
+
+
+class MatchPromptTemplate(Base):
+    """User-editable prompt templates that drive the LLM-augmented stages.
+
+    Two kinds of rows live here:
+
+    * **System prompts** (``is_system=True``, ``created_by=NULL``) — seeded
+      by the migration from the n8n workflow we ported from. The user
+      cannot edit a system row directly; the UI offers a "Fork" action
+      that copies it into a user-owned row.
+    * **User prompts** (``is_system=False``, ``created_by`` set) — created
+      by forking a system prompt or by typing a new one from scratch.
+      Fully editable; carry their own ``version`` so an estimator can
+      revert.
+
+    ``key`` is the stage hook the prompt plugs into:
+    ``schema.header_aggregation``, ``filter.building_classifier``,
+    ``match.cost_agent``, ``group.key_picker``. The stage runner resolves
+    the active prompt by (a) reading ``stage_state.prompt_template_id``
+    if set, else (b) loading the most recent template for the stage's
+    canonical key from this table.
+    """
+
+    __tablename__ = "oe_match_elements_prompt_template"
+    __table_args__ = (
+        Index("ix_match_prompt_key_version", "key", "version"),
+        Index("ix_match_prompt_creator", "created_by"),
+        UniqueConstraint("key", "name", "created_by", name="uq_match_prompt_owner_name"),
+    )
+
+    key: Mapped[str] = mapped_column(String(64), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    system_prompt: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    # Jinja-ish ``{var}`` placeholders for the user-supplied row data.
+    # No sandboxed execution — pure string ``str.format()`` so the call
+    # surface is the same regardless of provider.
+    user_template: Mapped[str] = mapped_column(Text, nullable=False)
+    # Comma-separated list of allowed providers, or empty for "any". e.g.
+    # ``"anthropic/claude-sonnet-4-6,openai/gpt-4o"``.
+    allowed_providers: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    version: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=1, server_default="1",
+    )
+    is_system: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="0",
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Forked-from pointer so the UI can show "edited from system prompt
+    # header_aggregation_v1". NULL on system rows and freshly-typed ones.
+    forked_from_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<MatchPromptTemplate key={self.key} name={self.name} "
+            f"v{self.version} system={self.is_system}>"
+        )

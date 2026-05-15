@@ -1655,6 +1655,7 @@ def create_app() -> FastAPI:
             from app.modules.integrations import models as _integrations_models  # noqa: F401
             from app.modules.jobs import models as _jobs_models  # noqa: F401
             from app.modules.markups import models as _markups_models  # noqa: F401
+            from app.modules.match_elements import models as _match_elements_models  # noqa: F401
             from app.modules.meetings import models as _meetings_models  # noqa: F401
             from app.modules.ncr import models as _ncr_models  # noqa: F401
             from app.modules.notifications import models as _notifications_models  # noqa: F401

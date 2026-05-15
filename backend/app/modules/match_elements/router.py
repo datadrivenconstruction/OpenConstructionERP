@@ -40,10 +40,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import CurrentUserId, SessionDep, verify_project_access
-from app.modules.match_elements import schemas
+from app.modules.match_elements import pipeline, schemas
 from app.modules.match_elements.analytics import compute_match_analytics
 from app.modules.match_elements.excel_import import parse_boq_xlsx
-from app.modules.match_elements.models import MatchSession
+from app.modules.match_elements.models import MatchPromptTemplate, MatchSession
 from app.modules.match_elements.service import get_service
 
 router = APIRouter()
@@ -573,6 +573,254 @@ async def delete_template(
         await get_service().delete_template(session, template_id)
     except NotImplementedError as exc:
         raise HTTPException(status_code=501, detail=str(exc)) from exc
+
+
+# ── Visible pipeline (v3034 — 7-stage match wizard) ──────────────────────
+
+
+@router.get(
+    "/sessions/{session_id}/stages",
+    response_model=schemas.StageListResponse,
+)
+async def list_pipeline_stages(
+    session_id: uuid.UUID,
+    session: SessionDep,
+    current_user_id: CurrentUserId,
+) -> schemas.StageListResponse:
+    """Return the seven pipeline stages for a session in canonical order.
+
+    Stages that have never run come back with status ``pending`` and
+    empty inputs/output so the UI always renders a full timeline. The
+    ``explainer`` / ``title`` / ``subtitle`` fields are the source of
+    truth for the StageCard copy.
+    """
+    await _assert_session_access(session, session_id, current_user_id)
+    await pipeline.ensure_system_prompts(session)
+    stages = await pipeline.list_stages(session, session_id)
+    return schemas.StageListResponse(
+        session_id=session_id,
+        stages=[schemas.StageState(**s) for s in stages],
+    )
+
+
+@router.post(
+    "/sessions/{session_id}/stages/{stage_name}/run",
+    response_model=schemas.RunStageResponse,
+)
+async def run_pipeline_stage(
+    session_id: uuid.UUID,
+    stage_name: str,
+    spec: schemas.RunStageRequest,
+    session: SessionDep,
+    current_user_id: CurrentUserId,
+) -> schemas.RunStageResponse:
+    """Execute one stage and persist its state.
+
+    Downstream stages that were ``done`` are marked ``stale`` so the UI
+    shows the user which steps need re-running after a tweak. An empty
+    body re-runs the stage with whatever knobs are already stored on it.
+    """
+    await _assert_session_access(session, session_id, current_user_id)
+    if stage_name not in pipeline.STAGE_NAMES:
+        raise HTTPException(
+            status_code=404, detail=f"Unknown stage: {stage_name!r}",
+        )
+    try:
+        result = await pipeline.run_stage(
+            session,
+            session_id,
+            stage_name,
+            inputs_override=spec.inputs,
+            prompt_template_id=spec.prompt_template_id,
+            llm_provider=spec.llm_provider,
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return schemas.RunStageResponse(**result)
+
+
+# ── Prompt templates (user-editable LLM prompts) ─────────────────────────
+
+
+@router.get(
+    "/prompt-templates",
+    response_model=list[schemas.PromptTemplateRead],
+)
+async def list_prompt_templates(
+    session: SessionDep,
+    current_user_id: CurrentUserId,
+    key: str | None = Query(None, max_length=64),
+) -> list[schemas.PromptTemplateRead]:
+    """List system + own prompt templates, optionally filtered by stage key.
+
+    System prompts (``is_system=True``, ``created_by=NULL``) are visible
+    to everyone; user prompts are visible only to their creator. The UI
+    groups them under each stage's ``prompt_key``.
+    """
+    await pipeline.ensure_system_prompts(session)
+    try:
+        uid = uuid.UUID(current_user_id)
+    except (ValueError, TypeError):
+        uid = None
+    stmt = select(MatchPromptTemplate).where(
+        (MatchPromptTemplate.is_system.is_(True))
+        | (MatchPromptTemplate.created_by == uid)
+    )
+    if key:
+        stmt = stmt.where(MatchPromptTemplate.key == key)
+    stmt = stmt.order_by(
+        MatchPromptTemplate.key.asc(),
+        MatchPromptTemplate.is_system.desc(),
+        MatchPromptTemplate.version.desc(),
+    )
+    rows = (await session.execute(stmt)).scalars().all()
+    return [schemas.PromptTemplateRead.model_validate(r) for r in rows]
+
+
+@router.get(
+    "/prompt-templates/{template_id}",
+    response_model=schemas.PromptTemplateRead,
+)
+async def get_prompt_template(
+    template_id: uuid.UUID,
+    session: SessionDep,
+    current_user_id: CurrentUserId,
+) -> schemas.PromptTemplateRead:
+    row = await session.get(MatchPromptTemplate, template_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Prompt template not found")
+    if not row.is_system:
+        try:
+            uid = uuid.UUID(current_user_id)
+        except (ValueError, TypeError):
+            uid = None
+        if row.created_by != uid:
+            raise HTTPException(
+                status_code=404, detail="Prompt template not found",
+            )
+    return schemas.PromptTemplateRead.model_validate(row)
+
+
+@router.post(
+    "/prompt-templates",
+    response_model=schemas.PromptTemplateRead,
+    status_code=201,
+)
+async def create_prompt_template(
+    spec: schemas.PromptTemplateCreate,
+    session: SessionDep,
+    current_user_id: CurrentUserId,
+) -> schemas.PromptTemplateRead:
+    """Create a user-owned prompt — typically a fork of a system prompt.
+
+    The ``key`` is validated against the known stage hooks so a typo
+    can't orphan a prompt that no stage will ever resolve.
+    """
+    valid_keys = {
+        m["prompt_key"]
+        for m in pipeline.STAGE_META.values()
+        if m["prompt_key"]
+    }
+    if spec.key not in valid_keys:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unknown prompt key {spec.key!r}. "
+                f"Valid keys: {sorted(valid_keys)}"
+            ),
+        )
+    try:
+        uid: uuid.UUID | None = uuid.UUID(current_user_id)
+    except (ValueError, TypeError):
+        uid = None
+    # Next version for this (key) owned by the user.
+    existing = (
+        await session.execute(
+            select(MatchPromptTemplate.version)
+            .where(
+                MatchPromptTemplate.key == spec.key,
+                MatchPromptTemplate.created_by == uid,
+            )
+            .order_by(MatchPromptTemplate.version.desc())
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+    next_version = (existing or 0) + 1
+    row = MatchPromptTemplate(
+        key=spec.key,
+        name=spec.name,
+        description=spec.description,
+        system_prompt=spec.system_prompt or "",
+        user_template=spec.user_template,
+        allowed_providers=spec.allowed_providers,
+        version=next_version,
+        is_system=False,
+        created_by=uid,
+        forked_from_id=spec.forked_from_id,
+    )
+    session.add(row)
+    await session.commit()
+    await session.refresh(row)
+    return schemas.PromptTemplateRead.model_validate(row)
+
+
+@router.patch(
+    "/prompt-templates/{template_id}",
+    response_model=schemas.PromptTemplateRead,
+)
+async def update_prompt_template(
+    template_id: uuid.UUID,
+    patch: schemas.PromptTemplateUpdate,
+    session: SessionDep,
+    current_user_id: CurrentUserId,
+) -> schemas.PromptTemplateRead:
+    """Edit a user-owned prompt. System prompts are immutable — fork first."""
+    row = await session.get(MatchPromptTemplate, template_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Prompt template not found")
+    if row.is_system:
+        raise HTTPException(
+            status_code=403,
+            detail="System prompts are read-only — fork it first",
+        )
+    try:
+        uid = uuid.UUID(current_user_id)
+    except (ValueError, TypeError):
+        uid = None
+    if row.created_by != uid:
+        raise HTTPException(status_code=404, detail="Prompt template not found")
+    data = patch.model_dump(exclude_unset=True)
+    for field, value in data.items():
+        setattr(row, field, value)
+    row.version = (row.version or 1) + 1
+    await session.commit()
+    await session.refresh(row)
+    return schemas.PromptTemplateRead.model_validate(row)
+
+
+@router.delete("/prompt-templates/{template_id}", status_code=204)
+async def delete_prompt_template(
+    template_id: uuid.UUID,
+    session: SessionDep,
+    current_user_id: CurrentUserId,
+) -> None:
+    row = await session.get(MatchPromptTemplate, template_id)
+    if row is None:
+        return
+    if row.is_system:
+        raise HTTPException(
+            status_code=403, detail="System prompts cannot be deleted",
+        )
+    try:
+        uid = uuid.UUID(current_user_id)
+    except (ValueError, TypeError):
+        uid = None
+    if row.created_by != uid:
+        raise HTTPException(status_code=404, detail="Prompt template not found")
+    await session.delete(row)
+    await session.commit()
 
 
 # ── Analytics (MAPPING_PROCESS.md §10) ───────────────────────────────────

@@ -129,15 +129,20 @@ def test_sniff_rejects_ascii_but_wrong_pattern(tmp_path: Path) -> None:
 # ── _dwg_version_too_old ──────────────────────────────────────────────
 
 
-def test_too_old_accepts_modern_versions() -> None:
-    """R18 (2010) and newer are supported."""
-    for code in ("AC1024", "AC1027", "AC1032"):
+def test_too_old_accepts_r14_and_newer() -> None:
+    """R14 (1997) and every newer release are supported.
+
+    v3.0.6 lowered the floor to AC1014 (R14): the ezdxf-backed DWG
+    path reads R14 cleanly, so refusing it was a needless block for
+    legacy drawing sets still in circulation.
+    """
+    for code in ("AC1014", "AC1015", "AC1018", "AC1021", "AC1024", "AC1027", "AC1032"):
         assert _dwg_version_too_old(code) is False, code
 
 
-def test_too_old_rejects_pre_r2010_versions() -> None:
-    """R14 / R15 / R16 / R17 → rejected as too old."""
-    for code in ("AC1014", "AC1015", "AC1018", "AC1021"):
+def test_too_old_rejects_pre_r14_versions() -> None:
+    """R13 and older (AC1012 / AC1009 / AC1006) → rejected as too old."""
+    for code in ("AC1012", "AC1009", "AC1006"):
         assert _dwg_version_too_old(code) is True, code
 
 
@@ -160,12 +165,12 @@ def test_too_old_handles_none() -> None:
     assert _dwg_version_too_old(None) is False
 
 
-def test_min_supported_version_is_autocad_2010() -> None:
-    """Pin the minimum supported DWG version at R18 (AutoCAD 2010).
+def test_min_supported_version_is_autocad_r14() -> None:
+    """Pin the minimum supported DWG version at R14 (AC1014).
 
-    DDC DwgExporter's release notes name R18 as the oldest tested
-    format; older versions have undefined behaviour. If this assertion
-    fails because we bumped the floor, also update the user-facing
-    error message in ``_handle_dwg``.
+    v3.0.6 lowered the floor from R18 to R14: the ezdxf-backed DWG
+    path reads R14 cleanly and legacy drawing sets are still common.
+    If this assertion fails because we moved the floor again, also
+    update the user-facing error message in ``_handle_dwg``.
     """
-    assert _DWG_MIN_SUPPORTED_VERSION_CODE == "AC1024"
+    assert _DWG_MIN_SUPPORTED_VERSION_CODE == "AC1014"

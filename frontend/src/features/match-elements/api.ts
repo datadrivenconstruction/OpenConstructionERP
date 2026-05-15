@@ -714,7 +714,157 @@ export const matchElementsApi = {
     if (params.catalog_id) qs.set('catalog_id', params.catalog_id);
     return call<MatchAnalyticsResponse>(`/analytics?${qs.toString()}`);
   },
+
+  // ── Visible pipeline (v3034 — 7-stage wizard) ─────────────────────────
+
+  /** Read the seven pipeline stages for a session in canonical order.
+   *  Stages that have never run come back ``pending`` with empty
+   *  inputs/output so the timeline always renders fully. */
+  listStages: (sessionId: string) =>
+    call<StageListResponse>(`/sessions/${sessionId}/stages`),
+
+  /** Execute one stage. Empty body re-runs with stored knobs; pass
+   *  ``inputs`` / ``prompt_template_id`` / ``llm_provider`` to tune.
+   *  Downstream done-stages flip to ``stale`` so the UI flags them. */
+  runStage: (
+    sessionId: string,
+    stageName: StageName,
+    body: RunStageRequest = {},
+  ) =>
+    call<RunStageResponse>(
+      `/sessions/${sessionId}/stages/${stageName}/run`,
+      { method: 'POST', body: JSON.stringify(body) },
+    ),
+
+  /** List system + own prompt templates, optionally filtered by stage
+   *  key (``schema.header_aggregation`` etc.). */
+  listPromptTemplates: (key?: string) => {
+    const qs = key ? `?key=${encodeURIComponent(key)}` : '';
+    return call<PromptTemplate[]>(`/prompt-templates${qs}`);
+  },
+
+  getPromptTemplate: (id: string) =>
+    call<PromptTemplate>(`/prompt-templates/${id}`),
+
+  /** Fork a system prompt (or type a new one) into a user-owned,
+   *  editable row. ``forked_from_id`` records provenance. */
+  createPromptTemplate: (spec: PromptTemplateCreate) =>
+    call<PromptTemplate>('/prompt-templates', {
+      method: 'POST',
+      body: JSON.stringify(spec),
+    }),
+
+  updatePromptTemplate: (id: string, patch: PromptTemplateUpdate) =>
+    call<PromptTemplate>(`/prompt-templates/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
+
+  deletePromptTemplate: (id: string) =>
+    call<void>(`/prompt-templates/${id}`, { method: 'DELETE' }),
 };
+
+// ── Visible pipeline types (mirror match_elements/schemas.py) ─────────
+
+export type StageName =
+  | 'convert'
+  | 'load'
+  | 'schema'
+  | 'filter'
+  | 'group'
+  | 'match'
+  | 'rollup';
+
+export type StageStatus =
+  | 'pending'
+  | 'running'
+  | 'done'
+  | 'error'
+  | 'stale'
+  | 'skipped';
+
+export interface StageState {
+  stage_name: StageName;
+  title: string;
+  subtitle: string;
+  explainer: string;
+  uses_llm: boolean;
+  prompt_key: string | null;
+  status: StageStatus;
+  inputs: Record<string, unknown>;
+  output: Record<string, unknown>;
+  error: string | null;
+  took_ms: number | null;
+  prompt_template_id: string | null;
+  llm_provider: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+  updated_at: string | null;
+}
+
+export interface StageListResponse {
+  session_id: string;
+  stages: StageState[];
+}
+
+export interface RunStageRequest {
+  inputs?: Record<string, unknown>;
+  prompt_template_id?: string | null;
+  llm_provider?: string | null;
+}
+
+export interface RunStageResponse {
+  stage_name: StageName;
+  status: StageStatus;
+  output: Record<string, unknown>;
+  error: string | null;
+  took_ms: number | null;
+}
+
+export interface PromptTemplate {
+  id: string;
+  key: string;
+  name: string;
+  description: string | null;
+  system_prompt: string;
+  user_template: string;
+  allowed_providers: string | null;
+  version: number;
+  is_system: boolean;
+  created_by: string | null;
+  forked_from_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PromptTemplateCreate {
+  key: string;
+  name: string;
+  description?: string | null;
+  system_prompt?: string;
+  user_template: string;
+  allowed_providers?: string | null;
+  forked_from_id?: string | null;
+}
+
+export interface PromptTemplateUpdate {
+  name?: string;
+  description?: string | null;
+  system_prompt?: string;
+  user_template?: string;
+  allowed_providers?: string | null;
+}
+
+/** LLM providers the Adjust sheet offers. The backend treats the
+ *  provider string as opaque (``vendor/model``); this list is the UI
+ *  default — a deploy can offer more by typing a custom value. */
+export const LLM_PROVIDERS: { id: string; label: string }[] = [
+  { id: 'anthropic/claude-sonnet-4-6', label: 'Claude Sonnet 4.6' },
+  { id: 'anthropic/claude-opus-4-7', label: 'Claude Opus 4.7' },
+  { id: 'openai/gpt-4o', label: 'OpenAI GPT-4o' },
+  { id: 'openai/gpt-4o-mini', label: 'OpenAI GPT-4o mini' },
+  { id: 'local/ollama', label: 'Local (Ollama)' },
+];
 
 // ── §10 analytics (MAPPING_PROCESS.md) ────────────────────────────────
 

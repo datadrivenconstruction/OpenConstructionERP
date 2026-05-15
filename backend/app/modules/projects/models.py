@@ -20,7 +20,20 @@ Tables:
 import os as _os
 import uuid
 
-from sqlalchemy import JSON, Boolean, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from datetime import datetime
+
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -374,3 +387,156 @@ class MatchProjectSettings(Base):
             f"mode={self.mode} classifier={self.classifier} "
             f"catalog={self.cost_database_id}>"
         )
+
+
+class ProjectProfile(Base):
+    """The applied profile for a project (concept doc §6.1).
+
+    One row per project. Captures the wizard answers (preset, axes,
+    region, …) so the module set can be recomputed when the profile is
+    edited. ``focus_mode_enabled`` is the user-facing master switch the
+    sidebar reads: when false the nav shows every module ungreyed
+    (legacy behaviour) — the "this mode can be turned off" requirement.
+
+    The wizard *draft* is intentionally NOT here (doc §6.4) — drafts
+    live in :class:`ProjectWizardDraft` with a TTL so a half-finished
+    setup never pollutes a real project.
+    """
+
+    __tablename__ = "oe_project_profile"
+    __table_args__ = (
+        UniqueConstraint("project_id", name="uq_project_profile_project"),
+        Index("ix_project_profile_project", "project_id"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    preset: Mapped[str] = mapped_column(
+        String(64), nullable=False, default="custom", server_default="custom",
+    )
+    # Multi-select axes stored as JSON lists.
+    activity: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=list, server_default="[]",
+    )
+    phases: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=list, server_default="[]",
+    )
+    role: Mapped[str | None] = mapped_column(String(48), nullable=True)
+    size: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    region: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    language: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    extensions_enabled: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=list, server_default="[]",
+    )
+    # Master switch the sidebar honours. True = numbered route + greyed
+    # non-selected modules. False = show everything normally.
+    focus_mode_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default="1",
+    )
+    # {"wizard_steps_completed":[1,2,3,5],"skipped_steps":[4],
+    #  "completion_score":0.83}
+    setup_completion: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=dict, server_default="{}",
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata", JSON, nullable=False, default=dict, server_default="{}",
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<ProjectProfile project={self.project_id} "
+            f"preset={self.preset} focus={self.focus_mode_enabled}>"
+        )
+
+
+class ProjectModule(Base):
+    """Per-project module selection (concept doc §6.1 ``modules``).
+
+    Presentation-only gating: this drives the sidebar's visual emphasis
+    (active + numbered vs greyed) — it never unloads a module or blocks
+    its API. ``ordinal`` is the global sequential number (doc §3.2);
+    null for cross-cutting / disabled modules. ``source`` records why
+    the module is in the set (core / region / preset / score / manual)
+    so the wizard can explain it and edit-setup can diff cleanly.
+    """
+
+    __tablename__ = "oe_project_module"
+    __table_args__ = (
+        UniqueConstraint(
+            "project_id", "module_name", name="uq_project_module_unique",
+        ),
+        Index("ix_project_module_project", "project_id"),
+        Index("ix_project_module_project_enabled", "project_id", "enabled"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    module_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="0",
+    )
+    # must | recommended | optional | hidden
+    tier: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="hidden", server_default="hidden",
+    )
+    score: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0",
+    )
+    phase: Mapped[str] = mapped_column(
+        String(24), nullable=False, default="construction",
+        server_default="construction",
+    )
+    # core | region | preset | score | manual
+    source: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="score", server_default="score",
+    )
+    # Global sequential number for the numbered route; null = no number
+    # (cross-cutting / disabled).
+    ordinal: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    why: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True,
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<ProjectModule project={self.project_id} "
+            f"{self.module_name} {self.tier} ord={self.ordinal}>"
+        )
+
+
+class ProjectWizardDraft(Base):
+    """Transient wizard state (concept doc §6.4).
+
+    Separate from :class:`ProjectProfile` so an abandoned half-finished
+    setup never creates a real project. Promoted to a Project +
+    ProjectProfile atomically on the wizard's final "Create" step.
+    Rows older than ``WIZARD_DRAFT_TTL_DAYS`` are swept by a periodic
+    job (not part of Slice 1 — the column is here so the sweep has a
+    timestamp to filter on).
+    """
+
+    __tablename__ = "oe_project_wizard_draft"
+    __table_args__ = (
+        Index("ix_project_wizard_draft_owner", "created_by"),
+        Index("ix_project_wizard_draft_created", "created_at"),
+    )
+
+    # Free-form wizard answers so far; shape mirrors ProjectProfile plus
+    # the in-progress project name / code / dates.
+    payload: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=dict, server_default="{}",
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<ProjectWizardDraft by={self.created_by}>"

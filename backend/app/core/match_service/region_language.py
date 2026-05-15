@@ -132,6 +132,7 @@ REGION_LANGUAGE: dict[str, str] = {
     "CN_SHANGHAI": "zh",
     "JP_TOKYO": "ja",
     "KR_SEOUL": "ko",
+    "MN_ULAANBAATAR": "mn",  # Mongolian
     "ID_JAKARTA": "id",
     "TH_BANGKOK": "th",
     "VN_HANOI": "vi",
@@ -256,6 +257,7 @@ _BARE_COUNTRY_OVERRIDES: dict[str, str] = {
     "ID": "id",      # Indonesia
     "JP": "ja",      # Japan
     "KR": "ko",      # Korea
+    "MN": "mn",      # Mongolia
     "RO": "ro",      # Romania
     "TH": "th",      # Thailand
     "TR": "tr",      # Turkey
