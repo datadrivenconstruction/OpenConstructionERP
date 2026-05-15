@@ -92,9 +92,9 @@ restore_volume() {
 }
 
 # Restore each volume
-restore_volume "pg_data"
-restore_volume "minio_data"
-restore_volume "qdrant_data"
+restore_volume "ocerp_pg_data"
+restore_volume "ocerp_minio_data"
+restore_volume "ocerp_qdrant_data"
 
 # Cleanup
 rm -rf "${RESTORE_DIR}"
