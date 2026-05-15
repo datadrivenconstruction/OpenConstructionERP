@@ -158,16 +158,15 @@ class ERPChatService:
         """Resolve AI provider, API key, and optional model.
 
         Returns:
-            Tuple of (provider, api_key, model_or_none).
+            Tuple of (provider, api_key, preferred_model).
         """
         from app.modules.ai.ai_client import resolve_provider_and_key
         from app.modules.ai.repository import AISettingsRepository
 
         repo = AISettingsRepository(self.session)
         settings = await repo.get_by_user_id(uuid.UUID(user_id))
-        provider, api_key = resolve_provider_and_key(settings)
-        model = getattr(settings, "preferred_model", None) if settings else None
-        return provider, api_key, model
+        provider, api_key, preferred_model = resolve_provider_and_key(settings)
+        return provider, api_key, preferred_model
 
     # ── Main streaming entry point ───────────────────────────────────────
 
@@ -217,7 +216,7 @@ class ERPChatService:
                     else:
                         # Fallback: no tool support — plain text
                         async for chunk in self._call_fallback(
-                            provider, api_key, request.message
+                            provider, api_key, request.message, preferred_model
                         ):
                             yield chunk
                         yield _sse("done", {})
@@ -460,7 +459,7 @@ class ERPChatService:
     # ── Fallback (non-tool providers) ────────────────────────────────────
 
     async def _call_fallback(
-        self, provider: str, api_key: str, message: str
+        self, provider: str, api_key: str, message: str, model: str | None = None
     ) -> AsyncGenerator[str, None]:
         """Call a provider without tool support — yield SSE text events."""
         from app.modules.ai.ai_client import call_ai
@@ -471,6 +470,7 @@ class ERPChatService:
                 api_key=api_key,
                 system=SYSTEM_PROMPT,
                 prompt=message,
+                model=model,
             )
             chunk_size = 50
             for i in range(0, len(text), chunk_size):

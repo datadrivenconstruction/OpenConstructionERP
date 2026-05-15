@@ -137,16 +137,16 @@ async def _get_ai_settings(session: AsyncSession) -> Any:
         return None
 
 
-async def _resolve_provider(session: AsyncSession) -> tuple[str, str] | None:
-    """Resolve AI provider and key. Returns None if no LLM configured."""
+async def _resolve_provider(session: AsyncSession) -> tuple[str, str, str] | None:
+    """Resolve AI provider, key, and model. Returns None if no LLM configured."""
     try:
         from app.modules.ai.ai_client import resolve_provider_and_key
 
         settings = await _get_ai_settings(session)
         if settings is None:
             return None
-        provider, key = resolve_provider_and_key(settings)
-        return (provider, key)
+        provider, key, model = resolve_provider_and_key(settings)
+        return (provider, key, model)
     except (ValueError, Exception):
         return None
 
@@ -176,7 +176,7 @@ async def generate_recommendations(
         try:
             from app.modules.ai.ai_client import call_ai
 
-            provider, api_key = provider_info
+            provider, api_key, preferred_model = provider_info
             system = _build_system_prompt(role, language, state.standard)
             context = _build_context_prompt(state, score)
             prompt = (
@@ -191,6 +191,7 @@ async def generate_recommendations(
                 system=system,
                 prompt=prompt,
                 max_tokens=2048,
+                model=preferred_model,
             )
             return text_response
         except Exception:
@@ -222,7 +223,7 @@ async def explain_gap(
         try:
             from app.modules.ai.ai_client import call_ai
 
-            provider, api_key = provider_info
+            provider, api_key, preferred_model = provider_info
             system = (
                 f"You are a construction ERP expert explaining a project issue. "
                 f"Respond in {language}. Be specific, actionable, and concise."
@@ -245,6 +246,7 @@ async def explain_gap(
                 system=system,
                 prompt=prompt,
                 max_tokens=1024,
+                model=preferred_model,
             )
             return text_response
         except Exception:
@@ -327,7 +329,7 @@ async def answer_question(
         try:
             from app.modules.ai.ai_client import call_ai
 
-            provider, api_key = provider_info
+            provider, api_key, preferred_model = provider_info
             system = _build_system_prompt(role, language, state.standard)
             context = _build_context_prompt(state, score)
             # Pull semantically relevant chunks from BOQ / documents / tasks /
@@ -356,6 +358,7 @@ async def answer_question(
                 system=system,
                 prompt=prompt,
                 max_tokens=1024,
+                model=preferred_model,
             )
             return text_response
         except Exception:

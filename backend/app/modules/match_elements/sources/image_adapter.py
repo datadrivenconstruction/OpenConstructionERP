@@ -376,16 +376,16 @@ class ImageSourceAdapter:
                     ).scalars().all()
                     for row in rows:
                         try:
-                            provider, api_key = resolve_provider_and_key(row)
+                            provider, api_key, preferred_model = resolve_provider_and_key(row)
                             settings_row = row
                             break
                         except ValueError:
                             continue
                 if settings_row is not None and provider is None:
                     try:
-                        provider, api_key = resolve_provider_and_key(settings_row)
+                        provider, api_key, preferred_model = resolve_provider_and_key(settings_row)
                     except ValueError:
-                        provider, api_key = None, None
+                        provider, api_key, preferred_model = None, None, None
             except Exception as exc:  # noqa: BLE001 — AI is best-effort
                 logger.warning("ImageAdapter: settings lookup failed: %s", exc)
 
@@ -405,6 +405,7 @@ class ImageSourceAdapter:
                 prompt=IMAGE_EXTRACTION_PROMPT,
                 image_base64=image_b64,
                 image_media_type=mime,
+                model=preferred_model if 'preferred_model' in dir() else None,
             )
         except Exception as exc:  # noqa: BLE001 — vision is best-effort
             logger.warning("ImageAdapter: AI call failed: %s", exc)

@@ -173,7 +173,7 @@ async def rerank_top_k(
         return candidates, 0.0
 
     try:
-        provider, api_key = resolve_provider_and_key(
+        provider, api_key, preferred_model = resolve_provider_and_key(
             ai_settings, preferred_model=RERANK_MODEL_HINT,
         )
     except ValueError:
@@ -188,6 +188,7 @@ async def rerank_top_k(
             system=_SYSTEM_PROMPT,
             prompt=prompt,
             max_tokens=RERANK_MAX_TOKENS,
+            model=preferred_model,
         )
     except Exception as exc:  # pragma: no cover — defensive
         logger.debug("rerank LLM call failed: %s", exc)

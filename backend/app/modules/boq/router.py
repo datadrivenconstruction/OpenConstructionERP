@@ -2247,7 +2247,7 @@ async def ai_chat_boq(
     settings = await settings_repo.get_by_user_id(uid)
 
     try:
-        provider, api_key = resolve_provider_and_key(settings)
+        provider, api_key, preferred_model = resolve_provider_and_key(settings)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
@@ -2276,6 +2276,7 @@ async def ai_chat_boq(
             system=with_locale(BOQ_CHAT_SYSTEM_PROMPT, locale),
             prompt=prompt,
             max_tokens=4096,
+            model=preferred_model,
         )
     except Exception as exc:
         logger.exception("AI chat failed for BOQ %s: %s", boq_id, exc)
@@ -4625,7 +4626,7 @@ async def smart_import(
     ai_settings = await settings_repo.get_by_user_id(user_uuid)
 
     try:
-        provider, api_key = resolve_provider_and_key(ai_settings)
+        provider, api_key, preferred_model = resolve_provider_and_key(ai_settings)
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -4673,6 +4674,7 @@ async def smart_import(
             image_base64=image_b64,
             image_media_type=image_mime,
             max_tokens=4096,
+            model=preferred_model,
         )
     except Exception as exc:
         logger.exception("Smart import AI call failed for BOQ %s: %s", boq_id, exc)

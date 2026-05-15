@@ -4720,13 +4720,14 @@ class BOQService:
         """Call LLM and return (raw_text, provider, tokens_used)."""
         from app.modules.ai.ai_client import call_ai
 
-        provider, api_key = await self._get_ai_client(user_id)
+        provider, api_key, preferred_model = await self._get_ai_client(user_id)
         raw_text, tokens = await call_ai(
             provider=provider,
             api_key=api_key,
             system=system,
             prompt=prompt,
             max_tokens=2048,
+            model=preferred_model,
         )
         return raw_text, provider, tokens
 

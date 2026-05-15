@@ -3361,7 +3361,7 @@ async def analyze_document(
     settings = await settings_repo.get_by_user_id(_uuid.UUID(user_id))
 
     try:
-        provider, api_key = resolve_provider_and_key(settings)
+        provider, api_key, preferred_model = resolve_provider_and_key(settings)
     except ValueError as exc:
         raise HTTPException(
             status_code=400,
@@ -3385,6 +3385,7 @@ async def analyze_document(
             api_key=api_key,
             system=SYSTEM_PROMPT,
             prompt=prompt,
+            model=preferred_model,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

@@ -885,13 +885,14 @@ async def advisor_chat(
 
     used_db = bool(context_items)
     try:
-        provider, api_key = resolve_provider_and_key(settings)
+        provider, api_key, preferred_model = resolve_provider_and_key(settings)
         text, _tokens = await call_ai(
             provider=provider,
             api_key=api_key,
             system=system_prompt,
             prompt=user_prompt,
             max_tokens=1500,
+            model=preferred_model,
         )
         answer = text
     except (ValueError, Exception) as exc:

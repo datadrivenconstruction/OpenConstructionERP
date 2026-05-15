@@ -355,7 +355,7 @@ class AIService:
 
         # Resolve which AI provider to use
         try:
-            provider, api_key = resolve_provider_and_key(settings)
+            provider, api_key, preferred_model = resolve_provider_and_key(settings)
         except ValueError as exc:
             logger.warning("AI provider config error for user %s: %s", user_id, exc)
             raise HTTPException(
@@ -410,6 +410,7 @@ class AIService:
                 api_key=api_key,
                 system=SYSTEM_PROMPT,
                 prompt=prompt,
+                model=preferred_model,
             )
             duration_ms = int((time.monotonic() - start_time) * 1000)
 
@@ -541,7 +542,7 @@ class AIService:
         settings = await self.settings_repo.get_by_user_id(uid)
 
         try:
-            provider, api_key = resolve_provider_and_key(settings)
+            provider, api_key, preferred_model = resolve_provider_and_key(settings)
         except ValueError as exc:
             logger.warning("AI provider config error for user %s: %s", user_id, exc)
             raise HTTPException(
@@ -590,6 +591,7 @@ class AIService:
                 prompt=prompt,
                 image_base64=image_b64,
                 image_media_type=media_type,
+                model=preferred_model,
             )
             duration_ms = int((time.monotonic() - start_time) * 1000)
 
@@ -723,7 +725,7 @@ class AIService:
         settings = await self.settings_repo.get_by_user_id(uid)
 
         try:
-            provider, api_key = resolve_provider_and_key(settings)
+            provider, api_key, preferred_model = resolve_provider_and_key(settings)
         except ValueError as exc:
             logger.warning("AI provider config error for user %s: %s", user_id, exc)
             raise HTTPException(
@@ -866,6 +868,7 @@ class AIService:
                     api_key=api_key,
                     system=SYSTEM_PROMPT,
                     prompt=prompt,
+                    model=preferred_model,
                 )
             elif image_b64:
                 prompt = SMART_IMPORT_VISION_PROMPT.format(filename=filename)
@@ -876,6 +879,7 @@ class AIService:
                     prompt=prompt,
                     image_base64=image_b64,
                     image_media_type=image_mime or "image/jpeg",
+                    model=preferred_model,
                 )
             else:
                 prompt = SMART_IMPORT_PROMPT.format(filename=filename, text=extracted_text[:15000])
@@ -884,6 +888,7 @@ class AIService:
                     api_key=api_key,
                     system=SYSTEM_PROMPT,
                     prompt=prompt,
+                    model=preferred_model,
                 )
 
             duration_ms = int((time.monotonic() - start_time) * 1000)

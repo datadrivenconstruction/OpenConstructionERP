@@ -295,6 +295,17 @@ _OPENAI_COMPAT_CONFIG = {
     },
 }
 
+_DEFAULT_MODELS = {
+    "anthropic": ANTHROPIC_MODEL,
+    "openai": OPENAI_MODEL,
+    "gemini": GEMINI_MODEL,
+}
+
+
+def _DEFAULT_MODEL_FOR(provider: str) -> str:
+    """Return the hardcoded default model for a provider."""
+    return _DEFAULT_MODELS.get(provider, OPENROUTER_MODEL)
+
 
 async def call_openai_compatible(
     provider: str,
@@ -304,6 +315,7 @@ async def call_openai_compatible(
     image_base64: str | None = None,
     image_media_type: str = "image/jpeg",
     max_tokens: int = 4096,
+    model: str | None = None,
 ) -> tuple[str, int]:
     """Call any OpenAI-compatible API (OpenRouter, Mistral, Groq, DeepSeek).
 
@@ -313,6 +325,10 @@ async def call_openai_compatible(
     if not config:
         msg = f"Unknown OpenAI-compatible provider: {provider}"
         raise ValueError(msg)
+
+    # Use caller-provided model if available, otherwise fall back to the
+    # provider's hardcoded default from _OPENAI_COMPAT_CONFIG.
+    model_name = model or config["model"]
 
     headers: dict[str, str] = {
         "Authorization": f"Bearer {api_key}",
@@ -333,7 +349,7 @@ async def call_openai_compatible(
     user_content.append({"type": "text", "text": prompt})
 
     payload = {
-        "model": config["model"],
+        "model": model_name,
         "max_tokens": max_tokens,
         "messages": [
             {"role": "system", "content": system},
@@ -367,6 +383,7 @@ async def call_ai(
     image_base64: str | None = None,
     image_media_type: str = "image/jpeg",
     max_tokens: int = 4096,
+    model: str | None = None,
 ) -> tuple[str, int]:
     """Route an AI call to the correct provider.
 
@@ -378,6 +395,7 @@ async def call_ai(
         image_base64: Optional base64 image.
         image_media_type: Image MIME type.
         max_tokens: Max response tokens.
+        model: Optional model override (e.g. "qwen/qwen3.6-flash" for OpenRouter).
 
     Returns:
         Tuple of (response_text, tokens_used).
@@ -404,6 +422,7 @@ async def call_ai(
                 image_base64,
                 image_media_type,
                 max_tokens=max_tokens,
+                model=model,
             )
 
     elif provider in callers:
@@ -416,6 +435,7 @@ async def call_ai(
                 prompt,
                 image_base64,
                 image_media_type,
+                model=model or _DEFAULT_MODEL_FOR(provider),
                 max_tokens=max_tokens,
             )
 
@@ -502,7 +522,7 @@ def extract_json(text: str) -> Any:
 def resolve_provider_and_key(
     settings: Any,
     preferred_model: str | None = None,
-) -> tuple[str, str]:
+) -> tuple[str, str, str]:
     """Determine which AI provider and API key to use based on user settings.
 
     Args:
@@ -510,7 +530,7 @@ def resolve_provider_and_key(
         preferred_model: Optional model preference override.
 
     Returns:
-        Tuple of (provider_name, api_key).
+        Tuple of (provider_name, api_key, preferred_model).
 
     Raises:
         ValueError: If no API key is configured.
@@ -542,7 +562,7 @@ def resolve_provider_and_key(
             if raw:
                 decrypted = decrypt_secret(raw)
                 if decrypted:
-                    return provider_name, decrypted
+                    return provider_name, decrypted, model
                 # key exists but is undecryptable (JWT_SECRET rotated) —
                 # fall through so the fallback loop can try other providers
             break  # matched model but no (usable) key — fall through to fallback
@@ -571,7 +591,7 @@ def resolve_provider_and_key(
             if key_val:
                 decrypted = decrypt_secret(key_val)
                 if decrypted:
-                    return provider_name, decrypted
+                    return provider_name, decrypted, model
                 undecryptable = True
 
     if undecryptable:

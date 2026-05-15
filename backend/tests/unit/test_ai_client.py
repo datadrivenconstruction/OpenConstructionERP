@@ -138,27 +138,31 @@ class TestResolveProviderAndKey:
 
     def test_anthropic_preferred(self):
         settings = self._make_settings(anthropic_api_key="sk-ant-123")
-        provider, key = resolve_provider_and_key(settings, "claude-sonnet")
+        provider, key, model = resolve_provider_and_key(settings, "claude-sonnet")
         assert provider == "anthropic"
         assert key == "sk-ant-123"
+        assert model == "claude-sonnet"
 
     def test_openai_preferred(self):
         settings = self._make_settings(openai_api_key="sk-openai-123")
-        provider, key = resolve_provider_and_key(settings, "gpt-4o")
+        provider, key, model = resolve_provider_and_key(settings, "gpt-4o")
         assert provider == "openai"
         assert key == "sk-openai-123"
+        assert model == "gpt-4o"
 
     def test_gemini_preferred(self):
         settings = self._make_settings(gemini_api_key="AIza-123")
-        provider, key = resolve_provider_and_key(settings, "gemini-2.0-flash")
+        provider, key, model = resolve_provider_and_key(settings, "gemini-2.0-flash")
         assert provider == "gemini"
         assert key == "AIza-123"
+        assert model == "gemini-2.0-flash"
 
     def test_fallback_to_any_available(self):
         settings = self._make_settings(openai_api_key="sk-fallback")
-        provider, key = resolve_provider_and_key(settings, "claude-sonnet")
+        provider, key, model = resolve_provider_and_key(settings, "claude-sonnet")
         assert provider == "openai"
         assert key == "sk-fallback"
+        assert model == "claude-sonnet"
 
     def test_no_keys_raises_error(self):
         settings = self._make_settings()

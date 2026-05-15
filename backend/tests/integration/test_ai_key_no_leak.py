@@ -206,6 +206,7 @@ async def test_resolve_provider_returns_decrypted_key_for_llm_call(session, user
     repo = AISettingsRepository(session)
     row = await repo.get_by_user_id(uuid.UUID(user_id))
 
-    provider, key = resolve_provider_and_key(row, preferred_model="claude-sonnet")
+    provider, key, model = resolve_provider_and_key(row, preferred_model="claude-sonnet")
     assert provider == "anthropic"
     assert key == ANTHROPIC_KEY  # decrypted for the outbound HTTP call
+    assert model == "claude-sonnet"

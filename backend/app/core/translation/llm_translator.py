@@ -118,7 +118,7 @@ async def llm_translate(
         return None
 
     try:
-        provider, api_key = resolve_provider_and_key(user_settings)
+        provider, api_key, preferred_model = resolve_provider_and_key(user_settings)
     except ValueError as exc:
         logger.debug("LLM translate skipped: %s", exc)
         return None
@@ -132,6 +132,8 @@ async def llm_translate(
             provider=provider,
             api_key=api_key,
             system=_SYSTEM,
+            prompt=prompt,
+            model=preferred_model,
             prompt=prompt,
             # Construction terms are short — cap response length so a
             # confused LLM can't generate paragraphs and inflate cost.
