@@ -3,7 +3,7 @@
 ## Stack
 - **Backend**: Python 3.12+ / FastAPI / SQLAlchemy (async) / Alembic / Pydantic v2
 - **Frontend**: React 18 / TypeScript / Vite / Tailwind / AG Grid / i18next
-- **Database**: PostgreSQL 16+ (prod) / SQLite (dev, zero-config)
+- **Database**: PostgreSQL 16+ (prod/Docker dev) / SQLite (dev fallback, zero-config)
 - **CLI**: `openestimate` / `openconstructionerp` (installed via pip)
 
 ## Repo Structure
@@ -48,6 +48,57 @@ make db-reset         # DESTRUCTIVE: drop + recreate + migrate + seed
 # Single module: make module-test NAME=oe_boq
 ```
 
+## Local Dev Infrastructure (Docker)
+
+For day-to-day development with persistent data and hot-reload:
+
+```bash
+# Start Docker infra (postgres, redis, minio, qdrant)
+docker compose up -d postgres redis minio qdrant
+
+# With AI services (Qdrant for semantic search)
+docker compose --profile ai up -d
+
+# View running containers
+docker compose ps
+
+# Stop all (preserves volumes — data survives)
+docker compose down
+```
+
+**Named volumes** (persist across restarts):
+- `ocerp_pg_data` — PostgreSQL data
+- `ocerp_minio_data` — MinIO / S3 storage
+- `ocerp_qdrant_data` — Vector search data
+
+> ⚠️ Only `docker compose down -v` DELETES data. The `-v` flag is the danger.
+
+---
+
+## Backup & Restore
+
+```bash
+make backup                              # Creates ./backups/ocerp_backup_<timestamp>.tar.gz
+make restore BACKUP_FILE=./backups/...  # Restores from backup archive
+```
+
+---
+
+## Environment Configuration
+
+`.env` — Production settings (DO NOT edit for dev)  
+`.env.local` — Local dev overrides — **USE THIS FOR DEV**
+
+Key local dev settings in `.env.local`:
+```bash
+DATABASE_URL=postgresql+asyncpg://oe:oe@localhost:5432/openestimate
+REDIS_URL=redis://localhost:6379/0
+S3_ENDPOINT=http://localhost:9000
+QDRANT_URL=http://localhost:6333
+```
+
+---
+
 ## Key Conventions
 
 - **Lint/format tools**: ruff (backend, NOT flake8), prettier/eslint (frontend)
@@ -69,17 +120,46 @@ make db-reset         # DESTRUCTIVE: drop + recreate + migrate + seed
 ## Docker / Production
 
 ```bash
-make quickstart        # docker compose -f docker-compose.quickstart.yml up --build (zero-config, http://localhost:8080)
+# Dev (infra only — app runs locally for hot-reload):
+make infra            # docker compose up -d postgres redis minio
+make infra-ai         # + qdrant for AI services
+make dev-backend      # terminal 1
+make dev-frontend     # terminal 2
+
+# Quickstart (all-in-docker, zero-config):
+make quickstart        # docker compose -f docker-compose.quickstart.yml up --build
 make quickstart-down
 make quickstart-reset  # DESTRUCTIVE: deletes volumes
+
+# Production:
+docker compose -f docker-compose.prod.yml up -d
+
+# Build images
 make build             # build all Docker images
 ```
 
 ## Demo Accounts
-Auto-created on first startup. Default password `DemoPass1234!` for all three:
+
+Auto-created on first startup. Three accounts:
 - Admin: `demo@openestimator.io`
 - Estimator: `estimator@openestimator.io`
 - Manager: `manager@openestimator.io`
+
+### Login Methods
+
+**Demo login** (no password required):
+```bash
+POST /api/v1/users/auth/demo-login/
+{"email": "demo@openestimator.io"}
+```
+
+**Regular login** (password from `~/.openestimator/.demo_credentials.json`):
+```bash
+POST /api/v1/users/auth/login/
+{"email": "demo@openestimator.io", "password": "<from-credentials-file>"}
+```
+
+> Demo credentials are generated fresh on each install. Check `~/.openestimator/.demo_credentials.json` for the current passwords.
 
 Override with `DEMO_ADMIN_PASSWORD` / `DEMO_ESTIMATOR_PASSWORD` / `DEMO_MANAGER_PASSWORD` env vars before first boot, or disable with `DISABLE_DEMO_ACCOUNTS=1`.
 
