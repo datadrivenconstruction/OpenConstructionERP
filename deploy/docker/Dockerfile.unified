@@ -54,6 +54,10 @@ COPY data/ data/
 # Create data volume directory
 RUN mkdir -p /data && chown oe:oe /data
 
+# Create locales directory (app writes locale files at runtime)
+RUN mkdir -p /usr/local/lib/python3.12/site-packages/locales && \
+    chown oe:oe /usr/local/lib/python3.12/site-packages/locales
+
 # Set ownership
 RUN chown -R oe:oe /app
 
