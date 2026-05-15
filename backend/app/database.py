@@ -124,6 +124,7 @@ def create_engine_from_settings():
     # pool size for both backends.
     kwargs["pool_size"] = settings.database_pool_size
     kwargs["max_overflow"] = settings.database_max_overflow
+    kwargs["pool_pre_ping"] = True
 
     return create_async_engine(url, **kwargs)
 
