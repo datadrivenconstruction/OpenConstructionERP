@@ -507,9 +507,9 @@ function UpdateFullModal({
       key: 'source',
       title: t('update.method_source', { defaultValue: 'Source (git)' }),
       subtitle: t('update.method_source_sub', {
-        defaultValue: 'For self-hosted installs from source',
+        defaultValue: 'For self-hosted installs from source — local changes are preserved',
       }),
-      cmd: 'git pull && cd frontend && npm ci && npm run build && cd ../backend && pip install -e .',
+      cmd: 'git stash && git pull --rebase && git stash pop && cd frontend && npm ci && npm run build && cd ../backend && pip install -e . && sudo supervisorctl restart openconstruction-backend',
     },
   ];
 

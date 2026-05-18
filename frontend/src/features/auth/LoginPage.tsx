@@ -90,7 +90,7 @@ export function LoginPage() {
 
   const demoAccounts = [
     { email: 'demo@openestimator.io', name: 'Admin', role: t('auth.demo_role_admin', 'Administrator'), color: 'bg-blue-500', letter: 'A' },
-    { email: 'estimator@openestimator.io', name: 'Anna Musterfrau', role: t('auth.demo_role_estimator', 'Estimator'), color: 'bg-emerald-500', letter: 'A' },
+    { email: 'estimator@openestimator.io', name: 'Сарнай Бат', role: t('auth.demo_role_estimator', 'Estimator'), color: 'bg-emerald-500', letter: 'S' },
     { email: 'manager@openestimator.io', name: 'Thomas Müller', role: t('auth.demo_role_manager', 'Manager'), color: 'bg-amber-500', letter: 'M' },
   ];
 
@@ -337,7 +337,7 @@ export function LoginPage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
               <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-emerald-500" />
             </span>
-            <span className="text-[11px] font-medium tracking-[0.04em] text-emerald-700 dark:text-emerald-300">Open Source</span>
+            <span className="text-[11px] font-medium tracking-[0.04em] text-emerald-700 dark:text-emerald-300">{t('login.open_source_label', { defaultValue: 'Open Source' })}</span>
           </span>
         </div>
 
@@ -547,7 +547,7 @@ export function LoginPage() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Open Source</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">{t('login.open_source_label', { defaultValue: 'Open Source' })}</span>
               </div>
               <p className="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
                 {t('login.open_source_badge', { defaultValue: 'The #1 Open-Source Construction ERP' })}
