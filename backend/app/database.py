@@ -48,7 +48,10 @@ def _log_slow_query(
     executemany: bool,
 ) -> None:
     """Log statements that exceed ``settings.slow_query_ms`` at WARNING level."""
-    start = conn.info.pop("query_start_time", None)
+    try:
+        start = conn.info.pop("query_start_time", None)
+    except Exception:  # noqa: BLE001 — connection may be closed by concurrent coroutine
+        return
     if start is None:
         return
     elapsed_ms = (time.perf_counter() - start) * 1000.0
