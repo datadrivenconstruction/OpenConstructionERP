@@ -180,6 +180,12 @@ def _build_settings_response(settings: AISettings) -> AISettingsResponse:
             if isinstance(v, str) and v.strip()
         }
 
+    # Read custom base URLs for local providers from metadata_
+    raw_ollama_base_url = meta.get("ollama_base_url") if isinstance(meta, dict) else None
+    raw_vllm_base_url = meta.get("vllm_base_url") if isinstance(meta, dict) else None
+    ollama_base_url = str(raw_ollama_base_url).strip() if isinstance(raw_ollama_base_url, str) and raw_ollama_base_url.strip() else None
+    vllm_base_url = str(raw_vllm_base_url).strip() if isinstance(raw_vllm_base_url, str) and raw_vllm_base_url.strip() else None
+
     return AISettingsResponse(
         id=settings.id,
         user_id=settings.user_id,
@@ -200,6 +206,9 @@ def _build_settings_response(settings: AISettings) -> AISettingsResponse:
         baidu_api_key_set=_usable(getattr(settings, "baidu_api_key", None)),
         yandex_api_key_set=_usable(getattr(settings, "yandex_api_key", None)),
         gigachat_api_key_set=_usable(getattr(settings, "gigachat_api_key", None)),
+        kimi_api_key_set=_usable(getattr(settings, "kimi_api_key", None)),
+        ollama_base_url=ollama_base_url,
+        vllm_base_url=vllm_base_url,
         preferred_model=settings.preferred_model,
         model_overrides=model_overrides,
         default_models=dict(DEFAULT_MODELS),
@@ -320,6 +329,7 @@ class AIService:
             "baidu_api_key",
             "yandex_api_key",
             "gigachat_api_key",
+            "kimi_api_key",
         ]
 
         from app.core.crypto import encrypt_secret
@@ -349,6 +359,21 @@ class AIService:
             meta["model_overrides"] = overrides
             return meta
 
+        def _merge_base_urls(
+            existing_meta: Any,
+            ollama_url: str | None,
+            vllm_url: str | None,
+        ) -> dict[str, Any]:
+            """Merge custom base URLs for local providers into metadata."""
+            meta: dict[str, Any] = dict(existing_meta) if isinstance(existing_meta, dict) else {}
+            if ollama_url is not None:
+                cleaned = ollama_url.strip()
+                meta["ollama_base_url"] = cleaned if cleaned else None
+            if vllm_url is not None:
+                cleaned = vllm_url.strip()
+                meta["vllm_base_url"] = cleaned if cleaned else None
+            return meta
+
         if settings is None:
             # Create with provided values (encrypt API keys at rest)
             create_kwargs: dict[str, Any] = {"user_id": uid}
@@ -359,6 +384,9 @@ class AIService:
             create_kwargs["preferred_model"] = data.preferred_model or "claude-sonnet"
             if data.model_overrides is not None:
                 create_kwargs["metadata_"] = _merge_overrides({}, data.model_overrides)
+            meta = create_kwargs.get("metadata_", {})
+            if isinstance(meta, dict):
+                create_kwargs["metadata_"] = _merge_base_urls(meta, data.ollama_base_url, data.vllm_base_url)
             settings = AISettings(**create_kwargs)
             settings = await self.settings_repo.create(settings)
         else:
@@ -371,6 +399,9 @@ class AIService:
                 fields["preferred_model"] = data.preferred_model
             if data.model_overrides is not None:
                 fields["metadata_"] = _merge_overrides(settings.metadata_, data.model_overrides)
+            if data.ollama_base_url is not None or data.vllm_base_url is not None:
+                existing_meta = fields.get("metadata_", settings.metadata_)
+                fields["metadata_"] = _merge_base_urls(existing_meta, data.ollama_base_url, data.vllm_base_url)
 
             if fields:
                 await self.settings_repo.update_fields(settings.id, **fields)
@@ -386,6 +417,13 @@ class AIService:
             {"user_id": user_id},
             source_module="oe_ai",
         )
+
+        # Sync custom base URLs for local providers into the global
+        # provider config so all subsequent call_ai() calls across the
+        # entire app (boq, takeoff, erp_chat, etc.) use the user's URL.
+        from app.modules.ai.ai_client import update_provider_config
+
+        update_provider_config(settings.metadata_)
 
         return _build_settings_response(settings)
 

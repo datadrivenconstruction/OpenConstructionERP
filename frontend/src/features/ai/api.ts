@@ -20,7 +20,10 @@ export type AIProvider =
   | 'zhipu'
   | 'baidu'
   | 'yandex'
-  | 'gigachat';
+  | 'gigachat'
+  | 'ollama'
+  | 'kimi'
+  | 'vllm';
 
 export type AIConnectionStatus = 'connected' | 'not_configured' | 'error';
 
@@ -44,6 +47,9 @@ export interface AISettings {
   baidu_api_key_set: boolean;
   yandex_api_key_set: boolean;
   gigachat_api_key_set: boolean;
+  kimi_api_key_set: boolean;
+  ollama_base_url: string | null;
+  vllm_base_url: string | null;
   preferred_model: string;
   /** Per-provider model-id override the user has saved (provider -> model id). */
   model_overrides: Record<string, string>;
@@ -80,6 +86,9 @@ export interface AISettingsUpdate {
   baidu_api_key?: string | null;
   yandex_api_key?: string | null;
   gigachat_api_key?: string | null;
+  kimi_api_key?: string | null;
+  ollama_base_url?: string | null;
+  vllm_base_url?: string | null;
 }
 
 export interface AITestResult {

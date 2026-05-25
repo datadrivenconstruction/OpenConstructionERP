@@ -54,6 +54,10 @@ class AISettingsUpdate(BaseModel):
     baidu_api_key: str | None = None
     yandex_api_key: str | None = None
     gigachat_api_key: str | None = None
+    kimi_api_key: str | None = None
+    # Custom base URL for local providers (Ollama, vLLM), e.g. "http://host:11434"
+    ollama_base_url: str | None = None
+    vllm_base_url: str | None = None
     preferred_model: str | None = Field(default=None, max_length=100)
     # Per-provider model-id override, e.g. {"gemini": "gemini-2.5-flash",
     # "openrouter": "anthropic/claude-sonnet-4"}. Lets users track provider
@@ -92,6 +96,9 @@ class AISettingsResponse(BaseModel):
     baidu_api_key_set: bool = False
     yandex_api_key_set: bool = False
     gigachat_api_key_set: bool = False
+    kimi_api_key_set: bool = False
+    ollama_base_url: str | None = None
+    vllm_base_url: str | None = None
     preferred_model: str
     # Effective per-provider model id the platform will send (override if the
     # user set one, otherwise the built-in default). Drives the editable

@@ -1209,7 +1209,7 @@ async def project_dashboard(
             activity_queries.append(
                 select(
                     literal_column("'field_report'").label("type"),
-                    FieldReport.title.label("title"),
+                    func.coalesce(FieldReport.work_performed, FieldReport.report_type).label("title"),
                     FieldReport.created_at,
                 ).where(FieldReport.project_id == project_id)
             )

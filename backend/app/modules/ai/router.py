@@ -128,6 +128,9 @@ _AI_PROVIDERS: list[dict[str, Any]] = [
     {"id": "cohere", "display_name": "Cohere", "supports_streaming": True, "model_choices": []},
     {"id": "ai21", "display_name": "AI21 Labs", "supports_streaming": False, "model_choices": []},
     {"id": "xai", "display_name": "xAI Grok", "supports_streaming": True, "model_choices": []},
+    {"id": "ollama", "display_name": "Ollama (Local)", "supports_streaming": True, "model_choices": []},
+    {"id": "kimi", "display_name": "Kimi (Moonshot AI)", "supports_streaming": True, "model_choices": []},
+    {"id": "vllm", "display_name": "vLLM (Local)", "supports_streaming": True, "model_choices": []},
 ]
 
 
@@ -216,6 +219,7 @@ async def test_ai_connection(
     _VALID_PROVIDERS = (
         "anthropic", "openai", "gemini", "openrouter", "mistral", "groq", "deepseek",
         "together", "fireworks", "perplexity", "cohere", "ai21", "xai",
+        "ollama", "kimi", "vllm",
     )
     provider = body.get("provider", "").strip()
     if provider not in _VALID_PROVIDERS:
@@ -261,6 +265,18 @@ async def test_ai_connection(
     model_override = _model_override_for(settings, provider)
     effective_model = model_override or default_model_for(provider)
 
+    # Resolve custom base URL for local providers (Ollama, vLLM)
+    meta = settings.metadata_ or {}
+    base_url = None
+    if provider in ("ollama", "vllm"):
+        url_key = f"{provider}_base_url"
+        raw_url = meta.get(url_key) if isinstance(meta, dict) else None
+        if isinstance(raw_url, str) and raw_url.strip():
+            base = raw_url.strip().rstrip("/")
+            if not base.endswith("/v1/chat/completions"):
+                base += "/v1/chat/completions"
+            base_url = base
+
     # Make a minimal test call
     try:
         t0 = time.monotonic()
@@ -271,6 +287,7 @@ async def test_ai_connection(
             prompt="Reply with exactly: OK",
             max_tokens=10,
             model=model_override,
+            base_url=base_url,
         )
         latency_ms = int((time.monotonic() - t0) * 1000)
         return {

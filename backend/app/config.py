@@ -336,6 +336,7 @@ class Settings(BaseSettings):
     baidu_api_key: str | None = None
     yandex_api_key: str | None = None
     gigachat_api_key: str | None = None
+    kimi_api_key: str | None = None
 
     # ── Email ────────────────────────────────────────────────────────────
     # ``email_backend`` picks the transport for outbound email.  Dev

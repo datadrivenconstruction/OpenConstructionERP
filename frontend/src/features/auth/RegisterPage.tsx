@@ -40,6 +40,9 @@ export function RegisterPage() {
 
   const passwordsMatch = password === confirmPassword;
   const passwordLongEnough = password.length >= 8;
+  const passwordHasLetter = /[a-zA-Zа-яА-Я]/.test(password);
+  const passwordHasDigit = /\d/.test(password);
+  const passwordStrong = passwordLongEnough && passwordHasLetter && passwordHasDigit;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -49,8 +52,8 @@ export function RegisterPage() {
       setError(t('auth.passwords_no_match', { defaultValue: 'Passwords do not match' }));
       return;
     }
-    if (!passwordLongEnough) {
-      setError(t('auth.password_min_length', { defaultValue: 'Password must be at least 8 characters' }));
+    if (!passwordStrong) {
+      setError(t('auth.password_requirements', { defaultValue: 'Password must be at least 8 characters with at least one letter and one digit' }));
       return;
     }
 
@@ -72,7 +75,11 @@ export function RegisterPage() {
 
       if (!regRes.ok) {
         const data = await regRes.json().catch(() => null);
-        setError(data?.detail || t('auth.registration_failed', 'Registration failed'));
+        const detail = data?.detail;
+        const errorMsg = Array.isArray(detail)
+          ? detail.map((e: { msg?: string }) => e.msg).join('; ')
+          : detail || t('auth.registration_failed', 'Registration failed');
+        setError(errorMsg);
         return;
       }
 
@@ -424,7 +431,7 @@ export function RegisterPage() {
                   variant="primary"
                   size="lg"
                   loading={loading}
-                  disabled={!fullName || !email || !password || !confirmPassword || !passwordsMatch || !passwordLongEnough || !privacyAccepted}
+                  disabled={!fullName || !email || !password || !confirmPassword || !passwordsMatch || !passwordStrong || !privacyAccepted}
                   className="w-full btn-shimmer"
                 >
                   {t('auth.create_account', 'Create account')}

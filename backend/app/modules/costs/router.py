@@ -1784,12 +1784,30 @@ async def restore_qdrant_snapshot(
             )
             logger.info("Created Qdrant collection: %s", collection_name)
 
-        # Recover snapshot — uses the Qdrant HTTP API under the hood
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(
-            None,
-            lambda: client.recover_snapshot(collection_name, location=str(local_path)),
+        # Upload snapshot via multipart — client.recover_snapshot() only
+        # accepts URIs the Qdrant SERVER can fetch (http://, s3://, file://
+        # on the server's own disk). Our snapshot sits on the app container,
+        # so we POST the bytes directly to /collections/{name}/snapshots/upload.
+        from app.modules.costs.qdrant_snapshot_loader import restore_snapshot_file
+
+        qdrant_url = _v3_qdrant_url()
+        if not qdrant_url:
+            raise HTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "Qdrant URL not configured — set QDRANT_URL or CWICR_QDRANT_URL",
+            )
+        ok = await asyncio.to_thread(
+            restore_snapshot_file,
+            qdrant_url=qdrant_url,
+            collection_name=collection_name,
+            snapshot_path=local_path,
+            timeout_s=1800,
         )
+        if not ok:
+            raise HTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                f"Failed to restore Qdrant snapshot for {db_id}. Check Qdrant logs.",
+            )
         logger.info("Snapshot restored for collection %s", collection_name)
     except Exception as exc:
         logger.error("Failed to restore snapshot for %s: %s", db_id, exc)
@@ -3153,11 +3171,10 @@ async def load_cwicr_database(
     total_rows = len(df)
     logger.info("Raw data: %d rows", total_rows)
 
-    from app.config import get_settings
+    import os
 
-    settings = get_settings()
-    sqlite_url = settings.database_url
-    db_file = sqlite_url.split("///")[-1] if "///" in sqlite_url else "openestimate.db"
+    sqlite_url = os.getenv("SQLITE_URL", "sqlite:////app/.openestimate/openestimate.db")
+    db_file = sqlite_url.split("sqlite:///", 1)[1] if "sqlite:///" in sqlite_url else "/app/.openestimate/openestimate.db"
 
     # Run in thread to avoid blocking the event loop during heavy pandas + sqlite work.
     try:
@@ -3570,6 +3587,23 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
     conn.execute("PRAGMA busy_timeout=30000")
     conn.execute("PRAGMA temp_store=MEMORY")
     conn.execute("PRAGMA cache_size=-20000")  # 20 MB cache
+
+    conn.execute("""CREATE TABLE IF NOT EXISTS oe_costs_item (
+        id          TEXT PRIMARY KEY,
+        code        TEXT NOT NULL,
+        description TEXT NOT NULL,
+        unit        TEXT NOT NULL,
+        rate        TEXT NOT NULL,
+        currency    TEXT NOT NULL DEFAULT '',
+        source      TEXT NOT NULL DEFAULT 'cwicr',
+        classification TEXT NOT NULL DEFAULT '{}',
+        tags        TEXT NOT NULL DEFAULT '[]',
+        components  TEXT NOT NULL DEFAULT '[]',
+        descriptions TEXT NOT NULL DEFAULT '{}',
+        is_active   INTEGER NOT NULL DEFAULT 1,
+        region      TEXT,
+        metadata    TEXT NOT NULL DEFAULT '{}'
+    )""")
 
     sql = """INSERT OR IGNORE INTO oe_costs_item
         (id, code, description, unit, rate, currency, source,

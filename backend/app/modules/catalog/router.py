@@ -148,7 +148,9 @@ async def import_catalog_from_github(
     """
     import csv
     import io
-    import urllib.request
+    import requests
+    from requests.adapters import HTTPAdapter
+    from urllib3.util.retry import Retry
 
     folder = REGION_MAP.get(region)
     if folder is None:
@@ -171,21 +173,26 @@ async def import_catalog_from_github(
     logger.info("Downloading catalog CSV: %s", url)
 
     try:
-        req = urllib.request.Request(
-            url,
-            headers={
+        # Offload blocking requests to a worker thread so the event loop
+        # stays responsive during the 60-second download window.
+        def _fetch() -> bytes:
+            session = requests.Session()
+            retries = Retry(
+                total=3,
+                backoff_factor=2,
+                status_forcelist=[500, 502, 503, 504],
+                allowed_methods=["GET"],
+            )
+            session.mount("https://", HTTPAdapter(max_retries=retries))
+            session.headers.update({
                 "User-Agent": (
                     "OpenConstructionERP "
                     "(+https://datadrivenconstruction.io; DDC-CWICR-OE-2026)"
-                )
-            },
-        )
-
-        # Offload blocking urllib to a worker thread so the event loop
-        # stays responsive during the 60-second download window.
-        def _fetch() -> bytes:
-            with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 — host pinned above
-                return resp.read()
+                ),
+            })
+            resp = session.get(url, timeout=60)
+            resp.raise_for_status()
+            return resp.content
 
         raw_bytes = await asyncio.to_thread(_fetch)
     except Exception as exc:

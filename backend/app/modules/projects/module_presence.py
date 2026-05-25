@@ -40,6 +40,13 @@ from typing import NamedTuple
 
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError, ProgrammingError
+
+try:
+    from sqlalchemy.exc import InFailedSQLTransactionError
+except ImportError:
+    # Older SQLAlchemy (<2.0): InFailedSQLTransactionError was added in 2.0.
+    # Fall back to the base class so the except clause still compiles.
+    from sqlalchemy.exc import DBAPIError as InFailedSQLTransactionError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
@@ -202,6 +209,16 @@ async def _run_one_probe(
         # migrations land. Don't log at WARNING — too noisy.
         logger.debug(
             "module_presence: probe %s skipped (table missing or schema mismatch)",
+            probe.module_key,
+        )
+        return probe.module_key, False
+    except InFailedSQLTransactionError:
+        # The session's transaction was aborted by a prior concurrent probe.
+        # We cannot safely rollback on a shared session — other probes are
+        # still executing concurrently. Just return False; the caller gets a
+        # fresh session on the next request.
+        logger.warning(
+            "module_presence: probe %s skipped (transaction aborted by prior probe)",
             probe.module_key,
         )
         return probe.module_key, False

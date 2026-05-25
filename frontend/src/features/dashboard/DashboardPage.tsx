@@ -2523,7 +2523,7 @@ function SystemStatus() {
     {
       name: t('dashboard.vector_db', { defaultValue: 'Vector DB' }),
       status: vectorStatus,
-      detail: vectorVectors > 0 ? `${vectorVectors.toLocaleString()} vectors` : '',
+      detail: [status?.vector_db?.engine, vectorVectors > 0 ? `${vectorVectors.toLocaleString()} vectors` : ''].filter(Boolean).join(' · '),
       icon: <Globe size={13} />,
       delay: 520,
     },
