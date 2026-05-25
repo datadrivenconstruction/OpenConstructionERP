@@ -34,8 +34,10 @@ const inFlightGeometryFetches = new Map<
  *
  * - GLB: bytes 0..3 == ASCII 'glTF' (0x67 0x6c 0x54 0x46)
  * - DAE: first 4 KiB (after optional UTF-8 BOM + XML decl) contains
- *   ``<COLLADA`` somewhere; case-insensitive because some exporters
- *   write ``<Collada``.
+ *   a ``<COLLADA`` root tag; case-insensitive and namespace-prefix-tolerant
+ *   (matches ``<ns0:COLLADA`` as well as the bare ``<COLLADA`` form).
+ *   Python ElementTree without ET.register_namespace() serialises the
+ *   namespace-prefixed form; both are valid COLLADA.
  */
 function detectGeometryKind(buffer: ArrayBuffer): 'glb' | 'dae' | null {
   if (buffer.byteLength < 12) return null;
@@ -50,7 +52,9 @@ function detectGeometryKind(buffer: ArrayBuffer): 'glb' | 'dae' | null {
   );
   // Strip BOM for the check.
   const stripped = head.charCodeAt(0) === 0xfeff ? head.slice(1) : head;
-  if (/<COLLADA[\s>]/i.test(stripped)) return 'dae';
+  // Match bare <COLLADA and namespace-prefixed <ns0:COLLADA (Python ET
+  // without register_namespace() serialises the latter).
+  if (/<(?:[A-Za-z0-9_-]+:)?COLLADA[\s>]/i.test(stripped)) return 'dae';
   return null;
 }
 
@@ -1047,7 +1051,9 @@ export class ElementManager {
         // walker explodes with the unhelpful "reading 'getAttribute'"
         // error somewhere inside the parser instead of telling us it's
         // not COLLADA. Bail out early with a clear message.
-        if (!/<COLLADA[\s>]/i.test(text.slice(0, 4096))) {
+        // The regex also accepts namespace-prefixed forms such as
+        // "<ns0:COLLADA" (produced by Python ET without register_namespace()).
+        if (!/<(?:[A-Za-z0-9_-]+:)?COLLADA[\s>]/i.test(text.slice(0, 4096))) {
           reject(new Error('Not a COLLADA document — <COLLADA> root tag not found in first 4096 chars'));
           return;
         }

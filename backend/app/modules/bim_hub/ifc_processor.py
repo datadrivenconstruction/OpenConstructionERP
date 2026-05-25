@@ -3197,6 +3197,17 @@ def _patch_collada_node_names(dae_path: Path) -> int:
 
     if patched > 0:
         ET.indent(tree, space="  ")
+        # Register COLLADA namespace as the default (empty prefix) so
+        # tree.write() emits <COLLADA xmlns="..."> instead of
+        # <ns0:COLLADA xmlns:ns0="...">.  Python ET emits the ns0: form when
+        # the namespace is not in the global prefix registry, which causes the
+        # frontend's literal "<COLLADA" text-scan to reject the file with
+        # "Not a COLLADA document".
+        # NOTE: default_namespace= cannot be used here — Python ET rejects it
+        # whenever any element or attribute carries a non-qualified name
+        # (e.g. the `version` attribute on <COLLADA>): ValueError "cannot use
+        # non-qualified names with default_namespace option".
+        ET.register_namespace("", _COLLADA_NS)
         tree.write(str(dae_path), xml_declaration=True, encoding="utf-8")
         logger.info(
             "Patched %d COLLADA node name attributes to match id in %s",

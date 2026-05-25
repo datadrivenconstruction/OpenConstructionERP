@@ -273,21 +273,25 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
 
   const statusDot = model.status === 'ready'
     ? 'bg-emerald-500'
-    : isProcessing
-      ? 'bg-amber-400 animate-pulse'
-      : isError
-        ? 'bg-red-400'
-        : 'bg-gray-400';
+    : model.status === 'degraded'
+      ? 'bg-amber-500'
+      : isProcessing
+        ? 'bg-amber-400 animate-pulse'
+        : isError
+          ? 'bg-red-400'
+          : 'bg-gray-400';
 
   const statusLabel = model.status === 'ready'
     ? t('bim.status_ready', { defaultValue: 'Ready' })
-    : model.status === 'needs_converter'
-      ? t('bim.status_needs_converter', { defaultValue: 'Needs Converter' })
-      : model.status === 'processing'
-        ? t('bim.status_processing', { defaultValue: 'Processing' })
-        : model.status === 'error'
-          ? t('bim.status_error', { defaultValue: 'Error' })
-          : model.status;
+    : model.status === 'degraded'
+      ? t('bim.status_degraded', { defaultValue: 'Imported (no quantities)' })
+      : model.status === 'needs_converter'
+        ? t('bim.status_needs_converter', { defaultValue: 'Needs Converter' })
+        : model.status === 'processing'
+          ? t('bim.status_processing', { defaultValue: 'Processing' })
+          : model.status === 'error'
+            ? t('bim.status_error', { defaultValue: 'Error' })
+            : model.status;
 
   // The card itself acts as a button (click selects the model). We render
   // it as a <div role="button"> so the inner delete button can stay a real
@@ -1565,9 +1569,10 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
             {(landingModels ?? []).map((m) => {
               const fmt = (m.model_format || m.format || '').toUpperCase();
               const isReady = m.status === 'ready';
+              const isDegraded = m.status === 'degraded';
               const isProcessing = m.status === 'processing';
               const isError = m.status === 'error' || m.status === 'needs_converter';
-              const statusDot = isReady ? 'bg-emerald-500' : isProcessing ? 'bg-amber-400 animate-pulse' : isError ? 'bg-red-400' : 'bg-gray-400';
+              const statusDot = isReady ? 'bg-emerald-500' : isDegraded ? 'bg-amber-500' : isProcessing ? 'bg-amber-400 animate-pulse' : isError ? 'bg-red-400' : 'bg-gray-400';
 
               return (
                 <button
@@ -1597,7 +1602,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     <div className="flex items-center gap-2 text-[10px] text-content-quaternary">
                       <span className="flex items-center gap-1">
                         <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`} />
-                        {isReady ? t('bim.status_ready', { defaultValue: 'Ready' }) : isProcessing ? t('bim.status_processing', { defaultValue: 'Processing' }) : m.status}
+                        {isReady ? t('bim.status_ready', { defaultValue: 'Ready' }) : isDegraded ? t('bim.status_degraded', { defaultValue: 'Imported (no quantities)' }) : isProcessing ? t('bim.status_processing', { defaultValue: 'Processing' }) : m.status}
                       </span>
                       {(m.element_count ?? 0) > 0 && (
                         <>
@@ -1950,7 +1955,10 @@ export function BIMPage() {
     // an upload) used to surface a misleading "Failed to load model elements"
     // toast — the inline NonReadyOverlay now drives the UI for non-ready
     // states and the elements query waits its turn.
-    enabled: !!activeModelId && activeModel?.status === 'ready',
+    // 'degraded' models have geometry + elements in the DB (imported but DDC
+    // converter absent or no quantities extracted) — show them in the viewer
+    // with the existing converter-absent warning banner.
+    enabled: !!activeModelId && (activeModel?.status === 'ready' || activeModel?.status === 'degraded'),
   });
   const elements: BIMElementData[] = elementsQuery.data?.items ?? [];
   const elementsTotal: number = elementsQuery.data?.total ?? 0;
@@ -2066,9 +2074,11 @@ export function BIMPage() {
   // The ?token= param authenticates the request (Three.js can't set headers).
   // Cache-bust with model updated_at to ensure fresh geometry after re-upload.
   const geometryUrl = useMemo(() => {
+    const modelIsViewable =
+      activeModel?.status === 'ready' || activeModel?.status === 'degraded';
     if (
       !activeModelId ||
-      activeModel?.status !== 'ready' ||
+      !modelIsViewable ||
       ((activeModel?.element_count ?? 0) === 0 && !elements.some((el) => !!el.mesh_ref))
     ) {
       return null;
