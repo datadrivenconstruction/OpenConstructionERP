@@ -269,36 +269,85 @@ def rerank(
     raw_scores = [float(s) for s in raw_scores]
     normalized = _normalize_bge_scores(raw_scores)
 
+    # Blend factor — how much weight to give the BGE rerank vs the
+    # prior (fused vector + boosts) score. On payload-only snapshots
+    # the catalogue descriptions are templated (e.g.
+    # "Electrical equipment — IfcLightFixture — Commissioning —
+    # MasterFormat 26 20 00") and BGE finds little signal beyond the
+    # generic category prefix — its sigmoid logits collapse to the
+    # 0.003-0.05 band even for objectively-correct matches. A naive
+    # score replacement then drags every correct hit down to that
+    # band, killing the confidence story for downstream UI/auto-link.
+    #
+    # The blend below treats BGE as a *reordering* signal, not a
+    # *score replacement*: 60% prior + 40% BGE preserves the vector
+    # confidence while still letting BGE break ties between top-k
+    # candidates. Reranker still drives the final sort order (so
+    # candidate at position 1 after rerank is the one BGE thinks is
+    # best) — only the displayed/stored score is preserved.
+    _BGE_BLEND_WEIGHT: float = 0.4
+
     by_code = classification_confidence_by_code or {}
-    reranked: list[MatchCandidate] = []
+    # Pair each head candidate with its BGE signal so we can sort by
+    # BGE (re-ordering authority) but display the blended score.
+    indexed: list[tuple[float, float, MatchCandidate]] = []
     for cand, new_score in zip(head, normalized, strict=False):
         clamped = max(0.0, min(1.0, new_score))
+        prior = float(cand.score)
+        # Blend: prior_score * (1 - w) + bge_score * w. When
+        # ``bge_score`` is much lower than prior (the templated-passage
+        # cliff), we keep most of the prior. When BGE is much higher
+        # (rare — usually means the prior was over-cautious), we move
+        # closer to BGE's reading.
+        blended = prior * (1.0 - _BGE_BLEND_WEIGHT) + clamped * _BGE_BLEND_WEIGHT
+        blended = max(0.0, min(1.0, blended))
+        indexed.append((clamped, blended, cand))
+
+    # Sort the head by BGE first (reorder authority), tie-break by
+    # blended (preserves prior signal when BGE is flat), then by code
+    # for determinism.
+    indexed.sort(key=lambda t: (-t[0], -t[1], t[2].code))
+
+    reranked: list[MatchCandidate] = []
+    for clamped, blended, cand in indexed:
+        prior = float(cand.score)
         band = _dynamic_band_for_bge(
-            clamped,
+            blended,
             hard_filters_matched=hard_filters_matched,
             classification_confidence=by_code.get(cand.code),
         )
         reranked.append(
             cand.model_copy(
                 update={
-                    "score": clamped,
+                    # ``score`` is what the UI shows + what auto-link
+                    # gates on; keep it on the same scale as the
+                    # pre-rerank vector path so a 0.85 auto-link
+                    # threshold means the same thing across reranked
+                    # and non-reranked responses.
+                    "score": blended,
                     "confidence_band": band,
                     "boosts_applied": {
                         **cand.boosts_applied,
-                        "bge_rerank": clamped - cand.score,
+                        # Track both the raw BGE signal and the
+                        # blended delta so the explainability panel
+                        # can show "BGE rerank pushed this up by X".
+                        "bge_rerank_raw": clamped,
+                        "bge_rerank_delta": blended - prior,
                     },
                 }
             )
         )
 
-    # Deterministic tie-break on rate_code: BGE logits collapse at the
-    # 0.001–0.04 band on payload-only snapshots, so equal-score ties
-    # are common. Without ``c.code`` as the secondary key, Python's
-    # stable sort preserves whatever order the input list happened to
-    # arrive in — which is itself a function of upstream async ordering
-    # and HNSW tie resolution. Pin the lex order so the bench can
-    # measure ranker quality instead of run-to-run permutation noise.
-    reranked.sort(key=lambda c: (-c.score, c.code))
+    # Head was already sorted by BGE-then-blended-then-code in
+    # ``indexed.sort`` above (BGE preserves the cross-encoder's
+    # ordering authority; blended + code tie-break for determinism).
+    # Avoid the trailing ``reranked.sort(key=score)`` that the
+    # pre-blend implementation did — once we blend with the prior, the
+    # blended score is no longer monotone in BGE rank, so re-sorting
+    # by it would undo the BGE reordering and collapse back to
+    # vector-only ranking. We keep the BGE order from indexed.sort
+    # and let the caller's final ``candidates.sort`` (in
+    # ``ranker_qdrant.rank``) deal with global ordering.
     return reranked + tail
 
 
