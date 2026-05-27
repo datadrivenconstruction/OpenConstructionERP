@@ -640,11 +640,16 @@ class CrmService:
 
         # 1. Scrub the lead row itself. Keep status / lifecycle so audit
         #    counts (e.g. win-rate denominators) stay consistent.
+        # R8 audit: ``source`` is String(32) but some integrations write a
+        # free-form referral label such as "referral:john.doe@corp.com" —
+        # that is GDPR-class PII (Art. 4(1) direct identifier) and must be
+        # erased alongside the contact fields.
         await self.lead_repo.update_fields(
             lead_id,
             contact_name=scrub_marker,
             contact_email=None,
             contact_phone=None,
+            source=scrub_marker,
             qualification_notes="",
         )
 
@@ -654,6 +659,9 @@ class CrmService:
         # read ``act.id`` on the next loop, SQLAlchemy would re-trigger IO
         # outside the async greenlet (raising MissingGreenlet). Snapshot the
         # IDs up-front so the loop never touches stale ORM state.
+        # R8 audit: ``outcome`` is a free-text field that reps often populate
+        # with direct-speech notes ("Spoke to John, he said …") — PII risk
+        # identical to body/subject. Scrub it alongside body.
         activities, _ = await self.activity_repo.list_all(limit=10000, lead_id=lead_id)
         activity_ids = [act.id for act in activities]
         for activity_id in activity_ids:
@@ -661,6 +669,7 @@ class CrmService:
                 activity_id,
                 subject=scrub_marker,
                 body="",
+                outcome=None,
             )
 
         # 3. Audit-log the action (best-effort; never block the erasure).
