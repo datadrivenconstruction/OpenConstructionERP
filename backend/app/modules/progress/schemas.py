@@ -26,8 +26,30 @@ class ProgressEntryCreate(BaseModel):
     # WGS84 geo pin from the field worker's device
     geo_lat: float | None = Field(default=None, ge=-90.0, le=90.0)
     geo_lon: float | None = Field(default=None, ge=-180.0, le=180.0)
-    photos: list[str] = Field(default_factory=list)
+    photos: list[str] = Field(default_factory=list, max_length=20)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("photos")
+    @classmethod
+    def _validate_photos(cls, v: list[str]) -> list[str]:
+        """Reject photo paths that look like path-traversal attempts or are oversized.
+
+        Progress photos stored here should be server-issued opaque paths (e.g.
+        ``uploads/progress/photos/<uuid>.jpg``).  We sanitise caller-supplied
+        values so that no path-traversal string can be persisted.
+        """
+        cleaned: list[str] = []
+        for raw in v:
+            if not isinstance(raw, str):
+                raise ValueError("Each photo entry must be a string")
+            if len(raw) > 512:
+                raise ValueError(f"Photo path too long (max 512 chars): {raw[:80]!r}")
+            # Reject obvious path-traversal patterns
+            normalised = raw.replace("\\", "/")
+            if ".." in normalised.split("/"):
+                raise ValueError(f"Photo path contains path traversal component: {raw!r}")
+            cleaned.append(raw)
+        return cleaned
 
     @field_validator("percent_complete")
     @classmethod

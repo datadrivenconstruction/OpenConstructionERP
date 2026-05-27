@@ -28,7 +28,7 @@ from app.core.file_signature import (
 from app.core.file_signature import (
     require as require_signature,
 )
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
 from app.modules.punchlist.schemas import (
     PinToSheetRequest,
     PunchBulkCloseRequest,
@@ -283,6 +283,7 @@ async def transition_status(
     data: PunchStatusTransition,
     user_id: CurrentUserId,
     session: SessionDep,
+    payload: CurrentUserPayload,
     _perm: None = Depends(RequirePermission("punchlist.update")),
     service: PunchListService = Depends(_get_service),
 ) -> PunchItemResponse:
@@ -294,15 +295,10 @@ async def transition_status(
     """
     existing = await service.get_item(item_id)
     await verify_project_access(existing.project_id, str(user_id), session)
-    # For verify and close transitions, require the verify permission
+    # For verify and close transitions, require the punchlist.verify permission
+    # in addition to punchlist.update which is already checked by the decorator.
     if data.new_status in ("verified", "closed"):
-        # Check verify permission manually
-
-        # The RequirePermission("punchlist.update") already ran;
-        # for verify/close we need the extra verify permission check.
-        # This is handled by requiring the permission on this endpoint
-        # and checking explicitly here for the verify case.
-        pass  # verify permission enforced below via separate check if needed
+        await RequirePermission("punchlist.verify")(payload)
 
     item = await service.transition_status(item_id, data, user_id)
     return _item_to_response(item)
@@ -442,11 +438,14 @@ async def upload_photo(
 async def remove_photo(
     item_id: uuid.UUID,
     index: int,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("punchlist.update")),
     service: PunchListService = Depends(_get_service),
 ) -> None:
     """Remove a photo by index from a punch item."""
+    existing = await service.get_item(item_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
     await service.remove_photo(item_id, index)
 
 
