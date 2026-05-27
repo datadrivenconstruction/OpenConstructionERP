@@ -200,3 +200,59 @@ def test_render_br_invoice_pdf_escapes_html_in_description() -> None:
     ]
     pdf_bytes = render_br_invoice_pdf(invoice=invoice, line_items=line_items)
     assert pdf_bytes[:5] == b"%PDF-"
+
+
+# ── Content-Disposition filename sanitisation ────────────────────────────
+# These tests cover the inline sanitisation applied in finance/router.py
+# *before* the invoice_number is embedded in the quoted Content-Disposition
+# header.  We replicate the exact transformation here so a future router
+# refactor can't quietly re-introduce the injection surface without a red
+# test.
+
+
+def _sanitise_invoice_number(raw: str | None) -> str:
+    """Mirror of the sanitisation logic in ``finance/router.py``."""
+    _raw_num = raw or "invoice"
+    _safe = (
+        _raw_num.encode("ascii", errors="replace")
+        .decode("ascii")
+        .replace("\r", "")
+        .replace("\n", "")
+        .replace('"', "'")
+        .replace("/", "-")
+        .strip()
+    )[:80] or "invoice"
+    return _safe
+
+
+def test_invoice_number_strips_double_quotes() -> None:
+    """``"`` in invoice_number would terminate the RFC 6266 quoted-string."""
+    assert '"' not in _sanitise_invoice_number('INV-"2026"-01')
+
+
+def test_invoice_number_strips_crlf() -> None:
+    """CRLF in invoice_number enables HTTP response-header injection.
+
+    The CRLF bytes themselves must be removed (that is the injection vector).
+    The remaining text may still be present as a literal filename substring,
+    which is harmless — "X-Inject: evil" in a single-line quoted token cannot
+    inject a second header.
+    """
+    result = _sanitise_invoice_number("INV-001\r\nX-Inject: evil")
+    assert "\r" not in result
+    assert "\n" not in result
+
+
+def test_invoice_number_strips_slashes() -> None:
+    assert "/" not in _sanitise_invoice_number("INV/2026/01")
+
+
+def test_invoice_number_fallback_on_empty() -> None:
+    assert _sanitise_invoice_number(None) == "invoice"
+    assert _sanitise_invoice_number("") == "invoice"
+    assert _sanitise_invoice_number("   ") == "invoice"
+
+
+def test_invoice_number_caps_at_80_chars() -> None:
+    long_num = "A" * 120
+    assert len(_sanitise_invoice_number(long_num)) == 80

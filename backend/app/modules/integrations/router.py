@@ -594,6 +594,6 @@ async def calendar_feed(
         content=content,
         media_type="text/calendar; charset=utf-8",
         headers={
-            "Content-Disposition": f"attachment; filename=project-{project_id}.ics",
+            "Content-Disposition": f'attachment; filename="project-{project_id}.ics"',
         },
     )

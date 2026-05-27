@@ -162,7 +162,7 @@ async def export_markups(
     return PlainTextResponse(
         content=csv_content,
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=markups.csv"},
+        headers={"Content-Disposition": 'attachment; filename="markups.csv"'},
     )
 
 

@@ -955,7 +955,7 @@ async def export_pdf(
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=field_report_{report_id}.pdf"},
+        headers={"Content-Disposition": f'attachment; filename="field_report_{report_id}.pdf"'},
     )
 
 

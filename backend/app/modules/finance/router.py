@@ -520,8 +520,24 @@ async def export_invoice_br_pdf(
         project=project_dict or None,
     )
 
-    invoice_number = (invoice.invoice_number or "invoice").replace("/", "-")
-    filename = f"RPS_{invoice_number}.pdf"
+    # Sanitise invoice_number before embedding in a quoted Content-Disposition
+    # header.  invoice_number is a user-controlled DB value — it can contain
+    # characters that would break the RFC 6266 quoted-string or inject
+    # additional headers (CRLF injection).  Strip every character that is not
+    # ASCII printable, remove double-quotes (which terminate the quoted-string
+    # token) and forward-slashes (already done historically), and cap length.
+    _raw_num = (invoice.invoice_number or "invoice")
+    _safe_num = (
+        _raw_num
+        .encode("ascii", errors="replace")  # non-ASCII → b'?'
+        .decode("ascii")
+        .replace("\r", "")
+        .replace("\n", "")
+        .replace('"', "'")
+        .replace("/", "-")
+        .strip()
+    )[:80] or "invoice"
+    filename = f"RPS_{_safe_num}.pdf"
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",

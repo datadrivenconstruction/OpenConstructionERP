@@ -325,8 +325,15 @@ async def get_report_content(
     history panels listed report rows but had no way to open them
     because no endpoint exposed the rendered body.
     """
-    report, body_html = await service.get_report_content(report_id)
+    # Resolve the metadata row first (raises 404 if unknown) so we know
+    # which project to gate on, then verify access *before* fetching the
+    # rendered body from the storage backend.  Reversing the order would
+    # waste a storage I/O for every unauthorised request and, more
+    # importantly, would read sensitive report content into memory before
+    # the caller's access is confirmed.
+    report = await service.get_report(report_id)
     await verify_project_access(report.project_id, user_id, session)
+    _, body_html = await service.get_report_content(report_id)
     return HTMLResponse(content=body_html, status_code=200)
 
 
