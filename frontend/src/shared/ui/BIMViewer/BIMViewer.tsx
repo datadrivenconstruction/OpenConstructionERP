@@ -2500,7 +2500,14 @@ export function BIMViewer({
 
   return (
     <div ref={containerRef} className={clsx('relative w-full h-full min-h-[400px] bg-surface-secondary rounded-lg overflow-hidden', className)}>
-      <canvas ref={canvasRef} className="w-full h-full block" />
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full block"
+        role="img"
+        aria-label={t('bim.viewer.canvas_aria_label', {
+          defaultValue: '3D BIM model viewer — use mouse or touch to orbit, zoom, and pan',
+        })}
+      />
 
       {/* W6.6 Stream B — Site Compass. Mounts only after the SceneManager
           is alive so the cube never tries to read from a null ref. The

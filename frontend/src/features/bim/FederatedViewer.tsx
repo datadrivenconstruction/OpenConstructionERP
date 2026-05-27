@@ -93,6 +93,22 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
       };
     }, []);
 
+    /* ── Dark-mode sync ──────────────────────────────────────────── */
+    useEffect(() => {
+      const scene = sceneRef.current;
+      if (!scene) return;
+      const html = document.documentElement;
+      const sync = (): void => scene.setDarkMode(html.classList.contains('dark'));
+      sync(); // initial
+      const observer = new MutationObserver(sync);
+      observer.observe(html, { attributes: true, attributeFilter: ['class'] });
+      return () => observer.disconnect();
+    // sceneRef.current is a stable object; we only need to re-run when the
+    // scene itself changes (i.e., never after mount). Empty dep array is
+    // intentional here — the MutationObserver keeps it live.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     /* ── Push newly-loaded GLBs into the scene ────────────────────── */
     useEffect(() => {
       const scene = sceneRef.current;
@@ -214,6 +230,10 @@ export const FederatedViewer = forwardRef<FederatedViewerHandle, Props>(
           ref={canvasRef}
           data-testid="federated-viewer-canvas"
           className="block h-full w-full"
+          role="img"
+          aria-label={t('bim.federation.viewer.canvas_aria_label', {
+            defaultValue: 'Federated BIM viewer — use mouse to orbit, zoom, and pan',
+          })}
         />
 
         {/* Toolbar — top-left */}

@@ -147,7 +147,12 @@ export class FederatedViewerScene {
     this.updateSize();
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xf0f2f5);
+    this.scene.background = new THREE.Color(
+      typeof document !== 'undefined' &&
+      document.documentElement.classList.contains('dark')
+        ? 0x1a1a2e
+        : 0xf0f2f5,
+    );
 
     const aspect = this.container.clientWidth / Math.max(this.container.clientHeight, 1);
     this.camera = new THREE.PerspectiveCamera(45, aspect, 0.01, 1_000_000);
@@ -239,6 +244,14 @@ export class FederatedViewerScene {
 
   /** Mark dirty so the next animation tick re-renders. */
   requestRender(): void {
+    this._needsRender = true;
+  }
+
+  /** Swap the scene background between dark and light mode.
+   *  Call this whenever the host detects a theme change so the canvas
+   *  background matches the surrounding UI. */
+  setDarkMode(dark: boolean): void {
+    (this.scene.background as THREE.Color).set(dark ? 0x1a1a2e : 0xf0f2f5);
     this._needsRender = true;
   }
 
@@ -400,6 +413,13 @@ export class FederatedViewerScene {
       state.override = null;
       state.cloned = false;
     }
+    // Clear the sweep set now that all overrides are reverted. Without this
+    // the set would accumulate stale mesh refs across add/remove cycles —
+    // each removeMember() call already deletes entries via disposeGroup(),
+    // but meshes from members that were never removed (just uncolored)
+    // would stay until the next disposeGroup / dispose(). Clearing here
+    // keeps the set bounded to the currently-overridden meshes only.
+    this.overriddenMeshes.clear();
   }
 
   /* ── Isolation ─────────────────────────────────────────────────── */
