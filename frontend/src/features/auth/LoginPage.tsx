@@ -206,13 +206,11 @@ export function LoginPage() {
         .dark .login-glass-pro {
           background:
             linear-gradient(135deg, rgba(22, 26, 36, 0.78) 0%, rgba(15, 17, 23, 0.66) 100%);
-          border-color: rgba(255, 255, 255, 0.08);
+          border-color: transparent;
           box-shadow:
             0 30px 80px -24px rgba(14, 165, 233, 0.35),
             0 12px 40px -12px rgba(0, 0, 0, 0.55),
-            0 2px 6px -2px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 rgba(255, 255, 255, 0.12),
-            inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+            0 2px 6px -2px rgba(0, 0, 0, 0.4);
         }
         .login-glass-pro::after {
           content: '';
@@ -436,7 +434,7 @@ export function LoginPage() {
               >
                 <div
                   className={`relative flex flex-col items-center justify-center w-[88px] h-[100px] animate-fade-in transition-transform duration-300 hover:scale-[1.05] ${
-                    isAccent ? 'text-white' : 'text-content-primary'
+                    isAccent ? 'text-white' : 'text-slate-900'
                   }`}
                   style={{
                     animationDelay: `${280 + idx * 35}ms`,
@@ -453,11 +451,11 @@ export function LoginPage() {
                   <Icon
                     size={isAccent ? 22 : 18}
                     strokeWidth={isAccent ? 2 : 1.65}
-                    className={isAccent ? '' : 'text-oe-blue/90'}
+                    className={isAccent ? '' : 'text-oe-blue'}
                   />
                   <span
                     className={`mt-[5px] text-[10px] font-semibold tracking-[-0.01em] ${
-                      isAccent ? 'text-white/95' : 'text-content-primary/85'
+                      isAccent ? 'text-white/95' : 'text-slate-800'
                     }`}
                   >
                     {cell.label}
