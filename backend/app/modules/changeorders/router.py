@@ -253,9 +253,17 @@ async def get_change_order(
     order_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("changeorders.read")),
     service: ChangeOrderService = Depends(_get_service),
 ) -> ChangeOrderWithItems:
-    """Get change order with all items."""
+    """Get change order with all items.
+
+    R8 audit: the legacy GET /{order_id} lacked a RequirePermission gate —
+    only verify_project_access ran, meaning any authenticated user could
+    read a CO on a project they owned regardless of their CO-module role.
+    Now gated on ``changeorders.read`` (viewer+) for consistency with the
+    list endpoint.
+    """
     order = await service.get_order(order_id)
     await verify_project_access(order.project_id, str(user_id), session)
     return _order_to_with_items(order)
@@ -397,6 +405,29 @@ async def reject_order(
     existing = await service.get_order(order_id)
     await verify_project_access(existing.project_id, str(user_id), session)
     order = await service.reject_order(order_id, user_id)
+    return _order_to_response(order)
+
+
+@router.post("/{order_id}/execute/", response_model=ChangeOrderResponse)
+async def execute_order(
+    order_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("changeorders.update")),
+    service: ChangeOrderService = Depends(_get_service),
+) -> ChangeOrderResponse:
+    """Mark an approved change order as executed (work completed on site).
+
+    R8 audit: the ``executed`` terminal state existed in the service FSM
+    (``approved`` → ``executed``) but had no router endpoint — leaving
+    approved COs permanently stuck at that status and making the
+    ``executed`` distinction invisible to project controllers. Callers
+    need ``changeorders.update`` (editor-level) because execution is an
+    operational milestone, not an approval decision.
+    """
+    existing = await service.get_order(order_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
+    order = await service.execute_order(order_id, user_id)
     return _order_to_response(order)
 
 

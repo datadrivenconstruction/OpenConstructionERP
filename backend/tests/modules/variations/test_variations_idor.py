@@ -268,3 +268,142 @@ async def test_duplicate_final_account_create_returns_409_not_500() -> None:
                 ),
             )
     assert exc.value.status_code == 409
+
+
+# ── R8: convert_vr_to_vo race-condition guard ──────────────────────────────
+
+
+class _ConditionalUpdateSession:
+    """Stub session that simulates a DB-level conditional UPDATE for the
+    convert_vr_to_vo guard (first call wins; second sees rowcount=0)."""
+
+    def __init__(self) -> None:
+        self._converted: set[uuid.UUID] = set()
+
+    async def refresh(self, obj: Any) -> None:
+        return None
+
+    async def flush(self) -> None:
+        return None
+
+    async def rollback(self) -> None:
+        return None
+
+    async def execute(self, stmt: Any) -> Any:
+        # Detect the guard UPDATE by inspecting the compiled SQL or
+        # statement type — for simplicity we key on the presence of
+        # VariationRequest in the table clause which is unique to the
+        # guard. Fall through to a no-op scalar for everything else.
+        from sqlalchemy import update as _sa_update
+
+        if isinstance(stmt, type(_sa_update(object).__class__)):
+            return SimpleNamespace(scalar_one_or_none=lambda: None, rowcount=None)
+        # Plain scalar fallback used by the ActivityLog writer etc.
+        return SimpleNamespace(scalar_one_or_none=lambda: None, rowcount=None)
+
+
+class _GuardedSession:
+    """Simulates two concurrent convert_vr_to_vo calls — the second one
+    gets rowcount=0 from the conditional UPDATE (VR already flipped)."""
+
+    def __init__(self) -> None:
+        self._flip_calls = 0
+
+    async def refresh(self, obj: Any) -> None:
+        return None
+
+    async def flush(self) -> None:
+        return None
+
+    async def rollback(self) -> None:
+        return None
+
+    async def execute(self, stmt: Any) -> Any:
+        # Identify the guard UPDATE by its class hierarchy depth — the
+        # easiest portable probe is checking ``.whereclause`` is not None
+        # and the compiled string fragment. Use a simple string-repr probe.
+        stmt_repr = repr(stmt)
+        if "UPDATE" in stmt_repr.upper() and "VariationRequest" in stmt_repr:
+            self._flip_calls += 1
+            rowcount = 1 if self._flip_calls == 1 else 0
+            return SimpleNamespace(rowcount=rowcount)
+        return SimpleNamespace(scalar_one_or_none=lambda: None, rowcount=None)
+
+
+@pytest.mark.asyncio
+async def test_convert_vr_to_vo_race_second_call_gets_409() -> None:
+    """R8: the conditional UPDATE guard must return 409 when the VR was
+    already flipped to converted_to_vo by a concurrent call.
+
+    We simulate the race by injecting a session whose execute() returns
+    rowcount=0 on the guard UPDATE, matching what the DB returns when the
+    UPDATE matched 0 rows (the row was already updated).
+    """
+    from types import SimpleNamespace
+
+    project_id = uuid.uuid4()
+    vr_id = uuid.uuid4()
+
+    vr = SimpleNamespace(
+        id=vr_id,
+        project_id=project_id,
+        status="approved",
+        code="VR-0001",
+        title="test VR",
+        currency="EUR",
+        estimated_cost_impact=Decimal("1000"),
+        contract_standard="",
+        contract_clause_ref="",
+        quotation_due_at=None,
+        assessment_due_at=None,
+        requested_at=None,
+    )
+
+    class _LoserSession:
+        async def refresh(self, obj: Any) -> None:
+            return None
+
+        async def flush(self) -> None:
+            return None
+
+        async def rollback(self) -> None:
+            return None
+
+        async def execute(self, stmt: Any) -> Any:
+            # Always report rowcount=0 — simulates "another txn already
+            # claimed this VR".
+            return SimpleNamespace(rowcount=0)
+
+    svc = VariationsService.__new__(VariationsService)
+    svc.session = _LoserSession()
+
+    # Minimal repo stubs so get_request() resolves the VR.
+    vr_repo = _Repo()
+    vr_repo.rows[vr_id] = vr
+    svc.vr_repo = vr_repo
+    svc.vo_repo = _Repo()
+    svc.cost_impact_repo = _Repo()
+    svc.schedule_impact_repo = _Repo()
+    svc.site_measurement_repo = _Repo()
+    svc.daywork_repo = _Repo()
+    svc.daywork_line_repo = _Repo()
+    svc.disruption_repo = _Repo()
+    svc.eot_repo = _Repo()
+    svc.final_account_repo = _Repo()
+    svc.notice_repo = _Repo()
+
+    from app.modules.variations.schemas import VariationOrderCreate
+
+    payload = VariationOrderCreate(
+        project_id=project_id,
+        variation_request_id=vr_id,
+        title="raced",
+        final_cost_impact=Decimal("1000"),
+        currency="EUR",
+    )
+
+    with pytest.raises(HTTPException) as exc:
+        await svc.convert_vr_to_vo(vr_id, payload, user_id="u1")
+
+    assert exc.value.status_code == 409
+    assert "concurrently converted" in exc.value.detail.lower() or "converted" in exc.value.detail.lower()

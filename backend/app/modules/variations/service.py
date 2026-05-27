@@ -1179,6 +1179,43 @@ class VariationsService:
                 status_code=http_status.HTTP_409_CONFLICT,
                 detail=f"Only approved VRs can be converted (current: {vr.status})",
             )
+
+        # R8 race-safety: flip the VR status to ``converted_to_vo`` BEFORE
+        # creating the VO. Without this, two concurrent calls both pass the
+        # ``status == "approved"`` guard above and both reach ``create_order``,
+        # resulting in two VOs (and two COs) for one VR — a commercial ledger
+        # integrity violation. The conditional UPDATE below is atomic at the
+        # database level: only ONE caller's WHERE clause can match a row that is
+        # still ``approved``; the loser sees rowcount == 0 and 409s cleanly.
+        # This replaces the earlier ``vr_repo.update_fields(status=…)`` call at
+        # the bottom of the method which was a TOCTOU window.
+        from sqlalchemy import update as _sa_update
+
+        guard_stmt = (
+            _sa_update(VariationRequest)
+            .where(VariationRequest.id == vr_id)
+            .where(VariationRequest.status == "approved")
+            .values(status="converted_to_vo")
+        )
+        guard_result = await self.session.execute(guard_stmt)
+        affected = getattr(guard_result, "rowcount", None)
+        if affected == 0:
+            # A concurrent call already flipped the status — re-fetch for the
+            # current status so the error message is accurate.
+            refreshed = await self.vr_repo.get_by_id(vr_id)
+            current_status = getattr(refreshed, "status", "unknown") if refreshed else "unknown"
+            raise HTTPException(
+                status_code=http_status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Variation request was concurrently converted (current: {current_status}). "
+                    "Only one VO may be created per approved VR."
+                ),
+            )
+        # Keep the in-memory VR instance in sync so subsequent code and the
+        # ActivityLog writer see the new status without an extra round-trip.
+        vr.status = "converted_to_vo"
+        await self.session.flush()
+
         # Force link to the source VR.
         payload_dict = vo_payload.model_dump()
         payload_dict["project_id"] = vr.project_id
@@ -1236,8 +1273,7 @@ class VariationsService:
                 detail=("Failed to mirror variation order into change orders module; promotion rolled back."),
             )
 
-        # Flip VR.status -> converted_to_vo
-        await self.vr_repo.update_fields(vr_id, status="converted_to_vo")
+        # VR.status was already flipped to converted_to_vo by the guard above.
         await self.session.refresh(vr)
         await self.session.refresh(vo)
 
