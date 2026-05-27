@@ -163,16 +163,13 @@
 
 .dark {
   /* Brand — slightly brighter for dark backgrounds.
-     `--oe-blue-dark` is the *high-contrast* text colour used on
-     bg-oe-blue-subtle pills (header project picker, sidebar active
-     items, badges). In light mode it's a deep blue (#005bb5) so
-     8:1 against light cyan; in dark mode it must be a *bright* shade
-     so it reads on top of the dim rgba(59,130,246,0.15) tint sitting
-     over the dark surface. Name kept for cross-mode parity. */
+     `--oe-blue-dark` is the solid button hover/active background.
+     White button text needs a saturated blue here, not a tint;
+     theme-aware text uses `--oe-blue-text` instead. */
   --oe-blue: #3b82f6;
   --oe-blue-hover: #60a5fa;
   --oe-blue-active: #2563eb;
-  --oe-blue-dark: #bfdbfe;
+  --oe-blue-dark: #1e40af;
   --oe-blue-subtle: rgba(59, 130, 246, 0.15);
   /* See light-mode comment. Dark-mode swaps to Tailwind blue-300 so
      `text-oe-blue-text` reads cleanly on lifted dark surfaces without
