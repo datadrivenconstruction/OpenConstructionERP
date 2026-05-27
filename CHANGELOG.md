@@ -5,7 +5,58 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [5.3.0] - 2026-05-27
+## [5.4.0] - 2026-05-27
+
+**Quality wave on the v5.3.0 base.** Six focused commits — no schema
+changes, no new modules. Bundles WCAG-AA round 2, AI-surfaces refactor,
+match-quality fixes from real-BIM iteration, and the dark-mode token
+followups from the v5.3.0 review pass.
+
+### Added
+- **`useLLMRun()` shared hook** (`frontend/src/features/ai/hooks/useLLMRun.ts`)
+  — `useMutation`-backed wrapper for LLM-bound async ops with
+  AbortController and focus-restore ref. Replaces ad-hoc `useState` +
+  `try/catch` blocks in AdvisorPage and QuickEstimatePage (6 call sites).
+- **`shared/lib/formatters.ts` lifted utilities**: `formatNumber`
+  (currency-aware), `formatFileSize`, `getFileExtension` — promoted from
+  feature-local helpers for reuse across AI + reporting surfaces.
+- **Theme-aware `--oe-blue-text` token + `text-oe-blue-text` utility**
+  (light `#005bb5` / dark `#93c5fd`) — splits the blue-on-tint text use
+  case off `--oe-blue-dark` so the same class clears WCAG-AA in both
+  modes. 145 occurrences across 56 files migrated.
+- **`_is_non_billable_envelope()` gate** in match ranker (`IfcSpace`,
+  `IfcZone`, `IfcOpeningElement` w/o material, etc.) prevents
+  metadata-only fallback from surfacing arbitrary "Electrical equipment"
+  rows for non-billable IFC entities.
+
+### Fixed
+- **Match: `ifc_class` filter never fired on IFC-sourced elements** —
+  BIM extractor left every v3 structured field (`ifc_class`,
+  `material_class`, `ifc_predefined_type`, `nominal_size_mm`) at `None`,
+  so the SearchPlan skipped the hard filter even though ~28k catalogue
+  rows are indexed by it. Three layered fixes: 35 `Ifc*` aliases added
+  to `classification_mapper._CATEGORY_ALIASES`, English IFC noun
+  prepended to the dense description in `extractors/bim`, and direct
+  envelope population from BIM properties.
+- **Match: BGE rerank collapsed correct candidates** — the
+  cross-encoder's sigmoid logits land in 0.003–0.05 on templated
+  catalogue passages, and the pre-blend implementation *replaced* the
+  prior (RRF + boosts) score with this collapsed signal. Now 60/40
+  blends prior with BGE; sorts head by raw BGE (preserves rerank
+  authority) but displays blended score with `bge_rerank_delta` in
+  `boosts_applied` for explainability.
+- **WCAG-AA — `--oe-text-secondary` failed on tinted light surfaces**:
+  `#6e6e73` → `#5b5e66`. 2 511 occurrences in ~330 files now clear AA
+  on `bg-oe-blue-subtle` (4.27:1 → 5.75:1+).
+- **Dark-mode `hover:bg-oe-blue-dark` button contrast**: white text on
+  the `#bfdbfe` tint (introduced as a text-token band-aid in `ee2edb9d`)
+  dropped to ~1.3:1. Now that `text-oe-blue-dark` is gone, the token
+  reverts to `#1e40af` for saturated white-on-button contrast.
+
+### Refactor
+- **AI surfaces**: AdvisorPage + QuickEstimatePage migrated to
+  `useLLMRun()`. No behaviour change; tsc clean.
+
 
 **Last stable 5.x cut.** Six audit bundles consolidated on the v5.2.8 base.
 No schema changes — alembic stays at `v3144`. Module count unchanged at 116.

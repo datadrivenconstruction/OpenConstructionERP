@@ -29,8 +29,9 @@ interface ChangelogEntry {
 // Sorted newest → oldest. Sort is enforced at runtime below (semver-aware) so
 // out-of-order entries here still display correctly.
 const CHANGELOG: ChangelogEntry[] = [
-  // ── v5.x — second stable major, last stable cut v5.3.0 ───────────────────
-  { version: '5.3.0', date: '2026-05-27', tag: 'NEW',       summary: 'Last stable 5.x — Geo Hub round 2 (storage sweep + 10km accuracy cap + 100dvh), Brazil Tier-1 (BRL + NBR 12721 + RPS PDF), /login dark-mode, /reporting renderer, Daily Diary delete, WCAG-AA contrast pass on 51 files, dashboard rollup' },
+  // ── v5.x — second stable major ───────────────────────────────────────────
+  { version: '5.4.0', date: '2026-05-27', tag: 'NEW',       summary: 'Quality wave — match-quality (IFC classifier + BGE rerank blend + non-billable gate), WCAG-AA round 2 (theme-aware blue-text token + secondary contrast bump), useLLMRun hook + formatters lift, dark-mode button-bg revert' },
+  { version: '5.3.0', date: '2026-05-27', tag: 'NEW',       summary: 'Geo Hub round 2 (storage sweep + 10km accuracy cap + 100dvh), Brazil Tier-1 (BRL + NBR 12721 + RPS PDF), /login dark-mode, /reporting renderer, Daily Diary delete, WCAG-AA contrast pass on 51 files, dashboard rollup' },
   { version: '5.2.8', date: '2026-05-27', tag: 'FIX',       summary: '/geo tabs reliability + /markups → /takeoff deep-link + /resources inline edit + danger-styled delete' },
   { version: '5.2.7', date: '2026-05-27', tag: 'NEW',       summary: 'Project-detail widget grid (responsive 1/2/3-col) + one-click in-app upgrade with captured pip log' },
   { version: '5.2.0', date: '2026-05-26', tag: 'NEW',       summary: 'International BOQ exchange (GAEB X83/X84 + BC3 + NRM Excel + MasterFormat Excel) — Epic I Phase 1' },
