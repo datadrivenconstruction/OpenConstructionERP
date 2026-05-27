@@ -517,9 +517,12 @@ class FinanceService:
 
             # Reset every budget row before assignment so removing a
             # cost_category from future invoices drains the actual back to 0.
+            # Assign Decimal (not str) — MoneyType column expects Decimal on
+            # the ORM side; str assignment works on SQLite but triggers a
+            # type-coercion warning on PostgreSQL (BUG-FINANCE-ACT01).
             for budget in budgets:
                 key = (budget.wbs_id, budget.category)
-                budget.actual = str(bucketed.get(key, Decimal("0")))
+                budget.actual = bucketed.get(key, Decimal("0"))
 
             logger.info(
                 "Updated budget actuals for project %s: total_actual=%s across %d budget row(s), %d bucket(s)",
