@@ -1250,8 +1250,28 @@ class ContractsService:
         """Increment the contract value by a change-order delta.
 
         Emits ``contracts.contract.amended``.
+
+        Change orders are only valid on commercially-live contracts (``active``
+        or ``suspended``). Applying a change order to a ``terminated`` or
+        ``completed`` contract would silently rewrite the final agreed value,
+        corrupt the audit trail, and — for ``terminated`` contracts — partially
+        resurrect a dead instrument. Value adjustments after close-out must
+        go through a final-account amendment instead.
         """
         contract = await self.get_contract(contract_id)
+        if contract.status in ("terminated", "completed"):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "contract_not_amendable",
+                    "message": (
+                        f"Change orders cannot be applied to a contract in "
+                        f"status {contract.status!r}. Use the final-account "
+                        "amendment workflow for post-close adjustments."
+                    ),
+                    "contract_status": contract.status,
+                },
+            )
         delta = Decimal(str(co_amount or 0))
         new_value = Decimal(str(contract.total_value or 0)) + delta
         await self.contract_repo.update_fields(
