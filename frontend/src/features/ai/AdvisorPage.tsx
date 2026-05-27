@@ -18,6 +18,7 @@ import { apiGet, apiPost } from '@/shared/lib/api';
 import { Link } from 'react-router-dom';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useLLMRun } from './hooks/useLLMRun';
 
 /* ── Types ──────────────────────────────────────────────────────── */
 

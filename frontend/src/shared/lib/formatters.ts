@@ -3,6 +3,11 @@
  *
  * Maps i18next language codes to Intl locale tags.
  * Falls back to browser locale when no mapping exists.
+ *
+ * This module also hosts a small handful of file/number helpers that
+ * are not AI-specific (`formatNumber`, `formatFileSize`,
+ * `getFileExtension`) — they used to live inside AI feature files but
+ * were lifted out so any feature can reuse them.
  */
 import i18next from 'i18next';
 
@@ -192,4 +197,65 @@ export function formatTemperature(
   return system === 'imperial'
     ? _fmtUnit((value as number) * 9 / 5 + 32, locale, '°F')
     : _fmtUnit(value as number, locale, '°C');
+}
+
+// ---------------------------------------------------------------------------
+// File / generic-number helpers — lifted from per-feature files so any
+// surface (AI, takeoff, tendering, …) can share them. None of these are
+// AI-specific; the function names follow the existing
+// `format*` / `get*` conventions used elsewhere in this module.
+// ---------------------------------------------------------------------------
+
+/**
+ * Locale-aware number formatter with optional currency style.
+ *
+ * - When ``currency`` is omitted (or empty), renders as a plain
+ *   decimal with grouping (e.g. ``1,234.5``).
+ * - When ``currency`` is a valid ISO 4217 code, renders with the
+ *   matching symbol (``$1,234.50``, ``€1.234,50``).
+ * - On any Intl error, falls back to ``n.toLocaleString()`` so calls
+ *   never throw.
+ *
+ * @param n The numeric value.
+ * @param currency Optional ISO 4217 currency code.
+ */
+export function formatNumber(n: number, currency?: string): string {
+  try {
+    return new Intl.NumberFormat(getIntlLocale(), {
+      style: currency ? 'currency' : 'decimal',
+      currency: currency || undefined,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(n);
+  } catch {
+    return n.toLocaleString();
+  }
+}
+
+/**
+ * Human-readable byte size — short form (``523 B`` / ``12.4 KB`` /
+ * ``3.1 MB``). Always returns 1 decimal place above 1 KiB so file
+ * lists line up visually.
+ *
+ * Uses binary 1024 units (KB/MB) to match what users see in OS file
+ * managers; callers showing wire-bytes should use the SI variant
+ * elsewhere.
+ */
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/**
+ * Extract the (lowercased) file extension from a name.
+ *
+ * - ``"foo.pdf"`` → ``"pdf"``
+ * - ``"FILE.PDF"`` → ``"pdf"``
+ * - ``"archive.tar.gz"`` → ``"gz"``  (returns only the final segment)
+ * - ``"noext"`` → ``""``
+ */
+export function getFileExtension(name: string): string {
+  const dot = name.lastIndexOf('.');
+  return dot >= 0 ? name.slice(dot + 1).toLowerCase() : '';
 }

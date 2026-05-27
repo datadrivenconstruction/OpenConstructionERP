@@ -49,7 +49,13 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse, type EnrichResult, type EnrichedItem, type CadColumnsResponse, type CadGroupResponse, type CadDynamicGroup, type CadGroupElementsResponse } from './api';
 import { apiGet, apiPost } from '@/shared/lib/api';
-import { getIntlLocale } from '@/shared/lib/formatters';
+import {
+  formatFileSize,
+  formatNumber,
+  getFileExtension,
+  getIntlLocale,
+} from '@/shared/lib/formatters';
+import { useLLMRun } from './hooks/useLLMRun';
 
 // ── Tab types ────────────────────────────────────────────────────────────────
 
@@ -145,30 +151,9 @@ const FORMAT_LABELS: { [K in FileTab]: string } = {
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatNumber(n: number, currency?: string): string {
-  try {
-    return new Intl.NumberFormat(getIntlLocale(), {
-      style: currency ? 'currency' : 'decimal',
-      currency: currency || undefined,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(n);
-  } catch {
-    return n.toLocaleString();
-  }
-}
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function getFileExtension(name: string): string {
-  const dot = name.lastIndexOf('.');
-  return dot >= 0 ? name.slice(dot + 1).toLowerCase() : '';
-}
+// formatNumber / formatFileSize / getFileExtension live in
+// `@/shared/lib/formatters` — they were lifted out of this file once it
+// became clear they were not AI-specific.
 
 // ── Shimmer loading rows ─────────────────────────────────────────────────────
 
@@ -1439,11 +1424,15 @@ export function QuickEstimatePage() {
     [selectedFile, handleRemoveFile],
   );
 
-  // ── Text estimate mutation ────────────────────────────────────────────
+  // ── AI runs — all five operations now share `useLLMRun` so they get
+  //    AbortController cancellation, post-run focus-restore (a11y P1
+  //    finding #4), and a consistent error-normalisation contract.
+  //    The toast call sites are identical to the pre-refactor versions;
+  //    only the plumbing changed.
 
-  const textEstimateMutation = useMutation({
-    mutationFn: (data: Parameters<typeof aiApi.quickEstimate>[0]) =>
-      aiApi.quickEstimate(data),
+  const textEstimateRun = useLLMRun<QuickEstimateRequest, EstimateJobResponse>({
+    mutationFn: (data, { signal }) => aiApi.quickEstimate(data, { signal }),
+    focusRestoreRef: resultRegionRef,
     onSuccess: (data) => {
       setResult(data);
       addToast({
@@ -1456,7 +1445,7 @@ export function QuickEstimatePage() {
         }),
       });
     },
-    onError: (err: Error) => {
+    onError: (err) => {
       addToast({
         type: 'error',
         title: t('ai.estimate_failed', { defaultValue: 'Estimation failed' }),
@@ -1465,10 +1454,9 @@ export function QuickEstimatePage() {
     },
   });
 
-  // ── Photo estimate mutation ───────────────────────────────────────────
-
-  const photoEstimateMutation = useMutation({
-    mutationFn: aiApi.photoEstimate,
+  const photoEstimateRun = useLLMRun<Parameters<typeof aiApi.photoEstimate>[0], EstimateJobResponse>({
+    mutationFn: (params, { signal }) => aiApi.photoEstimate({ ...params, signal }),
+    focusRestoreRef: resultRegionRef,
     onSuccess: (data) => {
       setResult(data);
       addToast({
@@ -1481,7 +1469,7 @@ export function QuickEstimatePage() {
         }),
       });
     },
-    onError: (err: Error) => {
+    onError: (err) => {
       addToast({
         type: 'error',
         title: t('ai.estimate_failed', { defaultValue: 'Estimation failed' }),
@@ -1490,10 +1478,9 @@ export function QuickEstimatePage() {
     },
   });
 
-  // ── File estimate mutation (PDF, Excel, CSV, CAD) ───────────────────
-
-  const fileEstimateMutation = useMutation({
-    mutationFn: aiApi.fileEstimate,
+  const fileEstimateRun = useLLMRun<Parameters<typeof aiApi.fileEstimate>[0], EstimateJobResponse>({
+    mutationFn: (params, { signal }) => aiApi.fileEstimate({ ...params, signal }),
+    focusRestoreRef: resultRegionRef,
     onSuccess: (data) => {
       setResult(data);
       addToast({
@@ -1506,7 +1493,7 @@ export function QuickEstimatePage() {
         }),
       });
     },
-    onError: (err: Error) => {
+    onError: (err) => {
       addToast({
         type: 'error',
         title: t('ai.estimate_failed', { defaultValue: 'Estimation failed' }),
@@ -1515,10 +1502,11 @@ export function QuickEstimatePage() {
     },
   });
 
-  // ── CAD extract mutation (no AI, deterministic grouping) ────────────
-
-  const cadExtractMutation = useMutation({
-    mutationFn: aiApi.cadExtract,
+  const cadExtractRun = useLLMRun<File, CadExtractResponse>({
+    // `cadExtract` is a no-AI deterministic path; we still funnel it
+    // through useLLMRun for the shared cancel/focus contract.
+    mutationFn: (file) => aiApi.cadExtract(file),
+    focusRestoreRef: resultRegionRef,
     onSuccess: (data) => {
       setCadResult(data);
       addToast({
@@ -1531,7 +1519,7 @@ export function QuickEstimatePage() {
         }),
       });
     },
-    onError: (err: Error) => {
+    onError: (err) => {
       addToast({
         type: 'error',
         title: t('ai.cad_extract_failed', { defaultValue: 'CAD extraction failed' }),
@@ -1540,10 +1528,8 @@ export function QuickEstimatePage() {
     },
   });
 
-  // ── CAD columns mutation (interactive grouping step 1) ──────────────
-
-  const cadColumnsMutation = useMutation({
-    mutationFn: aiApi.cadColumns,
+  const cadColumnsRun = useLLMRun<File, CadColumnsResponse>({
+    mutationFn: (file) => aiApi.cadColumns(file),
     onSuccess: (data) => {
       setCadColumnsData(data);
       // Auto-select the "standard" preset if available, else fall back to suggested
@@ -1566,7 +1552,7 @@ export function QuickEstimatePage() {
         }),
       });
     },
-    onError: (err: Error) => {
+    onError: (err) => {
       addToast({
         type: 'error',
         title: t('ai.cad_columns_failed', { defaultValue: 'Column detection failed' }),
@@ -1648,19 +1634,19 @@ export function QuickEstimatePage() {
   // ── Determine if any mutation is pending ──────────────────────────────
 
   const isPending =
-    textEstimateMutation.isPending || photoEstimateMutation.isPending || fileEstimateMutation.isPending || cadExtractMutation.isPending || cadColumnsMutation.isPending || cadGrouping;
+    textEstimateRun.isPending || photoEstimateRun.isPending || fileEstimateRun.isPending || cadExtractRun.isPending || cadColumnsRun.isPending || cadGrouping;
   const isError =
-    (textEstimateMutation.isError && !textEstimateMutation.isPending) ||
-    (photoEstimateMutation.isError && !photoEstimateMutation.isPending) ||
-    (fileEstimateMutation.isError && !fileEstimateMutation.isPending) ||
-    (cadExtractMutation.isError && !cadExtractMutation.isPending) ||
-    (cadColumnsMutation.isError && !cadColumnsMutation.isPending);
+    (textEstimateRun.isError && !textEstimateRun.isPending) ||
+    (photoEstimateRun.isError && !photoEstimateRun.isPending) ||
+    (fileEstimateRun.isError && !fileEstimateRun.isPending) ||
+    (cadExtractRun.isError && !cadExtractRun.isPending) ||
+    (cadColumnsRun.isError && !cadColumnsRun.isPending);
   const mutationError =
-    (textEstimateMutation.error as Error | null) ||
-    (photoEstimateMutation.error as Error | null) ||
-    (fileEstimateMutation.error as Error | null) ||
-    (cadExtractMutation.error as Error | null) ||
-    (cadColumnsMutation.error as Error | null);
+    textEstimateRun.error ||
+    photoEstimateRun.error ||
+    fileEstimateRun.error ||
+    cadExtractRun.error ||
+    cadColumnsRun.error;
 
   // ── Submit handlers per tab ───────────────────────────────────────────
 
@@ -1679,32 +1665,32 @@ export function QuickEstimatePage() {
       if (areaM2 && Number(areaM2) > 0) request.area_m2 = Number(areaM2);
 
       setResult(null);
-      textEstimateMutation.mutate(request);
+      textEstimateRun.run(request);
     },
-    [description, location, currency, standard, buildingType, areaM2, textEstimateMutation],
+    [description, location, currency, standard, buildingType, areaM2, textEstimateRun],
   );
 
   const handlePhotoSubmit = useCallback(() => {
     if (!selectedFile) return;
     setResult(null);
-    photoEstimateMutation.mutate({
+    photoEstimateRun.run({
       file: selectedFile,
       location: location.trim() || undefined,
       currency: currency || undefined,
       standard: standard || undefined,
     });
-  }, [selectedFile, location, currency, standard, photoEstimateMutation]);
+  }, [selectedFile, location, currency, standard, photoEstimateRun]);
 
   const handleFileSubmit = useCallback(() => {
     if (!selectedFile) return;
     setResult(null);
-    fileEstimateMutation.mutate({
+    fileEstimateRun.run({
       file: selectedFile,
       location: location.trim() || undefined,
       currency: currency || undefined,
       standard: standard || undefined,
     });
-  }, [selectedFile, location, currency, standard, fileEstimateMutation]);
+  }, [selectedFile, location, currency, standard, fileEstimateRun]);
 
   const handleCadSubmit = useCallback(() => {
     if (!selectedFile) return;
@@ -1713,11 +1699,11 @@ export function QuickEstimatePage() {
     setCadColumnsData(null);
     setCadGroupResult(null);
     if (isCadRoute) {
-      cadColumnsMutation.mutate(selectedFile);
+      cadColumnsRun.run(selectedFile);
     } else {
-      cadExtractMutation.mutate(selectedFile);
+      cadExtractRun.run(selectedFile);
     }
-  }, [selectedFile, cadExtractMutation, cadColumnsMutation, isCadRoute]);
+  }, [selectedFile, cadExtractRun, cadColumnsRun, isCadRoute]);
 
   const handleApplyGrouping = useCallback(async () => {
     if (!cadColumnsData || selectedGroupBy.length === 0) return;
@@ -1792,8 +1778,8 @@ export function QuickEstimatePage() {
     if (standard) request.standard = standard;
 
     setResult(null);
-    textEstimateMutation.mutate(request);
-  }, [pasteText, location, currency, standard, textEstimateMutation]);
+    textEstimateRun.run(request);
+  }, [pasteText, location, currency, standard, textEstimateRun]);
 
   // ── Unified submit ────────────────────────────────────────────────────
 
@@ -1886,20 +1872,20 @@ export function QuickEstimatePage() {
     setAreaM2('');
     setPasteText('');
     handleRemoveFile();
-    textEstimateMutation.reset();
-    photoEstimateMutation.reset();
-    fileEstimateMutation.reset();
-    cadExtractMutation.reset();
-    cadColumnsMutation.reset();
-  }, [handleRemoveFile, textEstimateMutation, photoEstimateMutation, fileEstimateMutation, cadExtractMutation, cadColumnsMutation]);
+    textEstimateRun.reset();
+    photoEstimateRun.reset();
+    fileEstimateRun.reset();
+    cadExtractRun.reset();
+    cadColumnsRun.reset();
+  }, [handleRemoveFile, textEstimateRun, photoEstimateRun, fileEstimateRun, cadExtractRun, cadColumnsRun]);
 
   const resetMutationErrors = useCallback(() => {
-    textEstimateMutation.reset();
-    photoEstimateMutation.reset();
-    fileEstimateMutation.reset();
-    cadExtractMutation.reset();
-    cadColumnsMutation.reset();
-  }, [textEstimateMutation, photoEstimateMutation, fileEstimateMutation, cadExtractMutation, cadColumnsMutation]);
+    textEstimateRun.reset();
+    photoEstimateRun.reset();
+    fileEstimateRun.reset();
+    cadExtractRun.reset();
+    cadColumnsRun.reset();
+  }, [textEstimateRun, photoEstimateRun, fileEstimateRun, cadExtractRun, cadColumnsRun]);
 
   // ── Filtered groups for CAD QTO ──────────────────────────────────────
   const filteredGroups = useMemo(() => {
